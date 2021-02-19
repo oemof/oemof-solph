@@ -1,0 +1,16 @@
+v0.2.3 (November 21, 2018)
+--------------------------
+
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* Some functions did not work with tuples as labels. It has been fixed for the ExtractionTurbineCHP, the graph module and the parameter_as_dict function. (`Issue #507 <https://github.com/oemof/oemof-solph/pull/507>`_)
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Simon Hilpert
+* Stephan Günther
+* Uwe Krien
+

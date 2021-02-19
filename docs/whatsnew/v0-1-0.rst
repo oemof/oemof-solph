@@ -1,0 +1,87 @@
+v0.1.0 (November 1, 2016)
+-------------------------
+
+The framework provides the basis for a great range of different energy
+system model types, ranging from LP bottom-up (power and heat) economic dispatch
+models with optional investment to MILP operational unit commitment models.
+
+With v0.1.0 we refactored oemof (not backward compatible!) to bring the
+implementation in line with the general concept. Hence, the API of components
+has changed significantly and we introduced the new 'Flow' component. Besides
+an extensive grouping functionality for automatic creation of constraints based
+on component input data the documentation has been revised.
+
+We provide examples to show the broad range of possible applications and the
+frameworks flexibility.
+
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+ * The demandlib is no longer part of the oemof package. It has its own
+   package now: (`demandlib <https://github.com/oemof/demandlib>`_)
+
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+ * Solph's `EnergySystem <oemof.solph.network.EnergySystem>` now
+   automatically uses solph's `GROUPINGS
+   <oemof.solph.groupings.GROUPINGS>` in addition to any user supplied
+   ones.
+   See the API documentation for more information.
+
+ * The `groupings <oemof.groupings.Grouping>` introduced in version
+   0.0.5 now have more features, more documentation and should generally be
+   pretty usable:
+
+    * They moved to their own module: `oemof.groupings` and deprecated
+      constructs ensuring compatibility with prior versions have been removed.
+
+    * It's possible to assign a node to multiple groups from one
+      `Grouping <oemof.groupings.Grouping>` by returning a list of group
+      keys from `key <oemof.groupings.Grouping.key>`.
+
+    * If you use a non callable object as the `key
+      <oemof.groupings.Grouping.key>` parameter to `Groupings
+      <oemof.groupings.Grouping>`, the constructor will not make an attempt to
+      call them, but use the object directly as a key.
+
+    * There's now a `filter <oemof.groupings.Grouping.filter>` parameter,
+      enabling a more concise way of filtering group contents than using
+      `value <oemof.groupings.Grouping.value>`.
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+ * Complete revision of the documentation. We hope it is now more intuitive and easier to understand.
+
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+ * Create a structure to use examples as system tests (`issue #160 <https://github.com/oemof/oemof-solph/pull/160>`_)
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+ * Fix relative path of logger (`issue #201 <https://github.com/oemof/oemof-solph/issues/201>`_)
+ * More path fixes regarding installation via pip
+
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+ * Travis CI will now check PR's automatically
+ * Examples executable from command-line (`issue #227 <https://github.com/oemof/oemof-solph/pull/227>`_)
+
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+ * Stephan Günther
+ * Simon Hilpert
+ * Uwe Krien
+ * Guido Pleßmann
+ * Cord Kaldemeyer

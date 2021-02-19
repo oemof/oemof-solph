@@ -1,0 +1,163 @@
+v0.2.0 (January 12, 2018)
+-------------------------
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+* The `NodesFromCSV` has been removed from the code base. An alternative excel
+  (spreadsheet) reader is provided in the newly created
+  `excel example in the oemof_examples <https://github.com/oemof/oemof-examples/tree/master/oemof_examples/oemof.solph/v0.2.x/excel_reader>`_
+  repository.
+* LinearTransformer and LinearN1Transformer classes are now combined within one
+  Transformer class. The new class has n inputs and n outputs. Please note that
+  the definition of the conversion factors (for N1) has changed. See the new
+  docstring of `~oemof.solph.network.Transformer` class to avoid errors
+  (`Issue #351 <https://github.com/oemof/oemof-solph/pull/351>`_).
+* The `oemof.solph.network.Storage` class has been renamed and moved to
+  `oemof.solph.components.GenericStorage`.
+* As the example section has been moved to a new repository the `oemof_example`
+  command was removed. Use `oemof_installation_test` to check your installation
+  and the installed solvers.
+* OperationalModel has been renamed to Model. The `es` parameter was
+  renamed to `energysystem` parameter.
+* `Nodes <oemof.network.Node>` are no longer automatically added to the
+  most recently created `energy system
+  <oemof.energy_system.EnergySystem>`. You can still restore the old automatic
+  registration by manually assigning an `energy system
+  <oemof.energy_system.EnergySystem>` to `Node.registry
+  <oemof.network.Node.registry>`. On the other hand you can still explicitly
+  `add <oemof.energy_system.EnergySystem.add>` `nodes
+  <oemof.network.Node>` to an `energy system
+  <oemof.energy_system.EnergySystem>`. This option has been made a bit more
+  feature rich by the way, but see below for more on this.
+  Also check the
+  `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository
+  for more information on the usage.
+* The `fixed_costs` attribute of the  `nodes <oemof.solph.network.Flow>`
+  has been removed. See
+  (`Issue #407 <https://github.com/oemof/oemof-solph/pull/407>`_) for more
+  information.
+* The classes `DataFramePlot <outputlib.DataFramePlot>` and
+  `ResultsDataFrame <outputlib.ResultsDataFrame>` have been removed
+  due to the redesign of the outputlib module.
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* A new `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository
+  with some new examples was created.
+* A new outputlib module has been created to provide a convenient data structure
+  for optimization results and enable quick analyses.
+  All decision variables of a Node are now collected automatically which
+  enables an easier development of custom components. See the revised
+  :ref:`oemof_outputlib_label` documentation for more details or have a look at
+  the `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository
+  for information on the usage. Keep your eyes open, some new functions will
+  come soon that make the processing of the results easier. See the actual pull
+  request or issues for detailed information.
+* The transformer class can now be used with n inputs and n outputs (
+  `~oemof.solph.network.Transformer`)
+* A new module with useful additional constraints were created with these
+  constraints global emission or investment limits can be set. Furthermore
+  it is possible to connect investment variables. Please add your own additional
+  constraints or let us know what is needed in the future.
+* A module to create a networkx graph from your energy system or your
+  optimisation model was added. You can use networkx to plot and analyse graphs.
+  See the graph module in the documentation of oemof-network for more information.
+* It's now possible to modify a `node's <oemof.network.Node>`
+  `inputs <oemof.network.Node.inputs>` and
+  `outputs <oemof.network.Node.outputs>` by inserting and removing
+  `nodes <oemof.network.Node>` to and from the correspoding dictionaries.
+  `Outputs <oemof.network.Node.outputs>` where already working
+  previously, but due to an implementation quirk, `inputs
+  <oemof.network.Node.inputs>` did not behave as expected. This is now fixed.
+* One can now explicitly `add <oemof.energy_system.EnergySystem.add>`
+  `nodes <oemof.network.Node>` to an `energy system
+  <oemof.energy_system.EnergySystem>` in bulk using `*` and `**` syntax. For
+  the latter case, the `values <dict.values>` of the dictionary passed in
+  will be added.
+* New components can now be added to the custom.py module. Components in this module
+  are indicated as in a testing state. Use them with care. This lowers the entry
+  barriers to test new components within the solph structure and find other testers.
+
+New components
+^^^^^^^^^^^^^^^^^^^^
+
+* The nodes `ElectricalLine <oemof.solph.custom.ElectricalLine>`
+  and `ElectricalBus <oemof.solph.custom.ElectricalBus>` can be used
+  for Linear Optimal Powerflow calculation based on angle formulations.
+  These components have been added to the `solph.custom` module.
+  Though it should work correctly, it is in a preliminary stage.
+  Please check your results. Feedback is welcome!
+* The custom component `Link <oemof.solph.custom.Link>` can now be used to model
+  a bidirectional connection within one component. Check out the example in the
+  `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository.
+* The component `GenericCHP <oemof.solph.components.GenericCHP>` can be
+  used to model different CHP types such as extraction or back-pressure turbines
+  and motoric plants. The component uses a mixed-integer linear formulation and
+  can be adapted to different technical layouts with a high level of detail.
+  Check out the example in the
+  `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository.
+* The component `GenericCAES <oemof.solph.custom.GenericCAES>` can be
+  used to model different concepts of compressed air energy storage. Technical
+  concepts such as diabatic or adiabatic layouts can be modelled at a high level
+  of detail. The component uses a mixed-integer linear formulation.
+* The custom component
+  `GenericOffsetTransformer <oemof.solph.custom.GenericOffsetTransformer>`
+  can be used to model components with load ranges such as heat pumps and also
+  uses a mixed-integer linear formulation.
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* Large parts of the documentation have been proofread and improved since
+  the last developer meeting in Flensburg.
+* The solph documentation has got an extra section with all existing components
+  (:ref:`oemof_solph_components_label`).
+* The developer documentation has been developed to lower the barriers for new
+  developers. Furthermore, a template for pull request was created.
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+* It is not possible to model one time step with oemof.solph. You have to model
+  at least two timesteps
+  (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a
+  comment if this bug affects you.
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* LP-file tests are now invariant against sign changes in equations, because
+  the equations are now normalized to always have non-negative right hand
+  sides.
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+* All known and newly created components are now tested within an independent
+  testing environment which can be found in `/tests/`.
+* Other testing routines have been streamlined and reviewed and
+  example tests have been integrated in the nosetest environment.
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* The plot functionalities have been removed completely from the outputlib as
+  they are less a necessary part but more an optional tool .
+  Basic plotting examples that show how to quickly create plots from
+  optimization results can now be found in the
+  `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository.
+  You can still find the "old" standard plots within the
+  `oemof_visio <https://github.com/oemof/oemof-visio>`_ repository as they are
+  now maintained separately.
+* A `user forum <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ has
+  been created to answer use questions.
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Cord Kaldemeyer
+* Jens-Olaf Delfs
+* Stephan Günther
+* Simon Hilpert
+* Uwe Krien

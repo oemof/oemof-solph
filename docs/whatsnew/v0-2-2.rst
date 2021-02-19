@@ -1,0 +1,102 @@
+v0.2.2 (July 1, 2018)
+----------------------
+
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+* The storage API has been revised, even though it is still possible to use the
+  old API. In that case a warning is raised
+  (`Issue #491 <https://github.com/oemof/oemof-solph/pull/491>`_).
+* The newly introduced parm_results are not results and therefore renamed to
+  parameter_as_dict. The old name is still valid but raises a warning.
+
+
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* We added a new attribute `existing` to the `solph.options.Investement` class.
+  It will now be possible to run investment optimization based on already
+  installed capacity of a component.
+  Take a look on :ref:`investment_mode_label` for usage of this option.
+  (`Issue #489 <https://github.com/oemof/oemof-solph/pull/489>`_).
+
+* Investement variables for the capacity and the flows are now decoupled to
+  enable more flexibility. It is possible to couple the flows to the capacity,
+  the flows to itself or to not couple anything. The newly added attributes
+  `invest_relation_input_output`, `invest_relation_input_capacity` and
+  `invest_relation_output_capacity` replace the existing attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` for the
+  investment mode. In case of the dispatch mode one should use the
+  `nominal_value` of the Flow classes. The attributes
+  `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` will be
+  removed in v0.3.0. Please adapt your application to avoid problems in the
+  future (`Issue #480 <https://github.com/oemof/oemof-solph/pull/480>`_).
+
+* We now have experimental support for deserializing an energy system from a
+  tabular `data package <https://specs.frictionlessdata.io/data-package/>`_. Since
+  we have to extend the datapackage format a bit, the specification is not yet
+  finalized and documentation as well as tests range from sparse to
+  nonexistent. But anyone who wishes to help with the code is welcome to check
+  it out in the `datapackage <oemof.tools.datapackage>` module.
+
+
+New components
+^^^^^^^^^^^^^^^^^^^^
+
+
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* The documentation of the storage
+  `storage component <https://oemof-solph.readthedocs.io/en/latest/usage.html#genericstorage-component>`_ has been improved.
+* The documentation of the
+  `Extraction Turbine <https://oemof-solph.readthedocs.io/en/latest/usage.html#extractionturbinechp-component>`_ has been improved.
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* It is not possible to model one time step with oemof.solph. You have to
+  model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a comment if this bug affects you.
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* Fix file extension check to dump a graph correctly as .graphml-file
+* The full constraint set of the ExtractionTurbineCHP class was only build for
+  one object. If more than one object was present the input/output constraint
+  was missing. This lead to wrong results.
+* In the solph constraints module the emission constraint did not include the
+  timeincrement from the model which has now be fixed.
+* The parameter_as_dict (former: param_results) do work with the views
+  functions now (`Issue #494 <https://github.com/oemof/oemof-solph/pull/494>`_).
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+* The test coverage has been increased (>80%). oemof has experimental areas to
+  test new functions. These functions are marked as experimental and will not
+  be tested. Therefore the real coverage is even higher.
+
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* Subclasses of `Node <oemof.network.Node>` are no longer optimized
+  using `__slots__
+  <https://docs.python.org/3/reference/datamodel.html#slots>`_.
+  The abstract parent class still defines `__slots__
+  <oemof.network.Node.__slots__>` so that custom subclasses still have the
+  option of using it.
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* Fabian Büllesbach
+* Guido Plessmann
+* Simon Hilpert
+* Stephan Günther
+* Uwe Krien
+
