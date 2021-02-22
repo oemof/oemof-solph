@@ -7,13 +7,13 @@
 
 ------------------------------
 
-.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?master
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?master
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?master
+.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
