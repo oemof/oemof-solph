@@ -1545,7 +1545,7 @@ class GenericCHPBlock(SimpleBlock):
                 expr = 0
                 expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
                 expr += (
-                    list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
+                    list(n.heat_output.values())[0].Q_CW_max[t] * self.Y[n, t]
                 )
                 expr += -self.H_F[n, t]
                 return expr >= 0
