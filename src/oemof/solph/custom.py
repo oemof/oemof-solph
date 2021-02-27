@@ -1252,7 +1252,7 @@ class SinkDSM(Sink):
                 self.flex_share_down = flex_share_down
             else:
                 e1 = ("Please determine either flex_share_down "
-                      "(investment modeling)\n or set"
+                      "(investment modeling)\n or set "
                       "max_demand and max_capacity_down (dispatch modeling).\n"
                       "Otherwise, overdetermination occurs.")
                 raise AttributeError(e1)
@@ -1296,8 +1296,15 @@ class SinkDSM(Sink):
         self._multiperiodinvest_group = isinstance(
             self.multiperiodinvestment, MultiPeriodInvestment)
 
+        # Check for multiperiod unit
+        self.multiperiod = kwargs.get("multiperiod", False)
+
+        if self._invest_group or self._multiperiodinvest_group:
+            self._check_invest_attributes()
+
     def _check_invest_attributes(self):
-        if (self.investment is not None
+        if ((self.investment is not None
+            or self.multiperiodinvestment is not None)
             and (self.max_demand
                  or self.max_capacity_down
                  or self.max_capacity_up) is not None):
@@ -1305,10 +1312,46 @@ class SinkDSM(Sink):
                 "If an investment object is defined, the invest variable "
                 "replaces the max_demand, the max_capacity_down as well as\n"
                 "the max_capacity_up values. Therefore, max_demand,\n"
-                "max_capacity_up and max_capacity_down values should be"
-                "'None'.\n"
+                "max_capacity_up and max_capacity_down values should be "
+                "'None' (the default values).\n"
             )
             raise AttributeError(e1)
+
+        if (self.investment is not None
+            and self.multiperiodinvestment is not None):
+            e2 = (
+                "Either define an investment object "
+                "(solph.options.Investment) "
+                "for standard investment models\nor define a "
+                "multiperiodinvestment object "
+                "(solph.options.MultiPeriodInvestment) in case you want to set"
+                "up a MultiPeriodModel.\nSetting both at the "
+                "same time is not feasible.\n"
+            )
+            raise AttributeError(e2)
+
+        if (self.multiperiod == True
+            and self.multiperiodinvestment is not None):
+            e3 = (
+                "Either set multiperiod to True if you want to define a "
+                "unit for dispatch only in a MultiPeriodModel or define a "
+                "multiperiodinvestment object "
+                "(solph.options.MultiPeriodInvestment) for allowing "
+                "investments.\nSetting both at the same time is not allowed.\n"
+            )
+            raise AttributeError(e3)
+
+        if (self.investment is not None
+            and self.multiperiod == True):
+            e4 = (
+                "Either define an investment object if you want to build "
+                "a standard investment model or set multiperiod "
+                "to True if you want to simulate a dispatch only unit in a "
+                "MultiPeriodModel.\nSetting both at the same time is not"
+                "feasible."
+            )
+            raise AttributeError(e4)
+
 
     def constraint_group(self):
         possible_approaches = ['DIW', 'DLR', 'oemof']
@@ -1331,6 +1374,8 @@ class SinkDSM(Sink):
                 return SinkDSMDIWInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMDIWMultiPeriodInvestmentBlock
+            elif self.multiperiod == True:
+                return SinkDSMDIWMultiPeriodBlock
             else:
                 return SinkDSMDIWBlock
 
@@ -1339,6 +1384,8 @@ class SinkDSM(Sink):
                 return SinkDSMDLRInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMDLRMultiPeriodInvestmentBlock
+            elif self.multiperiod == True:
+                return SinkDSMDLRMultiPeriodBlock
             else:
                 return SinkDSMDLRBlock
 
@@ -1350,6 +1397,8 @@ class SinkDSM(Sink):
                 return SinkDSMOemofInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMOemofMultiPeriodInvestmentBlock
+            elif self.multiperiod == True:
+                return SinkDSMOemofMultiPeriodBlock
             else:
                 return SinkDSMOemofBlock
         else:
