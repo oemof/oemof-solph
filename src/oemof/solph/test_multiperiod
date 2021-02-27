@@ -120,7 +120,9 @@ source_shortage_FR = network.Source(
 sink_el = network.Sink(
     label='DE_sink_el',
     inputs={bus_el: network.Flow(
+        # Use this when using storage / demand response / exchange
         fix = [80] * len(timeindex),
+        # Use this when simulating only the basic config, without the above
         # fix=[100] * len(timeindex),
         # nominal_value=1)})
         nominal_value=1,
@@ -223,8 +225,10 @@ pp_natgas_GT = network.Transformer(
             lifetime=20,
             age=0,
             interest_rate=0.02,
+            fixed_costs=1000,
             # overall_maximum=9,
             # nonconvex=True,
+            # offset=400,
             # age=39,
             # lifetime=40
         ),
@@ -232,48 +236,50 @@ pp_natgas_GT = network.Transformer(
         # min=0.1,
         # max=0.9,
         # fix=1,
+        # multiperiod=True,
         # nominal_value=100,
-        variable_costs=4
+        variable_costs=4,
+        # fixed_costs=30
     )},
     conversion_factors={bus_el: 0.4})
 
 storage_el = components.GenericStorage(
     label='DE_storage_el',
     inputs={bus_el: network.Flow(
-        # nominal_value=20,
+        nominal_value=20,
         variable_costs=0,
         max=1,
-        # multiperiod=True
+        multiperiod=True
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
-            maximum=20,
-            ep_costs=1000,
-            existing=0,
-            lifetime=20,
-            age=0,
-            interest_rate=0.02,
+        # multiperiodinvestment=options.MultiPeriodInvestment(
+        #     maximum=20,
+        #     ep_costs=1000,
+        #     existing=0,
+        #     lifetime=20,
+        #     age=0,
+        #     interest_rate=0.02,
             # age=39,
             # lifetime=40
-        )
+        # )
     )},
     outputs={bus_el: network.Flow(
-        # nominal_value=20,
+        nominal_value=20,
         variable_costs=0,
         max=1,
-        # multiperiod=True
+        multiperiod=True
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
-            maximum=20,
-            ep_costs=1000,
-            existing=0,
-            lifetime=20,
-            age=0,
-            interest_rate=0.02,
+        # multiperiodinvestment=options.MultiPeriodInvestment(
+        #     maximum=20,
+        #     ep_costs=1000,
+        #     existing=0,
+        #     lifetime=20,
+        #     age=0,
+        #     interest_rate=0.02,
             # age=39,
             # lifetime=40
-        )
+        # )
     )},
-    # nominal_storage_capacity=20,
+    nominal_storage_capacity=20,
     loss_rate=0,
     initial_storage_level=0,
     max_storage_level=1,
@@ -284,21 +290,23 @@ storage_el = components.GenericStorage(
     invest_relation_input_output=1,
     invest_relation_input_capacity=None,
     invest_relation_output_capacity=None,
-    # multiperiod=True,
+    multiperiod=True,
+    fixed_costs=10,
     # investment=options.Investment(
-    multiperiodinvestment=options.MultiPeriodInvestment(
-        maximum=20,
-        ep_costs=1000,
-        existing=0,
-        lifetime=20,
-        age=0,
-        interest_rate=0.02,
+    # multiperiodinvestment=options.MultiPeriodInvestment(
+    #     maximum=20,
+    #     ep_costs=1000,
+    #     existing=0,
+    #     lifetime=20,
+    #     age=0,
+    #     interest_rate=0.02,
+        # fixed_costs=10,
         # overall_maximum=9,
         # overall_minimum=14,
         # nonconvex=True,
         # age=39,
         # lifetime=40
-    )
+    # )
 )
 
 link_DE_FR = custom.Link(
@@ -327,7 +335,7 @@ link_DE_FR = custom.Link(
     multiperiod=True
 )
 
-approach='oemof'
+approach='DLR'
 
 kwargs_all = {
     'label': 'demand_dsm',
@@ -348,11 +356,11 @@ kwargs_all = {
     'efficiency': 1.0,
     'shed_eligibility': False,
     'shift_eligibility': True,
-    'max_demand': 20,
-    'max_capacity_down': 10,
-    'max_capacity_up': 10,
-    'flex_share_down': None,
-    'flex_share_up': None,
+    # 'max_demand': 20,
+    # 'max_capacity_down': 10,
+    # 'max_capacity_up': 10,
+    'flex_share_down': 1,
+    'flex_share_up': 1,
     'shift_time': 2}
 
 kwargs_dict = {
@@ -373,6 +381,7 @@ dsm_unit = custom.SinkDSM(
     **kwargs_all,
     approach=approach,
     **kwargs_dict[approach],
+    # multiperiod=True,
     multiperiodinvestment=options.MultiPeriodInvestment(
     # investment=options.Investment(
         existing=0,
@@ -381,7 +390,8 @@ dsm_unit = custom.SinkDSM(
         lifetime=20,
         age=18,
         interest_rate=0.02
-    ))
+    )
+)
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
@@ -394,7 +404,7 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        )
 
 # test = models.Model(es)
-test = models.MultiPeriodModel(es)
+test = models.MultiPeriodModel(es, discount_rate=0.02)
 # test.pprint()
 test.receive_duals()
 
@@ -409,6 +419,7 @@ results = processing.results(test)
 bus_el_flow_res = views.node(results, bus_el)['sequences']
 # Collect all investment results
 invest_units = [bus_el, dsm_unit, storage_el]
+# invest_units = [bus_el]
 
 invest_res = {}
 
