@@ -174,6 +174,7 @@ class MultiPeriodInvestment:
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
+        self._check_age_and_lifetime()
 
     def _check_invest_attributes(self):
         if (self.existing != 0) and (self.nonconvex is True):
@@ -197,6 +198,12 @@ class MultiPeriodInvestment:
             e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
                   " ignored.")
             raise AttributeError(e3)
+
+    def _check_age_and_lifetime(self):
+        if self.age > self.lifetime:
+            e4 =("A unit's age must be smaller or equal to its "
+                 "expected lifetime.")
+            raise AttributeError(e4)
 
 
 class NonConvex:
