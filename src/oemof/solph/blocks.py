@@ -1356,14 +1356,15 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODINVESTFLOWS,
                                      rule=_summed_min_investflow_rule)
 
-        # Note: In general, there are two different options to define
-        # an overall maximum:
-        # 1.) overall_max = limit for (net) installed capacity for each period
-        # This is the constraint used here
-        # 2.) overall max = sum of all (gross) investments occuring
         def _overall_maximum_investflow_rule(block):
             """Rule definition for maximum overall investment
             in multiperiodinvestment case.
+
+            Note: In general, there are two different options to define
+            an overall maximum:
+            1.) overall_max = limit for (net) installed capacity
+            for each period. This is the constraint used here
+            2.) overall max = sum of all (gross) investments occuring
             """
             for i, o in self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
@@ -1380,10 +1381,11 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.overall_maximum_build = BuildAction(
             rule=_overall_maximum_investflow_rule)
 
-        # Note: This only holds for the last period
         def _overall_minimum_investflow_rule(block, i, o):
             """Rule definition for minimum overall investment
             in multiperiodinvestment case.
+
+            Note: This is only applicable for the last period
             """
             expr = (
                 m.flows[i, o].multiperiodinvestment.overall_minimum
