@@ -24,6 +24,7 @@ from pyomo.opt import SolverFactory
 import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
+from oemof.tools import debugging
 
 
 class BaseModel(po.ConcreteModel):
@@ -387,6 +388,12 @@ class MultiPeriodModel(BaseModel):
 
     def __init__(self, energysystem, discount_rate=0.02, **kwargs):
         self.discount_rate = discount_rate
+        if discount_rate == 0.02:
+            msg = ("By default, a discount_rate of {} is used for a "
+                   "MultiPeriodModel. If you want to use another value, "
+                   "you have to specify the `discount_rate` attribute.")
+            warnings.warn(msg.format(discount_rate),
+                          debugging.SuspiciousUsageWarning)
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
