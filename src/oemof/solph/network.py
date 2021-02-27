@@ -190,9 +190,6 @@ class Flow(on.Edge):
         keys = [k for k in kwargs if k != 'label']
 
         if 'fixed_costs' in keys:
-            # raise AttributeError(
-            #     "The `fixed_costs` attribute has been removed"
-            #     " with v0.2!")
             msg = ("Be aware that the fixed costs attribute is only\n"
                    "meant to be used for MultiPeriodModels.\n"
                    "It has been decided to remove the `fixed_costs` "
@@ -237,12 +234,28 @@ class Flow(on.Edge):
                         sequence(value) if attribute in sequences else value)
 
         # Checking for impossible attribute combinations
-        if self.investment and self.nominal_value is not None:
+        if ((self.investment or self.multiperiodinvestment)
+            and self.nominal_value is not None):
             raise ValueError("Using the investment object the nominal_value"
                              " has to be set to None.")
-        if self.investment and self.nonconvex:
+        if ((self.investment or self.multiperiodinvestment)
+            and self.nonconvex):
             raise ValueError("Investment flows cannot be combined with " +
                              "nonconvex flows!")
+        if self.investment and self.multiperiodinvestment:
+            raise ValueError("Either use a standard investment flow for "
+                             "standard investment models or a "
+                             "multiperiodinvestment flow for "
+                             "MultiPeriodModels.\n"
+                             "Combining both is not feasible!")
+        if self.multiperiod == True and self.multiperiodinvestment:
+            raise ValueError("In a MultiPeriodModel, a flow can either "
+                             "be defined to be a flow for dispatch only,\n"
+                             "when setting the attribute `multiperiod` to "
+                             "True,\nor it can be defined to be used for "
+                             "investments,\nwhen a `multiperiodinvestment` "
+                             "object is declared.\nCombining both is not "
+                             "feasible!")
 
 
 class Bus(on.Bus):
