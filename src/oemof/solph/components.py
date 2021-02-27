@@ -1658,16 +1658,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
-        # self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT = Set(
-        #     initialize=[n for n in group if n.initial_storage_level is None]
-        # )
-        #
-        # self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT = Set(
-        #     initialize=[
-        #         n for n in group if n.initial_storage_level is not None
-        #     ]
-        # )
-
         self.INVEST_REL_CAP_IN = Set(
             initialize=[
                 n
@@ -1737,12 +1727,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             within=NonNegativeReals,
             bounds=_storage_investvar_bound_rule,
         )
-
-        # An initial storage content doesn't make much sense
-        # for multiperiod investment models and thus will not be used
-        # self.init_content = Var(self.MULTIPERIODINVESTSTORAGES,
-        #                         m.PERIODS,
-        #                         within=NonNegativeReals)
 
         # Total capacity
         self.total = Var(self.MULTIPERIODINVESTSTORAGES,
@@ -1819,67 +1803,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         self.old_storage_rule_build = BuildAction(
             rule=_old_storage_capacity_rule)
 
-        # TODO: Check what constrs / vars do make sense and should be kept
-        # def _inv_storage_init_content_max_rule(block):
-        #     """Constraint for a variable initial storage capacity."""
-        #     for n in self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT:
-        #         for p in m.PERIODS:
-        #             expr = (
-        #                 block.init_content[n, p]
-        #                 <= block.total[n, p]
-        #                 # <= (n.multiperiodinvestment.existing
-        #                 # + block.invest[n, p])
-        #             )
-        #             self.init_content_limit.add((n, p), expr)
-        #
-        # self.init_content_limit = Constraint(
-        #     self.MULTIPERIODINVESTSTORAGES_NO_INIT_CONTENT,
-        #     m.PERIODS,
-        #     noruleinit=True)
-        # self.init_content_limit_build = BuildAction(
-        #     rule=_inv_storage_init_content_max_rule)
-        #
-        # # Note: For now holds for all periods, but shall only be applicable
-        # # if investments occur in period
-        # def _inv_storage_init_content_fix_rule(block):
-        #     """Constraint for a fixed initial storage capacity."""
-        #     for n in self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT:
-        #         for p in m.PERIODS:
-        #             expr = (block.init_content[n, p] == n.initial_storage_level
-        #                     # * (n.multiperiodinvestment.existing
-        #                     # + block.invest[n, p]))
-        #                     * block.total[n, p])
-        #             self.init_content_fix.add((n, p), expr)
-        #
-        # self.init_content_fix = Constraint(
-        #     self.MULTIPERIODINVESTSTORAGES_INIT_CONTENT,
-        #     m.PERIODS,
-        #     noruleinit=True)
-        # self.init_content_fix_build = BuildAction(
-        #     rule=_inv_storage_init_content_fix_rule)
-
-        # Addition: Force storage level and initial content to zero as
-        # long as no investment occurred in storage
-        # def _init_content_no_investments(block, n):
-        #     """
-        #     Rule definition to force initial content to zero
-        #     as long as no investments have occurred
-        #     """
-        #     for p in m.PERIODS:
-        #         if self.total[n, p] == 0:
-        #             expr = block.init_content[n, p] == 0
-        #             self.init_content_noinv_rule.add((n, p), expr)
-        #         else:
-        #             pass
-        #
-        # self.init_content_noinv_rule = Constraint(
-        #     self.MULTIPERIODINVESTSTORAGES,
-        #     m.PERIODS,
-        #     noruleinit=True)
-        # self.init_content_noinv_rule_build = BuildAction(
-        #     rule=_init_content_no_investments)
-
-        # TODO: Check whether this enables infeasible states
         def _storage_level_no_investments(block):
             """
             Rule definition to force storage level to zero
@@ -1904,10 +1827,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             expr = 0
             expr += block.storage_content[n, 0]
-            # expr += (
-            #     -block.init_content[n, 0]
-            #     * (1 - n.loss_rate[0]) ** m.timeincrement[0]
-            # )
             expr += (
                 n.fixed_losses_relative[0]
                 * (n.multiperiodinvestment.existing + self.invest[n, 0])
@@ -1965,7 +1884,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                     if p >= lifetime - age:
                         expr = (
                             block.storage_content[n, t]
-                            # == block.init_content[n, p - (lifetime - age)]
                             == 0
                         )
                         self.balanced_cstr.add((n, p, t), expr)
@@ -1987,12 +1905,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.PERIODS:
                     expr = (
-                               # m.MultiPeriodInvestmentFlow.invest[n, o[n], p]
-                               # + m.flows[n, o[n]].multiperiodinvestment.existing
                                m.MultiPeriodInvestmentFlow.total[n, o[n], p]
                            ) * n.invest_relation_input_output == (
-                               # m.MultiPeriodInvestmentFlow.invest[i[n], n, p]
-                               # + m.flows[i[n], n].multiperiodinvestment.existing
                                m.MultiPeriodInvestmentFlow.total[i[n], n, p]
                            )
                     self.power_coupled.add((n, p), expr)
@@ -2015,11 +1929,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                 for p in m.PERIODS:
                     expr = (
                         (
-                            # m.MultiPeriodInvestmentFlow.invest[i[n], n, p]
-                            # + m.flows[i[n], n].multiperiodinvestment.existing
                             m.MultiPeriodInvestmentFlow.total[i[n], n, p]
                         )
-                        # == (n.multiperiodinvestment.existing + self.invest[n, p])
                         == self.total[n, p]
                         * n.invest_relation_input_capacity
                     )
@@ -2043,11 +1954,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                 for p in m.PERIODS:
                     expr = (
                         (
-                            # m.MultiPeriodInvestmentFlow.invest[n, o[n], p]
-                            # + m.flows[n, o[n]].multiperiodinvestment.existing
                             m.MultiPeriodInvestmentFlow.total[n, o[n], p]
                         )
-                        # == (n.multiperiodinvestment.existing + self.invest[n, p])
                         == self.total[n, p]
                         * n.invest_relation_output_capacity
                     )
@@ -2067,7 +1975,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             expr = (
                 self.storage_content[n, t]
-                # <= (n.mulitperiodinvestment.existing + self.invest[n, p])
                 <= self.total[n, p]
                 * n.max_storage_level[t]
             )
@@ -2086,7 +1993,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             expr = (
                 self.storage_content[n, t]
-                # >= (n.multiperiodinvestment.existing + self.invest[n, p])
                 >= n.total[n, p]
                 * n.min_storage_level[t]
             )
@@ -2133,12 +2039,14 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             rule=smallest_invest
         )
 
-        # Note: There are two different options to define an overall maximum:
-        # 1.) overall_max = limit for (net) installed capacity for each period
-        # 2.) overall max = sum of all (gross) investments occurring
         def _overall_storage_maximum_investflow_rule(block):
             """Rule definition for maximum overall investment
             in multiperiodinvestment case.
+
+            Note: There are two different options to define an overall maximum:
+            1.) overall_max = limit for (net) installed capacity
+            for each period
+            2.) overall max = sum of all (gross) investments occurring
             """
             for n in self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES:
                 for p in m.PERIODS:
