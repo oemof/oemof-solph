@@ -32,9 +32,9 @@ t_idx_3 = pd.date_range('1/1/2040', periods=3, freq='H')
 # timeindex = {'1': t_idx_1, '2': t_idx_2, '3': t_idx_3}
 
 # Create an overall timeindex
-t_idx_1_Series = pd.Series(index=t_idx_1)
-t_idx_2_Series = pd.Series(index=t_idx_2)
-t_idx_3_Series = pd.Series(index=t_idx_3)
+t_idx_1_Series = pd.Series(index=t_idx_1, dtype='float64')
+t_idx_2_Series = pd.Series(index=t_idx_2, dtype='float64')
+t_idx_3_Series = pd.Series(index=t_idx_3, dtype='float64')
 
 timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
                        t_idx_3_Series]).index
