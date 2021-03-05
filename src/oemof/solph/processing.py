@@ -20,6 +20,7 @@ from itertools import groupby
 
 import pandas as pd
 from oemof.network.network import Node
+from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.solph.helpers import flatten
@@ -38,7 +39,7 @@ def get_tuple(x):
         if isinstance(i, tuple):
             return i
         elif issubclass(type(i), Node):
-            return i,
+            return (i,)
 
     # for standalone variables, x is used as identifying tuple
     if isinstance(x, tuple):
@@ -111,23 +112,28 @@ def create_dataframe(om):
     components or the timesteps / timeindices.
     """
     # get all pyomo variables including their block
-    block_vars = []
-    for bv in om.component_data_objects(Var):
-        block_vars.append(bv.parent_component())
-    block_vars = list(set(block_vars))
-
-    # write them into a dict with tuples as keys
-    var_dict = {(str(bv).split('.')[0], str(bv).split('.')[-1], i): bv[i].value
-                for bv in block_vars for i in getattr(bv, '_index')}
+    block_vars = list(
+        set([bv.parent_component() for bv in om.component_data_objects(Var)])
+    )
+    var_dict = {}
+    for bv in block_vars:
+        # Drop the auxiliary variables introduced by pyomo's Piecewise
+        parent_component = bv.parent_block().parent_component()
+        if not isinstance(parent_component, IndexedPiecewise):
+            for i in getattr(bv, "_index"):
+                key = (str(bv).split(".")[0], str(bv).split(".")[-1], i)
+                value = bv[i].value
+                var_dict[key] = value
 
     # use this to create a pandas dataframe
-    df = pd.DataFrame(list(var_dict.items()), columns=['pyomo_tuple', 'value'])
-    df['variable_name'] = df['pyomo_tuple'].str[1]
+    df = pd.DataFrame(list(var_dict.items()), columns=["pyomo_tuple", "value"])
+    df["variable_name"] = df["pyomo_tuple"].str[1]
 
     # adapt the dataframe by separating tuple data into columns depending
     # on which dimension the variable/parameter has (scalar/sequence).
     # columns for the oemof tuple and timestep are created
     df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
+    df = df[df["oemof_tuple"].map(lambda x: x is not None)]
     time_col = 'timestep'
     methods_dict = {'get': get_timestep,
                     'remove': remove_timestep}
@@ -144,7 +150,7 @@ def create_dataframe(om):
                         ascending=[True, True])
 
     # drop empty decision variables
-    df = df.dropna(subset=['value'])
+    df = df.dropna(subset=["value"])
 
     return df
 
@@ -178,33 +184,40 @@ def results(om):
         scalars_col = 'period_scalars'
 
     # create a dict of dataframes keyed by oemof tuples
-    df_dict = {k if len(k) > 1 else (k[0], None):
-               v[[time_col, 'variable_name', 'value']]
-               for k, v in df.groupby('oemof_tuple')}
+    df_dict = {
+        k if len(k) > 1 else (k[0], None):
+        v[[time_col, "variable_name", "value"]]
+        for k, v in df.groupby('oemof_tuple')
+    }
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
     for k in df_dict:
         df_dict[k].set_index(time_col, inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns='variable_name', values='value')
+        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         if not isinstance(om, models.MultiPeriodModel):
             try:
                 df_dict[k].index = om.es.timeindex
             except ValueError as e:
-                msg = ("\nFlow: {0}-{1}. This could be caused by NaN-values in"
-                       " your input data.")
-                raise type(e)(str(e) + msg.format(k[0].label, k[1].label)
-                              ).with_traceback(sys.exc_info()[2])
+                msg = (
+                    "\nFlow: {0}-{1}. This could be caused by NaN-values in"
+                    " your input data."
+                )
+                raise type(e)(
+                    str(e) + msg.format(k[0].label, k[1].label)
+                ).with_traceback(sys.exc_info()[2])
             try:
                 condition = df_dict[k].isnull().any()
                 scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
                 sequences = df_dict[k].loc[:, ~condition]
-                result[k] = {scalars_col: scalars, 'sequences': sequences}
+                result[k] = {scalars_col: scalars, "sequences": sequences}
             except IndexError:
-                error_message = ('Cannot access index on result data. ' +
-                                 'Did the optimization terminate' +
-                                 ' without errors?')
+                error_message = (
+                    "Cannot access index on result data. "
+                    + "Did the optimization terminate"
+                    + " without errors?"
+                )
                 raise IndexError(error_message)
         # TODO: Revise and potentially speed up
         else:
@@ -225,12 +238,14 @@ def results(om):
             try:
                 sequences.index = om.es.timeindex
                 period_scalars.rename(index=d, inplace=True)
-                period_scalars.index.name = 'period'
+                period_scalars.index.name = "period"
                 result[k] = {scalars_col: period_scalars,
-                             'sequences': sequences}
+                             "sequences": sequences}
             except IndexError:
-                error_message = ('Some indices seem to be not matching.\n'
-                                 'Cannot properly extract model results.')
+                error_message = (
+                    "Some indices seem to be not matching.\n"
+                    "Cannot properly extract model results."
+                )
                 raise IndexError(error_message)
 
     # add dual variables for bus constraints
@@ -242,20 +257,22 @@ def results(om):
                               lambda p: p[0])
             for bus, timesteps in grouped:
                 duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
-                df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
+                df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
         else:
             grouped = groupby(sorted(om.MultiPeriodBus.balance.iterkeys()),
                               lambda p: p[0])
             for bus, timeindex in grouped:
                 duals = [om.dual[om.MultiPeriodBus.balance[bus, p, t]]
                          for _, p, t in timeindex]
-                df = pd.DataFrame({'duals': duals}, index=om.es.timeindex)
+                df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
 
         if (bus, None) not in result.keys():
             result[(bus, None)] = {
-                'sequences': df, scalars_col: pd.Series(dtype=float)}
+                "sequences": df,
+                scalars_col: pd.Series(dtype=float)
+            }
         else:
-            result[(bus, None)]['sequences']['duals'] = duals
+            result[(bus, None)]["sequences"]["duals"] = duals
 
     return result
 
@@ -272,14 +289,14 @@ def convert_keys_to_strings(result, keep_none_type=False):
         converted = {
             tuple([str(e) if e is not None else None for e in k])
             if isinstance(k, tuple)
-            else str(k) if k is not None else None: v
+            else str(k)
+            if k is not None
+            else None: v
             for k, v in result.items()
         }
     else:
         converted = {
-            tuple(map(str, k))
-            if isinstance(k, tuple)
-            else str(k): v
+            tuple(map(str, k)) if isinstance(k, tuple) else str(k): v
             for k, v in result.items()
         }
     return converted
@@ -302,24 +319,24 @@ def meta_results(om, undefined=False):
     -------
     dict
     """
-    meta_res = {'objective': om.objective()}
+    meta_res = {"objective": om.objective()}
 
-    for k1 in ['Problem', 'Solver']:
+    for k1 in ["Problem", "Solver"]:
         k1 = k1.lower()
         meta_res[k1] = {}
         for k2, v2 in om.es.results[k1][0].items():
             try:
-                if str(om.es.results[k1][0][k2]) == '<undefined>':
+                if str(om.es.results[k1][0][k2]) == "<undefined>":
                     if undefined:
-                        meta_res[k1][k2] = str(
-                            om.es.results[k1][0][k2])
+                        meta_res[k1][k2] = str(om.es.results[k1][0][k2])
                 else:
                     meta_res[k1][k2] = om.es.results[k1][0][k2]
             except TypeError:
                 if undefined:
                     msg = "Cannot fetch meta results of type {0}"
                     meta_res[k1][k2] = msg.format(
-                        type(om.es.results[k1][0][k2]))
+                        type(om.es.results[k1][0][k2])
+                    )
 
     return meta_res
 
@@ -339,44 +356,57 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     -------
     dict
     """
-    def detect_scalars_and_sequences(com):
-        com_data = {'scalars': {}, 'sequences': {}}
 
-        exclusions = ('__', '_', 'registry', 'inputs', 'outputs',
-                      'register',
-                      'Label', 'from_object', 'input', 'output',
-                      'constraint_group')
-        attrs = [i for i in dir(com)
-                 if not (callable(i) or i.startswith(exclusions))]
+    def detect_scalars_and_sequences(com):
+        com_data = {"scalars": {}, "sequences": {}}
+
+        exclusions = (
+            "__",
+            "_",
+            "registry",
+            "inputs",
+            "outputs",
+            "register",
+            "Label",
+            "from_object",
+            "input",
+            "output",
+            "constraint_group",
+        )
+        attrs = [
+            i
+            for i in dir(com)
+            if not (callable(i) or i.startswith(exclusions))
+        ]
 
         for a in attrs:
             attr_value = getattr(com, a)
 
             # Iterate trough investment and add scalars and sequences with
             # "investment" prefix to component data:
-            if attr_value.__class__.__name__ == 'Investment':
+            if attr_value.__class__.__name__ == "Investment":
                 invest_data = detect_scalars_and_sequences(attr_value)
-                com_data['scalars'].update(
+                com_data["scalars"].update(
                     {
-                        'investment_' + str(k): v
-                        for k, v in invest_data['scalars'].items()
-                     }
+                        "investment_" + str(k): v
+                        for k, v in invest_data["scalars"].items()
+                    }
                 )
-                com_data['sequences'].update(
+                com_data["sequences"].update(
                     {
-                        'investment_' + str(k): v
-                        for k, v in invest_data['sequences'].items()
+                        "investment_" + str(k): v
+                        for k, v in invest_data["sequences"].items()
                     }
                 )
                 continue
 
             if isinstance(attr_value, str):
-                com_data['scalars'][a] = attr_value
+                com_data["scalars"][a] = attr_value
                 continue
 
             # If the label is a tuple it is iterable, therefore it should be
             # converted to a string. Otherwise it will be a sequence.
-            if a == 'label':
+            if a == "label":
                 attr_value = str(attr_value)
 
             # check if attribute is iterable
@@ -384,53 +414,50 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
             # in-python-how-do-i-determine-if-an-object-is-iterable
             try:
                 _ = (e for e in attr_value)
-                com_data['sequences'][a] = attr_value
+                com_data["sequences"][a] = attr_value
             except TypeError:
-                com_data['scalars'][a] = attr_value
+                com_data["scalars"][a] = attr_value
 
-        com_data['sequences'] = flatten(com_data['sequences'])
+        com_data["sequences"] = flatten(com_data["sequences"])
         move_undetected_scalars(com_data)
         if exclude_none:
             remove_nones(com_data)
 
         com_data = {
-            'scalars': pd.Series(com_data['scalars']),
-            'sequences': pd.DataFrame(com_data['sequences'])
+            "scalars": pd.Series(com_data["scalars"]),
+            "sequences": pd.DataFrame(com_data["sequences"]),
         }
         return com_data
 
     def move_undetected_scalars(com):
-        for ckey, value in list(com['sequences'].items()):
+        for ckey, value in list(com["sequences"].items()):
             if isinstance(value, str):
-                com['scalars'][ckey] = value
-                del com['sequences'][ckey]
+                com["scalars"][ckey] = value
+                del com["sequences"][ckey]
                 continue
             try:
                 _ = (e for e in value)
             except TypeError:
-                com['scalars'][ckey] = value
-                del com['sequences'][ckey]
+                com["scalars"][ckey] = value
+                del com["sequences"][ckey]
             else:
                 try:
                     if not value.default_changed:
-                        com['scalars'][ckey] = value.default
-                        del com['sequences'][ckey]
+                        com["scalars"][ckey] = value.default
+                        del com["sequences"][ckey]
                 except AttributeError:
                     pass
 
     def remove_nones(com):
-        for ckey, value in list(com['scalars'].items()):
+        for ckey, value in list(com["scalars"].items()):
             if value is None:
-                del com['scalars'][ckey]
-        for ckey, value in list(com['sequences'].items()):
-            if (
-                    len(value) == 0 or
-                    value[0] is None
-            ):
-                del com['sequences'][ckey]
+                del com["scalars"][ckey]
+        for ckey, value in list(com["sequences"].items()):
+            if len(value) == 0 or value[0] is None:
+                del com["sequences"][ckey]
 
     # Check if system is es or om:
-    if system.__class__.__name__ == 'EnergySystem':
+    if system.__class__.__name__ == "EnergySystem":
         components = system.flows() if get_flows else system.nodes
     else:
         components = system.flows if get_flows else system.es.nodes

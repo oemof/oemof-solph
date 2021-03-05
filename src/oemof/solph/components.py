@@ -1033,8 +1033,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """
-        """
+        """"""
         m = self.parent_block()
         if group is None:
             return None
@@ -1245,13 +1244,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__inflow_ratio
             """
             expr = (
-                (
-                    m.InvestmentFlow.invest[i[n], n]
-                    + m.flows[i[n], n].investment.existing
-                )
-                == (n.investment.existing + self.invest[n])
-                * n.invest_relation_input_capacity
-            )
+                m.InvestmentFlow.invest[i[n], n]
+                + m.flows[i[n], n].investment.existing
+            ) == (
+                n.investment.existing + self.invest[n]
+            ) * n.invest_relation_input_capacity
             return expr
 
         self.storage_capacity_inflow = Constraint(
@@ -1265,13 +1262,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__outflow_ratio
             """
             expr = (
-                (
-                    m.InvestmentFlow.invest[n, o[n]]
-                    + m.flows[n, o[n]].investment.existing
-                )
-                == (n.investment.existing + self.invest[n])
-                * n.invest_relation_output_capacity
-            )
+                m.InvestmentFlow.invest[n, o[n]]
+                + m.flows[n, o[n]].investment.existing
+            ) == (
+                n.investment.existing + self.invest[n]
+            ) * n.invest_relation_output_capacity
             return expr
 
         self.storage_capacity_outflow = Constraint(
@@ -2745,7 +2740,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the
+        """Creates the linear constraint for the
         :class:`oemof.solph.Transformer` block.
 
         Parameters
@@ -2788,8 +2783,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
             ]
 
         def _input_output_relation_rule(block):
-            """Connection between input, main output and tapped output.
-            """
+            """Connection between input, main output and tapped output."""
             for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g.inflow, g, t]
@@ -2808,8 +2802,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         )
 
         def _out_flow_relation_rule(block):
-            """Relation between main and tapped output in full chp mode.
-            """
+            """Relation between main and tapped output in full chp mode."""
             for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g, g.main_output, t]
@@ -2928,7 +2921,7 @@ class OffsetTransformerBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the relation for the class:`OffsetTransformer`.
+        """Creates the relation for the class:`OffsetTransformer`.
 
         Parameters
         ----------

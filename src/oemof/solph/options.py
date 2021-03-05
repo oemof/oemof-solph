@@ -46,8 +46,17 @@ class Investment:
     :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
 
     """
-    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0, nonconvex=False, offset=0, **kwargs):
+
+    def __init__(
+        self,
+        maximum=float("+inf"),
+        minimum=0,
+        ep_costs=0,
+        existing=0,
+        nonconvex=False,
+        offset=0,
+        **kwargs,
+    ):
 
         self.maximum = maximum
         self.minimum = minimum
@@ -66,25 +75,31 @@ class Investment:
 
     def _check_invest_attributes(self):
         if (self.existing != 0) and (self.nonconvex is True):
-            e1 = ("Values for 'offset' and 'existing' are given in"
-                  " investement attributes. \n These two options cannot be "
-                  "considered at the same time.")
+            e1 = (
+                "Values for 'offset' and 'existing' are given in"
+                " investement attributes. \n These two options cannot be "
+                "considered at the same time."
+            )
             raise AttributeError(e1)
 
     def _check_invest_attributes_maximum(self):
-        if (self.maximum == float('+inf')) and (self.nonconvex is True):
-            e2 = ("Please provide an maximum investment value in case of"
-                  " nonconvex investemnt (nonconvex=True), which is in the"
-                  " expected magnitude."
-                  " \nVery high maximum values (> 10e8) as maximum investment"
-                  " limit might lead to numeric issues, so that no investment"
-                  " is done, although it is the optimal solution!")
+        if (self.maximum == float("+inf")) and (self.nonconvex is True):
+            e2 = (
+                "Please provide an maximum investment value in case of"
+                " nonconvex investemnt (nonconvex=True), which is in the"
+                " expected magnitude."
+                " \nVery high maximum values (> 10e8) as maximum investment"
+                " limit might lead to numeric issues, so that no investment"
+                " is done, although it is the optimal solution!"
+            )
             raise AttributeError(e2)
 
     def _check_invest_attributes_offset(self):
         if (self.offset != 0) and (self.nonconvex is False):
-            e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
-                  " ignored.")
+            e3 = (
+                "If `nonconvex` is `False`, the `offset` parameter will be"
+                " ignored."
+            )
             raise AttributeError(e3)
 
 
@@ -239,16 +254,25 @@ class NonConvex:
         the maximum of both e.g. for six timesteps if a minimum downtime of
         six timesteps is defined in addition to a four timestep minimum uptime.
     """
+
     def __init__(self, **kwargs):
-        scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status',
-                   'maximum_startups', 'maximum_shutdowns']
-        sequences = ['startup_costs', 'shutdown_costs', 'activity_costs']
-        defaults = {'initial_status': 0}
+        scalars = [
+            "minimum_uptime",
+            "minimum_downtime",
+            "initial_status",
+            "maximum_startups",
+            "maximum_shutdowns",
+        ]
+        sequences = ["startup_costs", "shutdown_costs", "activity_costs"]
+        defaults = {"initial_status": 0}
 
         for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(self, attribute,
-                    sequence(value) if attribute in sequences else value)
+            setattr(
+                self,
+                attribute,
+                sequence(value) if attribute in sequences else value,
+            )
 
         self._max_up_down = None
 
