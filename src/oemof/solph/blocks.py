@@ -948,7 +948,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
 
     Total capacity is determined based on calculating the difference between
     new investments and decommissionings of old units that have reached their
-    lifetimes:
+    lifetimes (n):
 
         .. math::
             P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
@@ -958,10 +958,10 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             for p = 0
 
         .. math::
-            P_{old}(p) = P_{invest}(p-lifetime) \forall p > lifetime\\
+            P_{old}(p) = P_{invest}(p-n) \forall p > n\\
             &
             P_{old}(p) = P_{existing} + P{invest){0}
-            \forall p = lifetime - age\\
+            \forall p = n - age\\
             &
             P_{old}(p) = 0 else
 
@@ -1031,19 +1031,39 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         * :attr:`nonconvex = False`
 
             .. math::
-                \sum_{p} P_{invest}(p) \cdot c_{invest}(p) \cdot DF(pp)
-                \forall pp in [pp, pp+lifetime-1]
+                P_{invest}(p) \cdot annuity_{c_{invest}(p), n, i}(p) \cot n
+                \cdot DF(p)
+                \forall p in PERIODS
 
         * :attr:`nonconvex = True`
 
             .. math::
-                \sum_{p} P_{invest}(p) \cdot c_{invest}(p) \cdot DF(pp)
-                \forall pp in [pp, pp+lifetime-1] + b_{invest}(p)
-                \cdot offset(p) \cdot DF(p)\\
+                (P_{invest}(p) \cdot annuity_{c_{invest}(p), n, i}(p)
+                + b_{invest} \cdot c_{invest, fix})
+                \cdot DF(p)
+                \forall p in PERIODS\\
 
-    with DF being the discount factor to be used.
+    with lifetime n, interest rate i, discount factor DF(p),
+    investment expenses c_{invest}(p) and
 
-    The total value of all costs of all *MutliPeriodInvestmentFlow*
+        .. math::
+            annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
+            \cdot c_{invest}(p)
+            &
+            DF(p) = (1+d)^{-p}
+
+    whereby d is the discount rate. The interest rate i may deviate from the
+    discount rate (if a microeconomic perspective is taken).
+
+    Fixed costs in turn are calculated the same manner for all
+    MultiPeriodInvestmentFlows and added to the objective value:
+
+        .. math::
+            \sum_{pp=p}^{p+n} P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF(pp)
+            \cdot DF(p)
+            \space \forall p \in PERIODS\\
+
+    The total value of all costs of all *MultiPeriodInvestmentFlow*
     can be retrieved calling :meth:`om.InvestmentFlow.investment_costs.expr()`.
 
     .. csv-table:: List of Variables (in csv table syntax)
