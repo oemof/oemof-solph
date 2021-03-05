@@ -201,8 +201,8 @@ class MultiPeriodInvestment:
 
     def _check_age_and_lifetime(self):
         if self.age > self.lifetime:
-            e4 =("A unit's age must be smaller or equal to its "
-                 "expected lifetime.")
+            e4 = ("A unit's age must be smaller or equal to its "
+                  "expected lifetime.")
             raise AttributeError(e4)
 
 

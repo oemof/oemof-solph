@@ -25,7 +25,7 @@ from oemof.network import network as on
 from oemof.tools import debugging
 
 # TODO: Change imports back!
-#from oemof.solph import blocks
+# from oemof.solph import blocks
 import blocks
 from oemof.solph.plumbing import sequence
 
@@ -248,7 +248,7 @@ class Flow(on.Edge):
                              "multiperiodinvestment flow for "
                              "MultiPeriodModels.\n"
                              "Combining both is not feasible!")
-        if self.multiperiod == True and self.multiperiodinvestment:
+        if self.multiperiod is True and self.multiperiodinvestment:
             raise ValueError("In a MultiPeriodModel, a flow can either "
                              "be defined to be a flow for dispatch only,\n"
                              "when setting the attribute `multiperiod` to "

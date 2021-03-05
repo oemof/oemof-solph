@@ -43,8 +43,6 @@ from oemof.tools import debugging
 
 # TODO: Change back imports!
 from options import Investment, MultiPeriodInvestment
-
-
 # from oemof.solph.options import Investment, MultiPeriodInvestment
 
 
@@ -1330,7 +1328,7 @@ class SinkDSM(Sink):
             )
             raise AttributeError(e2)
 
-        if (self.multiperiod == True
+        if (self.multiperiod is True
             and self.multiperiodinvestment is not None):
             e3 = (
                 "Either set multiperiod to True if you want to define a "
@@ -1342,7 +1340,7 @@ class SinkDSM(Sink):
             raise AttributeError(e3)
 
         if (self.investment is not None
-            and self.multiperiod == True):
+            and self.multiperiod is True):
             e4 = (
                 "Either define an investment object if you want to build "
                 "a standard investment model or set multiperiod "
@@ -1351,7 +1349,6 @@ class SinkDSM(Sink):
                 "feasible."
             )
             raise AttributeError(e4)
-
 
     def constraint_group(self):
         possible_approaches = ['DIW', 'DLR', 'oemof']
@@ -1374,7 +1371,7 @@ class SinkDSM(Sink):
                 return SinkDSMDIWInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMDIWMultiPeriodInvestmentBlock
-            elif self.multiperiod == True:
+            elif self.multiperiod is True:
                 return SinkDSMDIWMultiPeriodBlock
             else:
                 return SinkDSMDIWBlock
@@ -1384,7 +1381,7 @@ class SinkDSM(Sink):
                 return SinkDSMDLRInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMDLRMultiPeriodInvestmentBlock
-            elif self.multiperiod == True:
+            elif self.multiperiod is True:
                 return SinkDSMDLRMultiPeriodBlock
             else:
                 return SinkDSMDLRBlock
@@ -1397,7 +1394,7 @@ class SinkDSM(Sink):
                 return SinkDSMOemofInvestmentBlock
             elif self._multiperiodinvest_group is True:
                 return SinkDSMOemofMultiPeriodInvestmentBlock
-            elif self.multiperiod == True:
+            elif self.multiperiod is True:
                 return SinkDSMOemofMultiPeriodBlock
             else:
                 return SinkDSMOemofBlock
@@ -5631,10 +5628,11 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
             map_MULTIPERIODDR_H.values())))
         self.H = Set(initialize=unique_H)
 
-        self.MULTIPERIODDR_H = Set(within=self.MULTIPERIODDR * self.H,
-                                   initialize=[(dr, h)
-                                               for dr in map_MULTIPERIODDR_H
-                                               for h in map_MULTIPERIODDR_H[dr]])
+        self.MULTIPERIODDR_H = Set(
+            within=self.MULTIPERIODDR * self.H,
+            initialize=[(dr, h)
+                        for dr in map_MULTIPERIODDR_H
+                        for h in map_MULTIPERIODDR_H[dr]])
 
         #  ************* VARIABLES *****************************
 

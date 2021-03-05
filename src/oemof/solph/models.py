@@ -20,7 +20,7 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 # TODO: Change imports back!
-#from oemof.solph import blocks
+# from oemof.solph import blocks
 import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
@@ -382,7 +382,7 @@ class MultiPeriodModel(BaseModel):
 
     """
     CONSTRAINT_GROUPS = [blocks.MultiPeriodBus, blocks.MultiPeriodTransformer,
-                         blocks.InvestmentFlow, #blocks.Flow,
+                         blocks.InvestmentFlow,
                          blocks.NonConvexFlow, blocks.MultiPeriodFlow,
                          blocks.MultiPeriodInvestmentFlow]
 
@@ -440,7 +440,7 @@ class MultiPeriodModel(BaseModel):
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[k for (k, v) in self.flows.items() if not
-            hasattr(v, 'bidirectional')],
+                        hasattr(v, 'bidirectional')],
             ordered=True, dimen=2, within=self.FLOWS)
 
     def _add_parent_block_variables(self):
