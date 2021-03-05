@@ -1460,7 +1460,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                 for p in m.PERIODS:
                     fixed_costs += (
                         sum(self.invest[i, o, p]
-                            * m.flows[i, o].multiperiodinvestment.fixed_costs[pp]
+                            * m.flows[i, o].multiperiodinvestment
+                            .fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(p, p + lifetime)
                             )

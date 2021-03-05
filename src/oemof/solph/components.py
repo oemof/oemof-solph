@@ -39,6 +39,7 @@ from oemof.solph.plumbing import sequence as solph_sequence
 from oemof.tools import economics
 from oemof.tools import debugging
 
+
 class GenericStorage(network.Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
@@ -417,13 +418,6 @@ class GenericStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
-        # Can / should this be removed?
-        # self.STORAGES_WITH_INVEST_FLOW_REL = Set(
-        #     initialize=[
-        #         n for n in group if n.invest_relation_input_output is not None
-        #     ]
-        # )
-
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -535,24 +529,6 @@ class GenericStorageBlock(SimpleBlock):
         self.balanced_cstr = Constraint(
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
-
-        # def _power_coupled(block, n):
-        #     """
-        #     Rule definition for constraint to connect the input power
-        #     and output power
-        #     """
-        #     expr = (
-        #         m.InvestmentFlow.invest[n, o[n]]
-        #         + m.flows[n, o[n]].investment.existing
-        #     ) * n.invest_relation_input_output == (
-        #         m.InvestmentFlow.invest[i[n], n]
-        #         + m.flows[i[n], n].investment.existing
-        #     )
-        #     return expr
-        #
-        # self.power_coupled = Constraint(
-        #     self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled
-        # )
 
     def _objective_expression(self):
         r"""
@@ -691,12 +667,6 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
-        # self.STORAGES_WITH_INVEST_FLOW_REL = Set(
-        #     initialize=[
-        #         n for n in group if n.invest_relation_input_output is not None
-        #     ]
-        # )
-
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -809,26 +779,6 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
         self.balanced_cstr = Constraint(
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
-
-        # def _power_coupled(block, n, p):
-        #     """
-        #     Rule definition for constraint to connect the input power
-        #     and output power
-        #     """
-        #     expr = (
-        #         m.MuliPeriodInvestmentFlow.invest[n, o[n], p]
-        #         + m.flows[n, o[n]].multiperiodinvestment.existing
-        #     ) * n.invest_relation_input_output == (
-        #         m.MuliPeriodInvestmentFlow.invest[i[n], n, p]
-        #         + m.flows[i[n], n].multiperiodinvestment.existing
-        #     )
-        #     return expr
-        #
-        # self.power_coupled = Constraint(
-        #     self.STORAGES_WITH_INVEST_FLOW_REL,
-        #     m.PERIODS,
-        #     rule=_power_coupled
-        # )
 
     def _objective_expression(self):
         r"""
@@ -1368,7 +1318,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             storage.
             """
             return (
-                       n.investment.maximum * self.invest_status[n] - self.invest[n]
+                       n.investment.maximum * self.invest_status[n]
+                       - self.invest[n]
                    ) >= 0
 
         self.limit_max = Constraint(
