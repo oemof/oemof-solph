@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
+SPDX-FileCopyrightText: Johannes Giehl
 
 SPDX-License-Identifier: MIT
 
@@ -1410,7 +1411,9 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
 
     Total capacity is determined based on calculating the difference between
     new investments and decommissionings of old units that have reached their
-    lifetimes (n):
+    lifetimes (n). Hereby, for old units, a distinction is made between
+    existing, i.e. exogenous capacities at the beginning of the
+    simulation run and endogenous installations:
 
         .. math::
             E_{total}(p) = E_{invest}(p) + E_{total}(p-1) - E_{old}(p) \forall
@@ -1420,12 +1423,16 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             for p = 0
 
         .. math::
-            E_{old}(p) = E_{invest}(p-n) \forall p > n\\
+            E_{old, end}(p) = E_{invest}(p-n) \forall p \geq n\\
             &
-            E_{old}(p) = E_{existing} + E{invest){0}
-            \forall p = n - age\\
+            E_{old, end}(p) = 0 else\\
             &
-            E_{old}(p) = 0 else
+            E_{old, exo}(p) = E_{existing} \forall p == n - age\\
+            &
+            E_{old, exo}(p) = 0 else\\
+            &
+            E_{old}(p) = E_{old, end}(p) + E_{old, exo}(p)\\
+            &
 
     Depending on the attribute :attr:`nonconvex`, the constraints for the
     bounds of the decision variable :math:`E_{invest}(p)` are different:\
@@ -1567,6 +1574,12 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         capacity of the storage in period p accounting for decommissionings"
         ":math:`E_{old}(p)`", ":attr:`old[n, p]`", "Old (nominal)
         capacity of the storage to be decommissioned in period p"
+        ":math:`E_{old, exo}(p)`", ":attr:`old[n, p]`", "Existing, i.e.
+        exogenous (nominal)capacity of the storage to be decommissioned
+        in period p"
+        ":math:`E_{old, end}(p)`", ":attr:`old[n, p]`", "Endogenous(nominal)
+        capacity of the storage to be decommissioned
+        in period p"
         ":math:`b_{invest}(p)`", ":attr:`invest_status[i, o, p]`",
         "Binary variable for the status of investment in period p"
         ":math:`P_{i,invest}(p)`",
@@ -1738,9 +1751,20 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                          within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
         self.old = Var(self.MULTIPERIODINVESTSTORAGES,
                        m.PERIODS,
                        within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.MULTIPERIODINVESTSTORAGES,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.MULTIPERIODINVESTSTORAGES,
+                           m.PERIODS,
+                           within=NonNegativeReals)
 
         # create status variable for a non-convex investment storage
         self.invest_status = Var(self.NON_CONVEX_MULTIPERIODINVESTSTORAGES,
@@ -1779,37 +1803,99 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         self.total_storage_rule_build = BuildAction(
             rule=_total_storage_capacity_rule)
 
+        # def _old_storage_capacity_rule(block):
+        #     """Rule definition for determining old capacity
+        #     to be decommissioned due to reaching its lifetime
+        #     """
+        #     for n in self.MULTIPERIODINVESTSTORAGES:
+        #         for p in m.PERIODS:
+        #             age = n.multiperiodinvestment.age
+        #             lifetime = n.multiperiodinvestment.lifetime
+        #             if lifetime <= p:
+        #                 expr = (self.old[n, p]
+        #                         == self.invest[n, p - lifetime])
+        #                 self.old_storage_rule.add((n, p), expr)
+        #             elif lifetime - age == p:
+        #                 expr = (self.old[n, p]
+        #                         == n.multiperiodinvestment.existing
+        #                         + self.invest[n, 0])
+        #                 self.old_storage_rule.add((n, p), expr)
+        #             else:
+        #                 expr = (self.old[n, p]
+        #                         == 0)
+        #                 self.old_storage_rule.add((n, p), expr)
+        #
+        # self.old_storage_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
+        #                                    m.PERIODS,
+        #                                    noruleinit=True)
+        # self.old_storage_rule_build = BuildAction(
+        #     rule=_old_storage_capacity_rule)
+
+        def _old_storage_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for n in self.MULTIPERIODINVESTSTORAGES:
+                lifetime = n.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[n, p]
+                                == self.invest[n, p - lifetime])
+                        self.old_rule_end.add((n, p), expr)
+                    else:
+                        expr = (self.old_end[n, p]
+                                == 0)
+                        self.old_rule_end.add((n, p), expr)
+
+        self.old_rule_end = Constraint(self.MULTIPERIODINVESTSTORAGES,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_end_build = BuildAction(
+            rule=_old_storage_capacity_rule_end)
+
+        def _old_storage_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for n in self.MULTIPERIODINVESTSTORAGES:
+                age = n.multiperiodinvestment.age
+                lifetime = n.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime - age == p:
+                        expr = (
+                            self.old_exo[n, p]
+                            == n.multiperiodinvestment.existing)
+                        self.old_rule_exo.add((n, p), expr)
+                    else:
+                        expr = (self.old_exo[n, p]
+                                == 0)
+                        self.old_rule_exo.add((n, p), expr)
+
+        self.old_rule_exo = Constraint(self.MULTIPERIODINVESTSTORAGES,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_storage_capacity_rule_exo)
+
         def _old_storage_capacity_rule(block):
-            """Rule definition for determining old capacity
+            """Rule definition for determining (overall) old capacity
             to be decommissioned due to reaching its lifetime
             """
             for n in self.MULTIPERIODINVESTSTORAGES:
                 for p in m.PERIODS:
-                    age = n.multiperiodinvestment.age
-                    lifetime = n.multiperiodinvestment.lifetime
-                    if lifetime <= p:
-                        expr = (self.old[n, p]
-                                == self.invest[n, p - lifetime])
-                        self.old_storage_rule.add((n, p), expr)
-                    elif lifetime - age == p:
-                        expr = (self.old[n, p]
-                                == n.multiperiodinvestment.existing
-                                + self.invest[n, 0])
-                        self.old_storage_rule.add((n, p), expr)
-                    else:
-                        expr = (self.old[n, p]
-                                == 0)
-                        self.old_storage_rule.add((n, p), expr)
+                    expr = (
+                        self.old[n, p] ==
+                        self.old_end[n, p] + self.old_exo[n, p])
+                    self.old_rule.add((n, p), expr)
 
-        self.old_storage_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
-                                           m.PERIODS,
-                                           noruleinit=True)
-        self.old_storage_rule_build = BuildAction(
+        self.old_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
+                                   m.PERIODS,
+                                   noruleinit=True)
+        self.old_rule_build = BuildAction(
             rule=_old_storage_capacity_rule)
 
         def _storage_level_no_investments(block):
-            """
-            Rule definition to force storage level to zero
+            """Rule definition to force storage level to zero
             as long as no investments have occurred
             """
             for n in self.MULTIPERIODINVESTSTORAGES:

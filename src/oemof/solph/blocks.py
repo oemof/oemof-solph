@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
+SPDX-FileCopyrightText: Johannes Giehl
 
 SPDX-License-Identifier: MIT
 
@@ -1019,7 +1020,9 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
 
     Total capacity is determined based on calculating the difference between
     new investments and decommissionings of old units that have reached their
-    lifetimes (n):
+    lifetimes (n). Hereby, for old units, a distinction is made between
+    existing, i.e. exogenous capacities at the beginning of the
+    simulation run and endogenous installations:
 
         .. math::
             P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
@@ -1029,12 +1032,16 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             for p = 0
 
         .. math::
-            P_{old}(p) = P_{invest}(p-n) \forall p > n\\
+            P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
             &
-            P_{old}(p) = P_{existing} + P{invest){0}
-            \forall p = n - age\\
+            P_{old, end}(p) = 0 else\\
             &
-            P_{old}(p) = 0 else
+            P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+            &
+            P_{old, exo}(p) = 0 else\\
+            &
+            P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+            &
 
     For all *MultiPeriodInvestmentFlow* (independent of the attribute
     :attr:`nonconvex`), the following additional constraints are created,
@@ -1148,6 +1155,12 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         capacity"
         ":math:`P_{old}(p)`", ":py:obj:`old[i, o, p]`", "Capacity being
         decommissioned due to unit age"
+        ":math:`P_{old, exo}(p)`", ":py:obj:`old_exo[i, o, p]`", "Existing
+        (exogeneously given) capacity at the beginning being decommissioned
+        due to unit age"
+        ":math:`P_{old, end}(p)`", ":py:obj:`old_end[i, o, p]`", "Endogenously
+        installed capacity being decommissioned due to reaching its lifetime
+        in the course of the simulation"
         ":math:`b_{invest}(p)`", ":py:obj:`invest_status[i, o, p]`", "Binary
         status of investment"
 
@@ -1276,9 +1289,20 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                          within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
         self.old = Var(self.MULTIPERIODINVESTFLOWS,
                        m.PERIODS,
                        within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.MULTIPERIODINVESTFLOWS,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.MULTIPERIODINVESTFLOWS,
+                           m.PERIODS,
+                           within=NonNegativeReals)
 
         # create status variable for a non-convex multiperiodinvestment flow
         self.invest_status = Var(self.NON_CONVEX_MULTIPERIODINVESTFLOWS,
@@ -1343,28 +1367,60 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        def _old_capacity_rule(block):
-            """Rule definition for determining old capacity
+        def _old_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for i, o in self.MULTIPERIODINVESTFLOWS:
+                lifetime = m.flows[i, o].multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[i, o, p]
+                                == self.invest[i, o, p - lifetime])
+                        self.old_rule_end.add((i, o, p), expr)
+                    else:
+                        expr = (self.old_end[i, o, p]
+                                == 0)
+                        self.old_rule_end.add((i, o, p), expr)
+
+        self.old_rule_end = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_end_build = BuildAction(
+            rule=_old_capacity_rule_end)
+
+        def _old_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
             for i, o in self.MULTIPERIODINVESTFLOWS:
                 age = m.flows[i, o].multiperiodinvestment.age
                 lifetime = m.flows[i, o].multiperiodinvestment.lifetime
                 for p in m.PERIODS:
-                    if lifetime <= p:
-                        expr = (self.old[i, o, p]
-                                == self.invest[i, o, p - lifetime])
-                        self.old_rule.add((i, o, p), expr)
-                    elif lifetime - age == p:
+                    if lifetime - age == p:
                         expr = (
-                            self.old[i, o, p]
-                            == (m.flows[i, o].multiperiodinvestment.existing
-                                + self.invest[i, o, 0]))
-                        self.old_rule.add((i, o, p), expr)
+                            self.old_exo[i, o, p]
+                            == m.flows[i, o].multiperiodinvestment.existing)
+                        self.old_rule_exo.add((i, o, p), expr)
                     else:
-                        expr = (self.old[i, o, p]
+                        expr = (self.old_exo[i, o, p]
                                 == 0)
-                        self.old_rule.add((i, o, p), expr)
+                        self.old_rule_exo.add((i, o, p), expr)
+
+        self.old_rule_exo = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_capacity_rule_exo)
+
+        def _old_capacity_rule(block):
+            """Rule definition for determining (overall) old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for i, o in self.MULTIPERIODINVESTFLOWS:
+                for p in m.PERIODS:
+                    expr = (
+                        self.old[i, o, p] ==
+                        self.old_end[i, o, p] + self.old_exo[i, o, p])
+                    self.old_rule.add((i, o, p), expr)
 
         self.old_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
                                    noruleinit=True)
@@ -2053,9 +2109,13 @@ class NonConvexFlow(SimpleBlock):
             ]
         )
 
-        self.MINDOWNTIMEFLOWS = Set(initialize=[(g[0], g[1]) for g in group
-                                    if g[2].nonconvex.minimum_downtime
-                                    is not None])
+        self.MINDOWNTIMEFLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].nonconvex.minimum_downtime is not None
+            ]
+        )
 
         self.ACTIVITYCOSTFLOWS = Set(
             initialize=[
