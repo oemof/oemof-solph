@@ -2274,9 +2274,20 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                          within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
         self.old = Var(self.multiperiodinvestdsm,
                        m.PERIODS,
                        within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.multiperiodinvestdsm,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.multiperiodinvestdsm,
+                           m.PERIODS,
+                           within=NonNegativeReals)
 
         # Variable load shift down
         self.dsm_do_shift = Var(self.multiperiodinvestdsm, m.TIMESTEPS,
@@ -2314,30 +2325,93 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        def _old_capacity_rule(block):
-            """Rule definition for determining old capacity
+        # def _old_capacity_rule(block):
+        #     """Rule definition for determining old capacity
+        #     to be decommissioned due to reaching its lifetime
+        #     """
+        #     for g in group:
+        #         age = g.multiperiodinvestment.age
+        #         lifetime = g.multiperiodinvestment.lifetime
+        #         for p in m.PERIODS:
+        #             if lifetime <= p:
+        #                 expr = (self.old[g, p]
+        #                         == self.invest[g, p - lifetime])
+        #                 self.old_rule.add((g, p), expr)
+        #             elif lifetime - age == p:
+        #                 expr = (
+        #                     self.old[g, p]
+        #                     == (g.multiperiodinvestment.existing
+        #                         + self.invest[g, 0]))
+        #                 self.old_rule.add((g, p), expr)
+        #             else:
+        #                 expr = (self.old[g, p]
+        #                         == 0)
+        #                 self.old_rule.add((g, p), expr)
+        #
+        # self.old_rule = Constraint(group, m.PERIODS,
+        #                            noruleinit=True)
+        # self.old_rule_build = BuildAction(
+        #     rule=_old_capacity_rule)
+
+        def _old_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                lifetime = g.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[g, p]
+                                == self.invest[g, p - lifetime])
+                        self.old_rule_end.add((g, p), expr)
+                    else:
+                        expr = (self.old_end[g, p]
+                                == 0)
+                        self.old_rule_end.add((g, p), expr)
+
+        self.old_rule_end = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_end_build = BuildAction(
+            rule=_old_capacity_rule_end)
+
+        def _old_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
             for g in group:
                 age = g.multiperiodinvestment.age
                 lifetime = g.multiperiodinvestment.lifetime
                 for p in m.PERIODS:
-                    if lifetime <= p:
-                        expr = (self.old[g, p]
-                                == self.invest[g, p - lifetime])
-                        self.old_rule.add((g, p), expr)
-                    elif lifetime - age == p:
+                    if lifetime - age == p:
                         expr = (
-                            self.old[g, p]
-                            == (g.multiperiodinvestment.existing
-                                + self.invest[g, 0]))
-                        self.old_rule.add((g, p), expr)
+                            self.old_exo[g, p]
+                            == g.multiperiodinvestment.existing)
+                        self.old_rule_exo.add((g, p), expr)
                     else:
-                        expr = (self.old[g, p]
+                        expr = (self.old_exo[g, p]
                                 == 0)
-                        self.old_rule.add((g, p), expr)
+                        self.old_rule_exo.add((g, p), expr)
 
-        self.old_rule = Constraint(group, m.PERIODS,
+        self.old_rule_exo = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_capacity_rule_exo)
+
+        def _old_capacity_rule(block):
+            """Rule definition for determining (overall) old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                for p in m.PERIODS:
+                    expr = (
+                        self.old[g, p] ==
+                        self.old_end[g, p] + self.old_exo[g, p])
+                    self.old_rule.add((g, p), expr)
+
+        self.old_rule = Constraint(group,
+                                   m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
             rule=_old_capacity_rule)
@@ -4301,9 +4375,20 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                          within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
         self.old = Var(self.multiperiodinvestdsm,
                        m.PERIODS,
                        within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.multiperiodinvestdsm,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.multiperiodinvestdsm,
+                           m.PERIODS,
+                           within=NonNegativeReals)
 
         # Variable load shift down
         self.dsm_do_shift = Var(self.multiperiodinvestdsm,
@@ -4346,30 +4431,93 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        def _old_capacity_rule(block):
-            """Rule definition for determining old capacity
+        # def _old_capacity_rule(block):
+        #     """Rule definition for determining old capacity
+        #     to be decommissioned due to reaching its lifetime
+        #     """
+        #     for g in group:
+        #         age = g.multiperiodinvestment.age
+        #         lifetime = g.multiperiodinvestment.lifetime
+        #         for p in m.PERIODS:
+        #             if lifetime <= p:
+        #                 expr = (self.old[g, p]
+        #                         == self.invest[g, p - lifetime])
+        #                 self.old_rule.add((g, p), expr)
+        #             elif lifetime - age == p:
+        #                 expr = (
+        #                     self.old[g, p]
+        #                     == (g.multiperiodinvestment.existing
+        #                         + self.invest[g, 0]))
+        #                 self.old_rule.add((g, p), expr)
+        #             else:
+        #                 expr = (self.old[g, p]
+        #                         == 0)
+        #                 self.old_rule.add((g, p), expr)
+        #
+        # self.old_rule = Constraint(group, m.PERIODS,
+        #                            noruleinit=True)
+        # self.old_rule_build = BuildAction(
+        #     rule=_old_capacity_rule)
+
+        def _old_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                lifetime = g.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[g, p]
+                                == self.invest[g, p - lifetime])
+                        self.old_rule_end.add((g, p), expr)
+                    else:
+                        expr = (self.old_end[g, p]
+                                == 0)
+                        self.old_rule_end.add((g, p), expr)
+
+        self.old_rule_end = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_end_build = BuildAction(
+            rule=_old_capacity_rule_end)
+
+        def _old_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
             for g in group:
                 age = g.multiperiodinvestment.age
                 lifetime = g.multiperiodinvestment.lifetime
                 for p in m.PERIODS:
-                    if lifetime <= p:
-                        expr = (self.old[g, p]
-                                == self.invest[g, p - lifetime])
-                        self.old_rule.add((g, p), expr)
-                    elif lifetime - age == p:
+                    if lifetime - age == p:
                         expr = (
-                            self.old[g, p]
-                            == (g.multiperiodinvestment.existing
-                                + self.invest[g, 0]))
-                        self.old_rule.add((g, p), expr)
+                            self.old_exo[g, p]
+                            == g.multiperiodinvestment.existing)
+                        self.old_rule_exo.add((g, p), expr)
                     else:
-                        expr = (self.old[g, p]
+                        expr = (self.old_exo[g, p]
                                 == 0)
-                        self.old_rule.add((g, p), expr)
+                        self.old_rule_exo.add((g, p), expr)
 
-        self.old_rule = Constraint(group, m.PERIODS,
+        self.old_rule_exo = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_capacity_rule_exo)
+
+        def _old_capacity_rule(block):
+            """Rule definition for determining (overall) old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                for p in m.PERIODS:
+                    expr = (
+                        self.old[g, p] ==
+                        self.old_end[g, p] + self.old_exo[g, p])
+                    self.old_rule.add((g, p), expr)
+
+        self.old_rule = Constraint(group,
+                                   m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
             rule=_old_capacity_rule)
@@ -7377,9 +7525,20 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                          within=NonNegativeReals)
 
         # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
         self.old = Var(self.MULTIPERIODINVESTDR,
                        m.PERIODS,
                        within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.MULTIPERIODINVESTDR,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.MULTIPERIODINVESTDR,
+                           m.PERIODS,
+                           within=NonNegativeReals)
 
         # Variable load shift down (capacity)
         self.dsm_do_shift = Var(self.MULTIPERIODINVESTDR_H,
@@ -7442,30 +7601,93 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        def _old_capacity_rule(block):
-            """Rule definition for determining old capacity
+        # def _old_capacity_rule(block):
+        #     """Rule definition for determining old capacity
+        #     to be decommissioned due to reaching its lifetime
+        #     """
+        #     for g in group:
+        #         age = g.multiperiodinvestment.age
+        #         lifetime = g.multiperiodinvestment.lifetime
+        #         for p in m.PERIODS:
+        #             if lifetime <= p:
+        #                 expr = (self.old[g, p]
+        #                         == self.invest[g, p - lifetime])
+        #                 self.old_rule.add((g, p), expr)
+        #             elif lifetime - age == p:
+        #                 expr = (
+        #                     self.old[g, p]
+        #                     == (g.multiperiodinvestment.existing
+        #                         + self.invest[g, 0]))
+        #                 self.old_rule.add((g, p), expr)
+        #             else:
+        #                 expr = (self.old[g, p]
+        #                         == 0)
+        #                 self.old_rule.add((g, p), expr)
+        #
+        # self.old_rule = Constraint(group, m.PERIODS,
+        #                            noruleinit=True)
+        # self.old_rule_build = BuildAction(
+        #     rule=_old_capacity_rule)
+
+        def _old_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                lifetime = g.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[g, p]
+                                == self.invest[g, p - lifetime])
+                        self.old_rule_end.add((g, p), expr)
+                    else:
+                        expr = (self.old_end[g, p]
+                                == 0)
+                        self.old_rule_end.add((g, p), expr)
+
+        self.old_rule_end = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_end_build = BuildAction(
+            rule=_old_capacity_rule_end)
+
+        def _old_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
             for g in group:
                 age = g.multiperiodinvestment.age
                 lifetime = g.multiperiodinvestment.lifetime
                 for p in m.PERIODS:
-                    if lifetime <= p:
-                        expr = (self.old[g, p]
-                                == self.invest[g, p - lifetime])
-                        self.old_rule.add((g, p), expr)
-                    elif lifetime - age == p:
+                    if lifetime - age == p:
                         expr = (
-                            self.old[g, p]
-                            == (g.multiperiodinvestment.existing
-                                + self.invest[g, 0]))
-                        self.old_rule.add((g, p), expr)
+                            self.old_exo[g, p]
+                            == g.multiperiodinvestment.existing)
+                        self.old_rule_exo.add((g, p), expr)
                     else:
-                        expr = (self.old[g, p]
+                        expr = (self.old_exo[g, p]
                                 == 0)
-                        self.old_rule.add((g, p), expr)
+                        self.old_rule_exo.add((g, p), expr)
 
-        self.old_rule = Constraint(group, m.PERIODS,
+        self.old_rule_exo = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_capacity_rule_exo)
+
+        def _old_capacity_rule(block):
+            """Rule definition for determining (overall) old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for g in group:
+                for p in m.PERIODS:
+                    expr = (
+                        self.old[g, p] ==
+                        self.old_end[g, p] + self.old_exo[g, p])
+                    self.old_rule.add((g, p), expr)
+
+        self.old_rule = Constraint(group,
+                                   m.PERIODS,
                                    noruleinit=True)
         self.old_rule_build = BuildAction(
             rule=_old_capacity_rule)
