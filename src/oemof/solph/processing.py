@@ -132,21 +132,21 @@ def create_dataframe(om):
     # adapt the dataframe by separating tuple data into columns depending
     # on which dimension the variable/parameter has (scalar/sequence).
     # columns for the oemof tuple and timestep are created
-    df['oemof_tuple'] = df['pyomo_tuple'].map(get_tuple)
+    df["oemof_tuple"] = df["pyomo_tuple"].map(get_tuple)
     df = df[df["oemof_tuple"].map(lambda x: x is not None)]
-    time_col = 'timestep'
-    methods_dict = {'get': get_timestep,
-                    'remove': remove_timestep}
+    time_col = "timestep"
+    methods_dict = {"get": get_timestep,
+                    "remove": remove_timestep}
 
     if isinstance(om, models.MultiPeriodModel):
-        time_col = 'timeindex'
-        methods_dict = {'get': get_timeindex,
-                        'remove': remove_timeindex}
+        time_col = "timeindex"
+        methods_dict = {"get": get_timeindex,
+                        "remove": remove_timeindex}
 
-    df[time_col] = df['oemof_tuple'].map(methods_dict['get'])
-    df['oemof_tuple'] = df['oemof_tuple'].map(methods_dict['remove'])
+    df[time_col] = df["oemof_tuple"].map(methods_dict["get"])
+    df["oemof_tuple"] = df["oemof_tuple"].map(methods_dict["remove"])
     # order the data by oemof tuple and timestep
-    df = df.sort_values(['oemof_tuple', time_col],
+    df = df.sort_values(["oemof_tuple", time_col],
                         ascending=[True, True])
 
     # drop empty decision variables
@@ -167,27 +167,33 @@ def results(om):
     and flows e.g. `results[n, n]['sequences']` for a standard model.
     """
     df = create_dataframe(om)
-    time_col = 'timestep'
-    scalars_col = 'scalars'
+    time_col = "timestep"
+    scalars_col = "scalars"
 
     if isinstance(om, models.MultiPeriodModel):
         # Note: timeindex differs dependent on variables!
-        period_indexed = ['invest', 'total', 'old']
-        period_timestep_indexed = ['flow']
+        period_indexed = [
+            "invest",
+            "total",
+            "old",
+            "old_exo",
+            "old_end"
+        ]
+        period_timestep_indexed = ["flow"]
         # TODO: Take care of initial storage content instead of just ignoring
-        to_be_ignored = ['init_content']
-        timestep_indexed = [el for el in df['variable_name'].unique()
+        to_be_ignored = ["init_content"]
+        timestep_indexed = [el for el in df["variable_name"].unique()
                             if el not in period_indexed
                             and el not in period_timestep_indexed
                             and el not in to_be_ignored]
-        time_col = 'timeindex'
-        scalars_col = 'period_scalars'
+        time_col = "timeindex"
+        scalars_col = "period_scalars"
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
         k if len(k) > 1 else (k[0], None):
         v[[time_col, "variable_name", "value"]]
-        for k, v in df.groupby('oemof_tuple')
+        for k, v in df.groupby("oemof_tuple")
     }
 
     # create final result dictionary by splitting up the dataframes in the
@@ -223,7 +229,7 @@ def results(om):
         else:
             # Split data set
             timeindex_cols = [col for col in df_dict[k].columns
-                              if col in timestep_indexed or col == 'flow']
+                              if col in timestep_indexed or col == "flow"]
             period_cols = [col for col in df_dict[k].columns
                            if col not in timeindex_cols]
             sequences = df_dict[k][timeindex_cols].dropna()
