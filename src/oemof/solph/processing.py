@@ -84,8 +84,7 @@ def get_timeindex(x):
     for i, n in enumerate(x):
         if isinstance(n, int):
             return x[i:]
-    else:
-        return (0,)
+    return (0,)
 
 
 def remove_timeindex(x):
@@ -99,8 +98,7 @@ def remove_timeindex(x):
     for i, n in enumerate(x):
         if isinstance(n, int):
             return x[:i]
-    else:
-        return x
+    return x
 
 
 def create_dataframe(om):

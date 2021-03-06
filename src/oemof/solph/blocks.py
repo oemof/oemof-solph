@@ -1553,7 +1553,6 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             return 0
 
         m = self.parent_block()
-        costs = 0
         investment_costs = 0
         fixed_costs = 0
 
