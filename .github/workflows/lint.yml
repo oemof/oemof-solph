@@ -9,9 +9,6 @@ on:
     branches:
       - master
       - dev
-  workflow_dispatch:
-  schedule:
-    - cron: "0 5 * * 6"  # 5:00 UTC every Saturday
 
 jobs:
   run-linters:
