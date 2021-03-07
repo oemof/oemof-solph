@@ -1071,6 +1071,21 @@ class SinkDSM(Sink):
     - oemof: Created by Julian Endres. A fairly simple DSM representation which
     demands the energy balance to be levelled out in fixed cycles
 
+    An evaluation of different modeling approaches has been carried out and
+    presented at the INREC 2020. Some of the results are as follows:
+    - DIW: A solid implementation with the tendency of slight overestimization
+    of potentials since a shift_time is not accounted for. It may get
+    computationally expensive due to a high time-interlinkage in constraint
+    formulations.
+    - DLR: An extensive modeling approach for demand response which neither
+    leads to an over- nor underestimization of potentials and balances modeling
+    detail and computation intensity. :attr:`fixes` and :attr:`addition` should
+    both be set to True which is the default value.
+    - oemof: A very computationally efficient approach which only requires the
+    energy balance to be levelled out in certain intervals. If demand response
+    is not at the center of the research and/or parameter availability is
+    limited, this approach should be chosen.
+
     SinkDSM adds additional constraints that allow to shift energy in certain
     time window constrained by :attr:`~capacity_up` and
     :attr:`~capacity_down`.
@@ -1098,16 +1113,16 @@ class SinkDSM(Sink):
         DIW :
 
             Sophisticated model based on the formulation by
-            Zerrahn & Schill (2015a). The load-shift of the component must be
-            compensated in a predefined delay-time (:attr:`~delay_time` is
+            Zerrahn & Schill (2015a). The load shift of the component must be
+            compensated in a predefined delay time (:attr:`~delay_time` is
             mandatory).
             For details see :class:`~SinkDSMDIWBlock`.
 
         DLR :
 
             Sophisticated model based on the formulation by
-            Gils (2015). The load-shift of the component must be
-            compensated in a predefined delay-time (:attr:`~delay_time` is
+            Gils (2015). The load shift of the component must be
+            compensated in a predefined delay time (:attr:`~delay_time` is
             mandatory).
             For details see :class:`~SinkDSMDLRBlock`.
     shift_interval: int
@@ -1203,6 +1218,7 @@ class SinkDSM(Sink):
     Note
     ----
 
+    * :attr:`method` has been renamed to :attr:`approach`.
     * This component is a candidate component. It's implemented as a custom
       component for users that like to use and test the component at early
       stage. Please report issues to improve the component.
@@ -1213,7 +1229,9 @@ class SinkDSM(Sink):
       compared to the approach 'DIW'
     * Using :attr:`~approach` 'DIW' or 'DLR' might result in demand shifts that
       exceed the specified delay time by activating up and down simultaneously
-      in the time steps between to DSM events.
+      in the time steps between to DSM events. Thus, the purpose of this
+      component is to model demand response portfolios rather than individual
+      demand units.
     * It's not recommended to assign cost to the flow that connects
       :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up`
       or :attr:`~cost_dsm_down_shift`
@@ -1245,8 +1263,8 @@ class SinkDSM(Sink):
                  n_yearLimit_shift=None,
                  n_yearLimit_shed=None,
                  t_dayLimit=None,
-                 addition=False,
-                 fixes=False,
+                 addition=True,
+                 fixes=True,
                  shed_eligibility=True,
                  shift_eligibility=True,
                  **kwargs):
@@ -4429,6 +4447,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
         self.cost = Expression(expr=investment_costs + variable_costs)
         return self.cost
+
 
 class PiecewiseLinearTransformer(on.Transformer):
     """Component to model a transformer with one input and one output
