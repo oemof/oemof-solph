@@ -28,6 +28,7 @@ import views
 t_idx_1 = pd.date_range('1/1/2020', periods=3, freq='H')
 t_idx_2 = pd.date_range('1/1/2030', periods=3, freq='H')
 t_idx_3 = pd.date_range('1/1/2040', periods=3, freq='H')
+t_idx_4 = pd.date_range('1/1/2050', periods=3, freq='H')
 
 # timeindex = {'1': t_idx_1, '2': t_idx_2, '3': t_idx_3}
 
@@ -35,9 +36,12 @@ t_idx_3 = pd.date_range('1/1/2040', periods=3, freq='H')
 t_idx_1_Series = pd.Series(index=t_idx_1, dtype='float64')
 t_idx_2_Series = pd.Series(index=t_idx_2, dtype='float64')
 t_idx_3_Series = pd.Series(index=t_idx_3, dtype='float64')
+t_idx_4_Series = pd.Series(index=t_idx_4, dtype='float64')
 
+# timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
+#                        t_idx_3_Series]).index
 timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
-                       t_idx_3_Series]).index
+                       t_idx_3_Series, t_idx_4_Series]).index
 
 es = network.EnergySystem(timeindex=timeindex,
                           timeincrement=[1] * len(timeindex))
@@ -220,7 +224,8 @@ pp_natgas_GT = network.Transformer(
         multiperiodinvestment=options.MultiPeriodInvestment(
             maximum=1000,
             # ep_costs=0.6e6,
-            ep_costs=[0.6e6, 0.5e6, 0.8e6],
+            # ep_costs=[0.6e6, 0.5e6, 0.8e6],
+            ep_costs=[0.6e6, 0.5e6, 0.8e6, 0.4e6],
             existing=0,
             lifetime=20,
             age=0,
@@ -229,6 +234,8 @@ pp_natgas_GT = network.Transformer(
             # overall_maximum=9,
             # nonconvex=True,
             # offset=400,
+            # age=1,
+            # lifetime=2,
             # age=39,
             # lifetime=40
         ),
@@ -246,40 +253,40 @@ pp_natgas_GT = network.Transformer(
 storage_el = components.GenericStorage(
     label='DE_storage_el',
     inputs={bus_el: network.Flow(
-        nominal_value=20,
+        # nominal_value=20,
         variable_costs=0,
         max=1,
-        multiperiod=True
+        # multiperiod=True
         # investment=options.Investment(
-        # multiperiodinvestment=options.MultiPeriodInvestment(
-        #     maximum=20,
-        #     ep_costs=1000,
-        #     existing=0,
-        #     lifetime=20,
-        #     age=0,
-        #     interest_rate=0.02,
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=20,
+            ep_costs=1000,
+            existing=10,
+            lifetime=2,
+            age=1,
+            interest_rate=0.02,
             # age=39,
             # lifetime=40
-        # )
+        )
     )},
     outputs={bus_el: network.Flow(
-        nominal_value=20,
+        # nominal_value=20,
         variable_costs=0,
         max=1,
-        multiperiod=True
+        # multiperiod=True
         # investment=options.Investment(
-        # multiperiodinvestment=options.MultiPeriodInvestment(
-        #     maximum=20,
-        #     ep_costs=1000,
-        #     existing=0,
-        #     lifetime=20,
-        #     age=0,
-        #     interest_rate=0.02,
+        multiperiodinvestment=options.MultiPeriodInvestment(
+            maximum=20,
+            ep_costs=1000,
+            existing=10,
+            lifetime=2,
+            age=1,
+            interest_rate=0.02,
             # age=39,
             # lifetime=40
-        # )
+        )
     )},
-    nominal_storage_capacity=20,
+    # nominal_storage_capacity=20,
     loss_rate=0,
     initial_storage_level=0,
     max_storage_level=1,
@@ -290,23 +297,23 @@ storage_el = components.GenericStorage(
     invest_relation_input_output=1,
     invest_relation_input_capacity=None,
     invest_relation_output_capacity=None,
-    multiperiod=True,
+    # multiperiod=True,
     fixed_costs=10,
     # investment=options.Investment(
-    # multiperiodinvestment=options.MultiPeriodInvestment(
-    #     maximum=20,
-    #     ep_costs=1000,
-    #     existing=0,
-    #     lifetime=20,
-    #     age=0,
-    #     interest_rate=0.02,
+    multiperiodinvestment=options.MultiPeriodInvestment(
+        maximum=20,
+        ep_costs=1000,
+        existing=10,
+        lifetime=2,
+        age=1,
+        interest_rate=0.02,
         # fixed_costs=10,
         # overall_maximum=9,
         # overall_minimum=14,
         # nonconvex=True,
         # age=39,
         # lifetime=40
-    # )
+    )
 )
 
 link_DE_FR = custom.Link(
@@ -335,7 +342,7 @@ link_DE_FR = custom.Link(
     multiperiod=True
 )
 
-approach='DLR'
+approach = 'DLR'
 
 kwargs_all = {
     'label': 'demand_dsm',
@@ -384,11 +391,11 @@ dsm_unit = custom.SinkDSM(
     # multiperiod=True,
     multiperiodinvestment=options.MultiPeriodInvestment(
     # investment=options.Investment(
-        existing=0,
+        existing=10,
         maximum=20,
         ep_costs=10,
-        lifetime=20,
-        age=18,
+        lifetime=2,
+        age=1,
         interest_rate=0.02
     )
 )
