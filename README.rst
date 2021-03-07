@@ -1,31 +1,24 @@
-========
-Overview
-========
+|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
 
-.. start-badges
-
-**docs**
-
-|docs| |zenodo|
-
-**tests**
-
-|travis| |appveyor| |requires|
-|coveralls| |codecov|
-|scrutinizer| |codacy| |codeclimate|
-
-**package**
+|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
 
 |version| |wheel| |supported-versions| |supported-implementations|
-|commits-since|
+|commits-since| |zenodo|
+
+------------------------------
+
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |travis| image:: https://api.travis-ci.org/oemof/oemof-solph.svg?branch=dev
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/github/oemof/oemof-solph/branches
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
@@ -79,8 +72,11 @@ Overview
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+===========
+oemof.solph
+===========
 
-.. end-badges
+**A model generator for energy system modelling and optimisation (LP/MILP)**
 
 
 .. contents::
@@ -104,7 +100,7 @@ Since v0.4.0. it is not possible to install just oemof, use
 ``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph.
-Read our `contribution <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ section.
+Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
@@ -135,7 +131,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
     pip install oemof.solph
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use::
+If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
@@ -214,8 +210,10 @@ Contributing
 ============
 
 A warm welcome to all who want to join the developers and contribute to
-oemof.solph. Information on the details and how to approach us can be found
-`in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+oemof.solph.
+
+Information on the details and how to approach us can be found
+`in the oemof documentation <https://oemof.readthedocs.io/en/latest/contributing.html>`_ .
 
 Citing
 ======
@@ -223,7 +221,7 @@ Citing
 For explicitly citing solph, you might want to refer to
 `DOI:10.1016/j.simpa.2020.100028 <https://doi.org/10.1016/j.simpa.2020.100028>`_,
 which gives an overview over the capabilities of solph.
-The core ideas of oemof as a whole are described in 
+The core ideas of oemof as a whole are described in
 `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_
 (preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
 To allow citing specific versions, we use the zenodo project to get a DOI for each version.

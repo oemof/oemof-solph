@@ -17,7 +17,7 @@ from oemof.solph.plumbing import sequence
 
 
 def investment_limit(model, limit=None):
-    r""" Set an absolute limit for the total investment costs of an investment
+    r"""Set an absolute limit for the total investment costs of an investment
     optimization problem:
 
     .. math:: \sum_{investment\_costs} \leq limit
@@ -67,9 +67,8 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     limit : numeric
         Global limit of keyword attribute for the energy system.
 
+    **Constraint**
 
-    Constraint
-    ----------
     .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
@@ -122,14 +121,23 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
     limit_name = "invest_limit_" + keyword
 
-    setattr(model, limit_name, po.Expression(
-        expr=sum(model.InvestmentFlow.invest[inflow, outflow] *
-                 getattr(invest_flows[inflow, outflow], keyword)
-                 for (inflow, outflow) in invest_flows
-                 )))
+    setattr(
+        model,
+        limit_name,
+        po.Expression(
+            expr=sum(
+                model.InvestmentFlow.invest[inflow, outflow]
+                * getattr(invest_flows[inflow, outflow], keyword)
+                for (inflow, outflow) in invest_flows
+            )
+        ),
+    )
 
-    setattr(model, limit_name + "_constraint", po.Constraint(
-        expr=(getattr(model, limit_name) <= limit)))
+    setattr(
+        model,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    )
 
     return model
 
@@ -143,10 +151,9 @@ def emission_limit(om, flows=None, limit=None):
     Flow objects required an attribute "emission_factor"!
 
     """
-    generic_integral_limit(om,
-                           keyword='emission_factor',
-                           flows=flows,
-                           limit=limit)
+    generic_integral_limit(
+        om, keyword="emission_factor", flows=flows, limit=limit
+    )
 
 
 def generic_integral_limit(om, keyword, flows=None, limit=None):
@@ -223,27 +230,40 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         for (i, o) in flows:
             if not hasattr(flows[i, o], keyword):
                 raise AttributeError(
-                    ('Flow with source: {0} and target: {1} '
-                     'has no attribute {2}.').format(
-                        i.label, o.label, keyword))
+                    (
+                        "Flow with source: {0} and target: {1} "
+                        "has no attribute {2}."
+                    ).format(i.label, o.label, keyword)
+                )
 
-    limit_name = "integral_limit_"+keyword
+    limit_name = "integral_limit_" + keyword
 
-    setattr(om, limit_name, po.Expression(
-        expr=sum(om.flow[inflow, outflow, t]
-                 * om.timeincrement[t]
-                 * sequence(getattr(flows[inflow, outflow], keyword))[t]
-                 for (inflow, outflow) in flows
-                 for t in om.TIMESTEPS)))
+    setattr(
+        om,
+        limit_name,
+        po.Expression(
+            expr=sum(
+                om.flow[inflow, outflow, t]
+                * om.timeincrement[t]
+                * sequence(getattr(flows[inflow, outflow], keyword))[t]
+                for (inflow, outflow) in flows
+                for t in om.TIMESTEPS
+            )
+        ),
+    )
 
-    setattr(om, limit_name+"_constraint", po.Constraint(
-        expr=(getattr(om, limit_name) <= limit)))
+    setattr(
+        om,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(om, limit_name) <= limit)),
+    )
 
     return om
 
 
-def limit_active_flow_count(model, constraint_name, flows,
-                            lower_limit=0, upper_limit=None):
+def limit_active_flow_count(
+    model, constraint_name, flows, lower_limit=0, upper_limit=None
+):
     r"""
     Set limits (lower and/or upper) for the number of concurrently
     active NonConvex flows. The flows are given as a list.
@@ -304,23 +324,29 @@ def limit_active_flow_count(model, constraint_name, flows,
 
     def _flow_count_rule(m):
         for ts in m.TIMESTEPS:
-            lhs = sum(m.NonConvexFlow.status[fi, fo, ts]
-                      for fi, fo in flows)
+            lhs = sum(m.NonConvexFlow.status[fi, fo, ts] for fi, fo in flows)
             rhs = getattr(model, constraint_name)[ts]
-            expr = (lhs == rhs)
+            expr = lhs == rhs
             if expr is not True:
                 getattr(m, attrname_constraint).add(ts, expr)
 
-    setattr(model, attrname_constraint,
-            po.Constraint(model.TIMESTEPS, noruleinit=True))
-    setattr(model, attrname_constraint+"_build",
-            po.BuildAction(rule=_flow_count_rule))
+    setattr(
+        model,
+        attrname_constraint,
+        po.Constraint(model.TIMESTEPS, noruleinit=True),
+    )
+    setattr(
+        model,
+        attrname_constraint + "_build",
+        po.BuildAction(rule=_flow_count_rule),
+    )
 
     return model
 
 
-def limit_active_flow_count_by_keyword(model, keyword,
-                                       lower_limit=0, upper_limit=None):
+def limit_active_flow_count_by_keyword(
+    model, keyword, lower_limit=0, upper_limit=None
+):
     r"""
     This wrapper for limit_active_flow_count allows to set limits
     to the count of concurrently active flows by using a keyword
@@ -351,10 +377,13 @@ def limit_active_flow_count_by_keyword(model, keyword,
         if hasattr(model.flows[i, o], keyword):
             flows.append((i, o))
 
-    return limit_active_flow_count(model, keyword,
-                                   flows=flows,
-                                   lower_limit=lower_limit,
-                                   upper_limit=upper_limit)
+    return limit_active_flow_count(
+        model,
+        keyword,
+        flows=flows,
+        lower_limit=lower_limit,
+        upper_limit=upper_limit,
+    )
 
 
 def equate_variables(model, var1, var2, factor1=1, name=None):
@@ -415,15 +444,23 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     ...    om.InvestmentFlow.invest[line21, bel1])
     """
     if name is None:
-        name = '_'.join(["equate", str(var1), str(var2)])
+        name = "_".join(["equate", str(var1), str(var2)])
 
     def equate_variables_rule(m):
         return var1 * factor1 == var2
+
     setattr(model, name, po.Constraint(rule=equate_variables_rule))
 
 
-def shared_limit(model, quantity, limit_name,
-                 components, weights, lower_limit=0, upper_limit=None):
+def shared_limit(
+    model,
+    quantity,
+    limit_name,
+    components,
+    weights,
+    lower_limit=0,
+    upper_limit=None,
+):
     r"""
     Adds a constraint to the given model that restricts
     the weighted sum of variables to a corridor.
@@ -496,13 +533,18 @@ def shared_limit(model, quantity, limit_name,
 
     def _weighted_sum_rule(m):
         for ts in m.TIMESTEPS:
-            lhs = sum(quantity[c, ts] * w
-                      for c, w in zip(components, weights))
+            lhs = sum(quantity[c, ts] * w for c, w in zip(components, weights))
             rhs = getattr(model, limit_name)[ts]
-            expr = (lhs == rhs)
+            expr = lhs == rhs
             getattr(m, weighted_sum_constraint).add(ts, expr)
 
-    setattr(model, weighted_sum_constraint,
-            po.Constraint(model.TIMESTEPS, noruleinit=True))
-    setattr(model, weighted_sum_constraint+"_build",
-            po.BuildAction(rule=_weighted_sum_rule))
+    setattr(
+        model,
+        weighted_sum_constraint,
+        po.Constraint(model.TIMESTEPS, noruleinit=True),
+    )
+    setattr(
+        model,
+        weighted_sum_constraint + "_build",
+        po.BuildAction(rule=_weighted_sum_rule),
+    )
