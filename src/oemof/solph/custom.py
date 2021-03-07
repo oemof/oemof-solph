@@ -1084,7 +1084,9 @@ class SinkDSM(Sink):
     - oemof: A very computationally efficient approach which only requires the
     energy balance to be levelled out in certain intervals. If demand response
     is not at the center of the research and/or parameter availability is
-    limited, this approach should be chosen.
+    limited, this approach should be chosen. Note that approach `oemof` does
+    allow for load shedding, but does not impose a limit on maximum amount of
+    shedded energy.
 
     SinkDSM adds additional constraints that allow to shift energy in certain
     time window constrained by :attr:`~capacity_up` and
@@ -1275,7 +1277,7 @@ class SinkDSM(Sink):
         self.demand = sequence(demand)
         self.approach = approach
         self.shift_interval = shift_interval
-        if not approach == 'DLR':
+        if not approach == "DLR":
             self.delay_time = delay_time
         else:
             self.delay_time = [el for el in range(1, delay_time + 1)]
@@ -1292,29 +1294,52 @@ class SinkDSM(Sink):
             if max_capacity_down is None and max_demand is None:
                 self.flex_share_down = flex_share_down
             else:
-                e1 = ("Please determine either flex_share_down "
-                      "(investment modeling)\n or set"
-                      "max_demand and max_capacity_down (dispatch modeling).\n"
-                      "Otherwise, overdetermination occurs.")
+                e1 = (
+                    "Please determine either **flex_share_down "
+                    "(investment modeling)\n or set "
+                    "**max_demand and **max_capacity_down "
+                    "(dispatch modeling).\n"
+                    "Otherwise, overdetermination occurs."
+                )
                 raise AttributeError(e1)
         else:
-            self.flex_share_down = self.max_capacity_down / self.max_demand
+            if max_capacity_down is None or max_demand is None:
+                e2 = (
+                    "If you do not specify **flex_share_down\n"
+                    "which should be used for investment modeling,\n"
+                    "you have to specify **max_capacity_down "
+                    "and **max_demand\n"
+                    "instead which should be used for dispatch modeling."
+                )
+                raise AttributeError(e2)
+            else:
+                self.flex_share_down = self.max_capacity_down / self.max_demand
 
         if flex_share_up is not None:
             if max_capacity_up is None and max_demand is None:
                 self.flex_share_up = flex_share_up
             else:
-                e2 = ("Please determine either flex_share_up "
-                      "(investment modeling)\n or set"
+                e3 = ("Please determine either flex_share_up "
+                      "(investment modeling)\n or set "
                       "max_demand and max_capacity_up (dispatch modeling).\n"
                       "Otherwise, overdetermination occurs.")
-                raise AttributeError(e2)
+                raise AttributeError(e3)
         else:
-            self.flex_share_up = self.max_capacity_up / self.max_demand
+            if max_capacity_up is None or max_demand is None:
+                e4 = (
+                    "If you do not specify **flex_share_up\n"
+                    "which should be used for investment modeling,\n"
+                    "you have to specify **max_capacity_up "
+                    "and **max_demand\n"
+                    "instead which should be used for dispatch modeling."
+                )
+                raise AttributeError(e4)
+            else:
+                self.flex_share_up = self.max_capacity_up / self.max_demand
 
-        self.cost_dsm_up = cost_dsm_up
-        self.cost_dsm_down_shift = cost_dsm_down_shift
-        self.cost_dsm_down_shed = cost_dsm_down_shed
+        self.cost_dsm_up = sequence(cost_dsm_up)
+        self.cost_dsm_down_shift = sequence(cost_dsm_down_shift)
+        self.cost_dsm_down_shed = sequence(cost_dsm_down_shed)
         self.efficiency = efficiency
         self.capacity_down_mean = mean(capacity_down)
         self.capacity_up_mean = mean(capacity_up)
@@ -1339,30 +1364,37 @@ class SinkDSM(Sink):
             and (self.max_demand
                  or self.max_capacity_down
                  or self.max_capacity_up) is not None):
-            e1 = (
+            e5 = (
                 "If an investment object is defined, the invest variable "
-                "replaces the max_demand, the max_capacity_down as well as\n"
-                "the max_capacity_up values. Therefore, max_demand,\n"
-                "max_capacity_up and max_capacity_down values should be"
+                "replaces the **max_demand, the **max_capacity_down "
+                "as well as\n"
+                "the **max_capacity_up values. Therefore, **max_demand,\n"
+                "**max_capacity_up and **max_capacity_down values should be "
                 "'None'.\n"
             )
-            raise AttributeError(e1)
+            raise AttributeError(e5)
 
     def constraint_group(self):
-        possible_approaches = ['DIW', 'DLR', 'oemof']
+        possible_approaches = ["DIW", "DLR", "oemof"]
 
         if self.approach in [possible_approaches[0],
                              possible_approaches[1]]:
             if self.delay_time is None:
-                raise ValueError('Please define: **delay_time'
-                                 'is a mandatory parameter')
+                raise ValueError(
+                    "Please define: **delay_time"
+                    " is a mandatory parameter"
+                )
             if not self.shed_eligibility and not self.shift_eligibility:
-                raise ValueError('At least one of **shed_eligibility'
-                                 ' and **shift_eligibility must be True')
+                raise ValueError(
+                    "At least one of **shed_eligibility"
+                    " and **shift_eligibility must be True"
+                )
             if self.shed_eligibility:
                 if self.recovery_time_shed is None:
-                    raise ValueError('If unit is eligible for load shedding,'
-                                     ' **recovery_time_shed must be defined')
+                    raise ValueError(
+                        "If unit is eligible for load shedding,"
+                        " **recovery_time_shed must be defined"
+                    )
 
         if self.approach == possible_approaches[0]:
             if self._invest_group is True:
@@ -1378,8 +1410,8 @@ class SinkDSM(Sink):
 
         elif self.approach == possible_approaches[2]:
             if self.shift_interval is None:
-                raise ValueError('Please define: **shift_interval'
-                                 ' is a mandatory parameter')
+                raise ValueError("Please define: **shift_interval"
+                                 " is a mandatory parameter")
             if self._invest_group is True:
                 return SinkDSMOemofInvestmentBlock
             else:
@@ -1399,17 +1431,24 @@ class SinkDSMOemofBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
+        (1) \quad DSM_{t}^{do, shift} = 0 \quad \forall t
+        \quad if \space eligibility_{shift} = False
+        &
+        (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        \quad if \space eligibility_{shed} = False
+        &
+        (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
+        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
         \quad \forall t \in \mathbb{T}\\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
+        (4) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
         \mathbb{T}\\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
-        \mathbb{T}\\
+        (5) \quad DSM_{t}^{do} \leq  E_{t}^{do, shift} + E_{t}^{do, shed}
+        \quad \forall t \in \mathbb{T}\\
         &
-        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
-        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
+        (6) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in \{k
         \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
@@ -1422,12 +1461,16 @@ class SinkDSMOemofBlock(SimpleBlock):
 
             ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up` ","V", "DSM
             up shift"
-            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.dsm_down` ","V","DSM
-            down shift"
+            ":math:`DSM_{t}^{do, shift}` ",":attr:`~SinkDSM.dsm_do_shift` ",
+            "V","DSM down shift"
+            ":math:`DSM_{t}^{do, shed}` ",":attr:`~SinkDSM.dsm_do_shed` ",
+            "V","DSM down shift"
             ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
             flowing in from electrical bus"
-            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
-            series"
+            ":math:`demand_{t}`",":attr:`demand[t]`","P", "(Electrical) demand
+            series (normalized)"
+            ":math:`demand_{max}`",":attr:`max_demand`","P", "Maximum demand
+            value"
             ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Capacity
             DSM down shift capacity"
             ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Capacity
@@ -1437,6 +1480,12 @@ class SinkDSMOemofBlock(SimpleBlock):
             ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
             load shifting processes"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
+            ":math:`eligibility_{shift}` ",":attr:`shift_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shifting"
+            ":math:`eligibility_{shed}` ",":attr:`shed_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shedding"
 
     """
     CONSTRAINT_GROUP = True
@@ -1467,6 +1516,11 @@ class SinkDSMOemofBlock(SimpleBlock):
             within=NonNegativeReals
         )
 
+        # Variable load shedding
+        self.dsm_do_shed = Var(
+            self.dsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals)
+
         # Variable load shift up
         self.dsm_up = Var(
             self.dsm, m.TIMESTEPS, initialize=0, within=NonNegativeReals
@@ -1474,10 +1528,34 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         #  ************* CONSTRAINTS *****************************
 
+        def _shift_shed_vars_rule(block):
+            """Force shifting resp. shedding variables to zero dependent
+            on how boolean parameters for shift resp. shed eligibility
+            are set.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    if not g.shift_eligibility:
+                        lhs = self.dsm_do_shift[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+                    if not g.shed_eligibility:
+                        lhs = self.dsm_do_shed[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+        self.shift_shed_vars = Constraint(group, m.TIMESTEPS,
+                                          noruleinit=True)
+        self.shift_shed_vars_build = BuildAction(
+            rule=_shift_shed_vars_rule)
+
         # Demand Production Relation
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DSM.
             Generator Production == Demand_el +- DSM
             """
@@ -1488,7 +1566,8 @@ class SinkDSMOemofBlock(SimpleBlock):
 
                     # Demand + DSM_up - DSM_down
                     rhs = (g.demand[t] * g.max_demand
-                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t])
+                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t]
+                           - self.dsm_do_shed[g, t])
 
                     # add constraint
                     block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1502,11 +1581,9 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         # Upper bounds relation
         def dsm_up_constraint_rule(block):
-            """
-            Realised upward load shift at time t has to be smaller than
+            """Realised upward load shift at time t has to be smaller than
             upward DSM capacity at time t.
             """
-
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM up
@@ -1524,15 +1601,13 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         # Upper bounds relation
         def dsm_down_constraint_rule(block):
-            """
-            Realised downward load shift at time t has to be smaller than
+            """Realised downward load shift at time t has to be smaller than
             downward DSM capacity at time t.
             """
-
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM down
-                    lhs = self.dsm_do_shift[g, t]
+                    lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
                     rhs = g.capacity_down[t] * g.max_capacity_down
 
@@ -1547,8 +1622,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         )
 
         def dsm_sum_constraint_rule(block):
-            """
-            Relation to compensate the total amount of positive
+            """Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
             This constraint is building balance in full intervals starting
             with index 0. The last interval might not be full.
@@ -1593,8 +1667,13 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         for t in m.TIMESTEPS:
             for g in self.dsm:
-                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
-                dsm_cost += self.dsm_do_shift[g, t] * g.cost_dsm_down_shift
+                dsm_cost += (
+                    self.dsm_up[g, t] * g.cost_dsm_up[t]
+                )
+                dsm_cost += (
+                    self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
+                    + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                )
 
         self.cost = Expression(expr=dsm_cost)
 
@@ -1662,11 +1741,41 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         self.dsm_do_shift = Var(self.investdsm, m.TIMESTEPS, initialize=0,
                                 within=NonNegativeReals)
 
+        # Variable load shedding
+        self.dsm_do_shed = Var(
+            self.dsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals)
+
         # Variable load shift up
         self.dsm_up = Var(self.investdsm, m.TIMESTEPS, initialize=0,
                           within=NonNegativeReals)
 
         #  ************* CONSTRAINTS *****************************
+
+        def _shift_shed_vars_rule(block):
+            """Force shifting resp. shedding variables to zero dependent
+            on how boolean parameters for shift resp. shed eligibility
+            are set.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    if not g.shift_eligibility:
+                        lhs = self.dsm_do_shift[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+                    if not g.shed_eligibility:
+                        lhs = self.dsm_do_shed[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+        self.shift_shed_vars = Constraint(group, m.TIMESTEPS,
+                                          noruleinit=True)
+        self.shift_shed_vars_build = BuildAction(
+            rule=_shift_shed_vars_rule)
 
         # Demand Production Relation
         def _input_output_relation_rule(block):
@@ -1682,7 +1791,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
                     # Demand + DSM_up - DSM_down
                     rhs = (g.demand[t] * self.invest[g]
-                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t])
+                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t]
+                           - self.dsm_do_shed[g, t])
 
                     # add constraint
                     block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1787,10 +1897,16 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                 raise ValueError("Missing value for investment costs!")
             for t in m.TIMESTEPS:
                 variable_costs += self.dsm_up[g, t] * g.cost_dsm_up
-                variable_costs += (self.dsm_do_shift[g, t]
-                                   * g.cost_dsm_down_shift)
+                variable_costs += (
+                    self.dsm_do_shift[g, t]
+                    * g.cost_dsm_down_shift
+                    + self.dsm_do_shed[g, t]
+                    * g.cost_dsm_down_shed[t]
+                )
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+        self.cost = Expression(
+            expr=investment_costs + variable_costs
+        )
 
         return self.cost
 
