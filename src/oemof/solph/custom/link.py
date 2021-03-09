@@ -23,6 +23,7 @@ from oemof.network import network as on
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
+
 from oemof.solph.plumbing import sequence
 
 
