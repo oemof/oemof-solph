@@ -24,6 +24,7 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 
 from oemof.solph import network as solph_network
+from oemof.solph.plumbing import sequence as solph_sequence
 
 
 class OffsetTransformer(network.Transformer):
