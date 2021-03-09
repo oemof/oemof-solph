@@ -1444,7 +1444,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         (4) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
         \mathbb{T}\\
         &
-        (5) \quad DSM_{t}^{do} \leq  E_{t}^{do, shift} + E_{t}^{do, shed}
+        (5) \quad DSM_{t}^{do, shift} + DSM_{t}^{do, shed} \leq  E_{t}^{do}
         \quad \forall t \in \mathbb{T}\\
         &
         (6) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
@@ -1452,6 +1452,18 @@ class SinkDSMOemofBlock(SimpleBlock):
         \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
+    **The following parts of the objective function are created:**
+
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \forall t in \mathbb{T}
+
+    Note that variable costs may be attributed to upshifts, downshifts or both.
+    Also note that costs for shedding may deviate from that for shifting
+    (usually costs for shedding are much larger and equal to the value of lost
+    load)
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -1460,33 +1472,44 @@ class SinkDSMOemofBlock(SimpleBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up` ","V", "DSM
-            up shift"
+            up shift (capacity shifted upwards)"
             ":math:`DSM_{t}^{do, shift}` ",":attr:`~SinkDSM.dsm_do_shift` ",
-            "V","DSM down shift"
+            "V","DSM down shift (capacity shifted downwards)"
             ":math:`DSM_{t}^{do, shed}` ",":attr:`~SinkDSM.dsm_do_shed` ",
-            "V","DSM down shift"
+            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
             ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from electrical bus"
+            flowing in from (electrical) inflow bus"
             ":math:`demand_{t}`",":attr:`demand[t]`","P", "(Electrical) demand
             series (normalized)"
             ":math:`demand_{max}`",":attr:`max_demand`","P", "Maximum demand
             value"
-            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Capacity
-            DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Capacity
-            DSM up shift "
+            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Maximum
+            capacity allowed for a load adjustment downwards
+            (DSM down shift + DSM shedded)"
+            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Maximum
+            capacity allowed for a shift upwards (DSM up shift)"
             ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
-            interval"
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
+            interval (time within which the energy balance must be
+            levelled out"
+            ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
+            loss forload shifting processes"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
-            ":math:`eligibility_{shift}` ",":attr:`shift_eligibility`","P",
+            ":math:`eligibility_{shift}` ",
+            ":attr:`~SinkDSM.shift_eligibility`","P",
             "Boolean parameter indicating if unit can be used for
             load shifting"
-            ":math:`eligibility_{shed}` ",":attr:`shed_eligibility`","P",
+            ":math:`eligibility_{shed}` ",
+            ":attr:`~SinkDSM.shed_eligibility`","P",
             "Boolean parameter indicating if unit can be used for
             load shedding"
-
+            ":math:`cost_{t}^{dsm, up}` ", ":attr:`~SinkDSM.cost_dsm_up`","P",
+            "Variable costs for an upwards shift"
+            ":math:`cost_{t}^{dsm, do, shift}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shift`","P",
+            "Variable costs for a downwards shift (load shifting)"
+            ":math:`cost_{t}^{dsm, do, shed}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shed`","P",
+            "Variable costs for shedding load"
     """
     CONSTRAINT_GROUP = True
 
@@ -1499,7 +1522,7 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        # for all DSM components get inflow from bus_elec
+        # for all DSM components get inflow from a bus
         for n in group:
             n.inflow = list(n.inputs)[0]
 
@@ -1689,18 +1712,73 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
+        (1) \quad invest_{min} \leq invest \leq invest_{max}
+        &
+        (2) \quad DSM_{t}^{do, shift} = 0 \quad \forall t
+        \quad if \space eligibility_{shift} = False
+        &
+        (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        \quad if \space eligibility_{shed} = False
+        &
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot invest + DSM_{t}^{up}
+        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
         \quad \forall t \in \mathbb{T}\\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
-        \mathbb{T}\\
+        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot invest \cdot s_{flex, up}
+        \quad \forall t \in \mathbb{T}\\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
-        \mathbb{T}\\
+        (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
+        E_{t}^{do} \cdot invest \cdot s_{flex, do}
+        \quad \forall t \in \mathbb{T}\\
         &
-        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
-        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
+        (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in \{k
         \in \mathbb{T} \mid k \mod \tau = 0\} \\
+        &
+
+    **The following parts of the objective function are created:**
+
+    * Investment annuity:
+
+    .. math::
+        invest \cdot costs_{invest}
+
+    * Variable costs:
+
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \forall t in \mathbb{T}
+
+    See remarks in :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    **Symbols and attribute names of variables and parameters**
+
+    Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    The following variables and parameters are exclusively used for
+    investment modeling:
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+            ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
+            invested in. Equals to installed capacity. The capacity share
+            eligible for a shift is determined by flex share(s)."
+            ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment"
+            ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment"
+            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
+            "P","Share of invested capacity that may be shift upwards
+            at maximum"
+            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
+            "P", "Share of invested capacity that may be shift downwards
+            at maximum"
+            ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific investment annuity"
     """
     CONSTRAINT_GROUP = True
 
@@ -1779,8 +1857,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
         # Demand Production Relation
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DSM.
             Generator Production == Demand_el +- DSM
             """
@@ -1804,11 +1881,9 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
         # Upper bounds relation
         def dsm_up_constraint_rule(block):
-            """
-            Realised upward load shift at time t has to be smaller than
+            """Realised upward load shift at time t has to be smaller than
             upward DSM capacity at time t.
             """
-
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM up
@@ -1825,15 +1900,14 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
         # Upper bounds relation
         def dsm_down_constraint_rule(block):
-            """
-            Realised downward load shift at time t has to be smaller than
+            """Realised downward load shift at time t has to be smaller than
             downward DSM capacity at time t.
             """
 
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM down
-                    lhs = self.dsm_do_shift[g, t]
+                    lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
                     rhs = (g.capacity_down[t] * self.invest[g]
                            * g.flex_share_down)
@@ -1847,13 +1921,11 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
             rule=dsm_down_constraint_rule)
 
         def dsm_sum_constraint_rule(block):
-            """
-            Relation to compensate the total amount of positive
+            """Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
             This constraint is building balance in full intervals starting
             with index 0. The last interval might not be full.
             """
-
             for g in group:
                 intervals = range(m.TIMESTEPS[1],
                                   m.TIMESTEPS[-1],
