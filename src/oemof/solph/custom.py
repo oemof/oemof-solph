@@ -1896,10 +1896,10 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
             else:
                 raise ValueError("Missing value for investment costs!")
             for t in m.TIMESTEPS:
-                variable_costs += self.dsm_up[g, t] * g.cost_dsm_up
+                variable_costs += self.dsm_up[g, t] * g.cost_dsm_up[t]
                 variable_costs += (
                     self.dsm_do_shift[g, t]
-                    * g.cost_dsm_down_shift
+                    * g.cost_dsm_down_shift[t]
                     + self.dsm_do_shed[g, t]
                     * g.cost_dsm_down_shed[t]
                 )
@@ -2456,10 +2456,12 @@ class SinkDSMDIWBlock(SimpleBlock):
 
         for t in m.TIMESTEPS:
             for g in self.dsm:
-                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
+                dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up[t]
                 dsm_cost += (sum(self.dsm_do_shift[g, t, tt]
-                                 for tt in m.TIMESTEPS) * g.cost_dsm_down_shift
-                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed)
+                                 for tt in m.TIMESTEPS)
+                             * g.cost_dsm_down_shift[t]
+                             + self.dsm_do_shed[g, t]
+                             * g.cost_dsm_down_shed[t])
 
         self.cost = Expression(expr=dsm_cost)
 
@@ -3002,12 +3004,12 @@ class SinkDSMDIWInvestmentBlock(SinkDSMDIWBlock):
                 raise ValueError("Missing value for investment costs!")
 
             for t in m.TIMESTEPS:
-                variable_costs += self.dsm_up[g, t] * g.cost_dsm_up
+                variable_costs += self.dsm_up[g, t] * g.cost_dsm_up[t]
                 variable_costs += (sum(self.dsm_do_shift[g, t, tt]
                                        for tt in m.TIMESTEPS)
-                                   * g.cost_dsm_down_shift
+                                   * g.cost_dsm_down_shift[t]
                                    + self.dsm_do_shed[g, t]
-                                   * g.cost_dsm_down_shed)
+                                   * g.cost_dsm_down_shed[t])
 
         self.cost = Expression(expr=investment_costs + variable_costs)
 
@@ -3767,13 +3769,16 @@ class SinkDSMDLRBlock(SimpleBlock):
 
         for t in m.TIMESTEPS:
             for g in self.DR:
-                dr_cost += sum(self.dsm_up[g, h, t]
+                dr_cost += (sum(self.dsm_up[g, h, t]
                                + self.balance_dsm_do[g, h, t]
-                               for h in g.delay_time) * g.cost_dsm_up
+                               for h in g.delay_time)
+                            * g.cost_dsm_up[t])
                 dr_cost += (sum(self.dsm_do_shift[g, h, t]
                                 + self.balance_dsm_up[g, h, t]
-                                for h in g.delay_time) * g.cost_dsm_down_shift
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed)
+                                for h in g.delay_time)
+                            * g.cost_dsm_down_shift[t]
+                            + self.dsm_do_shed[g, t]
+                            * g.cost_dsm_down_shed[t])
 
         self.cost = Expression(expr=dr_cost)
 
@@ -4551,15 +4556,16 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             else:
                 raise ValueError("Missing value for investment costs!")
             for t in m.TIMESTEPS:
-                variable_costs += sum(self.dsm_up[g, h, t]
-                                      + self.balance_dsm_do[g, h, t]
-                                      for h in g.delay_time) * g.cost_dsm_up
+                variable_costs += (sum(self.dsm_up[g, h, t]
+                                       + self.balance_dsm_do[g, h, t]
+                                       for h in g.delay_time)
+                                   * g.cost_dsm_up[t])
                 variable_costs += (sum(self.dsm_do_shift[g, h, t]
                                        + self.balance_dsm_up[g, h, t]
                                        for h in g.delay_time)
-                                   * g.cost_dsm_down_shift
+                                   * g.cost_dsm_down_shift[t]
                                    + self.dsm_do_shed[g, t]
-                                   * g.cost_dsm_down_shed)
+                                   * g.cost_dsm_down_shed[t])
 
         self.cost = Expression(expr=investment_costs + variable_costs)
         return self.cost
