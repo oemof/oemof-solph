@@ -18,7 +18,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-import numpy as np
 from oemof.network import network
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary

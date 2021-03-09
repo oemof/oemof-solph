@@ -27,8 +27,6 @@ from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.network import Bus
-
 
 class PiecewiseLinearTransformer(on.Transformer):
     """Component to model a transformer with one input and one output

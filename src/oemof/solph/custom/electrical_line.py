@@ -23,18 +23,13 @@ import logging
 
 from oemof.network import network as on
 from pyomo.core.base.block import SimpleBlock
-from pyomo.environ import Binary
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
-from pyomo.environ import Expression
-from pyomo.environ import NonNegativeReals
-from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.solph.network import Bus
 from oemof.solph.network import Flow
-from oemof.solph.network import Sink
 from oemof.solph.plumbing import sequence
 
 
