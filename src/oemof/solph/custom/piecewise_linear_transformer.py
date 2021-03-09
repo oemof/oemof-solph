@@ -64,7 +64,8 @@ class PiecewiseLinearTransformer(on.Transformer):
     ...    pw_repn='CC')
 
     >>> type(pwltf)
-    <class 'oemof.solph.custom.PiecewiseLinearTransformer'>
+    <class 'oemof.solph.custom.piecewise_linear_transformer.\
+PiecewiseLinearTransformer'>
     """
 
     def __init__(self, *args, **kwargs):
@@ -93,7 +94,7 @@ class PiecewiseLinearTransformer(on.Transformer):
 
 class PiecewiseLinearTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.custom.PiecewiseLinearTransformer`
+    :class:`~oemof.solph.custom.piecewise_linear_transformer.PiecewiseLinearTransformer`
 
     **The following constraints are created:**
 

@@ -97,10 +97,11 @@ class GenericStorage(network.Node):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
-       Investment object present)
-     * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
-       Investment object present)
+     * :py:class:`~oemof.solph.components.generic_storage.GenericStorageBlock`
+       (if no Investment object present)
+     * :py:class:
+       `~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`
+       (if Investment object present)
 
     Examples
     --------

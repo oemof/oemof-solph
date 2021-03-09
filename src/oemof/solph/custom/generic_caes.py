@@ -57,7 +57,7 @@ class GenericCAES(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.GenericCAES`
+     * :py:class:`~oemof.solph.blocks.generic_caes.GenericCAES`
 
     TODO: Add description for constraints. See referenced paper until then!
 
@@ -98,7 +98,7 @@ class GenericCAES(on.Transformer):
     ...    electrical_output={bel: solph.Flow()},
     ...    params=concept, fixed_costs=0)
     >>> type(caes)
-    <class 'oemof.solph.custom.GenericCAES'>
+    <class 'oemof.solph.custom.generic_caes.GenericCAES'>
     """
 
     def __init__(self, *args, **kwargs):

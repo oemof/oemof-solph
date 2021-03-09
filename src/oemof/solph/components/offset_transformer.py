@@ -23,7 +23,6 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
-from oemof.solph import network as solph_network
 from oemof.solph.plumbing import sequence as solph_sequence
 
 
@@ -42,7 +41,8 @@ class OffsetTransformer(network.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.OffsetTransformerBlock`
+     * :py:class:
+       `~oemof.solph.components.offset_transformer.OffsetTransformerBlock`
 
     Examples
     --------
@@ -61,7 +61,7 @@ class OffsetTransformer(network.Transformer):
     ...    coefficients=(20, 0.5))
 
     >>> type(ostf)
-    <class 'oemof.solph.components.OffsetTransformer'>
+    <class 'oemof.solph.components.offset_transformer.OffsetTransformer'>
     """
 
     def __init__(self, *args, **kwargs):
@@ -95,7 +95,7 @@ class OffsetTransformer(network.Transformer):
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.OffsetTransformer`
+    :class:`~oemof.solph.components.offset_transformer.OffsetTransformer`
 
     **The following constraints are created:**
 

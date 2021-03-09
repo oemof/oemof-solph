@@ -42,7 +42,7 @@ class Link(on.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.LinkBlock`
+     * :py:class:`~oemof.solph.custom.link.LinkBlock`
 
     Examples
     --------
@@ -60,7 +60,7 @@ class Link(on.Transformer):
     [0.92, 0.99]
 
     >>> type(link)
-    <class 'oemof.solph.custom.Link'>
+    <class 'oemof.solph.custom.link.Link'>
 
     >>> sorted([str(i) for i in link.inputs])
     ['el0', 'el1']

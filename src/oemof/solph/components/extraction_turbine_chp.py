@@ -52,7 +52,8 @@ class ExtractionTurbineCHP(solph_network.Transformer):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.ExtractionTurbineCHPBlock`
+     * :py:class:`~oemof.solph.components.extraction_turbine_chp\
+.ExtractionTurbineCHPBlock`
 
     Examples
     --------

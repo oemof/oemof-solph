@@ -100,12 +100,13 @@ class Flow(on.Edge):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Flow`
-     * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
-       Investment object is present)
-     * :py:class:`~oemof.solph.blocks.NonConvexFlow` (If
-        nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.blocks.Flow` class and a MILP will be build)
+     * :py:class:`~oemof.solph.blocks.flow.Flow`
+     * :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow`
+        (additionally if Investment object is present)
+     * :py:class:`~oemof.solph.blocks.non_convex_flow.NonConvexFlow`
+        (If nonconvex  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.flow.Flow`
+        class and a MILP will be build)
 
     Examples
     --------

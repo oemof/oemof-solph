@@ -28,7 +28,7 @@ class Bus(on.Bus):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Bus`
+     * :py:class:`~oemof.solph.blocks.bus.Bus`
 
     """
 

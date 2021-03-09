@@ -56,7 +56,7 @@ class Transformer(on.Transformer):
     [0.2, 0.3, 0.5, 0.8]
 
     >>> type(trsf)
-    <class 'oemof.solph.network.Transformer'>
+    <class 'oemof.solph.network.transformer.Transformer'>
 
     >>> sorted([str(i) for i in trsf.inputs])
     ['hard_coal', 'natural_gas']
@@ -72,7 +72,7 @@ class Transformer(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Transformer`
+     * :py:class:`~oemof.solph.blocks.transformer.Transformer`
     """
 
     def __init__(self, *args, **kwargs):

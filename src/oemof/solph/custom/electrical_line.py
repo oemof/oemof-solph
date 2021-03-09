@@ -21,7 +21,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 
-from oemof.network import network as on
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -30,7 +29,7 @@ from pyomo.environ import Var
 
 from oemof.solph.network import Bus
 from oemof.solph.network import Flow
-from oemof.solph.plumbing import sequence
+from oemof.solph.plumbing import sequence as solph_sequence
 
 
 class ElectricalBus(Bus):
@@ -52,9 +51,9 @@ class ElectricalBus(Bus):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Bus`
+     * :py:class:`~oemof.solph.blocks.bus.Bus`
     The objects are also used inside:
-     * :py:class:`~oemof.solph.custom.ElectricalLine`
+     * :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine`
 
     """
 
@@ -89,13 +88,13 @@ class ElectricalLine(Flow):
       differently by the user
 
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.ElectricalLineBlock`
+     * :py:class:`~oemof.solph.custom.electrical_line.ElectricalLineBlock`
 
     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.reactance = sequence(kwargs.get("reactance", 0.00001))
+        self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:

@@ -91,7 +91,7 @@ class GenericCHP(network.Transformer):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericCHPBlock`
+     * :py:class:`~oemof.solph.components.generic_chp.GenericCHPBlock`
 
     Examples
     --------
@@ -112,7 +112,7 @@ class GenericCHP(network.Transformer):
     ...        Q_CW_min=[10.552])},
     ...    Beta=[0.122], back_pressure=False)
     >>> type(ccet)
-    <class 'oemof.solph.components.GenericCHP'>
+    <class 'oemof.solph.components.generic_chp.GenericCHP'>
     """
 
     def __init__(self, *args, **kwargs):
