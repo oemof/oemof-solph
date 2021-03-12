@@ -1221,9 +1221,6 @@ class SinkDSM(Sink):
     ----
 
     * :attr:`method` has been renamed to :attr:`approach`.
-    * This component is a candidate component. It's implemented as a custom
-      component for users that like to use and test the component at early
-      stage. Please report issues to improve the component.
     * As many constraints and dependencies are created in approach 'DIW',
       computational cost might be high with a large 'delay_time' and with model
       of high temporal resolution
@@ -1237,6 +1234,10 @@ class SinkDSM(Sink):
     * It's not recommended to assign cost to the flow that connects
       :class:`~SinkDSM` with a bus. Instead, use :attr:`~SinkDSM.cost_dsm_up`
       or :attr:`~cost_dsm_down_shift`
+    * Variable costs may be attributed to upshifts, downshifts or both.
+      Costs for shedding may deviate from that for shifting
+      (usually costs for shedding are much larger and equal to the value
+      of lost load).
 
     """
 
@@ -1432,20 +1433,20 @@ class SinkDSMOemofBlock(SimpleBlock):
     .. math::
         &
         (1) \quad DSM_{t}^{do, shift} = 0 \quad \forall t
-        \quad if \space eligibility_{shift} = False
+        \quad if \space eligibility_{shift} = False \\
         &
         (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
-        \quad if \space eligibility_{shed} = False
+        \quad if \space eligibility_{shed} = False \\
         &
         (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
-        \quad \forall t \in \mathbb{T}\\
+        \quad \forall t \in \mathbb{T} \\
         &
         (4) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
-        \mathbb{T}\\
+        \mathbb{T} \\
         &
         (5) \quad DSM_{t}^{do, shift} + DSM_{t}^{do, shed} \leq  E_{t}^{do}
-        \quad \forall t \in \mathbb{T}\\
+        \quad \forall t \in \mathbb{T} \\
         &
         (6) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
         \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in \{k
@@ -1458,12 +1459,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
         + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \forall t in \mathbb{T}
-
-    Note that variable costs may be attributed to upshifts, downshifts or both.
-    Also note that costs for shedding may deviate from that for shifting
-    (usually costs for shedding are much larger and equal to the value of lost
-    load)
+        \quad \forall t in \mathbb{T} \\
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -1704,32 +1700,33 @@ class SinkDSMOemofBlock(SimpleBlock):
 
 
 class SinkDSMOemofInvestmentBlock(SimpleBlock):
-    r"""Constraints for SinkDSM with "oemof" approach
+    r"""Constraints for SinkDSM with "oemof" approach and :attr:`investment`
 
-    **The following constraints are created for approach = 'oemof':**
+    **The following constraints are created for approach = 'oemof' with an
+    investment object defined:**
 
     .. _SinkDSMOemof equations:
 
     .. math::
         &
-        (1) \quad invest_{min} \leq invest \leq invest_{max}
+        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
         &
         (2) \quad DSM_{t}^{do, shift} = 0 \quad \forall t
-        \quad if \space eligibility_{shift} = False
+        \quad if \space eligibility_{shift} = False \\
         &
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
-        \quad if \space eligibility_{shed} = False
+        \quad if \space eligibility_{shed} = False \\
         &
         (4) \quad \dot{E}_{t} = demand_{t} \cdot invest + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
-        \quad \forall t \in \mathbb{T}\\
+        \quad \forall t \in \mathbb{T} \\
         &
         (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot invest \cdot s_{flex, up}
-        \quad \forall t \in \mathbb{T}\\
+        \quad \forall t \in \mathbb{T} \\
         &
         (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
         E_{t}^{do} \cdot invest \cdot s_{flex, do}
-        \quad \forall t \in \mathbb{T}\\
+        \quad \forall t \in \mathbb{T} \\
         &
         (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
         \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in \{k
@@ -1741,7 +1738,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
     * Investment annuity:
 
     .. math::
-        invest \cdot costs_{invest}
+        invest \cdot costs_{invest} \\
 
     * Variable costs:
 
@@ -1749,7 +1746,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
         + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \forall t in \mathbb{T}
+        \quad  \forall t in \mathbb{T} \\
 
     See remarks in :class:`oemof.solph.custom.SinkDSMOemofBlock`.
 
@@ -1993,10 +1990,10 @@ class SinkDSMDIWBlock(SimpleBlock):
     .. math::
         &
         (1) \quad DSM_{t}^{up} = 0 \quad \forall t
-        \quad if \space eligibility_{shift} = False
+        \quad if \space eligibility_{shift} = False \\
         &
         (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
-        \quad if \space eligibility_{shed} = False
+        \quad if \space eligibility_{shed} = False \\
         &
         (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
@@ -2022,46 +2019,84 @@ class SinkDSMDIWBlock(SimpleBlock):
         \leq E_{t}^{up} \cdot E_{up, max} \cdot L \cdot \tau
         \quad \forall t \in \mathbb{T} \\
         &
+        (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
+        \leq E_{t}^{do} \cdot E_{do, max} \cdot t_{shed} \cdot \tau
+        \quad \forall t \in \mathbb{T} \\
+        &
 
-    Note: For the sake of readability, the handling of indices is not
+    *Note*: For the sake of readability, the handling of indices is not
     displayed here. E.g. evaluating a variable for t-L may lead to a negative
     and therefore infeasible index.
     This is addressed by limiting the sums to non-negative indices within the
     model index bounds. Please refer to the constraints implementation
     themselves.
 
-    **Table: Symbols and attribute names of variables and parameters**
+    **The following parts of the objective function are created:**
 
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + \sum_{tt=0}^{|T|} DSM_{t, tt}^{do, shift} \cdot
+        cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \quad \forall t in \mathbb{T} \\
+
+    **Table: Symbols and attribute names of variables and parameters**
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-
-
-            ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V","DSM up
+            ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V", "DSM up
             shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V",
-            "DSM down shift (less load) in hour tt
+            ":math:`DSM_{t,tt}^{do, shift}` ",":attr:`dsm_do_shift[g,t,tt]`",
+            "V", "DSM down shift (less load) in hour tt
             to compensate for upwards shifts in hour t"
+            ":math:`DSM_{t}^{do, shed}` ",":attr:`~SinkDSM.dsm_do_shed` ",
+            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
             ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
-            flowing in from electrical bus"
-            ":math:`L`",":attr:`delay_time`","P", "Delay time for
-            load shift"
-            ":math:`demand_{t}` ",":attr:`demand[t]`","P","Electrical
-            demand series"
-            ":math:`E_{t}^{do}` ",":attr:`capacity_down[t]`","P","Capacity
-            DSM down shift "
-            ":math:`E_{t}^{up}` ", ":attr:`capacity_up[t]`", "P","Capacity
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
-            ":math:`\R`",":attr:`recovery_time_shift`","P",
-            "Minimum time between the end
-            of one load shifting process and the start of another"
-            DSM up shift"
+            flowing in from (electrical) inflow bus"
+            ":math:`L`",":attr:`delay_time`","P", "Maximum delay time for
+            load shift (time until the energy balance has to be levelled out
+            again; roundtrip time of one load shifting cycle, i.e. time window
+            for upshift and compensating downshift)"
+            ":math:`t_{she}`",":attr:`shed_time`","P", "Maximum time for one
+            load shedding process"
+            ":math:`demand_{t}`",":attr:`demand[t]`","P", "(Electrical) demand
+            series (normalized)"
+            ":math:`demand_{max}`",":attr:`max_demand`","P", "Maximum demand
+            value"
+            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Maximum
+            capacity allowed for a load adjustment downwards
+            (DSM down shift + DSM shedded)"
+            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Maximum
+            capacity allowed for a shift upwards (DSM up shift)"
+            ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
+            interval (time within which the energy balance must be
+            levelled out"
+            ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
+            loss forload shifting processes"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
-
-
+            ":math:`eligibility_{shift}` ",
+            ":attr:`~SinkDSM.shift_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shifting"
+            ":math:`eligibility_{shed}` ",
+            ":attr:`~SinkDSM.shed_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shedding"
+            ":math:`cost_{t}^{dsm, up}` ", ":attr:`~SinkDSM.cost_dsm_up`","P",
+            "Variable costs for an upwards shift"
+            ":math:`cost_{t}^{dsm, do, shift}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shift`","P",
+            "Variable costs for a downwards shift (load shifting)"
+            ":math:`cost_{t}^{dsm, do, shed}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shed`","P",
+            "Variable costs for shedding load"
+            ":math:`\R`",":attr:`~SinkDSM.recovery_time_shift`","P",
+            "Minimum time between the end of one load shifting process
+            and the start of another"
+            ":math:`\tau`",":attr:`~Model.timeincrement`","P",
+            "The time increment of the model"
     """
     CONSTRAINT_GROUP = True
 
@@ -2500,33 +2535,101 @@ class SinkDSMDIWBlock(SimpleBlock):
 
 
 class SinkDSMDIWInvestmentBlock(SimpleBlock):
-    r"""Constraints for SinkDSM with "DIW" approach
+    r"""Constraints for SinkDSM with "DIW" approach and :attr:`investment`
 
-    **The following constraints are created for approach = 'DIW':**
+    **The following constraints are created for approach = 'DIW' with an
+    investment object defined:**
 
     .. _SinkDSMDIW equations:
 
     .. math::
-
-
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} -
-        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}  \quad \forall t \in \mathbb{T} \\
+        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
         &
-        (2) \quad DSM_{t}^{up} \cdot \eta = \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do}
+        (2) \quad DSM_{t}^{up} = 0 \quad \forall t
+        \quad if \space eligibility_{shift} = False \\
+        &
+        (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        \quad if \space eligibility_{shed} = False \\
+        &
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot invest + DSM_{t}^{up} -
+        \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
+        \forall t \in \mathbb{T} \\
+        &
+        (5) \quad DSM_{t}^{up} \cdot \eta =
+        \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do, shift}
         \quad \forall t \in \mathbb{T} \\
         &
-        (3) \quad DSM_{t}^{up} \leq  E_{t}^{up} \quad \forall t \in
-        \mathbb{T} \\
+        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot invest \ s_{flex, up}
+        \quad \forall t \in \mathbb{T} \\
         &
-        (4) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do}  \leq E_{tt}^{do}
+        (7) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
+        + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot invest \cdot s_{flex, do}
         \quad \forall tt \in \mathbb{T} \\
         &
-        (5) \quad DSM_{tt}^{up}  + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do} \leq
-        max \{ E_{tt}^{up}, E_{tt}^{do} \}\quad \forall tt \in \mathbb{T} \\
+        (8) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
+        + DSM_{tt}^{do, shed} \leq
+        max \{ E_{tt}^{up} \cdot s_{flex, up},
+        E_{tt}^{do} \cdot s_{flex, do} \} \cdot invest
+        \quad \forall tt \in \mathbb{T} \\
         &
-        (6) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up} \leq E_{t}^{up} \cdot L
+        (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
+        \leq E_{t}^{up} \cdot invest \cdot s_{flex, up} \cdot L \cdot \tau
         \quad \forall t \in \mathbb{T} \\
+        &
+        (10) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
+        \leq E_{t}^{do} \cdot invest \cdot s_{flex, do} \cdot t_{shed}
+        \cdot \tau \quad \forall t \in \mathbb{T} \\
+
+    *Note*: For the sake of readability, the handling of indices is not
+    displayed here. E.g. evaluating a variable for t-L may lead to a negative
+    and therefore infeasible index.
+    This is addressed by limiting the sums to non-negative indices within the
+    model index bounds. Please refer to the constraints implementation
+    themselves.
+
+    **The following parts of the objective function are created:**
+
+    * Investment annuity:
+
+    .. math::
+        invest \cdot costs_{invest} \\
+
+    * Variable costs:
+
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + \sum_{tt=0}^{|T|} DSM_{t, tt}^{do, shift} \cdot
+        cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \quad \forall t in \mathbb{T}
+
+    **Table: Symbols and attribute names of variables and parameters**
+
+    Please refer to :class:`oemof.solph.custom.SinkDSMDIWBlock`.
+
+    The following variables and parameters are exclusively used for
+    investment modeling:
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+            ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
+            invested in. Equals to installed capacity. The capacity share
+            eligible for a shift is determined by flex share(s)."
+            ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment"
+            ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment"
+            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
+            "P","Share of invested capacity that may be shift upwards
+            at maximum"
+            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
+            "P", "Share of invested capacity that may be shift downwards
+            at maximum"
+            ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific investment annuity"
     """
     CONSTRAINT_GROUP = True
 
