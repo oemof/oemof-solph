@@ -1565,7 +1565,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                 for g in group:
 
                     if not g.shift_eligibility:
-                        lhs = self.up[g, t]
+                        lhs = self.dsm_up[g, t]
                         rhs = 0
 
                         block.shift_shed_vars.add((g, t), (lhs == rhs))
@@ -1827,7 +1827,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
         # Variable load shedding
         self.dsm_do_shed = Var(
-            self.dsm, m.TIMESTEPS, initialize=0,
+            self.investdsm, m.TIMESTEPS, initialize=0,
             within=NonNegativeReals)
 
         # Variable load shift up
@@ -1845,7 +1845,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                 for g in group:
 
                     if not g.shift_eligibility:
-                        lhs = self.up[g, t]
+                        lhs = self.dsm_up[g, t]
                         rhs = 0
 
                         block.shift_shed_vars.add((g, t), (lhs == rhs))
@@ -3395,7 +3395,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                     for h in g.delay_time:
 
                         if not g.shift_eligibility:
-                            lhs = self.up[g, h, t]
+                            lhs = self.dsm_up[g, h, t]
                             rhs = 0
 
                             block.shift_shed_vars.add((g, h, t), (lhs == rhs))
@@ -4228,7 +4228,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     for h in g.delay_time:
 
                         if not g.shift_eligibility:
-                            lhs = self.up[g, h, t]
+                            lhs = self.dsm_up[g, h, t]
                             rhs = 0
 
                             block.shift_shed_vars.add((g, h, t), (lhs == rhs))
