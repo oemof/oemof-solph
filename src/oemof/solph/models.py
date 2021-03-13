@@ -14,16 +14,17 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
-import pyomo.environ as po
-from oemof.solph import blocks
-from oemof.solph import processing
-from oemof.solph.plumbing import sequence
+from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
+from oemof.solph import blocks
+from oemof.solph import processing
+from oemof.solph.plumbing import sequence
+
 
 class BaseModel(po.ConcreteModel):
-    """ The BaseModel for other solph-models (Model, MultiPeriodModel, etc.)
+    """The BaseModel for other solph-models (Model, MultiPeriodModel, etc.)
 
     Parameters
     ----------
@@ -60,6 +61,7 @@ class BaseModel(po.ConcreteModel):
     rc : ... or None
 
     """
+
     CONSTRAINT_GROUPS = []
 
     def __init__(self, energysystem, **kwargs):
@@ -67,30 +69,39 @@ class BaseModel(po.ConcreteModel):
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get('name', type(self).__name__)
+        self.name = kwargs.get("name", type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(kwargs.get('timeincrement',
-                                      self.es.timeincrement))
+        self.timeincrement = sequence(
+            kwargs.get("timeincrement", self.es.timeincrement)
+        )
         if self.timeincrement[0] is None:
             try:
                 self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12)
+                    self.es.timeindex.freq.nanos / 3.6e12
+                )
             except AttributeError:
-                msg = ("No valid time increment found. Please pass a valid "
-                       "timeincremet parameter or pass an EnergySystem with "
-                       "a valid time index. Please note that a valid time"
-                       "index need to have a 'freq' attribute.")
+                msg = (
+                    "No valid time increment found. Please pass a valid "
+                    "timeincremet parameter or pass an EnergySystem with "
+                    "a valid time index. Please note that a valid time"
+                    "index need to have a 'freq' attribute."
+                )
                 raise AttributeError(msg)
 
-        self.objective_weighting = kwargs.get('objective_weighting',
-                                              self.timeincrement)
+        self.objective_weighting = kwargs.get(
+            "objective_weighting", self.timeincrement
+        )
 
-        self._constraint_groups = (type(self).CONSTRAINT_GROUPS +
-                                   kwargs.get('constraint_groups', []))
+        self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
+            "constraint_groups", []
+        )
 
-        self._constraint_groups += [i for i in self.es.groups
-                                    if hasattr(i, 'CONSTRAINT_GROUP') and
-                                    i not in self._constraint_groups]
+        self._constraint_groups += [
+            i
+            for i in self.es.groups
+            if hasattr(i, "CONSTRAINT_GROUP")
+            and i not in self._constraint_groups
+        ]
 
         self.flows = self.es.flows()
 
@@ -102,28 +113,27 @@ class BaseModel(po.ConcreteModel):
             self._construct()
 
     def _construct(self):
-        """
-        """
+        """"""
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
         self._add_objective()
 
     def _add_parent_block_sets(self):
-        """" Method to create all sets located at the parent block, i.e. the
+        """ " Method to create all sets located at the parent block, i.e. the
         model itself as they are to be shared across all model components.
         """
         pass
 
     def _add_parent_block_variables(self):
-        """" Method to create all variables located at the parent block,
+        """ " Method to create all variables located at the parent block,
         i.e. the model itself as these variables  are to be shared across
         all model components.
         """
         pass
 
     def _add_child_blocks(self):
-        """ Method to add the defined child blocks for components that have
+        """Method to add the defined child blocks for components that have
         been grouped in the defined constraint groups.
         """
 
@@ -137,24 +147,24 @@ class BaseModel(po.ConcreteModel):
             block._create(group=self.es.groups.get(group))
 
     def _add_objective(self, sense=po.minimize, update=False):
-        """ Method to sum up all objective expressions from the child blocks
+        """Method to sum up all objective expressions from the child blocks
         that have been created. This method looks for `_objective_expression`
         attribute in the block definition and will call this method to add
         their return value to the objective function.
         """
         if update:
-            self.del_component('objective')
+            self.del_component("objective")
 
         expr = 0
 
         for block in self.component_data_objects():
-            if hasattr(block, '_objective_expression'):
+            if hasattr(block, "_objective_expression"):
                 expr += block._objective_expression()
 
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
-        """ Method sets solver suffix to extract information about dual
+        """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
 
@@ -165,12 +175,11 @@ class BaseModel(po.ConcreteModel):
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
-        """ Returns a nested dictionary of the results of this optimization
-        """
+        """Returns a nested dictionary of the results of this optimization"""
         return processing.results(self)
 
-    def solve(self, solver='cbc', solver_io='lp', **kwargs):
-        r""" Takes care of communication with solver to solve the model.
+    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+        r"""Takes care of communication with solver to solve the model.
 
         Parameters
         ----------
@@ -194,7 +203,7 @@ class BaseModel(po.ConcreteModel):
             {"method": 2}
 
         """
-        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
 
         opt = SolverFactory(solver, solver_io=solver_io)
@@ -206,20 +215,22 @@ class BaseModel(po.ConcreteModel):
         solver_results = opt.solve(self, **solve_kwargs)
 
         status = solver_results["Solver"][0]["Status"]
-        termination_condition = (
-            solver_results["Solver"][0]["Termination condition"])
+        termination_condition = solver_results["Solver"][0][
+            "Termination condition"
+        ]
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
-            self.es.results = solver_results
-            self.solver_results = solver_results
         else:
-            msg = ("Optimization ended with status {0} and termination "
-                   "condition {1}")
-            warnings.warn(msg.format(status, termination_condition),
-                          UserWarning)
-            self.es.results = solver_results
-            self.solver_results = solver_results
+            msg = (
+                "Optimization ended with status {0} and termination "
+                "condition {1}"
+            )
+            warnings.warn(
+                msg.format(status, termination_condition), UserWarning
+            )
+        self.es.results = solver_results
+        self.solver_results = solver_results
 
         return solver_results
 
@@ -232,7 +243,7 @@ class BaseModel(po.ConcreteModel):
 
 
 class Model(BaseModel):
-    """ An  energy system model for operational and investment
+    """An  energy system model for operational and investment
     optimization.
 
     Parameters
@@ -263,22 +274,27 @@ class Model(BaseModel):
         the corresponding flow object.
 
     """
-    CONSTRAINT_GROUPS = [blocks.Bus, blocks.Transformer,
-                         blocks.InvestmentFlow, blocks.Flow,
-                         blocks.NonConvexFlow]
+
+    CONSTRAINT_GROUPS = [
+        blocks.Bus,
+        blocks.Transformer,
+        blocks.InvestmentFlow,
+        blocks.Flow,
+        blocks.NonConvexFlow,
+    ]
 
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
-        """
-        """
+        """"""
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
-                                ordered=True)
+        self.TIMESTEPS = po.Set(
+            initialize=range(len(self.es.timeindex)), ordered=True
+        )
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
@@ -287,44 +303,58 @@ class Model(BaseModel):
         self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
 
         # pyomo set for all flows in the energy system graph
-        self.FLOWS = po.Set(initialize=self.flows.keys(),
-                            ordered=True, dimen=2)
+        self.FLOWS = po.Set(
+            initialize=self.flows.keys(), ordered=True, dimen=2
+        )
 
-        self.BIDIRECTIONAL_FLOWS = po.Set(initialize=[
-            k for (k, v) in self.flows.items() if hasattr(v, 'bidirectional')],
-                                          ordered=True, dimen=2,
-                                          within=self.FLOWS)
+        self.BIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[
+                k
+                for (k, v) in self.flows.items()
+                if hasattr(v, "bidirectional")
+            ],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[k for (k, v) in self.flows.items() if not
-                        hasattr(v, 'bidirectional')],
-            ordered=True, dimen=2, within=self.FLOWS)
+            initialize=[
+                k
+                for (k, v) in self.flows.items()
+                if not hasattr(v, "bidirectional")
+            ],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
 
     def _add_parent_block_variables(self):
-        """
-        """
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS,
-                           within=po.Reals)
+        """"""
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t] *
-                            self.flows[o, i].nominal_value)
+                            self.flows[o, i].fix[t]
+                            * self.flows[o, i].nominal_value
+                        )
                         self.flow[o, i, t].fix()
                 else:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
-                            self.flows[o, i].max[t] *
-                            self.flows[o, i].nominal_value)
+                            self.flows[o, i].max[t]
+                            * self.flows[o, i].nominal_value
+                        )
 
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
-                                self.flows[o, i].min[t] *
-                                self.flows[o, i].nominal_value)
+                                self.flows[o, i].min[t]
+                                * self.flows[o, i].nominal_value
+                            )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(0)

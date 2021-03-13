@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
+SPDX-FileCopyrightText: jnnr
 
 SPDX-License-Identifier: MIT
 
@@ -20,20 +21,21 @@ SPDX-License-Identifier: MIT
 
 import logging
 
-from oemof.network.network import Transformer as NetworkTransformer
-from oemof.solph.network import Bus
-from oemof.solph.network import Flow
-from oemof.solph.network import Sink
-from oemof.solph.network import Transformer
-from oemof.solph.plumbing import sequence
+from oemof.network import network as on
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
+from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
+
+from oemof.solph.network import Bus
+from oemof.solph.network import Flow
+from oemof.solph.network import Sink
+from oemof.solph.plumbing import sequence
 
 
 class ElectricalBus(Bus):
@@ -63,9 +65,9 @@ class ElectricalBus(Bus):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.slack = kwargs.get('slack', False)
-        self.v_max = kwargs.get('v_max', 1000)
-        self.v_min = kwargs.get('v_min', -1000)
+        self.slack = kwargs.get("slack", False)
+        self.v_max = kwargs.get("v_max", 1000)
+        self.v_min = kwargs.get("v_min", -1000)
 
 
 class ElectricalLine(Flow):
@@ -95,16 +97,19 @@ class ElectricalLine(Flow):
      * :py:class:`~oemof.solph.custom.ElectricalLineBlock`
 
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.reactance = sequence(kwargs.get('reactance', 0.00001))
+        self.reactance = sequence(kwargs.get("reactance", 0.00001))
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:
             raise ValueError(
-                ("Attribute `nonconvex` must be None for " +
-                 "component `ElectricalLine` from {} to {}!").format(
-                    self.input, self.output))
+                (
+                    "Attribute `nonconvex` must be None for "
+                    + "component `ElectricalLine` from {} to {}!"
+                ).format(self.input, self.output)
+            )
         if self.min is None:
             self.min = -1
         # to be used in grouping for all bidi flows
@@ -146,7 +151,7 @@ class ElectricalLineBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the linear constraint for the class:`ElectricalLine`
+        """Creates the linear constraint for the class:`ElectricalLine`
         block.
 
         Parameters
@@ -164,13 +169,16 @@ class ElectricalLineBlock(SimpleBlock):
         m = self.parent_block()
 
         # create voltage angle variables
-        self.ELECTRICAL_BUSES = Set(initialize=[n for n in m.es.nodes
-                                    if isinstance(n, ElectricalBus)])
+        self.ELECTRICAL_BUSES = Set(
+            initialize=[n for n in m.es.nodes if isinstance(n, ElectricalBus)]
+        )
 
         def _voltage_angle_bounds(block, b, t):
             return b.v_min, b.v_max
-        self.voltage_angle = Var(self.ELECTRICAL_BUSES, m.TIMESTEPS,
-                                 bounds=_voltage_angle_bounds)
+
+        self.voltage_angle = Var(
+            self.ELECTRICAL_BUSES, m.TIMESTEPS, bounds=_voltage_angle_bounds
+        )
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
             # TODO: Make this robust to select the same slack bus for
@@ -178,7 +186,9 @@ class ElectricalLineBlock(SimpleBlock):
             bus = [b for b in self.ELECTRICAL_BUSES][0]
             logging.info(
                 "No slack bus set,setting bus {0} as slack bus".format(
-                    bus.label))
+                    bus.label
+                )
+            )
             bus.slack = True
 
         def _voltage_angle_relation(block):
@@ -189,21 +199,27 @@ class ElectricalLineBlock(SimpleBlock):
                         self.voltage_angle[n.output, t].fix()
                     try:
                         lhs = m.flow[n.input, n.output, t]
-                        rhs = 1 / n.reactance[t] * (
-                            self.voltage_angle[n.input, t] -
-                            self.voltage_angle[n.output, t])
+                        rhs = (
+                            1
+                            / n.reactance[t]
+                            * (
+                                self.voltage_angle[n.input, t]
+                                - self.voltage_angle[n.output, t]
+                            )
+                        )
                     except ValueError:
-                        raise ValueError("Error in constraint creation",
-                                         "of node {}".format(n.label))
+                        raise ValueError(
+                            "Error in constraint creation",
+                            "of node {}".format(n.label),
+                        )
                     block.electrical_flow.add((n, t), (lhs == rhs))
 
         self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
 
-        self.electrical_flow_build = BuildAction(
-                                         rule=_voltage_angle_relation)
+        self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)
 
 
-class Link(Transformer):
+class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
 
     Parameters
@@ -245,16 +261,23 @@ class Link(Transformer):
     >>> link.conversion_factors[(bel0, bel1)][3]
     0.92
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        if len(self.inputs) > 2 or len(self.outputs) > 2:
-            raise ValueError("Component `Link` must not have more than \
-                             2 inputs and 2 outputs!")
-
         self.conversion_factors = {
             k: sequence(v)
-            for k, v in kwargs.get('conversion_factors', {}).items()}
+            for k, v in kwargs.get("conversion_factors", {}).items()
+        }
+
+        wrong_args_message = (
+            "Component `Link` must have exactly"
+            + "2 inputs, 2 outputs, and 2"
+            + "conversion factors connecting these."
+        )
+        assert len(self.inputs) == 2, wrong_args_message
+        assert len(self.outputs) == 2, wrong_args_message
+        assert len(self.conversion_factors) == 2, wrong_args_message
 
     def constraint_group(self):
         return LinkBlock
@@ -278,7 +301,7 @@ class LinkBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """ Creates the relation for the class:`Link`.
+        """Creates the relation for the class:`Link`.
 
         Parameters
         ----------
@@ -297,31 +320,64 @@ class LinkBlock(SimpleBlock):
         all_conversions = {}
         for n in group:
             all_conversions[n] = {
-                            k: v for k, v in n.conversion_factors.items()}
+                k: v for k, v in n.conversion_factors.items()
+            }
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
-                            expr = (m.flow[n, cidx[1], t] ==
-                                    c[t] * m.flow[cidx[0], n, t])
+                            expr = (
+                                m.flow[n, cidx[1], t]
+                                == c[t] * m.flow[cidx[0], n, t]
+                            )
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
                                 "from: {0}, to: {1}, via: {2}".format(
-                                    cidx[0], cidx[1], n))
+                                    cidx[0], cidx[1], n
+                                ),
+                            )
                         block.relation.add((n, cidx[0], cidx[1], t), (expr))
 
         self.relation = Constraint(
-            [(n, cidx[0], cidx[1], t)
-             for t in m.TIMESTEPS
-             for n, conversion in all_conversions.items()
-             for cidx, c in conversion.items()], noruleinit=True)
+            [
+                (n, cidx[0], cidx[1], t)
+                for t in m.TIMESTEPS
+                for n, conversion in all_conversions.items()
+                for cidx, c in conversion.items()
+            ],
+            noruleinit=True,
+        )
         self.relation_build = BuildAction(rule=_input_output_relation)
 
+        def _exclusive_direction_relation(block):
+            for t in m.TIMESTEPS:
+                for n, cf in all_conversions.items():
+                    cf_keys = list(cf.keys())
+                    expr = (
+                        m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
+                        + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
+                        == m.flow[n, cf_keys[0][1], t]
+                        + m.flow[n, cf_keys[1][1], t]
+                    )
+                    block.relation_exclusive_direction.add((n, t), expr)
 
-class GenericCAES(NetworkTransformer):
+        self.relation_exclusive_direction = Constraint(
+            [
+                (n, t)
+                for t in m.TIMESTEPS
+                for n, conversion in all_conversions.items()
+            ],
+            noruleinit=True,
+        )
+        self.relation_exclusive_direction_build = BuildAction(
+            rule=_exclusive_direction_relation
+        )
+
+
+class GenericCAES(on.Transformer):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
@@ -398,15 +454,15 @@ class GenericCAES(NetworkTransformer):
 
         super().__init__(*args, **kwargs)
 
-        self.electrical_input = kwargs.get('electrical_input')
-        self.fuel_input = kwargs.get('fuel_input')
-        self.electrical_output = kwargs.get('electrical_output')
-        self.params = kwargs.get('params')
+        self.electrical_input = kwargs.get("electrical_input")
+        self.fuel_input = kwargs.get("fuel_input")
+        self.electrical_output = kwargs.get("electrical_output")
+        self.params = kwargs.get("params")
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get('electrical_input'))
-        self.inputs.update(kwargs.get('fuel_input'))
-        self.outputs.update(kwargs.get('electrical_output'))
+        self.inputs.update(kwargs.get("electrical_input"))
+        self.inputs.update(kwargs.get("fuel_input"))
+        self.outputs.update(kwargs.get("electrical_output"))
 
     def constraint_group(self):
         return GenericCAESBlock
@@ -639,75 +695,92 @@ class GenericCAESBlock(SimpleBlock):
         self.cmp_st = Var(self.GENERICCAES, m.TIMESTEPS, within=Binary)
 
         # Compression: Realized capacity
-        self.cmp_p = Var(self.GENERICCAES, m.TIMESTEPS,
-                         within=NonNegativeReals)
+        self.cmp_p = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Compression: Max. Capacity
-        self.cmp_p_max = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.cmp_p_max = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Compression: Heat flow
-        self.cmp_q_out_sum = Var(self.GENERICCAES, m.TIMESTEPS,
-                                 within=NonNegativeReals)
+        self.cmp_q_out_sum = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Compression: Waste heat
-        self.cmp_q_waste = Var(self.GENERICCAES, m.TIMESTEPS,
-                               within=NonNegativeReals)
+        self.cmp_q_waste = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Expansion: Binary variable for operation status
         self.exp_st = Var(self.GENERICCAES, m.TIMESTEPS, within=Binary)
 
         # Expansion: Realized capacity
-        self.exp_p = Var(self.GENERICCAES, m.TIMESTEPS,
-                         within=NonNegativeReals)
+        self.exp_p = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Expansion: Max. Capacity
-        self.exp_p_max = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.exp_p_max = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Expansion: Heat flow of natural gas co-firing
-        self.exp_q_in_sum = Var(self.GENERICCAES, m.TIMESTEPS,
-                                within=NonNegativeReals)
+        self.exp_q_in_sum = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Expansion: Heat flow of natural gas co-firing
-        self.exp_q_fuel_in = Var(self.GENERICCAES, m.TIMESTEPS,
-                                 within=NonNegativeReals)
+        self.exp_q_fuel_in = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Expansion: Heat flow of additional firing
-        self.exp_q_add_in = Var(self.GENERICCAES, m.TIMESTEPS,
-                                within=NonNegativeReals)
+        self.exp_q_add_in = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Cavern: Filling levelh
-        self.cav_level = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.cav_level = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Cavern: Energy inflow
-        self.cav_e_in = Var(self.GENERICCAES, m.TIMESTEPS,
-                            within=NonNegativeReals)
+        self.cav_e_in = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Cavern: Energy outflow
-        self.cav_e_out = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.cav_e_out = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # TES: Filling levelh
-        self.tes_level = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.tes_level = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # TES: Energy inflow
-        self.tes_e_in = Var(self.GENERICCAES, m.TIMESTEPS,
-                            within=NonNegativeReals)
+        self.tes_e_in = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # TES: Energy outflow
-        self.tes_e_out = Var(self.GENERICCAES, m.TIMESTEPS,
-                             within=NonNegativeReals)
+        self.tes_e_out = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Spot market: Positive capacity
-        self.exp_p_spot = Var(self.GENERICCAES, m.TIMESTEPS,
-                              within=NonNegativeReals)
+        self.exp_p_spot = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Spot market: Negative capacity
-        self.cmp_p_spot = Var(self.GENERICCAES, m.TIMESTEPS,
-                              within=NonNegativeReals)
+        self.cmp_p_spot = Var(
+            self.GENERICCAES, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         # Compression: Capacity on markets
         def cmp_p_constr_rule(block, n, t):
@@ -715,60 +788,89 @@ class GenericCAESBlock(SimpleBlock):
             expr += -self.cmp_p[n, t]
             expr += m.flow[list(n.electrical_input.keys())[0], n, t]
             return expr == 0
+
         self.cmp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule
+        )
 
         # Compression: Max. capacity depending on cavern filling level
         def cmp_p_max_constr_rule(block, n, t):
             if t != 0:
-                return (self.cmp_p_max[n, t] ==
-                        n.params['cmp_p_max_m'] * self.cav_level[n, t-1] +
-                        n.params['cmp_p_max_b'])
+                return (
+                    self.cmp_p_max[n, t]
+                    == n.params["cmp_p_max_m"] * self.cav_level[n, t - 1]
+                    + n.params["cmp_p_max_b"]
+                )
             else:
-                return self.cmp_p_max[n, t] == n.params['cmp_p_max_b']
+                return self.cmp_p_max[n, t] == n.params["cmp_p_max_b"]
+
         self.cmp_p_max_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_constr_rule
+        )
 
         def cmp_p_max_area_constr_rule(block, n, t):
             return self.cmp_p[n, t] <= self.cmp_p_max[n, t]
+
         self.cmp_p_max_area_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_area_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_max_area_constr_rule
+        )
 
         # Compression: Status of operation (on/off)
         def cmp_st_p_min_constr_rule(block, n, t):
             return (
-                self.cmp_p[n, t] >= n.params['cmp_p_min'] * self.cmp_st[n, t])
+                self.cmp_p[n, t] >= n.params["cmp_p_min"] * self.cmp_st[n, t]
+            )
+
         self.cmp_st_p_min_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_min_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_min_constr_rule
+        )
 
         def cmp_st_p_max_constr_rule(block, n, t):
-            return (self.cmp_p[n, t] <=
-                    (n.params['cmp_p_max_m'] * n.params['cav_level_max'] +
-                    n.params['cmp_p_max_b']) * self.cmp_st[n, t])
+            return (
+                self.cmp_p[n, t]
+                <= (
+                    n.params["cmp_p_max_m"] * n.params["cav_level_max"]
+                    + n.params["cmp_p_max_b"]
+                )
+                * self.cmp_st[n, t]
+            )
+
         self.cmp_st_p_max_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_max_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_st_p_max_constr_rule
+        )
 
         # (7) Compression: Heat flow out
         def cmp_q_out_constr_rule(block, n, t):
-            return (self.cmp_q_out_sum[n, t] ==
-                    n.params['cmp_q_out_m'] * self.cmp_p[n, t] +
-                    n.params['cmp_q_out_b'] * self.cmp_st[n, t])
+            return (
+                self.cmp_q_out_sum[n, t]
+                == n.params["cmp_q_out_m"] * self.cmp_p[n, t]
+                + n.params["cmp_q_out_b"] * self.cmp_st[n, t]
+            )
+
         self.cmp_q_out_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_constr_rule
+        )
 
         #  (8) Compression: Definition of single heat flows
         def cmp_q_out_sum_constr_rule(block, n, t):
-            return (self.cmp_q_out_sum[n, t] == self.cmp_q_waste[n, t] +
-                    self.tes_e_in[n, t])
+            return (
+                self.cmp_q_out_sum[n, t]
+                == self.cmp_q_waste[n, t] + self.tes_e_in[n, t]
+            )
+
         self.cmp_q_out_sum_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_sum_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_sum_constr_rule
+        )
 
         # (9) Compression: Heat flow out ratio
         def cmp_q_out_shr_constr_rule(block, n, t):
-            return (self.cmp_q_waste[n, t] * n.params['cmp_q_tes_share'] ==
-                    self.tes_e_in[n, t] * (1 - n.params['cmp_q_tes_share']))
+            return self.cmp_q_waste[n, t] * n.params[
+                "cmp_q_tes_share"
+            ] == self.tes_e_in[n, t] * (1 - n.params["cmp_q_tes_share"])
+
         self.cmp_q_out_shr_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_shr_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_q_out_shr_constr_rule
+        )
 
         # (10) Expansion: Capacity on markets
         def exp_p_constr_rule(block, n, t):
@@ -776,48 +878,70 @@ class GenericCAESBlock(SimpleBlock):
             expr += -self.exp_p[n, t]
             expr += m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
+
         self.exp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule
+        )
 
         # (11-12) Expansion: Max. capacity depending on cavern filling level
         def exp_p_max_constr_rule(block, n, t):
             if t != 0:
-                return (self.exp_p_max[n, t] ==
-                        n.params['exp_p_max_m'] * self.cav_level[n, t-1] +
-                        n.params['exp_p_max_b'])
+                return (
+                    self.exp_p_max[n, t]
+                    == n.params["exp_p_max_m"] * self.cav_level[n, t - 1]
+                    + n.params["exp_p_max_b"]
+                )
             else:
-                return self.exp_p_max[n, t] == n.params['exp_p_max_b']
+                return self.exp_p_max[n, t] == n.params["exp_p_max_b"]
+
         self.exp_p_max_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_constr_rule
+        )
 
         # (13)
         def exp_p_max_area_constr_rule(block, n, t):
             return self.exp_p[n, t] <= self.exp_p_max[n, t]
+
         self.exp_p_max_area_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_area_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_max_area_constr_rule
+        )
 
         # (14) Expansion: Status of operation (on/off)
         def exp_st_p_min_constr_rule(block, n, t):
             return (
-                self.exp_p[n, t] >= n.params['exp_p_min'] * self.exp_st[n, t])
+                self.exp_p[n, t] >= n.params["exp_p_min"] * self.exp_st[n, t]
+            )
+
         self.exp_st_p_min_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_min_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_min_constr_rule
+        )
 
         # (15)
         def exp_st_p_max_constr_rule(block, n, t):
-            return (self.exp_p[n, t] <=
-                    (n.params['exp_p_max_m'] * n.params['cav_level_max'] +
-                     n.params['exp_p_max_b']) * self.exp_st[n, t])
+            return (
+                self.exp_p[n, t]
+                <= (
+                    n.params["exp_p_max_m"] * n.params["cav_level_max"]
+                    + n.params["exp_p_max_b"]
+                )
+                * self.exp_st[n, t]
+            )
+
         self.exp_st_p_max_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_max_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_st_p_max_constr_rule
+        )
 
         # (16) Expansion: Heat flow in
         def exp_q_in_constr_rule(block, n, t):
-            return (self.exp_q_in_sum[n, t] ==
-                    n.params['exp_q_in_m'] * self.exp_p[n, t] +
-                    n.params['exp_q_in_b'] * self.exp_st[n, t])
+            return (
+                self.exp_q_in_sum[n, t]
+                == n.params["exp_q_in_m"] * self.exp_p[n, t]
+                + n.params["exp_q_in_b"] * self.exp_st[n, t]
+            )
+
         self.exp_q_in_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_constr_rule
+        )
 
         # (17) Expansion: Fuel allocation
         def exp_q_fuel_constr_rule(block, n, t):
@@ -825,77 +949,109 @@ class GenericCAESBlock(SimpleBlock):
             expr += -self.exp_q_fuel_in[n, t]
             expr += m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
+
         self.exp_q_fuel_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule
+        )
 
         # (18) Expansion: Definition of single heat flows
         def exp_q_in_sum_constr_rule(block, n, t):
-            return (self.exp_q_in_sum[n, t] == self.exp_q_fuel_in[n, t] +
-                    self.tes_e_out[n, t] + self.exp_q_add_in[n, t])
+            return (
+                self.exp_q_in_sum[n, t]
+                == self.exp_q_fuel_in[n, t]
+                + self.tes_e_out[n, t]
+                + self.exp_q_add_in[n, t]
+            )
+
         self.exp_q_in_sum_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_sum_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_sum_constr_rule
+        )
 
         # (19) Expansion: Heat flow in ratio
         def exp_q_in_shr_constr_rule(block, n, t):
-            return (n.params['exp_q_tes_share'] * self.exp_q_fuel_in[n, t] ==
-                    (1 - n.params['exp_q_tes_share']) *
-                    (self.exp_q_add_in[n, t] + self.tes_e_out[n, t]))
+            return n.params["exp_q_tes_share"] * self.exp_q_fuel_in[n, t] == (
+                1 - n.params["exp_q_tes_share"]
+            ) * (self.exp_q_add_in[n, t] + self.tes_e_out[n, t])
+
         self.exp_q_in_shr_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_shr_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_in_shr_constr_rule
+        )
 
         # (20) Cavern: Energy inflow
         def cav_e_in_constr_rule(block, n, t):
-            return (self.cav_e_in[n, t] ==
-                    n.params['cav_e_in_m'] * self.cmp_p[n, t] +
-                    n.params['cav_e_in_b'])
+            return (
+                self.cav_e_in[n, t]
+                == n.params["cav_e_in_m"] * self.cmp_p[n, t]
+                + n.params["cav_e_in_b"]
+            )
+
         self.cav_e_in_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cav_e_in_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_e_in_constr_rule
+        )
 
         # (21) Cavern: Energy outflow
         def cav_e_out_constr_rule(block, n, t):
-            return (self.cav_e_out[n, t] ==
-                    n.params['cav_e_out_m'] * self.exp_p[n, t] +
-                    n.params['cav_e_out_b'])
+            return (
+                self.cav_e_out[n, t]
+                == n.params["cav_e_out_m"] * self.exp_p[n, t]
+                + n.params["cav_e_out_b"]
+            )
+
         self.cav_e_out_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cav_e_out_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_e_out_constr_rule
+        )
 
         # (22-23) Cavern: Storage balance
         def cav_eta_constr_rule(block, n, t):
             if t != 0:
-                return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        self.cav_level[n, t-1] + m.timeincrement[t] *
-                        (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
+                return n.params["cav_eta_temp"] * self.cav_level[
+                    n, t
+                ] == self.cav_level[n, t - 1] + m.timeincrement[t] * (
+                    self.cav_e_in[n, t] - self.cav_e_out[n, t]
+                )
             else:
-                return (n.params['cav_eta_temp'] * self.cav_level[n, t] ==
-                        m.timeincrement[t] *
-                        (self.cav_e_in[n, t] - self.cav_e_out[n, t]))
+                return n.params["cav_eta_temp"] * self.cav_level[
+                    n, t
+                ] == m.timeincrement[t] * (
+                    self.cav_e_in[n, t] - self.cav_e_out[n, t]
+                )
+
         self.cav_eta_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_eta_constr_rule
+        )
 
         # (24) Cavern: Upper bound
         def cav_ub_constr_rule(block, n, t):
-            return self.cav_level[n, t] <= n.params['cav_level_max']
+            return self.cav_level[n, t] <= n.params["cav_level_max"]
+
         self.cav_ub_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=cav_ub_constr_rule
+        )
 
         # (25-26) TES: Storage balance
         def tes_eta_constr_rule(block, n, t):
             if t != 0:
-                return (self.tes_level[n, t] ==
-                        self.tes_level[n, t-1] + m.timeincrement[t] *
-                        (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
+                return self.tes_level[n, t] == self.tes_level[
+                    n, t - 1
+                ] + m.timeincrement[t] * (
+                    self.tes_e_in[n, t] - self.tes_e_out[n, t]
+                )
             else:
-                return (self.tes_level[n, t] ==
-                        m.timeincrement[t] *
-                        (self.tes_e_in[n, t] - self.tes_e_out[n, t]))
+                return self.tes_level[n, t] == m.timeincrement[t] * (
+                    self.tes_e_in[n, t] - self.tes_e_out[n, t]
+                )
+
         self.tes_eta_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=tes_eta_constr_rule
+        )
 
         # (27) TES: Upper bound
         def tes_ub_constr_rule(block, n, t):
-            return self.tes_level[n, t] <= n.params['tes_level_max']
+            return self.tes_level[n, t] <= n.params["tes_level_max"]
+
         self.tes_ub_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule)
+            self.GENERICCAES, m.TIMESTEPS, rule=tes_ub_constr_rule
+        )
 
 
 class SinkDSM(Sink):
@@ -973,9 +1129,18 @@ class SinkDSM(Sink):
 
     """
 
-    def __init__(self, demand, capacity_up, capacity_down, method,
-                 shift_interval=None, delay_time=None, cost_dsm_up=0,
-                 cost_dsm_down=0, **kwargs):
+    def __init__(
+        self,
+        demand,
+        capacity_up,
+        capacity_down,
+        method,
+        shift_interval=None,
+        delay_time=None,
+        cost_dsm_up=0,
+        cost_dsm_down=0,
+        **kwargs,
+    ):
         super().__init__(**kwargs)
 
         self.capacity_up = sequence(capacity_up)
@@ -988,22 +1153,26 @@ class SinkDSM(Sink):
         self.cost_dsm_down = cost_dsm_down
 
     def constraint_group(self):
-        possible_methods = ['delay', 'interval']
+        possible_methods = ["delay", "interval"]
 
         if self.method == possible_methods[0]:
             if self.delay_time is None:
-                raise ValueError('Please define: **delay_time'
-                                 'is a mandatory parameter')
+                raise ValueError(
+                    "Please define: **delay_time" "is a mandatory parameter"
+                )
             return SinkDSMDelayBlock
         elif self.method == possible_methods[1]:
             if self.shift_interval is None:
-                raise ValueError('Please define: **shift_interval'
-                                 ' is a mandatory parameter')
+                raise ValueError(
+                    "Please define: **shift_interval"
+                    " is a mandatory parameter"
+                )
             return SinkDSMIntervalBlock
         else:
             raise ValueError(
                 'The "method" must be one of the following set: '
-                '"{}"'.format('" or "'.join(possible_methods)))
+                '"{}"'.format('" or "'.join(possible_methods))
+            )
 
 
 class SinkDSMIntervalBlock(SimpleBlock):
@@ -1076,12 +1245,14 @@ class SinkDSMIntervalBlock(SimpleBlock):
         #  ************* VARIABLES *****************************
 
         # Variable load shift down
-        self.dsm_do = Var(self.dsm, m.TIMESTEPS, initialize=0,
-                          within=NonNegativeReals)
+        self.dsm_do = Var(
+            self.dsm, m.TIMESTEPS, initialize=0, within=NonNegativeReals
+        )
 
         # Variable load shift up
-        self.dsm_up = Var(self.dsm, m.TIMESTEPS, initialize=0,
-                          within=NonNegativeReals)
+        self.dsm_up = Var(
+            self.dsm, m.TIMESTEPS, initialize=0, within=NonNegativeReals
+        )
 
         #  ************* CONSTRAINTS *****************************
 
@@ -1103,10 +1274,12 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # add constraint
                     block.input_output_relation.add((g, t), (lhs == rhs))
 
-        self.input_output_relation = Constraint(group, m.TIMESTEPS,
-                                                noruleinit=True)
+        self.input_output_relation = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.input_output_relation_build = BuildAction(
-            rule=_input_output_relation_rule)
+            rule=_input_output_relation_rule
+        )
 
         # Upper bounds relation
         def dsm_up_constraint_rule(block):
@@ -1125,8 +1298,9 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
 
-        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
-                                            noruleinit=True)
+        self.dsm_up_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
 
         # Upper bounds relation
@@ -1146,10 +1320,12 @@ class SinkDSMIntervalBlock(SimpleBlock):
                     # add constraint
                     block.dsm_down_constraint.add((g, t), (lhs <= rhs))
 
-        self.dsm_down_constraint = Constraint(group, m.TIMESTEPS,
-                                              noruleinit=True)
+        self.dsm_down_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_down_constraint_build = BuildAction(
-            rule=dsm_down_constraint_rule)
+            rule=dsm_down_constraint_rule
+        )
 
         def dsm_sum_constraint_rule(block):
             """
@@ -1160,33 +1336,38 @@ class SinkDSMIntervalBlock(SimpleBlock):
             """
 
             for g in group:
-                intervals = range(m.TIMESTEPS.value_list[0],
-                                  m.TIMESTEPS.value_list[-1],
-                                  g.shift_interval)
+                intervals = range(
+                    m.TIMESTEPS.value_list[0],
+                    m.TIMESTEPS.value_list[-1],
+                    g.shift_interval,
+                )
 
                 for interval in intervals:
-                    if (interval + g.shift_interval - 1) \
-                            > m.TIMESTEPS.value_list[-1]:
-                        timesteps = range(interval,
-                                          m.TIMESTEPS.value_list[-1] + 1)
+                    if (
+                        interval + g.shift_interval - 1
+                    ) > m.TIMESTEPS.value_list[-1]:
+                        timesteps = range(
+                            interval, m.TIMESTEPS.value_list[-1] + 1
+                        )
                     else:
-                        timesteps = range(interval, interval +
-                                          g.shift_interval)
+                        timesteps = range(
+                            interval, interval + g.shift_interval
+                        )
 
                     # DSM up/down
-                    lhs = sum(self.dsm_up[g, tt]
-                              for tt in timesteps)
+                    lhs = sum(self.dsm_up[g, tt] for tt in timesteps)
                     # value
-                    rhs = sum(self.dsm_do[g, tt]
-                              for tt in timesteps)
+                    rhs = sum(self.dsm_do[g, tt] for tt in timesteps)
 
                     # add constraint
                     block.dsm_sum_constraint.add((g, interval), (lhs == rhs))
 
-        self.dsm_sum_constraint = Constraint(group, m.TIMESTEPS,
-                                             noruleinit=True)
+        self.dsm_sum_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_sum_constraint_build = BuildAction(
-            rule=dsm_sum_constraint_rule)
+            rule=dsm_sum_constraint_rule
+        )
 
     def _objective_expression(self):
         """Adding cost terms for DSM activity to obj. function"""
@@ -1284,12 +1465,18 @@ class SinkDSMDelayBlock(SimpleBlock):
         #  ************* VARIABLES *****************************
 
         # Variable load shift down
-        self.dsm_do = Var(self.dsm, m.TIMESTEPS, m.TIMESTEPS, initialize=0,
-                          within=NonNegativeReals)
+        self.dsm_do = Var(
+            self.dsm,
+            m.TIMESTEPS,
+            m.TIMESTEPS,
+            initialize=0,
+            within=NonNegativeReals,
+        )
 
         # Variable load shift up
-        self.dsm_up = Var(self.dsm, m.TIMESTEPS, initialize=0,
-                          within=NonNegativeReals)
+        self.dsm_up = Var(
+            self.dsm, m.TIMESTEPS, initialize=0, within=NonNegativeReals
+        )
 
         #  ************* CONSTRAINTS *****************************
 
@@ -1308,24 +1495,34 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
-                            self.dsm_do[g, tt, t]
-                            for tt in range(t + g.delay_time + 1))
+                        rhs = (
+                            g.demand[t]
+                            + self.dsm_up[g, t]
+                            - sum(
+                                self.dsm_do[g, tt, t]
+                                for tt in range(t + g.delay_time + 1)
+                            )
+                        )
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
-                            self.dsm_do[g, tt, t]
-                            for tt in range(t - g.delay_time,
-                                            t + g.delay_time + 1))
+                        rhs = (
+                            g.demand[t]
+                            + self.dsm_up[g, t]
+                            - sum(
+                                self.dsm_do[g, tt, t]
+                                for tt in range(
+                                    t - g.delay_time, t + g.delay_time + 1
+                                )
+                            )
+                        )
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1335,18 +1532,26 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = g.demand[t] + self.dsm_up[g, t] - sum(
-                            self.dsm_do[g, tt, t]
-                            for tt in range(t - g.delay_time,
-                                            m.TIMESTEPS[-1] + 1))
+                        rhs = (
+                            g.demand[t]
+                            + self.dsm_up[g, t]
+                            - sum(
+                                self.dsm_do[g, tt, t]
+                                for tt in range(
+                                    t - g.delay_time, m.TIMESTEPS[-1] + 1
+                                )
+                            )
+                        )
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
-        self.input_output_relation = Constraint(group, m.TIMESTEPS,
-                                                noruleinit=True)
+        self.input_output_relation = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.input_output_relation_build = BuildAction(
-            rule=_input_output_relation_rule)
+            rule=_input_output_relation_rule
+        )
 
         # Equation 7
         def dsm_up_down_constraint_rule(block):
@@ -1366,22 +1571,26 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM up
                         lhs = self.dsm_up[g, t]
                         # DSM down
-                        rhs = sum(self.dsm_do[g, t, tt]
-                                  for tt in range(t + g.delay_time + 1))
+                        rhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for tt in range(t + g.delay_time + 1)
+                        )
 
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif g.delay_time < t <= (
-                            m.TIMESTEPS[-1] - g.delay_time):
+                    elif g.delay_time < t <= (m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t]
                         # DSM down
-                        rhs = sum(self.dsm_do[g, t, tt]
-                                  for tt in range(t - g.delay_time,
-                                                  t + g.delay_time + 1))
+                        rhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for tt in range(
+                                t - g.delay_time, t + g.delay_time + 1
+                            )
+                        )
 
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
@@ -1392,17 +1601,22 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM up
                         lhs = self.dsm_up[g, t]
                         # DSM down
-                        rhs = sum(self.dsm_do[g, t, tt]
-                                  for tt in range(t - g.delay_time,
-                                                  m.TIMESTEPS[-1] + 1))
+                        rhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for tt in range(
+                                t - g.delay_time, m.TIMESTEPS[-1] + 1
+                            )
+                        )
 
                         # add constraint
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
-        self.dsm_updo_constraint = Constraint(group, m.TIMESTEPS,
-                                              noruleinit=True)
+        self.dsm_updo_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_updo_constraint_build = BuildAction(
-            rule=dsm_up_down_constraint_rule)
+            rule=dsm_up_down_constraint_rule
+        )
 
         # Equation 8
         def dsm_up_constraint_rule(block):
@@ -1422,8 +1636,9 @@ class SinkDSMDelayBlock(SimpleBlock):
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
 
-        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
-                                            noruleinit=True)
+        self.dsm_up_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
 
         # Equation 9
@@ -1441,8 +1656,10 @@ class SinkDSMDelayBlock(SimpleBlock):
                     if tt <= g.delay_time:
 
                         # DSM down
-                        lhs = sum(self.dsm_do[g, t, tt]
-                                  for t in range(tt + g.delay_time + 1))
+                        lhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(tt + g.delay_time + 1)
+                        )
                         # Capacity DSM down
                         rhs = g.capacity_down[tt]
 
@@ -1450,13 +1667,15 @@ class SinkDSMDelayBlock(SimpleBlock):
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                     # main use case
-                    elif g.delay_time < tt <= (
-                            m.TIMESTEPS[-1] - g.delay_time):
+                    elif g.delay_time < tt <= (m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM down
-                        lhs = sum(self.dsm_do[g, t, tt]
-                                  for t in range(tt - g.delay_time,
-                                                 tt + g.delay_time + 1))
+                        lhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(
+                                tt - g.delay_time, tt + g.delay_time + 1
+                            )
+                        )
                         # Capacity DSM down
                         rhs = g.capacity_down[tt]
 
@@ -1467,19 +1686,22 @@ class SinkDSMDelayBlock(SimpleBlock):
                     else:
 
                         # DSM down
-                        lhs = sum(self.dsm_do[g, t, tt]
-                                  for t in range(tt - g.delay_time,
-                                                 m.TIMESTEPS[-1] + 1))
+                        lhs = sum(
+                            self.dsm_do[g, t, tt]
+                            for t in range(
+                                tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                            )
+                        )
                         # Capacity DSM down
                         rhs = g.capacity_down[tt]
 
                         # add constraint
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
-        self.dsm_do_constraint = Constraint(group, m.TIMESTEPS,
-                                            noruleinit=True)
-        self.dsm_do_constraint_build = BuildAction(
-            rule=dsm_do_constraint_rule)
+        self.dsm_do_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
+        self.dsm_do_constraint_build = BuildAction(rule=dsm_do_constraint_rule)
 
         # Equation 10
         def c2_constraint_rule(block):
@@ -1499,21 +1721,23 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(
                             self.dsm_do[g, t, tt]
-                            for t in range(tt + g.delay_time + 1))
+                            for t in range(tt + g.delay_time + 1)
+                        )
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt], g.capacity_down[tt])
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif g.delay_time < tt <= (
-                            m.TIMESTEPS[-1] - g.delay_time):
+                    elif g.delay_time < tt <= (m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(
                             self.dsm_do[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           tt + g.delay_time + 1))
+                            for t in range(
+                                tt - g.delay_time, tt + g.delay_time + 1
+                            )
+                        )
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt], g.capacity_down[tt])
 
@@ -1525,8 +1749,10 @@ class SinkDSMDelayBlock(SimpleBlock):
                         # DSM up/down
                         lhs = self.dsm_up[g, tt] + sum(
                             self.dsm_do[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           m.TIMESTEPS[-1] + 1))
+                            for t in range(
+                                tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                            )
+                        )
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt], g.capacity_down[tt])
 
@@ -1546,9 +1772,186 @@ class SinkDSMDelayBlock(SimpleBlock):
         for t in m.TIMESTEPS:
             for g in self.dsm:
                 dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up
-                dsm_cost += sum(self.dsm_do[g, t, tt] for tt in m.TIMESTEPS
-                                ) * g.cost_dsm_down
+                dsm_cost += (
+                    sum(self.dsm_do[g, t, tt] for tt in m.TIMESTEPS)
+                    * g.cost_dsm_down
+                )
 
         self.cost = Expression(expr=dsm_cost)
 
         return self.cost
+
+
+class PiecewiseLinearTransformer(on.Transformer):
+    """Component to model a transformer with one input and one output
+    and an arbitrary piecewise linear conversion function.
+
+    Parameters
+    ----------
+    in_breakpoints : list
+        List containing the domain breakpoints, i.e. the breakpoints for the
+        incoming flow.
+
+    conversion_function : func
+        The function describing the relation between incoming flow and outgoing
+        flow which is to be approximated.
+
+    pw_repn : string
+        Choice of piecewise representation that is passed to
+        pyomo.environ.Piecewise
+
+    Examples
+    --------
+    >>> import oemof.solph as solph
+
+    >>> b_gas = Bus(label='biogas')
+    >>> b_el = Bus(label='electricity')
+
+    >>> pwltf = solph.custom.PiecewiseLinearTransformer(
+    ...    label='pwltf',
+    ...    inputs={b_gas: solph.Flow(
+    ...    nominal_value=100,
+    ...    variable_costs=1)},
+    ...    outputs={b_el: solph.Flow()},
+    ...    in_breakpoints=[0,25,50,75,100],
+    ...    conversion_function=lambda x: x**2,
+    ...    pw_repn='CC')
+
+    >>> type(pwltf)
+    <class 'oemof.solph.custom.PiecewiseLinearTransformer'>
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        self.in_breakpoints = list(kwargs.get("in_breakpoints"))
+        self.conversion_function = kwargs.get("conversion_function")
+        self.pw_repn = kwargs.get("pw_repn")
+
+        if len(self.inputs) > 1 or len(self.outputs) > 1:
+            raise ValueError(
+                "Component `PiecewiseLinearTransformer` cannot have "
+                + "more than 1 input and 1 output!"
+            )
+
+        nominal_value = [a.nominal_value for a in self.inputs.values()][0]
+        if max(self.in_breakpoints) < nominal_value:
+            raise ValueError(
+                "Largest in_breakpoint must be larger or equal "
+                + "nominal value"
+            )
+
+    def constraint_group(self):
+        return PiecewiseLinearTransformerBlock
+
+
+class PiecewiseLinearTransformerBlock(SimpleBlock):
+    r"""Block for the relation of nodes with type
+    :class:`~oemof.solph.custom.PiecewiseLinearTransformer`
+
+    **The following constraints are created:**
+
+    """
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """Creates the relation for the class:`PiecewiseLinearTransformer`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.PiecewiseLinearTransformer objects
+            for which the relation of inputs and outputs is created
+            e.g. group = [pwltf1, pwltf2, pwltf3, ...].
+
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
+
+        pw_repns = [n.pw_repn for n in group]
+        if all(x == pw_repns[0] for x in pw_repns):
+            self.pw_repn = pw_repns[0]
+        else:
+            print(
+                "Cannot different piecewise representations ",
+                [n.pw_repn for n in group],
+            )
+
+        self.breakpoints = {}
+
+        def build_breakpoints(block, n):
+            for t in m.TIMESTEPS:
+                self.breakpoints[(n, t)] = n.in_breakpoints
+
+        self.breakpoint_build = BuildAction(
+            self.PWLINEARTRANSFORMERS, rule=build_breakpoints
+        )
+
+        def _conversion_function(block, n, t, x):
+            expr = n.conversion_function(x)
+            return expr
+
+        # bounds are min/max of breakpoints
+        lower_bound_in = {n: min(n.in_breakpoints) for n in group}
+        upper_bound_in = {n: max(n.in_breakpoints) for n in group}
+        lower_bound_out = {
+            n: n.conversion_function(bound)
+            for (n, bound) in lower_bound_in.items()
+        }
+        upper_bound_out = {
+            n: n.conversion_function(bound)
+            for (n, bound) in upper_bound_in.items()
+        }
+
+        def get_inflow_bounds(model, n, t):
+            return lower_bound_in[n], upper_bound_in[n]
+
+        def get_outflow_bounds(model, n, t):
+            return lower_bound_out[n], upper_bound_out[n]
+
+        self.inflow = Var(
+            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_inflow_bounds
+        )
+        self.outflow = Var(
+            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds
+        )
+
+        def _in_equation(block, n, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+            expr += -m.flow[list(n.inputs.keys())[0], n, t]
+            expr += self.inflow[n, t]
+            return expr == 0
+
+        self.equate_in = Constraint(
+            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_in_equation
+        )
+
+        def _out_equation(block, n, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += self.outflow[n, t]
+            return expr == 0
+
+        self.equate_out = Constraint(
+            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_out_equation
+        )
+
+        self.piecewise = Piecewise(
+            self.PWLINEARTRANSFORMERS,
+            m.TIMESTEPS,
+            self.outflow,
+            self.inflow,
+            pw_repn=self.pw_repn,
+            pw_constr_type="EQ",
+            pw_pts=self.breakpoints,
+            f_rule=_conversion_function,
+        )
