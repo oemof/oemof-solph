@@ -1096,6 +1096,10 @@ class SinkDSM(Sink):
     ----------
     demand: numeric
         original electrical demand (normalized)
+        For investment modeling, it is advised to use the maximum of the
+        demand timeseries and the cumulated (fixed) infeed time series
+        for normalization, because the balancing potential may be determined by
+        both. Elsewhise, underinvestments may occur.
     capacity_up: int or array
         maximum DSM capacity that may be increased (normalized)
     capacity_down: int or array
