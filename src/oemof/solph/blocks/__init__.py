@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""Creating sets, variables, constraints and parts of the objective function
+for the specified groups.
+"""
+
 from .bus import Bus  # noqa: F401
 from .flow import Flow  # noqa: F401
 from .investment_flow import InvestmentFlow  # noqa: F401

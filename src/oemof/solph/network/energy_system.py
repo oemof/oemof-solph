@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Classes used to model energy supply systems within solph.
-
-Classes are derived from oemof core network classes and adapted for specific
-optimization tasks. An energy system is modelled as a graph/network of nodes
-with very specific constraints on which types of nodes are allowed to be
-connected.
+"""
+solph version of oemof.network.energy_system
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
