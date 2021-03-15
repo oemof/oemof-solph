@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Additional constraints to be used in an oemof energy model.
+"""Constraints to limit total values that are dependent on several Flows.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

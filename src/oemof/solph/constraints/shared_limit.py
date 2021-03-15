@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 
-"""Additional constraints to be used in an oemof energy model.
+"""A constraint to have one common limit for several components.
 
-SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
-SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Patrik Schönfeldt
-SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
 

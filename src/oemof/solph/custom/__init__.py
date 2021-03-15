@@ -1,5 +1,13 @@
 # -*- coding: utf-8 -*-
 
+"""
+This module is designed to hold in-development components with their classes
+and associated individual constraints (blocks) and groupings.
+
+Requirements for documentation and unit tests are relaxed,
+so code within this module might not have production quality.
+"""
+
 from .electrical_line import ElectricalBus  # noqa: F401
 from .electrical_line import ElectricalLine  # noqa: F401
 from .generic_caes import GenericCAES  # noqa: F401
