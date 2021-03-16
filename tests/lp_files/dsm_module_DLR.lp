@@ -138,6 +138,30 @@ c_e_SinkDSMDLRBlock_capacity_balance_inc(demand_dsm_2_2)_:
 -1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_0)
 = 0
 
+c_e_SinkDSMDLRBlock_no_comp_red(demand_dsm_1_2)_:
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_1_2)
+= 0
+
+c_e_SinkDSMDLRBlock_no_comp_red(demand_dsm_2_1)_:
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_2_1)
+= 0
+
+c_e_SinkDSMDLRBlock_no_comp_red(demand_dsm_2_2)_:
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_2_2)
+= 0
+
+c_e_SinkDSMDLRBlock_no_comp_inc(demand_dsm_1_2)_:
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_1_2)
+= 0
+
+c_e_SinkDSMDLRBlock_no_comp_inc(demand_dsm_2_1)_:
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_1)
+= 0
+
+c_e_SinkDSMDLRBlock_no_comp_inc(demand_dsm_2_2)_:
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_2)
+= 0
+
 c_u_SinkDSMDLRBlock_availability_red(demand_dsm_0)_:
 +1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_1_0)
 +1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_2_0)
@@ -253,6 +277,42 @@ c_u_SinkDSMDLRBlock_dr_storage_limit_inc(demand_dsm_1)_:
 
 c_u_SinkDSMDLRBlock_dr_storage_limit_inc(demand_dsm_2)_:
 +1 SinkDSMDLRBlock_dsm_up_level(demand_dsm_2)
+<= 0.5
+
+c_u_SinkDSMDLRBlock_dr_logical_constraint(demand_dsm_0)_:
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_1_0)
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_2_0)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_1_0)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_2_0)
++1 SinkDSMDLRBlock_dsm_do_shed(demand_dsm_0)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_1_0)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_2_0)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_1_0)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_0)
+<= 0.5
+
+c_u_SinkDSMDLRBlock_dr_logical_constraint(demand_dsm_1)_:
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_1_1)
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_2_1)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_1_1)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_2_1)
++1 SinkDSMDLRBlock_dsm_do_shed(demand_dsm_1)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_1_1)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_2_1)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_1_1)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_1)
+<= 0.5
+
+c_u_SinkDSMDLRBlock_dr_logical_constraint(demand_dsm_2)_:
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_1_2)
++1 SinkDSMDLRBlock_balance_dsm_do(demand_dsm_2_2)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_1_2)
++1 SinkDSMDLRBlock_balance_dsm_up(demand_dsm_2_2)
++1 SinkDSMDLRBlock_dsm_do_shed(demand_dsm_2)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_1_2)
++1 SinkDSMDLRBlock_dsm_do_shift(demand_dsm_2_2)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_1_2)
++1 SinkDSMDLRBlock_dsm_up(demand_dsm_2_2)
 <= 0.5
 
 c_e_ONE_VAR_CONSTANT: 
