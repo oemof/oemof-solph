@@ -97,8 +97,19 @@ class LinkBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
-    TODO: Add tests
+    .. _Link-equations:
+
+    .. math::
+        &
+        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+            \quad \forall t \in T, \forall n in {1,2} \\
+        &
+        (2) \qquad
+                P_{\mathrm{in},1}(t)
+                + P_{\mathrm{in},2}(t)
+                = c_1(t) \times P_{\mathrm{out},1}(t)
+                + c_2(t) \times P_{\mathrm{out},2}(t)
+            \quad \forall t \in T
 
     """
     CONSTRAINT_GROUP = True
