@@ -352,30 +352,6 @@ class LinkBlock(SimpleBlock):
         )
         self.relation_build = BuildAction(rule=_input_output_relation)
 
-        def _exclusive_direction_relation(block):
-            for t in m.TIMESTEPS:
-                for n, cf in all_conversions.items():
-                    cf_keys = list(cf.keys())
-                    expr = (
-                        m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
-                        + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
-                        == m.flow[n, cf_keys[0][1], t]
-                        + m.flow[n, cf_keys[1][1], t]
-                    )
-                    block.relation_exclusive_direction.add((n, t), expr)
-
-        self.relation_exclusive_direction = Constraint(
-            [
-                (n, t)
-                for t in m.TIMESTEPS
-                for n, conversion in all_conversions.items()
-            ],
-            noruleinit=True,
-        )
-        self.relation_exclusive_direction_build = BuildAction(
-            rule=_exclusive_direction_relation
-        )
-
 
 class GenericCAES(on.Transformer):
     """
