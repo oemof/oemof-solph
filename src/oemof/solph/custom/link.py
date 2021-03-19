@@ -104,6 +104,12 @@ class LinkBlock(SimpleBlock):
         (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
             \quad \forall t \in T, \forall n in {1,2} \\
         &
+        (2) \qquad 0 \le \hat{S} + P_{\mathrm{in},1}(t)/P_{\mathrm{max}} \le 1
+            \quad \forall t \in T \\
+        &
+        (3) \qquad 0 \le \hat{S} - P_{\mathrm{in},2}(t)/P_{\mathrm{max}} \le 1
+            \quad \forall t \in T \\
+        &
 
     """
     CONSTRAINT_GROUP = True
