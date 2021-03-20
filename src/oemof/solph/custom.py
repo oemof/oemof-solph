@@ -2711,7 +2711,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                 for g in group:
 
                     if not g.shift_eligibility:
-                        lhs = self.dsm_upt[g, t]
+                        lhs = self.dsm_up[g, t]
                         rhs = 0
 
                         block.shift_shed_vars.add((g, t), (lhs == rhs))
@@ -3668,7 +3668,8 @@ class SinkDSMDLRBlock(SimpleBlock):
                         lhs = (m.timeincrement[t]
                                * sum((self.dsm_do_shift[g, h, t]
                                       - self.balance_dsm_do[g, h, t]
-                                      * g.efficiency) for h in g.delay_time))
+                                      * g.efficiency)
+                                     for h in g.delay_time))
 
                         # load reduction storage level transition
                         rhs = (self.dsm_do_level[g, t]
@@ -3732,15 +3733,25 @@ class SinkDSMDLRBlock(SimpleBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-                    # fictious demand response load reduction storage level
-                    lhs = self.dsm_do_level[g, t]
 
-                    # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_down_mean * g.max_capacity_down
-                           * g.shift_time)
+                    if g.shift_eligibility:
+                        # fictious demand response load reduction storage level
+                        lhs = self.dsm_do_level[g, t]
 
-                    # add constraint
-                    block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+                        # maximum (time-dependent) available shifting capacity
+                        rhs = (g.capacity_down_mean * g.max_capacity_down
+                               * g.shift_time)
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+
+                    else:
+                        lhs = self.dsm_do_level[g, t]
+                        # Force storage level and thus dsm_do_shift to 0
+                        rhs = 0
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
 
         self.dr_storage_limit_red = Constraint(group, m.TIMESTEPS,
                                                noruleinit=True)
@@ -4507,7 +4518,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         lhs = (m.timeincrement[t]
                                * sum((self.dsm_do_shift[g, h, t]
                                       - self.balance_dsm_do[g, h, t]
-                                      * g.efficiency) for h in g.delay_time))
+                                      * g.efficiency)
+                                     for h in g.delay_time))
 
                         # load reduction storage level transition
                         rhs = (self.dsm_do_level[g, t]
@@ -4571,16 +4583,26 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-                    # fictious demand response load reduction storage level
-                    lhs = self.dsm_do_level[g, t]
 
-                    # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_down_mean
-                           * (self.invest[g] + g.investment.existing)
-                           * g.flex_share_down * g.shift_time)
+                    if g.shift_eligibility:
+                        # fictious demand response load reduction storage level
+                        lhs = self.dsm_do_level[g, t]
 
-                    # add constraint
-                    block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+                        # maximum (time-dependent) available shifting capacity
+                        rhs = (g.capacity_down_mean
+                               * (self.invest[g] + g.investment.existing)
+                               * g.flex_share_down * g.shift_time)
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+
+                    else:
+                        lhs = self.dsm_do_level[g, t]
+                        # Force storage level and thus dsm_do_shift to 0
+                        rhs = 0
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
 
         self.dr_storage_limit_red = Constraint(group, m.TIMESTEPS,
                                                noruleinit=True)
