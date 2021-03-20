@@ -1877,7 +1877,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     lhs = m.flow[g.inflow, g, t]
 
                     # Demand + DSM_up - DSM_down
-                    rhs = (g.demand[t] * self.invest[g]
+                    rhs = (g.demand[t]
+                           * (self.invest[g] + g.investment.existing)
                            + self.dsm_up[g, t] - self.dsm_do_shift[g, t]
                            - self.dsm_do_shed[g, t])
 
@@ -1899,7 +1900,9 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
-                    rhs = g.capacity_up[t] * self.invest[g] * g.flex_share_up
+                    rhs = (g.capacity_up[t]
+                           * (self.invest[g] + g.investment.existing)
+                           * g.flex_share_up)
 
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
@@ -1918,7 +1921,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     # DSM down
                     lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
-                    rhs = (g.capacity_down[t] * self.invest[g]
+                    rhs = (g.capacity_down[t]
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_down)
 
                     # add constraint
@@ -2738,7 +2742,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.invest[g] + self.dsm_up[g, t]
+                        rhs = (g.demand[t]
+                               * (self.invest[g] + g.investment.existing)
+                               + self.dsm_up[g, t]
                                - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t + g.delay_time + 1))
@@ -2754,7 +2760,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.invest[g] + self.dsm_up[g, t]
+                        rhs = (g.demand[t]
+                               * (self.invest[g] + g.investment.existing)
+                               + self.dsm_up[g, t]
                                - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
@@ -2769,7 +2777,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.invest[g] + self.dsm_up[g, t]
+                        rhs = (g.demand[t]
+                               * (self.invest[g] + g.investment.existing)
+                               + self.dsm_up[g, t]
                                - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
@@ -2852,7 +2862,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
-                    rhs = g.capacity_up[t] * self.invest[g] * g.flex_share_up
+                    rhs = (g.capacity_up[t]
+                           * (self.invest[g] + g.investment.existing)
+                           * g.flex_share_up)
 
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
@@ -2878,7 +2890,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                                    for t in range(tt + g.delay_time + 1))
                                + self.dsm_do_shed[g, tt])
                         # Capacity DSM down
-                        rhs = (g.capacity_down[tt] * self.invest[g]
+                        rhs = (g.capacity_down[tt]
+                               * (self.invest[g] + g.investment.existing)
                                * g.flex_share_down)
 
                         # add constraint
@@ -2894,7 +2907,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                                                   tt + g.delay_time + 1))
                                + self.dsm_do_shed[g, tt])
                         # Capacity DSM down
-                        rhs = (g.capacity_down[tt] * self.invest[g]
+                        rhs = (g.capacity_down[tt]
+                               * (self.invest[g] + g.investment.existing)
                                * g.flex_share_down)
 
                         # add constraint
@@ -2909,7 +2923,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                                                   m.TIMESTEPS[-1] + 1))
                                + self.dsm_do_shed[g, tt])
                         # Capacity DSM down
-                        rhs = (g.capacity_down[tt] * self.invest[g]
+                        rhs = (g.capacity_down[tt]
+                               * (self.invest[g] + g.investment.existing)
                                * g.flex_share_down)
 
                         # add constraint
@@ -2942,7 +2957,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
-                               * self.invest[g])
+                               * (self.invest[g] + g.investment.existing))
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2959,7 +2974,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
-                               * self.invest[g])
+                               * (self.invest[g] + g.investment.existing))
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2975,7 +2990,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
-                               * self.invest[g])
+                               * (self.invest[g] + g.investment.existing))
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -3004,7 +3019,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             lhs = sum(self.dsm_up[g, tt] for tt in
                                       range(t, t + g.recovery_time_shift))
                             # max energy shift for shifting process
-                            rhs = (g.capacity_up[t] * self.invest[g]
+                            rhs = (g.capacity_up[t]
+                                   * (self.invest[g] + g.investment.existing)
                                    * g.flex_share_up * g.delay_time
                                    * m.timeincrement[t])
                             # add constraint
@@ -3017,7 +3033,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             lhs = sum(self.dsm_up[g, tt] for tt in
                                       range(t, m.TIMESTEPS[-1] + 1))
                             # max energy shift for shifting process
-                            rhs = (g.capacity_up[t] * self.invest[g]
+                            rhs = (g.capacity_up[t]
+                                   * (self.invest[g] + g.investment.existing)
                                    * g.flex_share_up * g.delay_time
                                    * m.timeincrement[t])
                             # add constraint
@@ -3051,7 +3068,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             lhs = sum(self.dsm_do_shed[g, tt] for tt in
                                       range(t, t + g.recovery_time_shed))
                             # max energy shift for shifting process
-                            rhs = (g.capacity_down[t] * self.invest[g]
+                            rhs = (g.capacity_down[t]
+                                   * (self.invest[g] + g.investment.existing)
                                    * g.flex_share_down * g.shed_time
                                    * m.timeincrement[t])
                             # add constraint
@@ -3065,7 +3083,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             lhs = sum(self.dsm_do_shed[g, tt] for tt in
                                       range(t, m.TIMESTEPS[-1] + 1))
                             # max energy shift for shifting process
-                            rhs = (g.capacity_down[t] * self.invest[g]
+                            rhs = (g.capacity_down[t]
+                                   * (self.invest[g] + g.investment.existing)
                                    * g.flex_share_down * g.shed_time
                                    * m.timeincrement[t])
                             # add constraint
@@ -4261,7 +4280,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     lhs = m.flow[g.inflow, g, t]
 
                     # Demand +- DR
-                    rhs = (g.demand[t] * self.invest[g] +
+                    rhs = (g.demand[t]
+                           * (self.invest[g] + g.investment.existing)
                            + sum(self.dsm_up[g, h, t]
                                  + self.balance_dsm_do[g, h, t]
                                  - self.dsm_do_shift[g, h, t]
@@ -4436,7 +4456,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                            + self.dsm_do_shed[g, t])
 
                     # upper bound
-                    rhs = (g.capacity_down[t] * self.invest[g]
+                    rhs = (g.capacity_down[t]
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_down)
 
                     # add constraint
@@ -4460,7 +4481,9 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                               for h in g.delay_time)
 
                     # upper bound
-                    rhs = g.capacity_up[t] * self.invest[g] * g.flex_share_up
+                    rhs = (g.capacity_up[t]
+                           * (self.invest[g] + g.investment.existing)
+                           * g.flex_share_up)
 
                     # add constraint
                     block.availability_inc.add((g, t), (lhs <= rhs))
@@ -4552,7 +4575,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     lhs = self.dsm_do_level[g, t]
 
                     # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_down_mean * self.invest[g]
+                    rhs = (g.capacity_down_mean
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_down * g.shift_time)
 
                     # add constraint
@@ -4573,7 +4597,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     lhs = self.dsm_up_level[g, t]
 
                     # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_up_mean * self.invest[g]
+                    rhs = (g.capacity_up_mean
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_up * g.shift_time)
 
                     # add constraint
@@ -4598,7 +4623,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                           for t in m.TIMESTEPS)
 
                 # year limit
-                rhs = (g.capacity_down_mean * self.invest[g]
+                rhs = (g.capacity_down_mean
+                       * (self.invest[g] + g.investment.existing)
                        * g.flex_share_down * g.shed_time
                        * g.n_yearLimit_shed)
 
@@ -4625,7 +4651,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                               for t in m.TIMESTEPS)
 
                     # year limit
-                    rhs = (g.capacity_down_mean * self.invest[g]
+                    rhs = (g.capacity_down_mean
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_down * g.shift_time
                            * g.n_yearLimit_shift)
 
@@ -4653,7 +4680,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                               for t in m.TIMESTEPS)
 
                     # year limit
-                    rhs = (g.capacity_up_mean * self.invest[g]
+                    rhs = (g.capacity_up_mean
+                           * (self.invest[g] + g.investment.existing)
                            * g.flex_share_up * g.shift_time
                            * g.n_yearLimit_shift)
 
@@ -4687,7 +4715,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
                             # daily limit
                             rhs = (
-                                g.capacity_down_mean * self.invest[g]
+                                g.capacity_down_mean
+                                * (self.invest[g] + g.investment.existing)
                                 * g.flex_share_down * g.shift_time
                                 - sum(sum(self.dsm_do_shift[g, h, t - t_dash]
                                           for h in g.delay_time)
@@ -4728,7 +4757,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
                             # daily limit
                             rhs = (
-                                g.capacity_up_mean * self.invest[g]
+                                g.capacity_up_mean
+                                * (self.invest[g] + g.investment.existing)
                                 * g.flex_share_up * g.shift_time
                                 - sum(sum(self.dsm_up[g, h, t - t_dash]
                                           for h in g.delay_time)
@@ -4771,7 +4801,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         # maximum capacity eligibly for load shifting
                         rhs = (max(g.capacity_down[t] * g.flex_share_down,
                                    g.capacity_up[t] * g.flex_share_up)
-                               * self.invest[g])
+                               * (self.invest[g] + g.investment.existing))
 
                         # add constraint
                         block.dr_logical_constraint.add((g, t), (lhs <= rhs))
