@@ -1731,15 +1731,17 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot invest + DSM_{t}^{up}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
         \quad \forall t \in \mathbb{T} \\
         &
-        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot invest \cdot s_{flex, up}
+        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \cdot s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
-        E_{t}^{do} \cdot invest \cdot s_{flex, do}
+        E_{t}^{do} \cdot (invest + E_{exist}) \cdot s_{flex, do}
         \quad \forall t \in \mathbb{T} \\
         &
         (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
@@ -1776,12 +1778,15 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to installed capacity. The capacity share
-            eligible for a shift is determined by flex share(s)."
+            invested in. Equals to the additionally installed capacity.
+            The capacity share eligible for a shift is determined
+            by flex share(s)."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
+            ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
+            "P", "existing DSM capacity"
             ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
             "P","Share of invested capacity that may be shift upwards
             at maximum"
@@ -2574,7 +2579,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot invest + DSM_{t}^{up} -
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
         \forall t \in \mathbb{T} \\
         &
@@ -2582,25 +2588,29 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do, shift}
         \quad \forall t \in \mathbb{T} \\
         &
-        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot invest \ s_{flex, up}
+        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \ s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (7) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
-        + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot invest \cdot s_{flex, do}
+        + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot (invest + E_{exist})
+        \cdot s_{flex, do}
         \quad \forall tt \in \mathbb{T} \\
         &
         (8) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \leq
         max \{ E_{tt}^{up} \cdot s_{flex, up},
-        E_{tt}^{do} \cdot s_{flex, do} \} \cdot invest
+        E_{tt}^{do} \cdot s_{flex, do} \} \cdot (invest + E_{exist})
         \quad \forall tt \in \mathbb{T} \\
         &
         (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
-        \leq E_{t}^{up} \cdot invest \cdot s_{flex, up} \cdot L \cdot \Delta t
+        \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \cdot s_{flex, up} \cdot L \cdot \Delta t
         \quad \forall t \in \mathbb{T} \\
         &
         (10) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
-        \leq E_{t}^{do} \cdot invest \cdot s_{flex, do} \cdot t_{shed}
+        \leq E_{t}^{do} \cdot (invest + E_{exist})
+        \cdot s_{flex, do} \cdot t_{shed}
         \cdot \Delta t \quad \forall t \in \mathbb{T} \\
 
     *Note*: For the sake of readability, the handling of indices is not
@@ -2638,12 +2648,15 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to installed capacity. The capacity share
-            eligible for a shift is determined by flex share(s)."
+            invested in. Equals to the additionally installed capacity.
+            The capacity share eligible for a shift is determined
+            by flex share(s)."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
+            ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
+            "P", "existing DSM capacity"
             ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
             "P","Share of invested capacity that may be shift upwards
             at maximum"
@@ -4025,8 +4038,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t \in \mathbb{T}
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot invest +
-        \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        + \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
         - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed}
         \quad \forall t \in \mathbb{T} \\
@@ -4049,12 +4062,14 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         &
         (9) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
         + DSM_{h, t}^{balanceUp}) + DSM_{t}^{do, shed}
-        \leq E_{t}^{do} \cdot invest \cdot s_{flex, do}
+        \leq E_{t}^{do} \cdot (invest + E_{exist})
+        \cdot s_{flex, do}
         \quad \forall t \in \mathbb{T} \\
         &
         (10) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo})
-        \leq E_{t}^{up} \cdot invest \cdot s_{flex, up}
+        \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \cdot s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (11) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
@@ -4068,34 +4083,40 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         \quad \forall t \in [1..T] \\
         &
         (13) \quad W_{t}^{levelDo} \leq \overline{E}_{t}^{do}
-        \cdot invest \cdot s_{flex, do} \cdot t_{shift}
+        \cdot (invest + E_{exist})
+        \cdot s_{flex, do} \cdot t_{shift}
         \quad \forall t \in \mathbb{T} \\
         &
         (14) \quad W_{t}^{levelUp} \leq \overline{E}_{t}^{up}
-        \cdot invest \cdot s_{flex, up} \cdot t_{shift}
+        \cdot (invest + E_{exist})
+        \cdot s_{flex, up} \cdot t_{shift}
         \quad \forall t \in \mathbb{T} \\
         &
         (15) \quad \displaystyle\sum_{t=0}^{T} DSM_{t}^{do, shed}
-        \leq invest \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \leq (invest + E_{exist})
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
         \cdot t_{shed}
         \cdot n^{yearLimitShed} \\
         &
         (16) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{do, shift}
-        \leq invest \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \leq (invest + E_{exist})
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
         (optional \space constraint) \\
         &
         (17) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{up}
-        \leq invest \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \leq (invest + E_{exist})
+        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
         (optional \space constraint) \\
         &
         (18) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{do, shift}
-        \leq invest \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \leq (invest + E_{exist})
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
         \cdot t_{shift} -
         \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
         DSM_{h, t - t'}^{do, shift}
@@ -4103,7 +4124,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (optional \space constraint) \\
         &
         (19) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
-        \leq invest \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \leq (invest + E_{exist})
+        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
         \cdot t_{shift} -
         \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
         DSM_{h, t - t'}^{up}
@@ -4115,7 +4137,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
         + DSM_{t}^{shed}
         \leq \max \{E_{t}^{up} \cdot s_{flex, up},
-        E_{t}^{do} \cdot s_{flex, do} \} \cdot invest
+        E_{t}^{do} \cdot s_{flex, do} \} \cdot (invest + E_{exist})
         \quad \forall t \in \mathbb{T} \\
         (optional \space constraint) \\
         &
@@ -4156,12 +4178,15 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to installed capacity. The capacity share
-            eligible for a shift is determined by flex share(s)."
+            invested in. Equals to the additionally installed capacity.
+            The capacity share eligible for a shift is determined
+            by flex share(s)."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
+            ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
+            "P", "existing DSM capacity"
             ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
             "P","Share of invested capacity that may be shift upwards
             at maximum"
