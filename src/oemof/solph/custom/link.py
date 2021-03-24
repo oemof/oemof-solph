@@ -187,11 +187,11 @@ class LinkBlock(SimpleBlock):
         def _flow1_rule(block, i, link, t):
             """Rule definition for Eq. (2)."""
             expr = (
-                1 >=
-                self.direction[link, t]
-                + m.flow[i, link, t]
-                * m.flows[i, link].max[t]
-                * m.flows[i, link].nominal_value
+                1 >= (self.direction[link, t]
+                      + m.flow[i, link, t]
+                      * m.flows[i, link].max[t]
+                      * m.flows[i, link].nominal_value
+                )
             )
             return expr
 
@@ -202,11 +202,11 @@ class LinkBlock(SimpleBlock):
         def _flow2_rule(block, i, link, t):
             """Rule definition for Eq. (3)."""
             expr = (
-                0 <=
-                self.direction[link, t]
-                - m.flow[i, link, t]
-                * m.flows[i, link].max[t]
-                * m.flows[i, link].nominal_value
+                0 <= (self.direction[link, t]
+                      - m.flow[i, link, t]
+                      * m.flows[i, link].max[t]
+                      * m.flows[i, link].nominal_value
+                )
             )
             return expr
 
