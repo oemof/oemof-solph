@@ -191,7 +191,7 @@ class LinkBlock(SimpleBlock):
                       + m.flow[i, link, t]
                       * m.flows[i, link].max[t]
                       * m.flows[i, link].nominal_value
-                )
+                     )
             )
             return expr
 
@@ -206,7 +206,7 @@ class LinkBlock(SimpleBlock):
                       - m.flow[i, link, t]
                       * m.flows[i, link].max[t]
                       * m.flows[i, link].nominal_value
-                )
+                     )
             )
             return expr
 
