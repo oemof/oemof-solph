@@ -362,3 +362,306 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
+                        
+
+class MultiObjectiveModel(BaseModel):
+    """An  energy system model for operational and investment
+    optimization.
+
+    Parameters
+    ----------
+    energysystem : EnergySystem object
+        Object that holds the nodes of an oemof energy system graph
+    constraint_groups : list
+        Solph looks for these groups in the given energy system and uses them
+        to create the constraints of the optimization problem.
+        Defaults to `Model.CONSTRAINTS`
+
+    **The following basic sets are created**:
+
+    NODES :
+        A set with all nodes of the given energy system.
+
+    TIMESTEPS :
+        A set with all timesteps of the given time horizon.
+
+    FLOWS :
+        A 2 dimensional set with all flows. Index: `(source, target)`
+
+    **The following basic variables are created**:
+
+    flow
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
+        Note: Bounds of this variable are set depending on attributes of
+        the corresponding flow object.
+
+    """
+
+    CONSTRAINT_GROUPS = [
+        blocks.Bus,
+        blocks.Transformer,
+        blocks.InvestmentFlow,
+        blocks.Flow,
+        blocks.NonConvexFlow,
+        blocks.MultiObjectiveFlow
+    ]
+
+    def __init__(self, energysystem, **kwargs):
+        super().__init__(energysystem, **kwargs)
+
+    def _add_parent_block_sets(self):
+        """"""
+        # set with all nodes
+        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+
+        # pyomo set for timesteps of optimization problem
+        self.TIMESTEPS = po.Set(
+            initialize=range(len(self.es.timeindex)), ordered=True
+        )
+
+        # previous timesteps
+        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
+        previous_timesteps[0] = self.TIMESTEPS.last()
+
+        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
+
+        # pyomo set for all flows in the energy system graph
+        self.FLOWS = po.Set(
+            initialize=self.flows.keys(), ordered=True, dimen=2
+        )
+
+        self.BIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[
+                k
+                for (k, v) in self.flows.items()
+                if hasattr(v, "bidirectional")
+            ],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
+
+        self.UNIDIRECTIONAL_FLOWS = po.Set(
+            initialize=[
+                k
+                for (k, v) in self.flows.items()
+                if not hasattr(v, "bidirectional")
+            ],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
+
+    def _add_parent_block_variables(self):
+        """"""
+
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
+
+        for (o, i) in self.FLOWS:
+            if self.flows[o, i].nominal_value is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].value = (
+                            self.flows[o, i].fix[t]
+                            * self.flows[o, i].nominal_value
+                        )
+                        self.flow[o, i, t].fix()
+                else:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setub(
+                            self.flows[o, i].max[t]
+                            * self.flows[o, i].nominal_value
+                        )
+
+                    if not self.flows[o, i].nonconvex:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(
+                                self.flows[o, i].min[t]
+                                * self.flows[o, i].nominal_value
+                            )
+                    elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].setlb(0)
+            else:
+                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
+                    for t in self.TIMESTEPS:
+                        self.flow[o, i, t].setlb(0)
+
+    def _add_objective(self, sense=po.minimize, update=False):
+        """ Method to sum up all objective expressions from the child blocks
+        that have been created. This method looks for `_objective_expression`
+        attribute in the block definition and will call this method to add
+        their return value to the objective function or to the respective
+        objective function if multiple objective function keys are given.
+        """
+
+        if update:
+            self.del_component('objective')
+
+        # create dict for all distinct objective expressions
+        self.objective_functions = defaultdict(lambda: 0, {'_standard': 0})
+
+        # set sign based on optimisation sense
+        if sense == po.minimize:
+            sign = 1
+        else:
+            sign = -1
+
+        for block in self.component_data_objects():
+            if hasattr(block, '_objective_expression'):
+                expr = block._objective_expression()
+                if isinstance(expr, defaultdict):
+                    for obj_key, obj_val in expr.items():
+                        self.objective_functions[obj_key] += (
+                                sign * obj_val)
+                else:
+                    self.objective_functions['_standard'] += (
+                            sign * expr)
+
+    def solve(self, solver='cbc', solver_io='lp', **kwargs):
+        r""" Takes care of communication with solver to solve the model.
+        Differentiates between single objective optimization or multi
+        objective optimization. Defaults to single objective optimization.
+
+        Parameters
+        ----------
+        solver : string
+            solver to be used e.g. "glpk","gurobi","cplex"
+        solver_io : string
+            pyomo solver interface file format: "lp","python","nl", etc.
+        \**kwargs : keyword arguments
+            Possible keys can be set see below:
+
+        Other Parameters
+        ----------------
+        solve_kwargs : dict
+            Other arguments for the pyomo.opt.SolverFactory.solve() method
+            Example : {"tee":True}
+        cmdline_options : dict
+            Dictionary with command line options for solver e.g.
+            {"mipgap":"0.01"} results in "--mipgap 0.01"
+            {"interior":" "} results in "--interior"
+            Gurobi solver takes numeric parameter values such as
+            {"method": 2}
+        optimization_type: str, default 'singular'
+            Sets type of optimization, currently either 'singular' for single
+            objective or 'weighted' for weighted sum of several objectives.
+        objective (with 'singular'): str, default '_standard'
+            Name of singular objective function to use. Defaults to internal
+            standard name.
+        objective_weights (with 'weighted'): dict, default {'_standard': 1}
+            Dictionary with names of objectives as keys and numeric weights
+            as values.
+        """
+        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solver_cmdline_options = kwargs.get("cmdline_options", {})
+
+        opt = SolverFactory(solver, solver_io=solver_io)
+        # set command line options
+        options = opt.options
+        for k in solver_cmdline_options:
+            options[k] = solver_cmdline_options[k]
+
+        # get type of optimisation
+        optimization_type = kwargs.get('optimization_type', 'singular')
+
+        # delete objective if it exists
+        self.del_component('objective')
+
+        if optimization_type == 'singular':
+            # get function to use
+            objective = kwargs.get('objective', '_standard')
+
+            if not isinstance(objective, str):
+                raise TypeError('Objective is not of type "string"')
+            if objective not in self.objective_functions.keys():
+                raise ValueError(
+                    'No cost for objective "{0}"'.format(objective))
+
+            # log objective
+            logging.info('Objective set to {0}.'.format(objective))
+
+            # set chosen objective function
+            self.objective = po.Objective(
+                    sense=po.minimize,
+                    expr=self.objective_functions.get(objective, 0.0))
+
+            solver_results = opt.solve(self, **solve_kwargs)
+
+            status = solver_results["Solver"][0]["Status"]
+            termination_condition = (
+                solver_results["Solver"][0]["Termination condition"])
+
+            if status == "ok" and termination_condition == "optimal":
+                logging.info("Optimization successful...")
+            else:
+                msg = ("Optimization ended with status {0} and termination "
+                       "condition {1}")
+                warnings.warn(msg.format(status, termination_condition),
+                              UserWarning)
+            self.es.results = solver_results
+            self.solver_results = solver_results
+
+            return solver_results
+
+        elif optimization_type == 'weighted':
+
+            # get function names and weights to use
+            obj_weights = kwargs.get(
+                    'objective_weights',
+                    {'_standard': 1})
+
+            # check for correct type
+            if not isinstance(obj_weights, dict):
+                raise TypeError("Objective weights must be of type 'dict'.")
+
+            # check existance of objectives
+            if len(obj_weights) == 0:
+                raise ValueError("Objective weights must not be empty.")
+
+            # initialise weighted sum of objectives
+            expr = 0
+
+            # check and set objectives and weights
+            for obj_name, obj_weight in obj_weights.items():
+                if not isinstance(obj_name, str):
+                    raise TypeError(
+                        'Objective "{0}" is not of type "string"'.format(
+                            obj_name))
+                if obj_name not in self.objective_functions.keys():
+                    raise ValueError('No cost for objective "{0}"'.format(
+                        obj_name))
+
+                # add to summed objective
+                expr += (obj_weight
+                         * self.objective_functions.get(obj_name))
+
+            # log objective and weights
+            logging.info('Objectives set to: {0} with weights: {1}'.format(
+                ', '.join(obj_weights.keys()), str(obj_weights)))
+
+            # create objective
+            self.objective = po.Objective(
+                    sense=po.minimize, expr=expr)
+
+            # solve
+            solver_results = opt.solve(self, **solve_kwargs)
+
+            status = solver_results["Solver"][0]["Status"]
+            termination_condition = (
+                solver_results["Solver"][0]["Termination condition"])
+
+            if status == "ok" and termination_condition == "optimal":
+                logging.info("Optimization successful...")
+            else:
+                msg = ("Optimization ended with status {0} and termination "
+                       "condition {1}")
+                warnings.warn(msg.format(status, termination_condition),
+                              UserWarning)
+            self.es.results = solver_results
+            self.solver_results = solver_results
+
+            return solver_results
+        else:
+            raise Exception('Invalid optimization type')
+
