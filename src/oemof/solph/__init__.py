@@ -19,6 +19,7 @@ from .network import Source  # noqa: F401
 from .network import Transformer  # noqa: F401
 from .options import Investment  # noqa: F401
 from .options import NonConvex  # noqa: F401
+from .options import MultiObjective
 from .plumbing import sequence  # noqa: F401
 from .processing import parameter_as_dict  # noqa: F401
 from .processing import results  # noqa: F401
