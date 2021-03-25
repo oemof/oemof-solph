@@ -19,9 +19,7 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
-# TODO: Change imports back!
-# from oemof.solph import blocks
-import blocks
+from oemof.solph import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
 from oemof.tools import debugging

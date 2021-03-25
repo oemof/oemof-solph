@@ -24,8 +24,7 @@ from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.solph.helpers import flatten
-# TODO: Generalize imports!
-import models
+import oemof.solph.models as models
 
 
 def get_tuple(x):
