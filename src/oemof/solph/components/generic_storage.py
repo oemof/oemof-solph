@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -
 
-"""This module is designed to hold components with their classes and
-associated individual constraints (blocks) and groupings. Therefore this
-module holds the class definition and the block directly located by each other.
+"""
+GenericStorage and associated individual constraints (blocks) and groupings.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -21,11 +20,9 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-import numpy as np
 from oemof.network import network
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
-from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
@@ -106,10 +103,11 @@ class GenericStorage(network.Node):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.GenericStorageBlock` (if no
-       Investment object present)
-     * :py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` (if
-       Investment object present)
+     * :py:class:`~oemof.solph.components.generic_storage.GenericStorageBlock`
+       (if no Investment object present)
+     * :py:class:
+       `~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`
+       (if Investment object present)
 
     Examples
     --------
@@ -290,9 +288,6 @@ class GenericStorage(network.Node):
                 "Won't return any constraints block for GenericStorage."
             )
             raise AttributeError(e)
-
-
-# Todo: accessed by
 
 
 class GenericStorageBlock(SimpleBlock):

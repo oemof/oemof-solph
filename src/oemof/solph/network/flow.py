@@ -1,11 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Classes used to model energy supply systems within solph.
-
-Classes are derived from oemof core network classes and adapted for specific
-optimization tasks. An energy system is modelled as a graph/network of nodes
-with very specific constraints on which types of nodes are allowed to be
-connected.
+"""
+solph version of oemof.network.Edge
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -20,7 +16,6 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.network import energy_system as es
 from oemof.network import network as on
 from oemof.tools import debugging
 
@@ -146,12 +141,13 @@ class Flow(on.Edge):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.Flow`
-     * :py:class:`~oemof.solph.blocks.InvestmentFlow` (additionally if
-       Investment object is present)
-     * :py:class:`~oemof.solph.blocks.NonConvexFlow` (If
-        nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.blocks.Flow` class and a MILP will be build)
+     * :py:class:`~oemof.solph.blocks.flow.Flow`
+     * :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow`
+        (additionally if Investment object is present)
+     * :py:class:`~oemof.solph.blocks.non_convex_flow.NonConvexFlow`
+        (If nonconvex  object is present, CAUTION: replaces
+        :py:class:`~oemof.solph.blocks.flow.Flow`
+        class and a MILP will be build)
 
     Examples
     --------
