@@ -22,6 +22,8 @@ from oemof.solph import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
 
+from collections import defaultdict
+
 
 class BaseModel(po.ConcreteModel):
     """The BaseModel for other solph-models (Model, MultiPeriodModel, etc.)
