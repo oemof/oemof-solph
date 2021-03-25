@@ -18,6 +18,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
+
 from warnings import warn
 
 from oemof.network import network
