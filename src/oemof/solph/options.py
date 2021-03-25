@@ -180,3 +180,70 @@ class NonConvex:
             self._calculate_max_up_down()
 
         return self._max_up_down
+
+class MultiObjective:
+    """
+    Parameters
+    ----------
+    [key-value-pairs]: MultiObjective.Objective
+        Key value pair consisting of name for partial objective function and
+        instance of Objective nested class with corresponding parameters.
+    """
+
+    def __init__(self, **kwargs):
+
+        # initalise internal dict
+        self.mo = dict()
+
+        for mo_key, mo_param in kwargs.items():
+            if isinstance(mo_param, MultiObjective.Objective):
+                self.mo[mo_key] = mo_param
+
+    def items(self):
+        return self.mo.items()
+
+    class Objective:
+        """
+        Comfort class to faciliate construction of different objectives.
+
+        Comfort class wrapping objective function parameters for singular
+        objective function in multi objective optimization. Uses same
+        parameters for objective declaration as
+        :class:`Flow <oemof.solph.blocks.Flow>`.
+
+        Parameters
+        ----------
+        variable_costs : numeric (iterable or scalar)
+            The costs associated with one unit of the flow. If this is set the
+            costs will be added to the objective expression of the optimization
+            problem.
+        positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+            A dictionary containing the following two keys:
+
+             * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+               bound* on the positive difference (`flow[t-1] < flow[t]`) of
+               two consecutive flow values.
+             * `'costs``: numeric (scalar or None), the gradient cost per
+               unit.
+
+        negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+            A dictionary containing the following two keys:
+
+              * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+                bound* on the negative difference (`flow[t-1] > flow[t]`) of
+                two consecutive flow values.
+              * `'costs``: numeric (scalar or None), the gradient cost per
+                unit.
+        """
+
+        def __init__(self, variable_costs=None,
+                     positive_gradient={"ub": None, "costs": 0},
+                     negative_gradient={"ub": None, "costs": 0}):
+            self.variable_costs = sequence(variable_costs)
+            self.positive_gradient = {
+                "ub": sequence(positive_gradient["ub"]),
+                "costs": sequence(positive_gradient["costs"])}
+            self.negative_gradient = {
+                "ub": sequence(negative_gradient["ub"]),
+                "costs": sequence(negative_gradient["costs"])}
+
