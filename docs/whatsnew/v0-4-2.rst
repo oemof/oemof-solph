@@ -1,4 +1,4 @@
-v0.4.2 (???, 2020)
+v0.4.2 (???, 2021)
 -----------------------
 
 
@@ -17,6 +17,15 @@ New components/constraints
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Custom component: oemof.solph.custom.PiecewiseLinearTransformer. A transformer model with one input and one output and an arbitrary piecewise linear conversion function. On how to use the component, refer to the `test script <https://github.com/oemof/oemof-solph/blob/dev/tests/test_scripts/test_solph/test_piecewiselineartransformer/test_piecewiselineartransformer.py>`_ and `example <https://github.com/oemof/oemof-examples/blob/master/oemof_examples/oemof.solph/v0.4.x/piecewise/piecewise_linear_transformer.py>`_.
+* Enhanced custom SinkDSM:
+    * Renamed keyword argument `method` to `approach`
+    * Renamed approaches `interval` to `oemof` and `delay` to `DIW`
+    * Added modeling approach `DLR` (PhD thesis of Hans Christian Gils 2015)
+    * Included load shedding
+    * Introduced `recovery_time` in `DIW` approach
+    * Introduced `shift_time` and other parameters for `DLR` approach
+    * Included investments in DSM
+    * Normalized keyword arguments `demand`, `cap_up` and `cap_do`
 
 Documentation
 ^^^^^^^^^^^^^^^^^^^^
@@ -47,4 +56,5 @@ Contributors
 ^^^^^^^^^^^^^^^^^^^^
 
 * Jann Launer
+* Johannes Kochems
 * Stefan Schirmeister
