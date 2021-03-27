@@ -23,4 +23,4 @@ Changelog
     * Introduced `recovery_time` in `DIW` approach
     * Introduced `shift_time` and other parameters for `DLR` approach
     * Included investments in DSM
-    * Normalized keyword arguments `demand`, `cap_up` and `cap_do`
+    * Normalized keyword arguments `demand`, `capapcity_up` and `capacity_down`
