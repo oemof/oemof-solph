@@ -1194,10 +1194,9 @@ class SinkDSMDIWBlock(SimpleBlock):
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t - g.delay_time,
-                                                t + g.delay_time + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t - g.delay_time,
+                                                     t + g.delay_time + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
