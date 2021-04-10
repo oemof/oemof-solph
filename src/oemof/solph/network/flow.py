@@ -224,7 +224,7 @@ class Flow(on.Edge):
                              " has to be set to None.")
         if ((self.investment or self.multiperiodinvestment)
             and self.nonconvex):
-            raise ValueError("Investment flows cannot be combined with " +
+            raise ValueError("Investment flows cannot be combined with "
                              "nonconvex flows!")
         if self.investment and self.multiperiodinvestment:
             raise ValueError("Either use a standard investment flow for "

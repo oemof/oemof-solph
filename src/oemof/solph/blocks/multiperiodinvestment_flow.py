@@ -500,8 +500,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             for i, o in self.MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
                     expr = (
-                        self.old[i, o, p] ==
-                        self.old_end[i, o, p] + self.old_exo[i, o, p])
+                        self.old[i, o, p]
+                        == self.old_end[i, o, p] + self.old_exo[i, o, p])
                     self.old_rule.add((i, o, p), expr)
 
         self.old_rule = Constraint(self.MULTIPERIODINVESTFLOWS, m.PERIODS,
@@ -564,9 +564,9 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             in multiperiodinvestment case.
             """
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
-                        for p, t in m.TIMEINDEX) <=
-                    (m.flows[i, o].summed_max *
-                     sum(self.total[i, o, p] for p in m.PERIODS)))
+                        for p, t in m.TIMEINDEX)
+                    <= (m.flows[i, o].summed_max
+                        * sum(self.total[i, o, p] for p in m.PERIODS)))
             return expr
 
         self.summed_max = Constraint(self.SUMMED_MAX_MULTIPERIODINVESTFLOWS,
@@ -577,8 +577,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             in multiperiodinvestment case.
             """
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
-                        for p, t in m.TIMEINDEX) >=
-                    (sum(self.total[i, o, p] for p in m.PERIODS)
+                        for p, t in m.TIMEINDEX)
+                    >= (sum(self.total[i, o, p] for p in m.PERIODS)
                      * m.flows[i, o].summed_min))
             return expr
 
@@ -598,8 +598,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             for i, o in self.OVERALL_MAXIMUM_MULTIPERIODINVESTFLOWS:
                 for p in m.PERIODS:
                     expr = (
-                        self.total[i, o, p] <=
-                        m.flows[i, o].multiperiodinvestment.overall_maximum
+                        self.total[i, o, p]
+                        <= m.flows[i, o].multiperiodinvestment.overall_maximum
                     )
                     self.overall_maximum.add((i, o, p), expr)
 
@@ -678,8 +678,8 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     wacc=interest)
                 investment_costs += (
                     (self.invest[i, o, p] * annuity * lifetime
-                     + self.invest_status[i, o, p] *
-                     m.flows[i, o].multiperiodinvestment.offset[p])
+                     + self.invest_status[i, o, p]
+                     * m.flows[i, o].multiperiodinvestment.offset[p])
                     * ((1 + m.discount_rate) ** (-p))
                 )
         for i, o in self.MULTIPERIODINVESTFLOWS:

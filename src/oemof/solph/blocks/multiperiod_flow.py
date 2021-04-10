@@ -23,6 +23,7 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
+
 class MultiPeriodFlow(SimpleBlock):
     r""" Block for all flows with :attr:`multiperiod` being not None.
 
@@ -113,12 +114,14 @@ class MultiPeriodFlow(SimpleBlock):
         # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
         self.SUMMED_MAX_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if g[2].summed_max is not None and
-                                           g[2].nominal_value is not None])
+            (g[0], g[1]) for g in group
+            if (g[2].summed_max is not None
+                and g[2].nominal_value is not None)])
 
         self.SUMMED_MIN_FLOWS = Set(initialize=[
-            (g[0], g[1]) for g in group if g[2].summed_min is not None and
-                                           g[2].nominal_value is not None])
+            (g[0], g[1]) for g in group
+            if (g[2].summed_min is not None
+                and g[2].nominal_value is not None)])
 
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group
@@ -160,8 +163,8 @@ class MultiPeriodFlow(SimpleBlock):
             for inp, out in self.SUMMED_MAX_FLOWS:
                 lhs = sum(m.flow[inp, out, p, ts] * m.timeincrement[ts]
                           for p, ts in m.TIMEINDEX)
-                rhs = (m.flows[inp, out].summed_max *
-                       m.flows[inp, out].nominal_value)
+                rhs = (m.flows[inp, out].summed_max
+                       * m.flows[inp, out].nominal_value)
                 self.summed_max.add((inp, out), lhs <= rhs)
 
         self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
@@ -173,8 +176,8 @@ class MultiPeriodFlow(SimpleBlock):
             for inp, out in self.SUMMED_MIN_FLOWS:
                 lhs = sum(m.flow[inp, out, p, ts] * m.timeincrement[ts]
                           for p, ts in m.TIMEINDEX)
-                rhs = (m.flows[inp, out].summed_min *
-                       m.flows[inp, out].nominal_value)
+                rhs = (m.flows[inp, out].summed_min
+                       * m.flows[inp, out].nominal_value)
                 self.summed_min.add((inp, out), lhs >= rhs)
 
         self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
@@ -243,9 +246,9 @@ class MultiPeriodFlow(SimpleBlock):
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
                 for p, t in m.TIMEINDEX:
-                    variable_costs += (m.flow[i, o, p, t] *
-                                       m.objective_weighting[t] *
-                                       m.flows[i, o].variable_costs[p]
+                    variable_costs += (m.flow[i, o, p, t]
+                                       * m.objective_weighting[t]
+                                       * m.flows[i, o].variable_costs[p]
                                        * ((1 + m.discount_rate) ** -p))
 
             if m.flows[i, o].positive_gradient['ub'][0] is not None:
@@ -257,16 +260,16 @@ class MultiPeriodFlow(SimpleBlock):
 
             if m.flows[i, o].negative_gradient['ub'][0] is not None:
                 for p, t in m.TIMEINDEX:
-                    gradient_costs += (self.negative_gradient[i, o, t] *
-                                       m.flows[i, o].negative_gradient[
+                    gradient_costs += (self.negative_gradient[i, o, t]
+                                       * m.flows[i, o].negative_gradient[
                                            'costs']
                                        * ((1 + m.discount_rate) ** -p))
 
             if (m.flows[i, o].fixed_costs[0] is not None
                 and m.flows[i, o].nominal_value is not None):
                 for p in m.PERIODS:
-                    fixed_costs += (m.flows[i, o].nominal_value *
-                                    m.flows[i, o].fixed_costs[p]
+                    fixed_costs += (m.flows[i, o].nominal_value
+                                    * m.flows[i, o].fixed_costs[p]
                                     * ((1 + m.discount_rate) ** -p))
 
         return variable_costs + gradient_costs + fixed_costs

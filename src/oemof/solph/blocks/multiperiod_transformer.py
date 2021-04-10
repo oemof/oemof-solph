@@ -96,10 +96,10 @@ class MultiPeriodTransformer(SimpleBlock):
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
-                                lhs = (m.flow[i, n, p, t] *
-                                       n.conversion_factors[o][t])
-                                rhs = (m.flow[n, o, p, t] *
-                                       n.conversion_factors[i][t])
+                                lhs = (m.flow[i, n, p, t]
+                                       * n.conversion_factors[o][t])
+                                rhs = (m.flow[n, o, p, t]
+                                       * n.conversion_factors[i][t])
                             except ValueError:
                                 raise ValueError(
                                     "Error in constraint creation",
@@ -108,4 +108,3 @@ class MultiPeriodTransformer(SimpleBlock):
                             block.relation.add((n, i, o, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)
-

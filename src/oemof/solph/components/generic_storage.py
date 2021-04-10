@@ -471,11 +471,11 @@ class GenericStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                        -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             expr += (
-                        m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -501,11 +501,11 @@ class GenericStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -723,11 +723,11 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                        -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             expr += (
-                        m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -753,11 +753,11 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -1165,11 +1165,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                        -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             expr += (
-                        m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -1194,11 +1194,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -1221,12 +1221,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             and output power
             """
             expr = (
-                       m.InvestmentFlow.invest[n, o[n]]
-                       + m.flows[n, o[n]].investment.existing
-                   ) * n.invest_relation_input_output == (
-                       m.InvestmentFlow.invest[i[n], n]
-                       + m.flows[i[n], n].investment.existing
-                   )
+                m.InvestmentFlow.invest[n, o[n]]
+                + m.flows[n, o[n]].investment.existing
+            ) * n.invest_relation_input_output == (
+                m.InvestmentFlow.invest[i[n], n]
+                + m.flows[i[n], n].investment.existing
+            )
             return expr
 
         self.power_coupled = Constraint(
@@ -1240,11 +1240,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__inflow_ratio
             """
             expr = (
-                m.InvestmentFlow.invest[i[n], n]
-                + m.flows[i[n], n].investment.existing
-            ) == (
-                n.investment.existing + self.invest[n]
-            ) * n.invest_relation_input_capacity
+                       m.InvestmentFlow.invest[i[n], n]
+                       + m.flows[i[n], n].investment.existing
+                   ) == (
+                       n.investment.existing + self.invest[n]
+                   ) * n.invest_relation_input_capacity
             return expr
 
         self.storage_capacity_inflow = Constraint(
@@ -1258,11 +1258,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__outflow_ratio
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
-                + m.flows[n, o[n]].investment.existing
-            ) == (
-                n.investment.existing + self.invest[n]
-            ) * n.invest_relation_output_capacity
+                       m.InvestmentFlow.invest[n, o[n]]
+                       + m.flows[n, o[n]].investment.existing
+                   ) == (
+                       n.investment.existing + self.invest[n]
+                   ) * n.invest_relation_output_capacity
             return expr
 
         self.storage_capacity_outflow = Constraint(
@@ -1312,9 +1312,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             storage.
             """
             return (
-                       n.investment.maximum * self.invest_status[n]
-                       - self.invest[n]
-                   ) >= 0
+                n.investment.maximum * self.invest_status[n]
+                - self.invest[n]
+            ) >= 0
 
         self.limit_max = Constraint(
             self.NON_CONVEX_INVESTSTORAGES, rule=maximum_invest_limit
@@ -1851,8 +1851,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             for n in self.MULTIPERIODINVESTSTORAGES:
                 for p in m.PERIODS:
                     expr = (
-                        self.old[n, p] ==
-                        self.old_end[n, p] + self.old_exo[n, p])
+                        self.old[n, p]
+                        == self.old_end[n, p] + self.old_exo[n, p])
                     self.old_rule.add((n, p), expr)
 
         self.old_rule = Constraint(self.MULTIPERIODINVESTSTORAGES,
@@ -1891,11 +1891,11 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
             expr += (
-                        -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             expr += (
-                        m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
-                    ) * m.timeincrement[0]
+                m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+            ) * m.timeincrement[0]
             return expr == 0
 
         self.balance_first = Constraint(
@@ -1921,11 +1921,11 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
@@ -1962,10 +1962,10 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.PERIODS:
                     expr = (
-                               m.MultiPeriodInvestmentFlow.total[n, o[n], p]
-                           ) * n.invest_relation_input_output == (
-                               m.MultiPeriodInvestmentFlow.total[i[n], n, p]
-                           )
+                        m.MultiPeriodInvestmentFlow.total[n, o[n], p]
+                    ) * n.invest_relation_input_output == (
+                        m.MultiPeriodInvestmentFlow.total[i[n], n, p]
+                    )
                     self.power_coupled.add((n, p), expr)
 
         self.power_coupled = Constraint(
@@ -2068,9 +2068,9 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             multiperiodinvestment storage.
             """
             return (
-                       n.multiperiodinvestment.maximum[p]
-                       * self.invest_status[n, p] - self.invest[n, p]
-                   ) >= 0
+                n.multiperiodinvestment.maximum[p]
+                * self.invest_status[n, p] - self.invest[n, p]
+            ) >= 0
 
         self.limit_max = Constraint(
             self.NON_CONVEX_MULTIPERIODINVESTSTORAGES,
@@ -2107,9 +2107,10 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             for n in self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES:
                 for p in m.PERIODS:
-                    expr = (self.total[n, p] <=
-                            n.multiperiodinvestment.overall_maximum)
+                    expr = (self.total[n, p]
+                            <= n.multiperiodinvestment.overall_maximum)
                     self.overall_storage_maximum.add((n, p), expr)
+
         self.overall_storage_maximum = Constraint(
             self.OVERALL_MAXIMUM_MULTIPERIODINVESTSTORAGES,
             m.PERIODS,
@@ -2126,6 +2127,7 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                     expr = (n.multiperiodinvestment.overall_minimum
                             <= self.total[n, p])
                     self.overall_minimum.add((n, p), expr)
+
         self.overall_minimum = Constraint(
             self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES,
             m.PERIODS,
@@ -2184,8 +2186,8 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                         wacc=interest)
                     investment_costs += (
                         (self.invest[n, p] * annuity * lifetime
-                         + self.invest_status[n, p] *
-                         n.multiperiodinvestment.offset[p])
+                         + self.invest_status[n, p]
+                         * n.multiperiodinvestment.offset[p])
                         * ((1 + m.discount_rate) ** (-p))
                     )
 

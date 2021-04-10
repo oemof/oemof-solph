@@ -448,8 +448,8 @@ class MultiPeriodModel(BaseModel):
 
         # TODO: Make this robust -> number of timesteps per period
         # Calculates an average if leap years are included
-        self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS) /
-                                              len(self.PERIODS)))
+        self.PERIOD_TIMESTEPS = {a: range(int(len(self.TIMESTEPS)
+                                              / len(self.PERIODS)))
                                  for a in self.PERIODS}
 
         # previous timesteps
@@ -483,20 +483,20 @@ class MultiPeriodModel(BaseModel):
                 if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].value = (
-                            self.flows[o, i].fix[t] *
-                            self.flows[o, i].nominal_value)
+                            self.flows[o, i].fix[t]
+                            * self.flows[o, i].nominal_value)
                         self.flow[o, i, p, t].fix()
                 else:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setub(
-                            self.flows[o, i].max[t] *
-                            self.flows[o, i].nominal_value)
+                            self.flows[o, i].max[t]
+                            * self.flows[o, i].nominal_value)
 
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(
-                                self.flows[o, i].min[t] *
-                                self.flows[o, i].nominal_value)
+                                self.flows[o, i].min[t]
+                                * self.flows[o, i].nominal_value)
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(0)
