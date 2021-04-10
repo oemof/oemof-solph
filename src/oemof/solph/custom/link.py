@@ -233,8 +233,8 @@ class MultiPeriodLinkBlock(SimpleBlock):
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
-                            expr = (m.flow[n, cidx[1], p, t] ==
-                                    c[t] * m.flow[cidx[0], n, p, t])
+                            expr = (m.flow[n, cidx[1], p, t]
+                                    == c[t] * m.flow[cidx[0], n, p, t])
                         except ValueError:
                             raise ValueError(
                                 "Error in constraint creation",
@@ -257,8 +257,7 @@ class MultiPeriodLinkBlock(SimpleBlock):
                             * cf[cf_keys[0]][t]
                             + m.flow[cf_keys[1][0], n, p, t]
                             * cf[cf_keys[1]][t]
-                            ==
-                            m.flow[n, cf_keys[0][1], p, t]
+                            == m.flow[n, cf_keys[0][1], p, t]
                             + m.flow[n, cf_keys[1][1], p, t])
                     block.relation_exclusive_direction.add((n, p, t), expr)
 

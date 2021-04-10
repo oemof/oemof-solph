@@ -579,7 +579,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
                         for p, t in m.TIMEINDEX)
                     >= (sum(self.total[i, o, p] for p in m.PERIODS)
-                     * m.flows[i, o].summed_min))
+                        * m.flows[i, o].summed_min))
             return expr
 
         self.summed_min = Constraint(self.SUMMED_MIN_MULTIPERIODINVESTFLOWS,

@@ -1240,11 +1240,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__inflow_ratio
             """
             expr = (
-                       m.InvestmentFlow.invest[i[n], n]
-                       + m.flows[i[n], n].investment.existing
-                   ) == (
-                       n.investment.existing + self.invest[n]
-                   ) * n.invest_relation_input_capacity
+                m.InvestmentFlow.invest[i[n], n]
+                + m.flows[i[n], n].investment.existing
+            ) == (
+                n.investment.existing + self.invest[n]
+            ) * n.invest_relation_input_capacity
             return expr
 
         self.storage_capacity_inflow = Constraint(
@@ -1258,11 +1258,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             by nominal_storage_capacity__outflow_ratio
             """
             expr = (
-                       m.InvestmentFlow.invest[n, o[n]]
-                       + m.flows[n, o[n]].investment.existing
-                   ) == (
-                       n.investment.existing + self.invest[n]
-                   ) * n.invest_relation_output_capacity
+                m.InvestmentFlow.invest[n, o[n]]
+                + m.flows[n, o[n]].investment.existing
+            ) == (
+                n.investment.existing + self.invest[n]
+            ) * n.invest_relation_output_capacity
             return expr
 
         self.storage_capacity_outflow = Constraint(

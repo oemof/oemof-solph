@@ -98,9 +98,9 @@ class Transformer(on.Transformer):
         # Check outputs for multiperiod modeling
         for v in self.outputs.values():
             if (hasattr(v, 'multiperiod')
-                or hasattr(v, 'multiperiodinvestment')):
+                    or hasattr(v, 'multiperiodinvestment')):
                 if (v.multiperiod is not None
-                    or v.multiperiodinvestment is not None):
+                        or v.multiperiodinvestment is not None):
                     self.multiperiod = True
                     break
                 else:

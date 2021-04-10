@@ -219,11 +219,11 @@ class Flow(on.Edge):
 
         # Checking for impossible attribute combinations
         if ((self.investment or self.multiperiodinvestment)
-            and self.nominal_value is not None):
+                and self.nominal_value is not None):
             raise ValueError("Using the investment object the nominal_value"
                              " has to be set to None.")
         if ((self.investment or self.multiperiodinvestment)
-            and self.nonconvex):
+                and self.nonconvex):
             raise ValueError("Investment flows cannot be combined with "
                              "nonconvex flows!")
         if self.investment and self.multiperiodinvestment:
