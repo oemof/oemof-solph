@@ -16,8 +16,11 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
-from numpy import mean
 
+from numpy import mean
+from oemof.solph.network import Sink
+from oemof.solph.options import Investment
+from oemof.solph.plumbing import sequence
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -25,10 +28,6 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
-
-from oemof.solph.network import Sink
-from oemof.solph.plumbing import sequence
-from oemof.solph.options import Investment
 
 
 class SinkDSM(Sink):
