@@ -932,8 +932,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                         timesteps = range(interval,
                                           m.TIMESTEPS[-1] + 1)
                     else:
-                        timesteps = range(interval, interval +
-                                          g.shift_interval)
+                        timesteps = range(interval,
+                                          interval + g.shift_interval)
 
                     # DSM up/down
                     lhs = sum(self.dsm_up[g, tt]
@@ -1180,9 +1180,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t + g.delay_time + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t + g.delay_time + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
@@ -1210,10 +1209,9 @@ class SinkDSMDIWBlock(SimpleBlock):
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t - g.delay_time,
-                                                m.TIMESTEPS[-1] + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t - g.delay_time,
+                                                     m.TIMESTEPS[-1] + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
@@ -1251,8 +1249,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -1292,7 +1290,6 @@ class SinkDSMDIWBlock(SimpleBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
@@ -1331,8 +1328,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                     # main use case
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM down
                         lhs = (sum(self.dsm_do_shift[g, t, tt]
@@ -1379,9 +1376,9 @@ class SinkDSMDIWBlock(SimpleBlock):
                     if tt <= g.delay_time:
 
                         # DSM up/down
-                        lhs = (self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt + g.delay_time + 1))
+                        lhs = (self.dsm_up[g, tt]
+                               + sum(self.dsm_do_shift[g, t, tt]
+                                     for t in range(tt + g.delay_time + 1))
                                + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt] * g.max_capacity_up,
@@ -1390,15 +1387,17 @@ class SinkDSMDIWBlock(SimpleBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
-                        lhs = (self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           tt + g.delay_time + 1))
-                               + self.dsm_do_shed[g, tt])
+                        lhs = (
+                            self.dsm_up[g, tt]
+                            + sum(self.dsm_do_shift[g, t, tt]
+                                  for t in range(tt - g.delay_time,
+                                                 tt + g.delay_time + 1))
+                            + self.dsm_do_shed[g, tt]
+                        )
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt] * g.max_capacity_up,
                                   g.capacity_down[tt] * g.max_capacity_down)
@@ -1736,17 +1735,16 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         rhs = (g.demand[t]
                                * (self.invest[g] + g.investment.existing)
                                + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t + g.delay_time + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t + g.delay_time + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
@@ -1754,10 +1752,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         rhs = (g.demand[t]
                                * (self.invest[g] + g.investment.existing)
                                + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t - g.delay_time,
-                                                t + g.delay_time + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t - g.delay_time,
+                                                     t + g.delay_time + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
@@ -1771,10 +1768,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         rhs = (g.demand[t]
                                * (self.invest[g] + g.investment.existing)
                                + self.dsm_up[g, t]
-                               - sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in range(t - g.delay_time,
-                                                m.TIMESTEPS[-1] + 1))
+                               - sum(self.dsm_do_shift[g, tt, t]
+                                     for tt in range(t - g.delay_time,
+                                                     m.TIMESTEPS[-1] + 1))
                                - self.dsm_do_shed[g, t])
 
                         # add constraint
@@ -1810,8 +1806,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -1849,7 +1845,6 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
@@ -1889,8 +1884,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                     # main use case
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM down
                         lhs = (sum(self.dsm_do_shift[g, t, tt]
@@ -1941,9 +1936,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                     if tt <= g.delay_time:
 
                         # DSM up/down
-                        lhs = (self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt + g.delay_time + 1))
+                        lhs = (self.dsm_up[g, tt]
+                               + sum(self.dsm_do_shift[g, t, tt]
+                                     for t in range(tt + g.delay_time + 1))
                                + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
@@ -1953,8 +1948,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = (self.dsm_up[g, tt] + sum(
@@ -3197,7 +3192,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         # Depict different delay_times per unit via a mapping
         map_INVESTDR_H = {
             k: v for k, v in zip([n for n in group],
-                                  [n.delay_time for n in group])
+                                 [n.delay_time for n in group])
         }
 
         unique_H = list(
