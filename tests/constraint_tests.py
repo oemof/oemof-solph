@@ -420,7 +420,7 @@ class TestsConstraint:
             outputs={bel: solph.Flow()},
             nominal_storage_capacity=1111,
             initial_storage_level=None,
-            balanced=False,
+            periods=0,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
         )
@@ -436,7 +436,7 @@ class TestsConstraint:
             outputs={bel: solph.Flow()},
             nominal_storage_capacity=None,
             initial_storage_level=0.5,
-            balanced=False,
+            periods=0,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
             investment=solph.Investment(ep_costs=145),
