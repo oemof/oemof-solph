@@ -182,7 +182,6 @@ class GenericStorage(network.Node):
                 else:
                     self.period_length = 0
 
-
         # Check number of flows.
         self._check_number_of_flows()
 
@@ -418,14 +417,19 @@ class GenericStorageBlock(SimpleBlock):
             Rule definition for bounds of storage_content variable of
             storage n in timestep t.
             """
-            bounds = (
-                n.nominal_storage_capacity * n.min_storage_level[t],
-                n.nominal_storage_capacity * n.max_storage_level[t],
-            )
+            if t >= 0:
+                bounds = (
+                    n.nominal_storage_capacity * n.min_storage_level[t],
+                    n.nominal_storage_capacity * n.max_storage_level[t],
+                )
+            else:
+                bounds = (0, n.nominal_storage_capacity, )
             return bounds
 
         self.storage_content = Var(
-            self.STORAGES, m.TIMESTEPS, bounds=_storage_content_bound_rule
+            self.STORAGES,
+            m.TIMESTEPS | {-1},
+            bounds=_storage_content_bound_rule
         )
 
         def _storage_init_content_bound_rule(block, n):
@@ -447,39 +451,6 @@ class GenericStorageBlock(SimpleBlock):
 
         #  ************* Constraints ***************************
 
-        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
-
-        # storage balance constraint (first time step)
-        def _storage_balance_first_rule(block, n):
-            """
-            Rule definition for the storage balance of every storage n for
-            the first timestep.
-            """
-            expr = 0
-            expr += block.storage_content[n, 0]
-            expr += (
-                -block.init_content[n]
-                * (1 - n.loss_rate[0]) ** m.timeincrement[0]
-            )
-            expr += (
-                n.fixed_losses_relative[0]
-                * n.nominal_storage_capacity
-                * m.timeincrement[0]
-            )
-            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
-            expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
-            expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
-            return expr == 0
-
-        self.balance_first = Constraint(
-            self.STORAGES, rule=_storage_balance_first_rule
-        )
-
-        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
             """
             Rule definition for the storage balance of every storage n and
@@ -506,7 +477,20 @@ class GenericStorageBlock(SimpleBlock):
             return expr == 0
 
         self.balance = Constraint(
-            self.STORAGES, reduced_timesteps, rule=_storage_balance_rule
+            self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
+        )
+
+        def _initial_storage_rule(block, n):
+            """
+            Storage content before first time step.
+            """
+            return (
+                block.storage_content[n, -1]
+                == block.init_content[n]
+            )
+
+        self.initial_cstr = Constraint(
+            self.STORAGES, rule=_initial_storage_rule
         )
 
         def _balanced_storage_rule(block, n):
