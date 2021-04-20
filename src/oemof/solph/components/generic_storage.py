@@ -423,13 +423,16 @@ class GenericStorageBlock(SimpleBlock):
                     n.nominal_storage_capacity * n.max_storage_level[t],
                 )
             else:
-                bounds = (0, n.nominal_storage_capacity, )
+                bounds = (
+                    0,
+                    n.nominal_storage_capacity,
+                )
             return bounds
 
         self.storage_content = Var(
             self.STORAGES,
             m.TIMESTEPS | {-1},
-            bounds=_storage_content_bound_rule
+            bounds=_storage_content_bound_rule,
         )
 
         def _storage_init_content_bound_rule(block, n):
@@ -484,10 +487,7 @@ class GenericStorageBlock(SimpleBlock):
             """
             Storage content before first time step.
             """
-            return (
-                block.storage_content[n, -1]
-                == block.init_content[n]
-            )
+            return block.storage_content[n, -1] == block.init_content[n]
 
         self.initial_cstr = Constraint(
             self.STORAGES, rule=_initial_storage_rule
