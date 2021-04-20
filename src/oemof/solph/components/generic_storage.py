@@ -467,7 +467,10 @@ class GenericStorageBlock(SimpleBlock):
             Rule definition for the storage balance of every storage n and
             every timestep but the first (t > 0).
             """
-            previous_time_step = t - 1
+            if t == 0 or t % n.period_length != 0:
+                previous_time_step = t - 1
+            else:
+                previous_time_step = t - 1 + n.period_length
 
             expr = 0
             expr += block.storage_content[n, t]
