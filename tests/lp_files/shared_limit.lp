@@ -98,13 +98,13 @@ c_e_GenericStorageBlock_initial_cstr(storage2)_:
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage1)_:
--1 GenericStorageBlock_init_content(storage1)
-+1 GenericStorageBlock_storage_content(storage1_2)
+-1 GenericStorageBlock_storage_content(storage1_2)
++1 GenericStorageBlock_storage_content(storage1__1)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage2)_:
--1 GenericStorageBlock_init_content(storage2)
-+1 GenericStorageBlock_storage_content(storage2_2)
+-1 GenericStorageBlock_storage_content(storage2_2)
++1 GenericStorageBlock_storage_content(storage2__1)
 = 0
 
 c_e_ONE_VAR_CONSTANT:

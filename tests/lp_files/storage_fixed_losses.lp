@@ -52,8 +52,9 @@ c_e_GenericStorageBlock_initial_cstr(storage_no_invest)_:
 = 40000
 
 c_e_GenericStorageBlock_balanced_cstr(storage_no_invest)_:
-+1 GenericStorageBlock_storage_content(storage_no_invest_2)
-= 40000
+-1 GenericStorageBlock_storage_content(storage_no_invest_2)
++1 GenericStorageBlock_storage_content(storage_no_invest__1)
+= 0
 
 c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0

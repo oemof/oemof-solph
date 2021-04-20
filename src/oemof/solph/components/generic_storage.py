@@ -400,8 +400,16 @@ class GenericStorageBlock(SimpleBlock):
 
         self.STORAGES = Set(initialize=[n for n in group])
 
+        for n in group:
+            if n.period_length == 0:
+                n.period_length = m.TIMESTEPS[-1] + 2
+            elif n.period_length < 0:
+                n.period_length += m.TIMESTEPS[-1] + 2
+
         self.STORAGES_BALANCED = Set(
-            initialize=[n for n in group if n.period_length == -1]
+            initialize=[
+                n for n in group if n.period_length <= m.TIMESTEPS[-1] + 1
+            ]
         )
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
@@ -459,10 +467,12 @@ class GenericStorageBlock(SimpleBlock):
             Rule definition for the storage balance of every storage n and
             every timestep but the first (t > 0).
             """
+            previous_time_step = t - 1
+
             expr = 0
             expr += block.storage_content[n, t]
             expr += (
-                -block.storage_content[n, t - 1]
+                -block.storage_content[n, previous_time_step]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -493,18 +503,18 @@ class GenericStorageBlock(SimpleBlock):
             self.STORAGES, rule=_initial_storage_rule
         )
 
-        def _balanced_storage_rule(block, n):
+        def _storage_balance_initial_rule(block, n):
             """
             Storage content of last time step == initial storage content
             if period_length == -1.
             """
             return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
-                == block.init_content[n]
+                block.storage_content[n, -1]
+                == block.storage_content[n, n.period_length - 1]
             )
 
         self.balanced_cstr = Constraint(
-            self.STORAGES_BALANCED, rule=_balanced_storage_rule
+            self.STORAGES_BALANCED, rule=_storage_balance_initial_rule
         )
 
         def _power_coupled(block, n):

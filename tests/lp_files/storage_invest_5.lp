@@ -78,8 +78,8 @@ c_e_GenericStorageBlock_initial_cstr(storage5)_:
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage5)_:
--1 GenericStorageBlock_init_content(storage5)
-+1 GenericStorageBlock_storage_content(storage5_2)
+-1 GenericStorageBlock_storage_content(storage5_2)
++1 GenericStorageBlock_storage_content(storage5__1)
 = 0
 
 c_e_GenericStorageBlock_power_coupled(storage5)_:
