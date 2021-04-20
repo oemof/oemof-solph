@@ -757,17 +757,23 @@ SinkDSM (custom)
 ^^^^^^^^^^^^^^^^
 
 :class:`~oemof.solph.custom.SinkDSM` can used to represent flexibility in a demand time series.
-Elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
+It can represent both, load shifting or load shedding.
+For load shifting, elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
 Upwards shifted demand is then balanced with downwards shifted demand.
+For load shedding, shedding capability is described by :attr:`~oemof.solph.custom.SinkDSM.capacity_down`.
+It both, load shifting and load shedding are allowed, :attr:`~oemof.solph.custom.SinkDSM.capacity_down` limits the sum of both downshift categories.
 
-At the moment, :class:`~oemof.solph.custom.SinkDSM` provides two method how the Demand-Side Management (DSM) flexibility is represented in constraints
+:class:`~oemof.solph.custom.SinkDSM` provides three approaches how the Demand-Side Management (DSM) flexibility is represented in constraints
+It can be used for both, dispatch and investments modeling.
 
-* "delay": Implementation of the DSM modeling method proposed by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
-  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDelayBlock`
-* "interval": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
-  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMIntervalBlock`
+* "DLR": Implementation of the DSM modeling approach from by Gils (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage, Stuttgart, <http://dx.doi.org/10.18419/opus-6888>,`_,
+  Details: :class:`~oemof.solph.custom.SinkDSMDLRBlock` and :class:`~oemof.solph.custom.SinkDSMDLRInvestmentBlock`
+* "DIW": Implementation of the DSM modeling approach by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
+  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDIWBlock` and :class:`~oemof.solph.custom.SinkDSMDIWInvestmentBlock`
+* "oemof": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
+  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMOemofBlock` and :class:`~oemof.solph.custom.SinkDSMOemofInvestmentBlock`
 
-Cost can be associated to either demand up shifts or demand down shifts.
+Cost can be associated to either demand up shifts or demand down shifts or both.
 
 This small example of PV, grid and SinkDSM shows how to use the component
 
@@ -811,13 +817,16 @@ This small example of PV, grid and SinkDSM shows how to use the component
                           )
 
     # Create DSM Sink
-    demand_dsm = solph.custom.SinkDSM(label='DSM',
+    demand_dsm = solph.custom.SinkDSM(label="DSM",
                                       inputs={b_elec: solph.Flow()},
-                                      capacity_up=data['Cap_up'],
-                                      capacity_down=data['Cap_do'],
-                                      delay_time=6,
                                       demand=data['demand_el'],
-                                      method="delay",
+                                      capacity_up=data["Cap_up"],
+                                      capacity_down=data["Cap_do"],
+                                      delay_time=6,
+                                      max_demand=1,
+                                      max_capacity_up=1,
+                                      max_capacity_down=1,
+                                      approach="DIW",
                                       cost_dsm_down=5)
 
 Yielding the following results
@@ -829,10 +838,15 @@ Yielding the following results
 
 
 .. note::
-   * This component is a candidate component. It's implemented as a custom
+    * Keyword argument `method` from v0.4.1 has been renamed to `approach` in v0.4.2
+     and methods have been renamed.
+    * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow
+     investments modeling. To retreive the original dispatch behaviour from v0.4.1, set
+     `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
+    * This component is a candidate component. It's implemented as a custom
      component for users that like to use and test the component at early
      stage. Please report issues to improve the component.
-   * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
+    * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
      background.
 
 
