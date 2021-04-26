@@ -366,7 +366,7 @@ class Model(BaseModel):
                         self.flow[o, i, t].setlb(0)
                         
 
-class MultiObjectiveModel(BaseModel):
+class MultiObjectiveModel(Model):
     """An  energy system model for operational and investment
     optimization.
 
@@ -410,84 +410,6 @@ class MultiObjectiveModel(BaseModel):
 
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)
-
-    def _add_parent_block_sets(self):
-        """"""
-        # set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
-
-        # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
-        )
-
-        # previous timesteps
-        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
-        previous_timesteps[0] = self.TIMESTEPS.last()
-
-        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-
-        # pyomo set for all flows in the energy system graph
-        self.FLOWS = po.Set(
-            initialize=self.flows.keys(), ordered=True, dimen=2
-        )
-
-        self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if hasattr(v, "bidirectional")
-            ],
-            ordered=True,
-            dimen=2,
-            within=self.FLOWS,
-        )
-
-        self.UNIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if not hasattr(v, "bidirectional")
-            ],
-            ordered=True,
-            dimen=2,
-            within=self.FLOWS,
-        )
-
-    def _add_parent_block_variables(self):
-        """"""
-
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
-
-        for (o, i) in self.FLOWS:
-            if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
-                        )
-                        self.flow[o, i, t].fix()
-                else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
-                            self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
-                        )
-
-                    if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
-                                self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
-                            )
-                    elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
-            else:
-                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
 
     def _add_objective(self, sense=po.minimize, update=False):
         """ Method to sum up all objective expressions from the child blocks
