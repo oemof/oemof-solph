@@ -1,14 +1,7 @@
 from collections import defaultdict
-
-from pyomo.core import Binary
-from pyomo.core import BuildAction
-from pyomo.core import Constraint
-from pyomo.core import Expression
-from pyomo.core import NonNegativeIntegers
-from pyomo.core import NonNegativeReals
 from pyomo.core import Set
-from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
+
 
 class MultiObjectiveFlow(SimpleBlock):
     r""" Block for all flows with :attr:`multiobjective` being not None.

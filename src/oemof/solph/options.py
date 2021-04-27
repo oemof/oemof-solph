@@ -181,6 +181,7 @@ class NonConvex:
 
         return self._max_up_down
 
+
 class MultiObjective:
     """
     Parameters
@@ -246,4 +247,3 @@ class MultiObjective:
             self.negative_gradient = {
                 "ub": sequence(negative_gradient["ub"]),
                 "costs": sequence(negative_gradient["costs"])}
-
