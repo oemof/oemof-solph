@@ -11,3 +11,4 @@ Changelog
 ------------------
 
 * Fixed incompatibility with recent Pyomo release (5.7)
+* Implemented the possibility to solve multi-objective problems via the weighted sum approach and to add further multi-objective approaches
