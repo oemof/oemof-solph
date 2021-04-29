@@ -5,8 +5,6 @@ Authors
 
 (`see full list on github <https://github.com/oemof/oemof-solph/graphs/contributors>`_)
 
-* Alexander Westerwinter
-* Argjend Imeri
 * Birgit Schachler
 * Brian Michael Lancien
 * Caroline Möller
@@ -16,7 +14,6 @@ Authors
 * Daniel Rank
 * Elisa Gaudchau
 * Elisa Papdis
-* Eva Schischke
 * Fabian Büllesbach
 * Francesco Witte
 * Guido Plessmann
@@ -28,9 +25,7 @@ Authors
 * Jonathan Amme
 * Julian Endres
 * Lluis Millet
-* Lennart Schürmann
 * Martin Soethe
-* Mathias van Beek
 * Patrik Schönfeldt
 * Simon Hilpert
 * Stephan Günther
