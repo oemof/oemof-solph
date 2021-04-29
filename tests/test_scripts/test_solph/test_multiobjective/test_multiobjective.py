@@ -27,10 +27,10 @@ def test_multiobjective():
 
     # read import data
     import_data = pd.DataFrame(
-            index=pd.date_range(start='2020-01-01', periods=8, freq='3H'),
-            data={'cost_ecological': [0, 1, 1, 1, 1, 2, 3, 4],
-                  'cost_financial': [0, 1, 2, 3, 4, 1, 1, 1],
-                  'p_el_dem': [1, 1, 1, 1, 1, 1, 1, 1]})
+        index=pd.date_range(start='2020-01-01', periods=8, freq='3H'),
+        data={'cost_ecological': [0, 1, 1, 1, 1, 2, 3, 4],
+              'cost_financial': [0, 1, 2, 3, 4, 1, 1, 1],
+              'p_el_dem': [1, 1, 1, 1, 1, 1, 1, 1]})
 
     # get demand
     p_el_dem = import_data.loc[:, 'p_el_dem']
@@ -44,42 +44,42 @@ def test_multiobjective():
     ###########################################################################
     # get timeindex
     timesteps = pd.date_range(
-            start=import_data.index[0],
-            end=import_data.index[-1],
-            freq=import_data.index.inferred_freq)
+        start=import_data.index[0],
+        end=import_data.index[-1],
+        freq=import_data.index.inferred_freq)
 
     # initialise energy system
     energy_system = solph.EnergySystem(timeindex=timesteps)
 
     # create and add electrical bus
     el_bus = solph.Bus(
-            label='el_bus')
+        label='el_bus')
     energy_system.add(el_bus)
 
     # create and add electrical demand
     el_dem = solph.Sink(
-            label='el_dem',
-            inputs={el_bus: solph.Flow(fix=p_el_dem, nominal_value=1000)})
+        label='el_dem',
+        inputs={el_bus: solph.Flow(fix=p_el_dem, nominal_value=1000)})
     energy_system.add(el_dem)
 
     # create and add electrical source with variable price
     el_source_var = solph.Source(
-            label='el_source_var',
-            outputs={el_bus: solph.Flow(multiobjective=mo(
-                    ecological=mo.Objective(
-                            variable_costs=cost_ecological_var),
-                    financial=mo.Objective(
-                            variable_costs=cost_financial_var)))})
+        label='el_source_var',
+        outputs={el_bus: solph.Flow(multiobjective=mo(
+            ecological=mo.Objective(
+                variable_costs=cost_ecological_var),
+            financial=mo.Objective(
+                variable_costs=cost_financial_var)))})
     energy_system.add(el_source_var)
 
     # create and add electrical source with fixed price
     el_source_fix = solph.Source(
-            label='el_source_fix',
-            outputs={el_bus: solph.Flow(multiobjective=mo(
-                    ecological=mo.Objective(
-                            variable_costs=cost_ecological_fix),
-                    financial=mo.Objective(
-                            variable_costs=cost_financial_fix)))})
+        label='el_source_fix',
+        outputs={el_bus: solph.Flow(multiobjective=mo(
+            ecological=mo.Objective(
+                variable_costs=cost_ecological_fix),
+            financial=mo.Objective(
+                variable_costs=cost_financial_fix)))})
     energy_system.add(el_source_fix)
 
     #######################################################################
@@ -98,12 +98,12 @@ def test_multiobjective():
         # solve problem using cplex
         # no console output
         solver_results = optimisation_model.solve(
-                solver='cbc',
-                optimization_type='weighted',
-                objective_weights={'ecological': weight_ecological,
-                                   'financial': weight_financial},
-                solve_kwargs={'tee': False},
-                cmdline_options={'tmlim': 30})
+            solver='cbc',
+            optimization_type='weighted',
+            objective_weights={'ecological': weight_ecological,
+                               'financial': weight_financial},
+            solve_kwargs={'tee': False},
+            cmdline_options={'tmlim': 30})
 
         #######################################################################
         # Extract and Postprocess results
@@ -138,7 +138,7 @@ def test_multiobjective():
 
             # print weighting and resulting total cost
             print('Ecological: {0:>4.0%}\t Financial: {1:>4.0%}\n'.format(
-                    weight_ecological, weight_financial))
+                weight_ecological, weight_financial))
             print('Total costs:\t{0:>9.2f}\n'.format(total_cost.sum()))
 
             ###################################################################

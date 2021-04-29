@@ -17,7 +17,7 @@ from pyomo.core.expr import current
 
 def test_opt_type():
     es = solph.EnergySystem(timeindex=pd.date_range(
-            start='1/1/2018', end='3/1/2018', freq='D'))
+        start='1/1/2018', end='3/1/2018', freq='D'))
     mod = solph.MultiObjectiveModel(es)
     with pytest.raises(Exception, match="Invalid optimization type"):
         mod.solve(solver="cbc", optimization_type="flux_capacitator")
@@ -25,7 +25,7 @@ def test_opt_type():
 
 def test_singular_obj_type():
     es = solph.EnergySystem(timeindex=pd.date_range(
-            start='1/1/2018', end='3/1/2018', freq='D'))
+        start='1/1/2018', end='3/1/2018', freq='D'))
     mod = solph.MultiObjectiveModel(es)
     with pytest.raises(TypeError, match='Objective is not of type "string"'):
         mod.solve(solver="cbc",
@@ -35,12 +35,12 @@ def test_singular_obj_type():
 
 def test_weighted_weights_dict():
     es = solph.EnergySystem(timeindex=pd.date_range(
-            start='1/1/2018', end='3/1/2018', freq='D'))
+        start='1/1/2018', end='3/1/2018', freq='D'))
     bus = solph.Bus(label='bus')
     src = solph.Source(label='src', outputs={bus: solph.Flow(
-            multiobjective=mo(
-                    eco=mo.Objective(
-                            variable_costs=0.5)))})
+        multiobjective=mo(
+            eco=mo.Objective(
+                variable_costs=0.5)))})
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
@@ -53,12 +53,12 @@ def test_weighted_weights_dict():
 
 def test_weighted_weights_length():
     es = solph.EnergySystem(timeindex=pd.date_range(
-            start='1/1/2018', end='3/1/2018', freq='D'))
+        start='1/1/2018', end='3/1/2018', freq='D'))
     bus = solph.Bus(label='bus')
     src = solph.Source(label='src', outputs={bus: solph.Flow(
-            multiobjective=mo(
-                    eco=mo.Objective(
-                            variable_costs=0.5)))})
+        multiobjective=mo(
+            eco=mo.Objective(
+                variable_costs=0.5)))})
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
@@ -71,14 +71,14 @@ def test_weighted_weights_length():
 
 def test_objective_weighting():
     es = solph.EnergySystem(timeindex=pd.date_range(
-            start='1/1/2018', end='3/1/2018', freq='D'))
+        start='1/1/2018', end='3/1/2018', freq='D'))
     bus = solph.Bus(label='bus')
     src = solph.Source(label='src', outputs={bus: solph.Flow(
-            multiobjective=mo(
-                    eco=mo.Objective(
-                            variable_costs=0.5),
-                    mon=mo.Objective(
-                            variable_costs=1.3)))})
+        multiobjective=mo(
+            eco=mo.Objective(
+                variable_costs=0.5),
+            mon=mo.Objective(
+                variable_costs=1.3)))})
     snk = solph.Sink(label='snk', inputs={bus: solph.Flow()})
     es.add(bus)
     es.add(src)
@@ -91,23 +91,23 @@ def test_objective_weighting():
 
     # initialise expression string for first part of wighted sum
     i = 0
-    expr_str = '(0.3*({0:}*flow[src,bus,{1:d}]'.format(0.5*24, i)
+    expr_str = '(0.3*({0:}*flow[src,bus,{1:d}]'.format(0.5 * 24, i)
     i += 1
     # add summed values
-    while i < (len(es.timeindex)-1):
-        expr_str += ' + {0:}*flow[src,bus,{1:d}]'.format(0.5*24, i)
+    while i < (len(es.timeindex) - 1):
+        expr_str += ' + {0:}*flow[src,bus,{1:d}]'.format(0.5 * 24, i)
         i += 1
     # add end of first partial sum
-    expr_str += ' + {0:}*flow[src,bus,{1:d}])'.format(0.5*24, i)
+    expr_str += ' + {0:}*flow[src,bus,{1:d}])'.format(0.5 * 24, i)
     # initialise expression string for second part of wighted sum
     i = 0
-    expr_str += ' + 0.7*({0:}*flow[src,bus,{1:d}]'.format(1.3*24, i)
+    expr_str += ' + 0.7*({0:}*flow[src,bus,{1:d}]'.format(1.3 * 24, i)
     i += 1
     # add summed values
-    while i < (len(es.timeindex)-1):
-        expr_str += ' + {0:}*flow[src,bus,{1:d}]'.format(1.3*24, i)
+    while i < (len(es.timeindex) - 1):
+        expr_str += ' + {0:}*flow[src,bus,{1:d}]'.format(1.3 * 24, i)
         i += 1
     # add end of first partial sum
-    expr_str += ' + {0:}*flow[src,bus,{1:d}]))'.format(1.3*24, i)
+    expr_str += ' + {0:}*flow[src,bus,{1:d}]))'.format(1.3 * 24, i)
 
     assert s == expr_str

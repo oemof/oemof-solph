@@ -437,10 +437,10 @@ class MultiObjectiveModel(Model):
                 if isinstance(expr, defaultdict):
                     for obj_key, obj_val in expr.items():
                         self.objective_functions[obj_key] += (
-                                sign * obj_val)
+                            sign * obj_val)
                 else:
                     self.objective_functions['_standard'] += (
-                            sign * expr)
+                        sign * expr)
 
     def solve(self, solver='cbc', solver_io='lp', **kwargs):
         r""" Takes care of communication with solver to solve the model.
@@ -507,8 +507,8 @@ class MultiObjectiveModel(Model):
 
             # set chosen objective function
             self.objective = po.Objective(
-                    sense=po.minimize,
-                    expr=self.objective_functions.get(objective, 0.0))
+                sense=po.minimize,
+                expr=self.objective_functions.get(objective, 0.0))
 
             solver_results = opt.solve(self, **solve_kwargs)
 
@@ -532,8 +532,8 @@ class MultiObjectiveModel(Model):
 
             # get function names and weights to use
             obj_weights = kwargs.get(
-                    'objective_weights',
-                    {'_standard': 1})
+                'objective_weights',
+                {'_standard': 1})
 
             # check for correct type
             if not isinstance(obj_weights, dict):
@@ -565,8 +565,7 @@ class MultiObjectiveModel(Model):
                 ', '.join(obj_weights.keys()), str(obj_weights)))
 
             # create objective
-            self.objective = po.Objective(
-                    sense=po.minimize, expr=expr)
+            self.objective = po.Objective(sense=po.minimize, expr=expr)
 
             # solve
             solver_results = opt.solve(self, **solve_kwargs)
@@ -588,4 +587,3 @@ class MultiObjectiveModel(Model):
             return solver_results
         else:
             raise Exception('Invalid optimization type')
-
