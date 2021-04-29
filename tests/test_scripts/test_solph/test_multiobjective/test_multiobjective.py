@@ -139,8 +139,7 @@ def test_multiobjective():
             # print weighting and resulting total cost
             print('Ecological: {0:>4.0%}\t Financial: {1:>4.0%}\n'.format(
                     weight_ecological, weight_financial))
-            print('Total costs:\t{0:>9.2f}\n'.format(
-                    total_cost.sum()))
+            print('Total costs:\t{0:>9.2f}\n'.format(total_cost.sum()))
 
             ###################################################################
             # Validate results

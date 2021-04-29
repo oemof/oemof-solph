@@ -364,7 +364,7 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
-                        
+
 
 class MultiObjectiveModel(Model):
     """An  energy system model for operational and investment
