@@ -10,8 +10,6 @@ from oemof.solph import (processing, views)
 
 import pandas as pd
 
-from pyomo.opt import (SolverStatus, TerminationCondition)
-
 
 def test_multiobjective():
     ###########################################################################
@@ -97,7 +95,7 @@ def test_multiobjective():
 
         # solve problem using cplex
         # no console output
-        solver_results = optimisation_model.solve(
+        optimisation_model.solve(
             solver='cbc',
             optimization_type='weighted',
             objective_weights={'ecological': weight_ecological,
@@ -128,9 +126,6 @@ def test_multiobjective():
         # get fix costs
         cost_fix = (weight_ecological * cost_ecological_fix
                     + weight_financial * cost_financial_fix)
-
-        # get total cost
-        total_cost = p_el_var * cost_var + p_el_fix * cost_fix
 
         ###################################################################
         # Validate results
