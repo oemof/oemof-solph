@@ -109,49 +109,37 @@ def test_multiobjective():
         # Extract and Postprocess results
         #######################################################################
 
-        if ((solver_results.solver.status == SolverStatus.ok) and
-            (solver_results.solver.termination_condition
-             == TerminationCondition.optimal)):
+        # get result dict
+        results = processing.results(optimisation_model)
 
-            # get result dict
-            results = processing.results(optimisation_model)
+        # get results for important nodes
+        el_bus_data = views.node(results, 'el_bus')['sequences']
 
-            # get results for important nodes
-            el_bus_data = views.node(results, 'el_bus')['sequences']
+        # get costs for variable cost source
+        p_el_var = el_bus_data[(('el_source_var', 'el_bus'), 'flow')]
 
-            # get costs for variable cost source
-            p_el_var = el_bus_data[(('el_source_var', 'el_bus'), 'flow')]
+        # get costs for fixed cost source
+        p_el_fix = el_bus_data[(('el_source_fix', 'el_bus'), 'flow')]
 
-            # get costs for fixed cost source
-            p_el_fix = el_bus_data[(('el_source_fix', 'el_bus'), 'flow')]
+        # get variable costs
+        cost_var = (weight_ecological * cost_ecological_var
+                    + weight_financial * cost_financial_var)
 
-            # get variable costs
-            cost_var = (weight_ecological * cost_ecological_var
-                        + weight_financial * cost_financial_var)
+        # get fix costs
+        cost_fix = (weight_ecological * cost_ecological_fix
+                    + weight_financial * cost_financial_fix)
 
-            # get fix costs
-            cost_fix = (weight_ecological * cost_ecological_fix
-                        + weight_financial * cost_financial_fix)
+        # get total cost
+        total_cost = p_el_var * cost_var + p_el_fix * cost_fix
 
-            # get total cost
-            total_cost = p_el_var * cost_var + p_el_fix * cost_fix
+        ###################################################################
+        # Validate results
+        ###################################################################
 
-            # print weighting and resulting total cost
-            print('Ecological: {0:>4.0%}\t Financial: {1:>4.0%}\n'.format(
-                weight_ecological, weight_financial))
-            print('Total costs:\t{0:>9.2f}\n'.format(total_cost.sum()))
-
-            ###################################################################
-            # Validate results
-            ###################################################################
-
-            # iterate over timesteps
-            for t in range(len(timesteps)):
-                # assert correct assignment only for unambiguous timesteps
-                if cost_var.iat[t] > cost_fix:
-                    assert p_el_var.iat[t] == 0
-                elif cost_var.iat[t] < cost_fix:
-                    assert p_el_fix.iat[t] == 0
-        else:
-            # make sure to fail test when optimisation is unsuccessful
-            assert False
+        # iterate over timesteps
+        for t in range(len(timesteps)):
+            # assert correct assignment only for unambiguous timesteps
+            if cost_var.iat[t] > cost_fix:
+                assert p_el_var.iat[t] == 0
+            elif cost_var.iat[t] < cost_fix:
+                assert p_el_fix.iat[t] == 0
