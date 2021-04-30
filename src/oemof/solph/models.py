@@ -13,6 +13,7 @@ SPDX-License-Identifier: MIT
 """
 import logging
 import warnings
+from collections import defaultdict
 
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -21,8 +22,6 @@ from pyomo.opt import SolverFactory
 from oemof.solph import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
-
-from collections import defaultdict
 
 
 class BaseModel(po.ConcreteModel):
