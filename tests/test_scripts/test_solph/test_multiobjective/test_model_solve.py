@@ -40,8 +40,7 @@ def test_weighted_weights_dict():
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
-    with raises(TypeError,
-                       match="Objective weights must be of type 'dict'"):
+    with raises(TypeError, match="Objective weights must be of type 'dict'"):
         mod.solve(solver="cbc",
                   optimization_type='weighted',
                   objective_weights=[0.3])
@@ -58,8 +57,7 @@ def test_weighted_weights_length():
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
-    with raises(ValueError,
-                       match='Objective weights must not be empty'):
+    with raises(ValueError, match='Objective weights must not be empty'):
         mod.solve(solver="cbc",
                   optimization_type='weighted',
                   objective_weights={})
