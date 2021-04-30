@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Created on Tue Sep 29 11:11:32 2020
-
-@author: weal
+This script contains an integration test for multi objective modelling.
 """
-import oemof.solph as solph
-from oemof.solph.options import MultiObjective as mo
-from oemof.solph import (processing, views)
 
 import pandas as pd
+
+import oemof.solph as solph
+from oemof.solph import processing
+from oemof.solph import views
+from oemof.solph.options import MultiObjective as mo
 
 
 def test_multiobjective():

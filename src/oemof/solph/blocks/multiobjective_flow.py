@@ -1,4 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""Creating sets, variables, constraints and parts of the objective function
+for MultiObjectiveFlow objects.
+"""
+
 from collections import defaultdict
+
 from pyomo.core import Set
 from pyomo.core.base.block import SimpleBlock
 

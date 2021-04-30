@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov  6 09:40:34 2020
-
-@author: schev, lens
+This script contains tests for the MultiObjectiveModel
 """
+
+import pandas as pd
+from pyomo.core.expr import current
 
 import oemof.solph as solph
 from oemof.solph.options import MultiObjective as mo
-
-from pyomo.core.expr import current
-
-import pandas as pd
 
 
 def test_objective_functions_keys():

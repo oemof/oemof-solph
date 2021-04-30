@@ -237,13 +237,20 @@ class MultiObjective:
                 unit.
         """
 
-        def __init__(self, variable_costs=None,
-                     positive_gradient={"ub": None, "costs": 0},
-                     negative_gradient={"ub": None, "costs": 0}):
-            self.variable_costs = sequence(variable_costs)
-            self.positive_gradient = {
-                "ub": sequence(positive_gradient["ub"]),
-                "costs": sequence(positive_gradient["costs"])}
-            self.negative_gradient = {
-                "ub": sequence(negative_gradient["ub"]),
-                "costs": sequence(negative_gradient["costs"])}
+        def __init__(self, **kwargs):
+            dictionaries = ["positive_gradient", "negative_gradient"]
+            defaults = {
+                "positive_gradient": {"ub": None, "costs": 0},
+                "negative_gradient": {"ub": None, "costs": 0},
+            }
+
+            self.variable_costs = sequence(kwargs.get("variable_costs"), 0)
+
+            for attribute in dictionaries:
+                value = kwargs.get(attribute, defaults.get(attribute))
+
+                setattr(
+                    self,
+                    attribute,
+                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                )

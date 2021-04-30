@@ -92,7 +92,11 @@ class Flow(on.Edge):
         :class:`Flow <oemof.solph.blocks.Flow>`.
         Note: at the moment this does not work if the investment attribute is
         set .
-    #TODO: update docu
+    multiobjective: :class:`oemof.solph.options.MultiObjective`
+        Object indicating if multiple objectives should be added for this
+        flow. To be used together with
+        :class:`oemof.solph.models.MultiObjectiveModel` to generate
+        multi objective program.
 
     Notes
     -----

@@ -1,25 +1,21 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Nov  6 10:31:00 2020
-
-@author: beem
+This script cains tests for the MultiObjectiveModel solve-function.
 """
+
+import pandas as pd
+from nose.tools import raises
+from pyomo.core.expr import current
 
 import oemof.solph as solph
 from oemof.solph.options import MultiObjective as mo
-
-import pandas as pd
-
-import pytest
-
-from pyomo.core.expr import current
 
 
 def test_opt_type():
     es = solph.EnergySystem(timeindex=pd.date_range(
         start='1/1/2018', end='3/1/2018', freq='D'))
     mod = solph.MultiObjectiveModel(es)
-    with pytest.raises(Exception, match="Invalid optimization type"):
+    with raises(Exception, match="Invalid optimization type"):
         mod.solve(solver="cbc", optimization_type="flux_capacitator")
 
 
@@ -27,7 +23,7 @@ def test_singular_obj_type():
     es = solph.EnergySystem(timeindex=pd.date_range(
         start='1/1/2018', end='3/1/2018', freq='D'))
     mod = solph.MultiObjectiveModel(es)
-    with pytest.raises(TypeError, match='Objective is not of type "string"'):
+    with raises(TypeError, match='Objective is not of type "string"'):
         mod.solve(solver="cbc",
                   optimization_type='singular',
                   objective=['eco'])
@@ -44,7 +40,7 @@ def test_weighted_weights_dict():
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
-    with pytest.raises(TypeError,
+    with raises(TypeError,
                        match="Objective weights must be of type 'dict'"):
         mod.solve(solver="cbc",
                   optimization_type='weighted',
@@ -62,7 +58,7 @@ def test_weighted_weights_length():
     es.add(bus)
     es.add(src)
     mod = solph.MultiObjectiveModel(es)
-    with pytest.raises(ValueError,
+    with raises(ValueError,
                        match='Objective weights must not be empty'):
         mod.solve(solver="cbc",
                   optimization_type='weighted',
