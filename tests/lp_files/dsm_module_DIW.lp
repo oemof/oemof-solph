@@ -95,17 +95,20 @@ c_u_SinkDSMDIWBlock_dsm_up_constraint(demand_dsm_2)_:
 <= 0.5
 
 c_u_SinkDSMDIWBlock_dsm_do_constraint(demand_dsm_0)_:
++1 SinkDSMDIWBlock_dsm_do_shed(demand_dsm_0)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_0_0)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_1_0)
 <= 0.5
 
 c_u_SinkDSMDIWBlock_dsm_do_constraint(demand_dsm_1)_:
++1 SinkDSMDIWBlock_dsm_do_shed(demand_dsm_1)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_0_1)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_1_1)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_2_1)
 <= 0.5
 
 c_u_SinkDSMDIWBlock_dsm_do_constraint(demand_dsm_2)_:
++1 SinkDSMDIWBlock_dsm_do_shed(demand_dsm_2)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_1_2)
 +1 SinkDSMDIWBlock_dsm_do_shift(demand_dsm_2_2)
 <= 0.5
