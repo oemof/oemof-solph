@@ -929,8 +929,8 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                         timesteps = range(interval,
                                           m.TIMESTEPS[-1] + 1)
                     else:
-                        timesteps = range(interval, interval +
-                                          g.shift_interval)
+                        timesteps = range(interval, interval
+                                          + g.shift_interval)
 
                     # DSM up/down
                     lhs = sum(self.dsm_up[g, tt]
@@ -1483,8 +1483,8 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
             for g in group:
                 for p in m.PERIODS:
                     expr = (
-                        self.old[g, p] ==
-                        self.old_end[g, p] + self.old_exo[g, p])
+                        self.old[g, p]
+                        == self.old_end[g, p] + self.old_exo[g, p])
                     self.old_rule.add((g, p), expr)
 
         self.old_rule = Constraint(group,
@@ -1580,8 +1580,8 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         timesteps = range(interval,
                                           m.TIMESTEPS[-1] + 1)
                     else:
-                        timesteps = range(interval, interval +
-                                          g.shift_interval)
+                        timesteps = range(interval, interval
+                                          + g.shift_interval)
 
                     # DSM up/down
                     lhs = sum(self.dsm_up[g, tt]
@@ -1858,12 +1858,14 @@ class SinkDSMDIWBlock(SimpleBlock):
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * g.max_demand
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 t + g.delay_time + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
@@ -1873,12 +1875,14 @@ class SinkDSMDIWBlock(SimpleBlock):
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * g.max_demand
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 m.TIMESTEPS[-1] + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add((g, t), (lhs == rhs))
@@ -2348,11 +2352,13 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * g.max_demand
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t + g.delay_time + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
@@ -2365,12 +2371,14 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * g.max_demand
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 t + g.delay_time + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
@@ -2381,12 +2389,14 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * g.max_demand + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * g.max_demand
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 m.TIMESTEPS[-1] + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
@@ -2424,8 +2434,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -2503,8 +2513,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                             block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                         # main use case
-                        elif (g.delay_time < tt <=
-                              m.TIMESTEPS[-1] - g.delay_time):
+                        elif (g.delay_time < tt
+                              <= m.TIMESTEPS[-1] - g.delay_time):
 
                             # DSM down
                             lhs = sum(self.dsm_do_shift[g, t, tt]
@@ -2599,10 +2609,11 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                     if tt <= g.delay_time:
 
                         # DSM up/down
-                        lhs = (self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt + g.delay_time + 1))
-                               + self.dsm_do_shed[g, tt])
+                        lhs = (
+                            self.dsm_up[g, tt] + sum(
+                                self.dsm_do_shift[g, t, tt]
+                                for t in range(tt + g.delay_time + 1))
+                            + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt] * g.max_capacity_up,
                                   g.capacity_down[tt] * g.max_capacity_down)
@@ -2610,8 +2621,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = (self.dsm_up[g, tt] + sum(
@@ -3588,8 +3599,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
             for g in group:
                 for p in m.PERIODS:
                     expr = (
-                        self.old[g, p] ==
-                        self.old_end[g, p] + self.old_exo[g, p])
+                        self.old[g, p]
+                        == self.old_end[g, p] + self.old_exo[g, p])
                     self.old_rule.add((g, p), expr)
 
         self.old_rule = Constraint(group,
@@ -3639,31 +3650,33 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.total[g, p]
-                               + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * self.total[g, p]
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t + g.delay_time + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
                             (g, p, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.total[g, p]
-                               + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * self.total[g, p]
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 t + g.delay_time + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
@@ -3674,13 +3687,14 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
-                        rhs = (g.demand[t] * self.total[g, p]
-                               + self.dsm_up[g, t]
-                               - sum(
+                        rhs = (
+                            g.demand[t] * self.total[g, p]
+                            + self.dsm_up[g, t]
+                            - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(t - g.delay_time,
                                                 m.TIMESTEPS[-1] + 1))
-                               - self.dsm_do_shed[g, t])
+                            - self.dsm_do_shed[g, t])
 
                         # add constraint
                         block.input_output_relation.add(
@@ -3718,8 +3732,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -3800,8 +3814,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                                 (g, p, tt), (lhs <= rhs))
 
                         # main use case
-                        elif (g.delay_time < tt <=
-                              m.TIMESTEPS[-1] - g.delay_time):
+                        elif (g.delay_time < tt
+                              <= m.TIMESTEPS[-1] - g.delay_time):
 
                             # DSM down
                             lhs = sum(self.dsm_do_shift[g, t, tt]
@@ -3849,8 +3863,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                                 (g, p, tt), (lhs <= rhs))
 
                         # main use case
-                        elif (g.delay_time < tt <=
-                              m.TIMESTEPS[-1] - g.delay_time):
+                        elif (g.delay_time < tt
+                              <= m.TIMESTEPS[-1] - g.delay_time):
 
                             # DSM down
                             lhs = (sum(self.dsm_do_shift[g, t, tt]
@@ -3906,10 +3920,12 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                     if tt <= g.delay_time:
 
                         # DSM up/down
-                        lhs = self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt + g.delay_time + 1)) \
-                              + self.dsm_do_shed[g, tt]
+                        lhs = (
+                            self.dsm_up[g, tt]
+                            + sum(
+                                self.dsm_do_shift[g, t, tt]
+                                for t in range(tt + g.delay_time + 1))
+                            + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
@@ -3922,11 +3938,13 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                           m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
-                        lhs = self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           tt + g.delay_time + 1)) \
-                              + self.dsm_do_shed[g, tt]
+                        lhs = (
+                            self.dsm_up[g, tt]
+                            + sum(
+                                self.dsm_do_shift[g, t, tt]
+                                for t in range(tt - g.delay_time,
+                                               tt + g.delay_time + 1))
+                            + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
@@ -3938,11 +3956,13 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                     else:
 
                         # DSM up/down
-                        lhs = self.dsm_up[g, tt] + sum(
-                            self.dsm_do_shift[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           m.TIMESTEPS[-1] + 1)) \
-                              + self.dsm_do_shed[g, tt]
+                        lhs = (
+                            self.dsm_up[g, tt]
+                            + sum(
+                                self.dsm_do_shift[g, t, tt]
+                                for t in range(tt - g.delay_time,
+                                               m.TIMESTEPS[-1] + 1))
+                            + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = (max(g.capacity_up[tt] * g.flex_share_up,
                                    g.capacity_down[tt] * g.flex_share_down)
@@ -6951,8 +6971,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
             for g in group:
                 for p in m.PERIODS:
                     expr = (
-                        self.old[g, p] ==
-                        self.old_end[g, p] + self.old_exo[g, p])
+                        self.old[g, p]
+                        == self.old_end[g, p] + self.old_exo[g, p])
                     self.old_rule.add((g, p), expr)
 
         self.old_rule = Constraint(group,
