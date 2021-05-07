@@ -13,9 +13,8 @@ for Germany
 Add wind source and demand sink for FR and links for exchange.
 """
 
-import pandas as pd
 import matplotlib.pyplot as plt
-import logging
+import pandas as pd
 
 from oemof.solph import (models, network, components, custom, options,
                          processing, views)
