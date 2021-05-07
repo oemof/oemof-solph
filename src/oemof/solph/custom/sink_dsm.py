@@ -471,6 +471,7 @@ class SinkDSM(Sink):
                 'The "approach" must be one of the following set: '
                 '"{}"'.format('" or "'.join(possible_approaches)))
 
+
 class SinkDSMOemofBlock(SimpleBlock):
     r"""Constraints for SinkDSM with "oemof" approach
 
@@ -589,8 +590,12 @@ class SinkDSMOemofBlock(SimpleBlock):
         #  ************* VARIABLES *****************************
 
         # Variable load shift down
-        self.dsm_do_shift = Var(self.dsm, m.TIMESTEPS, initialize=0,
-                                within=NonNegativeReals)# Variable load shedding
+        self.dsm_do_shift = Var(
+            self.dsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals
+        )
+
+        # Variable load shedding
         self.dsm_do_shed = Var(
             self.dsm, m.TIMESTEPS, initialize=0,
             within=NonNegativeReals)
@@ -1909,8 +1914,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -1974,98 +1979,47 @@ class SinkDSMDIWBlock(SimpleBlock):
             for tt in m.TIMESTEPS:
                 for g in group:
 
-                    if not g.shed_eligibility and g.shift_eligibility:
+                    # first times steps: 0 + delay
+                    if tt <= g.delay_time:
 
-                        # first times steps: 0 + delay
-                        if tt <= g.delay_time:
+                        # DSM down
+                        lhs = (sum(self.dsm_do_shift[g, t, tt]
+                                   for t in range(tt + g.delay_time + 1))
+                               + self.dsm_do_shed[g, tt])
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt] * g.max_capacity_down
 
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt + g.delay_time + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
+                    # main use case
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
-                        # main use case
-                        elif (g.delay_time < tt
-                              <= m.TIMESTEPS[-1] - g.delay_time):
+                        # DSM down
+                        lhs = (sum(self.dsm_do_shift[g, t, tt]
+                                   for t in range(tt - g.delay_time,
+                                                  tt + g.delay_time + 1))
+                               + self.dsm_do_shed[g, tt])
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt] * g.max_capacity_down
 
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt - g.delay_time,
-                                                      tt + g.delay_time + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
-
-                        # last time steps: end - delay time
-                        else:
-
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt - g.delay_time,
-                                                      m.TIMESTEPS[-1] + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
-
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
-
-                    # if shed eligibility (and shift_eligibility)
-                    elif g.shed_eligibility and g.shift_eligibility:
-
-                        # first times steps: 0 + delay
-                        if tt <= g.delay_time:
-
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt + g.delay_time + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
-
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
-
-                        # main use case
-                        elif (g.delay_time < tt
-                              <= m.TIMESTEPS[-1] - g.delay_time):
-
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt - g.delay_time,
-                                                      tt + g.delay_time + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
-
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
-
-                        # last time steps: end - delay time
-                        else:
-
-                            # DSM down
-                            lhs = (sum(self.dsm_do_shift[g, t, tt]
-                                       for t in range(tt - g.delay_time,
-                                                      m.TIMESTEPS[-1] + 1))
-                                   + self.dsm_do_shed[g, tt])
-                            # Capacity DSM down
-                            rhs = g.capacity_down[tt] * g.max_capacity_down
-
-                            # add constraint
-                            block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
-
-                    # shed_eligibility only -> will be added later on
+                    # last time steps: end - delay time
                     else:
-                        pass
+
+                        # DSM down
+                        lhs = (sum(self.dsm_do_shift[g, t, tt]
+                                   for t in range(tt - g.delay_time,
+                                                  m.TIMESTEPS[-1] + 1))
+                               + self.dsm_do_shed[g, tt])
+                        # Capacity DSM down
+                        rhs = g.capacity_down[tt] * g.max_capacity_down
+
+                        # add constraint
+                        block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
         self.dsm_do_constraint = Constraint(group, m.TIMESTEPS,
                                             noruleinit=True)
@@ -2098,8 +2052,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = (
@@ -4887,7 +4841,7 @@ class SinkDSMDLRBlock(SimpleBlock):
 
         # Equation 4.19
         def dr_daily_limit_red_rule(block):
-            """"Introduce rolling (energy) limit for load reductions
+            """Introduce rolling (energy) limit for load reductions
             This effectively limits DR utilization dependent on
             activations within previous hours.
             """
