@@ -2365,8 +2365,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                             (g, p, t), (lhs == rhs))
 
                     # main use case
-                    elif (g.delay_time < t <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < t
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # Generator loads from bus
                         lhs = m.flow[g.inflow, g, p, t]
@@ -2556,8 +2556,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                             block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                         # main use case
-                        elif (g.delay_time < tt <=
-                              m.TIMESTEPS[-1] - g.delay_time):
+                        elif (g.delay_time < tt
+                              <= m.TIMESTEPS[-1] - g.delay_time):
 
                             # DSM down
                             lhs = (sum(self.dsm_do_shift[g, t, tt]
@@ -3934,8 +3934,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         # add constraint
                         block.C2_constraint.add((g, p, tt), (lhs <= rhs))
 
-                    elif (g.delay_time < tt <=
-                          m.TIMESTEPS[-1] - g.delay_time):
+                    elif (g.delay_time < tt
+                          <= m.TIMESTEPS[-1] - g.delay_time):
 
                         # DSM up/down
                         lhs = (
