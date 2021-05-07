@@ -312,7 +312,8 @@ class SinkDSM(Sink):
             if max_capacity_up is None and max_demand is None:
                 self.flex_share_up = flex_share_up
             else:
-                e3 = ("Please determine either **flex_share_up "
+                e3 = (
+                    "Please determine either **flex_share_up "
                     "(investment modeling)\n or set"
                     "**max_demand and **max_capacity_up (dispatch modeling).\n"
                     "Otherwise, overdetermination occurs.")
@@ -378,7 +379,7 @@ class SinkDSM(Sink):
             raise AttributeError(e5)
 
         if (self.investment is not None
-            and self.multiperiodinvestment is not None):
+                and self.multiperiodinvestment is not None):
             e6 = (
                 "Either define an investment object "
                 "(solph.options.Investment) "
@@ -391,7 +392,7 @@ class SinkDSM(Sink):
             raise AttributeError(e6)
 
         if (self.multiperiod is True
-            and self.multiperiodinvestment is not None):
+                and self.multiperiodinvestment is not None):
             e7 = (
                 "Either set multiperiod to True if you want to define a "
                 "unit for dispatch only in a MultiPeriodModel or define a "
@@ -402,7 +403,7 @@ class SinkDSM(Sink):
             raise AttributeError(e7)
 
         if (self.investment is not None
-            and self.multiperiod is True):
+                and self.multiperiod is True):
             e8 = (
                 "Either define an investment object if you want to build "
                 "a standard investment model or set multiperiod "
@@ -457,7 +458,7 @@ class SinkDSM(Sink):
         elif self.approach == possible_approaches[2]:
             if self.shift_interval is None:
                 raise ValueError("Please define: **shift_interval"
-                    " is a mandatory parameter")
+                                 " is a mandatory parameter")
             if self._invest_group is True:
                 return SinkDSMOemofInvestmentBlock
             elif self._multiperiodinvest_group is True:
@@ -2059,9 +2060,9 @@ class SinkDSMDIWBlock(SimpleBlock):
                         lhs = (
                             self.dsm_up[g, tt]
                             + sum(self.dsm_do_shift[g, t, tt]
-                            for t in range(tt - g.delay_time,
-                                           tt + g.delay_time + 1))
-                               + self.dsm_do_shed[g, tt])
+                                  for t in range(tt - g.delay_time,
+                                                 tt + g.delay_time + 1))
+                            + self.dsm_do_shed[g, tt])
                         # max capacity at tt
                         rhs = max(g.capacity_up[tt] * g.max_capacity_up,
                                   g.capacity_down[tt] * g.max_capacity_down)
@@ -2248,8 +2249,10 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
 
             ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V","DSM up
             shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V","DSM down
-            shift (less load) in hour tt to compensate for upwards shifts in hour t"
+            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V",
+            "DSM down
+            shift (less load) in hour tt to compensate for upwards shifts
+            in hour t"
             ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
             flowing in from electrical bus"
             ":math:`L`",":attr:`delay_time`","P", "Delay time for
@@ -2262,8 +2265,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
             ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
             load shifting processes"
             ":math:`\R`",":attr:`recovery_time_shift`","P", "Minimum time
-            between the end of one load shifting process and the start of another"
-            DSM up shift"
+            between the end of one load shifting process and the start
+            of another DSM up shift"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
 
 
@@ -3383,8 +3386,10 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
 
             ":math:`DSM_{t}^{up}` ",":attr:`dsm_up[g,t]`", "V","DSM up
             shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V","DSM down
-            shift (less load) in hour tt to compensate for upwards shifts in hour t"
+            ":math:`DSM_{t,tt}^{do}` ",":attr:`dsm_do_shift[g,t,tt]`","V",
+            "DSM down
+            shift (less load) in hour tt to compensate for upwards shifts
+            in hour t"
             ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
             flowing in from electrical bus"
             ":math:`L`",":attr:`delay_time`","P", "Delay time for
@@ -3397,8 +3402,8 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
             ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
             load shifting processes"
             ":math:`\R`",":attr:`recovery_time_shift`","P", "Minimum time
-            between the end of one load shifting process and the start of another"
-            DSM up shift"
+            between the end of one load shifting process and the start
+            of another DSM up shift"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
 
 
@@ -4970,11 +4975,11 @@ class SinkDSMDLRBlock(SimpleBlock):
                                 for h in g.delay_time)
                             * g.cost_dsm_up[t] * m.objective_weighting[t])
                 dr_cost += ((sum(self.dsm_do_shift[g, h, t]
-                                + self.balance_dsm_up[g, h, t]
-                                for h in g.delay_time)
-                            * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t]
-                            * g.cost_dsm_down_shed[t])
+                                 + self.balance_dsm_up[g, h, t]
+                                 for h in g.delay_time)
+                             * g.cost_dsm_down_shift[t]
+                             + self.dsm_do_shed[g, t]
+                             * g.cost_dsm_down_shed[t])
                             * m.objective_weighting[t])
 
         self.cost = Expression(expr=dr_cost)
