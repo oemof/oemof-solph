@@ -16,9 +16,8 @@ SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-License-Identifier: MIT
 
 """
-from warnings import warn
 import itertools
-from numpy import mean
+from warnings import warn
 
 from numpy import mean
 from pyomo.core.base.block import SimpleBlock
@@ -29,12 +28,12 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.options import Investment, MultiPeriodInvestment
 from oemof.solph.network import Sink
 from oemof.solph.options import Investment
+from oemof.solph.options import MultiPeriodInvestment
 from oemof.solph.plumbing import sequence
-from oemof.tools import economics
 from oemof.tools import debugging
+from oemof.tools import economics
 
 
 class SinkDSM(Sink):
