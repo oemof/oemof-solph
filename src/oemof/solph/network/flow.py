@@ -19,7 +19,6 @@ from warnings import warn
 from oemof.network import network as on
 from oemof.tools import debugging
 
-from oemof.solph import blocks
 from oemof.solph.plumbing import sequence
 
 
