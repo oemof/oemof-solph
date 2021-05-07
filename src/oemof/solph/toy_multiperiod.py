@@ -19,6 +19,7 @@ import logging
 
 from oemof.solph import (models, network, components, custom, options,
                          processing, views)
+
 # import models
 # import network
 # import components
@@ -66,9 +67,9 @@ bus_el = network.Bus(label='DE_bus_el',
                      balanced=True,
                      multiperiod=True)
 bus_el_FR = network.Bus(label='FR_bus_el',
-                     # balanced=True)
-                     balanced=True,
-                     multiperiod=True)
+                        # balanced=True)
+                        balanced=True,
+                        multiperiod=True)
 
 # Create sources
 source_lignite = network.Source(
@@ -127,7 +128,7 @@ sink_el = network.Sink(
     label='DE_sink_el',
     inputs={bus_el: network.Flow(
         # Use this when using storage / demand response / exchange
-        fix = [80] * len(timeindex),
+        fix=[80] * len(timeindex),
         # Use this when simulating only the basic config, without the above
         # fix=[100] * len(timeindex),
         # nominal_value=1)})
@@ -153,14 +154,14 @@ sink_excess_FR = network.Sink(
 sink_el_FR = network.Sink(
     label='FR_sink_el',
     inputs={bus_el_FR: network.Flow(fix=[50] * len(timeindex),
-                                 # nominal_value=1)})
-                                 nominal_value=1,
-                                 multiperiod=True)})
+                                    # nominal_value=1)})
+                                    nominal_value=1,
+                                    multiperiod=True)})
 
 # Create multiperiod transformers
 pp_lignite = network.Transformer(
     label='DE_pp_lignite',
-    inputs={bus_lignite: network.Flow(#)},
+    inputs={bus_lignite: network.Flow(  # )},
         multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
@@ -179,7 +180,7 @@ pp_lignite = network.Transformer(
 
 pp_hardcoal = network.Transformer(
     label='DE_pp_hardcoal',
-    inputs={bus_hardcoal: network.Flow(#)},
+    inputs={bus_hardcoal: network.Flow(  # )},
         multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
@@ -198,7 +199,7 @@ pp_hardcoal = network.Transformer(
 
 pp_natgas_CCGT = network.Transformer(
     label='DE_pp_natgas_CCGT',
-    inputs={bus_natgas: network.Flow(#)},
+    inputs={bus_natgas: network.Flow(  # )},
         multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
@@ -209,7 +210,7 @@ pp_natgas_CCGT = network.Transformer(
             lifetime=20,
             age=0,
             interest_rate=0.02,
-        #     overall_minimum=2,
+            #     overall_minimum=2,
         ),
         # nominal_value=100,
         variable_costs=3,
@@ -219,7 +220,7 @@ pp_natgas_CCGT = network.Transformer(
 
 pp_natgas_GT = network.Transformer(
     label='DE_pp_natgas_GT',
-    inputs={bus_natgas: network.Flow(#)},
+    inputs={bus_natgas: network.Flow(  # )},
         multiperiod=True)},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
@@ -392,7 +393,7 @@ dsm_unit = custom.SinkDSM(
     **kwargs_dict[approach],
     # multiperiod=True,
     multiperiodinvestment=options.MultiPeriodInvestment(
-    # investment=options.Investment(
+        # investment=options.Investment(
         existing=10,
         maximum=20,
         ep_costs=10,
@@ -444,8 +445,8 @@ invest_results.rename(columns={'level_0': 'node', 'level_1': 'period'},
 invest_results = invest_results.pivot(index='period', columns='node')
 invest_results.columns = invest_results.columns.swaplevel()
 
-investments = invest_results.loc[:,
-              invest_results.columns.get_level_values(1) == 'invest']
+invest_cols = invest_results.columns.get_level_values(1) == 'invest'
+investments = invest_results.loc[:, invest_cols]
 
 investments.plot(kind='bar')
 plt.title('Investments per period')
