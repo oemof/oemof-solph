@@ -191,17 +191,17 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         * :attr:`nonconvex = False`
 
             .. math::
-                P_{invest}(p) \cdot annuity_{c_{invest}(p), n, i}(p) \cot n
+                P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
                 \cdot DF(p)
-                \forall p in PERIODS
+                \forall p \in PERIODS
 
         * :attr:`nonconvex = True`
 
             .. math::
-                (P_{invest}(p) \cdot annuity_{c_{invest}(p), n, i}(p)
+                (P_{invest}(p) \cdot annuity(c_{invest}(p), n, i)
                 + b_{invest} \cdot c_{invest, fix})
                 \cdot DF(p)
-                \forall p in PERIODS\\
+                \forall p \in PERIODS\\
 
     with lifetime n, interest rate i, discount factor DF(p),
     investment expenses c_{invest}(p) and
