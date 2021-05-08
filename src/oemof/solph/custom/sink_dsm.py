@@ -1036,20 +1036,29 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        dsm_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for p, t in m.TIMEINDEX:
-            for g in self.multiperioddsm:
-                dsm_cost += (self.dsm_up[g, t]
-                             * m.objective_weighting[t]
-                             * g.cost_dsm_up[p]
-                             * ((1 + m.discount_rate) ** -p))
-                dsm_cost += (self.dsm_do_shift[g, t]
-                             * m.objective_weighting[t]
-                             * g.cost_dsm_down_shift[p]
-                             * ((1 + m.discount_rate) ** -p))
+        for g in self.multiperioddsm:
+            for p, t in m.TIMEINDEX:
+                variable_costs += (self.dsm_up[g, t]
+                                   * m.objective_weighting[t]
+                                   * g.cost_dsm_up[p]
+                                   * ((1 + m.discount_rate) ** -p))
+                variable_costs += (self.dsm_do_shift[g, t]
+                                   * m.objective_weighting[t]
+                                   * g.cost_dsm_down_shift[p]
+                                   * ((1 + m.discount_rate) ** -p))
 
-        self.cost = Expression(expr=dsm_cost)
+            if g.fixed_costs[0] is not None:
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        g.max_demand
+                        * g.fixed_costs[p]
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.cost = Expression(expr=variable_costs + fixed_costs)
 
         return self.cost
 
@@ -2896,23 +2905,32 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        dsm_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for p, t in m.TIMEINDEX:
-            for g in self.multiperioddsm:
-                dsm_cost += (self.dsm_up[g, t]
-                             * m.objective_weighting[t]
-                             * g.cost_dsm_up[p]
-                             * ((1 + m.discount_rate) ** -p))
-                dsm_cost += ((sum(self.dsm_do_shift[g, t, tt]
-                                  for tt in m.TIMESTEPS)
-                              * g.cost_dsm_down_shift[p]
-                              + self.dsm_do_shed[g, t]
-                              * g.cost_dsm_down_shed[p])
-                             * m.objective_weighting[t]
-                             * ((1 + m.discount_rate) ** -p))
+        for g in self.multiperioddsm:
+            for p, t in m.TIMEINDEX:
+                variable_costs += (self.dsm_up[g, t]
+                                   * m.objective_weighting[t]
+                                   * g.cost_dsm_up[p]
+                                   * ((1 + m.discount_rate) ** -p))
+                variable_costs += ((sum(self.dsm_do_shift[g, t, tt]
+                                        for tt in m.TIMESTEPS)
+                                    * g.cost_dsm_down_shift[p]
+                                    + self.dsm_do_shed[g, t]
+                                    * g.cost_dsm_down_shed[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
 
-        self.cost = Expression(expr=dsm_cost)
+            if g.fixed_costs[0] is not None:
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        g.max_demand
+                        * g.fixed_costs[p]
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.cost = Expression(expr=variable_costs + fixed_costs)
 
         return self.cost
 
@@ -5227,9 +5245,11 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         self.MULTIPERIODDR = Set(initialize=[n for n in group])
 
         # Depict different delay_times per unit via a mapping
-        map_MULTIPERIODDR_H = {k: v
-                               for k, v in zip([n for n in group],
-                                               [n.delay_time for n in group])}
+        map_MULTIPERIODDR_H = {
+            k: v
+            for k, v in zip([n for n in group],
+                            [n.delay_time for n in group])
+        }
 
         unique_H = list(set(itertools.chain.from_iterable(
             map_MULTIPERIODDR_H.values())))
@@ -5281,8 +5301,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         #  ************* CONSTRAINTS *****************************
 
         def _shift_shed_vars_rule(block):
-            """
-            Force shifting resp. shedding variables to zero dependent
+            """Force shifting resp. shedding variables to zero dependent
             on how boolean parameters for shift resp. shed eligibility
             are set.
             """
@@ -5291,7 +5310,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                     for h in g.delay_time:
 
                         if not g.shift_eligibility:
-                            lhs = self.dsm_do_shift[g, h, t]
+                            lhs = self.dsm_up[g, h, t]
                             rhs = 0
 
                             block.shift_shed_vars.add((g, h, t), (lhs == rhs))
@@ -5309,8 +5328,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Relation between inflow and effective Sink consumption
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DR.
             Bus outflow == Demand +- DR (i.e. effective Sink consumption)
             """
@@ -5339,8 +5357,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.8
         def capacity_balance_red_rule(block):
-            """
-            Load reduction must be balanced by load increase within delay_time
+            """Load reduction must be balanced by load increase
+            within delay_time
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -5387,8 +5405,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.9
         def capacity_balance_inc_rule(block):
-            """
-            Load increased must be balanced by load reduction within delay_time
+            """Load increased must be balanced by load reduction
+            within delay_time
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -5432,10 +5450,9 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         self.capacity_balance_inc_build = BuildAction(
             rule=capacity_balance_inc_rule)
 
-        # Own addition: prevent shifts which cannot be compensated
+        # Fix: prevent shifts which cannot be compensated
         def no_comp_red_rule(block):
-            """
-            Prevent downwards shifts that cannot be balanced anymore
+            """Prevent downwards shifts that cannot be balanced anymore
             within the optimization timeframe
             """
             for t in m.TIMESTEPS:
@@ -5458,10 +5475,9 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         self.no_comp_red_build = BuildAction(
             rule=no_comp_red_rule)
 
-        # Own addition: prevent shifts which cannot be compensated
+        # Fix: prevent shifts which cannot be compensated
         def no_comp_inc_rule(block):
-            """
-            Prevent upwards shifts that cannot be balanced anymore
+            """Prevent upwards shifts that cannot be balanced anymore
             within the optimization timeframe
             """
             for t in m.TIMESTEPS:
@@ -5486,8 +5502,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.11
         def availability_red_rule(block):
-            """
-            Load reduction must be smaller than or equal to the
+            """Load reduction must be smaller than or equal to the
             (time-dependent) capacity limit
             """
             for t in m.TIMESTEPS:
@@ -5511,8 +5526,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.12
         def availability_inc_rule(block):
-            """
-            Load increase must be smaller than or equal to the
+            """Load increase must be smaller than or equal to the
             (time-dependent) capacity limit
             """
             for t in m.TIMESTEPS:
@@ -5535,8 +5549,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.13
         def dr_storage_red_rule(block):
-            """
-            Fictious demand response storage level for load reductions
+            """Fictious demand response storage level for load reductions
             transition equation
             """
             for t in m.TIMESTEPS:
@@ -5548,7 +5561,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                         lhs = (m.timeincrement[t]
                                * sum((self.dsm_do_shift[g, h, t]
                                       - self.balance_dsm_do[g, h, t]
-                                      * g.efficiency) for h in g.delay_time))
+                                      * g.efficiency)
+                                     for h in g.delay_time))
 
                         # load reduction storage level transition
                         rhs = (self.dsm_do_level[g, t]
@@ -5571,8 +5585,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.14
         def dr_storage_inc_rule(block):
-            """
-            Fictious demand response storage level for load increase
+            """Fictious demand response storage level for load increase
             transition equation
             """
             for t in m.TIMESTEPS:
@@ -5597,8 +5610,9 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                     else:
                         # pass  # return(Constraint.Skip)
                         lhs = self.dsm_up_level[g, t]
-                        rhs = m.timeincrement[t] * sum(self.dsm_up[g, h, t]
-                                                       for h in g.delay_time)
+                        rhs = (m.timeincrement[t]
+                               * sum(self.dsm_up[g, h, t]
+                                     for h in g.delay_time))
                         block.dr_storage_inc.add((g, t), (lhs == rhs))
 
         self.dr_storage_inc = Constraint(group, m.TIMESTEPS,
@@ -5608,20 +5622,29 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.15
         def dr_storage_limit_red_rule(block):
-            """
-            Fictious demand response storage level for load reduction limit
+            """Fictious demand response storage level for load reduction limit
             """
             for t in m.TIMESTEPS:
                 for g in group:
-                    # fictious demand response load reduction storage level
-                    lhs = self.dsm_do_level[g, t]
 
-                    # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_down_mean * g.max_capacity_down
-                           * g.shift_time)
+                    if g.shift_eligibility:
+                        # fictious demand response load reduction storage level
+                        lhs = self.dsm_do_level[g, t]
 
-                    # add constraint
-                    block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+                        # maximum (time-dependent) available shifting capacity
+                        rhs = (g.capacity_down_mean * g.max_capacity_down
+                               * g.shift_time)
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
+
+                    else:
+                        lhs = self.dsm_do_level[g, t]
+                        # Force storage level and thus dsm_do_shift to 0
+                        rhs = 0
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, t), (lhs <= rhs))
 
         self.dr_storage_limit_red = Constraint(group, m.TIMESTEPS,
                                                noruleinit=True)
@@ -5630,8 +5653,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.16
         def dr_storage_limit_inc_rule(block):
-            """
-            Fictious demand response storage level for load increase limit
+            """Fictious demand response storage level for load increase limit
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -5652,8 +5674,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.17' -> load shedding
         def dr_yearly_limit_shed_rule(block):
-            """
-            Introduce overall annual (energy) limit for load shedding resp.
+            """Introduce overall annual (energy) limit for load shedding resp.
             overall limit for optimization timeframe considered
             A year limit in contrast to Gils (2015) is defined a mandatory
             parameter here in order to achieve an approach comparable
@@ -5674,7 +5695,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                     block.dr_yearly_limit_shed.add(g, (lhs <= rhs))
 
                 else:
-                    pass
+                    pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_shed = Constraint(group, noruleinit=True)
         self.dr_yearly_limit_shed_build = BuildAction(
@@ -5684,9 +5705,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.17
         def dr_yearly_limit_red_rule(block):
-            """
-            Introduce overall annual (energy) limit for load reductions resp.
-            overall limit for optimization timeframe considered
+            """Introduce overall annual (energy) limit for load reductions
+            resp. overall limit for optimization timeframe considered
             """
             for g in group:
 
@@ -5699,7 +5719,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                     # year limit
                     rhs = (g.capacity_down_mean * g.max_capacity_down
                            * g.shift_time * g.n_yearLimit_shift)
-                    print(rhs)
+
                     # add constraint
                     block.dr_yearly_limit_red.add(g, (lhs <= rhs))
 
@@ -5712,9 +5732,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.18
         def dr_yearly_limit_inc_rule(block):
-            """
-            Introduce overall annual (energy) limit for load increases resp.
-            overall limit for optimization timeframe considered
+            """Introduce overall annual (energy) limit for load increases
+            resp. overall limit for optimization timeframe considered
             """
             for g in group:
 
@@ -5740,20 +5759,14 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.19
         def dr_daily_limit_red_rule(block):
-            """
-            Introduce rolling (energy) limit for load reductions
+            """Introduce rolling (energy) limit for load reductions
             This effectively limits DR utilization dependent on
             activations within previous hours.
-
-            Note: This effectively limits downshift in the last
-            hour of a time span to the remaining share of an
-            average downshift.
             """
             for t in m.TIMESTEPS:
                 for g in group:
 
                     if g.ActivateDayLimit:
-
                         # main use case
                         if t >= g.t_dayLimit:
 
@@ -5768,7 +5781,8 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                                 - sum(sum(self.dsm_do_shift[g, h, t - t_dash]
                                           for h in g.delay_time)
                                       for t_dash
-                                      in range(1, int(g.t_dayLimit) + 1)))
+                                      in range(1, int(g.t_dayLimit) + 1))
+                            )
 
                             # add constraint
                             block.dr_daily_limit_red.add((g, t), (lhs <= rhs))
@@ -5786,20 +5800,14 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Equation 4.20
         def dr_daily_limit_inc_rule(block):
-            """
-            Introduce rolling (energy) limit for load increases
+            """Introduce rolling (energy) limit for load increases
             This effectively limits DR utilization dependent on
             activations within previous hours.
-
-            Note: This effectively limits upshift in the last
-            hour of a time span to the remaining share of an
-            average upshift.
             """
             for t in m.TIMESTEPS:
                 for g in group:
 
                     if g.ActivateDayLimit:
-
                         # main use case
                         if t >= g.t_dayLimit:
 
@@ -5808,12 +5816,14 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                                       for h in g.delay_time)
 
                             # daily limit
-                            rhs = (g.capacity_up_mean * g.max_capacity_up
-                                   * g.shift_time
-                                   - sum(sum(self.dsm_up[g, h, t - t_dash]
-                                             for h in g.delay_time)
-                                         for t_dash
-                                         in range(1, int(g.t_dayLimit) + 1)))
+                            rhs = (
+                                g.capacity_up_mean * g.max_capacity_up
+                                * g.shift_time
+                                - sum(sum(self.dsm_up[g, h, t - t_dash]
+                                          for h in g.delay_time)
+                                      for t_dash
+                                      in range(1, int(g.t_dayLimit) + 1))
+                            )
 
                             # add constraint
                             block.dr_daily_limit_inc.add((g, t), (lhs <= rhs))
@@ -5831,16 +5841,14 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
         # Own addition (optional)
         def dr_logical_constraint_rule(block):
-            """
-            Similar to equation 10 from Zerrahn and Schill (2015):
-            The sum of upwards and downwards shifts may not be greater than the
-            (bigger) capacity limit.
+            """Similar to equation 10 from Zerrahn and Schill (2015):
+            The sum of upwards and downwards shifts may not be greater
+            than the (bigger) capacity limit.
             """
             for t in m.TIMESTEPS:
                 for g in group:
 
                     if g.addition:
-
                         # sum of load increases and reductions
                         lhs = (sum(self.dsm_up[g, h, t]
                                    + self.balance_dsm_do[g, h, t]
@@ -5851,7 +5859,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
                         # maximum capacity eligibly for load shifting
                         rhs = max(g.capacity_down[t] * g.max_capacity_down,
-                                  g.capacity_up[t])
+                                  g.capacity_up[t] * g.max_capacity_up)
 
                         # add constraint
                         block.dr_logical_constraint.add((g, t), (lhs <= rhs))
@@ -5871,26 +5879,35 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         """
         m = self.parent_block()
 
-        dr_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for p, t in m.TIMEINDEX:
-            for g in self.MULTIPERIODDR:
-                dr_cost += ((sum(self.dsm_up[g, h, t]
-                                 + self.balance_dsm_do[g, h, t]
-                                 for h in g.delay_time)
-                             * g.cost_dsm_up[p])
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -p))
-                dr_cost += ((sum(self.dsm_do_shift[g, h, t]
-                                 + self.balance_dsm_up[g, h, t]
-                                 for h in g.delay_time)
-                             * g.cost_dsm_down_shift[p]
-                             + self.dsm_do_shed[g, t]
-                             * g.cost_dsm_down_shed[p])
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -p))
+        for g in self.MULTIPERIODDR:
+            for p, t in m.TIMEINDEX:
+                variable_costs += ((sum(self.dsm_up[g, h, t]
+                                        + self.balance_dsm_do[g, h, t]
+                                        for h in g.delay_time)
+                                    * g.cost_dsm_up[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
+                variable_costs += ((sum(self.dsm_do_shift[g, h, t]
+                                        + self.balance_dsm_up[g, h, t]
+                                        for h in g.delay_time)
+                                    * g.cost_dsm_down_shift[p]
+                                    + self.dsm_do_shed[g, t]
+                                    * g.cost_dsm_down_shed[p])
+                                   * m.objective_weighting[t]
+                                   * ((1 + m.discount_rate) ** -p))
 
-        self.cost = Expression(expr=dr_cost)
+            if g.fixed_costs[0] is not None:
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        g.max_demand
+                        * g.fixed_costs[p]
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.cost = Expression(expr=variable_costs + fixed_costs)
 
         return self.cost
 
@@ -6883,7 +6900,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         # Depict different delay_times per unit via a mapping
         map_MULTIPERIODINVESTDR_H = {
             k: v for k, v in zip([n for n in group],
-                                 [n.delay_time for n in group])}
+                                 [n.delay_time for n in group])
+        }
 
         unique_H = list(set(itertools.chain.from_iterable(
             map_MULTIPERIODINVESTDR_H.values())))
@@ -6982,48 +7000,20 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         expr = (self.total[g, p]
                                 == self.invest[g, p]
                                 + g.multiperiodinvestment.existing)
-                        self.total_rule.add((g, p), expr)
+                        self.total_dsm_rule.add((g, p), expr)
                     else:
                         expr = (self.total[g, p]
                                 == self.invest[g, p]
                                 + self.total[g, p - 1]
                                 - self.old[g, p])
-                        self.total_rule.add((g, p), expr)
+                        self.total_dsm_rule.add((g, p), expr)
 
-        self.total_rule = Constraint(group, m.PERIODS,
-                                     noruleinit=True)
-        self.total_rule_build = BuildAction(
+        self.total_dsm_rule = Constraint(group, m.PERIODS,
+                                         noruleinit=True)
+        self.total_dsm_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        # def _old_capacity_rule(block):
-        #     """Rule definition for determining old capacity
-        #     to be decommissioned due to reaching its lifetime
-        #     """
-        #     for g in group:
-        #         age = g.multiperiodinvestment.age
-        #         lifetime = g.multiperiodinvestment.lifetime
-        #         for p in m.PERIODS:
-        #             if lifetime <= p:
-        #                 expr = (self.old[g, p]
-        #                         == self.invest[g, p - lifetime])
-        #                 self.old_rule.add((g, p), expr)
-        #             elif lifetime - age == p:
-        #                 expr = (
-        #                     self.old[g, p]
-        #                     == (g.multiperiodinvestment.existing
-        #                         + self.invest[g, 0]))
-        #                 self.old_rule.add((g, p), expr)
-        #             else:
-        #                 expr = (self.old[g, p]
-        #                         == 0)
-        #                 self.old_rule.add((g, p), expr)
-        #
-        # self.old_rule = Constraint(group, m.PERIODS,
-        #                            noruleinit=True)
-        # self.old_rule_build = BuildAction(
-        #     rule=_old_capacity_rule)
-
-        def _old_capacity_rule_end(block):
+        def _old_dsm_capacity_rule_end(block):
             """Rule definition for determining old endogenously installed
             capacity to be decommissioned due to reaching its lifetime
             """
@@ -7033,19 +7023,19 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                     if lifetime <= p:
                         expr = (self.old_end[g, p]
                                 == self.invest[g, p - lifetime])
-                        self.old_rule_end.add((g, p), expr)
+                        self.old_dsm_rule_end.add((g, p), expr)
                     else:
                         expr = (self.old_end[g, p]
                                 == 0)
-                        self.old_rule_end.add((g, p), expr)
+                        self.old_dsm_rule_end.add((g, p), expr)
 
-        self.old_rule_end = Constraint(group,
-                                       m.PERIODS,
-                                       noruleinit=True)
-        self.old_rule_end_build = BuildAction(
-            rule=_old_capacity_rule_end)
+        self.old_dsm_rule_end = Constraint(group,
+                                           m.PERIODS,
+                                           noruleinit=True)
+        self.old_dsm_rule_end_build = BuildAction(
+            rule=_old_dsm_capacity_rule_end)
 
-        def _old_capacity_rule_exo(block):
+        def _old_dsm_capacity_rule_exo(block):
             """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
@@ -7057,19 +7047,19 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         expr = (
                             self.old_exo[g, p]
                             == g.multiperiodinvestment.existing)
-                        self.old_rule_exo.add((g, p), expr)
+                        self.old_dsm_rule_exo.add((g, p), expr)
                     else:
                         expr = (self.old_exo[g, p]
                                 == 0)
-                        self.old_rule_exo.add((g, p), expr)
+                        self.old_dsm_rule_exo.add((g, p), expr)
 
-        self.old_rule_exo = Constraint(group,
-                                       m.PERIODS,
-                                       noruleinit=True)
-        self.old_rule_exo_build = BuildAction(
-            rule=_old_capacity_rule_exo)
+        self.old_dsm_rule_exo = Constraint(group,
+                                           m.PERIODS,
+                                           noruleinit=True)
+        self.old_dsm_rule_exo_build = BuildAction(
+            rule=_old_dsm_capacity_rule_exo)
 
-        def _old_capacity_rule(block):
+        def _old_dsm_capacity_rule(block):
             """Rule definition for determining (overall) old capacity
             to be decommissioned due to reaching its lifetime
             """
@@ -7078,17 +7068,16 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                     expr = (
                         self.old[g, p]
                         == self.old_end[g, p] + self.old_exo[g, p])
-                    self.old_rule.add((g, p), expr)
+                    self.old_dsm_rule.add((g, p), expr)
 
-        self.old_rule = Constraint(group,
-                                   m.PERIODS,
-                                   noruleinit=True)
-        self.old_rule_build = BuildAction(
-            rule=_old_capacity_rule)
+        self.old_dsm_rule = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_dsm_rule_build = BuildAction(
+            rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
-            """
-            Force shifting resp. shedding variables to zero dependent
+            """Force shifting resp. shedding variables to zero dependent
             on how boolean parameters for shift resp. shed eligibility
             are set.
             """
@@ -7097,7 +7086,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                     for h in g.delay_time:
 
                         if not g.shift_eligibility:
-                            lhs = self.dsm_do_shift[g, h, t]
+                            lhs = self.dsm_up[g, h, t]
                             rhs = 0
 
                             block.shift_shed_vars.add((g, h, t), (lhs == rhs))
@@ -7115,8 +7104,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Relation between inflow and effective Sink consumption
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DR.
             Bus outflow == Demand +- DR (i.e. effective Sink consumption)
             """
@@ -7127,7 +7115,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                     lhs = m.flow[g.inflow, g, p, t]
 
                     # Demand +- DR
-                    rhs = (g.demand[t] * self.total[g, p] +
+                    rhs = (g.demand[t] * self.total[g, p]
                            + sum(self.dsm_up[g, h, t]
                                  + self.balance_dsm_do[g, h, t]
                                  - self.dsm_do_shift[g, h, t]
@@ -7145,8 +7133,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.8
         def capacity_balance_red_rule(block):
-            """
-            Load reduction must be balanced by load increase within delay_time
+            """Load reduction must be balanced by load increase
+            within delay_time
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -7193,8 +7181,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.9
         def capacity_balance_inc_rule(block):
-            """
-            Load increased must be balanced by load reduction within delay_time
+            """Load increased must be balanced by load reduction
+            within delay_time
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -7240,8 +7228,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Own addition: prevent shifts which cannot be compensated
         def no_comp_red_rule(block):
-            """
-            Prevent downwards shifts that cannot be balanced anymore
+            """Prevent downwards shifts that cannot be balanced anymore
             within the optimization timeframe
             """
             for t in m.TIMESTEPS:
@@ -7266,8 +7253,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Own addition: prevent shifts which cannot be compensated
         def no_comp_inc_rule(block):
-            """
-            Prevent upwards shifts that cannot be balanced anymore
+            """Prevent upwards shifts that cannot be balanced anymore
             within the optimization timeframe
             """
             for t in m.TIMESTEPS:
@@ -7292,10 +7278,9 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.11
         def availability_red_rule(block):
-            """
-            Load reduction must be smaller than or equal to the
-            (time-dependent) capacity limit
-            """
+            """Load reduction must be smaller than or equal to the
+             (time-dependent) capacity limit
+             """
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # load reduction
@@ -7318,8 +7303,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.12
         def availability_inc_rule(block):
-            """
-            Load increase must be smaller than or equal to the
+            """Load increase must be smaller than or equal to the
             (time-dependent) capacity limit
             """
             for p, t in m.TIMEINDEX:
@@ -7343,8 +7327,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.13
         def dr_storage_red_rule(block):
-            """
-            Fictious demand response storage level for load reductions
+            """Fictious demand response storage level for load reductions
             transition equation
             """
             for t in m.TIMESTEPS:
@@ -7356,7 +7339,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         lhs = (m.timeincrement[t]
                                * sum((self.dsm_do_shift[g, h, t]
                                       - self.balance_dsm_do[g, h, t]
-                                      * g.efficiency) for h in g.delay_time))
+                                      * g.efficiency)
+                                     for h in g.delay_time))
 
                         # load reduction storage level transition
                         rhs = (self.dsm_do_level[g, t]
@@ -7380,8 +7364,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.14
         def dr_storage_inc_rule(block):
-            """
-            Fictious demand response storage level for load increase
+            """Fictious demand response storage level for load increase
             transition equation
             """
             for t in m.TIMESTEPS:
@@ -7422,15 +7405,25 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
-                    # fictious demand response load reduction storage level
-                    lhs = self.dsm_do_level[g, t]
 
-                    # maximum (time-dependent) available shifting capacity
-                    rhs = (g.capacity_down_mean * self.total[g, p]
-                           * g.flex_share_down * g.shift_time)
+                    if g.shift_eligibility:
+                        # fictious demand response load reduction storage level
+                        lhs = self.dsm_do_level[g, t]
 
-                    # add constraint
-                    block.dr_storage_limit_red.add((g, p, t), (lhs <= rhs))
+                        # maximum (time-dependent) available shifting capacity
+                        rhs = (g.capacity_down_mean * self.total[g, p]
+                               * g.flex_share_down * g.shift_time)
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, p, t), (lhs <= rhs))
+
+                    else:
+                        lhs = self.dsm_do_level[g, t]
+                        # Force storage level and thus dsm_do_shift to 0
+                        rhs = 0
+
+                        # add constraint
+                        block.dr_storage_limit_red.add((g, p, t), (lhs <= rhs))
 
         self.dr_storage_limit_red = Constraint(group, m.TIMEINDEX,
                                                noruleinit=True)
@@ -7439,8 +7432,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.16
         def dr_storage_limit_inc_rule(block):
-            """
-            Fictious demand response storage level for load increase limit
+            """Fictious demand response storage level for load increase limit
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
@@ -7461,9 +7453,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.17' -> load shedding
         def dr_yearly_limit_shed_rule(block):
-            """
-            Introduce overall annual (energy) limit for load shedding resp.
-            overall limit for optimization timeframe considered
+            """Introduce overall annual (energy) limit for load shedding
+            resp. overall limit for optimization timeframe considered
             A year limit in contrast to Gils (2015) is defined a mandatory
             parameter here in order to achieve an approach comparable
             to the others.
@@ -7491,9 +7482,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.17
         def dr_yearly_limit_red_rule(block):
-            """
-            Introduce overall annual (energy) limit for load reductions resp.
-            overall limit for optimization timeframe considered
+            """Introduce overall annual (energy) limit for load reductions
+            resp. overall limit for optimization timeframe considered
             """
             for g in group:
 
@@ -7522,9 +7512,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.18
         def dr_yearly_limit_inc_rule(block):
-            """
-            Introduce overall annual (energy) limit for load increases resp.
-            overall limit for optimization timeframe considered
+            """Introduce overall annual (energy) limit for load increases
+            resp. overall limit for optimization timeframe considered
             """
             for g in group:
 
@@ -7553,14 +7542,9 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.19
         def dr_daily_limit_red_rule(block):
-            """
-            Introduce rolling (energy) limit for load reductions
+            """Introduce rolling (energy) limit for load reductions
             This effectively limits DR utilization dependent on
             activations within previous hours.
-
-            Note: This effectively limits downshift in the last
-            hour of a time span to the remaining share of an
-            average downshift.
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
@@ -7601,14 +7585,9 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.20
         def dr_daily_limit_inc_rule(block):
-            """
-            Introduce rolling (energy) limit for load increases
+            """Introduce rolling (energy) limit for load increases
             This effectively limits DR utilization dependent on
             activations within previous hours.
-
-            Note: This effectively limits upshift in the last
-            hour of a time span to the remaining share of an
-            average upshift.
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
@@ -7645,12 +7624,11 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         self.dr_daily_limit_inc_build = BuildAction(
             rule=dr_daily_limit_inc_rule)
 
-        # Own addition (optional)
+        # Addition: avoid simultaneous activations
         def dr_logical_constraint_rule(block):
-            """
-            Similar to equation 10 from Zerrahn and Schill (2015):
-            The sum of upwards and downwards shifts may not be greater than the
-            (bigger) capacity limit.
+            """Similar to equation 10 from Zerrahn and Schill (2015):
+            The sum of upwards and downwards shifts may not be greater
+            than the (bigger) capacity limit.
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
@@ -7683,12 +7661,13 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
             rule=dr_logical_constraint_rule)
 
     def _objective_expression(self):
-        r""" Objective expression with fixed and investement costs.
+        r"""Objective expression with variable, investment and fixed costs.
         """
         m = self.parent_block()
 
         investment_costs = 0
         variable_costs = 0
+        fixed_costs = 0
 
         for g in self.MULTIPERIODINVESTDR:
             if g.multiperiodinvestment.ep_costs is not None:
@@ -7730,5 +7709,18 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                                    * m.objective_weighting[t]
                                    * ((1 + m.discount_rate) ** -p))
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+            if g.multiperiodinvestment.fixed_costs[0] is not None:
+                lifetime = g.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        sum(self.invest[g, p]
+                            * g.multiperiodinvestment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(p, p + lifetime)
+                            )
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.cost = Expression(
+            expr=investment_costs + fixed_costs + variable_costs)
         return self.cost
