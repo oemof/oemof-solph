@@ -764,28 +764,43 @@ class SinkDSMOemofBlock(SimpleBlock):
 
 
 class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
-    r"""Constraints for SinkDSM with "oemof" approach
+    r"""Constraints for SinkDSM with "oemof" approach and :attr:`multiperiod`
 
     **The following constraints are created for approach = 'oemof':**
 
-    .. _SinkDSMInterval-equations:
+    .. _SinkDSMOemof equations:
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
-        \quad \forall t \in \mathbb{T}\\
+        (1) \quad DSM_{t}^{up} = 0 \quad \forall t
+        \quad if \space eligibility_{shift} = False \\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
-        \mathbb{T}\\
+        (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        \quad if \space eligibility_{shed} = False \\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
-        \mathbb{T}\\
+        (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
+        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
+        \quad \forall t \in \mathbb{T} \\
         &
-        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
-        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
-        \in \mathbb{T} \mid k \mod \tau = 0\} \\
+        (4) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot E_{up, max}
+        \quad \forall t \in \mathbb{T} \\
+        &
+        (5) \quad DSM_{t}^{do, shift} + DSM_{t}^{do, shed}
+        \leq  E_{t}^{do} \cdot E_{do, max}
+        \quad \forall t \in \mathbb{T} \\
+        &
+        (6) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in
+        \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
+    **The following parts of the objective function are created:**
+
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \quad \forall t \in \mathbb{T} \\
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -793,24 +808,55 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up` ","V", "DSM
-            up shift"
-            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.dsm_down` ","V","DSM
-            down shift"
+            ":math:`DSM_{t}^{up}` ",
+            ":attr:`~SinkDSM.dsm_up[g, t]` ","V", "DSM
+            up shift (capacity shifted upwards)"
+            ":math:`DSM_{t}^{do, shift}` ",
+            ":attr:`~SinkDSM.dsm_do_shift[g, t]` ",
+            "V","DSM down shift (capacity shifted downwards)"
+            ":math:`DSM_{t}^{do, shed}` ",
+            ":attr:`~SinkDSM.dsm_do_shed[g, t]` ",
+            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
             ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from electrical bus"
-            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
-            series"
-            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Capacity
-            DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Capacity
-            DSM up shift "
+            flowing in from (electrical) inflow bus"
+            ":math:`demand_{t}`",":attr:`~SinkDSM.demand[t]`","P",
+            "(Electrical) demand series (normalized)"
+            ":math:`demand_{max}`",":attr:`~SinkDSM.max_demand`","P",
+            "Maximum demand value"
+            ":math:`E_{t}^{do}`",":attr:`~SinkDSM.capacity_down[t]`","P",
+            "Capacity  allowed for a load adjustment downwards (normalized)
+            (DSM down shift + DSM shedded)"
+            ":math:`E_{t}^{up}`",":attr:`~SinkDSM.capacity_up[t]`","P",
+            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
+            ":math:`E_{do, max}`",":attr:`~SinkDSM.max_capacity_down`","P",
+            "Maximum capacity allowed for a load adjustment downwards
+            (DSM down shift + DSM shedded)"
+            ":math:`E_{up, max}`",":attr:`~SinkDSM.max_capacity_up`","P",
+            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
             ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
-            interval"
+            interval (time within which the energy balance must be
+            levelled out"
+            ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
+            loss forload shifting processes"
             ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
             load shifting processes"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
-
+            ":math:`eligibility_{shift}` ",
+            ":attr:`~SinkDSM.shift_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shifting"
+            ":math:`eligibility_{shed}` ",
+            ":attr:`~SinkDSM.shed_eligibility`","P",
+            "Boolean parameter indicating if unit can be used for
+            load shedding"
+            ":math:`cost_{t}^{dsm, up}` ", ":attr:`~SinkDSM.cost_dsm_up[t]`",
+            "P", "Variable costs for an upwards shift"
+            ":math:`cost_{t}^{dsm, do, shift}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shift[t]`","P",
+            "Variable costs for a downwards shift (load shifting)"
+            ":math:`cost_{t}^{dsm, do, shed}` ",
+            ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
+            "Variable costs for shedding load"
     """
     CONSTRAINT_GROUP = True
 
@@ -823,7 +869,7 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        # for all DSM components get inflow from bus_elec
+        # for all DSM components get inflow from a bus
         for n in group:
             n.inflow = list(n.inputs)[0]
 
@@ -835,46 +881,80 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
         #  ************* VARIABLES *****************************
 
         # Variable load shift down
-        self.dsm_do_shift = Var(self.multiperioddsm, m.TIMESTEPS, initialize=0,
-                                within=NonNegativeReals)
+        self.dsm_do_shift = Var(
+            self.multiperioddsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals
+        )
+
+        # Variable load shedding
+        self.dsm_do_shed = Var(
+            self.multiperioddsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals)
 
         # Variable load shift up
-        self.dsm_up = Var(self.multiperioddsm, m.TIMESTEPS, initialize=0,
-                          within=NonNegativeReals)
+        self.dsm_up = Var(
+            self.multiperioddsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals
+        )
 
         #  ************* CONSTRAINTS *****************************
 
+        def _shift_shed_vars_rule(block):
+            """Force shifting resp. shedding variables to zero dependent
+            on how boolean parameters for shift resp. shed eligibility
+            are set.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    if not g.shift_eligibility:
+                        lhs = self.dsm_up[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+                    if not g.shed_eligibility:
+                        lhs = self.dsm_do_shed[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+        self.shift_shed_vars = Constraint(group, m.TIMESTEPS,
+                                          noruleinit=True)
+        self.shift_shed_vars_build = BuildAction(
+            rule=_shift_shed_vars_rule)
+
         # Demand Production Relation
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DSM.
             Generator Production == Demand_el +- DSM
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
-                    # Generator loads directly from bus
+                    # Inflow from bus
                     lhs = m.flow[g.inflow, g, p, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (g.demand[t] * g.max_demand
-                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t])
+                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t]
+                           - self.dsm_do_shed[g, t])
 
                     # add constraint
                     block.input_output_relation.add((g, p, t), (lhs == rhs))
 
-        self.input_output_relation = Constraint(group, m.TIMEINDEX,
-                                                noruleinit=True)
+        self.input_output_relation = Constraint(
+            group, m.TIMEINDEX, noruleinit=True
+        )
         self.input_output_relation_build = BuildAction(
-            rule=_input_output_relation_rule)
+            rule=_input_output_relation_rule
+        )
 
         # Upper bounds relation
         def dsm_up_constraint_rule(block):
-            """
-            Realised upward load shift at time t has to be smaller than
+            """Realised upward load shift at time t has to be smaller than
             upward DSM capacity at time t.
             """
-
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM up
@@ -885,35 +965,35 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                     # add constraint
                     block.dsm_up_constraint.add((g, t), (lhs <= rhs))
 
-        self.dsm_up_constraint = Constraint(group, m.TIMESTEPS,
-                                            noruleinit=True)
+        self.dsm_up_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_up_constraint_build = BuildAction(rule=dsm_up_constraint_rule)
 
         # Upper bounds relation
         def dsm_down_constraint_rule(block):
-            """
-            Realised downward load shift at time t has to be smaller than
+            """Realised downward load shift at time t has to be smaller than
             downward DSM capacity at time t.
             """
-
             for t in m.TIMESTEPS:
                 for g in group:
                     # DSM down
-                    lhs = self.dsm_do_shift[g, t]
+                    lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
                     rhs = g.capacity_down[t] * g.max_capacity_down
 
                     # add constraint
                     block.dsm_down_constraint.add((g, t), (lhs <= rhs))
 
-        self.dsm_down_constraint = Constraint(group, m.TIMESTEPS,
-                                              noruleinit=True)
+        self.dsm_down_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_down_constraint_build = BuildAction(
-            rule=dsm_down_constraint_rule)
+            rule=dsm_down_constraint_rule
+        )
 
         def dsm_sum_constraint_rule(block):
-            """
-            Relation to compensate the total amount of positive
+            """Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
             This constraint is building balance in full intervals starting
             with index 0. The last interval might not be full.
@@ -928,8 +1008,9 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                         timesteps = range(interval,
                                           m.TIMESTEPS[-1] + 1)
                     else:
-                        timesteps = range(interval, interval
-                                          + g.shift_interval)
+                        timesteps = range(
+                            interval, interval + g.shift_interval
+                        )
 
                     # DSM up/down
                     lhs = sum(self.dsm_up[g, tt]
@@ -941,13 +1022,16 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                     # add constraint
                     block.dsm_sum_constraint.add((g, interval), (lhs == rhs))
 
-        self.dsm_sum_constraint = Constraint(group, m.TIMESTEPS,
-                                             noruleinit=True)
+        self.dsm_sum_constraint = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
         self.dsm_sum_constraint_build = BuildAction(
-            rule=dsm_sum_constraint_rule)
+            rule=dsm_sum_constraint_rule
+        )
 
     def _objective_expression(self):
-        """Adding cost terms for DSM activity to obj. function"""
+        r"""Objective expression with variable, investment and fixed costs
+        for DSM """
 
         m = self.parent_block()
 
@@ -1259,53 +1343,88 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
 
 
 class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
-    r"""Constraints for SinkDSM with "oemof" approach
+    r"""Constraints for SinkDSM with "oemof" approach and
+    :attr:`multiperiodinvestment`
 
-    **The following constraints are created for approach = 'oemof':**
+    **The following constraints are created for approach = 'oemof' with an
+    investment object defined:**
 
-    .. _SinkDSMInterval-equations:
+    .. _SinkDSMOemof equations:
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} + DSM_{t}^{up} - DSM_{t}^{do}
-        \quad \forall t \in \mathbb{T}\\
+        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
         &
-        (2) \quad  DSM_{t}^{up} \leq E_{t}^{up} \quad \forall t \in
-        \mathbb{T}\\
+        (2) \quad DSM_{t}^{up} = 0 \quad \forall t
+        \quad if \space eligibility_{shift} = False \\
         &
-        (3) \quad DSM_{t}^{do} \leq  E_{t}^{do} \quad \forall t \in
-        \mathbb{T}\\
+        (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
-        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do} \quad \forall t_s \in \{k
-        \in \mathbb{T} \mid k \mod \tau = 0\} \\
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        + DSM_{t}^{up}
+        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
+        \quad \forall t \in \mathbb{T} \\
+        &
+        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \cdot s_{flex, up}
+        \quad \forall t \in \mathbb{T} \\
+        &
+        (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
+        E_{t}^{do} \cdot (invest + E_{exist}) \cdot s_{flex, do}
+        \quad \forall t \in \mathbb{T} \\
+        &
+        (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
+        \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in
+        \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
 
+    **The following parts of the objective function are created:**
 
-    **Table: Symbols and attribute names of variables and parameters**
+    * Investment annuity:
+
+    .. math::
+        invest \cdot costs_{invest} \\
+
+    * Variable costs:
+
+    .. math::
+        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
+        \quad  \forall t \in \mathbb{T} \\
+
+    See remarks in :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    **Symbols and attribute names of variables and parameters**
+
+    Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    The following variables and parameters are exclusively used for
+    investment modeling:
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up` ","V", "DSM
-            up shift"
-            ":math:`DSM_{t}^{do}` ",":attr:`~SinkDSM.dsm_down` ","V","DSM
-            down shift"
-            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from electrical bus"
-            ":math:`demand_{t}`",":attr:`demand[t]`","P", "Electrical demand
-            series"
-            ":math:`E_{t}^{do}`",":attr:`capacity_down[t]`","P", "Capacity
-            DSM down shift capacity"
-            ":math:`E_{t}^{up}`",":attr:`capacity_up[t]`","P", "Capacity
-            DSM up shift "
-            ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
-            interval"
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
-            ":math:`\mathbb{T}` "," ","P", "Time steps"
-
+            ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
+            invested in. Equals to the additionally installed capacity.
+            The capacity share eligible for a shift is determined
+            by flex share(s)."
+            ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment"
+            ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment"
+            ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
+            "P", "existing DSM capacity"
+            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
+            "P","Share of invested capacity that may be shift upwards
+            at maximum"
+            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
+            "P", "Share of invested capacity that may be shift downwards
+            at maximum"
+            ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific investment annuity"
     """
     CONSTRAINT_GROUP = True
 
@@ -1370,6 +1489,11 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                                 initialize=0,
                                 within=NonNegativeReals)
 
+        # Variable load shedding
+        self.dsm_do_shed = Var(
+            self.multiperioddsm, m.TIMESTEPS, initialize=0,
+            within=NonNegativeReals)
+
         # Variable load shift up
         self.dsm_up = Var(self.multiperiodinvestdsm, m.TIMESTEPS,
                           initialize=0,
@@ -1378,7 +1502,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         #  ************* CONSTRAINTS *****************************
 
         # Handle unit lifetimes
-        def _total_capacity_rule(block):
+        def _total_dsm_capacity_rule(block):
             """Rule definition for determining total installed
             capacity (taking decommissioning into account)
             """
@@ -1388,48 +1512,20 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         expr = (self.total[g, p]
                                 == self.invest[g, p]
                                 + g.multiperiodinvestment.existing)
-                        self.total_rule.add((g, p), expr)
+                        self.total_dsm_rule.add((g, p), expr)
                     else:
                         expr = (self.total[g, p]
                                 == self.invest[g, p]
                                 + self.total[g, p - 1]
                                 - self.old[g, p])
-                        self.total_rule.add((g, p), expr)
+                        self.total_dsm_rule.add((g, p), expr)
 
-        self.total_rule = Constraint(group, m.PERIODS,
-                                     noruleinit=True)
-        self.total_rule_build = BuildAction(
-            rule=_total_capacity_rule)
+        self.total_dsm_rule = Constraint(group, m.PERIODS,
+                                         noruleinit=True)
+        self.total_dsm_rule_build = BuildAction(
+            rule=_total_dsm_capacity_rule)
 
-        # def _old_capacity_rule(block):
-        #     """Rule definition for determining old capacity
-        #     to be decommissioned due to reaching its lifetime
-        #     """
-        #     for g in group:
-        #         age = g.multiperiodinvestment.age
-        #         lifetime = g.multiperiodinvestment.lifetime
-        #         for p in m.PERIODS:
-        #             if lifetime <= p:
-        #                 expr = (self.old[g, p]
-        #                         == self.invest[g, p - lifetime])
-        #                 self.old_rule.add((g, p), expr)
-        #             elif lifetime - age == p:
-        #                 expr = (
-        #                     self.old[g, p]
-        #                     == (g.multiperiodinvestment.existing
-        #                         + self.invest[g, 0]))
-        #                 self.old_rule.add((g, p), expr)
-        #             else:
-        #                 expr = (self.old[g, p]
-        #                         == 0)
-        #                 self.old_rule.add((g, p), expr)
-        #
-        # self.old_rule = Constraint(group, m.PERIODS,
-        #                            noruleinit=True)
-        # self.old_rule_build = BuildAction(
-        #     rule=_old_capacity_rule)
-
-        def _old_capacity_rule_end(block):
+        def _old_dsm_capacity_rule_end(block):
             """Rule definition for determining old endogenously installed
             capacity to be decommissioned due to reaching its lifetime
             """
@@ -1439,19 +1535,19 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                     if lifetime <= p:
                         expr = (self.old_end[g, p]
                                 == self.invest[g, p - lifetime])
-                        self.old_rule_end.add((g, p), expr)
+                        self.old_dsm_rule_end.add((g, p), expr)
                     else:
                         expr = (self.old_end[g, p]
                                 == 0)
-                        self.old_rule_end.add((g, p), expr)
+                        self.old_dsm_rule_end.add((g, p), expr)
 
-        self.old_rule_end = Constraint(group,
-                                       m.PERIODS,
-                                       noruleinit=True)
-        self.old_rule_end_build = BuildAction(
-            rule=_old_capacity_rule_end)
+        self.old_dsm_rule_end = Constraint(group,
+                                           m.PERIODS,
+                                           noruleinit=True)
+        self.old_dsm_rule_end_build = BuildAction(
+            rule=_old_dsm_capacity_rule_end)
 
-        def _old_capacity_rule_exo(block):
+        def _old_dsm_capacity_rule_exo(block):
             """Rule definition for determining old exogenously given capacity
             to be decommissioned due to reaching its lifetime
             """
@@ -1463,19 +1559,19 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         expr = (
                             self.old_exo[g, p]
                             == g.multiperiodinvestment.existing)
-                        self.old_rule_exo.add((g, p), expr)
+                        self.old_dsm_rule_exo.add((g, p), expr)
                     else:
                         expr = (self.old_exo[g, p]
                                 == 0)
-                        self.old_rule_exo.add((g, p), expr)
+                        self.old_dsm_rule_exo.add((g, p), expr)
 
-        self.old_rule_exo = Constraint(group,
-                                       m.PERIODS,
-                                       noruleinit=True)
-        self.old_rule_exo_build = BuildAction(
-            rule=_old_capacity_rule_exo)
+        self.old_dsm_rule_exo = Constraint(group,
+                                           m.PERIODS,
+                                           noruleinit=True)
+        self.old_dsm_rule_exo_build = BuildAction(
+            rule=_old_dsm_capacity_rule_exo)
 
-        def _old_capacity_rule(block):
+        def _old_dsm_capacity_rule(block):
             """Rule definition for determining (overall) old capacity
             to be decommissioned due to reaching its lifetime
             """
@@ -1484,42 +1580,68 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                     expr = (
                         self.old[g, p]
                         == self.old_end[g, p] + self.old_exo[g, p])
-                    self.old_rule.add((g, p), expr)
+                    self.old_dsm_rule.add((g, p), expr)
 
-        self.old_rule = Constraint(group,
-                                   m.PERIODS,
-                                   noruleinit=True)
-        self.old_rule_build = BuildAction(
-            rule=_old_capacity_rule)
+        self.old_dsm_rule = Constraint(group,
+                                       m.PERIODS,
+                                       noruleinit=True)
+        self.old_dsm_rule_build = BuildAction(
+            rule=_old_dsm_capacity_rule)
+
+        def _shift_shed_vars_rule(block):
+            """Force shifting resp. shedding variables to zero dependent
+            on how boolean parameters for shift resp. shed eligibility
+            are set.
+            """
+            for t in m.TIMESTEPS:
+                for g in group:
+
+                    if not g.shift_eligibility:
+                        lhs = self.dsm_up[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+                    if not g.shed_eligibility:
+                        lhs = self.dsm_do_shed[g, t]
+                        rhs = 0
+
+                        block.shift_shed_vars.add((g, t), (lhs == rhs))
+
+        self.shift_shed_vars = Constraint(group, m.TIMESTEPS,
+                                          noruleinit=True)
+        self.shift_shed_vars_build = BuildAction(
+            rule=_shift_shed_vars_rule)
 
         # Demand Production Relation
         def _input_output_relation_rule(block):
-            """
-            Relation between input data and pyomo variables.
+            """Relation between input data and pyomo variables.
             The actual demand after DSM.
             Generator Production == Demand_el +- DSM
             """
             for p, t in m.TIMEINDEX:
                 for g in group:
-                    # Generator loads directly from bus
+                    # Inflow from bus
                     lhs = m.flow[g.inflow, g, p, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (g.demand[t] * self.total[g, p]
-                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t])
+                           + self.dsm_up[g, t] - self.dsm_do_shift[g, t]
+                           - self.dsm_do_shed[g, t])
 
                     # add constraint
                     block.input_output_relation.add((g, p, t), (lhs == rhs))
 
-        self.input_output_relation = Constraint(group, m.TIMEINDEX,
-                                                noruleinit=True)
+        self.input_output_relation = Constraint(
+            group, m.TIMEINDEX, noruleinit=True
+        )
         self.input_output_relation_build = BuildAction(
-            rule=_input_output_relation_rule)
+            rule=_input_output_relation_rule
+        )
 
         # Upper bounds relation
         def dsm_up_constraint_rule(block):
-            """
-            Realised upward load shift at time t has to be smaller than
+            """Realised upward load shift at time t has to be smaller than
             upward DSM capacity at time t.
             """
 
@@ -1540,15 +1662,13 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
 
         # Upper bounds relation
         def dsm_down_constraint_rule(block):
-            """
-            Realised downward load shift at time t has to be smaller than
+            """Realised downward load shift at time t has to be smaller than
             downward DSM capacity at time t.
             """
-
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # DSM down
-                    lhs = self.dsm_do_shift[g, t]
+                    lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
                     rhs = (g.capacity_down[t] * self.total[g, p]
                            * g.flex_share_down)
@@ -1562,13 +1682,11 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
             rule=dsm_down_constraint_rule)
 
         def dsm_sum_constraint_rule(block):
-            """
-            Relation to compensate the total amount of positive
+            """Relation to compensate the total amount of positive
             and negative DSM in between the shift_interval.
             This constraint is building balance in full intervals starting
             with index 0. The last interval might not be full.
             """
-
             for g in group:
                 intervals = range(m.TIMESTEPS[1],
                                   m.TIMESTEPS[-1],
@@ -1598,12 +1716,14 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
             rule=dsm_sum_constraint_rule)
 
     def _objective_expression(self):
-        """Adding cost terms for DSM activity to obj. function"""
+        r"""Objective expression with variable, investment and fixed costs
+        for DSM"""
 
         m = self.parent_block()
 
         investment_costs = 0
         variable_costs = 0
+        fixed_costs = 0
 
         for g in self.multiperiodinvestdsm:
             if g.multiperiodinvestment.ep_costs is not None:
@@ -1639,7 +1759,21 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                                    * g.cost_dsm_down_shift[p]
                                    * ((1 + m.discount_rate) ** -p))
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+            if g.multiperiodinvestment.fixed_costs[0] is not None:
+                lifetime = g.multiperiodinvestment.lifetime
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        sum(self.invest[g, p]
+                            * g.multiperiodinvestment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(p, p + lifetime)
+                            )
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.cost = Expression(
+            expr=investment_costs + fixed_costs + variable_costs
+        )
 
         return self.cost
 
