@@ -1,0 +1,49 @@
+v0.4.2 (???, 2020)
+-----------------------
+
+
+API changes
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+
+New features
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+New components/constraints
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Documentation
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Bug fixes
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Known issues
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Testing
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Other changes
+^^^^^^^^^^^^^^^^^^^^
+
+* something
+
+Contributors
+^^^^^^^^^^^^^^^^^^^^
+
+* something
