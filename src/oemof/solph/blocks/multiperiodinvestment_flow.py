@@ -63,10 +63,15 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         Value of the total installed capacity in period p accounting for
         decommissionings due to unit lifetime.
 
-    * :math:`P_{old}(p)`
+    * :math:`P_{old, exo}(p)`
 
-        Capacity to be decommissioned in a certain period p due to reaching
-        its lifetime.
+        Existing capacity to be decommissioned in a certain period p due to
+        reaching its lifetime.
+
+    * :math:`P_{old, end}(p)`
+
+        Endogeneously built capacity to be decommissioned in a certain
+        period p due to reaching its lifetime.
 
     * :math:`b_{invest}(p)`
 

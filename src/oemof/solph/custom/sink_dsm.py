@@ -783,9 +783,9 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
         (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
+        (3) \quad \dot{E}_{p, t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
-        \quad \forall t \in \mathbb{T} \\
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
         &
         (4) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot E_{up, max}
         \quad \forall t \in \mathbb{T} \\
@@ -801,67 +801,40 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
+    * Variable costs:
+
     .. math::
-        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \quad \forall t \in \mathbb{T} \\
+        (DSM_{t}^{up} \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + (DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t
+        * (1 + d)^{-p}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        demand_{max} \cdot cost_{p}^{fixed} \cdot (1 + d)^{-p}
 
     **Table: Symbols and attribute names of variables and parameters**
+
+    Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    The following variables and parameters are exclusively used for
+    multiperiod modeling:
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{up}` ",
-            ":attr:`~SinkDSM.dsm_up[g, t]` ","V", "DSM
-            up shift (capacity shifted upwards)"
-            ":math:`DSM_{t}^{do, shift}` ",
-            ":attr:`~SinkDSM.dsm_do_shift[g, t]` ",
-            "V","DSM down shift (capacity shifted downwards)"
-            ":math:`DSM_{t}^{do, shed}` ",
-            ":attr:`~SinkDSM.dsm_do_shed[g, t]` ",
-            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
-            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from (electrical) inflow bus"
-            ":math:`demand_{t}`",":attr:`~SinkDSM.demand[t]`","P",
-            "(Electrical) demand series (normalized)"
-            ":math:`demand_{max}`",":attr:`~SinkDSM.max_demand`","P",
-            "Maximum demand value"
-            ":math:`E_{t}^{do}`",":attr:`~SinkDSM.capacity_down[t]`","P",
-            "Capacity  allowed for a load adjustment downwards (normalized)
-            (DSM down shift + DSM shedded)"
-            ":math:`E_{t}^{up}`",":attr:`~SinkDSM.capacity_up[t]`","P",
-            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
-            ":math:`E_{do, max}`",":attr:`~SinkDSM.max_capacity_down`","P",
-            "Maximum capacity allowed for a load adjustment downwards
-            (DSM down shift + DSM shedded)"
-            ":math:`E_{up, max}`",":attr:`~SinkDSM.max_capacity_up`","P",
-            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
-            ":math:`\tau`",":attr:`~SinkDSM.shift_interval`","P", "Shift
-            interval (time within which the energy balance must be
-            levelled out"
-            ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
-            loss forload shifting processes"
-            ":math:`\eta`",":attr:`efficiency`","P", "Efficiency loss for
-            load shifting processes"
-            ":math:`\mathbb{T}` "," ","P", "Time steps"
-            ":math:`eligibility_{shift}` ",
-            ":attr:`~SinkDSM.shift_eligibility`","P",
-            "Boolean parameter indicating if unit can be used for
-            load shifting"
-            ":math:`eligibility_{shed}` ",
-            ":attr:`~SinkDSM.shed_eligibility`","P",
-            "Boolean parameter indicating if unit can be used for
-            load shedding"
-            ":math:`cost_{t}^{dsm, up}` ", ":attr:`~SinkDSM.cost_dsm_up[t]`",
-            "P", "Variable costs for an upwards shift"
-            ":math:`cost_{t}^{dsm, do, shift}` ",
-            ":attr:`~SinkDSM.cost_dsm_down_shift[t]`","P",
-            "Variable costs for a downwards shift (load shifting)"
-            ":math:`cost_{t}^{dsm, do, shed}` ",
-            ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
-            "Variable costs for shedding load"
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
+            ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
+            "The time increment of the model"
     """
     CONSTRAINT_GROUP = True
 
@@ -1049,9 +1022,11 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                                    * m.objective_weighting[t]
                                    * g.cost_dsm_up[p]
                                    * ((1 + m.discount_rate) ** -p))
-                variable_costs += (self.dsm_do_shift[g, t]
+                variable_costs += ((self.dsm_do_shift[g, t]
+                                    * g.cost_dsm_down_shift[p]
+                                    + self.dsm_do_shed[g, t]
+                                    * g.cost_dsm_down_shed[p])
                                    * m.objective_weighting[t]
-                                   * g.cost_dsm_down_shift[p]
                                    * ((1 + m.discount_rate) ** -p))
 
             if g.fixed_costs[0] is not None:
@@ -1367,28 +1342,44 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
+        (1) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
-        (2) \quad DSM_{t}^{up} = 0 \quad \forall t
+        (2) P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
+        p > 0\\
+        &
+        P_{total}(p) = P_{invest}(p) + P_{existing}
+        for p = 0
+        &
+        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
+        &
+        P_{old, end}(p) = 0 else\\
+        &
+        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+        &
+        P_{old, exo}(p) = 0 else\\
+        &
+        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+        &
+        (6) \quad DSM_{t}^{up} = 0 \quad \forall t
         \quad if \space eligibility_{shift} = False \\
         &
-        (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        (7) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        (8) \quad \dot{E}_{p, t} = demand_{t} \cdot (P_{invest}(p) + E_{exist})
         + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
-        \quad \forall t \in \mathbb{T} \\
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
         &
-        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        (9) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
         \cdot s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
-        (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
+        (10) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
         E_{t}^{do} \cdot (invest + E_{exist}) \cdot s_{flex, do}
         \quad \forall t \in \mathbb{T} \\
         &
-        (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
+        (11) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
         \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{do, shift} \quad \forall t_s \in
         \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
         &
@@ -1398,15 +1389,32 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
     * Investment annuity:
 
     .. math::
-        invest \cdot costs_{invest} \\
+        P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
+        \cdot DF(p)
+        \forall p \in PERIODS
+
+    with lifetime n, interest rate i, discount factor DF(p),
+    investment expenses c_{invest}(p) and
+
+        .. math::
+            annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
+            \cdot c_{invest}(p)
+            &
+            DF(p) = (1+d)^{-p}
 
     * Variable costs:
 
     .. math::
-        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \quad  \forall t \in \mathbb{T} \\
+        (DSM_{t}^{up} \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + (DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t
+        * DF(p)
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        demand_{max} \cdot cost_{p}^{fixed} \cdot DF(p) \\
 
     See remarks in :class:`oemof.solph.custom.SinkDSMOemofBlock`.
 
@@ -1415,20 +1423,23 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
     Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
 
     The following variables and parameters are exclusively used for
-    investment modeling:
+    multiperiodinvestment modeling:
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to the additionally installed capacity.
+            ":math:`P_{invest}(p)` ",":attr:`~SinkDSM.invest` ","V",
+            "DSM capacity invested in in period p.
+            Equals to the additionally installed capacity.
             The capacity share eligible for a shift is determined
             by flex share(s)."
-            ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
-            "P", "minimum investment"
-            ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
-            "P", "maximum investment"
+            ":math:`invest_{p}^{min}` ",
+            ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment in period p"
+            ":math:`invest_{p}^{max}` ",
+            ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment in period p"
             ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
             "P", "existing DSM capacity"
             ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
@@ -1437,8 +1448,23 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
             ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
             "P", "Share of invested capacity that may be shift downwards
             at maximum"
-            ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.epcosts` ",
-            "P", "specific investment annuity"
+            ":math:`c_{invest}(p)` ",
+            ":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific nominal investment expenses in period p"
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
+            ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
+            "The time increment of the model"
+            ":math:`i`",
+            ":attr:`~SinkDSM.multiperiodinvestment.interest_rate`", "P",
+            "The interest rate for investments into a SinkDSM"
+            ":math:`n`", "~SinkDSM.multiperiodinvestment.lifetime", "P",
+            "The lifetime of investments into a SinkDSM"
     """
     CONSTRAINT_GROUP = True
 
@@ -1849,7 +1875,7 @@ class SinkDSMDIWBlock(SimpleBlock):
 
     .. math::
         DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{|T|} DSM_{t, tt}^{do, shift} \cdot
+        + \sum_{tt=0}^{|T|} DSM_{tt, t}^{do, shift} \cdot
         cost_{t}^{dsm, do, shift}
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
         \quad \forall t \in \mathbb{T} \\
@@ -2375,7 +2401,8 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
         (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up} -
+        (3) \quad \dot{E}_{p, t} = demand_{t} \cdot demand_{max}
+        + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
         \forall t \in \mathbb{T} \\
         &
@@ -2413,72 +2440,40 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
+    * Variable costs:
+
     .. math::
-        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{|T|} DSM_{t, tt}^{do, shift} \cdot
+        (DSM_{t}^{up} \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + (\sum_{tt=0}^{|T|} DSM_{tt, t}^{do, shift} \cdot
         cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \quad \forall t \in \mathbb{T} \\
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t
+        * (1 + d)^{-p}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        \sum_{pp=p}^{p+n} (P_{invest}(p) \cdot cost_{p}^{fixed} \cdot DR(pp))
+        \cdot DR(p) \\
 
     **Table: Symbols and attribute names of variables and parameters**
+
+    Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+
+    The following variables and parameters are exclusively used for
+    multiperiod modeling:
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{up}` ",":attr:`~SinkDSM.dsm_up[g,t]`",
-            "V", "DSM up shift (additional load) in hour t"
-            ":math:`DSM_{t,tt}^{do, shift}` ",
-            ":attr:`~SinkDSM.dsm_do_shift[g,t,tt]`",
-            "V", "DSM down shift (less load) in hour tt
-            to compensate for upwards shifts in hour t"
-            ":math:`DSM_{t}^{do, shed}` ",":attr:`~SinkDSM.dsm_do_shed[g,t]` ",
-            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
-            ":math:`\dot{E}_{t}` ",":attr:`flow[g,t]`","V","Energy
-            flowing in from (electrical) inflow bus"
-            ":math:`L`",":attr:`~SinkDSM.delay_time`","P",
-            "Maximum delay time for load shift
-            (time until the energy balance has to be levelled out again;
-            roundtrip time of one load shifting cycle, i.e. time window
-            for upshift and compensating downshift)"
-            ":math:`t_{she}`",":attr:`~SinkDSM.shed_time`","P",
-            "Maximum time for one load shedding process"
-            ":math:`demand_{t}`",":attr:`~SinkDSM.demand[t]`","P",
-            "(Electrical) demand series (normalized)"
-            ":math:`demand_{max}`",":attr:`~SinkDSM.max_demand`","P",
-            "Maximum demand value"
-            ":math:`E_{t}^{do}`",":attr:`~SinkDSM.capacity_down[t]`","P",
-            "Capacity  allowed for a load adjustment downwards (normalized)
-            (DSM down shift + DSM shedded)"
-            ":math:`E_{t}^{up}`",":attr:`~SinkDSM.capacity_up[t]`","P",
-            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
-            ":math:`E_{do, max}`",":attr:`~SinkDSM.max_capacity_down`","P",
-            "Maximum capacity allowed for a load adjustment downwards
-            (DSM down shift + DSM shedded)"
-            ":math:`E_{up, max}`",":attr:`~SinkDSM.max_capacity_up`","P",
-            "Capacity allowed for a shift upwards (normalized) (DSM up shift)"
-            ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
-            loss for load shifting processes"
-            ":math:`\mathbb{T}` "," ","P", "Time steps"
-            ":math:`eligibility_{shift}` ",
-            ":attr:`~SinkDSM.shift_eligibility`","P",
-            "Boolean parameter indicating if unit can be used for
-            load shifting"
-            ":math:`eligibility_{shed}` ",
-            ":attr:`~SinkDSM.shed_eligibility`","P",
-            "Boolean parameter indicating if unit can be used for
-            load shedding"
-            ":math:`cost_{t}^{dsm, up}` ", ":attr:`~SinkDSM.cost_dsm_up[t]`",
-            "P", "Variable costs for an upwards shift"
-            ":math:`cost_{t}^{dsm, do, shift}` ",
-            ":attr:`~SinkDSM.cost_dsm_down_shift[t]`","P",
-            "Variable costs for a downwards shift (load shifting)"
-            ":math:`cost_{t}^{dsm, do, shed}` ",
-            ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
-            "Variable costs for shedding load"
-            ":math:`\R`",":attr:`~SinkDSM.recovery_time_shift`","P",
-            "Minimum time between the end of one load shifting process
-            and the start of another"
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
             ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
             "The time increment of the model"
     """
@@ -3009,7 +3004,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
 
     .. math::
         DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{T} DSM_{t, tt}^{do, shift} \cdot
+        + \sum_{tt=0}^{T} DSM_{tt, t}^{do, shift} \cdot
         cost_{t}^{dsm, do, shift}
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
         \quad \forall t \in \mathbb{T}
@@ -3527,44 +3522,62 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
 
     .. math::
         &
-        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
+        (1) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
-        (2) \quad DSM_{t}^{up} = 0 \quad \forall t
+        (2) P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
+        p > 0\\
+        &
+        P_{total}(p) = P_{invest}(p) + P_{existing}
+        for p = 0
+        &
+        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
+        &
+        P_{old, end}(p) = 0 else\\
+        &
+        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+        &
+        P_{old, exo}(p) = 0 else\\
+        &
+        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+        &
+        (6) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
+        &
+        (7) \quad DSM_{t}^{up} = 0 \quad \forall t
         \quad if \space eligibility_{shift} = False \\
         &
-        (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
+        (8) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        (9) \quad \dot{E}_{p, t} = demand_{t} \cdot (invest + E_{exist})
         + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
-        \forall t \in \mathbb{T} \\
+        \forall p \in PERIODS, t \in \mathbb{T} \\
         &
-        (5) \quad DSM_{t}^{up} \cdot \eta =
+        (10) \quad DSM_{t}^{up} \cdot \eta =
         \sum_{tt=t-L}^{t+L} DSM_{t,tt}^{do, shift}
         \quad \forall t \in \mathbb{T} \\
         &
-        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        (11) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
         \ s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
-        (7) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
+        (12) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot (invest + E_{exist})
         \cdot s_{flex, do}
         \quad \forall tt \in \mathbb{T} \\
         &
-        (8) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
+        (13) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \leq
         max \{ E_{tt}^{up} \cdot s_{flex, up},
         E_{tt}^{do} \cdot s_{flex, do} \} \cdot (invest + E_{exist})
         \quad \forall tt \in \mathbb{T} \\
         &
-        (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
+        (14) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
         \leq E_{t}^{up} \cdot (invest + E_{exist})
         \cdot s_{flex, up} \cdot L \cdot \Delta t
         \quad \forall t \in \mathbb{T} \\
         &
-        (10) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
+        (15) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
         \leq E_{t}^{do} \cdot (invest + E_{exist})
         \cdot s_{flex, do} \cdot t_{shed}
         \cdot \Delta t \quad \forall t \in \mathbb{T} \\
@@ -3581,16 +3594,34 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
     * Investment annuity:
 
     .. math::
-        invest \cdot costs_{invest} \\
+        P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
+        \cdot DF(p)
+        \forall p \in PERIODS
+
+    with lifetime n, interest rate i, discount factor DF(p),
+    investment expenses c_{invest}(p) and
+
+        .. math::
+            annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
+            \cdot c_{invest}(p)
+            &
+            DF(p) = (1+d)^{-p}
 
     * Variable costs:
 
     .. math::
-        DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{T} DSM_{t, tt}^{do, shift} \cdot
+        (DSM_{t}^{up} \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + (\sum_{tt=0}^{|T|} DSM_{tt, t}^{do, shift} \cdot
         cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
-        \quad \forall t \in \mathbb{T}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t
+        * DF(p)
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        \sum_{pp=p}^{p+n} (P_{invest}(p) \cdot cost_{p}^{fixed} \cdot DR(pp))
+        \cdot DR(p) \\
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -3603,14 +3634,17 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to the additionally installed capacity.
+            ":math:`P_{invest}(p)` ",":attr:`~SinkDSM.invest` ","V",
+            "DSM capacity invested in in period p.
+            Equals to the additionally installed capacity.
             The capacity share eligible for a shift is determined
             by flex share(s)."
-            ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
-            "P", "minimum investment"
-            ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
-            "P", "maximum investment"
+            ":math:`invest_{p}^{min}` ",
+            ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment in period p"
+            ":math:`invest_{p}^{max}` ",
+            ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment in period p"
             ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
             "P", "existing DSM capacity"
             ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
@@ -3619,9 +3653,23 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
             ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
             "P", "Share of invested capacity that may be shift downwards
             at maximum"
-            ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.ep_costs` ",
-            "P", "specific investment annuity"
-            ":math:`T` "," ","P", "Overall amount of time steps (cardinality)"
+            ":math:`c_{invest}(p)` ",
+            ":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific nominal investment expenses in period p"
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
+            ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
+            "The time increment of the model"
+            ":math:`i`",
+            ":attr:`~SinkDSM.multiperiodinvestment.interest_rate`", "P",
+            "The interest rate for investments into a SinkDSM"
+            ":math:`n`", "~SinkDSM.multiperiodinvestment.lifetime", "P",
+            "The lifetime of investments into a SinkDSM"
     """
     CONSTRAINT_GROUP = True
 
@@ -5143,7 +5191,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} +
+        (1) \quad \dot{E}_{p, t} = demand_{t} \cdot demand_{max} +
         \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDown} - DSM_{h, t}^{down} - DSM_{h, t}^{balanceUp}
         - DSM_{t}^{shed})
