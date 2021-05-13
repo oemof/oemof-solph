@@ -187,7 +187,7 @@ class SinkDSM(Sink):
         Maximum number of load sheds at full capacity per year, used to limit
         the amount of energy shedded per year. Mandatory parameter if load
         shedding is allowed by setting shed_eligibility to True
-    t_dayLimit: int
+    t_dayLimit : int
         Only used when :attr:`~approach` is set to 'DLR'.
         Maximum duration of load shifts at full capacity per day, used to limit
         the amount of energy shifted per day. Optional parameter that is only
@@ -207,6 +207,8 @@ class SinkDSM(Sink):
     shift_eligibility : boolean
         Boolean parameter indicating whether unit is eligible for
         load shifting
+    fixed_costs : numeric
+        Nominal value of fixed costs (per period)
 
     Note
     ----
@@ -261,6 +263,7 @@ class SinkDSM(Sink):
                  fixes=True,
                  shed_eligibility=True,
                  shift_eligibility=True,
+                 fixed_costs=0,
                  **kwargs):
         super().__init__(**kwargs)
 
@@ -347,6 +350,7 @@ class SinkDSM(Sink):
         self.fixes = fixes
         self.shed_eligibility = shed_eligibility
         self.shift_eligibility = shift_eligibility
+        self.fixed_costs = sequence(fixed_costs)
 
         # Check whether investment mode is active or not
         self.investment = kwargs.get("investment")
