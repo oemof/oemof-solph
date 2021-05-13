@@ -1505,7 +1505,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
 
         # Variable load shedding
         self.dsm_do_shed = Var(
-            self.multiperioddsm, m.TIMESTEPS, initialize=0,
+            self.multiperiodinvestdsm, m.TIMESTEPS, initialize=0,
             within=NonNegativeReals)
 
         # Variable load shift up
@@ -2347,7 +2347,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                 dsm_cost += (self.dsm_up[g, t]
                              * g.cost_dsm_up[t]
                              * m.objective_weigthing[t])
-                dsm_cost += ((sum(self.dsm_do_shift[g, t, tt]
+                dsm_cost += ((sum(self.dsm_do_shift[g, tt, t]
                                   for tt in m.TIMESTEPS)
                               * g.cost_dsm_down_shift[t]
                               + self.dsm_do_shed[g, t]
@@ -2918,7 +2918,7 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                                    * m.objective_weighting[t]
                                    * g.cost_dsm_up[p]
                                    * ((1 + m.discount_rate) ** -p))
-                variable_costs += ((sum(self.dsm_do_shift[g, t, tt]
+                variable_costs += ((sum(self.dsm_do_shift[g, tt, t]
                                         for tt in m.TIMESTEPS)
                                     * g.cost_dsm_down_shift[p]
                                     + self.dsm_do_shed[g, t]
@@ -3504,7 +3504,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             for t in m.TIMESTEPS:
                 variable_costs += (self.dsm_up[g, t] * g.cost_dsm_up[t]
                                    * m.objective_weighting[t])
-                variable_costs += ((sum(self.dsm_do_shift[g, t, tt]
+                variable_costs += ((sum(self.dsm_do_shift[g, tt, t]
                                         for tt in m.TIMESTEPS)
                                     * g.cost_dsm_down_shift[t]
                                     + self.dsm_do_shed[g, t]
@@ -4227,7 +4227,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                                    * m.objective_weighting[t]
                                    * g.cost_dsm_up[p]
                                    * ((1 + m.discount_rate) ** -p))
-                variable_costs += ((sum(self.dsm_do_shift[g, t, tt]
+                variable_costs += ((sum(self.dsm_do_shift[g, tt, t]
                                         for tt in m.TIMESTEPS)
                                     * g.cost_dsm_down_shift[p]
                                     + self.dsm_do_shed[g, t]
