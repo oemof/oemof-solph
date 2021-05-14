@@ -28,12 +28,12 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
+from oemof.tools import debugging
+from oemof.tools import economics
 from oemof.solph.network import Sink
 from oemof.solph.options import Investment
 from oemof.solph.options import MultiPeriodInvestment
 from oemof.solph.plumbing import sequence
-from oemof.tools import debugging
-from oemof.tools import economics
 
 
 class SinkDSM(Sink):
