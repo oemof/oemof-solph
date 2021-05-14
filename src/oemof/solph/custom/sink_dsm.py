@@ -5763,22 +5763,24 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
             for g in group:
 
                 if g.ActivateYearLimit:
-                    # sum of all load reductions
-                    lhs = sum(sum(self.dsm_do_shift[g, h, t]
-                                  for h in g.delay_time)
-                              for t in m.TIMESTEPS)
+                    for p in m.PERIODS:
+                        # sum of all load reductions
+                        lhs = sum(sum(self.dsm_do_shift[g, h, t]
+                                      for h in g.delay_time)
+                                  for pp, t in m.TIMEINDEX if pp == p)
 
-                    # year limit
-                    rhs = (g.capacity_down_mean * g.max_capacity_down
-                           * g.shift_time * g.n_yearLimit_shift)
+                        # year limit
+                        rhs = (g.capacity_down_mean * g.max_capacity_down
+                               * g.shift_time * g.n_yearLimit_shift)
 
-                    # add constraint
-                    block.dr_yearly_limit_red.add(g, (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_red.add((g, p), (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
 
-        self.dr_yearly_limit_red = Constraint(group, noruleinit=True)
+        self.dr_yearly_limit_red = Constraint(group, m.PERIODS,
+                                              noruleinit=True)
         self.dr_yearly_limit_red_build = BuildAction(
             rule=dr_yearly_limit_red_rule)
 
@@ -5790,22 +5792,24 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
             for g in group:
 
                 if g.ActivateYearLimit:
-                    # sum of all load increases
-                    lhs = sum(sum(self.dsm_up[g, h, t]
-                                  for h in g.delay_time)
-                              for t in m.TIMESTEPS)
+                    for p in m.PERIODS:
+                        # sum of all load increases
+                        lhs = sum(sum(self.dsm_up[g, h, t]
+                                      for h in g.delay_time)
+                                  for pp, t in m.TIMEINDEX if pp == p)
 
-                    # year limit
-                    rhs = (g.capacity_up_mean * g.max_capacity_up
-                           * g.shift_time * g.n_yearLimit_shift)
+                        # year limit
+                        rhs = (g.capacity_up_mean * g.max_capacity_up
+                               * g.shift_time * g.n_yearLimit_shift)
 
-                    # add constraint
-                    block.dr_yearly_limit_inc.add(g, (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_inc.add(g, (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
 
-        self.dr_yearly_limit_inc = Constraint(group, noruleinit=True)
+        self.dr_yearly_limit_inc = Constraint(group, m.PERIODS,
+                                              noruleinit=True)
         self.dr_yearly_limit_inc_build = BuildAction(
             rule=dr_yearly_limit_inc_rule)
 
@@ -5891,7 +5895,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
         self.dr_daily_limit_inc_build = BuildAction(
             rule=dr_daily_limit_inc_rule)
 
-        # Own addition (optional)
+        # Addition: avoid simultaneous activationss
         def dr_logical_constraint_rule(block):
             """Similar to equation 10 from Zerrahn and Schill (2015):
             The sum of upwards and downwards shifts may not be greater
@@ -7544,7 +7548,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         # sum of all load reductions
                         lhs = sum(sum(self.dsm_do_shift[g, h, t]
                                       for h in g.delay_time)
-                                  for t in m.TIMESTEPS)
+                                  for pp, t in m.TIMEINDEX if pp == p)
 
                         # year limit
                         rhs = (g.capacity_down_mean * self.total[g, p]
@@ -7574,7 +7578,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         # sum of all load increases
                         lhs = sum(sum(self.dsm_up[g, h, t]
                                       for h in g.delay_time)
-                                  for t in m.TIMESTEPS)
+                                  for pp, t in m.TIMEINDEX if pp == p)
 
                         # year limit
                         rhs = (g.capacity_up_mean * self.total[g, p]
@@ -7663,7 +7667,8 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                                       in range(1, int(g.t_dayLimit) + 1)))
 
                             # add constraint
-                            block.dr_daily_limit_inc.add((g, t), (lhs <= rhs))
+                            block.dr_daily_limit_inc.add(
+                                (g, p, t), (lhs <= rhs))
 
                         else:
                             pass  # return(Constraint.Skip)
