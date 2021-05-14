@@ -13,10 +13,14 @@ for Germany
 Add wind source and demand sink for FR and links for exchange.
 """
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ImportError as IE:
+    del IE
+
 import pandas as pd
 
-from oemof.solph import (models, network, components, custom, options,
+from oemof.solph import (models, network, custom, options,
                          processing, views)
 
 # import models
@@ -30,20 +34,20 @@ from oemof.solph import (models, network, components, custom, options,
 t_idx_1 = pd.date_range('1/1/2020', periods=3, freq='H')
 t_idx_2 = pd.date_range('1/1/2030', periods=3, freq='H')
 t_idx_3 = pd.date_range('1/1/2040', periods=3, freq='H')
-t_idx_4 = pd.date_range('1/1/2050', periods=3, freq='H')
+# t_idx_4 = pd.date_range('1/1/2050', periods=3, freq='H')
 
-# timeindex = {'1': t_idx_1, '2': t_idx_2, '3': t_idx_3}
+timeindex = {'1': t_idx_1, '2': t_idx_2, '3': t_idx_3}
 
 # Create an overall timeindex
 t_idx_1_Series = pd.Series(index=t_idx_1, dtype='float64')
 t_idx_2_Series = pd.Series(index=t_idx_2, dtype='float64')
 t_idx_3_Series = pd.Series(index=t_idx_3, dtype='float64')
-t_idx_4_Series = pd.Series(index=t_idx_4, dtype='float64')
+# t_idx_4_Series = pd.Series(index=t_idx_4, dtype='float64')
 
-# timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
-#                        t_idx_3_Series]).index
 timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
-                       t_idx_3_Series, t_idx_4_Series]).index
+                       t_idx_3_Series]).index
+# timeindex = pd.concat([t_idx_1_Series, t_idx_2_Series,
+#                        t_idx_3_Series, t_idx_4_Series]).index
 
 es = network.EnergySystem(timeindex=timeindex,
                           timeincrement=[1] * len(timeindex))
@@ -252,97 +256,97 @@ pp_natgas_GT = network.Transformer(
     )},
     conversion_factors={bus_el: 0.4})
 
-storage_el = components.GenericStorage(
-    label='DE_storage_el',
-    inputs={bus_el: network.Flow(
-        # nominal_value=20,
-        variable_costs=0,
-        max=1,
-        # multiperiod=True
-        # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
-            maximum=20,
-            ep_costs=1000,
-            existing=10,
-            lifetime=2,
-            age=1,
-            interest_rate=0.02,
-            # age=39,
-            # lifetime=40
-        )
-    )},
-    outputs={bus_el: network.Flow(
-        # nominal_value=20,
-        variable_costs=0,
-        max=1,
-        # multiperiod=True
-        # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
-            maximum=20,
-            ep_costs=1000,
-            existing=10,
-            lifetime=2,
-            age=1,
-            interest_rate=0.02,
-            # age=39,
-            # lifetime=40
-        )
-    )},
-    # nominal_storage_capacity=20,
-    loss_rate=0,
-    initial_storage_level=0,
-    max_storage_level=1,
-    min_storage_level=0,
-    inflow_conversion_factor=1,
-    outflow_conversion_factor=1,
-    balanced=True,
-    invest_relation_input_output=1,
-    invest_relation_input_capacity=None,
-    invest_relation_output_capacity=None,
-    # multiperiod=True,
-    fixed_costs=10,
-    # investment=options.Investment(
-    multiperiodinvestment=options.MultiPeriodInvestment(
-        maximum=20,
-        ep_costs=1000,
-        existing=10,
-        lifetime=2,
-        age=1,
-        interest_rate=0.02,
-        # fixed_costs=10,
-        # overall_maximum=9,
-        # overall_minimum=14,
-        # nonconvex=True,
-        # age=39,
-        # lifetime=40
-    )
-)
+# storage_el = components.GenericStorage(
+#     label='DE_storage_el',
+#     inputs={bus_el: network.Flow(
+#         # nominal_value=20,
+#         variable_costs=0,
+#         max=1,
+#         # multiperiod=True
+#         # investment=options.Investment(
+#         multiperiodinvestment=options.MultiPeriodInvestment(
+#             maximum=20,
+#             ep_costs=1000,
+#             existing=10,
+#             lifetime=2,
+#             age=1,
+#             interest_rate=0.02,
+#             # age=39,
+#             # lifetime=40
+#         )
+#     )},
+#     outputs={bus_el: network.Flow(
+#         # nominal_value=20,
+#         variable_costs=0,
+#         max=1,
+#         # multiperiod=True
+#         # investment=options.Investment(
+#         multiperiodinvestment=options.MultiPeriodInvestment(
+#             maximum=20,
+#             ep_costs=1000,
+#             existing=10,
+#             lifetime=2,
+#             age=1,
+#             interest_rate=0.02,
+#             # age=39,
+#             # lifetime=40
+#         )
+#     )},
+#     # nominal_storage_capacity=20,
+#     loss_rate=0,
+#     initial_storage_level=0,
+#     max_storage_level=1,
+#     min_storage_level=0,
+#     inflow_conversion_factor=1,
+#     outflow_conversion_factor=1,
+#     balanced=True,
+#     invest_relation_input_output=1,
+#     invest_relation_input_capacity=None,
+#     invest_relation_output_capacity=None,
+#     # multiperiod=True,
+#     fixed_costs=10,
+#     # investment=options.Investment(
+#     multiperiodinvestment=options.MultiPeriodInvestment(
+#         maximum=20,
+#         ep_costs=1000,
+#         existing=10,
+#         lifetime=2,
+#         age=1,
+#         interest_rate=0.02,
+#         # fixed_costs=10,
+#         # overall_maximum=9,
+#         # overall_minimum=14,
+#         # nonconvex=True,
+#         # age=39,
+#         # lifetime=40
+#     )
+# )
 
-link_DE_FR = custom.Link(
-    label='link_DE_FR',
-    inputs={
-        bus_el: network.Flow(
-            # nominal_value=10)},
-            nominal_value=10,
-            multiperiod=True),
-        bus_el_FR: network.Flow(
-            # nominal_value=10)},
-            nominal_value=10,
-            multiperiod=True)
-    },
-    outputs={
-        bus_el_FR: network.Flow(
-            multiperiod=True
-        ),
-        bus_el: network.Flow(
-            multiperiod=True
-        )
-    },
-    conversion_factors={
-        (bus_el, bus_el_FR): 0.999999,
-        (bus_el_FR, bus_el): 0.999999},
-    multiperiod=True
-)
+# link_DE_FR = custom.Link(
+#     label='link_DE_FR',
+#     inputs={
+#         bus_el: network.Flow(
+#             # nominal_value=10)},
+#             nominal_value=10,
+#             multiperiod=True),
+#         bus_el_FR: network.Flow(
+#             # nominal_value=10)},
+#             nominal_value=10,
+#             multiperiod=True)
+#     },
+#     outputs={
+#         bus_el_FR: network.Flow(
+#             multiperiod=True
+#         ),
+#         bus_el: network.Flow(
+#             multiperiod=True
+#         )
+#     },
+#     conversion_factors={
+#         (bus_el, bus_el_FR): 0.999999,
+#         (bus_el_FR, bus_el): 0.999999},
+#     multiperiod=True
+# )
 
 approach = 'DLR'
 
@@ -377,11 +381,11 @@ kwargs_dict = {
 
     'DIW': {},
 
-    'DLR': {'ActivateYearLimit': False,
-            'ActivateDayLimit': False,
-            'n_yearLimit_shift': None,
+    'DLR': {'ActivateYearLimit': True,
+            'ActivateDayLimit': True,
+            'n_yearLimit_shift': 2,
             'n_yearLimit_shed': 10,
-            't_dayLimit': None,
+            't_dayLimit': 2,
             'addition': True,
             'fixes': True},
 }
@@ -406,9 +410,9 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
        bus_lignite, bus_hardcoal, bus_natgas, bus_el,
        pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
-       sink_el, sink_excess, storage_el,
-       source_wind_FR, source_shortage_FR,
-       bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
+       sink_el, sink_excess, #storage_el,
+       # source_wind_FR, source_shortage_FR,
+       # bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
        dsm_unit,
        )
 
@@ -427,7 +431,7 @@ results = processing.results(test)
 # Show inflows and outflows from electricity bus
 bus_el_flow_res = views.node(results, bus_el)['sequences']
 # Collect all investment results
-invest_units = [bus_el, dsm_unit, storage_el]
+invest_units = [bus_el, dsm_unit]  # , storage_el]
 # invest_units = [bus_el]
 
 invest_res = {}
@@ -447,6 +451,7 @@ invest_results.columns = invest_results.columns.swaplevel()
 invest_cols = invest_results.columns.get_level_values(1) == 'invest'
 investments = invest_results.loc[:, invest_cols]
 
-investments.plot(kind='bar')
-plt.title('Investments per period')
-plt.show()
+if plt is not None:
+    investments.plot(kind='bar')
+    plt.title('Investments per period')
+    plt.show()
