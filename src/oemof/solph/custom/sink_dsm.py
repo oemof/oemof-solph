@@ -813,7 +813,7 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
     * Fixed costs:
 
     .. math::
-        demand_{max} \cdot cost_{p}^{fixed} \cdot (1 + d)^{-p}
+        demand_{max} \cdot cost_{p}^{fixed} \cdot (1 + d)^{-p} \\
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -1345,20 +1345,20 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         (1) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
         (2) P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
-        p > 0\\
+        p > 0 \\
         &
         P_{total}(p) = P_{invest}(p) + P_{existing}
-        for p = 0
+        for p = 0 \\
         &
-        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
+        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n \\
         &
-        P_{old, end}(p) = 0 else\\
+        P_{old, end}(p) = 0 else \\
         &
-        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age \\
         &
-        P_{old, exo}(p) = 0 else\\
+        P_{old, exo}(p) = 0 else \\
         &
-        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p) \\
         &
         (6) \quad DSM_{t}^{up} = 0 \quad \forall t
         \quad if \space eligibility_{shift} = False \\
@@ -1391,16 +1391,16 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
     .. math::
         P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
         \cdot DF(p)
-        \forall p \in PERIODS
+        \forall p \in PERIODS \\
 
     with lifetime n, interest rate i, discount factor DF(p),
     investment expenses c_{invest}(p) and
 
         .. math::
             annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
-            \cdot c_{invest}(p)
+            \cdot c_{invest}(p) \\
             &
-            DF(p) = (1+d)^{-p}
+            DF(p) = (1+d)^{-p} \\
 
     * Variable costs:
 
@@ -3525,20 +3525,20 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
         (1) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
         (2) P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
-        p > 0\\
+        p > 0 \\
         &
         P_{total}(p) = P_{invest}(p) + P_{existing}
-        for p = 0
+        for p = 0 \\
         &
-        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
+        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n \\
         &
-        P_{old, end}(p) = 0 else\\
+        P_{old, end}(p) = 0 else \\
         &
-        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age \\
         &
-        P_{old, exo}(p) = 0 else\\
+        P_{old, exo}(p) = 0 else \\
         &
-        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p) \\
         &
         (6) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
@@ -3596,16 +3596,16 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
     .. math::
         P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
         \cdot DF(p)
-        \forall p \in PERIODS
+        \forall p \in PERIODS \\
 
     with lifetime n, interest rate i, discount factor DF(p),
     investment expenses c_{invest}(p) and
 
         .. math::
             annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
-            \cdot c_{invest}(p)
+            \cdot c_{invest}(p) \\
             &
-            DF(p) = (1+d)^{-p}
+            DF(p) = (1+d)^{-p} \\
 
     * Variable costs:
 
@@ -3628,7 +3628,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
     Please refer to :class:`oemof.solph.custom.SinkDSMDIWBlock`.
 
     The following variables and parameters are exclusively used for
-    investment modeling:
+    multiperiodinvestment modeling:
 
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
@@ -5183,98 +5183,167 @@ class SinkDSMDLRBlock(SimpleBlock):
 
 
 class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
-    r"""Constraints for SinkDSMDLRBlock
+    r"""Constraints for SinkDSM with "DLR" approach
 
-    **The following constraints are created:**
+    **The following constraints are created for approach = 'DLR'
+    with attribute `multiperiod`:**
 
-    .. _SinkDSM-equations:
+    .. _SinkDSMDLR equations:
 
     .. math::
         &
-        (1) \quad \dot{E}_{p, t} = demand_{t} \cdot demand_{max} +
+        (1) \quad DSM_{h, t}^{up} = 0 \quad \forall h \in H_{DR}
+        \forall t \in \mathbb{T}
+        \quad if \space eligibility_{shift} = False \\
+        &
+        (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t \in \mathbb{T}
+        \quad if \space eligibility_{shed} = False \\
+        &
+        (3) \quad \dot{E}_{p, t} = demand_{t} \cdot demand_{max} +
         \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown} - DSM_{h, t}^{down} - DSM_{h, t}^{balanceUp}
-        - DSM_{t}^{shed})
+        + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
+        - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+        &
+        (4) \quad DSM_{h, t}^{balanceDo} =
+        \frac{DSM_{h, t - h}^{do, shift}}{\eta}
+        \quad \forall h \in H_{DR} \forall t \in [h..T] \\
+        &
+        (5) \quad DSM_{h, t}^{balanceUp} =
+        DSM_{h, t-h}^{up} \cdot \eta
+        \quad \forall h \in H_{DR} \forall t \in [h..T] \\
+        &
+        (6) \quad DSM_{h, t}^{do, shift} = 0
+        \quad \forall h \in H_{DR}
+        \forall t \in [T - h..T] \\
+        &
+        (7) \quad DSM_{h, t}^{up} = 0
+        \quad \forall h \in H_{DR}
+        \forall t \in [T - h..T] \\
+        &
+        (8) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+        + DSM_{h, t}^{balanceUp}) + DSM_{t}^{do, shed}
+        \leq E_{t}^{do} \cdot E_{max, do}
         \quad \forall t \in \mathbb{T} \\
         &
-        (2) \quad DSM_{h, t}^{balanceDown} =
-        \frac{DSM_{t-t_{shift}^h}^{down}}{\eta}
-        \quad \forall t \in [t_{shift}^h..\mathbb{T}], h \in H_{DR} \\
-        &
-        (3) \quad DSM_{h, t}^{balanceUp} = DSM_{t-t_{shift}^h}^{up} \cdot \eta
-        \quad \forall t \in [t_{shift}^{h}..\mathbb{T}], h \in H_{DR} \\
-        &
-        (4) \quad DSM_{h, t}^{down} = 0
-        \quad \forall t \in [\mathbb{T} - t_{shift}^h..\mathbb{T}],
-        h \in H_{DR}
-        &
-        (5) \quad DSM_{h, t}^{up} = 0
-        \quad \forall t \in [\mathbb{T} - t_{shift}^h..\mathbb{T}],
-        h \in H_{DR}
-        &
-        (6) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{down}
-        + DSM_{h, t}^{balanceUp}) + DSM_{t}^{shed} \leq capacity_{t}^{down}
-        \cdot capacity_{max}^{down}
+        (9) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        + DSM_{h, t}^{balanceDo})
+        \leq E_{t}^{up} \cdot E_{max, up}
         \quad \forall t \in \mathbb{T} \\
         &
-        (7) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown}) \leq capacity_{t}^{up}
-        \cdot capacity_{max}^{up}
+        (10) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
+        (DSM_{h, t}^{do, shift} - DSM_{h, t}^{balanceDo} \cdot \eta)
+        = W_{t}^{levelDo} - W_{t-1}^{levelDo}
+        \quad \forall t \in [1..T] \\
+        &
+        (11) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
+        (DSM_{h, t}^{up} \cdot \eta - DSM_{h, t}^{balanceUp})
+        = W_{t}^{levelUp} - W_{t-1}^{levelUp}
+        \quad \forall t \in [1..T] \\
+        &
+        (12) \quad W_{t}^{levelDo} \leq \overline{E}_{t}^{do}
+        \cdot E_{max, do} \cdot t_{shift}
         \quad \forall t \in \mathbb{T} \\
         &
-        (8) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{down} - DSM_{h, t}^{balanceDown} \cdot \eta =
-        W_{t}^{levelDown} - W_{t-1}^{levelDown} \quad
-        \forall t \in [1..\mathbb{T}] \\
+        (13) \quad W_{t}^{levelUp} \leq \overline{E}_{t}^{up}
+        \cdot E_{max, up} \cdot t_{shift}
+        \quad \forall t \in \mathbb{T} \\
         &
-        (9) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{up} \cdot \eta - DSM_{h, t}^{balanceUp}  = W_{t}^{levelUp}
-        - W_{t-1}^{levelUp} \quad \forall t \in [1..\mathbb{T}] \\
+        (14) \quad \displaystyle\sum_{t=t_{p}^{0}}^{t_{p}^{max}}
+        DSM_{t}^{do, shed}
+        \leq E_{max, do} \cdot \overline{E}_{t}^{do} \cdot t_{shed}
+        \cdot n^{yearLimitShed} \forall p \in PERIODS \\
         &
-        (10) \quad W_{t}^{levelDown} \leq \overline{capacity}_{t}^{down}
-        \cdot capacity_{max}^{down}
-        \cdot t_{interfere} \quad \forall t \in \mathbb{T} \\
+        (15) \quad \displaystyle\sum_{t=t_{p}^{0}}^{t_{p}^{max}}
+        \sum_{h=1}^{H_{DR}}
+        DSM_{h, t}^{do, shift}
+        \leq E_{max, do} \cdot \overline{E}_{t}^{do} \cdot t_{shift}
+        \cdot n^{yearLimitShift} \forall p \in PERIODS \\
+        (optional \space constraint) \\
         &
-        (11) \quad W_{t}^{levelUp} \leq \overline{capacity}_{t}^{up}
-        \cdot capacity_{max}^{up}
-        \cdot t_{interfere} \quad \forall t \in \mathbb{T} \\
+        (16) \quad \displaystyle\sum_{t=t_{p}^{0}}^{t_{p}^{max}}
+        \sum_{h=1}^{H_{DR}}
+        DSM_{h, t}^{up}
+        \leq E_{max, up} \cdot \overline{E}_{t}^{up} \cdot t_{shift}
+        \cdot n^{yearLimitShift} \forall p \in PERIODS \\
+        (optional \space constraint) \\
         &
-        (12) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
-         DSM_{h, t}^{down} \leq capacity_{max}^{down}
-        \cdot \overline{capacity}_{t}^{down} \cdot t_{interfere}
-        \cdot n^{yearLimit} \\
-        (optional \space constraint)
+        (17) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{do, shift}
+        \leq E_{max, do} \cdot \overline{E}_{t}^{do}
+        \cdot t_{shift} -
+        \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
+        DSM_{h, t - t'}^{do, shift}
+        \quad \forall t \in [t-t_{dayLimit}..T] \\
+        (optional \space constraint) \\
         &
-        (13) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{up} \leq capacity_{max}^{up}
-        \cdot \overline{capacity}_{t}^{up} \cdot t_{interfere}
-        \cdot n^{yearLimit} \\
-        (optional \space constraint
+        (18) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
+        \leq E_{max, up} \cdot \overline{E}_{t}^{up}
+        \cdot t_{shift} -
+        \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
+        DSM_{h, t - t'}^{up}
+        \quad \forall t \in [t-t_{dayLimit}..T] \\
+        (optional \space constraint) \\
         &
-        (14) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{down}
-        \leq capacity_{max}^{down} \cdot \overline{capacity}_{t}^{down}
-        \cdot t_{interfere} -
-        \displaystyle\sum_{t'=1}^{t_{dayLimit}}\sum_{h=1}^{H_{DR}}
-        DSM_{h, t-t'}^{down}
-        \quad \forall t \in [t-t_{dayLimit}..\mathbb{T}] \\
-        (optional \space constraint)
+        (19) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        + DSM_{h, t}^{balanceDo}
+        + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
+        + DSM_{t}^{do, shed}
+        \leq \max \{E_{t}^{up} \cdot E_{max, up},
+        E_{t}^{do} \cdot E_{max, do} \}
+        \quad \forall t \in \mathbb{T} \\
+        (optional \space constraint) \\
         &
-        (15) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
-        \leq capacity_{max}^{up} \cdot \overline{capacity}_{t}^{up}
-        \cdot t_{interfere} -
-        \displaystyle\sum_{t'=1}^{t_{dayLimit}}\sum_{h=1}^{H_{DR}}
-        DSM_{h, t-t'}^{up}
-        \quad \forall t \in [t-t_{dayLimit}..\mathbb{T}] \\
-        (optional \space constraint)
-        &
-        (16) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown}
-        + DSM_{h, t}^{down} + DSM_{h, t}^{balanceUp})
-        + DSM_{t}^{shed}
-        \leq \max \{capacity_{t}^{up} \cdot capacity_{max}^{up},
-        capacity_{t}^{down} \cdot capacity_{max}^{down} \}
-        \quad \forall t \in \mathbb{T} \\ (optional \space constraint)
-        &
+
+    *Note*: For the sake of readability, the handling of indices is not
+    displayed here. E.g. evaluating a variable for t-L may lead to a negative
+    and therefore infeasible index.
+    This is addressed by limiting the sums to non-negative indices within the
+    model index bounds. Please refer to the constraints implementation
+    themselves.
+
+    **The following parts of the objective function are created:**
+
+    * Variable costs:
+
+    .. math::
+        ((\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up} + DSM_{h, t}^{balanceDo})
+        \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + \sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+        + DSM_{h, t}^{balanceUp})
+        \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t)
+        * (1 + d)^{-p}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        demand_{max} \cdot cost_{p}^{fixed} \cdot (1 + d)^{-p} \\
+
+    **Table: Symbols and attribute names of variables and parameters**
+
+    The following variables and parameters are exclusively used for
+    multiperiod modeling:
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V",
+            "Energy flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
+            ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
+            "The time increment of the model"
+            ":math:`t_{p}^{0}`","",
+            "P", "The first timestep within a certain period of the
+            MultiPeriodModel"
+            ":math:`t_{p}^{max}`","",
+            "P", "The last timestep within a certain period of the
+            MultiPeriodModel"
     """
     CONSTRAINT_GROUP = True
 
@@ -6843,95 +6912,240 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
     r"""Constraints for SinkDSMDLRInvestmentBlock
 
-    **The following constraints are created:**
+    **The following constraints are created approach = 'DLR' with an
+    multiperiodinvestment object defined:**
 
     .. _SinkDSM-equations:
 
     .. math::
         &
-        (1) invest_{min} \leq \quad invest \leq invest_{max}
+        (1) \quad invest_{p}^{min} \leq P_{invest}(p) \leq invest_{p}^{max} \\
         &
-        (2) \quad \dot{E}_{t} = demand_{t} \cdot invest +
-        \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown} - DSM_{h, t}^{down} - DSM_{h, t}^{balanceUp}
-        - DSM_{t}^{shed})
-        \quad \forall t \in \mathbb{T} \\
+        (2) P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
+        p > 0 \\
         &
-        (3) \quad DSM_{h, t}^{balanceDown}
-        = \frac{DSM_{t-t_{shift}^h}^{down}}{\eta}
-        \quad \forall t \in [t_{shift}^h..\mathbb{T}], h \in H_{DR} \\
+        P_{total}(p) = P_{invest}(p) + P_{existing}
+        for p = 0 \\
         &
-        (4) \quad DSM_{h, t}^{balanceUp} = DSM_{t-t_{shift}^h}^{up} \cdot \eta
-        \quad \forall t \in [t_{shift}^{h}..\mathbb{T}], h \in H_{DR} \\
+        (3) P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n \\
         &
-        (5) \quad DSM_{h, t}^{down} = 0
-        \quad \forall t \in [\mathbb{T} - t_{shift}^h..\mathbb{T}],
-        h \in H_{DR}
+        P_{old, end}(p) = 0 else \\
         &
-       (6) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{down}
-        + DSM_{h, t}^{balanceUp}) + DSM_{t}^{shed} \leq capacity_{t}^{down}
-        \cdot invest \cdot flexshare^{down}
-        \quad \forall t \in \mathbb{T} \\
+        (4) P_{old, exo}(p) = P_{existing} \forall p == n - age \\
         &
-        (7) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown}) \leq capacity_{t}^{up}
-        \cdot invest \cdot flexshare^{up}
-        \quad \forall t \in \mathbb{T} \\
+        P_{old, exo}(p) = 0 else \\
         &
-        (8) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{down} - DSM_{h, t}^{balanceDown}
-        \cdot \eta = W_{t}^{levelDown}
-        - W_{t-1}^{levelDown} \quad \forall t \in [1..\mathbb{T}] \\
+        (5) P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p) \\
         &
-        (9) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{up} \cdot \eta - DSM_{h, t}^{balanceUp}
-        = W_{t}^{levelUp}
-        - W_{t-1}^{levelUp} \quad \forall t \in [1..\mathbb{T}] \\
+        (6) \quad DSM_{h, t}^{up} = 0 \quad \forall h \in H_{DR}
+        \forall t \in \mathbb{T}
+        \quad if \space eligibility_{shift} = False \\
         &
-        (10) \quad W_{t}^{levelDown} \leq \overline{capacity}_{t}^{down}
-        \cdot invest \cdot flexshare^{down}
-        \cdot t_{interfere} \quad \forall t \in \mathbb{T} \\
+        (7) \quad DSM_{t}^{do, shed} = 0 \quad \forall t \in \mathbb{T}
+        \quad if \space eligibility_{shed} = False \\
         &
-        (11) \quad W_{t}^{levelUp} \leq \overline{capacity}_{t}^{up}
-        \cdot invest \cdot flexshare^{up}
-        \cdot t_{interfere} \quad \forall t \in \mathbb{T} \\
+        (8) \quad \dot{E}_{p, t} = demand_{t} \cdot (P_{invest}(p) + E_{exist})
+        + \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
+        - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed}
+        \quad \forall o \in PERIODS, t \in \mathbb{T} \\
         &
-        (12) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
-         DSM_{h, t}^{down} \leq invest \cdot flexshare^{down}
-        \cdot \overline{capacity}_{t}^{down} \cdot t_{interfere}
-        \cdot n^{yearLimit} \\
-        (optional \space constraint)
+        (9) \quad DSM_{h, t}^{balanceDo} =
+        \frac{DSM_{h, t - h}^{do, shift}}{\eta}
+        \quad \forall h \in H_{DR} \forall t \in [h..T] \\
         &
-        (13) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
-        DSM_{h, t}^{up} \leq invest \cdot flexshare^{up}
-        \cdot \overline{capacity}_{t}^{up} \cdot t_{interfere}
-        \cdot n^{yearLimit} \\
-        (optional \space constraint
+        (10) \quad DSM_{h, t}^{balanceUp} =
+        DSM_{h, t-h}^{up} \cdot \eta
+        \quad \forall h \in H_{DR} \forall t \in [h..T] \\
         &
-        (14) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{down}
-        \leq invest \cdot flexshare^{down} \cdot \overline{capacity}_{t}^{down}
-        \cdot t_{interfere} -
-        \displaystyle\sum_{t'=1}^{t_{dayLimit}}\sum_{h=1}^{H_{DR}}
-        DSM_{h, t-t'}^{down}
-        \quad \forall t \in [t-t_{dayLimit}..\mathbb{T}] \\
-        (optional \space constraint)
+        (11) \quad DSM_{h, t}^{do, shift} = 0
+        \quad \forall h \in H_{DR}
+        \forall t \in [T - h..T] \\
         &
-        (15) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
-        \leq invest \cdot flexshare^{up} \cdot \overline{capacity}_{t}^{up}
-        \cdot t_{interfere} -
-        \displaystyle\sum_{t'=1}^{t_{dayLimit}}\sum_{h=1}^{H_{DR}}
-        DSM_{h, t-t'}^{up}
-        \quad \forall t \in [t-t_{dayLimit}..\mathbb{T}] \\
-        (optional \space constraint)
+        (12) \quad DSM_{h, t}^{up} = 0
+        \quad \forall h \in H_{DR}
+        \forall t \in [T - h..T] \\
         &
-        (16) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
-        + DSM_{h, t}^{balanceDown}
-        + DSM_{h, t}^{down} + DSM_{h, t}^{balanceUp})
+        (13) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+        + DSM_{h, t}^{balanceUp}) + DSM_{t}^{do, shed}
+        \leq E_{t}^{do} \cdot P_{total}(p)
+        \cdot s_{flex, do}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+        &
+        (14) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        + DSM_{h, t}^{balanceDo})
+        \leq E_{t}^{up} \cdot P_{total}(p)
+        \cdot s_{flex, up}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+        &
+        (15) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
+        (DSM_{h, t}^{do, shift} - DSM_{h, t}^{balanceDo} \cdot \eta)
+        = W_{t}^{levelDo} - W_{t-1}^{levelDo}
+        \quad \forall t \in [1..T] \\
+        &
+        (16) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
+        (DSM_{h, t}^{up} \cdot \eta - DSM_{h, t}^{balanceUp})
+        = W_{t}^{levelUp} - W_{t-1}^{levelUp}
+        \quad \forall t \in [1..T] \\
+        &
+        (17) \quad W_{t}^{levelDo} \leq \overline{E}_{t}^{do}
+        \cdot P_{total}(p)
+        \cdot s_{flex, do} \cdot t_{shift}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+        &
+        (18) \quad W_{t}^{levelUp} \leq \overline{E}_{t}^{up}
+        \cdot P_{total}(p)
+        \cdot s_{flex, up} \cdot t_{shift}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+        &
+        (19) \quad \displaystyle\sum_{t=t_{p}^{0]}^{t_{p}^{max}}
+        DSM_{t}^{do, shed}
+        \leq P_{total}(p)
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \cdot t_{shed}
+        \cdot n^{yearLimitShed} \quad \forall p \in PERIODS \\
+        &
+        (20) \quad \displaystyle\sum_{t=t_{p}^{0]}^{t_{p}^{max}}
+        \sum_{h=1}^{H_{DR}}
+        DSM_{h, t}^{do, shift}
+        \leq P_{total}(p)
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \cdot t_{shift}
+        \cdot n^{yearLimitShift} \quad \forall p \in PERIODS \\
+        (optional \space constraint) \\
+        &
+        (21) \quad \displaystyle\sum_{t=t_{p}^{0]}^{t_{p}^{max}}
+        \sum_{h=1}^{H_{DR}}
+        DSM_{h, t}^{up}
+        \leq P_{total}(p)
+        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \cdot t_{shift}
+        \cdot n^{yearLimitShift} \quad \forall p in PERIODS \\
+        (optional \space constraint) \\
+        &
+        (22) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{do, shift}
+        \leq P_{total}(p)
+        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \cdot t_{shift} -
+        \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
+        DSM_{h, t - t'}^{do, shift}
+        \quad \forall p \in PERIODS, t \in [t-t_{dayLimit}..T] \\
+        (optional \space constraint) \\
+        &
+        (23) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
+        \leq P_{total}(p)
+        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \cdot t_{shift} -
+        \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
+        DSM_{h, t - t'}^{up}
+        \quad \forall p \in PERIODS, t \in [t-t_{dayLimit}..T] \\
+        (optional \space constraint) \\
+        &
+        (24) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        + DSM_{h, t}^{balanceDo}
+        + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
         + DSM_{t}^{shed}
-        \leq \max \{capacity_{t}^{up} \cdot invest \cdot flexshare^{up},
-        capacity_{t}^{down} \cdot invest \cdot flexshare^{down} \}
-        \quad \forall t \in \mathbb{T} \\ (optional \space constraint)
+        \leq \max \{E_{t}^{up} \cdot s_{flex, up},
+        E_{t}^{do} \cdot s_{flex, do} \} \cdot P_{total}(p)
+        \quad \forall  p \in PERIODS, t \in \mathbb{T} \\
+        (optional \space constraint) \\
         &
+
+    *Note*: For the sake of readability, the handling of indices is not
+    displayed here. E.g. evaluating a variable for t-L may lead to a negative
+    and therefore infeasible index.
+    This is addressed by limiting the sums to non-negative indices within the
+    model index bounds. Please refer to the constraints implementation
+    themselves.
+
+    **The following parts of the objective function are created:**
+
+    * Investment annuity:
+
+    .. math::
+        P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
+        \cdot DF(p)
+        \forall p \in PERIODS \\
+
+    with lifetime n, interest rate i, discount factor DF(p),
+    investment expenses c_{invest}(p) and
+
+        .. math::
+            annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
+            \cdot c_{invest}(p) \\
+            &
+            DF(p) = (1+d)^{-p} \\
+
+
+    * Variable costs:
+
+    .. math::
+        ((\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up} + DSM_{h, t}^{balanceDo})
+        \cdot \Delta t \cdot cost_{t}^{dsm, up}
+        + \sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+        + DSM_{h, t}^{balanceUp})
+        \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}) \cdot \Delta t)
+        * (1 + d)^{-p}
+        \quad \forall p \in PERIODS, t \in \mathbb{T} \\
+
+    * Fixed costs:
+
+    .. math::
+        \sum_{pp=p}^{p+n} (P_{invest}(p) \cdot cost_{p}^{fixed} \cdot DR(pp))
+        \cdot DR(p) \\
+
+    **Table: Symbols and attribute names of variables and parameters**
+
+    The following variables and parameters are exclusively used for
+    multiperiodinvestment modeling:
+
+        .. csv-table:: Variables (V) and Parameters (P)
+            :header: "symbol", "attribute", "type", "explanation"
+            :widths: 1, 1, 1, 1
+
+            ":math:`P_{invest}(p)` ",":attr:`~SinkDSM.invest` ","V",
+            "DSM capacity invested in in period p.
+            Equals to the additionally installed capacity.
+            The capacity share eligible for a shift is determined
+            by flex share(s)."
+            ":math:`invest_{p}^{min}` ",
+            ":attr:`~SinkDSM.investment.minimum` ",
+            "P", "minimum investment in period p"
+            ":math:`invest_{p}^{max}` ",
+            ":attr:`~SinkDSM.investment.maximum` ",
+            "P", "maximum investment in period p"
+            ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
+            "P", "existing DSM capacity"
+            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
+            "P","Share of invested capacity that may be shift upwards
+            at maximum"
+            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
+            "P", "Share of invested capacity that may be shift downwards
+            at maximum"
+            ":math:`c_{invest}(p)` ",
+            ":attr:`~SinkDSM.investment.epcosts` ",
+            "P", "specific nominal investment expenses in period p"
+            ":math:`\dot{E}_{p, t}`",":attr:`~SinkDSM.inputs`","V", "Energy
+            flowing in from (electrical) inflow bus for period p
+            and timestep t"
+            ":math:`cost_{p}^{fixed}`",":attr:`~SinkDSM.fixed_costs`","P",
+            "Fixed costs in period p"
+            ":math:`d`", ":attr:`~MultiPeriodModel.discount_rate`", "P",
+            "The discount rate of the optimization run"
+            ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
+            "The time increment of the model"
+            ":math:`i`",
+            ":attr:`~SinkDSM.multiperiodinvestment.interest_rate`", "P",
+            "The interest rate for investments into a SinkDSM"
+            ":math:`n`", "~SinkDSM.multiperiodinvestment.lifetime", "P",
+            "The lifetime of investments into a SinkDSM"
+            ":math:`t_{p}^{0}`","",
+            "P", "The first timestep within a certain period of the
+            MultiPeriodModel"
+            ":math:`t_{p}^{max}`","",
+            "P", "The last timestep within a certain period of the
+            MultiPeriodModel"
     """
     CONSTRAINT_GROUP = True
 

@@ -101,9 +101,9 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
 
         .. math::
             &
-            P_{invest, min}(p) \cdot b_{invest}(p) \le P_{invest}(p)\\
+            P_{invest, min}(p) \cdot b_{invest}(p) \le P_{invest}(p) \\
             &
-            P_{invest}(p) \le P_{invest, max}(p) \cdot b_{invest}(p)\\
+            P_{invest}(p) \le P_{invest, max}(p) \cdot b_{invest}(p) \\
 
     Total capacity is determined based on calculating the difference between
     new investments and decommissionings of old units that have reached their
@@ -113,21 +113,21 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
 
         .. math::
             P_{total}(p) = P_{invest}(p) + P_{total}(p-1) - P_{old}(p) \forall
-            p > 0\\
+            p > 0 \\
             &
             P_{total}(p) = P_{invest}(p) + P_{existing}
-            for p = 0
+            for p = 0 \\
 
         .. math::
-            P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n\\
+            P_{old, end}(p) = P_{invest}(p-n) \forall p \geq n \\
             &
-            P_{old, end}(p) = 0 else\\
+            P_{old, end}(p) = 0 else \\
             &
-            P_{old, exo}(p) = P_{existing} \forall p == n - age\\
+            P_{old, exo}(p) = P_{existing} \forall p == n - age \\
             &
-            P_{old, exo}(p) = 0 else\\
+            P_{old, exo}(p) = 0 else \\
             &
-            P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p)\\
+            P_{old}(p) = P_{old, end}(p) + P_{old, exo}(p) \\
             &
 
     For all *MultiPeriodInvestmentFlow* (independent of the attribute
@@ -198,7 +198,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
             .. math::
                 P_{invest}(p) \cdot annuity(c_{invest}(p), n, i) \cdot n
                 \cdot DF(p)
-                \forall p \in PERIODS
+                \forall p \in PERIODS \\
 
         * :attr:`nonconvex = True`
 
@@ -206,16 +206,16 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                 (P_{invest}(p) \cdot annuity(c_{invest}(p), n, i)
                 + b_{invest} \cdot c_{invest, fix})
                 \cdot DF(p)
-                \forall p \in PERIODS\\
+                \forall p \in PERIODS \\
 
     with lifetime n, interest rate i, discount factor DF(p),
     investment expenses c_{invest}(p) and
 
         .. math::
             annuity(c_{invest}(p), n, i) = \frac {(1+i)^n \cdot i}{(1+i)^n - 1}
-            \cdot c_{invest}(p)
+            \cdot c_{invest}(p) \\
             &
-            DF(p) = (1+d)^{-p}
+            DF(p) = (1+d)^{-p} \\
 
     whereby d is the discount rate. The interest rate i may deviate from the
     discount rate (if a microeconomic perspective is taken).
@@ -226,7 +226,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
         .. math::
             \sum_{pp=p}^{p+n} P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF(pp)
             \cdot DF(p)
-            \space \forall p \in PERIODS\\
+            \space \forall p \in PERIODS \\
 
     The total value of all costs of all *MultiPeriodInvestmentFlow*
     can be retrieved calling :meth:`om.InvestmentFlow.investment_costs.expr()`.
