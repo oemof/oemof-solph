@@ -15,8 +15,8 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
-from oemof.solph.plumbing import sequence
 from oemof.solph.models import MultiPeriodModel
+from oemof.solph.plumbing import sequence
 
 
 def emission_limit(om, flows=None, limit=None):
