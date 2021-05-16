@@ -10,8 +10,10 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-License-Identifier: MIT
 
 """
+from builtins import map
 
 from pyomo import environ as po
+from oemof.solph.models import MultiPeriodModel
 
 
 def limit_active_flow_count(
@@ -66,28 +68,56 @@ def limit_active_flow_count(
     ================== ==== ===================================================
     """
 
-    # number of concurrent active flows
-    setattr(model, constraint_name, po.Var(model.TIMESTEPS))
+    if not isinstance(model, MultiPeriodModel):
+        # number of concurrent active flows
+        setattr(model, constraint_name, po.Var(model.TIMESTEPS))
 
-    for t in model.TIMESTEPS:
-        getattr(model, constraint_name)[t].setlb(lower_limit)
-        getattr(model, constraint_name)[t].setub(upper_limit)
+        for t in model.TIMESTEPS:
+            getattr(model, constraint_name)[t].setlb(lower_limit)
+            getattr(model, constraint_name)[t].setub(upper_limit)
 
-    attrname_constraint = constraint_name + "_constraint"
+        attrname_constraint = constraint_name + "_constraint"
 
-    def _flow_count_rule(m):
-        for ts in m.TIMESTEPS:
-            lhs = sum(m.NonConvexFlow.status[fi, fo, ts] for fi, fo in flows)
-            rhs = getattr(model, constraint_name)[ts]
-            expr = lhs == rhs
-            if expr is not True:
-                getattr(m, attrname_constraint).add(ts, expr)
+        def _flow_count_rule(m):
+            for ts in m.TIMESTEPS:
+                lhs = sum(m.NonConvexFlow.status[fi, fo, ts]
+                          for fi, fo in flows)
+                rhs = getattr(model, constraint_name)[ts]
+                expr = lhs == rhs
+                if expr is not True:
+                    getattr(m, attrname_constraint).add(ts, expr)
 
-    setattr(
-        model,
-        attrname_constraint,
-        po.Constraint(model.TIMESTEPS, noruleinit=True),
-    )
+        setattr(
+            model,
+            attrname_constraint,
+            po.Constraint(model.TIMESTEPS, noruleinit=True),
+        )
+
+    else:
+        # number of concurrent active flows
+        setattr(model, constraint_name, po.Var(model.TIMEINDEX))
+
+        for p, t in model.TIMEINDEX:
+            getattr(model, constraint_name)[p, t].setlb(lower_limit)
+            getattr(model, constraint_name)[p, t].setub(upper_limit)
+
+        attrname_constraint = constraint_name + "_constraint"
+
+        def _flow_count_rule(m):
+            for p, ts in m.TIMEINDEX:
+                lhs = sum(m.NonConvexFlow.status[fi, fo, p, ts]
+                          for fi, fo in flows)
+                rhs = getattr(model, constraint_name)[p, ts]
+                expr = lhs == rhs
+                if expr is not True:
+                    getattr(m, attrname_constraint).add(p, ts, expr)
+
+        setattr(
+            model,
+            attrname_constraint,
+            po.Constraint(model.TIMEINDEX, noruleinit=True),
+        )
+
     setattr(
         model,
         attrname_constraint + "_build",
