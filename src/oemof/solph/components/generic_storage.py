@@ -2204,6 +2204,6 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
+        self.investment_costs = investment_costs
         self.costs = Expression(expr=investment_costs + fixed_costs)
-
-        return investment_costs + fixed_costs
+        return self.costs

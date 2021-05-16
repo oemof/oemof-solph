@@ -1813,10 +1813,10 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
+        self.investment_costs = investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
-
         return self.cost
 
 
@@ -4295,10 +4295,10 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
+        self.investment_costs = investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
-
         return self.cost
 
 
@@ -7992,6 +7992,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
+        self.investment_costs = investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs)
         return self.cost

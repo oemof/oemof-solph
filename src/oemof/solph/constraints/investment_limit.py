@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 """
 
 from pyomo import environ as po
+from oemof.solph.models import MultiPeriodModel
 
 
 def investment_limit(model, limit=None):
@@ -31,11 +32,46 @@ def investment_limit(model, limit=None):
     def investment_rule(m):
         expr = 0
 
-        if hasattr(m, "InvestmentFlow"):
-            expr += m.InvestmentFlow.investment_costs
+        if not isinstance(m, MultiPeriodModel):
+            if hasattr(m, "InvestmentFlow"):
+                expr += m.InvestmentFlow.investment_costs
 
-        if hasattr(m, "GenericInvestmentStorageBlock"):
-            expr += m.GenericInvestmentStorageBlock.investment_costs
+            if hasattr(m, "GenericInvestmentStorageBlock"):
+                expr += m.GenericInvestmentStorageBlock.investment_costs
+
+            if hasattr(m, "SinkDSMOemofInvestmentBlock"):
+                expr += m.SinkDSMOemofInvestmentBlock.cost
+
+            if hasattr(m, "SinkDSMDIWInvestmentBlock"):
+                expr += m.SinkDSMDIWInvestmentBlock.cost
+
+            if hasattr(m, "SinkDSMDLRInvestmentBlock"):
+                expr += m.SinkDSMDLRInvestmentBlock.cost
+
+        else:
+            if hasattr(m, "MultiPeriodInvestmentFlow"):
+                expr += m.MultiPeriodInvestmentFlow.investment_costs
+
+            if hasattr(m, "GenericMultiPeriodInvestmentStorageBlock"):
+                expr += (
+                    m.GenericMultiPeriodInvestmentStorageBlock.investment_costs
+                )
+
+            if hasattr(m, "SinkDSMOemofMultiPeriodInvestmentBlock"):
+                expr += (
+                    m.SinkDSMOemofMultiPeriodInvestmentBlock.investment_costs
+                )
+
+            if hasattr(m, "SinkDSMDIWMultiPeriodInvestmentBlock"):
+                expr += (
+                    m.SinkDSMDIWMultiPeriodInvestmentBlock.investment_costs
+                )
+
+            if hasattr(m, "SinkDSMDLRMultiPeriodInvestmentBlock"):
+                expr += (
+                    m.SinkDSMDLRMultiPeriodInvestmentBlock.investment_costs
+                )
+
         return expr <= limit
 
     model.investment_limit = po.Constraint(rule=investment_rule)
@@ -111,23 +147,43 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
-    invest_flows = {}
 
-    for (i, o) in model.flows:
-        if hasattr(model.flows[i, o].investment, keyword):
-            invest_flows[(i, o)] = model.flows[i, o].investment
+    if not isinstance(model, MultiPeriodModel):
+        invest_flows = {}
 
-    limit_name = "invest_limit_" + keyword
+        for (i, o) in model.flows:
+            if hasattr(model.flows[i, o].investment, keyword):
+                invest_flows[(i, o)] = model.flows[i, o].investment
+
+        limit_name = "invest_limit_" + keyword
+
+        expr = sum(
+            model.InvestmentFlow.invest[inflow, outflow]
+            * getattr(invest_flows[inflow, outflow], keyword)
+            for (inflow, outflow) in invest_flows
+        )
+    else:
+        multiperiodinvest_flows = {}
+
+        for (i, o) in model.flows:
+            if hasattr(model.flows[i, o].mutliperiodinvestment, keyword):
+                multiperiodinvest_flows[(i, o)] = (
+                    model.flows[i, o].multiperiodinvestment
+                )
+
+        limit_name = "mutliperiodinvest_limit_" + keyword
+
+        expr = sum(
+            model.MultiPeriodInvestmentFlow.invest[inflow, outflow]
+            * getattr(multiperiodinvest_flows[inflow, outflow], keyword)
+            for (inflow, outflow) in multiperiodinvest_flows
+        )
 
     setattr(
         model,
         limit_name,
         po.Expression(
-            expr=sum(
-                model.InvestmentFlow.invest[inflow, outflow]
-                * getattr(invest_flows[inflow, outflow], keyword)
-                for (inflow, outflow) in invest_flows
-            )
+            expr=expr
         ),
     )
 
