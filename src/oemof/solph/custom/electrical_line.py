@@ -92,6 +92,7 @@ class ElectricalLine(Flow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+        self.multiperiod = kwargs.get("multiperiod", False)
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:
@@ -107,7 +108,10 @@ class ElectricalLine(Flow):
         self.bidirectional = True
 
     def constraint_group(self):
-        return ElectricalLineBlock
+        if not self.multiperiod:
+            return ElectricalLineBlock
+        else:
+            return ElectricalLineMultiPeriodBlock
 
 
 class ElectricalLineBlock(SimpleBlock):
@@ -206,5 +210,86 @@ class ElectricalLineBlock(SimpleBlock):
                     block.electrical_flow.add((n, t), (lhs == rhs))
 
         self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
+
+        self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)
+
+
+class ElectricalLineMultiPeriodBlock(SimpleBlock):
+    r"""Block for the linear relation of nodes with type
+    class:`.ElectricalLine` with :attr:`multiperiod` set to True.
+
+    See class:`ElectricalLine` for further information.
+    """
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """Creates the linear constraint for the class:`ElectricalLine`
+        block with :attr:`multiperiod` set to True.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.ElectricalLine (eline) objects for which
+            the linear relation of inputs and outputs is created
+            e.g. group = [eline1, eline2, ...]. The components inside the
+            list need to hold a attribute `reactance` of type Sequence
+            containing the reactance of the line.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        # create voltage angle variables
+        self.ELECTRICAL_BUSES = Set(
+            initialize=[n for n in m.es.nodes if isinstance(n, ElectricalBus)]
+        )
+
+        def _voltage_angle_bounds(block, b, t):
+            return b.v_min, b.v_max
+
+        self.voltage_angle = Var(
+            self.ELECTRICAL_BUSES, m.TIMESTEPS, bounds=_voltage_angle_bounds
+        )
+
+        if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
+            # TODO: Make this robust to select the same slack bus for
+            # the same problems
+            bus = [b for b in self.ELECTRICAL_BUSES][0]
+            logging.info(
+                "No slack bus set,setting bus {0} as slack bus".format(
+                    bus.label
+                )
+            )
+            bus.slack = True
+
+        def _voltage_angle_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n in group:
+                    if n.input.slack is True:
+                        self.voltage_angle[n.output, t].value = 0
+                        self.voltage_angle[n.output, t].fix()
+                    try:
+                        lhs = m.flow[n.input, n.output, p, t]
+                        rhs = (
+                            1
+                            / n.reactance[t]
+                            * (
+                                self.voltage_angle[n.input, t]
+                                - self.voltage_angle[n.output, t]
+                            )
+                        )
+                    except ValueError:
+                        raise ValueError(
+                            "Error in constraint creation",
+                            "of node {}".format(n.label),
+                        )
+                    block.electrical_flow.add((n, p, t), (lhs == rhs))
+
+        self.electrical_flow = Constraint(group, m.TIMEINDEX, noruleinit=True)
 
         self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)

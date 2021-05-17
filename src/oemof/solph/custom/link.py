@@ -92,7 +92,7 @@ class Link(on.Transformer):
         if not self.multiperiod:
             return LinkBlock
         else:
-            return MultiPeriodLinkBlock
+            return LinkMultiPeriodBlock
 
 
 class LinkBlock(SimpleBlock):
@@ -189,7 +189,7 @@ class LinkBlock(SimpleBlock):
         )
 
 
-class MultiPeriodLinkBlock(SimpleBlock):
+class LinkMultiPeriodBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.custom.Link` with the :attr:`multiperiod`
 
