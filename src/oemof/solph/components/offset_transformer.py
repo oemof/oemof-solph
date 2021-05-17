@@ -161,3 +161,55 @@ class OffsetTransformerBlock(SimpleBlock):
         self.relation = Constraint(
             self.OFFSETTRANSFORMERS, m.TIMESTEPS, rule=_relation_rule
         )
+
+
+class OffsetTransformerMultiPeriodBlock(SimpleBlock):
+    r"""Block for the relation of nodes with type
+    :class:`~oemof.solph.components.offset_transformer.OffsetTransformer`
+    with :attr:`multiperiod` set to True.
+
+    See class:`OffsetTransformerBlock` for parameters, variables and
+    constraints formulations.
+    """
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """Creates the relation for the class:`OffsetTransformer`.
+
+        Parameters
+        ----------
+        group : list
+            List of oemof.solph.custom.OffsetTransformer objects for which
+            the relation of inputs and outputs is created
+            e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
+            the list need to hold an attribute `coefficients` of type dict
+            containing the conversion factors for all inputs to outputs.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
+
+        def _relation_rule(block, n, p, t):
+            """Link binary input and output flow to component outflow."""
+            expr = 0
+            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
+            expr += (
+                m.flow[list(n.inputs.keys())[0], n, p, t]
+                * n.coefficients[1][t]
+            )
+            expr += (
+                m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t]
+                * n.coefficients[0][t]
+            )
+            return expr == 0
+
+        self.relation = Constraint(
+            self.OFFSETTRANSFORMERS, m.TIMEINDEX, rule=_relation_rule
+        )

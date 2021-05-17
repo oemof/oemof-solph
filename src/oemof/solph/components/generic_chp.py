@@ -503,3 +503,216 @@ class GenericCHPBlock(SimpleBlock):
             return 0
 
         return 0
+
+
+class GenericCHPMultiPeriodBlock(SimpleBlock):
+    r"""
+    Block for the relation of the :math:`n` nodes with
+    type class:`.GenericCHP` and :attr:`multiperiod` set to True.
+
+    See class:`GenericCHPBlock` for parameters, variables and
+    constraints descriptions.
+    """  # noqa: E501
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """
+        Create constraints for GenericCHPBlock.
+
+        Parameters
+        ----------
+        group : list
+            List containing `GenericCHP` objects.
+            e.g. groups=[ghcp1, gchp2,..]
+        """
+        m = self.parent_block()
+
+        if group is None:
+            return None
+
+        self.GENERICCHPS = Set(initialize=[n for n in group])
+
+        # variables
+        self.H_F = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.H_L_FG_max = Var(
+            self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals
+        )
+        self.H_L_FG_min = Var(
+            self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals
+        )
+        self.P_woDH = Var(
+            self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals
+        )
+        self.P = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.Q = Var(self.GENERICCHPS, m.TIMESTEPS, within=NonNegativeReals)
+        self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
+
+        # constraint rules
+        def _H_flow_rule(block, n, p, t):
+            """Link fuel consumption to component inflow."""
+            expr = 0
+            expr += self.H_F[n, t]
+            expr += -m.flow[list(n.fuel_input.keys())[0], n, p, t]
+            return expr == 0
+
+        self.H_flow = Constraint(
+            self.GENERICCHPS, m.TIMEINDEX, rule=_H_flow_rule
+        )
+
+        def _Q_flow_rule(block, n, p, t):
+            """Link heat flow to component outflow."""
+            expr = 0
+            expr += self.Q[n, t]
+            expr += -m.flow[n, list(n.heat_output.keys())[0], p, t]
+            return expr == 0
+
+        self.Q_flow = Constraint(
+            self.GENERICCHPS, m.TIMEINDEX, rule=_Q_flow_rule
+        )
+
+        def _P_flow_rule(block, n, p, t):
+            """Link power flow to component outflow."""
+            expr = 0
+            expr += self.P[n, t]
+            expr += -m.flow[n, list(n.electrical_output.keys())[0], p, t]
+            return expr == 0
+
+        self.P_flow = Constraint(
+            self.GENERICCHPS, m.TIMEINDEX, rule=_P_flow_rule
+        )
+
+        def _H_F_1_rule(block, n, t):
+            """Set P_woDH depending on H_F."""
+            expr = 0
+            expr += -self.H_F[n, t]
+            expr += n.alphas[0][t] * self.Y[n, t]
+            expr += n.alphas[1][t] * self.P_woDH[n, t]
+            return expr == 0
+
+        self.H_F_1 = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_F_1_rule
+        )
+
+        def _H_F_2_rule(block, n, t):
+            """Determine relation between H_F, P and Q."""
+            expr = 0
+            expr += -self.H_F[n, t]
+            expr += n.alphas[0][t] * self.Y[n, t]
+            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            return expr == 0
+
+        self.H_F_2 = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_F_2_rule
+        )
+
+        def _H_F_3_rule(block, n, t):
+            """Set upper value of operating range via H_F."""
+            expr = 0
+            expr += self.H_F[n, t]
+            expr += -self.Y[n, t] * (
+                list(n.electrical_output.values())[0].P_max_woDH[t]
+                / list(n.electrical_output.values())[0].Eta_el_max_woDH[t]
+            )
+            return expr <= 0
+
+        self.H_F_3 = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_F_3_rule
+        )
+
+        def _H_F_4_rule(block, n, t):
+            """Set lower value of operating range via H_F."""
+            expr = 0
+            expr += self.H_F[n, t]
+            expr += -self.Y[n, t] * (
+                list(n.electrical_output.values())[0].P_min_woDH[t]
+                / list(n.electrical_output.values())[0].Eta_el_min_woDH[t]
+            )
+            return expr >= 0
+
+        self.H_F_4 = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_F_4_rule
+        )
+
+        def _H_L_FG_max_rule(block, n, t):
+            """Set max. flue gas loss as share fuel flow share."""
+            expr = 0
+            expr += -self.H_L_FG_max[n, t]
+            expr += (
+                self.H_F[n, t]
+                * list(n.fuel_input.values())[0].H_L_FG_share_max[t]
+            )
+            return expr == 0
+
+        self.H_L_FG_max_def = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_L_FG_max_rule
+        )
+
+        def _Q_max_res_rule(block, n, t):
+            """Set maximum Q depending on fuel and electrical flow."""
+            expr = 0
+            expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
+            expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
+            expr += -self.H_F[n, t]
+            # back-pressure characteristics or one-segment model
+            if n.back_pressure is True:
+                return expr == 0
+            else:
+                return expr <= 0
+
+        self.Q_max_res = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_Q_max_res_rule
+        )
+
+        def _H_L_FG_min_rule(block, n, t):
+            """Set min. flue gas loss as fuel flow share."""
+            # minimum flue gas losses e.g. for motoric CHPs
+            if getattr(
+                list(n.fuel_input.values())[0], "H_L_FG_share_min", None
+            ):
+                expr = 0
+                expr += -self.H_L_FG_min[n, t]
+                expr += (
+                    self.H_F[n, t]
+                    * list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+                )
+                return expr == 0
+            else:
+                return Constraint.Skip
+
+        self.H_L_FG_min_def = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_L_FG_min_rule
+        )
+
+        def _Q_min_res_rule(block, n, t):
+            """Set minimum Q depending on fuel and eletrical flow."""
+            # minimum restriction for heat flows e.g. for motoric CHPs
+            if getattr(
+                list(n.fuel_input.values())[0], "H_L_FG_share_min", None
+            ):
+                expr = 0
+                expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_min[n, t]
+                expr += (
+                    list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
+                )
+                expr += -self.H_F[n, t]
+                return expr >= 0
+            else:
+                return Constraint.Skip
+
+        self.Q_min_res = Constraint(
+            self.GENERICCHPS, m.TIMESTEPS, rule=_Q_min_res_rule
+        )
+
+    def _objective_expression(self):
+        r"""Objective expression for generic CHPs with no investment.
+
+        Note: This adds nothing as variable costs are already
+        added in the Block :class:`Flow`.
+        """
+        if not hasattr(self, "GENERICCHPS"):
+            return 0
+
+        return 0
