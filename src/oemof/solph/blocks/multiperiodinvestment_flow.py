@@ -18,6 +18,8 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
+from oemof.tools import debugging
+from oemof.tools import economics
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -26,9 +28,6 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
-
-from oemof.tools import economics
-from oemof.tools import debugging
 
 
 class MultiPeriodInvestmentFlow(SimpleBlock):

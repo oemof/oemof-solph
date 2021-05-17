@@ -22,6 +22,8 @@ SPDX-License-Identifier: MIT
 from warnings import warn
 
 from oemof.network import network
+from oemof.tools import debugging
+from oemof.tools import economics
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -31,8 +33,6 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.tools import economics
-from oemof.tools import debugging
 from oemof.solph import network as solph_network
 from oemof.solph.options import Investment, MultiPeriodInvestment
 from oemof.solph.plumbing import sequence as solph_sequence

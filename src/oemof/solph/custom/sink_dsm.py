@@ -20,6 +20,8 @@ import itertools
 from warnings import warn
 
 from numpy import mean
+from oemof.tools import debugging
+from oemof.tools import economics
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -28,8 +30,6 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.tools import debugging
-from oemof.tools import economics
 from oemof.solph.network import Sink
 from oemof.solph.options import Investment
 from oemof.solph.options import MultiPeriodInvestment
