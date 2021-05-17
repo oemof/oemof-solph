@@ -75,9 +75,13 @@ class ExtractionTurbineCHP(solph_network.Transformer):
             k: solph_sequence(v)
             for k, v in conversion_factor_full_condensation.items()
         }
+        self.multiperiod = kwargs.get("multiperiod", False)
 
     def constraint_group(self):
-        return ExtractionTurbineCHPBlock
+        if not self.multiperiod:
+            return ExtractionTurbineCHPBlock
+        else:
+            return ExtractionTurbineCHPMultiPeriodBlock
 
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
@@ -211,6 +215,103 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         self.out_flow_relation = Constraint(
             group, m.TIMESTEPS, noruleinit=True
+        )
+        self.out_flow_relation_build = BuildAction(
+            rule=_out_flow_relation_rule
+        )
+
+
+class ExtractionTurbineCHPMultiPeriodBlock(SimpleBlock):
+    r"""Block for the linear relation of nodes with type
+    :class:`~oemof.solph.components.ExtractionTurbineCHP`
+    and :attr:`multiperiod` set to True
+
+    **The following two constraints are created:**
+
+    See class:`ExtractionTurbineCHPBlock`.
+
+    """  # noqa: E501
+
+    CONSTRAINT_GROUP = True
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+    def _create(self, group=None):
+        """Creates the linear constraint for the
+        :class:`oemof.solph.Transformer` block.
+
+        Parameters
+        ----------
+        group : list
+            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects
+            for which the linear relation of inputs and outputs is created
+            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
+            is created for all existing relations of the inputs and all outputs
+            of the transformer. The components inside the list need to hold
+            all needed attributes.
+        """
+        if group is None:
+            return None
+
+        m = self.parent_block()
+
+        for n in group:
+            n.inflow = list(n.inputs)[0]
+            n.main_flow = [
+                k for k, v in n.conversion_factor_full_condensation.items()
+            ][0]
+            n.main_output = [o for o in n.outputs if n.main_flow == o][0]
+            n.tapped_output = [o for o in n.outputs if n.main_flow != o][0]
+            n.conversion_factor_full_condensation_sq = (
+                n.conversion_factor_full_condensation[n.main_output]
+            )
+            n.flow_relation_index = [
+                n.conversion_factors[n.main_output][t]
+                / n.conversion_factors[n.tapped_output][t]
+                for t in m.TIMESTEPS
+            ]
+            n.main_flow_loss_index = [
+                (
+                    n.conversion_factor_full_condensation_sq[t]
+                    - n.conversion_factors[n.main_output][t]
+                )
+                / n.conversion_factors[n.tapped_output][t]
+                for t in m.TIMESTEPS
+            ]
+
+        def _input_output_relation_rule(block):
+            """Connection between input, main output and tapped output."""
+            for p, t in m.TIMEINDEX:
+                for g in group:
+                    lhs = m.flow[g.inflow, g, p, t]
+                    rhs = (
+                        m.flow[g, g.main_output, p, t]
+                        + m.flow[g, g.tapped_output, p, t]
+                        * g.main_flow_loss_index[t]
+                    ) / g.conversion_factor_full_condensation_sq[t]
+                    block.input_output_relation.add((g, p, t), (lhs == rhs))
+
+        self.input_output_relation = Constraint(
+            group, m.TIMEINDEX, noruleinit=True
+        )
+        self.input_output_relation_build = BuildAction(
+            rule=_input_output_relation_rule
+        )
+
+        def _out_flow_relation_rule(block):
+            """Relation between main and tapped output in full chp mode."""
+            for p, t in m.TIMEINDEX:
+                for g in group:
+                    lhs = m.flow[g, g.main_output, p, t]
+                    rhs = (
+                        m.flow[g, g.tapped_output, p, t]
+                        * g.flow_relation_index[t]
+                    )
+                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
+
+        self.out_flow_relation = Constraint(
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule
