@@ -34,7 +34,8 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.solph import network as solph_network
-from oemof.solph.options import Investment, MultiPeriodInvestment
+from oemof.solph.options import Investment
+from oemof.solph.options import MultiPeriodInvestment
 from oemof.solph.plumbing import sequence as solph_sequence
 
 
