@@ -23,13 +23,8 @@ import pandas as pd
 from oemof.solph import (models, network, custom, options,
                          processing, views)
 
-# import models
-# import network
-# import components
-# import custom
-# import options
-# import processing
-# import views
+solver = 'cbc'
+# solver = 'gurobi'
 
 t_idx_1 = pd.date_range('1/1/2020', periods=3, freq='H')
 t_idx_2 = pd.date_range('1/1/2030', periods=3, freq='H')
@@ -421,7 +416,7 @@ test = models.MultiPeriodModel(es, discount_rate=0.02)
 # test.pprint()
 test.receive_duals()
 
-test.solve(solver='gurobi', solve_kwargs={'tee': True})
+test.solve(solver=solver, solve_kwargs={'tee': True})
 
 meta = processing.meta_results(test)
 
