@@ -21,8 +21,12 @@ except ImportError as IE:
 
 import pandas as pd
 
-from oemof.solph import (models, network, custom, options,
-                         processing, views)
+from oemof.solph import custom
+from oemof.solph import models
+from oemof.solph import network
+from oemof.solph import options
+from oemof.solph import processing
+from oemof.solph import views
 
 solver = 'cbc'
 # solver = 'gurobi'
