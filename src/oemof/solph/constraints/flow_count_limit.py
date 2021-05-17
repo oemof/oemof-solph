@@ -10,9 +10,9 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-License-Identifier: MIT
 
 """
-from builtins import map
 
 from pyomo import environ as po
+
 from oemof.solph.models import MultiPeriodModel
 
 

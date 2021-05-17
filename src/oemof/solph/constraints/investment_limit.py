@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 """
 
 from pyomo import environ as po
-from oemof.solph.models import MultiPeriodModel
 
 
 def investment_limit(model, limit=None):

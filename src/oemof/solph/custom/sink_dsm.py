@@ -2372,7 +2372,7 @@ class SinkDSMDIWBlock(SimpleBlock):
             for g in self.dsm:
                 dsm_cost += (self.dsm_up[g, t]
                              * g.cost_dsm_up[t]
-                             * m.objective_weigthing[t])
+                             * m.objective_weighting[t])
                 dsm_cost += ((sum(self.dsm_do_shift[g, tt, t]
                                   for tt in m.TIMESTEPS)
                               * g.cost_dsm_down_shift[t]
