@@ -159,9 +159,9 @@ def additional_multiperiodinvestment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-            model.MultiPeriodInvestmentFlow.invest[inflow, outflow]
-            * getattr(multiperiodinvest_flows[inflow, outflow], keyword)
-            for (inflow, outflow) in multiperiodinvest_flows
+                model.MultiPeriodInvestmentFlow.invest[inflow, outflow]
+                * getattr(multiperiodinvest_flows[inflow, outflow], keyword)
+                for (inflow, outflow) in multiperiodinvest_flows
         )
         ),
     )
