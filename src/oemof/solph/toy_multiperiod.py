@@ -16,6 +16,7 @@ Add wind source and demand sink for FR and links for exchange.
 try:
     import matplotlib.pyplot as plt
 except ImportError as IE:
+    plt = None
     del IE
 
 import pandas as pd
