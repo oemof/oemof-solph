@@ -69,12 +69,6 @@ def test_wrong_combination_of_options():
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
 
 
-def test_error_of_deprecated_fixed_costs():
-    msg = "The `fixed_costs` attribute has been removed with v0.2!"
-    with pytest.raises(AttributeError, match=msg):
-        solph.Flow(fixed_costs=34)
-
-
 def test_flow_with_fix_and_min_max():
     msg = "It is not allowed to define min/max if fix is defined."
     with pytest.raises(AttributeError, match=msg):
