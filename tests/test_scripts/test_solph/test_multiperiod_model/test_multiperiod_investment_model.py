@@ -26,7 +26,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def test_multiperiod_investment_model(solver="gurobi"):
+def test_multiperiod_investment_model(solver="cbc"):
     """Test a simple multiperiod investment model
     for multiple SinkDSM approaches"""
 

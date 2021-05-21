@@ -21,12 +21,11 @@ from oemof.solph import components
 from oemof.solph import custom
 from oemof.solph import models
 from oemof.solph import network
-from oemof.solph import options
 from oemof.solph import processing
 from oemof.solph import views
 
 
-def test_multiperiod_dispatch_model(solver="gurobi"):
+def test_multiperiod_dispatch_model(solver="cbc"):
     """Test a simple multiperiod dispatch model
      for multiple SinkDSM approaches"""
 
