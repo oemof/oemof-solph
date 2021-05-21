@@ -26,7 +26,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def test_multiperiod_model(solver="gurobi"):
+def test_multiperiod_model(solver="cbc"):
     """Test a simple multiperiod investment model"""
 
     t_idx_1 = pd.date_range('1/1/2020', periods=3, freq='H')
@@ -284,14 +284,9 @@ def test_multiperiod_model(solver="gurobi"):
 
     om = models.MultiPeriodModel(es, discount_rate=0.02)
     om.receive_duals()
-
     om.solve(solver=solver)
 
     results = processing.results(om)
-
-    # Collect all investment results
-    invest_units = [bus_el, dsm_unit, storage_el]
-
     test_results = {
         "DE_bus_el": pd.Series(
             {"invest": 0,
