@@ -5872,7 +5872,7 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                                * g.shift_time * g.n_yearLimit_shift)
 
                         # add constraint
-                        block.dr_yearly_limit_inc.add(g, (lhs <= rhs))
+                        block.dr_yearly_limit_inc.add((g, p), (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
