@@ -261,6 +261,7 @@ def results(om):
             for bus, timesteps in grouped:
                 duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
                 df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+                append_duals(result, bus, df, scalars_col, duals)
         else:
             grouped = groupby(sorted(om.MultiPeriodBus.balance.iterkeys()),
                               lambda p: p[0])
@@ -268,16 +269,20 @@ def results(om):
                 duals = [om.dual[om.MultiPeriodBus.balance[bus, p, t]]
                          for _, p, t in timeindex]
                 df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
-
-        if (bus, None) not in result.keys():
-            result[(bus, None)] = {
-                "sequences": df,
-                scalars_col: pd.Series(dtype=float)
-            }
-        else:
-            result[(bus, None)]["sequences"]["duals"] = duals
+                append_duals(result, bus, df, scalars_col, duals)
 
     return result
+
+
+def append_duals(result, bus, df, scalars_col, duals):
+    """Append the dual results for the respective bus to the results"""
+    if (bus, None) not in result.keys():
+        result[(bus, None)] = {
+            "sequences": df,
+            scalars_col: pd.Series(dtype=float),
+        }
+    else:
+        result[(bus, None)]["sequences"]["duals"] = duals
 
 
 def convert_keys_to_strings(result, keep_none_type=False):

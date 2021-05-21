@@ -61,14 +61,14 @@ def node(results, node, multiindex=False, keep_none_type=False):
     filtered = {}
 
     # create a series with tuples as index labels for scalars
-    scalars = {}
-    scalars_col = 'scalars'
+    scalars_col = "scalars"
     # Check for MultiPeriodModel (different naming)
-    if 'period_scalars' in list(list(results.values())[0].keys()):
-        scalars_col = 'period_scalars'
+    if "period_scalars" in list(list(results.values())[0].keys()):
+        scalars_col = "period_scalars"
 
     scalars = {
-        k: v[scalars_col] for k, v in results.items()
+        k: v[scalars_col]
+        for k, v in results.items()
         if node in k and not v[scalars_col].empty
     }
     if scalars:
