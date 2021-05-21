@@ -25,7 +25,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def test_multiperiod_dispatch_model(solver="gurobi"):
+def test_multiperiod_dispatch_model(solver="cbc"):
     """Test a simple multiperiod dispatch model
      for multiple SinkDSM approaches"""
 
