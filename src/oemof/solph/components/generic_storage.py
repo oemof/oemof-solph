@@ -415,6 +415,12 @@ class GenericStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
+        self.STORAGES_WITH_INVEST_FLOW_REL = Set(
+            initialize=[
+                n for n in group if n.invest_relation_input_output is not None
+            ]
+        )
+
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -525,6 +531,24 @@ class GenericStorageBlock(SimpleBlock):
 
         self.balanced_cstr = Constraint(
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
+        )
+
+        def _power_coupled(block, n):
+            """
+            Rule definition for constraint to connect the input power
+            and output power
+            """
+            expr = (
+                m.InvestmentFlow.invest[n, o[n]]
+                + m.flows[n, o[n]].investment.existing
+            ) * n.invest_relation_input_output == (
+                m.InvestmentFlow.invest[i[n], n]
+                + m.flows[i[n], n].investment.existing
+            )
+            return expr
+
+        self.power_coupled = Constraint(
+            self.STORAGES_WITH_INVEST_FLOW_REL, rule=_power_coupled
         )
 
     def _objective_expression(self):
@@ -667,6 +691,12 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
+        self.STORAGES_WITH_INVEST_FLOW_REL = Set(
+            initialize=[
+                n for n in group if n.invest_relation_input_output is not None
+            ]
+        )
+
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -778,6 +808,28 @@ class GenericMultiPeriodStorageBlock(SimpleBlock):
 
         self.balanced_cstr = Constraint(
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
+        )
+
+        def _power_coupled(block):
+            """
+            Rule definition for constraint to connect the input power
+            and output power
+            """
+            for n in self.STORAGES_WITH_INVEST_FLOW_REL:
+                for p in m.PERIODS:
+                    expr = (
+                        m.MultiPeriodInvestmentFlow.total[n, o[n], p]
+                    ) * n.invest_relation_input_output == (
+                        m.MultiPeriodInvestmentFlow.total[i[n], n, p]
+                    )
+                    self.power_coupled.add((n, p), expr)
+
+        self.power_coupled = Constraint(
+            self.STORAGES_WITH_INVEST_FLOW_REL,
+            m.PERIODS,
+            noruleinit=True)
+        self.power_coupled_build = BuildAction(
+            rule=_power_coupled
         )
 
     def _objective_expression(self):

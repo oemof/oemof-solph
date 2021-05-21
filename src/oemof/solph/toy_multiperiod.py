@@ -21,6 +21,7 @@ except ImportError as IE:
 
 import pandas as pd
 
+# from oemof.solph import components
 from oemof.solph import custom
 from oemof.solph import models
 from oemof.solph import network
