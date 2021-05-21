@@ -325,7 +325,7 @@ def test_generic_chp_multiperiod_without_warning():
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
 
-def test_extraction_turbine_multiperiod_chp():
+def test_extraction_turbine_chp():
     warnings.filterwarnings("error", category=SuspiciousUsageWarning)
     bel = Bus(label="electricityBus")
     bth = Bus(label="heatBus")
