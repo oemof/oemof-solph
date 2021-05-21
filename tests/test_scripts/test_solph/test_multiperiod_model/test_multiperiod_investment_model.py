@@ -1,5 +1,5 @@
 """
-Test for creating an MultiPeriod optimization model
+Test for creating an MultiPeriod investment optimization model
 
 Create an energy system consisting of the following fleets
 - lignite
@@ -26,7 +26,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def test_multiperiod_model(solver="gurobi"):
+def test_multiperiod_investment_model(solver="gurobi"):
     """Test a simple multiperiod investment model
     for multiple SinkDSM approaches"""
 
@@ -59,6 +59,9 @@ def test_multiperiod_model(solver="gurobi"):
         bus_el = network.Bus(label='DE_bus_el',
                              balanced=True,
                              multiperiod=True)
+        bus_el_FR = network.Bus(label='FR_bus_el',
+                                balanced=True,
+                                multiperiod=True)
 
         # Create sources
         source_lignite = network.Source(
@@ -78,7 +81,7 @@ def test_multiperiod_model(solver="gurobi"):
                 multiperiod=True)})
         source_wind = network.Source(
             label='DE_source_wind',
-            outputs={bus_el: network.Flow(  # variable_costs=0)})
+            outputs={bus_el: network.Flow(
                 variable_costs=0,
                 fix=[110] + [90] * (len(timeindex) - 1),
                 nominal_value=1,
@@ -86,6 +89,19 @@ def test_multiperiod_model(solver="gurobi"):
         source_shortage = network.Source(
             label='DE_source_shortage',
             outputs={bus_el: network.Flow(
+                variable_costs=1e10,
+                nominal_value=1e10,
+                multiperiod=True)})
+        source_wind_FR = network.Source(
+            label='FR_source_wind',
+            outputs={bus_el_FR: network.Flow(
+                variable_costs=0,
+                fix=[45] * len(timeindex),
+                nominal_value=1,
+                multiperiod=True)})
+        source_shortage_FR = network.Source(
+            label='FR_source_shortage',
+            outputs={bus_el_FR: network.Flow(
                 variable_costs=1e10,
                 nominal_value=1e10,
                 multiperiod=True)})
@@ -97,11 +113,22 @@ def test_multiperiod_model(solver="gurobi"):
                 fix=[80] * len(timeindex),
                 nominal_value=1,
                 multiperiod=True)})
-
         sink_excess = network.Sink(
             label='DE_sink_excess',
             inputs={bus_el: network.Flow(
                 variable_costs=1e10,
+                nominal_value=1e10,
+                multiperiod=True)})
+        sink_el_FR = network.Sink(
+            label='FR_sink_el',
+            inputs={bus_el_FR: network.Flow(
+                fix=[50] * len(timeindex),
+                nominal_value=1,
+                multiperiod=True)})
+        sink_excess_FR = network.Sink(
+            label='FR_sink_excess',
+            inputs={bus_el_FR: network.Flow(
+                variable_costs=1e3,
                 nominal_value=1e10,
                 multiperiod=True)})
 
@@ -223,6 +250,30 @@ def test_multiperiod_model(solver="gurobi"):
             )
         )
 
+        link_DE_FR = custom.Link(
+            label='link_DE_FR',
+            inputs={
+                bus_el: network.Flow(
+                    nominal_value=10,
+                    multiperiod=True),
+                bus_el_FR: network.Flow(
+                    nominal_value=10,
+                    multiperiod=True)
+            },
+            outputs={
+                bus_el_FR: network.Flow(
+                    multiperiod=True
+                ),
+                bus_el: network.Flow(
+                    multiperiod=True
+                )
+            },
+            conversion_factors={
+                (bus_el, bus_el_FR): 0.999999,
+                (bus_el_FR, bus_el): 0.999999},
+            multiperiod=True
+        )
+
         kwargs_all = {
             'label': 'demand_dsm',
             'inputs': {bus_el: network.Flow(
@@ -279,6 +330,8 @@ def test_multiperiod_model(solver="gurobi"):
                bus_lignite, bus_hardcoal, bus_natgas, bus_el,
                pp_lignite, pp_hardcoal, pp_natgas_CCGT, pp_natgas_GT,
                sink_el, sink_excess, storage_el,
+               source_wind_FR, source_shortage_FR,
+               bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
                dsm_unit,
                )
 

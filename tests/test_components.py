@@ -20,6 +20,7 @@ from oemof.solph import Investment
 from oemof.solph import NonConvex
 from oemof.solph import components
 
+
 # ********* GenericStorage *********
 
 
@@ -276,7 +277,7 @@ def test_offsettransformer_too_many_output_flows():
         )
 
 
-# ********* GenericCHP *********
+# ********* CHP *********
 def test_generic_chp_without_warning():
     warnings.filterwarnings("error", category=SuspiciousUsageWarning)
     bel = Bus(label="electricityBus")
@@ -296,5 +297,60 @@ def test_generic_chp_without_warning():
         heat_output={bth: Flow(Q_CW_min=[10.552])},
         Beta=[0.122],
         back_pressure=False,
+    )
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+
+def test_generic_chp_multiperiod_without_warning():
+    warnings.filterwarnings("error", category=SuspiciousUsageWarning)
+    bel = Bus(label="electricityBus")
+    bth = Bus(label="heatBus")
+    bgas = Bus(label="commodityBus")
+    components.GenericCHP(
+        label="combined_cycle_extraction_turbine",
+        fuel_input={bgas: Flow(H_L_FG_share_max=[0.183])},
+        electrical_output={
+            bel: Flow(
+                P_max_woDH=[155.946],
+                P_min_woDH=[68.787],
+                Eta_el_max_woDH=[0.525],
+                Eta_el_min_woDH=[0.444],
+            )
+        },
+        heat_output={bth: Flow(Q_CW_min=[10.552])},
+        Beta=[0.122],
+        back_pressure=False,
+        multiperiod=True
+    )
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+
+def test_extraction_turbine_multiperiod_chp():
+    warnings.filterwarnings("error", category=SuspiciousUsageWarning)
+    bel = Bus(label="electricityBus")
+    bth = Bus(label="heatBus")
+    bgas = Bus(label="commodityBus")
+    components.ExtractionTurbineCHP(
+        label='variable_chp_gas',
+        inputs={bgas: Flow(nominal_value=10e10)},
+        outputs={bel: Flow(), bth: Flow()},
+        conversion_factors={bel: 0.3, bth: 0.5},
+        conversion_factor_full_condensation={bel: 0.5},
+    )
+    warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+
+def test_extraction_turbine_multiperiod_chp():
+    warnings.filterwarnings("error", category=SuspiciousUsageWarning)
+    bel = Bus(label="electricityBus")
+    bth = Bus(label="heatBus")
+    bgas = Bus(label="commodityBus")
+    components.ExtractionTurbineCHP(
+        label='variable_chp_gas',
+        inputs={bgas: Flow(nominal_value=10e10)},
+        outputs={bel: Flow(), bth: Flow()},
+        conversion_factors={bel: 0.3, bth: 0.5},
+        conversion_factor_full_condensation={bel: 0.5},
+        multiperiod=True
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
