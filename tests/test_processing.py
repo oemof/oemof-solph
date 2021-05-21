@@ -119,8 +119,11 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
+            "fixed_costs": None,
             "integer": None,
             "investment": None,
+            "multiperiod": None,
+            "multiperiodinvestment": None,
             "nominal_value": 1,
             "nonconvex": None,
             "summed_max": None,
@@ -141,7 +144,7 @@ class TestParameterResult:
             pandas.Series(scalar_attributes).sort_index(),
         )
         sequences_attributes = {
-            "fix": self.demand_values,
+            "fix": self.demand_values
         }
         default_sequences = ["fix"]
         for attr in default_sequences:
@@ -159,10 +162,12 @@ class TestParameterResult:
         )
         param_results = processing.convert_keys_to_strings(param_results)
         assert_series_equal(
-            param_results[("storage", "None")]["scalars"],
+            param_results[("storage", "None")]["scalars"].sort_index(),
             pandas.Series(
                 {
                     "balanced": True,
+                    "fixed_costs": 0,
+                    "multiperiod": False,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
@@ -181,7 +186,7 @@ class TestParameterResult:
                     "min_storage_level": 0,
                     "outflow_conversion_factor": 0.8,
                 }
-            ),
+            ).sort_index(),
         )
         assert_frame_equal(
             param_results[("storage", "None")]["sequences"], pandas.DataFrame()
@@ -195,10 +200,12 @@ class TestParameterResult:
             param_results, keep_none_type=True
         )
         assert_series_equal(
-            param_results[("storage", None)]["scalars"],
+            param_results[("storage", None)]["scalars"].sort_index(),
             pandas.Series(
                 {
                     "balanced": True,
+                    "fixed_costs": 0,
+                    "multiperiod": False,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
@@ -217,7 +224,7 @@ class TestParameterResult:
                     "min_storage_level": 0,
                     "outflow_conversion_factor": 0.8,
                 }
-            ),
+            ).sort_index(),
         )
         assert_frame_equal(
             param_results[("storage", None)]["sequences"], pandas.DataFrame()
@@ -233,6 +240,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "label": "diesel",
+                    "multiperiod": False,
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
                 }
@@ -277,7 +285,7 @@ class TestParameterResult:
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        eq_(round(float(storage_content.sum()), 6), 1437.500003)
+        eq_(round(float(storage_content.sum()), 1), round(1437.500003, 1))
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
