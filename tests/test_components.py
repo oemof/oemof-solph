@@ -22,8 +22,6 @@ from oemof.solph import components
 
 
 # ********* GenericStorage *********
-
-
 def test_generic_storage_1():
     """Duplicate definition inflow."""
     bel = Bus()
