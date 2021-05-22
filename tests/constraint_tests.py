@@ -835,8 +835,25 @@ class TestsConstraint:
 
         self.compare_lp_files("connect_investment.lp", my_om=om)
 
+    def test_integer_flow(self):
+        """Testing forcing flows to integer values."""
+        bel = solph.Bus(label="electricityBus")
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    integer=True
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_integer_flow.lp")
+
     def test_gradient(self):
-        """Testing min and max runtimes for nonconvex flows."""
+        """Testing gradient implementation for convex flows."""
         bel = solph.Bus(label="electricityBus")
 
         solph.Source(
@@ -852,6 +869,63 @@ class TestsConstraint:
         )
 
         self.compare_lp_files("source_with_gradient.lp")
+
+    def test_multiperiod_gradient(self):
+        """Test gradient implementation for convex multiperiod flows."""
+        bel = solph.Bus(label="electricityBus", multiperiod=True)
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    positive_gradient={"ub": 0.03, "costs": 7},
+                    negative_gradient={"ub": 0.05, "costs": 8},
+                    multiperiod=True
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_multiperiod_gradient.lp")
+
+    def test_summed_max_min(self):
+        """Testing summed max and summed min for convex flows."""
+        bel = solph.Bus(label="electricityBus")
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    summed_max=100,
+                    summed_min=1,
+                    multiperiod=True
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_summed_max_min.lp")
+
+    def test_multiperiod_summed_max_min(self):
+        """Testing summed max and summed min for convex multiperiod flows."""
+        bel = solph.Bus(label="electricityBus", multiperiod=True)
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    summed_max=100,
+                    summed_min=1,
+                    multiperiod=True
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_multiperiod_summed_max_min.lp")
 
     def test_investment_limit(self):
         """Testing the investment_limit function in the constraint module."""
@@ -874,6 +948,27 @@ class TestsConstraint:
         solph.constraints.investment_limit(om, limit=900)
 
         self.compare_lp_files("investment_limit.lp", my_om=om)
+
+    def test_summed_min_investment(self):
+        """Testing summed min for investment flows"""
+        bel = solph.Bus(label="electricityBus")
+        bgas = solph.Bus(label="gasBus")
+
+        solph.Transformer(
+            label="powerplant",
+            inputs={bgas: solph.Flow()},
+            outputs={
+                bel: solph.Flow(
+                    variable_costs=23,
+                    investment=solph.Investment(
+                        ep_cost=100,
+                        summed_min=1000
+                    )
+                )
+            },
+        )
+
+        self.compare_lp_files("transformer_with_summed_min_investment.lp")
 
     def test_min_max_runtime(self):
         """Testing min and max runtimes for nonconvex flows."""
