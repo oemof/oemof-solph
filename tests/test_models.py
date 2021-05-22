@@ -122,3 +122,10 @@ def test_infeasible_model():
             m.solve(solver="cbc")
             assert "Optimization ended with status" in str(w[0].message)
             solph.processing.meta_results(m)
+
+
+def test_auto_construct():
+    es = solph.EnergySystem(timeindex=pd.date_range(
+        start="2012-01-01", periods=3, freq="H"))
+    m = solph.models.BaseModel(es, auto_construct=True)
+    assert(m.is_constructed())

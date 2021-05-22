@@ -213,3 +213,9 @@ def test_warning_fixed_still_used():
         solph.Flow(fixed=True)
         assert len(w) != 0
         assert msg == str(w[-1].message)
+
+
+def test_setting_kwargs():
+    test_flow = solph.Flow(superpower=3, awesomeness=5)
+    assert(test_flow.superpower == 3)
+    assert(test_flow.awesomeness == 5)
