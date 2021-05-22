@@ -69,6 +69,101 @@ def test_wrong_combination_of_options():
         solph.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
 
 
+def test_wrong_combination_of_multiperiod_options_1():
+    msg = ("Values for 'offset' and 'existing' are given in"
+           " investment attributes. \n These two options cannot be "
+           "considered at the same time.")
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(multiperiodinvestment=solph.MultiPeriodInvestment(
+            existing=100,
+            nonconvex=True,
+            lifetime=20
+        ))
+
+
+def test_wrong_combination_of_multiperiod_options_2():
+    msg = ("Please provide an maximum investment value in case of "
+           "nonconvex investment, which is in the "
+           "expected magnitude.\n"
+           "Very high maximum values as maximum investment "
+           "limit might lead to numeric issues, so that no investment "
+           "is done, although it is the optimal solution!")
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(multiperiodinvestment=solph.MultiPeriodInvestment(
+            nonconvex=True,
+            lifetime=20
+        ))
+
+
+def test_wrong_combination_of_multiperiod_options_3():
+    msg = ("If `nonconvex` is `False`, the `offset` parameter will be"
+           " ignored.")
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(multiperiodinvestment=solph.MultiPeriodInvestment(
+            nonconvex=False,
+            offset=100,
+            lifetime=20
+        ))
+
+
+def test_wrong_combination_of_multiperiod_options_4():
+    msg = ("A unit's age must be smaller than its "
+           "expected lifetime.")
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(multiperiodinvestment=solph.MultiPeriodInvestment(
+            age=21,
+            lifetime=20
+        ))
+
+
+def test_wrong_combination_of_multiperiod_options_5():
+    msg = ("Either use a standard investment flow for "
+           "standard investment models or a "
+           "multiperiodinvestment flow "
+           "for MultiPeriodModels.\n"
+           "Combining both is not feasible!")
+    with pytest.raises(ValueError, match=msg):
+        solph.Flow(
+            multiperiodinvestment=solph.MultiPeriodInvestment(lifetime=20),
+            investment=solph.Investment()
+        )
+
+
+def test_wrong_combination_of_multiperiod_options_6():
+    msg = ("In a MultiPeriodModel, a flow can either "
+           "be defined to be a flow for dispatch only,\n"
+           "when setting the attribute `multiperiod` to "
+           "True,\nor it can be defined to be used for "
+           "investments,\nwhen a `multiperiodinvestment` "
+           "object is declared.\nCombining both is not "
+           "feasible!")
+    with pytest.raises(ValueError, match=msg):
+        solph.Flow(
+            multiperiodinvestment=solph.MultiPeriodInvestment(lifetime=20),
+            multiperiod=True
+        )
+
+
+def test_calc_max_up_down_1():
+    test_flow = solph.Flow(
+        nonconvex=solph.NonConvex(minimum_uptime=3,
+                                  minimum_downtime=None)
+    )
+    test_flow.nonconvex._calculate_max_up_down()
+    assert (test_flow.nonconvex.minimum_uptime
+            == test_flow.nonconvex._max_up_down)
+
+
+def test_calc_max_up_down_2():
+    test_flow = solph.Flow(
+        nonconvex=solph.NonConvex(minimum_uptime=None,
+                                  minimum_downtime=5)
+    )
+    test_flow.nonconvex._calculate_max_up_down()
+    assert (test_flow.nonconvex.minimum_downtime
+            == test_flow.nonconvex._max_up_down)
+
+
 def test_flow_with_fix_and_min_max():
     msg = "It is not allowed to define min/max if fix is defined."
     with pytest.raises(AttributeError, match=msg):
@@ -94,6 +189,17 @@ def test_deprecated_actual_value():
     msg = "The `actual_value` attribute has been renamed to `fix`"
     with pytest.raises(AttributeError, match=msg):
         solph.Flow(actual_value=5)
+
+
+def test_warning_fixed_costs_attribute():
+    msg = ("Be aware that the fixed costs attribute is only\n"
+           "meant to be used for MultiPeriodModels.\n"
+           "It has been decided to remove the `fixed_costs` "
+           "attribute with v0.2 for regular uses!")
+    with warnings.catch_warnings(record=True) as w:
+        solph.Flow(fixed_costs=10)
+        assert len(w) != 0
+        assert msg == str(w[-1].message)
 
 
 def test_warning_fixed_still_used():

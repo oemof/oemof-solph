@@ -161,7 +161,7 @@ class Flow(on.Edge):
         }
         keys = [k for k in kwargs if k != "label"]
 
-        if 'fixed_costs' in keys:
+        if "fixed_costs" in keys:
             msg = ("Be aware that the fixed costs attribute is only\n"
                    "meant to be used for MultiPeriodModels.\n"
                    "It has been decided to remove the `fixed_costs` "
@@ -228,8 +228,8 @@ class Flow(on.Edge):
         if self.investment and self.multiperiodinvestment:
             raise ValueError("Either use a standard investment flow for "
                              "standard investment models or a "
-                             "multiperiodinvestment flow for "
-                             "MultiPeriodModels.\n"
+                             "multiperiodinvestment flow "
+                             "for MultiPeriodModels.\n"
                              "Combining both is not feasible!")
         if self.multiperiod is True and self.multiperiodinvestment:
             raise ValueError("In a MultiPeriodModel, a flow can either "
