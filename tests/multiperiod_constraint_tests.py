@@ -443,109 +443,156 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_4_multiperiod.lp")
 
-    # TODO: Resume here and add remaining tests!
     def test_storage_invest_5(self):
         """The storage capacity is fixed, but the Flows can be extended.
         e.g. PHES with a fixed basin but the pump and the turbine can be
         adapted. The installed capacity of the pump is 10 % bigger than the
         the capacity of the turbine due to 'invest_relation_input_output=1.1'.
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage5",
             inputs={
                 bel: solph.Flow(
-                    investment=solph.Investment(ep_costs=99, existing=110)
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=99,
+                        existing=110,
+                        lifetime=20,
+                        age=18
+                    )
                 )
             },
             outputs={
-                bel: solph.Flow(investment=solph.Investment(existing=100))
+                bel: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=9,
+                        existing=100,
+                        lifetime=20,
+                        age=18
+                    )
+                )
             },
             invest_relation_input_output=1.1,
             nominal_storage_capacity=10000,
+            multiperiod=True
         )
-        self.compare_lp_files("storage_invest_5.lp")
+        self.compare_lp_files("storage_invest_5_multiperiod.lp")
 
     def test_storage_invest_6(self):
         """Like test_storage_invest_5 but there can also be an investment in
         the basin.
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage6",
             inputs={
                 bel: solph.Flow(
-                    investment=solph.Investment(ep_costs=99, existing=110)
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=99,
+                        existing=110,
+                        lifetime=20,
+                        age=18
+                    )
                 )
             },
             outputs={
-                bel: solph.Flow(investment=solph.Investment(existing=100))
+                bel: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=9,
+                        existing=100,
+                        lifetime=20,
+                        age=18
+                    )
+                )
             },
             invest_relation_input_output=1.1,
-            investment=solph.Investment(ep_costs=145, existing=10000),
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                existing=10000,
+                lifetime=40,
+                age=39
+            ),
         )
-        self.compare_lp_files("storage_invest_6.lp")
+        self.compare_lp_files("storage_invest_6_multiperiod.lp")
 
     def test_storage_minimum_invest(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage1",
-            inputs={bel: solph.Flow()},
-            outputs={bel: solph.Flow()},
-            investment=solph.Investment(
-                ep_costs=145, minimum=100, maximum=200
+            inputs={bel: solph.Flow(multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True)},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145, minimum=100, maximum=200, lifetime=20
             ),
         )
 
-        self.compare_lp_files("storage_invest_minimum.lp")
+        self.compare_lp_files("storage_invest_minimum_multiperiod.lp")
 
     def test_storage_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage1",
-            inputs={bel: solph.Flow()},
-            outputs={bel: solph.Flow()},
+            inputs={bel: solph.Flow(multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True)},
             nominal_storage_capacity=1111,
             initial_storage_level=None,
             balanced=False,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
+            multiperiod=True
         )
-        self.compare_lp_files("storage_unbalanced.lp")
+        self.compare_lp_files("storage_unbalanced_multiperiod.lp")
 
     def test_storage_invest_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage1",
-            inputs={bel: solph.Flow()},
-            outputs={bel: solph.Flow()},
+            inputs={bel: solph.Flow(multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True)},
             nominal_storage_capacity=None,
             initial_storage_level=0.5,
             balanced=False,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
-            investment=solph.Investment(ep_costs=145),
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                lifetime=20
+            ),
         )
-        self.compare_lp_files("storage_invest_unbalanced.lp")
+        self.compare_lp_files("storage_invest_unbalanced_multiperiod.lp")
 
     def test_storage_fixed_losses(self):
         """"""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage_no_invest",
-            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
-            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
+            inputs={bel: solph.Flow(
+                nominal_value=16667,
+                variable_costs=56,
+                multiperiod=True
+            )},
+            outputs={bel: solph.Flow(
+                nominal_value=16667,
+                variable_costs=24,
+                multiperiod=True
+            )},
             nominal_storage_capacity=1e5,
             loss_rate=0.13,
             fixed_losses_relative=0.01,
@@ -553,20 +600,22 @@ class TestsConstraint:
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             initial_storage_level=0.4,
+            multiperiod=True
         )
 
-        self.compare_lp_files("storage_fixed_losses.lp")
+        self.compare_lp_files("storage_fixed_losses_multiperiod.lp")
 
     def test_storage_invest_1_fixed_losses(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage1",
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56, multiperiod=True)},
+            outputs={bel: solph.Flow(variable_costs=24, multiperiod=True)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             fixed_losses_relative=0.01,
@@ -577,53 +626,73 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(ep_costs=145, maximum=234),
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                maximum=234,
+                lifetime=20
+            ),
         )
 
-        self.compare_lp_files("storage_invest_1_fixed_losses.lp")
+        self.compare_lp_files("storage_invest_1_fixed_losses_multiperiod.lp")
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment."""
-        bgas = solph.Bus(label="gasBus")
-        bbms = solph.Bus(label="biomassBus")
-        bel = solph.Bus(label="electricityBus")
-        bth = solph.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bbms = solph.Bus(label="biomassBus",
+                         multiperiod=True)
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+        bth = solph.Bus(label="thermalBus",
+                        multiperiod=True)
 
         solph.Transformer(
             label="powerplantGasCoal",
-            inputs={bbms: solph.Flow(), bgas: solph.Flow()},
+            inputs={bbms: solph.Flow(multiperiod=True),
+                    bgas: solph.Flow(multiperiod=True)},
             outputs={
-                bel: solph.Flow(variable_costs=50),
-                bth: solph.Flow(nominal_value=5e10, variable_costs=20),
+                bel: solph.Flow(variable_costs=50, multiperiod=True),
+                bth: solph.Flow(nominal_value=5e10, variable_costs=20,
+                                multiperiod=True),
             },
             conversion_factors={bgas: 0.4, bbms: 0.1, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer.lp")
+        self.compare_lp_files("transformer_multiperiod.lp")
 
     def test_transformer_invest(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
-        bgas = solph.Bus(label="gasBus")
-        bcoal = solph.Bus(label="coalBus")
-        bel = solph.Bus(label="electricityBus")
-        bth = solph.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bcoal = solph.Bus(label="coalBus",
+                          multiperiod=True)
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+        bth = solph.Bus(label="thermalBus",
+                        multiperiod=True)
 
         solph.Transformer(
             label="powerplant_gas_coal",
-            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+            inputs={bgas: solph.Flow(multiperiod=True),
+                    bcoal: solph.Flow(multiperiod=True)},
             outputs={
                 bel: solph.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(maximum=1000, ep_costs=20),
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        maximum=1000,
+                        ep_costs=20,
+                        lifetime=20
+                    ),
                 ),
-                bth: solph.Flow(variable_costs=20),
+                bth: solph.Flow(variable_costs=20, multiperiod=True),
             },
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer_invest.lp")
+        self.compare_lp_files("transformer_invest_multiperiod.lp")
 
+    # TODO: Resume here!
     def test_transformer_invest_with_existing(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
