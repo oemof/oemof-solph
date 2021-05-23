@@ -290,57 +290,72 @@ class TestsConstraint:
 
         self.compare_lp_files("fixed_source_invest_sink_multiperiod.lp")
 
-    # TODO: RESUME HERE!
     def test_invest_source_fixed_sink(self):
         """Constraint test with a fixed sink and a dispatch invest source."""
 
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.Source(
             label="pv",
             outputs={
                 bel: solph.Flow(
-                    max=[45, 83, 65],
+                    max=[45, 83, 65, 45, 83, 65],
                     variable_costs=13,
-                    investment=solph.Investment(ep_costs=123),
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=123,
+                        lifetime=20
+                    ),
                 )
             },
         )
 
         solph.Sink(
             label="excess",
-            inputs={bel: solph.Flow(fix=[0.5, 0.8, 0.3], nominal_value=10e4)},
+            inputs={bel: solph.Flow(fix=[0.5, 0.8, 0.3, 0.5, 0.8, 0.3],
+                                    nominal_value=1e5,
+                                    multiperiod=True)},
         )
 
-        self.compare_lp_files("invest_source_fixed_sink.lp")
+        self.compare_lp_files("invest_source_fixed_sink_multiperiod.lp")
 
     def test_storage(self):
         """"""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage_no_invest",
-            inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
-            outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
+            inputs={bel: solph.Flow(nominal_value=16667,
+                                    variable_costs=56,
+                                    multiperiod=True)},
+            outputs={bel: solph.Flow(nominal_value=16667,
+                                     variable_costs=24,
+                                     multiperiod=True)},
             nominal_storage_capacity=10e4,
             loss_rate=0.13,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             initial_storage_level=0.4,
+            multiperiod=True
         )
 
-        self.compare_lp_files("storage.lp")
+        self.compare_lp_files("storage_multiperiod.lp")
 
+    # TODO: Fix implementation and get test working!
     def test_storage_invest_1(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage1",
-            inputs={bel: solph.Flow(variable_costs=56)},
-            outputs={bel: solph.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56,
+                                    multiperiod=True)},
+            outputs={bel: solph.Flow(variable_costs=24,
+                                     multiperiod=True)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
@@ -349,51 +364,86 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(ep_costs=145, maximum=234),
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                maximum=234,
+                lifetime=20,
+                age=10
+            ),
         )
 
-        self.compare_lp_files("storage_invest_1.lp")
+        self.compare_lp_files("storage_invest_1_multiperiod.lp")
 
     def test_storage_invest_2(self):
         """All can be free extended to their own cost."""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage2",
-            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
-            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
-            investment=solph.Investment(ep_costs=145),
+            inputs={bel: solph.Flow(
+                multiperiodinvestment=solph.MultiPeriodInvestment(
+                    ep_costs=99,
+                    lifetime=20
+                ))},
+            outputs={bel: solph.Flow(
+                multiperiodinvestment=solph.MultiPeriodInvestment(
+                    ep_costs=9,
+                    lifetime=20,
+                ))},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                lifetime=20
+            ),
             initial_storage_level=0.5,
         )
-        self.compare_lp_files("storage_invest_2.lp")
+        self.compare_lp_files("storage_invest_2_multiperiod.lp")
 
     def test_storage_invest_3(self):
         """The storage capacity is fixed, but the Flows can be extended.
         e.g. PHES with a fixed basin but the pump and the turbine can be
         adapted
         """
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage3",
-            inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
-            outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
+            inputs={bel: solph.Flow(
+                multiperiodinvestment=solph.MultiPeriodInvestment(
+                    ep_costs=99,
+                    lifetime=20
+                ))},
+            outputs={bel: solph.Flow(
+                multiperiodinvestment=solph.MultiPeriodInvestment(
+                    ep_costs=9,
+                    lifetime=20
+                ))},
             nominal_storage_capacity=5000,
+            multiperiod=True
         )
-        self.compare_lp_files("storage_invest_3.lp")
+        self.compare_lp_files("storage_invest_3_multiperiod.lp")
 
     def test_storage_invest_4(self):
         """Only the storage capacity can be extended."""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.components.GenericStorage(
             label="storage4",
-            inputs={bel: solph.Flow(nominal_value=80)},
-            outputs={bel: solph.Flow(nominal_value=100)},
-            investment=solph.Investment(ep_costs=145, maximum=500),
+            inputs={bel: solph.Flow(nominal_value=80,
+                                    multiperiod=True)},
+            outputs={bel: solph.Flow(nominal_value=100,
+                                     multiperiod=True)},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145,
+                maximum=500,
+                lifetime=20
+            ),
         )
-        self.compare_lp_files("storage_invest_4.lp")
+        self.compare_lp_files("storage_invest_4_multiperiod.lp")
 
+    # TODO: Resume here and add remaining tests!
     def test_storage_invest_5(self):
         """The storage capacity is fixed, but the Flows can be extended.
         e.g. PHES with a fixed basin but the pump and the turbine can be
