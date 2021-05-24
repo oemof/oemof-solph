@@ -147,29 +147,30 @@ def additional_multiperiodinvestment_flow_limit(model, keyword, limit=None):
     multiperiodinvest_flows = {}
 
     for (i, o) in model.flows:
-        if hasattr(model.flows[i, o].mutliperiodinvestment, keyword):
+        if hasattr(model.flows[i, o].multiperiodinvestment, keyword):
             multiperiodinvest_flows[(i, o)] = (
                 model.flows[i, o].multiperiodinvestment
             )
 
-    limit_name = "mutliperiodinvest_limit_" + keyword
+    limit_name = "multiperiodinvest_limit_" + keyword
 
-    setattr(
-        model,
-        limit_name,
-        po.Expression(
-            expr=sum(
-                model.MultiPeriodInvestmentFlow.invest[inflow, outflow]
-                * getattr(multiperiodinvest_flows[inflow, outflow], keyword)
+    def _additional_limit_rule(block):
+        for p in model.PERIODS:
+            lhs = sum(
+                model.MultiPeriodInvestmentFlow.invest[inflow, outflow, p]
+                * getattr(multiperiodinvest_flows[inflow, outflow],
+                          keyword)
                 for (inflow, outflow) in multiperiodinvest_flows
             )
-        ),
-    )
+            rhs = limit
+            model.add_limit.add(p, (lhs <= rhs))
 
-    setattr(
-        model,
-        limit_name + "_constraint",
-        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    model.add_limit = po.Constraint(
+        model.PERIODS,
+        noruleinit=True,
+        name=limit_name + "_constraint"
     )
+    model.add_limit_build = po.BuildAction(
+        rule=_additional_limit_rule)
 
     return model
