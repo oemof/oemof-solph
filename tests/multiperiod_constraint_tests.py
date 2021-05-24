@@ -24,7 +24,7 @@ from oemof import solph
 logging.disable(logging.INFO)
 
 
-class TestsConstraint:
+class TestsConstraintMultiperiod:
     @classmethod
     def setup_class(cls):
         cls.objective_pattern = re.compile(
@@ -195,7 +195,7 @@ class TestsConstraint:
 
         self.compare_lp_files("linear_multiperiod_transformer_invest.lp")
 
-    def test_max_source_min_sink(self):
+    def test_max_source_min_sink_multiperiod(self):
         """"""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -225,7 +225,7 @@ class TestsConstraint:
 
         self.compare_lp_files("max_source_min_sink_multiperiod.lp")
 
-    def test_fixed_source_variable_sink(self):
+    def test_fixed_source_variable_sink_multiperiod(self):
         """Constraint test with a fixed source and a variable sink."""
 
         bel = solph.Bus(label="electricityBus",
@@ -248,7 +248,7 @@ class TestsConstraint:
 
         self.compare_lp_files("fixed_source_variable_sink_multiperiod.lp")
 
-    def test_nominal_value_to_zero(self):
+    def test_nominal_value_to_zero_multiperiod(self):
         """If the nominal value is set to zero nothing should happen."""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -259,7 +259,7 @@ class TestsConstraint:
         )})
         self.compare_lp_files("nominal_value_to_zero_multiperiod.lp")
 
-    def test_fixed_source_invest_sink(self):
+    def test_fixed_source_invest_sink_multiperiod(self):
         """Wrong constraints for fixed source + invest sink w. `summed_max`."""
 
         bel = solph.Bus(label="electricityBus",
@@ -290,7 +290,7 @@ class TestsConstraint:
 
         self.compare_lp_files("fixed_source_invest_sink_multiperiod.lp")
 
-    def test_invest_source_fixed_sink(self):
+    def test_invest_source_fixed_sink_multiperiod(self):
         """Constraint test with a fixed sink and a dispatch invest source."""
 
         bel = solph.Bus(label="electricityBus",
@@ -319,7 +319,7 @@ class TestsConstraint:
 
         self.compare_lp_files("invest_source_fixed_sink_multiperiod.lp")
 
-    def test_storage(self):
+    def test_storage_multiperiod(self):
         """"""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -343,7 +343,7 @@ class TestsConstraint:
         self.compare_lp_files("storage_multiperiod.lp")
 
     # TODO: Fix implementation and get test working!
-    def test_storage_invest_1(self):
+    def test_storage_invest_1_multiperiod(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
@@ -374,7 +374,7 @@ class TestsConstraint:
 
         self.compare_lp_files("storage_invest_1_multiperiod.lp")
 
-    def test_storage_invest_2(self):
+    def test_storage_invest_2_multiperiod(self):
         """All can be free extended to their own cost."""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -399,7 +399,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_2_multiperiod.lp")
 
-    def test_storage_invest_3(self):
+    def test_storage_invest_3_multiperiod(self):
         """The storage capacity is fixed, but the Flows can be extended.
         e.g. PHES with a fixed basin but the pump and the turbine can be
         adapted
@@ -424,7 +424,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_3_multiperiod.lp")
 
-    def test_storage_invest_4(self):
+    def test_storage_invest_4_multiperiod(self):
         """Only the storage capacity can be extended."""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -443,7 +443,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_4_multiperiod.lp")
 
-    def test_storage_invest_5(self):
+    def test_storage_invest_5_multiperiod(self):
         """The storage capacity is fixed, but the Flows can be extended.
         e.g. PHES with a fixed basin but the pump and the turbine can be
         adapted. The installed capacity of the pump is 10 % bigger than the
@@ -480,7 +480,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_5_multiperiod.lp")
 
-    def test_storage_invest_6(self):
+    def test_storage_invest_6_multiperiod(self):
         """Like test_storage_invest_5 but there can also be an investment in
         the basin.
         """
@@ -519,7 +519,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_6_multiperiod.lp")
 
-    def test_storage_minimum_invest(self):
+    def test_storage_minimum_invest_multiperiod(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
@@ -537,7 +537,7 @@ class TestsConstraint:
 
         self.compare_lp_files("storage_invest_minimum_multiperiod.lp")
 
-    def test_storage_unbalanced(self):
+    def test_storage_unbalanced_multiperiod(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -555,7 +555,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_unbalanced_multiperiod.lp")
 
-    def test_storage_invest_unbalanced(self):
+    def test_storage_invest_unbalanced_multiperiod(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -576,7 +576,7 @@ class TestsConstraint:
         )
         self.compare_lp_files("storage_invest_unbalanced_multiperiod.lp")
 
-    def test_storage_fixed_losses(self):
+    def test_storage_fixed_losses_multiperiod(self):
         """"""
         bel = solph.Bus(label="electricityBus",
                         multiperiod=True)
@@ -605,7 +605,7 @@ class TestsConstraint:
 
         self.compare_lp_files("storage_fixed_losses_multiperiod.lp")
 
-    def test_storage_invest_1_fixed_losses(self):
+    def test_storage_invest_1_fixed_losses_multiperiod(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
@@ -635,7 +635,7 @@ class TestsConstraint:
 
         self.compare_lp_files("storage_invest_1_fixed_losses_multiperiod.lp")
 
-    def test_transformer(self):
+    def test_transformer_multiperiod(self):
         """Constraint test of a LinearN1Transformer without Investment."""
         bgas = solph.Bus(label="gasBus",
                          multiperiod=True)
@@ -660,7 +660,7 @@ class TestsConstraint:
 
         self.compare_lp_files("transformer_multiperiod.lp")
 
-    def test_transformer_invest(self):
+    def test_transformer_invest_multiperiod(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
         bgas = solph.Bus(label="gasBus",
@@ -692,103 +692,145 @@ class TestsConstraint:
 
         self.compare_lp_files("transformer_invest_multiperiod.lp")
 
-    # TODO: Resume here!
-    def test_transformer_invest_with_existing(self):
+    def test_transformer_invest_with_existing_multiperiod(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
-        bgas = solph.Bus(label="gasBus")
-        bcoal = solph.Bus(label="coalBus")
-        bel = solph.Bus(label="electricityBus")
-        bth = solph.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bcoal = solph.Bus(label="coalBus",
+                          multiperiod=True)
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+        bth = solph.Bus(label="thermalBus",
+                        multiperiod=True)
 
         solph.Transformer(
             label="powerplant_gas_coal",
-            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+            inputs={bgas: solph.Flow(multiperiod=True),
+                    bcoal: solph.Flow(multiperiod=True)},
             outputs={
                 bel: solph.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
-                        maximum=1000, ep_costs=20, existing=200
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        overall_maximum=2500,
+                        maximum=1000,
+                        ep_costs=20,
+                        existing=200,
+                        lifetime=30,
+                        age=27
                     ),
                 ),
-                bth: solph.Flow(variable_costs=20),
+                bth: solph.Flow(variable_costs=20,
+                                multiperiod=True),
             },
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer_invest_with_existing.lp")
+        self.compare_lp_files(
+            "transformer_invest_with_existing_multiperiod.lp"
+        )
 
-    def test_linear_transformer_chp(self):
+    def test_linear_transformer_chp_multiperiod(self):
         """
         Constraint test of a Transformer without Investment (two outputs).
         """
-        bgas = solph.Bus(label="gasBus")
-        bheat = solph.Bus(label="heatBus")
-        bel = solph.Bus(label="electricityBus")
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bheat = solph.Bus(label="heatBus",
+                          multiperiod=True)
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.Transformer(
             label="CHPpowerplantGas",
-            inputs={bgas: solph.Flow(nominal_value=10e10, variable_costs=50)},
-            outputs={bel: solph.Flow(), bheat: solph.Flow()},
+            inputs={bgas: solph.Flow(nominal_value=10e10,
+                                     variable_costs=50,
+                                     multiperiod=True
+                                     )},
+            outputs={bel: solph.Flow(multiperiod=True),
+                     bheat: solph.Flow(multiperiod=True)},
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
 
-        self.compare_lp_files("linear_transformer_chp.lp")
+        self.compare_lp_files("linear_transformer_chp_multiperiod.lp")
 
-    def test_linear_transformer_chp_invest(self):
+    def test_linear_transformer_chp_invest_multiperiod(self):
         """Constraint test of a Transformer with Investment (two outputs)."""
 
-        bgas = solph.Bus(label="gasBus")
-        bheat = solph.Bus(label="heatBus")
-        bel = solph.Bus(label="electricityBus")
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bheat = solph.Bus(label="heatBus",
+                          multiperiod=True)
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.Transformer(
             label="chp_powerplant_gas",
             inputs={
                 bgas: solph.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(maximum=1000, ep_costs=20),
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        minimum=100,
+                        maximum=1000,
+                        ep_costs=20,
+                        lifetime=30
+                    ),
                 )
             },
-            outputs={bel: solph.Flow(), bheat: solph.Flow()},
+            outputs={bel: solph.Flow(multiperiod=True),
+                     bheat: solph.Flow(multiperiod=True)},
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
 
-        self.compare_lp_files("linear_transformer_chp_invest.lp")
+        self.compare_lp_files("linear_transformer_chp_invest_multiperiod.lp")
 
-    def test_variable_chp(self):
+    def test_variable_chp_multiperiod(self):
         """"""
-        bel = solph.Bus(label="electricityBus")
-        bth = solph.Bus(label="heatBus")
-        bgas = solph.Bus(label="commodityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+        bth = solph.Bus(label="heatBus",
+                        multiperiod=True)
+        bgas = solph.Bus(label="commodityBus",
+                         multiperiod=True)
 
         solph.components.ExtractionTurbineCHP(
             label="variable_chp_gas1",
-            inputs={bgas: solph.Flow(nominal_value=100)},
-            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            inputs={bgas: solph.Flow(nominal_value=100,
+                                     multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True),
+                     bth: solph.Flow(multiperiod=True)},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
+            multiperiod=True
         )
 
         solph.components.ExtractionTurbineCHP(
             label="variable_chp_gas2",
-            inputs={bgas: solph.Flow(nominal_value=100)},
-            outputs={bel: solph.Flow(), bth: solph.Flow()},
+            inputs={bgas: solph.Flow(nominal_value=100,
+                                     multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True),
+                     bth: solph.Flow(multiperiod=True)},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
+            multiperiod=True
         )
 
-        self.compare_lp_files("variable_chp.lp")
+        self.compare_lp_files("variable_chp_multiperiod.lp")
 
-    def test_generic_invest_limit(self):
+    def test_generic_minvest_limit_multiperiod(self):
         """"""
-        bus = solph.Bus(label="bus_1")
+        bus = solph.Bus(label="bus_1",
+                        multiperiod=True)
 
         solph.Source(
             label="source_0",
             outputs={
                 bus: solph.Flow(
-                    investment=solph.Investment(ep_costs=50, space=4)
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=50,
+                        space=4,
+                        lifetime=20
+                    )
                 )
             },
         )
@@ -797,7 +839,11 @@ class TestsConstraint:
             label="source_1",
             outputs={
                 bus: solph.Flow(
-                    investment=solph.Investment(ep_costs=100, space=1)
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=100,
+                        space=1,
+                        lifetime=20
+                    )
                 )
             },
         )
@@ -805,49 +851,66 @@ class TestsConstraint:
         solph.Source(
             label="source_2",
             outputs={
-                bus: solph.Flow(investment=solph.Investment(ep_costs=75))
+                bus: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=75,
+                        lifetime=20
+                    )
+                )
             },
         )
 
         om = self.get_om()
 
-        om = solph.constraints.additional_investment_flow_limit(
+        om = solph.constraints.additional_multiperiodinvestment_flow_limit(
             om, "space", limit=20
         )
 
-        self.compare_lp_files("generic_invest_limit.lp", my_om=om)
+        self.compare_lp_files("generic_invest_limit_multiperiod.lp", my_om=om)
 
-    def test_emission_constraints(self):
+    def test_emission_constraints_multiperiod(self):
         """"""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.Source(
             label="source1",
             outputs={
                 bel: solph.Flow(
-                    nominal_value=100, emission_factor=[0.5, -1.0, 2.0]
-                )
-            },
+                    nominal_value=100,
+                    emission_factor=[0.5, -1.0, 2.0, 0.5, -1.0, 2.0],
+                    multiperiod=True
+                )},
         )
         solph.Source(
             label="source2",
-            outputs={bel: solph.Flow(nominal_value=100, emission_factor=3.5)},
+            outputs={bel: solph.Flow(
+                nominal_value=100,
+                emission_factor=3.5,
+                multiperiod=True
+            )},
         )
 
         # Should be ignored because the emission attribute is not defined.
         solph.Source(
-            label="source3", outputs={bel: solph.Flow(nominal_value=100)}
+            label="source3",
+            outputs={bel: solph.Flow(
+                nominal_value=100,
+                multiperiod=True
+            )}
         )
 
         om = self.get_om()
 
         solph.constraints.emission_limit(om, limit=777)
 
-        self.compare_lp_files("emission_limit.lp", my_om=om)
+        self.compare_lp_files("emission_limit_multiperiod.lp", my_om=om)
 
-    def test_flow_count_limit(self):
+    # TODO: Resume here and finish multiperiod nonconvex implementation
+    def test_flow_count_limit_multiperiod(self):
         """"""
-        bel = solph.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
 
         solph.Source(
             label="source1",
@@ -855,7 +918,8 @@ class TestsConstraint:
                 bel: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    emission_factor=[0.5, -1.0, 2.0],
+                    emission_factor=[0.5, -1.0, 2.0, 0.5, -1.0, 2.0],
+                    multiperiod=True
                 )
             },
         )
@@ -866,6 +930,7 @@ class TestsConstraint:
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
                     emission_factor=3.5,
+                    multiperiod=True
                 )
             },
         )
@@ -874,7 +939,9 @@ class TestsConstraint:
         solph.Source(
             label="source3",
             outputs={
-                bel: solph.Flow(nonconvex=solph.NonConvex(), nominal_value=100)
+                bel: solph.Flow(nonconvex=solph.NonConvex(),
+                                nominal_value=100,
+                                multiperiod=True)
             },
         )
 
@@ -883,7 +950,10 @@ class TestsConstraint:
             label="source4",
             outputs={
                 bel: solph.Flow(
-                    emission_factor=1.5, min=0.3, nominal_value=100
+                    emission_factor=1.5,
+                    min=0.3,
+                    nominal_value=100,
+                    multiperiod=True
                 )
             },
         )
@@ -895,7 +965,7 @@ class TestsConstraint:
             om, "emission_factor", lower_limit=1, upper_limit=2
         )
 
-        self.compare_lp_files("flow_count_limit.lp", my_om=om)
+        self.compare_lp_files("flow_count_limit_multiperiod.lp", my_om=om)
 
     def test_shared_limit(self):
         """"""
