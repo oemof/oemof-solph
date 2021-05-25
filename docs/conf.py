@@ -19,10 +19,10 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 project = "oemof.solph"
-year = "2014-2020"
+year = "2014-2021"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.4.2.dev0"
+version = release = "0.4.3.dev0"
 
 pygments_style = "trac"
 templates_path = ["."]
