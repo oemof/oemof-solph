@@ -10,7 +10,8 @@ API changes
   pull/537>`_).
 
 * The storage API has been revised. Please check the
-  `API documentation <https://oemof-solph.readthedocs.io/en/latest/usage.html#genericstorage-component>`_ for all details.
+  `API documentation <https://oemof.readthedocs.io/en/stable/api/
+  oemof.solph.html#oemof.solph.components.GenericStorage>`_ for all details.
 
 * The OffsetTransformer is now a regular oemof.solph component. It has been
   tested and the documentation has been improved. So it has been move from

@@ -20,7 +20,7 @@ Documentation
 ^^^^^^^^^^^^^^^^^^^^
 
 * Revision of the `outputlib documentation
-  <https://oemof-solph.readthedocs.io/en/v0.3.2/oemof_outputlib.html>`_.
+  <https://oemof.readthedocs.io/en/stable/oemof_outputlib.html>`_.
 
 Other changes
 ^^^^^^^^^^^^^^^^^^^^

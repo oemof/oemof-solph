@@ -13,7 +13,7 @@ Authors
 * Cord Kaldemeyer
 * Daniel Rank
 * Elisa Gaudchau
-* Elisa Papadis
+* Elisa Papdis
 * Fabian Büllesbach
 * Francesco Witte
 * Guido Plessmann
@@ -21,7 +21,6 @@ Authors
 * Jakob Wolf
 * Jann Launer
 * Jens-Olaf Delfs
-* Johannes Kochems
 * Johannes Röder
 * Jonathan Amme
 * Julian Endres

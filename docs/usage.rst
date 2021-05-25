@@ -25,7 +25,7 @@ How can I use solph?
 --------------------
 
 To use solph you have to install oemof and at least one solver (see :ref:`installation_label`), which can be used together with pyomo (e.g. CBC, GLPK, Gurobi, Cplex). See the `pyomo installation guide <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ for all supported solver.
-You can test it by executing one of the existing examples (see :ref:`solph_examples_label`, or directly `oemof's example repository <https://github.com/oemof/oemof-examples>`__). Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
+You can test it by executing one of the existing examples (see :ref:`solph_examples_label`, or directly `oemof's example repository <https://github.com/oemof/oemof_examples>`__). Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
 
 Once the example work you are close to your first energy model.
 
@@ -52,7 +52,7 @@ Set up an energy system
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
 To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <http://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
 .. code-block:: python
 
@@ -76,7 +76,7 @@ After defining an instance of the EnergySystem class you have to add all nodes y
 
 Basically, there are two types of *nodes* - *components* and *buses*. Every Component has to be connected with one or more *buses*. The connection between a *component* and a *bus* is the *flow*.
 
-All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest (see :ref:`feature_requests_and_feedback`).
+All solph *components* can be used to set up an energy system model but you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest. To do so please use the module oemof.solph.custom as described here: http://oemof.readthedocs.io/en/latest/developing_oemof.html#contribute-to-new-components
 
 An example of a simple energy system shows the usage of the nodes for
 real world representations:
@@ -376,7 +376,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../src/oemof/solph/components/extraction_turbine_chp.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -515,13 +515,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -533,8 +533,7 @@ If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 GenericStorage (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-A component to model a storage with its basic characteristics. The
-GenericStorage is designed for one input and one output.
+In contrast to the three classes above the storage class is a pure solph class and is not inherited from the oemof-network module.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
 To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
@@ -591,7 +590,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof_examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -695,7 +694,7 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/offset_transformer.py
+.. include:: ../src/oemof/solph/components.py
   :start-after: _OffsetTransformer-equations:
   :end-before: """
 
@@ -734,7 +733,7 @@ GenericCAES (custom)
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../src/oemof/solph/custom/generic_caes.py
+.. include:: ../src/oemof/solph/custom.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
@@ -757,23 +756,17 @@ SinkDSM (custom)
 ^^^^^^^^^^^^^^^^
 
 :class:`~oemof.solph.custom.SinkDSM` can used to represent flexibility in a demand time series.
-It can represent both, load shifting or load shedding.
-For load shifting, elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
+Elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
 Upwards shifted demand is then balanced with downwards shifted demand.
-For load shedding, shedding capability is described by :attr:`~oemof.solph.custom.SinkDSM.capacity_down`.
-It both, load shifting and load shedding are allowed, :attr:`~oemof.solph.custom.SinkDSM.capacity_down` limits the sum of both downshift categories.
 
-:class:`~oemof.solph.custom.SinkDSM` provides three approaches how the Demand-Side Management (DSM) flexibility is represented in constraints
-It can be used for both, dispatch and investments modeling.
+At the moment, :class:`~oemof.solph.custom.SinkDSM` provides two method how the Demand-Side Management (DSM) flexibility is represented in constraints
 
-* "DLR": Implementation of the DSM modeling approach from by Gils (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage, Stuttgart, <http://dx.doi.org/10.18419/opus-6888>,`_,
-  Details: :class:`~oemof.solph.custom.SinkDSMDLRBlock` and :class:`~oemof.solph.custom.SinkDSMDLRInvestmentBlock`
-* "DIW": Implementation of the DSM modeling approach by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
-  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDIWBlock` and :class:`~oemof.solph.custom.SinkDSMDIWInvestmentBlock`
-* "oemof": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
-  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMOemofBlock` and :class:`~oemof.solph.custom.SinkDSMOemofInvestmentBlock`
+* "delay": Implementation of the DSM modeling method proposed by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
+  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDelayBlock`
+* "interval": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
+  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMIntervalBlock`
 
-Cost can be associated to either demand up shifts or demand down shifts or both.
+Cost can be associated to either demand up shifts or demand down shifts.
 
 This small example of PV, grid and SinkDSM shows how to use the component
 
@@ -817,16 +810,13 @@ This small example of PV, grid and SinkDSM shows how to use the component
                           )
 
     # Create DSM Sink
-    demand_dsm = solph.custom.SinkDSM(label="DSM",
+    demand_dsm = solph.custom.SinkDSM(label='DSM',
                                       inputs={b_elec: solph.Flow()},
-                                      demand=data['demand_el'],
-                                      capacity_up=data["Cap_up"],
-                                      capacity_down=data["Cap_do"],
+                                      capacity_up=data['Cap_up'],
+                                      capacity_down=data['Cap_do'],
                                       delay_time=6,
-                                      max_demand=1,
-                                      max_capacity_up=1,
-                                      max_capacity_down=1,
-                                      approach="DIW",
+                                      demand=data['demand_el'],
+                                      method="delay",
                                       cost_dsm_down=5)
 
 Yielding the following results
@@ -838,15 +828,10 @@ Yielding the following results
 
 
 .. note::
-    * Keyword argument `method` from v0.4.1 has been renamed to `approach` in v0.4.2
-     and methods have been renamed.
-    * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow
-     investments modeling. To retreive the original dispatch behaviour from v0.4.1, set
-     `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
-    * This component is a candidate component. It's implemented as a custom
+   * This component is a candidate component. It's implemented as a custom
      component for users that like to use and test the component at early
      stage. Please report issues to improve the component.
-    * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
+   * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
      background.
 
 
@@ -1088,14 +1073,14 @@ The views module will provide some typical representations of the results.
 Plots are not part of solph, because plots are highly individual. However, the
 provided pandas.DataFrames are a good start for plots. Some basic functions
 for plotting of optimisation results can be found in the separate repository
-`oemof_visio <https://github.com/oemof/oemof-visio>`_.
+`oemof_visio <https://github.com/oemof/oemof_visio>`_.
 
 The ``processing.results`` function gives back the results as a python
 dictionary holding pandas Series for scalar values and pandas DataFrames for
 all nodes and flows between them. This way we can make use of the full power
 of the pandas package available to process the results.
 
-See the `pandas documentation <https://pandas.pydata.org/pandas-docs/stable/>`_
+See the `pandas documentation <http://pandas.pydata.org/pandas-docs/stable/>`_
 to learn how to `visualise
 <https://pandas.pydata.org/pandas-docs/stable/user_guide/visualization.html>`_,
 `read or write
@@ -1220,7 +1205,7 @@ dictionary such that the keys are changed to strings given by the labels:
 
 
 Another option is to access data belonging to a grouping by the name of the grouping
-(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
+(`note also this section on groupings <http://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
 Given the label of an object, e.g. 'wind' you can access the grouping by its label
 and use this to extract data from the results dictionary.
 
