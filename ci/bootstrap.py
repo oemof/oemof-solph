@@ -5,8 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import sys
 import subprocess
+import sys
 from os.path import abspath
 from os.path import dirname
 from os.path import exists
@@ -52,7 +52,6 @@ def exec_in_env():
 def main():
     import jinja2
     import matrix
-
 
     print("Project path: {0}".format(base_path))
 
@@ -101,4 +100,3 @@ if __name__ == "__main__":
     else:
         print("Unexpected arguments {0}".format(args), file=sys.stderr)
         sys.exit(1)
-

@@ -1,31 +1,24 @@
-========
-Overview
-========
+|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
 
-.. start-badges
-
-**docs**
-
-|docs| |zenodo|
-
-**tests**
-
-|travis| |appveyor| |requires|
-|coveralls| |codecov|
-|scrutinizer| |codacy| |codeclimate|
-
-**package**
+|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
 
 |version| |wheel| |supported-versions| |supported-implementations|
-|commits-since|
+|commits-since| |zenodo|
+
+------------------------------
+
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
+
+.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?branch=dev
+     :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |travis| image:: https://travis-ci.org/oemof/oemof-solph.svg?branch=dev
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/github/oemof/oemof-solph/branches
 
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
@@ -37,14 +30,14 @@ Overview
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
-    :target: https://coveralls.io/r/oemof/oemof-solph
+    :target: https://coveralls.io/github/oemof/oemof-solph
 
 .. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
     :alt: Coverage Status
     :target: https://codecov.io/github/oemof/oemof-solph
 
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
-    :target: https://www.codacy.com/gh/oemof/oemof-solph?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=oemof/oemof-solph&amp;utm_campaign=Badge_Grade
+    :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
     :alt: Codacy Code Quality Status
 
 .. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
@@ -67,9 +60,9 @@ Overview
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.0/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.1/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.4.0...dev
+    :target: https://github.com/oemof/oemof-solph/compare/v0.4.1...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: DOI
@@ -79,8 +72,11 @@ Overview
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+===========
+oemof.solph
+===========
 
-.. end-badges
+**A model generator for energy system modelling and optimisation (LP/MILP)**
 
 
 .. contents::
@@ -104,7 +100,7 @@ Since v0.4.0. it is not possible to install just oemof, use
 ``pip install oemof.solph`` instead.
 
 Everybody is welcome to use and/or develop oemof.solph.
-Read our `contribution <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ section.
+Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
@@ -120,7 +116,7 @@ you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 
 Documentation
 =============
-The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <http://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <http://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
+The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <https://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <https://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
 
 .. _installation_label:
@@ -135,7 +131,7 @@ If you have a working Python3 environment, use pypi to install the latest oemof 
 
     pip install oemof.solph
 
-If you want to use the latest features, you might want to install the **developer version**. See section `'Developing oemof' <http://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ for more information. The developer version is not recommended for productive use::
+If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
     pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
@@ -166,7 +162,7 @@ To install the solvers have a look at the package repository of your Linux distr
  1. Download CBC (`64 <https://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <https://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
- 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <http://www.computerhope.com/issues/ch000549.htm>`_
+ 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
  5. Restart Windows
 
 Check the solver installation by executing the test_installation example (see the `Installation test` section).
@@ -214,13 +210,21 @@ Contributing
 ============
 
 A warm welcome to all who want to join the developers and contribute to
-oemof.solph. Information on the details and how to approach us can be found
-`in the documentation <https://oemof.readthedocs.io/en/latest/developing_oemof.html>`_ .
+oemof.solph.
+
+Information on the details and how to approach us can be found
+`in the oemof documentation <https://oemof.readthedocs.io/en/latest/contributing.html>`_ .
 
 Citing
 ======
 
-The core ideas of oemof are described in `DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_ (preprint at `arXiv:1808.0807 <http://arxiv.org/abs/1808.08070v1>`_). To allow citing specific versions of oemof, we use the zenodo project to get a DOI for each version.
+For explicitly citing solph, you might want to refer to
+`DOI:10.1016/j.simpa.2020.100028 <https://doi.org/10.1016/j.simpa.2020.100028>`_,
+which gives an overview over the capabilities of solph.
+The core ideas of oemof as a whole are described in
+`DOI:10.1016/j.esr.2018.07.001 <https://doi.org/10.1016/j.esr.2018.07.001>`_
+(preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
+To allow citing specific versions, we use the zenodo project to get a DOI for each version.
 
 
 .. _solph_examples_label:
