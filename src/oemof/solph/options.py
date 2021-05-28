@@ -300,3 +300,12 @@ class NonConvex:
             self._calculate_max_up_down()
 
         return self._max_up_down
+
+
+class MultiPeriodNonConvex(NonConvex):
+    """Class for MultiPeriodNonConvexFlows
+    Introduced to allow for grouping of Flows with both :attr:`multiperiod`
+    and :attr:`nonconvex` set. The attribute :attr:`multiperiod_nonconvex` is
+    used for this purpose.
+    """
+    pass

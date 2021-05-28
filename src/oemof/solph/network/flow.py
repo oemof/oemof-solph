@@ -151,6 +151,7 @@ class Flow(on.Edge):
                    "multiperiod",
                    "multiperiodinvestment",
                    "nonconvex",
+                   "multiperiodnonconvex",
                    "integer"]
         sequences = ["fix", "variable_costs", "fixed_costs", "min", "max"]
         dictionaries = ["positive_gradient", "negative_gradient"]
