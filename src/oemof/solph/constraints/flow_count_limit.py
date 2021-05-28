@@ -156,9 +156,15 @@ def limit_active_flow_count_by_keyword(
                             lower_limit=0, upper_limit=None)
     """
     flows = []
-    for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
-        if hasattr(model.flows[i, o], keyword):
-            flows.append((i, o))
+    if not isinstance(model, MultiPeriodModel):
+        for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
+            if hasattr(model.flows[i, o], keyword):
+                flows.append((i, o))
+    else:
+        for (i, o) in (
+                model.MultiPeriodNonConvexFlow.MULTIPERIOD_NONCONVEX_FLOWS):
+            if hasattr(model.flows[i, o], keyword):
+                flows.append((i, o))
 
     return limit_active_flow_count(
         model,
