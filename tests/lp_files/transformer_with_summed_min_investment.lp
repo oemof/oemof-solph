@@ -63,6 +63,13 @@ c_u_InvestmentFlow_max(powerplant_electricityBus_2)_:
 +1 flow(powerplant_electricityBus_2)
 <= 0
 
+c_u_InvestmentFlow_summed_min(powerplant_electricityBus)_:
++1000 InvestmentFlow_invest(powerplant_electricityBus)
+-1 flow(powerplant_electricityBus_0)
+-1 flow(powerplant_electricityBus_1)
+-1 flow(powerplant_electricityBus_2)
+<= 0
+
 c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 

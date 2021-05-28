@@ -921,9 +921,9 @@ class TestsConstraint:
             outputs={
                 bel: solph.Flow(
                     variable_costs=23,
+                    summed_min=1000,
                     investment=solph.Investment(
                         ep_costs=100,
-                        summed_min=1000
                     )
                 )
             },
