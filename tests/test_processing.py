@@ -126,6 +126,7 @@ class TestParameterResult:
             "multiperiodinvestment": None,
             "nominal_value": 1,
             "nonconvex": None,
+            "multiperiodnonconvex": None,
             "summed_max": None,
             "summed_min": None,
             "max": 1,
