@@ -2,6 +2,7 @@
 
 min 
 objective:
++100 InvestmentFlow_invest(powerplant_electricityBus)
 +23 flow(powerplant_electricityBus_0)
 +23 flow(powerplant_electricityBus_1)
 +23 flow(powerplant_electricityBus_2)
