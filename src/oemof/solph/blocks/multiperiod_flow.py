@@ -185,15 +185,21 @@ class MultiPeriodFlow(SimpleBlock):
 
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint.
+            Note: Does ignore potential "gaps" between periods.
             """
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
-                for p, ts in m.TIMEINDEX:
-                    if ts > 0:
-                        lhs = (m.flow[inp, out, p, ts]
-                               - m.flow[inp, out, p, ts - 1])
-                        rhs = self.positive_gradient[inp, out, ts]
-                        self.positive_gradient_constr.add((inp, out, p, ts),
-                                                          lhs <= rhs)
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index][0],
+                                      m.TIMEINDEX[index][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                        m.TIMEINDEX[index - 1][1]])
+                        rhs = self.positive_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
+                        self.positive_gradient_constr.add(
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
 
@@ -204,17 +210,23 @@ class MultiPeriodFlow(SimpleBlock):
 
         def _negative_gradient_flow_rule(model):
             """Rule definition for negative gradient constraint.
+            Note: Does ignore potential "gaps" between periods.
             """
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
-                for p, ts in m.TIMEINDEX:
-                    if ts > 0:
-                        lhs = (m.flow[inp, out, p, ts - 1]
-                               - m.flow[inp, out, p, ts])
-                        rhs = self.negative_gradient[inp, out, ts]
-                        self.negative_gradient_constr.add((inp, out, p, ts),
-                                                          lhs <= rhs)
-                    else:
-                        pass  # return(Constraint.Skip)
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                      m.TIMEINDEX[index - 1][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index][0],
+                                        m.TIMEINDEX[index][1]])
+                        rhs = self.negative_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
+                        self.negative_gradient_constr.add(
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
+                else:
+                    pass  # return(Constraint.Skip)
 
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True)
