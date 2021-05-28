@@ -77,9 +77,10 @@ class OffsetTransformer(network.Transformer):
 
         if len(self.inputs) == 1:
             for k, v in self.inputs.items():
-                if not v.nonconvex:
+                if not v.nonconvex or v.multiperiodnonconvex:
                     raise TypeError(
-                        "Input flows must be of type NonConvexFlow!"
+                        "Input flows must be of type NonConvexFlow"
+                        " or MultiPeriodNonConvexFlow!"
                     )
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
@@ -89,7 +90,11 @@ class OffsetTransformer(network.Transformer):
             )
 
     def constraint_group(self):
-        return OffsetTransformerBlock
+        for v in self.inputs.values():
+            if v.nonconvex:
+                return OffsetTransformerBlock
+            else:
+                return OffsetTransformerMultiPeriodBlock
 
 
 class OffsetTransformerBlock(SimpleBlock):
