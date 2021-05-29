@@ -1542,7 +1542,7 @@ class SinkDSMDIWBlock(SimpleBlock):
         for t in m.TIMESTEPS:
             for g in self.dsm:
                 dsm_cost += self.dsm_up[g, t] * g.cost_dsm_up[t]
-                dsm_cost += (sum(self.dsm_do_shift[g, t, tt]
+                dsm_cost += (sum(self.dsm_do_shift[g, tt, t]
                                  for tt in m.TIMESTEPS)
                              * g.cost_dsm_down_shift[t]
                              + self.dsm_do_shed[g, t]
@@ -2117,7 +2117,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
 
             for t in m.TIMESTEPS:
                 variable_costs += self.dsm_up[g, t] * g.cost_dsm_up[t]
-                variable_costs += (sum(self.dsm_do_shift[g, t, tt]
+                variable_costs += (sum(self.dsm_do_shift[g, tt, t]
                                        for tt in m.TIMESTEPS)
                                    * g.cost_dsm_down_shift[t]
                                    + self.dsm_do_shed[g, t]
