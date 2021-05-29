@@ -15,6 +15,7 @@ from difflib import unified_diff
 from os import path as ospath
 
 import pandas as pd
+import pytest
 from nose.tools import assert_raises
 from nose.tools import eq_
 from oemof.network.network import Node
@@ -836,7 +837,7 @@ class TestsConstraint:
         self.compare_lp_files("connect_investment.lp", my_om=om)
 
     def test_gradient(self):
-        """Testing min and max runtimes for nonconvex flows."""
+        """Testing gradient constraints and costs."""
         bel = solph.Bus(label="electricityBus")
 
         solph.Source(
@@ -852,6 +853,54 @@ class TestsConstraint:
         )
 
         self.compare_lp_files("source_with_gradient.lp")
+
+    def test_nonconvex_gradient(self):
+        """Testing gradient constraints and costs."""
+        bel = solph.Bus(label="electricityBus")
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    nonconvex=solph.NonConvex(
+                        positive_gradient={"ub": 0.03, "costs": 7},
+                        negative_gradient={"ub": 0.05, "costs": 8},
+                    )
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_nonconvex_gradient.lp")
+
+    def test_nonconvex_positive_gradient_error(self):
+        """Testing nonconvex positive gradient error."""
+        msg = ("You specified a positive gradient in your nonconvex "
+               "option. This cannot be combined with a positive or a "
+               "negative gradient for a standard flow!")
+
+        with pytest.raises(ValueError, match=msg):
+            solph.Flow(
+                nonconvex=solph.NonConvex(
+                    positive_gradient={"ub": 0.03, "costs": 7},
+                ),
+                positive_gradient={"ub": 0.03, "costs": 7},
+            )
+
+    def test_nonconvex_negative_gradient_error(self):
+        """Testing nonconvex positive gradient error."""
+        msg = ("You specified a negative gradient in your nonconvex "
+               "option. This cannot be combined with a positive or a "
+               "negative gradient for a standard flow!")
+
+        with pytest.raises(ValueError, match=msg):
+            solph.Flow(
+                nonconvex=solph.NonConvex(
+                    negative_gradient={"ub": 0.03, "costs": 7},
+                ),
+                negative_gradient={"ub": 0.03, "costs": 7},
+            )
 
     def test_investment_limit(self):
         """Testing the investment_limit function in the constraint module."""
