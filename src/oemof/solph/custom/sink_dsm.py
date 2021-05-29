@@ -343,8 +343,9 @@ class SinkDSM(Sink):
         self.investment = kwargs.get("investment")
         self._invest_group = isinstance(self.investment, Investment)
 
-        if ((self.max_demand is None or self.max_capacity_up is None or
-                self.max_capacity_down is None) and not self._invest_group):
+        if ((self.max_demand is None or self.max_capacity_up is None
+                or self.max_capacity_down is None)
+                and not self._invest_group):
             e5 = (
                 "If you are setting up a dispatch model, "
                 "you have to specify **max_demand**, **max_capacity_up** "
