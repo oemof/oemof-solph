@@ -122,12 +122,12 @@ class TestsConstraintMultiperiod:
                     ):
                         for n in range(start, end):
                             lines[n] = (
-                                           "-"
-                                           if lines[n] and lines[n][0] == "+"
-                                           else "+"
-                                           if lines[n]
-                                           else lines[n]
-                                       ) + lines[n][1:]
+                                "-"
+                                if lines[n] and lines[n][0] == "+"
+                                else "+"
+                                if lines[n]
+                                else lines[n]
+                            ) + lines[n][1:]
                         lines[end] = "= " + lines[end][3:]
                     return lines
 
