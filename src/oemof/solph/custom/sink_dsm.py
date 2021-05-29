@@ -343,12 +343,27 @@ class SinkDSM(Sink):
         self.investment = kwargs.get("investment")
         self._invest_group = isinstance(self.investment, Investment)
 
+        if ((self.max_demand is None or self.max_capacity_up is None or
+                self.max_capacity_down is None) and not self._invest_group):
+            e5 = (
+                "If you are setting up a dispatch model, "
+                "you have to specify **max_demand**, **max_capacity_up** "
+                "and **max_capacity_down**.\n"
+                "The values you might have passed for **flex_share_up** "
+                "and **flex_share_down** will be ignored and only used in "
+                "an investment model."
+            )
+            raise AttributeError(e5)
+
+        if self._invest_group:
+            self._check_invest_attributes()
+
     def _check_invest_attributes(self):
         if (self.investment is not None
             and (self.max_demand
                  or self.max_capacity_down
                  or self.max_capacity_up) is not None):
-            e5 = (
+            e6 = (
                 "If an investment object is defined, the invest variable "
                 "replaces the **max_demand, the **max_capacity_down "
                 "as well as\n"
@@ -356,7 +371,7 @@ class SinkDSM(Sink):
                 "**max_capacity_up and **max_capacity_down values should be "
                 "'None'.\n"
             )
-            raise AttributeError(e5)
+            raise AttributeError(e6)
 
     def constraint_group(self):
         possible_approaches = ["DIW", "DLR", "oemof"]
@@ -3638,18 +3653,19 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             to the others.
             """
             for g in group:
-                # sum of all load reductions
-                lhs = sum(self.dsm_do_shed[g, t]
-                          for t in m.TIMESTEPS)
+                if g.shed_eligibility:
+                    # sum of all load reductions
+                    lhs = sum(self.dsm_do_shed[g, t]
+                              for t in m.TIMESTEPS)
 
-                # year limit
-                rhs = (g.capacity_down_mean
-                       * (self.invest[g] + g.investment.existing)
-                       * g.flex_share_down * g.shed_time
-                       * g.n_yearLimit_shed)
+                    # year limit
+                    rhs = (g.capacity_down_mean
+                           * (self.invest[g] + g.investment.existing)
+                           * g.flex_share_down * g.shed_time
+                           * g.n_yearLimit_shed)
 
-                # add constraint
-                block.dr_yearly_limit_shed.add(g, (lhs <= rhs))
+                    # add constraint
+                    block.dr_yearly_limit_shed.add(g, (lhs <= rhs))
 
         self.dr_yearly_limit_shed = Constraint(group, noruleinit=True)
         self.dr_yearly_limit_shed_build = BuildAction(
