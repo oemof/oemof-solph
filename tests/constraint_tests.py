@@ -1058,6 +1058,82 @@ class TestsConstraint:
         )
         self.compare_lp_files('dsm_module_oemof.lp')
 
+    def test_dsm_module_DIW_invest(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.Bus(label="bus_elec")
+        solph.custom.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            approach='DIW',
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_cost=100,
+                existing=50,
+                minimum=33,
+                maximum=100
+            )
+        )
+        self.compare_lp_files('dsm_module_DIW_invest.lp')
+
+    def test_dsm_module_DLR_invest(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.Bus(label='bus_elec')
+        solph.custom.SinkDSM(
+            label='demand_dsm',
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            approach='DLR',
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_cost=100,
+                existing=50,
+                minimum=33,
+                maximum=100
+            )
+        )
+        self.compare_lp_files('dsm_module_DLR_invest.lp')
+
+    def test_dsm_module_oemof_invest(self):
+        """Constraint test of SinkDSM with approach=oemof and investments"""
+
+        b_elec = solph.Bus(label="bus_elec")
+        solph.custom.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.5, 0.4, 0.5],
+            approach='oemof',
+            flex_share_up=1,
+            flex_share_down=1,
+            shift_interval=2,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_cost=100,
+                existing=50,
+                minimum=33,
+                maximum=100
+            )
+        )
+        self.compare_lp_files('dsm_module_oemof_invest.lp')
+
     def test_nonconvex_investment_storage_without_offset(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
