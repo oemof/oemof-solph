@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min 
+min
 objective:
 +50 flow(powerplantGasCoal_electricityBus_0)
 +50 flow(powerplantGasCoal_electricityBus_1)
@@ -60,66 +60,66 @@ c_e_Bus_balance(thermalBus_2)_:
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_electricityBus_0)_:
-+10 flow(biomassBus_powerplantGasCoal_0)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_0)
++0.29999999999999999 flow(biomassBus_powerplantGasCoal_0)
+-0.10000000000000001 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_electricityBus_1)_:
-+10 flow(biomassBus_powerplantGasCoal_1)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_1)
++0.29999999999999999 flow(biomassBus_powerplantGasCoal_1)
+-0.10000000000000001 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_electricityBus_2)_:
-+10 flow(biomassBus_powerplantGasCoal_2)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_2)
++0.29999999999999999 flow(biomassBus_powerplantGasCoal_2)
+-0.10000000000000001 flow(powerplantGasCoal_electricityBus_2)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_thermalBus_0)_:
-+10 flow(biomassBus_powerplantGasCoal_0)
--2 flow(powerplantGasCoal_thermalBus_0)
++0.5 flow(biomassBus_powerplantGasCoal_0)
+-0.10000000000000001 flow(powerplantGasCoal_thermalBus_0)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_thermalBus_1)_:
-+10 flow(biomassBus_powerplantGasCoal_1)
--2 flow(powerplantGasCoal_thermalBus_1)
++0.5 flow(biomassBus_powerplantGasCoal_1)
+-0.10000000000000001 flow(powerplantGasCoal_thermalBus_1)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_biomassBus_thermalBus_2)_:
-+10 flow(biomassBus_powerplantGasCoal_2)
--2 flow(powerplantGasCoal_thermalBus_2)
++0.5 flow(biomassBus_powerplantGasCoal_2)
+-0.10000000000000001 flow(powerplantGasCoal_thermalBus_2)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_electricityBus_0)_:
-+2.5 flow(gasBus_powerplantGasCoal_0)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_0)
++0.29999999999999999 flow(gasBus_powerplantGasCoal_0)
+-0.40000000000000002 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_electricityBus_1)_:
-+2.5 flow(gasBus_powerplantGasCoal_1)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_1)
++0.29999999999999999 flow(gasBus_powerplantGasCoal_1)
+-0.40000000000000002 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_electricityBus_2)_:
-+2.5 flow(gasBus_powerplantGasCoal_2)
--3.3333333333333335 flow(powerplantGasCoal_electricityBus_2)
++0.29999999999999999 flow(gasBus_powerplantGasCoal_2)
+-0.40000000000000002 flow(powerplantGasCoal_electricityBus_2)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_thermalBus_0)_:
-+2.5 flow(gasBus_powerplantGasCoal_0)
--2 flow(powerplantGasCoal_thermalBus_0)
++0.5 flow(gasBus_powerplantGasCoal_0)
+-0.40000000000000002 flow(powerplantGasCoal_thermalBus_0)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_thermalBus_1)_:
-+2.5 flow(gasBus_powerplantGasCoal_1)
--2 flow(powerplantGasCoal_thermalBus_1)
++0.5 flow(gasBus_powerplantGasCoal_1)
+-0.40000000000000002 flow(powerplantGasCoal_thermalBus_1)
 = 0
 
 c_e_Transformer_relation(powerplantGasCoal_gasBus_thermalBus_2)_:
-+2.5 flow(gasBus_powerplantGasCoal_2)
--2 flow(powerplantGasCoal_thermalBus_2)
++0.5 flow(gasBus_powerplantGasCoal_2)
+-0.40000000000000002 flow(powerplantGasCoal_thermalBus_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT: 
+c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds

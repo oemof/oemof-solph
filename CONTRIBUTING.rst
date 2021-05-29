@@ -21,6 +21,8 @@ oemof-solph could always use more documentation, whether as part of the
 official oemof-solph docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+.. _feature_requests_and_feedback:
+
 Feature requests and feedback
 =============================
 
