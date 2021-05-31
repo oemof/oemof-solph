@@ -2980,7 +2980,9 @@ class SinkDSMDLRBlock(SimpleBlock):
 
         # Equation 4.15
         def dr_storage_limit_red_rule(block):
-            """Fictious demand response storage level for load reduction limit"""
+            """
+            Fictious demand response storage level for load reduction limit
+            """
             for t in m.TIMESTEPS:
                 for g in group:
 
@@ -3015,7 +3017,9 @@ class SinkDSMDLRBlock(SimpleBlock):
 
         # Equation 4.16
         def dr_storage_limit_inc_rule(block):
-            """Fictious demand response storage level for load increase limit"""
+            """
+            Fictious demand response storage level for load increase limit
+            """
             for t in m.TIMESTEPS:
                 for g in group:
                     # fictious demand response load reduction storage level
@@ -3933,7 +3937,9 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.15
         def dr_storage_limit_red_rule(block):
-            """Fictious demand response storage level for load reduction limit"""
+            """
+            Fictious demand response storage level for load reduction limit
+            """
             for t in m.TIMESTEPS:
                 for g in group:
 
@@ -3969,7 +3975,9 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.16
         def dr_storage_limit_inc_rule(block):
-            """Fictious demand response storage level for load increase limit"""
+            """
+            Fictious demand response storage level for load increase limit
+            """
             for t in m.TIMESTEPS:
                 for g in group:
                     # fictious demand response load reduction storage level
