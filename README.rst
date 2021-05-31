@@ -60,9 +60,9 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.1/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.3/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.4.1...dev
+    :target: https://github.com/oemof/oemof-solph/compare/v0.4.3...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: DOI
