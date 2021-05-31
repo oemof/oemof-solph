@@ -6,6 +6,7 @@ API changes
 ^^^^^^^^^^^^^^^^^^^^
 
 * Allow conversion factor of zero for `GenericTransformer`
+* Python 3.6 is no longer officially supported. It may still work for a while though.
 
 
 New components/constraints
@@ -31,6 +32,7 @@ Other changes
 ^^^^^^^^^^^^^^^^^^^^
 
 * Split code into submodules
+* Move CI-Tests from Travis to github (see `PR #746 <https://github.com/oemof/oemof-solph/pull/746>`_)
 
 Contributors
 ^^^^^^^^^^^^^^^^^^^^
