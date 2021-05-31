@@ -766,7 +766,7 @@ It both, load shifting and load shedding are allowed, :attr:`~oemof.solph.custom
 :class:`~oemof.solph.custom.SinkDSM` provides three approaches how the Demand-Side Management (DSM) flexibility is represented in constraints
 It can be used for both, dispatch and investments modeling.
 
-* "DLR": Implementation of the DSM modeling approach from by Gils (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage, Stuttgart, <http://dx.doi.org/10.18419/opus-6888>,`_,
+* "DLR": Implementation of the DSM modeling approach from by Gils (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage, Stuttgart, <http://dx.doi.org/10.18419/opus-6888>`_,
   Details: :class:`~oemof.solph.custom.SinkDSMDLRBlock` and :class:`~oemof.solph.custom.SinkDSMDLRInvestmentBlock`
 * "DIW": Implementation of the DSM modeling approach by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
   in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDIWBlock` and :class:`~oemof.solph.custom.SinkDSMDIWInvestmentBlock`
@@ -838,16 +838,10 @@ Yielding the following results
 
 
 .. note::
-    * Keyword argument `method` from v0.4.1 has been renamed to `approach` in v0.4.2
-     and methods have been renamed.
-    * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow
-     investments modeling. To retreive the original dispatch behaviour from v0.4.1, set
-     `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
-    * This component is a candidate component. It's implemented as a custom
-     component for users that like to use and test the component at early
-     stage. Please report issues to improve the component.
-    * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical
-     background.
+    * Keyword argument `method` from v0.4.1 has been renamed to `approach` in v0.4.2 and methods have been renamed.
+    * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow investments modeling. To retreive the original dispatch behaviour from v0.4.1, set `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
+    * This component is a candidate component. It's implemented as a custom component for users that like to use and test the component at early stage. Please report issues to improve the component.
+    * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical background.
 
 
 .. _investment_mode_label:
