@@ -26,14 +26,7 @@ def read(*names, **kwargs):
 long_description = "%s\n%s" % (
     re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
         "", read("README.rst")
-    ),
-    "\n".join(
-        [
-            re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read(path))
-            for path in glob("docs/whatsnew/*")
-        ]
-    ),
-)
+    ))
 
 
 setup(
