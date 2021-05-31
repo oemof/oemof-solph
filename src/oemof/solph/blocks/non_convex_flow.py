@@ -468,9 +468,10 @@ class NonConvexFlow(SimpleBlock):
             for i, o in self.POSITIVE_GRADIENT_FLOWS:
                 for t in m.TIMESTEPS:
                     if t > 0:
-                        lhs = (m.flow[i, o, t] * self.status[i, o, t]
-                               - m.flow[i, o, t - 1]
-                               * self.status[i, o, t - 1])
+                        lhs = (
+                            m.flow[i, o, t] * self.status[i, o, t]
+                            - m.flow[i, o, t - 1] * self.status[i, o, t - 1]
+                        )
                         rhs = self.positive_gradient[i, o, t]
                         self.positive_gradient_constr.add(
                             (i, o, t), lhs <= rhs
@@ -490,8 +491,10 @@ class NonConvexFlow(SimpleBlock):
             for i, o in self.NEGATIVE_GRADIENT_FLOWS:
                 for t in m.TIMESTEPS:
                     if t > 0:
-                        lhs = (m.flow[i, o, t - 1] * self.status[i, o, t - 1]
-                               - m.flow[i, o, t] * self.status[i, o, t])
+                        lhs = (
+                            m.flow[i, o, t - 1] * self.status[i, o, t - 1]
+                            - m.flow[i, o, t] * self.status[i, o, t]
+                        )
                         rhs = self.negative_gradient[i, o, t]
                         self.negative_gradient_constr.add(
                             (i, o, t), lhs <= rhs
@@ -551,24 +554,24 @@ class NonConvexFlow(SimpleBlock):
 
         if self.POSITIVE_GRADIENT_FLOWS:
             for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                if (m.flows[i, o].nonconvex.positive_gradient["ub"][0]
-                        is not None):
+                if (
+                    m.flows[i, o].nonconvex.positive_gradient["ub"][0]
+                    is not None
+                ):
                     for t in m.TIMESTEPS:
-                        gradient_costs += (
-                            self.positive_gradient[i, o, t]
-                            * (m.flows[i, o].nonconvex
-                               .positive_gradient["costs"])
+                        gradient_costs += self.positive_gradient[i, o, t] * (
+                            m.flows[i, o].nonconvex.positive_gradient["costs"]
                         )
 
         if self.NEGATIVE_GRADIENT_FLOWS:
             for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                if (m.flows[i, o].nonconvex.negative_gradient["ub"][0]
-                        is not None):
+                if (
+                    m.flows[i, o].nonconvex.negative_gradient["ub"][0]
+                    is not None
+                ):
                     for t in m.TIMESTEPS:
-                        gradient_costs += (
-                            self.negative_gradient[i, o, t]
-                            * (m.flows[i, o].nonconvex
-                               .negative_gradient["costs"])
+                        gradient_costs += self.negative_gradient[i, o, t] * (
+                            m.flows[i, o].nonconvex.negative_gradient["costs"]
                         )
 
             self.gradient_costs = Expression(expr=gradient_costs)

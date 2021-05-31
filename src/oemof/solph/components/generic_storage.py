@@ -763,7 +763,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """"""
+        """ """
         m = self.parent_block()
         if group is None:
             return None

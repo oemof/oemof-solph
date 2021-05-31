@@ -170,7 +170,8 @@ class NonConvex:
         }
 
         for attribute in set(
-                scalars + sequences + dictionaries + list(kwargs)):
+            scalars + sequences + dictionaries + list(kwargs)
+        ):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(
