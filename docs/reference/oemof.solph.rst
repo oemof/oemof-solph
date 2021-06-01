@@ -16,7 +16,7 @@ oemof.solph.components module
 -----------------------------
 
 .. automodule:: oemof.solph.components
-    :members:
+    :members: GenericStorage, GenericStorageBlock, GenericCHP, GenericCHPBlock, OffsetTransformer, OffsetTransformerBlock, ExtractionTurbineCHP, ExtractionTurbineCHPBlock
     :undoc-members:
     :show-inheritance:
 
