@@ -44,7 +44,7 @@ class Investment:
     are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlow`
     and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
 
-    """
+    """  # noqa: E501
 
     def __init__(
         self,

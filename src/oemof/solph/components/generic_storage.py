@@ -128,7 +128,7 @@ class GenericStorage(network.Node):
     ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
-    """
+    """  # noqa: E501
 
     def __init__(
         self, *args, max_storage_level=1, min_storage_level=0, **kwargs

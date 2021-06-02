@@ -66,7 +66,7 @@ class ExtractionTurbineCHP(solph_network.Transformer):
     ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
-    """
+    """  # noqa: E501
 
     def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
         super().__init__(*args, **kwargs)

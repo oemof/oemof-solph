@@ -60,7 +60,7 @@ class OffsetTransformer(network.Transformer):
 
     >>> type(ostf)
     <class 'oemof.solph.components.offset_transformer.OffsetTransformer'>
-    """
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
