@@ -49,11 +49,10 @@ class ExtractionTurbineCHP(solph_network.Transformer):
         key is allowed. Use one of the keys of the conversion factors. The key
         indicates the main flow. The other output flow is the tapped flow.
 
-    Note
-    ----
+    Notes
+    -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.extraction_turbine_chp\
-.ExtractionTurbineCHPBlock`
+     * :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHPBlock`
 
     Examples
     --------
@@ -110,24 +109,24 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     output flows relate to each other, and the symbols used are defined as
     follows (with Variables (V) and Parameters (P)):
 
-    ========================= ==================================================== ==== =========
-    symbol                    attribute                                            type explanation
-    ========================= ==================================================== ==== =========
-    :math:`\dot H_{Fuel}`     :py:obj:`flow[i, n, t]`                              V    fuel input flow
+    ========================= ============================================ ==== =========
+    symbol                    attribute                                    type explanation
+    ========================= ============================================ ==== =========
+    :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
 
-    :math:`P_{el}`            :py:obj:`flow[n, main_output, t]`                    V    electric power
+    :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
 
-    :math:`\dot Q_{th}`       :py:obj:`flow[n, tapped_output, t]`                  V    thermal output
+    :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
 
-    :math:`\beta`             :py:obj:`main_flow_loss_index[n, t]`                 P    power loss index
+    :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
 
-    :math:`\eta_{el,woExtr}`  :py:obj:`conversion_factor_full_condensation[n, t]`  P    electric efficiency
+    :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
                                                                                         without heat extraction
-    :math:`\eta_{el,maxExtr}` :py:obj:`conversion_factors[main_output][n, t]`      P    electric efficiency
+    :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
                                                                                         with max heat extraction
-    :math:`\eta_{th,maxExtr}` :py:obj:`conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
+    :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
                                                                                         maximal heat extraction
-    ========================= ==================================================== ==== =========
+    ========================= ============================================ ==== =========
 
     """  # noqa: E501
 

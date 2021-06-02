@@ -234,85 +234,85 @@ class GenericCAESBlock(SimpleBlock):
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
 
-        ":math:`ST_{cmp}` ", ":py:obj:`cmp_st[n,t]` ", "V", "Status of
+        ":math:`ST_{cmp}` ", "`cmp_st[n,t]` ", "V", "Status of
         compression"
-        ":math:`{P}_{cmp}` ", ":py:obj:`cmp_p[n,t]`", "V", "Compression power"
-        ":math:`{P}_{cmp\_max}`", ":py:obj:`cmp_p_max[n,t]`", "V", "Max.
+        ":math:`{P}_{cmp}` ", "`cmp_p[n,t]`", "V", "Compression power"
+        ":math:`{P}_{cmp\_max}`", "`cmp_p_max[n,t]`", "V", "Max.
         compression power"
-        ":math:`\dot{Q}_{cmp}` ", ":py:obj:`cmp_q_out_sum[n,t]`", "V", "Summed
+        ":math:`\dot{Q}_{cmp}` ", "`cmp_q_out_sum[n,t]`", "V", "Summed
          heat flow in compression"
-        ":math:`\dot{Q}_{cmp\_out}` ", ":py:obj:`cmp_q_waste[n,t]`", "V", "
+        ":math:`\dot{Q}_{cmp\_out}` ", "`cmp_q_waste[n,t]`", "V", "
         Waste heat flow from compression"
-        ":math:`ST_{exp}(t)`", ":py:obj:`exp_st[n,t]`", "V", "Status of
+        ":math:`ST_{exp}(t)`", "`exp_st[n,t]`", "V", "Status of
         expansion (binary)"
-        ":math:`P_{exp}(t)`", ":py:obj:`exp_p[n,t]`", "V", "Expansion power"
-        ":math:`P_{exp\_max}(t)`", ":py:obj:`exp_p_max[n,t]`", "V", "Max.
+        ":math:`P_{exp}(t)`", "`exp_p[n,t]`", "V", "Expansion power"
+        ":math:`P_{exp\_max}(t)`", "`exp_p_max[n,t]`", "V", "Max.
         expansion power"
-        ":math:`\dot{Q}_{exp}(t)`", ":py:obj:`exp_q_in_sum[n,t]`", "V", "
+        ":math:`\dot{Q}_{exp}(t)`", "`exp_q_in_sum[n,t]`", "V", "
         Summed heat flow in expansion"
-        ":math:`\dot{Q}_{exp\_in}(t)`", ":py:obj:`exp_q_fuel_in[n,t]`", "V", "
+        ":math:`\dot{Q}_{exp\_in}(t)`", "`exp_q_fuel_in[n,t]`", "V", "
         Heat (external) flow into expansion"
-        ":math:`\dot{Q}_{exp\_add}(t)`", ":py:obj:`exp_q_add_in[n,t]`", "V", "
+        ":math:`\dot{Q}_{exp\_add}(t)`", "`exp_q_add_in[n,t]`", "V", "
         Additional heat flow into expansion"
-        ":math:`CAV_{fil}(t)`", ":py:obj:`cav_level[n,t]`", "V", "Filling level
+        ":math:`CAV_{fil}(t)`", "`cav_level[n,t]`", "V", "Filling level
          if CAE"
-        ":math:`\dot{E}_{cas\_in}(t)`", ":py:obj:`cav_e_in[n,t]`", "V", "
+        ":math:`\dot{E}_{cas\_in}(t)`", "`cav_e_in[n,t]`", "V", "
         Exergy flow into CAS"
-        ":math:`\dot{E}_{cas\_out}(t)`", ":py:obj:`cav_e_out[n,t]`", "V", "
+        ":math:`\dot{E}_{cas\_out}(t)`", "`cav_e_out[n,t]`", "V", "
         Exergy flow from CAS"
-        ":math:`TES_{fil}(t)`", ":py:obj:`tes_level[n,t]`", "V", "Filling
+        ":math:`TES_{fil}(t)`", "`tes_level[n,t]`", "V", "Filling
         level of Thermal Energy Storage (TES)"
-        ":math:`\dot{Q}_{tes\_in}(t)`", ":py:obj:`tes_e_in[n,t]`", "V", "Heat
+        ":math:`\dot{Q}_{tes\_in}(t)`", "`tes_e_in[n,t]`", "V", "Heat
          flow into TES"
-        ":math:`\dot{Q}_{tes\_out}(t)`", ":py:obj:`tes_e_out[n,t]`", "V", "Heat
+        ":math:`\dot{Q}_{tes\_out}(t)`", "`tes_e_out[n,t]`", "V", "Heat
          flow from TES"
-        ":math:`b_{cmp\_max}`", ":py:obj:`cmp_p_max_b[n,t]`", "P", "Specific
+        ":math:`b_{cmp\_max}`", "`cmp_p_max_b[n,t]`", "P", "Specific
          y-intersection"
-        ":math:`b_{cmp\_q}`", ":py:obj:`cmp_q_out_b[n,t]`", "P", "Specific
+        ":math:`b_{cmp\_q}`", "`cmp_q_out_b[n,t]`", "P", "Specific
         y-intersection"
-        ":math:`b_{exp\_max}`", ":py:obj:`exp_p_max_b[n,t]`", "P", "Specific
+        ":math:`b_{exp\_max}`", "`exp_p_max_b[n,t]`", "P", "Specific
         y-intersection"
-        ":math:`b_{exp\_q}`", ":py:obj:`exp_q_in_b[n,t]`", "P", "Specific
+        ":math:`b_{exp\_q}`", "`exp_q_in_b[n,t]`", "P", "Specific
         y-intersection"
-        ":math:`b_{cas\_in}`", ":py:obj:`cav_e_in_b[n,t]`", "P", "Specific
+        ":math:`b_{cas\_in}`", "`cav_e_in_b[n,t]`", "P", "Specific
         y-intersection"
-        ":math:`b_{cas\_out}`", ":py:obj:`cav_e_out_b[n,t]`", "P", "Specific
+        ":math:`b_{cas\_out}`", "`cav_e_out_b[n,t]`", "P", "Specific
         y-intersection"
-        ":math:`m_{cmp\_max}`", ":py:obj:`cmp_p_max_m[n,t]`", "P", "Specific
+        ":math:`m_{cmp\_max}`", "`cmp_p_max_m[n,t]`", "P", "Specific
          slope"
-        ":math:`m_{cmp\_q}`", ":py:obj:`cmp_q_out_m[n,t]`", "P", "Specific
+        ":math:`m_{cmp\_q}`", "`cmp_q_out_m[n,t]`", "P", "Specific
          slope"
-        ":math:`m_{exp\_max}`", ":py:obj:`exp_p_max_m[n,t]`", "P", "Specific
+        ":math:`m_{exp\_max}`", "`exp_p_max_m[n,t]`", "P", "Specific
          slope"
-        ":math:`m_{exp\_q}`", ":py:obj:`exp_q_in_m[n,t]`", "P", "Specific
+        ":math:`m_{exp\_q}`", "`exp_q_in_m[n,t]`", "P", "Specific
          slope"
-        ":math:`m_{cas\_in}`", ":py:obj:`cav_e_in_m[n,t]`", "P", "Specific
+        ":math:`m_{cas\_in}`", "`cav_e_in_m[n,t]`", "P", "Specific
          slope"
-        ":math:`m_{cas\_out}`", ":py:obj:`cav_e_out_m[n,t]`", "P", "Specific
+        ":math:`m_{cas\_out}`", "`cav_e_out_m[n,t]`", "P", "Specific
          slope"
-        ":math:`P_{cmp\_min}`", ":py:obj:`cmp_p_min[n,t]`", "P", "Min.
+        ":math:`P_{cmp\_min}`", "`cmp_p_min[n,t]`", "P", "Min.
         compression power"
-        ":math:`r_{cmp\_tes}`", ":py:obj:`cmp_q_tes_share[n,t]`", "P", "Ratio
+        ":math:`r_{cmp\_tes}`", "`cmp_q_tes_share[n,t]`", "P", "Ratio
          between waste heat flow and heat flow into TES"
-        ":math:`r_{exp\_tes}`", ":py:obj:`exp_q_tes_share[n,t]`", "P", "Ratio
+        ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "Ratio
          between external heat flow into expansion and heat flows from TES and
           additional source"
-        ":math:`\tau`", ":py:obj:`m.timeincrement[n,t]`", "P", "Time interval
+        ":math:`\tau`", "`m.timeincrement[n,t]`", "P", "Time interval
          length"
-        ":math:`TES_{fil\_max}`", ":py:obj:`tes_level_max[n,t]`", "P", "Max.
+        ":math:`TES_{fil\_max}`", "`tes_level_max[n,t]`", "P", "Max.
         filling level of TES"
-        ":math:`CAS_{fil\_max}`", ":py:obj:`cav_level_max[n,t]`", "P", "Max.
+        ":math:`CAS_{fil\_max}`", "`cav_level_max[n,t]`", "P", "Max.
          filling level of TES"
-        ":math:`\tau`", ":py:obj:`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
+        ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
          (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        :py:obj:`flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        :py:obj:`flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        :py:obj:`flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
+        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
          (external) into Expansion"
 
     """

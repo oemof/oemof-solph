@@ -17,18 +17,19 @@ from oemof.network import energy_system as es
 
 
 class EnergySystem(es.EnergySystem):
-    """A variant of :class:`EnergySystem
-    <oemof.core.energy_system.EnergySystem>` specially tailored to solph.
+    """A variant of the class EnergySystem from
+    <oemof.network.network.energy_system.EnergySystem> specially tailored to
+    solph.
 
     In order to work in tandem with solph, instances of this class always use
-    `solph.GROUPINGS <oemof.solph.GROUPINGS>`. If custom groupings are
-    supplied via the `groupings` keyword argument, `solph.GROUPINGS
-    <oemof.solph.GROUPINGS>` is prepended to those.
+    solph.GROUPINGS <oemof.solph.GROUPINGS>. If custom groupings are
+    supplied via the `groupings` keyword argument, solph.GROUPINGS
+    <oemof.solph.GROUPINGS> is prepended to those.
 
     If you know what you are doing and want to use solph without
-    `solph.GROUPINGS <oemof.solph.GROUPINGS>`, you can just use
-    :class:`core's EnergySystem <oemof.core.energy_system.EnergySystem>`
-    directly.
+    solph.GROUPINGS <oemof.solph.GROUPINGS>, you can just use
+    EnergySystem <oemof.network.network.energy_system.EnergySystem>` of
+    oemof.network directly.
     """
 
     def __init__(self, **kwargs):

@@ -126,7 +126,7 @@ To make it easier to connect the bus to a component you can optionally assign a 
     solph.Bus(label='natural_gas')
     electricity_bus = solph.Bus(label='electricity')
 
-.. note:: See the :py:class:`~oemof.solph.network.Bus` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.bus.Bus` class for all parameters and the mathematical background.
 
 
 Flow
@@ -134,7 +134,7 @@ Flow
 
 The flow class has to be used to connect. An instance of the Flow class is normally used in combination with the definition of a component.
 A Flow can be limited by upper and lower bounds (constant or time-dependent) or by summarised limits.
-For all parameters see the API documentation of the :py:class:`~oemof.solph.network.Flow` class or the examples of the nodes below. A basic flow can be defined without any parameter.
+For all parameters see the API documentation of the :py:class:`~oemof.solph.network.flow.Flow` class or the examples of the nodes below. A basic flow can be defined without any parameter.
 
 .. code-block:: python
 
@@ -142,7 +142,7 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.netw
 
 Oemof has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
 
-.. note:: See the :py:class:`~oemof.solph.network.Flow` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.flow.Flow` class for all parameters and the mathematical background.
 
 Components
 ++++++++++
@@ -362,15 +362,14 @@ A heat pump would be defined in the same manner. New buses are defined to make t
 
 If the low-temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and, therefore, a Transformer with one input is sufficient.
 
-.. note:: See the :py:class:`~oemof.solph.network.Transformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.network.transformer.Transformer` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_extraction_turbine_chp_label:
 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:class:`~oemof.solph.components.ExtractionTurbineCHP` inherits from the
-:ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+The :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
 the application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
@@ -381,7 +380,7 @@ these flows, with the following constraints:
   :end-before: """
 
 These constraints are applied in addition to those of a standard
-:class:`~oemof.solph.network.Transformer`. The constraints limit the range of
+:class:`~oemof.solph.network.transformer.Transformer`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
 the power loss factor :math:`\beta` (in some contexts also referred to as
@@ -393,11 +392,11 @@ incorporates the backpressure coefficient :math:`C_b`.
    :alt: variable_chp_plot.svg
    :align: center
 
-For now, :py:class:`~oemof.solph.components.ExtractionTurbineCHP` instances must
+For now, :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` instances must
 have one input and two output flows. The class allows the definition
 of a different efficiency for every time step that can be passed as a series
 of parameters that are fixed before the optimisation. In contrast to the
-:class:`~oemof.solph.network.Transformer`, a main flow and a tapped flow is
+:py:class:`~oemof.solph.network.transformer.Transformer`, a main flow and a tapped flow is
 defined. For the main flow you can define a separate conversion factor that
 applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
@@ -423,7 +422,7 @@ output of an example in the `example repository
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.components.ExtractionTurbineCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_caes_label:
@@ -525,7 +524,7 @@ If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.components.GenericCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.generic_chp.GenericCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_storage_label:
@@ -591,7 +590,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -642,7 +641,7 @@ The following example describes a battery with flows coupled to the capacity of 
         investment = solph.Investment(ep_costs=400))
 
 
-.. note:: See the :py:class:`~oemof.solph.components.GenericStorage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class for all parameters and the mathematical background.
 
 
 OffsetTransformer (component)
@@ -713,7 +712,7 @@ which results in a nonlinear relation:
 
 The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 
-.. note:: See the :py:class:`~oemof.solph.components.OffsetTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
@@ -723,7 +722,7 @@ ElectricalLine (custom)
 
 Electrical line.
 
-.. note:: See the :py:class:`~oemof.solph.custom.ElectricalLine` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_link_label:
@@ -738,7 +737,7 @@ The following constraints describe the CAES:
   :start-after: _GenericCAES-equations:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.components.GenericCAES` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.custom.generic_caes.GenericCAES` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_generic_chp_label:
 
@@ -747,7 +746,7 @@ Link (custom)
 
 Link.
 
-.. note:: See the :py:class:`~oemof.solph.custom.Link` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.custom.link.Link` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_sinkdsm_label:
@@ -756,22 +755,22 @@ Link.
 SinkDSM (custom)
 ^^^^^^^^^^^^^^^^
 
-:class:`~oemof.solph.custom.SinkDSM` can used to represent flexibility in a demand time series.
+:class:`~oemof.solph.custom.sink_dsm.SinkDSM` can used to represent flexibility in a demand time series.
 It can represent both, load shifting or load shedding.
-For load shifting, elasticity of the demand is described by upper (:attr:`~oemof.solph.custom.SinkDSM.capacity_up`) and lower (:attr:`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
+For load shifting, elasticity of the demand is described by upper (`~oemof.solph.custom.sink_dsm.SinkDSM.capacity_up`) and lower (`~oemof.solph.custom.SinkDSM.capacity_down`) bounds where within the demand is allowed to vary.
 Upwards shifted demand is then balanced with downwards shifted demand.
-For load shedding, shedding capability is described by :attr:`~oemof.solph.custom.SinkDSM.capacity_down`.
-It both, load shifting and load shedding are allowed, :attr:`~oemof.solph.custom.SinkDSM.capacity_down` limits the sum of both downshift categories.
+For load shedding, shedding capability is described by `~oemof.solph.custom.SinkDSM.capacity_down`.
+It both, load shifting and load shedding are allowed, `~oemof.solph.custom.SinkDSM.capacity_down` limits the sum of both downshift categories.
 
-:class:`~oemof.solph.custom.SinkDSM` provides three approaches how the Demand-Side Management (DSM) flexibility is represented in constraints
+:class:`~oemof.solph.custom.sink_dsm.SinkDSM` provides three approaches how the Demand-Side Management (DSM) flexibility is represented in constraints
 It can be used for both, dispatch and investments modeling.
 
 * "DLR": Implementation of the DSM modeling approach from by Gils (2015): `Balancing of Intermittent Renewable Power Generation by Demand Response and Thermal Energy Storage, Stuttgart, <http://dx.doi.org/10.18419/opus-6888>`_,
-  Details: :class:`~oemof.solph.custom.SinkDSMDLRBlock` and :class:`~oemof.solph.custom.SinkDSMDLRInvestmentBlock`
+  Details: :class:`~oemof.solph.custom.sink_dsm.SinkDSMDLRBlock` and :class:`~oemof.solph.custom.sink_dsm.SinkDSMDLRInvestmentBlock`
 * "DIW": Implementation of the DSM modeling approach by Zerrahn & Schill (2015): `On the representation of demand-side management in power system models <https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X>`_,
-  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.SinkDSMDIWBlock` and :class:`~oemof.solph.custom.SinkDSMDIWInvestmentBlock`
+  in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037. Details: :class:`~oemof.solph.custom.sink_dsm.SinkDSMDIWBlock` and :class:`~oemof.solph.custom.sink_dsm.SinkDSMDIWInvestmentBlock`
 * "oemof": Is a fairly simple approach. Within a defined windows of time steps, demand can be shifted within the defined bounds of elasticity.
-  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.SinkDSMOemofBlock` and :class:`~oemof.solph.custom.SinkDSMOemofInvestmentBlock`
+  The window sequentially moves forwards. Details: :class:`~oemof.solph.custom.sink_dsm.SinkDSMOemofBlock` and :class:`~oemof.solph.custom.sink_dsm.SinkDSMOemofInvestmentBlock`
 
 Cost can be associated to either demand up shifts or demand down shifts or both.
 
@@ -841,7 +840,7 @@ Yielding the following results
     * Keyword argument `method` from v0.4.1 has been renamed to `approach` in v0.4.2 and methods have been renamed.
     * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow investments modeling. To retreive the original dispatch behaviour from v0.4.1, set `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
     * This component is a candidate component. It's implemented as a custom component for users that like to use and test the component at early stage. Please report issues to improve the component.
-    * See the :py:class:`~oemof.solph.custom.SinkDSM` class for all parameters and the mathematical background.
+    * See the :py:class:`~oemof.solph.custom.sink_dsm.SinkDSM` class for all parameters and the mathematical background.
 
 
 .. _investment_mode_label:
@@ -900,8 +899,7 @@ The periodical costs (*ep_costs*) are typically calculated as follows:
     wacc = 0.05  # weighted average of capital cost
     epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
 
-This also implemented in :func:`~.oemof.tools.economics.annuity`. The code above
-would look like this:
+This also implemented in the annuity function of the economics module in the oemof.tools package. The code above would look like this:
 
 .. code-block:: python
 
@@ -961,8 +959,8 @@ in the following relation for convex and nonconvex investments:
    :alt: nonconvex_invest_specific_costs.svg
    :align: center
 
-See :py:class:`~oemof.solph.blocks.InvestmentFlow` and
-:py:class:`~oemof.solph.components.GenericInvestmentStorageBlock` for all the
+See :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow` and
+:py:class:`~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock` for all the
 mathematical background, like variables and constraints, which are used.
 
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
@@ -1002,7 +1000,7 @@ This will be used to model for example minimal/maximal power production constrai
 attributes `min`/`max` of the flow are set. It will also be used to include start up constraints and costs
 if corresponding attributes of the class are provided. For more
 information see the API of the :py:class:`~oemof.solph.options.NonConvex` class and its corresponding
-block class :py:class:`~oemof.solph.blocks.NonConvex`.
+block class :py:class:`~oemof.solph.blocks.non_convex_flow.NonConvexFlow`.
 
 .. note:: The usage of this class can sometimes be tricky as there are many interdenpendencies. So
           check out the examples and do not hesitate to ask the developers if your model does
@@ -1030,13 +1028,13 @@ Some predefined additional constraints can be found in the
 The Grouping module (Sets)
 -----------------------------------------------------
 To construct constraints,
-variables and objective expressions inside the :py:mod:`~oemof.solph.blocks`
+variables and objective expressions inside all Block classes
 and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,
 certain constraints are created for all elements of a specific group. Thus,
 mathematically the groups depict sets of elements inside the model.
 
 The grouping is handled by the solph grouping module :py:mod:`~oemof.solph.groupings`
-which is based on the oemof core :py:mod:`~oemof.groupings` functionality. You
+which is based on the groupings module functionality of oemof network. You
 do not need to understand how the underlying functionality works. Instead, checkout
 how the solph grouping module is used to create groups.
 
@@ -1052,12 +1050,12 @@ returns a key for the group depending e.g. on node attributes:
             return blocks.Transformer
    GROUPINGS = [constraint_grouping]
 
-This function can be passed in a list to :attr:`groupings` of
-:class:`oemof.solph.network.EnergySystem`. So that we end up with two groups,
+This function can be passed in a list to `groupings` of
+:class:`oemof.solph.network.energy_system.EnergySystem`. So that we end up with two groups,
 one with all Transformers and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
-(see for example: :py:class:`~oemof.groupings.FlowsWithNodes`).
+(see for example: FlowsWithNodes class in the oemof.network package).
 
 
 Using the Excel (csv) reader

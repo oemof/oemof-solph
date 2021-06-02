@@ -41,8 +41,8 @@ class Investment:
 
 
     For the variables, constraints and parts of the objective function, which
-    are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
-    :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
+    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlow`
+    and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
 
     """
 
