@@ -28,83 +28,84 @@ from pyomo.core.base.block import SimpleBlock
 class NonConvexFlow(SimpleBlock):
     r"""
     **The following sets are created:** (-> see basic sets at
-        :class:`.Model` )
+    :class:`.Model` )
 
-    A set of flows with the attribute :attr:`nonconvex` of type
+    A set of flows with the attribute `nonconvex` of type
         :class:`.options.NonConvex`.
     MIN_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute :attr:`min`
+        A subset of set NONCONVEX_FLOWS with the attribute `min`
         being not None in the first timestep.
     ACTIVITYCOSTFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`activity_costs` being not None.
+        `activity_costs` being not None.
     STARTUPFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`maximum_startups` or :attr:`startup_costs`
+        `maximum_startups` or `startup_costs`
         being not None.
     MAXSTARTUPFLOWS
         A subset of set STARTUPFLOWS with the attribute
-        :attr:`maximum_startups` being not None.
+        `maximum_startups` being not None.
     SHUTDOWNFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`maximum_shutdowns` or :attr:`shutdown_costs`
+        `maximum_shutdowns` or `shutdown_costs`
         being not None.
     MAXSHUTDOWNFLOWS
         A subset of set SHUTDOWNFLOWS with the attribute
-        :attr:`maximum_shutdowns` being not None.
+        `maximum_shutdowns` being not None.
     MINUPTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`minimum_uptime` being not None.
+        `minimum_uptime` being not None.
     MINDOWNTIMEFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`minimum_downtime` being not None.
+        `minimum_downtime` being not None.
     POSITIVE_GRADIENT_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`positive_gradient` being not None.
+        `positive_gradient` being not None.
     NEGATIVE_GRADIENT_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
-        :attr:`negative_gradient` being not None.
+        `negative_gradient` being not None.
 
     **The following variables are created:**
 
-    Status variable (binary) :attr:`om.NonConvexFlow.status`:
+    Status variable (binary) `om.NonConvexFlow.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    Startup variable (binary) :attr:`om.NonConvexFlow.startup`:
+    Startup variable (binary) `om.NonConvexFlow.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUPFLOWS
 
-    Shutdown variable (binary) :attr:`om.NonConvexFlow.shutdown`:
+    Shutdown variable (binary) `om.NonConvexFlow.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWNFLOWS
 
-    Positive gradient (continuous) :attr:`om.NonConvexFlow.positive_gradient`:
+    Positive gradient (continuous) `om.NonConvexFlow.positive_gradient`:
         Variable indicating the positive gradient, i.e. the load increase
         between two consecutive timesteps, indexed by
         POSITIVE_GRADIENT_FLOWS
 
-    Negative gradient (continuous) :attr:`om.NonConvexFlow.negative_gradient`:
+    Negative gradient (continuous) `om.NonConvexFlow.negative_gradient`:
         Variable indicating the negative gradient, i.e. the load decrease
         between two consecutive timesteps, indexed by
         NEGATIVE_GRADIENT_FLOWS
 
-    **The following constraints are created**:
 
-    Minimum flow constraint :attr:`om.NonConvexFlow.min[i,o,t]`
+    **The following constraints are created:**
+
+    Minimum flow constraint `om.NonConvexFlow.min[i,o,t]`
         .. math::
             flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
-    Maximum flow constraint :attr:`om.NonConvexFlow.max[i,o,t]`
+    Maximum flow constraint `om.NonConvexFlow.max[i,o,t]`
         .. math::
             flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
-    Startup constraint :attr:`om.NonConvexFlow.startup_constr[i,o,t]`
+    Startup constraint `om.NonConvexFlow.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
@@ -112,13 +113,13 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
-      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      `om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
 
-    Shutdown constraint :attr:`om.NonConvexFlow.shutdown_constr[i,o,t]`
+    Shutdown constraint `om.NonConvexFlow.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
@@ -126,13 +127,13 @@ class NonConvexFlow(SimpleBlock):
             \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-      :attr:`om.NonConvexFlow.max_startup_constr[i,o,t]`
+      `om.NonConvexFlow.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)
             \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
-    Minimum uptime constraint :attr:`om.NonConvexFlow.uptime_constr[i,o,t]`
+    Minimum uptime constraint `om.NonConvexFlow.uptime_constr[i,o,t]`
         .. math::
             (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
             \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
@@ -147,7 +148,7 @@ class NonConvexFlow(SimpleBlock):
             \{t\_max-minimum\_uptime..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
 
-    Minimum downtime constraint :attr:`om.NonConvexFlow.downtime_constr[i,o,t]`
+    Minimum downtime constraint `om.NonConvexFlow.downtime_constr[i,o,t]`
         .. math::
             (status(i, o, t-1)-status(i, o, t)) \
             \cdot minimum\_downtime(i, o) \\
@@ -165,7 +166,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
 
     Positive gradient constraint
-      :attr:`om.NonConvexFlow.positive_gradient_constr[i, o]`:
+      `om.NonConvexFlow.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) \cdot status(i, o, t)
         - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
           positive\_gradient(i, o, t), \\
@@ -173,7 +174,7 @@ class NonConvexFlow(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
-      :attr:`om.NonConvexFlow.negative_gradient_constr[i, o]`:
+      `om.NonConvexFlow.negative_gradient_constr[i, o]`:
         .. math::
           flow(i, o, t-1) \cdot status(i, o, t-1)
           - flow(i, o, t) \cdot status(i, o, t) \geq \
@@ -181,29 +182,30 @@ class NonConvexFlow(SimpleBlock):
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
           \forall t \in \textrm{TIMESTEPS}.
 
+
     **The following parts of the objective function are created:**
 
-    If :attr:`nonconvex.startup_costs` is set by the user:
+    If `nonconvex.startup_costs` is set by the user:
         .. math::
             \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
             \cdot startup\_costs(i, o)
 
-    If :attr:`nonconvex.shutdown_costs` is set by the user:
+    If `nonconvex.shutdown_costs` is set by the user:
         .. math::
             \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
-                \cdot shutdown\_costs(i, o)
+            \cdot shutdown\_costs(i, o)
 
-    If :attr:`nonconvex.activity_costs` is set by the user:
+    If `nonconvex.activity_costs` is set by the user:
         .. math::
             \sum_{i, o \in ACTIVITYCOSTFLOWS} \sum_t status(i, o, t) \
-                \cdot activity\_costs(i, o)
+            \cdot activity\_costs(i, o)
 
-    If :attr:`nonconvex.positive_gradient["costs"]` is set by the user:
+    If `nonconvex.positive_gradient["costs"]` is set by the user:
         .. math::
             \sum_{i, o \in POSITIVE_GRADIENT_FLOWS} \sum_t
             positive_gradient(i, o, t) \cdot positive\_gradient\_costs(i, o)
 
-    If :attr:`nonconvex.negative_gradient["costs"]` is set by the user:
+    If `nonconvex.negative_gradient["costs"]` is set by the user:
         .. math::
             \sum_{i, o \in NEGATIVE_GRADIENT_FLOWS} \sum_t
             negative_gradient(i, o, t) \cdot negative\_gradient\_costs(i, o)

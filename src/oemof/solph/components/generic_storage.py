@@ -41,17 +41,14 @@ class GenericStorage(network.Node):
     ----------
     nominal_storage_capacity : numeric, :math:`E_{nom}`
         Absolute nominal capacity of the storage
-
     invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
-
     invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
-
     invest_relation_input_output : numeric or None, :math:`r_{in,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
@@ -60,7 +57,6 @@ class GenericStorage(network.Node):
         set the input flow higher than the output flow. If None no relation
         will be set:
         :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
-
     initial_storage_level : numeric, :math:`c(-1)`
         The relative storage content in the timestep before the first
         time step of optimization (between 0 and 1).
@@ -93,13 +89,12 @@ class GenericStorage(network.Node):
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
 
-    Note
-    ----
+    Notes
+    -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components.generic_storage.GenericStorageBlock`
        (if no Investment object present)
-     * :py:class:
-       `~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`
+     * :py:class:`~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`
        (if Investment object present)
 
     Examples
@@ -133,7 +128,7 @@ class GenericStorage(network.Node):
     ...     invest_relation_output_capacity=1/6,
     ...     inflow_conversion_factor=1,
     ...     outflow_conversion_factor=0.8)
-    """
+    """  # noqa: E501
 
     def __init__(
         self, *args, max_storage_level=1, min_storage_level=0, **kwargs
@@ -277,7 +272,7 @@ class GenericStorageBlock(SimpleBlock):
          attr:`investment` of type :class:`.Investment`.
 
     STORAGES_BALANCED
-        A set of  all :class:`.Storage` objects, with 'balanced' attribute set
+        A set of  all :py:class:`~.GenericStorage` objects, with 'balanced' attribute set
         to True.
 
     STORAGES_WITH_INVEST_FLOW_REL
@@ -288,14 +283,14 @@ class GenericStorageBlock(SimpleBlock):
 
     storage_content
         Storage content for every storage and timestep. The value for the
-        storage content at the beginning is set by the parameter `initial_storage_level`
-        or not set if `initial_storage_level` is None.
+        storage content at the beginning is set by the parameter
+        `initial_storage_level` or not set if `initial_storage_level` is None.
         The variable of storage s and timestep t can be accessed by:
         `om.Storage.storage_content[s, t]`
 
     **The following constraints are created:**
 
-    Set storage_content of last time step to one at t=0 if :attr:`balanced == True`
+    Set storage_content of last time step to one at t=0 if balanced == True
         .. math::
             E(t_{last}) = &E(-1)
 
@@ -319,30 +314,30 @@ class GenericStorageBlock(SimpleBlock):
     =========================== ======================= =========
     symbol                      explanation             attribute
     =========================== ======================= =========
-    :math:`E(t)`                energy currently stored :py:obj:`storage_content`
-    :math:`E_{nom}`             nominal capacity of     :py:obj:`nominal_storage_capacity`
+    :math:`E(t)`                energy currently stored `storage_content`
+    :math:`E_{nom}`             nominal capacity of     `nominal_storage_capacity`
                                 the energy storage
-    :math:`c(-1)`               state before            :py:obj:`initial_storage_level`
+    :math:`c(-1)`               state before            `initial_storage_level`
                                 initial time step
-    :math:`c_{min}(t)`          minimum allowed storage :py:obj:`min_storage_level[t]`
-    :math:`c_{max}(t)`          maximum allowed storage :py:obj:`max_storage_level[t]`
-    :math:`\beta(t)`            fraction of lost energy :py:obj:`loss_rate[t]`
+    :math:`c_{min}(t)`          minimum allowed storage `min_storage_level[t]`
+    :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
+    :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
                                 as share of
                                 :math:`E(t)`
                                 per time unit
-    :math:`\gamma(t)`           fixed loss of energy    :py:obj:`fixed_losses_relative[t]`
+    :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
                                 relative to
                                 :math:`E_{nom}` per
                                 time unit
-    :math:`\delta(t)`           absolute fixed loss     :py:obj:`fixed_losses_absolute[t]`
+    :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
                                 of energy per
                                 time unit
-    :math:`\dot{E}_i(t)`        energy flowing in       :py:obj:`inputs`
-    :math:`\dot{E}_o(t)`        energy flowing out      :py:obj:`outputs`
-    :math:`\eta_i(t)`           conversion factor       :py:obj:`inflow_conversion_factor[t]`
+    :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
+    :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
+    :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 when storing energy
-    :math:`\eta_o(t)`           conversion factor when  :py:obj:`outflow_conversion_factor[t]`
+    :math:`\eta_o(t)`           conversion factor when  `outflow_conversion_factor[t]`
                                 (i.e. efficiency)
                                 taking stored energy
     :math:`\tau(t)`             duration of time step
@@ -715,19 +710,19 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
 
-        ":math:`E_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
+        ":math:`E_{exist}`", "`flows[i, o].investment.existing`", "
         Existing storage capacity"
-        ":math:`E_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        ":math:`E_{invest,min}`", "`flows[i, o].investment.minimum`", "
         Minimum investment value"
-        ":math:`E_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        ":math:`E_{invest,max}`", "`flows[i, o].investment.maximum`", "
         Maximum investment value"
-        ":math:`P_{i,exist}`", ":py:obj:`flows[i[n], n].investment.existing`
+        ":math:`P_{i,exist}`", "`flows[i[n], n].investment.existing`
         ", "Existing inflow capacity"
-        ":math:`P_{o,exist}`", ":py:obj:`flows[n, o[n]].investment.existing`
+        ":math:`P_{o,exist}`", "`flows[n, o[n]].investment.existing`
         ", "Existing outlfow capacity"
-        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ":math:`c_{invest,var}`", "`flows[i, o].investment.ep_costs`
         ", "Variable investment costs"
-        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        ":math:`c_{invest,fix}`", "`flows[i, o].investment.offset`", "
         Fix investment costs"
         ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "
         Relation of storage capacity and nominal inflow"
@@ -735,21 +730,21 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         Relation of storage capacity and nominal outflow"
         ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "
         Relation of nominal in- and outflow"
-        ":math:`\beta(t)`", ":py:obj:`loss_rate[t]`", "Fraction of lost energy
+        ":math:`\beta(t)`", "`loss_rate[t]`", "Fraction of lost energy
         as share of :math:`E(t)` per time unit"
-        ":math:`\gamma(t)`", ":py:obj:`fixed_losses_relative[t]`", "Fixed loss
+        ":math:`\gamma(t)`", "`fixed_losses_relative[t]`", "Fixed loss
         of energy relative to :math:`E_{invest} + E_{exist}` per time unit"
-        ":math:`\delta(t)`", ":py:obj:`fixed_losses_absolute[t]`", "Absolute
+        ":math:`\delta(t)`", "`fixed_losses_absolute[t]`", "Absolute
         fixed loss of energy per time unit"
-        ":math:`\eta_i(t)`", ":py:obj:`inflow_conversion_factor[t]`", "
+        ":math:`\eta_i(t)`", "`inflow_conversion_factor[t]`", "
         Conversion factor (i.e. efficiency) when storing energy"
-        ":math:`\eta_o(t)`", ":py:obj:`outflow_conversion_factor[t]`", "
+        ":math:`\eta_o(t)`", "`outflow_conversion_factor[t]`", "
         Conversion factor when (i.e. efficiency) taking stored energy"
-        ":math:`c(-1)`", ":py:obj:`initial_storage_level`", "Initial relativ
+        ":math:`c(-1)`", "`initial_storage_level`", "Initial relativ
         storage content (before timestep 0)"
-        ":math:`c_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
+        ":math:`c_{max}`", "`flows[i, o].max[t]`", "Normed maximum
         value of storage content"
-        ":math:`c_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
+        ":math:`c_{min}`", "`flows[i, o].min[t]`", "Normed minimum
         value of storage content"
         ":math:`\tau(t)`", "", "Duration of time step"
         ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`,
