@@ -65,6 +65,24 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
 
+    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+
+    With `IF` being the set of InvestmentFlows considered for the integral
+    limit.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    | symbol        | attribute                     | type | explanation                                                  |
+    +===============+===============================+======+==============================================================+
+    | :math:`P_{i}` | `InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
+    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`   | `keyword`                     | P    | weight given to investment flow named according to `keyword` |
+    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit` | `limit`                       | P    | global limit given by keyword `limit`                        |
+    +---------------+-------------------------------+------+--------------------------------------------------------------+
+
     Parameters
     ----------
     model : oemof.solph.Model
@@ -74,26 +92,6 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         used.
     limit : numeric
         Global limit of keyword attribute for the energy system.
-
-    **Constraint**
-
-    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
-
-    With `IF` being the set of InvestmentFlows considered for the integral
-    limit.
-
-    The symbols used are defined as follows
-    (with Variables (V) and Parameters (P)):
-
-    +---------------+---------------------------------------+------+--------------------------------------------------------------+
-    | symbol        | attribute                             | type | explanation                                                  |
-    +===============+=======================================+======+==============================================================+
-    | :math:`P_{i}` | :py:obj:`InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
-    +---------------+---------------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`   | :py:obj:`keyword`                     | P    | weight given to investment flow named according to `keyword` |
-    +---------------+---------------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit` | :py:obj:`limit`                       | P    | global limit given by keyword `limit`                        |
-    +---------------+---------------------------------------+------+--------------------------------------------------------------+
 
     Note
     ----

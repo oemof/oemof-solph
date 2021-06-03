@@ -42,10 +42,10 @@ class Investment:
 
 
     For the variables, constraints and parts of the objective function, which
-    are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
-    :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
+    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlow`
+    and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
 
-    """
+    """  # noqa: E501
 
     def __init__(
         self,
@@ -254,6 +254,23 @@ class NonConvex:
         If both, up and downtimes are defined, the initial status is set for
         the maximum of both e.g. for six timesteps if a minimum downtime of
         six timesteps is defined in addition to a four timestep minimum uptime.
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * `'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * `'costs``: numeric (scalar or None), the gradient cost per
+            unit.
     """
 
     def __init__(self, **kwargs):
@@ -265,15 +282,29 @@ class NonConvex:
             "maximum_shutdowns",
         ]
         sequences = ["startup_costs", "shutdown_costs", "activity_costs"]
-        defaults = {"initial_status": 0}
+        dictionaries = ["positive_gradient", "negative_gradient"]
+        defaults = {
+            "initial_status": 0,
+            "positive_gradient": {"ub": None, "costs": 0},
+            "negative_gradient": {"ub": None, "costs": 0},
+        }
 
-        for attribute in set(scalars + sequences + list(kwargs)):
+        for attribute in set(
+            scalars + sequences + dictionaries + list(kwargs)
+        ):
             value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(
-                self,
-                attribute,
-                sequence(value) if attribute in sequences else value,
-            )
+            if attribute in dictionaries:
+                setattr(
+                    self,
+                    attribute,
+                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                )
+            else:
+                setattr(
+                    self,
+                    attribute,
+                    sequence(value) if attribute in sequences else value,
+                )
 
         self._max_up_down = None
 

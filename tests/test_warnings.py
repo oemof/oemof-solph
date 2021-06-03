@@ -94,7 +94,7 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
 
 
 def test_storage_without_outputs(warning_fixture):
-    """ GenericStorage doesn't warn correctly about missing outputs."""
+    """GenericStorage doesn't warn correctly about missing outputs."""
     look_out = network.Bus()
     msg = (
         "Attribute <outputs> is missing in Node <storage without outputs>"
@@ -109,7 +109,7 @@ def test_storage_without_outputs(warning_fixture):
 
 
 def test_storage_without_inputs(warning_fixture):
-    """ GenericStorage doesn't warn correctly about missing inputs."""
+    """GenericStorage doesn't warn correctly about missing inputs."""
     look_out = network.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <storage without inputs>"
