@@ -371,7 +371,7 @@ class SinkDSM(Sink):
             self.max_demand is None
             or self.max_capacity_up is None
             or self.max_capacity_down is None
-        ) and not self._invest_group:
+        ) and not (self._invest_group or self._multiperiodinvest_group):
             e5 = (
                 "If you are setting up a dispatch model, "
                 "you have to specify **max_demand**, **max_capacity_up** "
