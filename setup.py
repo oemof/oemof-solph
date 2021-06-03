@@ -32,7 +32,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.4.4.dev0",
+    version="0.4.5.dev0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -51,12 +51,14 @@ setup(
         # complete classifier list:
         # http://pypi.python.org/pypi?%3Aaction=list_classifiers
         "Development Status :: 5 - Production/Stable",
-        "Intended Audience :: Science/Research/Developers",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Unix",
         "Operating System :: POSIX",
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS",
+        "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
@@ -81,7 +83,7 @@ setup(
         "dill",
         "numpy",
         "pandas",
-        "pyomo >= 5.7.0, < 6.0",
+        "pyomo >= 5.7.0, < 5.7.3",
         "networkx",
         "oemof.tools",
         "oemof.network",
