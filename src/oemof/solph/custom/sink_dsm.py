@@ -265,7 +265,7 @@ class SinkDSM(Sink):
         shed_eligibility=True,
         shift_eligibility=True,
         fixed_costs=0,
-                 **kwargs,
+        **kwargs,
     ):
         super().__init__(**kwargs)
 
