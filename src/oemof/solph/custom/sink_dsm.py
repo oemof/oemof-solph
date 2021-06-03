@@ -386,8 +386,8 @@ class SinkDSM(Sink):
             self._check_invest_attributes()
 
     def _check_invest_attributes(self):
-        if (self.investment is not None
-            or self.multiperiodinvestment is not None
+        if ((self.investment is not None
+            or self.multiperiodinvestment is not None)
             and (self.max_demand
                  or self.max_capacity_down
                  or self.max_capacity_up) is not None):
