@@ -199,7 +199,7 @@ class MultiPeriodInvestment:
             raise AttributeError(e1)
 
     def _check_invest_attributes_maximum(self):
-        if (self.maximum == sequence(float('+inf'))
+        if (self.maximum[0] == float('+inf')
                 and (self.nonconvex is True)):
             e2 = ("Please provide an maximum investment value in case of "
                   "nonconvex investment, which is in the "

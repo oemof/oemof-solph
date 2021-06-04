@@ -413,7 +413,8 @@ class MultiPeriodModel(BaseModel):
     CONSTRAINT_GROUPS = [blocks.MultiPeriodBus, blocks.MultiPeriodTransformer,
                          blocks.InvestmentFlow,
                          blocks.NonConvexFlow, blocks.MultiPeriodFlow,
-                         blocks.MultiPeriodInvestmentFlow]
+                         blocks.MultiPeriodInvestmentFlow,
+                         blocks.MultiPeriodNonConvexFlow]
 
     def __init__(self, energysystem, discount_rate=0.02, **kwargs):
         self.discount_rate = discount_rate

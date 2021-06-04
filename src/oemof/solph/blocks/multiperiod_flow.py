@@ -82,6 +82,9 @@ class MultiPeriodFlow(SimpleBlock):
           \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
           \forall p, t \in \textrm{TIMEINDEX}.
 
+    _Note: The matching routine used for attributing the timesteps to the
+    respective periods is not shown in the gradient equations._
+
     **The following parts of the objective function are created:**
 
     If :attr:`variable_costs` are set by the user:
