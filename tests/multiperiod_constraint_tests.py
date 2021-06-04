@@ -876,6 +876,61 @@ class TestsConstraintMultiperiod:
 
         self.compare_lp_files("variable_chp_multiperiod.lp")
 
+    def test_multiperiodinvestment_fixed(self):
+        """"""
+        bus = solph.Bus(label="bus_1",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source_0",
+            outputs={
+                bus: solph.Flow(fix=[1,2,3,4,5,6],
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=50,
+                        lifetime=20
+                    )
+                )
+            },
+        )
+        self.compare_lp_files("multiperiod_fix_investment.lp")
+
+    def test_multiperiodinvestment_min(self):
+        """"""
+        bus = solph.Bus(label="bus_1",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source_0",
+            outputs={
+                bus: solph.Flow(min=[1,2,3,4,5,6],
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=50,
+                        lifetime=20
+                    )
+                )
+            },
+        )
+        self.compare_lp_files("multiperiod_min_investment.lp")
+
+    def test_multiperiodinvestment_overall_minimum(self):
+        """"""
+        bus = solph.Bus(label="bus_1",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source_0",
+            outputs={
+                bus: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=50,
+                        lifetime=20,
+                        overall_minimum=100
+                    )
+                )
+            },
+        )
+        self.compare_lp_files("multiperiod_investment_overall_minimum.lp")
+
     def test_generic_minvest_limit_multiperiod(self):
         """"""
         bus = solph.Bus(label="bus_1",

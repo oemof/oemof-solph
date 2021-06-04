@@ -617,6 +617,38 @@ class TestsConstraint:
 
         self.compare_lp_files("variable_chp.lp")
 
+    def test_investment_fixed(self):
+        """"""
+        bus = solph.Bus(label="bus_1")
+
+        solph.Source(
+            label="source_0",
+            outputs={
+                bus: solph.Flow(fix=[1,2,3],
+                    investment=solph.Investment(
+                        ep_costs=50,
+                    )
+                )
+            },
+        )
+        self.compare_lp_files("fix_investment.lp")
+
+    def test_investment_min(self):
+        """"""
+        bus = solph.Bus(label="bus_1")
+
+        solph.Source(
+            label="source_0",
+            outputs={
+                bus: solph.Flow(min=[1,2,3],
+                    investment=solph.Investment(
+                        ep_costs=50,
+                    )
+                )
+            },
+        )
+        self.compare_lp_files("min_investment.lp")
+
     def test_generic_invest_limit(self):
         """ """
         bus = solph.Bus(label="bus_1")
