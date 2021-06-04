@@ -183,8 +183,8 @@ def test_gen_chp_multiperiod():
 
     test_dict = {
         (("bth", "demand_th"), "flow"): 20000.0,
-        (("combined_cycle_extraction_turbine", "bth"), "flow"): 14070.15215799,
-        (("source_th", "bth"), "flow"): 5929.8478649200015,
+        (("combined_cycle_extraction_turbine", "bth"), "flow"): 14068,
+        (("source_th", "bth"), "flow"): 5932,
     }
 
     for key in test_dict.keys():
