@@ -76,7 +76,7 @@ class OffsetTransformer(network.Transformer):
 
         if len(self.inputs) == 1:
             for k, v in self.inputs.items():
-                if not v.nonconvex or v.multiperiodnonconvex:
+                if not (v.nonconvex or v.multiperiodnonconvex):
                     raise TypeError(
                         "Input flows must be of type NonConvexFlow"
                         " or MultiPeriodNonConvexFlow!"
@@ -209,7 +209,8 @@ class OffsetTransformerMultiPeriodBlock(SimpleBlock):
                 * n.coefficients[1][t]
             )
             expr += (
-                m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t]
+                (m.MultiPeriodNonConvexFlow
+                 .status[list(n.inputs.keys())[0], n, t])
                 * n.coefficients[0][t]
             )
             return expr == 0
