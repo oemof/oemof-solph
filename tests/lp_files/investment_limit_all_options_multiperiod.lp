@@ -1,0 +1,2087 @@
+\* Source Pyomo model name=MultiPeriodModel *\
+
+min 
+objective:
++177.35448256334197 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_0)
++173.87694368955096 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1)
++170.46759185250093 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2)
++150.44552658821425 MultiPeriodInvestmentFlow_invest(Source_Bus1_0)
++147.49561430217082 MultiPeriodInvestmentFlow_invest(Source_Bus1_1)
++144.60354343350082 MultiPeriodInvestmentFlow_invest(Source_Bus1_2)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_5)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_5)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_5)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_5)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_0)
++2 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_1)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_2)
++1.9607843137254901 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_3)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4)
++1.9223375624759707 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
++2 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
++1.9607843137254901 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
++1.9223375624759707 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
++2 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0)
++2 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_1)
++1.9607843137254901 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_2)
++1.9607843137254901 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_3)
++1.9223375624759707 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_4)
++1.9223375624759707 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_5)
+
+s.t.
+
+c_u_multiperiodinvestment_limit_:
++177.35448256334197 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_0)
++173.87694368955096 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1)
++170.46759185250093 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2)
++150.44552658821425 MultiPeriodInvestmentFlow_invest(Source_Bus1_0)
++147.49561430217082 MultiPeriodInvestmentFlow_invest(Source_Bus1_1)
++144.60354343350082 MultiPeriodInvestmentFlow_invest(Source_Bus1_2)
+<= 1000
+
+c_e_MultiPeriodBus_balance(Bus1_0_0)_:
+-1 flow(Bus1_demand_dsm_DIW_0_0)
+-1 flow(Bus1_demand_dsm_DLR_0_0)
+-1 flow(Bus1_demand_dsm_oemof_0_0)
+-1 flow(Bus1_storage_invest_limit_0_0)
++1 flow(Source_Bus1_0_0)
++1 flow(storage_invest_limit_Bus1_0_0)
+= 0
+
+c_e_MultiPeriodBus_balance(Bus1_0_1)_:
+-1 flow(Bus1_demand_dsm_DIW_0_1)
+-1 flow(Bus1_demand_dsm_DLR_0_1)
+-1 flow(Bus1_demand_dsm_oemof_0_1)
+-1 flow(Bus1_storage_invest_limit_0_1)
++1 flow(Source_Bus1_0_1)
++1 flow(storage_invest_limit_Bus1_0_1)
+= 0
+
+c_e_MultiPeriodBus_balance(Bus1_1_2)_:
+-1 flow(Bus1_demand_dsm_DIW_1_2)
+-1 flow(Bus1_demand_dsm_DLR_1_2)
+-1 flow(Bus1_demand_dsm_oemof_1_2)
+-1 flow(Bus1_storage_invest_limit_1_2)
++1 flow(Source_Bus1_1_2)
++1 flow(storage_invest_limit_Bus1_1_2)
+= 0
+
+c_e_MultiPeriodBus_balance(Bus1_1_3)_:
+-1 flow(Bus1_demand_dsm_DIW_1_3)
+-1 flow(Bus1_demand_dsm_DLR_1_3)
+-1 flow(Bus1_demand_dsm_oemof_1_3)
+-1 flow(Bus1_storage_invest_limit_1_3)
++1 flow(Source_Bus1_1_3)
++1 flow(storage_invest_limit_Bus1_1_3)
+= 0
+
+c_e_MultiPeriodBus_balance(Bus1_2_4)_:
+-1 flow(Bus1_demand_dsm_DIW_2_4)
+-1 flow(Bus1_demand_dsm_DLR_2_4)
+-1 flow(Bus1_demand_dsm_oemof_2_4)
+-1 flow(Bus1_storage_invest_limit_2_4)
++1 flow(Source_Bus1_2_4)
++1 flow(storage_invest_limit_Bus1_2_4)
+= 0
+
+c_e_MultiPeriodBus_balance(Bus1_2_5)_:
+-1 flow(Bus1_demand_dsm_DIW_2_5)
+-1 flow(Bus1_demand_dsm_DLR_2_5)
+-1 flow(Bus1_demand_dsm_oemof_2_5)
+-1 flow(Bus1_storage_invest_limit_2_5)
++1 flow(Source_Bus1_2_5)
++1 flow(storage_invest_limit_Bus1_2_5)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Bus1_storage_invest_limit_0)_:
+-1 MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_0)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Bus1_storage_invest_limit_1)_:
+-1 MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_1)
++1 MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_1)
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Bus1_storage_invest_limit_2)_:
+-1 MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_2)
++1 MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_2)
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Source_Bus1_0)_:
+-1 MultiPeriodInvestmentFlow_invest(Source_Bus1_0)
++1 MultiPeriodInvestmentFlow_total(Source_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Source_Bus1_1)_:
+-1 MultiPeriodInvestmentFlow_invest(Source_Bus1_1)
++1 MultiPeriodInvestmentFlow_old(Source_Bus1_1)
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_0)
++1 MultiPeriodInvestmentFlow_total(Source_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(Source_Bus1_2)_:
+-1 MultiPeriodInvestmentFlow_invest(Source_Bus1_2)
++1 MultiPeriodInvestmentFlow_old(Source_Bus1_2)
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_1)
++1 MultiPeriodInvestmentFlow_total(Source_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(storage_invest_limit_Bus1_0)_:
+-1 MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_0)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(storage_invest_limit_Bus1_1)_:
+-1 MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_1)
++1 MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_1)
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_total_rule(storage_invest_limit_Bus1_2)_:
+-1 MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_2)
++1 MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_2)
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Bus1_storage_invest_limit_0)_:
++1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Bus1_storage_invest_limit_1)_:
++1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Bus1_storage_invest_limit_2)_:
++1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Source_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Source_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(Source_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(storage_invest_limit_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(storage_invest_limit_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_end(storage_invest_limit_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Bus1_storage_invest_limit_0)_:
++1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Bus1_storage_invest_limit_1)_:
++1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Bus1_storage_invest_limit_2)_:
++1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Source_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Source_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(Source_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(storage_invest_limit_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(storage_invest_limit_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule_exo(storage_invest_limit_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Bus1_storage_invest_limit_0)_:
++1 MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_0)
+-1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_0)
+-1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Bus1_storage_invest_limit_1)_:
++1 MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_1)
+-1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_1)
+-1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Bus1_storage_invest_limit_2)_:
++1 MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_2)
+-1 MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_2)
+-1 MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Source_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old(Source_Bus1_0)
+-1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_0)
+-1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Source_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old(Source_Bus1_1)
+-1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_1)
+-1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(Source_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old(Source_Bus1_2)
+-1 MultiPeriodInvestmentFlow_old_end(Source_Bus1_2)
+-1 MultiPeriodInvestmentFlow_old_exo(Source_Bus1_2)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(storage_invest_limit_Bus1_0)_:
++1 MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_0)
+-1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_0)
+-1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_0)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(storage_invest_limit_Bus1_1)_:
++1 MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_1)
+-1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_1)
+-1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_1)
+= 0
+
+c_e_MultiPeriodInvestmentFlow_old_rule(storage_invest_limit_Bus1_2)_:
++1 MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_2)
+-1 MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_2)
+-1 MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_2)
+= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_0_0)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0)
++1 flow(Bus1_storage_invest_limit_0_0)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_0_1)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0)
++1 flow(Bus1_storage_invest_limit_0_1)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_1_2)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1)
++1 flow(Bus1_storage_invest_limit_1_2)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_1_3)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1)
++1 flow(Bus1_storage_invest_limit_1_3)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_2_4)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_2)
++1 flow(Bus1_storage_invest_limit_2_4)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Bus1_storage_invest_limit_2_5)_:
+-1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_2)
++1 flow(Bus1_storage_invest_limit_2_5)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_0_0)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_0)
++1 flow(Source_Bus1_0_0)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_0_1)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_0)
++1 flow(Source_Bus1_0_1)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_1_2)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_1)
++1 flow(Source_Bus1_1_2)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_1_3)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_1)
++1 flow(Source_Bus1_1_3)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_2_4)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_2)
++1 flow(Source_Bus1_2_4)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(Source_Bus1_2_5)_:
+-1 MultiPeriodInvestmentFlow_total(Source_Bus1_2)
++1 flow(Source_Bus1_2_5)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_0_0)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0)
++1 flow(storage_invest_limit_Bus1_0_0)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_0_1)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0)
++1 flow(storage_invest_limit_Bus1_0_1)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_1_2)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1)
++1 flow(storage_invest_limit_Bus1_1_2)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_1_3)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1)
++1 flow(storage_invest_limit_Bus1_1_3)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_2_4)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_2)
++1 flow(storage_invest_limit_Bus1_2_4)
+<= 0
+
+c_u_MultiPeriodInvestmentFlow_max(storage_invest_limit_Bus1_2_5)_:
+-1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_2)
++1 flow(storage_invest_limit_Bus1_2_5)
+<= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_total_storage_rule(storage_invest_limit_0)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_0)
++1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_total_storage_rule(storage_invest_limit_1)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1)
++1 GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_1)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
++1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_total_storage_rule(storage_invest_limit_2)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2)
++1 GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_2)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
++1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_end(storage_invest_limit_0)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_end(storage_invest_limit_1)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_end(storage_invest_limit_2)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_2)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_exo(storage_invest_limit_0)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_exo(storage_invest_limit_1)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule_exo(storage_invest_limit_2)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_2)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule(storage_invest_limit_0)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_0)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_0)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule(storage_invest_limit_1)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_1)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_1)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_old_rule(storage_invest_limit_2)_:
++1 GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_2)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_2)
+-1 GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_2)
+= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_0_0)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_0)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_0_1)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_1)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_1_2)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_2)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_1_3)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_3)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_2_4)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_4)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_storage_level_noinv_rule(storage_invest_limit_2_5)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_5)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
+<= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance_first(storage_invest_limit)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_0)
+-1 flow(Bus1_storage_invest_limit_0_0)
++1 flow(storage_invest_limit_Bus1_0_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance(storage_invest_limit_0_1)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_0)
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_1)
+-1 flow(Bus1_storage_invest_limit_0_1)
++1 flow(storage_invest_limit_Bus1_0_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance(storage_invest_limit_1_2)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_1)
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_2)
+-1 flow(Bus1_storage_invest_limit_1_2)
++1 flow(storage_invest_limit_Bus1_1_2)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance(storage_invest_limit_1_3)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_2)
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_3)
+-1 flow(Bus1_storage_invest_limit_1_3)
++1 flow(storage_invest_limit_Bus1_1_3)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance(storage_invest_limit_2_4)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_3)
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_4)
+-1 flow(Bus1_storage_invest_limit_2_4)
++1 flow(storage_invest_limit_Bus1_2_4)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_balance(storage_invest_limit_2_5)_:
+-1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_4)
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_5)
+-1 flow(Bus1_storage_invest_limit_2_5)
++1 flow(storage_invest_limit_Bus1_2_5)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_inflow(storage_invest_limit_0)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_inflow(storage_invest_limit_1)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_inflow(storage_invest_limit_2)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
++1 MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_2)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_outflow(storage_invest_limit_0)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_outflow(storage_invest_limit_1)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1)
+= 0
+
+c_e_GenericMultiPeriodInvestmentStorageBlock_storage_capacity_outflow(storage_invest_limit_2)_:
+-0.20000000000000001 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
++1 MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_2)
+= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_0_0)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_0)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_0_1)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_1)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_1_2)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_2)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_1_3)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_3)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_2_4)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_4)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
+<= 0
+
+c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage_invest_limit_2_5)_:
++1 GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_5)
+-1 GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2)
+<= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DIW_0)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+= 50
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DIW_1)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DIW_2)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DIW_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DIW_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DIW_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DIW_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DIW_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DIW_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DIW_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DIW_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DIW_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_3)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_3)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_4)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_4)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DIW_5)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_5)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_0_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
++1 flow(Bus1_demand_dsm_DIW_0_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_0_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
++1 flow(Bus1_demand_dsm_DIW_0_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_1_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
++1 flow(Bus1_demand_dsm_DIW_1_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_1_3)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_3)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
++1 flow(Bus1_demand_dsm_DIW_1_3)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_2_4)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_4)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
++1 flow(Bus1_demand_dsm_DIW_2_4)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DIW_2_5)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_5)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
++1 flow(Bus1_demand_dsm_DIW_2_5)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_0)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_0)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_1)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_1)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_2)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_2)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_3)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_3)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_4)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_4)
+= 0
+
+c_e_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_updo_constraint(demand_dsm_DIW_5)_:
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4)
+-1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_5)
+= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_0_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_0)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_0_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_1)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_1_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_2)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_1_3)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_3)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_2_4)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_4)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_DIW_2_5)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_5)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_0_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_0_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_1_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_1_3)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_2_4)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_constraint(demand_dsm_DIW_2_5)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_0_0)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_0)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_0_1)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_1)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_1_2)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_2)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_1_3)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_3)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_2_4)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_4)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_u_SinkDSMDIWMultiPeriodInvestmentBlock_C2_constraint(demand_dsm_DIW_2_5)_:
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5)
++1 SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_5)
+-0.5 SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2)
+<= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DLR_0)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+= 50
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DLR_1)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_DLR_2)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DLR_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DLR_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_DLR_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DLR_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DLR_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_DLR_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DLR_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DLR_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_DLR_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_1_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_0_0)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
++1 flow(Bus1_demand_dsm_DLR_0_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_0_1)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
++1 flow(Bus1_demand_dsm_DLR_0_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_1_2)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
++1 flow(Bus1_demand_dsm_DLR_1_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_1_3)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
++1 flow(Bus1_demand_dsm_DLR_1_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_2_4)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
++1 flow(Bus1_demand_dsm_DLR_2_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_DLR_2_5)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
++1 flow(Bus1_demand_dsm_DLR_2_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_1_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_2_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_2_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_2_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_red(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_1_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_2_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_2_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_2_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_capacity_balance_inc(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_red(demand_dsm_DLR_1_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_red(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_red(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_inc(demand_dsm_DLR_1_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_inc(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_no_comp_inc(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5)
+= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_0_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_0_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_red(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_0_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_0_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_availability_inc(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_1)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_2)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_3)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_4)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_red(demand_dsm_DLR_5)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_0)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_0)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_1)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_0)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_1)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_2)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_1)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_2)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_3)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_2)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_3)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_4)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_3)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_4)
+= 0
+
+c_e_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_inc(demand_dsm_DLR_5)_:
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_4)
+-1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_5)
+= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_0_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_0)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_0_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_1)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_2)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_3)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_4)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_red(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_5)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_0_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_0)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_0_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_1)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_2)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_3)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_4)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_storage_limit_inc(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_5)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_0_0)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_0_1)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_1_2)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_1_3)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_2_4)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_u_SinkDSMDLRMultiPeriodInvestmentBlock_dr_logical_constraint(demand_dsm_DLR_2_5)_:
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5)
++1 SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5)
+-0.5 SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2)
+<= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_oemof_0)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_0)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
+= 50
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_oemof_1)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_1)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_1)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_total_dsm_rule(demand_dsm_oemof_2)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_2)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_oemof_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_0)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_oemof_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_end(demand_dsm_oemof_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_oemof_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_0)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_oemof_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule_exo(demand_dsm_oemof_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_oemof_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_0)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_0)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_0)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_oemof_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_1)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_1)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_old_dsm_rule(demand_dsm_oemof_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_0)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_3)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_3)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_4)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_4)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_shift_shed_vars(demand_dsm_oemof_5)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_5)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_0_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_0)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_0)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
++1 flow(Bus1_demand_dsm_oemof_0_0)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_0_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_1)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_1)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_1)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
++1 flow(Bus1_demand_dsm_oemof_0_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_1_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_2)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
++1 flow(Bus1_demand_dsm_oemof_1_2)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_1_3)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_3)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_3)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_3)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
++1 flow(Bus1_demand_dsm_oemof_1_3)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_2_4)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_4)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_4)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_4)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
++1 flow(Bus1_demand_dsm_oemof_2_4)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_input_output_relation(demand_dsm_oemof_2_5)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_5)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_5)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_5)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
++1 flow(Bus1_demand_dsm_oemof_2_5)
+= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_0_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_0)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_0_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_1)
+-0.40000000000000002 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_1_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_2)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_1_3)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_3)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_2_4)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_4)
+-0.40000000000000002 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up_constraint(demand_dsm_oemof_2_5)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_5)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_0_0)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_0)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_0_1)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_1)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_1)
+-0.40000000000000002 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_1_2)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_2)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_2)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_1_3)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_3)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_3)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_2_4)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_4)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_4)
+-0.40000000000000002 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
+<= 0
+
+c_u_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_down_constraint(demand_dsm_oemof_2_5)_:
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_5)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_5)
+-0.5 SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2)
+<= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_sum_constraint(demand_dsm_oemof_0)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_1)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_0)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_1)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_sum_constraint(demand_dsm_oemof_2)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_2)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_3)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_2)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_3)
+= 0
+
+c_e_SinkDSMOemofMultiPeriodInvestmentBlock_dsm_sum_constraint(demand_dsm_oemof_4)_:
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_4)
+-1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_5)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_4)
++1 SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_5)
+= 0
+
+c_e_ONE_VAR_CONSTANT: 
+ONE_VAR_CONSTANT = 1.0
+
+bounds
+   0 <= flow(Bus1_demand_dsm_DIW_0_0) <= +inf
+   0 <= flow(Bus1_demand_dsm_DIW_0_1) <= +inf
+   0 <= flow(Bus1_demand_dsm_DIW_1_2) <= +inf
+   0 <= flow(Bus1_demand_dsm_DIW_1_3) <= +inf
+   0 <= flow(Bus1_demand_dsm_DIW_2_4) <= +inf
+   0 <= flow(Bus1_demand_dsm_DIW_2_5) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_0_0) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_0_1) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_1_2) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_1_3) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_2_4) <= +inf
+   0 <= flow(Bus1_demand_dsm_DLR_2_5) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_0_0) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_0_1) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_1_2) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_1_3) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_2_4) <= +inf
+   0 <= flow(Bus1_demand_dsm_oemof_2_5) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_0_0) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_0_1) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_1_2) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_1_3) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_2_4) <= +inf
+   0 <= flow(Bus1_storage_invest_limit_2_5) <= +inf
+   0 <= flow(Source_Bus1_0_0) <= +inf
+   0 <= flow(Source_Bus1_0_1) <= +inf
+   0 <= flow(Source_Bus1_1_2) <= +inf
+   0 <= flow(Source_Bus1_1_3) <= +inf
+   0 <= flow(Source_Bus1_2_4) <= +inf
+   0 <= flow(Source_Bus1_2_5) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_0_0) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_0_1) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_1_2) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_1_3) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_2_4) <= +inf
+   0 <= flow(storage_invest_limit_Bus1_2_5) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Bus1_storage_invest_limit_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Source_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Source_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(Source_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_invest(storage_invest_limit_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Bus1_storage_invest_limit_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Source_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Source_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(Source_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_total(storage_invest_limit_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Bus1_storage_invest_limit_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Source_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Source_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(Source_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old(storage_invest_limit_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Bus1_storage_invest_limit_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Source_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Source_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(Source_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_end(storage_invest_limit_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Bus1_storage_invest_limit_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Source_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Source_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(Source_Bus1_2) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_0) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_1) <= +inf
+   0 <= MultiPeriodInvestmentFlow_old_exo(storage_invest_limit_Bus1_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_3) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_4) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_storage_content(storage_invest_limit_5) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_total(storage_invest_limit_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old(storage_invest_limit_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_end(storage_invest_limit_2) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_0) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_1) <= +inf
+   0 <= GenericMultiPeriodInvestmentStorageBlock_old_exo(storage_invest_limit_2) <= +inf
+   33 <= SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_0) <= 100
+   33 <= SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_1) <= 100
+   33 <= SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_2) <= 100
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_total(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_end(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_old_exo(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_0_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_1_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_2_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_3_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_4_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DIW_5_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DIW_5) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_0) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_1) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_2) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_3) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_4) <= +inf
+   0 <= SinkDSMDIWMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DIW_5) <= +inf
+   33 <= SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_0) <= 100
+   33 <= SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_1) <= 100
+   33 <= SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_2) <= 100
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_total(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_end(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_old_exo(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_1_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_DLR_2_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_DLR_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_1_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up(demand_dsm_DLR_2_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_1_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_do(demand_dsm_DLR_2_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_1_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_balance_dsm_up(demand_dsm_DLR_2_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_do_level(demand_dsm_DLR_5) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_0) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_1) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_2) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_3) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_4) <= +inf
+   0 <= SinkDSMDLRMultiPeriodInvestmentBlock_dsm_up_level(demand_dsm_DLR_5) <= +inf
+   33 <= SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_0) <= 100
+   33 <= SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_1) <= 100
+   33 <= SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_2) <= 100
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_total(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_end(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_old_exo(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_3) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_4) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shift(demand_dsm_oemof_5) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_3) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_4) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_do_shed(demand_dsm_oemof_5) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_0) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_1) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_2) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_3) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_4) <= +inf
+   0 <= SinkDSMOemofMultiPeriodInvestmentBlock_dsm_up(demand_dsm_oemof_5) <= +inf
+end
