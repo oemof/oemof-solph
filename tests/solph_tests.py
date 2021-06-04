@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 
 import os
 
+import pandas as pd
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
 from oemof.network.network import Node
@@ -64,6 +65,78 @@ class TestsGrouping:
                 "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
             ).format(self.es.groups.get(InvFlow)),
         )
+
+    def test_multiperiodinvestment_flow_grouping(self):
+        """Flows of investment sink should be grouped.
+
+        The constraint tests uncovered a spurious error where the flows of an
+        investment `Sink` where not put into the `InvestmentFlow` group,
+        although the corresponding grouping was present in the energy system.
+        The error occured in the case where the investment `Sink` was not
+        instantiated directly after the `Bus` it is connected to.
+
+        This test recreates this error scenario and makes sure that the
+        `InvestmentFlow` group is not empty.
+        """
+
+        b = solph.Bus(label="Bus",
+                      multiperiod=True)
+
+        solph.Source(
+            label="Source",
+            outputs={b: solph.Flow(fix=[12, 16, 14], nominal_value=1000000,
+                                   multiperiod=True)},
+        )
+
+        solph.Sink(
+            label="Sink",
+            inputs={
+                b: solph.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=500, maximum=10e5, lifetime=20),
+                )
+            },
+        )
+
+        ok_(
+            self.es.groups.get(solph.blocks.MultiPeriodInvestmentFlow),
+            (
+                "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
+            ).format(
+                self.es.groups.get(solph.blocks.MultiPeriodInvestmentFlow)),
+        )
+
+    def test_groupings(self):
+        """test for False return statements"""
+        b_from = solph.Bus(label="bus_from")
+        b_to = solph.Bus(label="bus_to")
+        tf = solph.Transformer(
+            inputs={b_from: solph.Flow()},
+            outputs={b_to: solph.Flow()}
+        )
+        self.es.timeindex = pd.date_range(start="2013-01-01", periods=3,
+                                          freq="H")
+        om = solph.Model(self.es)
+        flow_list = []
+        for el in om.flow:
+            flow_list.append(el)
+        test_flow = flow_list[0]
+
+        investment_value = solph.groupings._investment_grouping(test_flow)
+        assert (investment_value is False)
+        nonconvex_value = solph.groupings._nonconvex_grouping(test_flow)
+        assert (nonconvex_value is False)
+        multiperiod_value = solph.groupings._multiperiod_grouping(test_flow)
+        assert(multiperiod_value is False)
+        multiperiodinvestment_value = (
+            solph.groupings._multiperiodinvestment_grouping(test_flow))
+        assert(multiperiodinvestment_value is False)
+        multiperiod_nonconvex_value = (
+            solph.groupings._multiperiod_nonconvex_grouping(test_flow))
+        assert (multiperiod_nonconvex_value is False)
 
 
 def test_helpers():
