@@ -319,7 +319,7 @@ class GenericStorage(network.Node):
     def constraint_group(self):
         if self._invest_group is True:
             return GenericInvestmentStorageBlock
-        elif self._multiperiodinvest_group is True:
+        elif self._multiperiodinvest_group is True and not self.multiperiod:
             return GenericMultiPeriodInvestmentStorageBlock
         elif self._invest_group is False and not self.multiperiod:
             return GenericStorageBlock

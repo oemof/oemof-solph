@@ -15,6 +15,7 @@ from difflib import unified_diff
 from os import path as ospath
 
 import pandas as pd
+import pytest
 from nose.tools import assert_raises
 from nose.tools import eq_
 from oemof.network.network import Node
@@ -522,6 +523,18 @@ class TestsConstraintMultiperiod:
         )
         self.compare_lp_files("storage_invest_6_multiperiod.lp")
 
+    def test_generic_storage_infeasible_attrs_combination(self):
+        msg = "Infeasible combination of attributes\n"
+        bel = solph.Bus()
+        solph.GenericStorage(
+            label="storage11",
+            outputs={bel: solph.Flow(multiperiod=True)},
+            multiperiod=True,
+            multiperiodinvestment=solph.MultiPeriodInvestment(lifetime=5)
+        )
+        with pytest.raises(AttributeError, match=msg):
+            solph.MultiPeriodModel(self.energysystem)
+
     def test_storage_minimum_invest_multiperiod(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
@@ -539,6 +552,44 @@ class TestsConstraintMultiperiod:
         )
 
         self.compare_lp_files("storage_invest_minimum_multiperiod.lp")
+
+    def test_storage_overall_maximum_invest_multiperiod(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.components.GenericStorage(
+            label="storage1",
+            inputs={bel: solph.Flow(multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True)},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145, maximum=200, lifetime=20,
+                overall_maximum=500
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_overall_maximum_multiperiod.lp")
+
+    def test_storage_overall_minimum_invest_multiperiod(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.components.GenericStorage(
+            label="storage1",
+            inputs={bel: solph.Flow(multiperiod=True)},
+            outputs={bel: solph.Flow(multiperiod=True)},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145, maximum=200, lifetime=20,
+                overall_minimum=150
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_overall_minimum_multiperiod.lp")
 
     def test_storage_unbalanced_multiperiod(self):
         """Testing a unbalanced storage (e.g. battery)."""

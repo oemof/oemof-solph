@@ -228,7 +228,7 @@ def test_generic_storage_multiperiodinvest_no_lifetime_outflow():
     with pytest.raises(AttributeError, match=msg):
         components.GenericStorage(
             label="storage10",
-            outputs={bel: Flow()},
+            outputs={bel: Flow(multiperiod=True)},
             invest_relation_output_capacity=1 / 6,
             multiperiodinvestment=MultiPeriodInvestment(lifetime=5)
         )
