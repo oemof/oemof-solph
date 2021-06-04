@@ -100,3 +100,92 @@ def test_gen_chp():
 
     for key in test_dict.keys():
         eq_(int(round(data[key])), int(round(test_dict[key])))
+
+
+def test_gen_chp_multiperiod():
+    # read sequence data
+    full_filename = os.path.join(os.path.dirname(__file__), "ccet.csv")
+    data = pd.read_csv(full_filename)
+
+    # select periods
+    periods = len(data) - 1
+
+    # create an energy system
+    idx = pd.date_range("1/1/2017", periods=periods, freq="H")
+    es = solph.EnergySystem(timeindex=idx)
+    Node.registry = es
+
+    # resources
+    bgas = solph.Bus(label="bgas",
+                     multiperiod=True)
+
+    solph.Source(label="rgas", outputs={bgas: solph.Flow(multiperiod=True)})
+
+    # heat
+    bth = solph.Bus(label="bth",
+                    multiperiod=True)
+
+    solph.Source(
+        label="source_th", outputs={bth: solph.Flow(variable_costs=1000,
+                                                    multiperiod=True)}
+    )
+
+    solph.Sink(
+        label="demand_th",
+        inputs={bth: solph.Flow(fix=data["demand_th"], nominal_value=200,
+                                multiperiod=True)},
+    )
+
+    # power
+    bel = solph.Bus(label="bel",
+                    multiperiod=True)
+
+    solph.Sink(
+        label="demand_el",
+        inputs={bel: solph.Flow(variable_costs=data["price_el"],
+                                multiperiod=True)},
+    )
+
+    # generic chp
+    # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
+    solph.components.GenericCHP(
+        label="combined_cycle_extraction_turbine",
+        fuel_input={
+            bgas: solph.Flow(H_L_FG_share_max=data["H_L_FG_share_max"],
+                             multiperiod=True)
+        },
+        electrical_output={
+            bel: solph.Flow(
+                P_max_woDH=data["P_max_woDH"],
+                P_min_woDH=data["P_min_woDH"],
+                Eta_el_max_woDH=data["Eta_el_max_woDH"],
+                Eta_el_min_woDH=data["Eta_el_min_woDH"],
+                multiperiod=True
+            )
+        },
+        heat_output={bth: solph.Flow(Q_CW_min=data["Q_CW_min"],
+                                     multiperiod=True)},
+        Beta=data["Beta"],
+        back_pressure=False,
+        multiperiod=True
+    )
+
+    # create an optimization problem and solve it
+    om = solph.MultiPeriodModel(es)
+
+    # solve model
+    om.solve(solver="gurobi")
+
+    # create result object
+    results = processing.results(om)
+
+    data = views.node(results, "bth")["sequences"].sum(axis=0).to_dict()
+
+    test_dict = {
+        (("bth", "demand_th"), "flow"): 20000.0,
+        (("combined_cycle_extraction_turbine", "bth"), "flow"): 14070.15215799,
+        (("source_th", "bth"), "flow"): 5929.8478649200015,
+    }
+
+    for key in test_dict.keys():
+        eq_(int(round(data[key])), int(round(test_dict[key])))

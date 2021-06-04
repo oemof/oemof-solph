@@ -174,8 +174,8 @@ class GenericStorage(network.Node):
             "invest_relation_output_capacity"
         )
         self._invest_group = isinstance(self.investment, Investment)
-        self.multiperiod = kwargs.get('multiperiod', False)
-        self.multiperiodinvestment = kwargs.get('multiperiodinvestment')
+        self.multiperiod = kwargs.get("multiperiod", False)
+        self.multiperiodinvestment = kwargs.get("multiperiodinvestment")
         self._multiperiodinvest_group = isinstance(
             self.multiperiodinvestment, MultiPeriodInvestment)
 

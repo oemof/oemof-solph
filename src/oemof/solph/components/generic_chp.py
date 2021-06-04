@@ -131,6 +131,7 @@ class GenericCHP(network.Transformer):
 
         self.outputs.update(kwargs.get("electrical_output"))
         self.outputs.update(kwargs.get("heat_output"))
+        self.multiperiod = kwargs.get("multiperiod", False)
 
     def _calculate_alphas(self):
         """
@@ -191,7 +192,10 @@ class GenericCHP(network.Transformer):
         return self._alphas
 
     def constraint_group(self):
-        return GenericCHPBlock
+        if not self.multiperiod:
+            return GenericCHPBlock
+        else:
+            return GenericCHPMultiPeriodBlock
 
 
 class GenericCHPBlock(SimpleBlock):
