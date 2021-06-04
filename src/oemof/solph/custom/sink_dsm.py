@@ -8123,17 +8123,18 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
             """
             for g in group:
                 for p in m.PERIODS:
-                    # sum of all load reductions
-                    lhs = sum(self.dsm_do_shed[g, t]
-                              for t in m.TIMESTEPS)
+                    if g.shed_eligibility:
+                        # sum of all load reductions
+                        lhs = sum(self.dsm_do_shed[g, t]
+                                  for t in m.TIMESTEPS)
 
-                    # year limit
-                    rhs = (g.capacity_down_mean * self.total[g, p]
-                           * g.flex_share_down * g.shed_time
-                           * g.n_yearLimit_shed)
+                        # year limit
+                        rhs = (g.capacity_down_mean * self.total[g, p]
+                               * g.flex_share_down * g.shed_time
+                               * g.n_yearLimit_shed)
 
-                    # add constraint
-                    block.dr_yearly_limit_shed.add((g, p), (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_shed.add((g, p), (lhs <= rhs))
 
         self.dr_yearly_limit_shed = Constraint(group, m.PERIODS,
                                                noruleinit=True)
