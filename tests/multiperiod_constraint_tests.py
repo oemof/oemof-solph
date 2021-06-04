@@ -1293,8 +1293,6 @@ class TestsConstraintMultiperiod:
         )
         self.compare_lp_files("activity_costs_multiperiod.lp")
 
-
-
     def test_piecewise_linear_transformer_cc_multiperiod(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
         bgas = solph.Bus(label="gasBus",
