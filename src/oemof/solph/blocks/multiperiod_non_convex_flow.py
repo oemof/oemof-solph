@@ -620,7 +620,7 @@ class MultiPeriodNonConvexFlow(SimpleBlock):
                     is not None
                 ):
                     gradient_costs += sum(
-                        self.positive_gradient[i, o, p, t]
+                        self.positive_gradient[i, o, t]
                         * (m.flows[i, o].multiperiodnonconvex
                            .positive_gradient["costs"])
                         * m.objective_weighting[t]
@@ -636,7 +636,7 @@ class MultiPeriodNonConvexFlow(SimpleBlock):
                     is not None
                 ):
                     gradient_costs += sum(
-                        self.negative_gradient[i, o, p, t]
+                        self.negative_gradient[i, o, t]
                         * (m.flows[i, o].multiperiodnonconvex
                            .negative_gradient["costs"])
                         * m.objective_weighting[t]
