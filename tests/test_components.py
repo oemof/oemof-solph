@@ -17,6 +17,7 @@ from oemof.tools.debugging import SuspiciousUsageWarning
 from oemof.solph import Bus
 from oemof.solph import Flow
 from oemof.solph import Investment
+from oemof.solph import MultiPeriodInvestment
 from oemof.solph import NonConvex
 from oemof.solph import components
 
@@ -198,6 +199,39 @@ def test_generic_storage_too_many_outputs():
             label="storage7", outputs={bel1: Flow(), bel2: Flow()}
         )
 
+
+def test_generic_storage_invest_multiperiodinvest():
+    msg = "Either specify an investment attribute for a "
+    with pytest.raises(AttributeError, match=msg):
+        components.GenericStorage(
+            label="storage8",
+            investment=Investment(),
+            multiperiodinvestment=MultiPeriodInvestment(lifetime=5)
+        )
+
+
+def test_generic_storage_multiperiodinvest_no_lifetime_inflow():
+    msg = "you have to specify a lifetime for potential investments in inflow"
+    bel = Bus()
+    with pytest.raises(AttributeError, match=msg):
+        components.GenericStorage(
+            label="storage9",
+            inputs={bel: Flow()},
+            invest_relation_input_capacity=1 / 6,
+            multiperiodinvestment=MultiPeriodInvestment(lifetime=5)
+        )
+
+
+def test_generic_storage_multiperiodinvest_no_lifetime_outflow():
+    msg = "you have to specify a lifetime for potential investments in outflow"
+    bel = Bus()
+    with pytest.raises(AttributeError, match=msg):
+        components.GenericStorage(
+            label="storage10",
+            outputs={bel: Flow()},
+            invest_relation_output_capacity=1 / 6,
+            multiperiodinvestment=MultiPeriodInvestment(lifetime=5)
+        )
 
 # ********* OffsetTransformer *********
 
