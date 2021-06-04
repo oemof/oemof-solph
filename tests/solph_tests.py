@@ -113,7 +113,7 @@ class TestsGrouping:
         """test for False return statements"""
         b_from = solph.Bus(label="bus_from")
         b_to = solph.Bus(label="bus_to")
-        tf = solph.Transformer(
+        solph.Transformer(
             inputs={b_from: solph.Flow()},
             outputs={b_to: solph.Flow()}
         )

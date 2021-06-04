@@ -266,7 +266,6 @@ class GenericStorage(network.Node):
                         lifetime=self.lifetime_outflow
                     )
 
-
     def _check_invest_attributes(self):
         if self.investment and self.multiperiodinvestment is not None:
             e1 = (
