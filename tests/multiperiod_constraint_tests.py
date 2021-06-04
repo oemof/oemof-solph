@@ -909,64 +909,63 @@ class TestsConstraintMultiperiod:
 
         self.compare_lp_files("emission_limit_multiperiod.lp", my_om=om)
 
-    # TODO: Fix this! There seems to be a grouping issue
-    # def test_flow_count_limit_multiperiod(self):
-    #     """"""
-    #     bel = solph.Bus(label="electricityBus",
-    #                     multiperiod=True)
-    #
-    #     solph.Source(
-    #         label="source1",
-    #         outputs={
-    #             bel: solph.Flow(
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(),
-    #                 nominal_value=100,
-    #                 emission_factor=[0.5, -1.0, 2.0, 0.5, -1.0, 2.0]
-    #             )
-    #         },
-    #     )
-    #     solph.Source(
-    #         label="source2",
-    #         outputs={
-    #             bel: solph.Flow(
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(),
-    #                 nominal_value=100,
-    #                 emission_factor=3.5
-    #             )
-    #         },
-    #     )
-    #
-    #     # Should be ignored because emission_factor is not defined.
-    #     solph.Source(
-    #         label="source3",
-    #         outputs={
-    #             bel: solph.Flow(
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(),
-    #                 nominal_value=100)
-    #         },
-    #     )
-    #
-    #     # Should be ignored because it is not NonConvex.
-    #     solph.Source(
-    #         label="source4",
-    #         outputs={
-    #             bel: solph.Flow(
-    #                 emission_factor=1.5,
-    #                 min=0.3,
-    #                 nominal_value=100,
-    #                 multiperiod=True
-    #             )
-    #         },
-    #     )
-    #
-    #     om = self.get_om()
-    #
-    #     # one of the two flows has to be active
-    #     solph.constraints.limit_active_flow_count_by_keyword(
-    #         om, "emission_factor", lower_limit=1, upper_limit=2
-    #     )
-    #
-    #     self.compare_lp_files("flow_count_limit_multiperiod.lp", my_om=om)
+    def test_flow_count_limit_multiperiod(self):
+        """"""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source1",
+            outputs={
+                bel: solph.Flow(
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(),
+                    nominal_value=100,
+                    emission_factor=[0.5, -1.0, 2.0, 0.5, -1.0, 2.0]
+                )
+            },
+        )
+        solph.Source(
+            label="source2",
+            outputs={
+                bel: solph.Flow(
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(),
+                    nominal_value=100,
+                    emission_factor=3.5
+                )
+            },
+        )
+
+        # Should be ignored because emission_factor is not defined.
+        solph.Source(
+            label="source3",
+            outputs={
+                bel: solph.Flow(
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(),
+                    nominal_value=100)
+            },
+        )
+
+        # Should be ignored because it is not NonConvex.
+        solph.Source(
+            label="source4",
+            outputs={
+                bel: solph.Flow(
+                    emission_factor=1.5,
+                    min=0.3,
+                    nominal_value=100,
+                    multiperiod=True
+                )
+            },
+        )
+
+        om = self.get_om()
+
+        # one of the two flows has to be active
+        solph.constraints.limit_active_flow_count_by_keyword(
+            om, "emission_factor", lower_limit=1, upper_limit=2
+        )
+
+        self.compare_lp_files("flow_count_limit_multiperiod.lp", my_om=om)
 
     def test_shared_limit_multiperiod(self):
         """"""
@@ -1206,49 +1205,48 @@ class TestsConstraintMultiperiod:
         self.compare_lp_files(
             "transformer_with_summed_min_investment_multiperiod.lp", my_om=om)
 
-    # TODO: Fix this one (see above; NonConvex for multiperiod models)
-    # def test_min_max_runtime_multiperiod(self):
-    #     """Testing min and max runtimes for nonconvex flows."""
-    #     bus_t = solph.Bus(label="Bus_T",
-    #                       multiperiod=True)
-    #     solph.Source(
-    #         label="cheap_plant_min_down_constraints",
-    #         outputs={
-    #             bus_t: solph.Flow(
-    #                 nominal_value=10,
-    #                 min=0.5,
-    #                 max=1.0,
-    #                 variable_costs=10,
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(
-    #                     minimum_downtime=4,
-    #                     minimum_uptime=2,
-    #                     initial_status=2,
-    #                     startup_costs=5,
-    #                     shutdown_costs=7,
-    #                 ),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("min_max_runtime_multiperiod.lp")
+    def test_min_max_runtime_multiperiod(self):
+        """Testing min and max runtimes for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_T",
+                          multiperiod=True)
+        solph.Source(
+            label="cheap_plant_min_down_constraints",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        minimum_downtime=4,
+                        minimum_uptime=2,
+                        initial_status=1,
+                        startup_costs=5,
+                        shutdown_costs=7,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("min_max_runtime_multiperiod.lp")
 
-    # def test_activity_costs_multiperiod(self):
-    #     """Testing activity_costs attribute for nonconvex flows."""
-    #     bus_t = solph.Bus(label="Bus_C",
-    #                       multiperiod=True)
-    #     solph.Source(
-    #         label="cheap_plant_activity_costs",
-    #         outputs={
-    #             bus_t: solph.Flow(
-    #                 nominal_value=10,
-    #                 min=0.5,
-    #                 max=1.0,
-    #                 variable_costs=10,
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(
-    #                     activity_costs=2),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("activity_costs_multiperiod.lp")
+    def test_activity_costs_multiperiod(self):
+        """Testing activity_costs attribute for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_C",
+                          multiperiod=True)
+        solph.Source(
+            label="cheap_plant_activity_costs",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        activity_costs=2),
+                )
+            },
+        )
+        self.compare_lp_files("activity_costs_multiperiod.lp")
 
     def test_piecewise_linear_transformer_cc_multiperiod(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
@@ -1287,65 +1285,65 @@ class TestsConstraintMultiperiod:
         self.compare_lp_files(
             "piecewise_linear_transformer_dcc_multiperiod.lp")
 
-    # def test_maximum_startups_multiperiod(self):
-    #     """Testing maximum_startups attribute for nonconvex flows."""
-    #     bus_t = solph.Bus(label="Bus_C",
-    #                       multiperiod=True)
-    #     solph.Source(
-    #         label="cheap_plant_maximum_startups",
-    #         outputs={
-    #             bus_t: solph.Flow(
-    #                 nominal_value=10,
-    #                 min=0.5,
-    #                 max=1.0,
-    #                 variable_costs=10,
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(
-    #                     maximum_startups=2),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("maximum_startups_multiperiod.lp")
+    def test_maximum_startups_multiperiod(self):
+        """Testing maximum_startups attribute for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_C",
+                          multiperiod=True)
+        solph.Source(
+            label="cheap_plant_maximum_startups",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        maximum_startups=2),
+                )
+            },
+        )
+        self.compare_lp_files("maximum_startups_multiperiod.lp")
 
-    # def test_maximum_shutdowns_multiperiod(self):
-    #     """Testing maximum_shutdowns attribute for nonconvex flows."""
-    #     bus_t = solph.Bus(label="Bus_C",
-    #                       multiperiod=True)
-    #     solph.Source(
-    #         label="cheap_plant_maximum_shutdowns",
-    #         outputs={
-    #             bus_t: solph.Flow(
-    #                 nominal_value=10,
-    #                 min=0.5,
-    #                 max=1.0,
-    #                 variable_costs=10,
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(
-    #                     maximum_shutdowns=2),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("maximum_shutdowns_multiperiod.lp")
+    def test_maximum_shutdowns_multiperiod(self):
+        """Testing maximum_shutdowns attribute for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_C",
+                          multiperiod=True)
+        solph.Source(
+            label="cheap_plant_maximum_shutdowns",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        maximum_shutdowns=2),
+                )
+            },
+        )
+        self.compare_lp_files("maximum_shutdowns_multiperiod.lp")
 
-    # def test_offsettransformer(self):
-    #     """Constraint test of a OffsetTransformer."""
-    #     bgas = solph.Bus(label="gasBus",
-    #                      multiperiod=True)
-    #     bth = solph.Bus(label="thermalBus",
-    #                     multiperiod=True)
-    #
-    #     solph.components.OffsetTransformer(
-    #         label="gasboiler",
-    #         inputs={
-    #             bgas: solph.Flow(
-    #                 multiperiodnonconvex=solph.MultiPeriodNonConvex(),
-    #                 nominal_value=100,
-    #                 min=0.32,
-    #             )
-    #         },
-    #         outputs={bth: solph.Flow(multiperiod=True)},
-    #         coefficients=[-17, 0.9],
-    #     )
-    #
-    #     self.compare_lp_files("offsettransformer_multiperiod.lp")
+    def test_offsettransformer(self):
+        """Constraint test of a OffsetTransformer."""
+        bgas = solph.Bus(label="gasBus",
+                         multiperiod=True)
+        bth = solph.Bus(label="thermalBus",
+                        multiperiod=True)
+
+        solph.components.OffsetTransformer(
+            label="gasboiler",
+            inputs={
+                bgas: solph.Flow(
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(),
+                    nominal_value=100,
+                    min=0.32,
+                )
+            },
+            outputs={bth: solph.Flow(multiperiod=True)},
+            coefficients=[-17, 0.9],
+        )
+
+        self.compare_lp_files("offsettransformer_multiperiod.lp")
 
     def test_dsm_module_DIW_multiperiod(self):
         """Constraint test of SinkDSM with approach=DLR"""
@@ -1441,7 +1439,7 @@ class TestsConstraintMultiperiod:
     #     )
     #
     #     self.compare_lp_files("storage_invest_without_offset_multiperiod.lp")
-    #
+
     # def test_nonconvex_investment_storage_with_offset_multiperiod(self):
     #     """All invest variables are coupled. The invest variables of the
     #     Flows
@@ -1473,112 +1471,112 @@ class TestsConstraintMultiperiod:
     #     )
     #
     #     self.compare_lp_files("storage_invest_with_offset_multiperiod.lp")
-    #
-    # def test_nonconvex_invest_storage_all_nonconvex_multiperiod(self):
-    #     """All invest variables are free and nonconvex."""
-    #     b1 = solph.Bus(label="bus1",
-    #                    multiperiod=True)
-    #
-    #     solph.components.GenericStorage(
-    #         label="storage_all_nonconvex",
-    #         inputs={
-    #             b1: solph.Flow(
-    #                 multiperiodinvestment=solph.MultiPeriodInvestment(
-    #                     nonconvex=True,
-    #                     minimum=5,
-    #                     offset=10,
-    #                     maximum=30,
-    #                     ep_costs=10,
-    #                     lifetime=20
-    #                 )
-    #             )
-    #         },
-    #         outputs={
-    #             b1: solph.Flow(
-    #                 multiperiodinvestment=solph.MultiPeriodInvestment(
-    #                     nonconvex=True,
-    #                     minimum=8,
-    #                     offset=15,
-    #                     ep_costs=10,
-    #                     maximum=20,
-    #                     lifetime=20
-    #                 )
-    #             )
-    #         },
-    #         multiperiodinvestment=solph.MultiPeriodInvestment(
-    #             nonconvex=True, ep_costs=20, offset=30, minimum=20,
-    #             maximum=100, lifetime=20
-    #         ),
-    #     )
-    #
-    #     self.compare_lp_files("storage_invest_all_nonconvex_multiperiod.lp")
-    #
-    # def test_nonconvex_invest_sink_without_offset_multiperiod(self):
-    #     """Non convex invest flow without offset, with minimum."""
-    #     bel = solph.Bus(label="electricityBus",
-    #                     multiperiod=True)
-    #
-    #     solph.Sink(
-    #         label="sink_nonconvex_invest",
-    #         inputs={
-    #             bel: solph.Flow(
-    #                 summed_max=2.3,
-    #                 variable_costs=25,
-    #                 max=0.8,
-    #                 multiperiodinvestment=solph.MultiPeriodInvestment(
-    #                     ep_costs=500, minimum=15, nonconvex=True,
-    #                     maximum=172,
-    #                     lifetime=20
-    #                 ),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("flow_invest_without_offset_multiperiod.lp")
-    #
-    # def test_nonconvex_invest_source_with_offset_multiperiod(self):
-    #     """Non convex invest flow with offset, with minimum."""
-    #     bel = solph.Bus(label="electricityBus",
-    #                     multiperiod=True)
-    #
-    #     solph.Source(
-    #         label="source_nonconvex_invest",
-    #         inputs={
-    #             bel: solph.Flow(
-    #                 summed_max=2.3,
-    #                 variable_costs=25,
-    #                 max=0.8,
-    #                 multiperiodinvestment=solph.MultiPeriodInvestment(
-    #                     ep_costs=500,
-    #                     minimum=15,
-    #                     maximum=20,
-    #                     offset=34,
-    #                     nonconvex=True,
-    #                     lifetime=20
-    #                 ),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files("flow_invest_with_offset_multiperiod.lp")
-    #
-    # def test_nonconvex_invest_source_with_offset_no_min_multiperiod(self):
-    #     """Non convex invest flow with offset, without minimum."""
-    #     bel = solph.Bus(label="electricityBus",
-    #                     multiperiod=True)
-    #
-    #     solph.Source(
-    #         label="source_nonconvex_invest",
-    #         inputs={
-    #             bel: solph.Flow(
-    #                 summed_max=2.3,
-    #                 variable_costs=25,
-    #                 max=0.8,
-    #                 multiperiodinvestment=solph.MultiPeriodInvestment(
-    #                     ep_costs=500, maximum=1234, offset=34,
-    #                     nonconvex=True,
-    #                     lifetime=20
-    #                 ),
-    #             )
-    #         },
-    #     )
-    #     self.compare_lp_files(
-    #         "flow_invest_with_offset_no_minimum_multiperiod.lp")
+
+    def test_nonconvex_invest_storage_all_nonconvex_multiperiod(self):
+        """All invest variables are free and nonconvex."""
+        b1 = solph.Bus(label="bus1",
+                       multiperiod=True)
+
+        solph.components.GenericStorage(
+            label="storage_all_nonconvex",
+            inputs={
+                b1: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        nonconvex=True,
+                        minimum=5,
+                        offset=10,
+                        maximum=30,
+                        ep_costs=10,
+                        lifetime=20
+                    )
+                )
+            },
+            outputs={
+                b1: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        nonconvex=True,
+                        minimum=8,
+                        offset=15,
+                        ep_costs=10,
+                        maximum=20,
+                        lifetime=20
+                    )
+                )
+            },
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                nonconvex=True, ep_costs=20, offset=30, minimum=20,
+                maximum=100, lifetime=20
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_all_nonconvex_multiperiod.lp")
+
+    def test_nonconvex_invest_sink_without_offset_multiperiod(self):
+        """Non convex invest flow without offset, with minimum."""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Sink(
+            label="sink_nonconvex_invest",
+            inputs={
+                bel: solph.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=500, minimum=15, nonconvex=True,
+                        maximum=172,
+                        lifetime=20
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("flow_invest_without_offset_multiperiod.lp")
+
+    def test_nonconvex_invest_source_with_offset_multiperiod(self):
+        """Non convex invest flow with offset, with minimum."""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source_nonconvex_invest",
+            inputs={
+                bel: solph.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=500,
+                        minimum=15,
+                        maximum=20,
+                        offset=34,
+                        nonconvex=True,
+                        lifetime=20
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("flow_invest_with_offset_multiperiod.lp")
+
+    def test_nonconvex_invest_source_with_offset_no_min_multiperiod(self):
+        """Non convex invest flow with offset, without minimum."""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source_nonconvex_invest",
+            inputs={
+                bel: solph.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=500, maximum=1234, offset=34,
+                        nonconvex=True,
+                        lifetime=20
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files(
+            "flow_invest_with_offset_no_minimum_multiperiod.lp")
