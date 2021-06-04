@@ -178,12 +178,14 @@ class GenericStorage(network.Node):
         self.multiperiodinvestment = kwargs.get("multiperiodinvestment")
         self._multiperiodinvest_group = isinstance(
             self.multiperiodinvestment, MultiPeriodInvestment)
+        self.lifetime_inflow = kwargs.get("lifetime_inflow")
+        self.lifetime_outflow = kwargs.get("lifetime_outflow")
 
         # Check number of flows.
         self._check_number_of_flows()
 
         # Check attributes for the investment mode.
-        if self._invest_group is True:
+        if (self._invest_group or self._multiperiodinvest_group) is True:
             self._check_invest_attributes()
 
         # Check for old parameter names. This is a temporary fix and should
@@ -215,48 +217,94 @@ class GenericStorage(network.Node):
             raise AttributeError(message.format("\n  ".join(messages)))
 
     def _set_flows(self):
-        for flow in self.inputs.values():
-            if (
-                self.invest_relation_input_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
-                flow.investment = Investment()
-        for flow in self.outputs.values():
-            if (
-                self.invest_relation_output_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
-                flow.investment = Investment()
+        if self._invest_group:
+            for flow in self.inputs.values():
+                if (
+                    self.invest_relation_input_capacity is not None
+                    and not isinstance(flow.investment, Investment)
+                ):
+                    flow.investment = Investment()
+            for flow in self.outputs.values():
+                if (
+                    self.invest_relation_output_capacity is not None
+                    and not isinstance(flow.investment, Investment)
+                ):
+                    flow.investment = Investment()
+        else:
+            for flow in self.inputs.values():
+                if (
+                    self.invest_relation_input_capacity is not None
+                    and not isinstance(
+                        flow.multiperiodinvestment, MultiPeriodInvestment)
+                ):
+                    if self.lifetime_inflow is None:
+                        e1 = (
+                            "If you use multiperiod investment modeling, "
+                            "you have to specify a lifetime for potential "
+                            "investments in inflow capacity by setting the "
+                            "parameter **lifetime_inflow."
+                        )
+                        raise AttributeError(e1)
+                    flow.multiperiodinvestment = MultiPeriodInvestment(
+                        lifetime=self.lifetime_inflow
+                    )
+            for flow in self.outputs.values():
+                if (
+                    self.invest_relation_output_capacity is not None
+                    and not isinstance(
+                        flow.multiperiodinvestment, MultiPeriodInvestment)
+                ):
+                    if self.lifetime_inflow is None:
+                        e1 = (
+                            "If you use multiperiod investment modeling, "
+                            "you have to specify a lifetime for potential "
+                            "investments in outflow capacity by setting the "
+                            "parameter **lifetime_outflow."
+                        )
+                        raise AttributeError(e1)
+                    flow.multiperiodinvestment = MultiPeriodInvestment(
+                        lifetime=self.lifetime_outflow
+                    )
+
 
     def _check_invest_attributes(self):
-        if self.investment and self.nominal_storage_capacity is not None:
+        if self.investment and self.multiperiodinvestment is not None:
             e1 = (
+                "Either specify an investment attribute for a "
+                "standard investment model or a multiperiodinvestment "
+                "attribute for a MultiPeriodModel.\n"
+                "Doing both at the same time is not feasible."
+            )
+            raise AttributeError(e1)
+        if ((self.investment or self.multiperiodinvestment)
+                and self.nominal_storage_capacity is not None):
+            e2 = (
                 "If an investment object is defined the invest variable "
                 "replaces the nominal_storage_capacity.\n Therefore the "
                 "nominal_storage_capacity should be 'None'.\n"
             )
-            raise AttributeError(e1)
+            raise AttributeError(e2)
         if (
             self.invest_relation_input_output is not None
             and self.invest_relation_output_capacity is not None
             and self.invest_relation_input_capacity is not None
         ):
-            e2 = (
+            e3 = (
                 "Overdetermined. Three investment object will be coupled"
                 "with three constraints. Set one invest relation to 'None'."
             )
-            raise AttributeError(e2)
+            raise AttributeError(e3)
         if (
-            self.investment
+            (self.investment or self.multiperiodinvestment)
             and sum(solph_sequence(self.fixed_losses_absolute)) != 0
             and self.investment.existing == 0
             and self.investment.minimum == 0
         ):
-            e3 = (
+            e4 = (
                 "With fixed_losses_absolute > 0, either investment.existing "
                 "or investment.minimum has to be non-zero."
             )
-            raise AttributeError(e3)
+            raise AttributeError(e4)
 
         self._set_flows()
 
@@ -2098,7 +2146,7 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
             """
             expr = (
                 self.storage_content[n, t]
-                >= n.total[n, p]
+                >= self.total[n, p]
                 * n.min_storage_level[t]
             )
             return expr
