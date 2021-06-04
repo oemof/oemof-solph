@@ -174,7 +174,7 @@ def test_gen_chp_multiperiod():
     om = solph.MultiPeriodModel(es)
 
     # solve model
-    om.solve(solver="gurobi")
+    om.solve(solver="cbc")
 
     # create result object
     results = processing.results(om)
