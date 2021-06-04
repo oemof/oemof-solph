@@ -1007,6 +1007,29 @@ class TestsConstraint:
         )
         self.compare_lp_files("min_max_runtime.lp")
 
+    def test_min_max_runtime_2(self):
+        """Testing min and max runtimes for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_T")
+        solph.Source(
+            label="cheap_plant_min_down_constraints",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    nonconvex=solph.NonConvex(
+                        minimum_downtime=2,
+                        minimum_uptime=2,
+                        initial_status=2,
+                        startup_costs=5,
+                        shutdown_costs=7,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("min_max_runtime_2.lp")
+
     def test_activity_costs(self):
         """Testing activity_costs attribute for nonconvex flows."""
         bus_t = solph.Bus(label="Bus_C")

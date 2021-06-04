@@ -1132,6 +1132,27 @@ class TestsConstraintMultiperiod:
 
         self.compare_lp_files("source_with_gradient_multiperiod.lp")
 
+    def test_nonconvex_gradient_multiperiod(self):
+        """Testing gradient constraints and costs."""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Source(
+            label="powerplant",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=999,
+                    variable_costs=23,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        positive_gradient={"ub": 0.03, "costs": 7},
+                        negative_gradient={"ub": 0.05, "costs": 8},
+                    ),
+                )
+            },
+        )
+
+        self.compare_lp_files("source_with_nonconvex_gradient_multiperiod.lp")
+
     def test_summed_max_min_multiperiod(self):
         """Testing summed max and summed min for convex multiperiod flows."""
         bel = solph.Bus(label="electricityBus",
@@ -1229,6 +1250,30 @@ class TestsConstraintMultiperiod:
         )
         self.compare_lp_files("min_max_runtime_multiperiod.lp")
 
+    def test_min_max_runtime_multiperiod_2(self):
+        """Testing min and max runtimes for nonconvex flows."""
+        bus_t = solph.Bus(label="Bus_T",
+                          multiperiod=True)
+        solph.Source(
+            label="cheap_plant_min_down_constraints",
+            outputs={
+                bus_t: solph.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    multiperiodnonconvex=solph.MultiPeriodNonConvex(
+                        minimum_downtime=2,
+                        minimum_uptime=2,
+                        initial_status=1,
+                        startup_costs=5,
+                        shutdown_costs=7,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("min_max_runtime_multiperiod_2.lp")
+
     def test_activity_costs_multiperiod(self):
         """Testing activity_costs attribute for nonconvex flows."""
         bus_t = solph.Bus(label="Bus_C",
@@ -1247,6 +1292,8 @@ class TestsConstraintMultiperiod:
             },
         )
         self.compare_lp_files("activity_costs_multiperiod.lp")
+
+
 
     def test_piecewise_linear_transformer_cc_multiperiod(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
