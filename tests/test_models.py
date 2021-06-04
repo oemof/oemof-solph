@@ -13,6 +13,7 @@ import warnings
 
 import pandas as pd
 import pytest
+from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
 from oemof.solph.helpers import calculate_timeincrement
@@ -129,3 +130,27 @@ def test_auto_construct():
         start="2012-01-01", periods=3, freq="H"))
     m = solph.models.BaseModel(es, auto_construct=True)
     assert(m.is_constructed())
+
+
+def test_relax_problem():
+    es = solph.EnergySystem(timeindex=pd.date_range(
+        start="2012-01-01", periods=3, freq="H"))
+    bel = solph.Bus(label="bus")
+    sink = solph.Sink(inputs={bel: solph.Flow(nominal_value=5,
+                                              nonconvex=solph.NonConvex())})
+    es.add(bel, sink)
+    m = solph.models.Model(es)
+    m.relax_problem()
+    assert(hasattr(m, "_relaxed_integer_vars"))
+
+
+def test_default_discount_rate_multiperiod():
+    es = solph.EnergySystem(timeindex=pd.date_range(
+        start="2012-01-01", periods=3, freq="H"))
+    bel = solph.Bus(label="bus",
+                    multiperiod=True)
+    sink = solph.Sink(inputs={bel: solph.Flow(nominal_value=5,
+                                              multiperiod=True)})
+    es.add(bel, sink)
+    with pytest.warns(SuspiciousUsageWarning, match="By default"):
+        solph.models.MultiPeriodModel(es)
