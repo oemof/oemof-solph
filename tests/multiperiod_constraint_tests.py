@@ -1020,6 +1020,45 @@ class TestsConstraintMultiperiod:
 
         self.compare_lp_files("emission_limit_multiperiod.lp", my_om=om)
 
+    def test_emission_constraints_per_period_multiperiod(self):
+        """"""
+        bel = solph.Bus(label="electricityBus",
+                        multiperiod=True)
+
+        solph.Source(
+            label="source1",
+            outputs={
+                bel: solph.Flow(
+                    nominal_value=100,
+                    emission_factor=[0.5, -1.0, 2.0, 0.5, -1.0, 2.0],
+                    multiperiod=True
+                )},
+        )
+        solph.Source(
+            label="source2",
+            outputs={bel: solph.Flow(
+                nominal_value=100,
+                emission_factor=3.5,
+                multiperiod=True
+            )},
+        )
+
+        # Should be ignored because the emission attribute is not defined.
+        solph.Source(
+            label="source3",
+            outputs={bel: solph.Flow(
+                nominal_value=100,
+                multiperiod=True
+            )}
+        )
+
+        om = self.get_om()
+
+        solph.constraints.emission_limit_per_period(om, limit=[222, 333, 444])
+
+        self.compare_lp_files(
+            "emission_limit_per_period_multiperiod.lp", my_om=om)
+
     def test_flow_count_limit_multiperiod(self):
         """"""
         bel = solph.Bus(label="electricityBus",
