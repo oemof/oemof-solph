@@ -69,20 +69,77 @@ def test_multiperiodinvestment_limit_error1():
 
 def test_multiperiodinvestment_limit_error2():
     """Test errors getting thrown."""
-    msg1 = "multiperiodinvestment_limit_per_period is only applicable"
+    msg2 = "multiperiodinvestment_limit_per_period is only applicable"
     date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
     es = solph.EnergySystem(timeindex=date_time_index)
     om = solph.models.Model(es)
-    with pytest.raises(ValueError, match=msg1):
+    with pytest.raises(ValueError, match=msg2):
         solph.constraints.multiperiodinvestment_limit_per_period(om, limit=10)
 
 
 def test_multiperiodinvestment_limit_error3():
     """Test errors getting thrown."""
-    msg1 = "You have to provide an investment limit for each period!"
+    msg3 = "You have to provide an investment limit for each period!"
     date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
     es = solph.EnergySystem(timeindex=date_time_index)
     om = solph.models.MultiPeriodModel(es)
-    with pytest.raises(ValueError, match=msg1):
+    with pytest.raises(ValueError, match=msg3):
         solph.constraints.multiperiodinvestment_limit_per_period(
             om, limit=None)
+
+
+def test_integral_limit_error():
+    """Test errors getting thrown"""
+    msg = "has no attribute "
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    bel = solph.Bus()
+    s1 = solph.Source(inputs={bel: solph.Flow()})
+    es.add(bel, s1)
+    om = solph.models.Model(es)
+    with pytest.raises(AttributeError, match=msg):
+        solph.constraints.generic_integral_limit(
+            om, flows=om.flows, keyword="emission_factor", limit=100)
+
+
+def test_integral_limit_error1():
+    """Test errors getting thrown"""
+    msg1 = "has no attribute "
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    bel = solph.Bus(multiperiod=True)
+    s1 = solph.Source(inputs={bel: solph.Flow(multiperiod=True)})
+    es.add(bel, s1)
+    om = solph.models.MultiPeriodModel(es)
+    with pytest.raises(AttributeError, match=msg1):
+        solph.constraints.generic_periodical_integral_limit(
+            om, flows=om.flows, keyword="emission_factor", limit=100)
+
+
+def test_integral_limit_error2():
+    """Test errors getting thrown"""
+    msg2 = "generic_periodical_integral_limit is only applicable"
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    bel = solph.Bus()
+    s1 = solph.Source(inputs={bel: solph.Flow(emission_factor=0.8)})
+    es.add(bel, s1)
+    om = solph.models.Model(es)
+    with pytest.raises(ValueError, match=msg2):
+        solph.constraints.generic_periodical_integral_limit(
+            om, keyword="emission_factor", limit=100)
+
+
+def test_integral_limit_error3():
+    """Test errors getting thrown"""
+    msg3 = "You have to provide a limit for each period!"
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    bel = solph.Bus(multiperiod=True)
+    s1 = solph.Source(inputs={bel: solph.Flow(emission_factor=0.8,
+                                              multiperiod=True)})
+    es.add(bel, s1)
+    om = solph.models.MultiPeriodModel(es)
+    with pytest.raises(ValueError, match=msg3):
+        solph.constraints.generic_periodical_integral_limit(
+            om, keyword="emission_factor", limit=None)

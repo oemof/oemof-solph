@@ -242,7 +242,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     if limit is not None:
         limit = sequence(limit)
     else:
-        msg = ("You have to provide an investment limit for each period!\n"
+        msg = ("You have to provide a limit for each period!\n"
                "If you provide a scalar value, this will be applied as a "
                "limit for each period.")
         raise ValueError(msg)
