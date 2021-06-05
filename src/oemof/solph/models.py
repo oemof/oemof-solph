@@ -453,6 +453,12 @@ class MultiPeriodModel(BaseModel):
                                               / len(self.PERIODS)))
                                  for a in self.PERIODS}
 
+        # (Re-)Map timesteps to periods
+        timesteps_in_period = {p: [] for p in self.PERIODS}
+        for p, t in self.TIMEINDEX:
+            timesteps_in_period[p].append(t)
+        self.TIMESTEPS_IN_PERIOD = timesteps_in_period
+
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
         previous_timesteps[0] = self.TIMESTEPS.last()
