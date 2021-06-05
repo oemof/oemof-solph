@@ -1025,7 +1025,7 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         solph.custom.SinkDSM(
@@ -1042,7 +1042,7 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         solph.custom.SinkDSM(
@@ -1058,7 +1058,7 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         om = self.get_om()

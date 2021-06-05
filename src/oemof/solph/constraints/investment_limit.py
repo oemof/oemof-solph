@@ -38,13 +38,13 @@ def investment_limit(model, limit=None):
             expr += m.GenericInvestmentStorageBlock.investment_costs
 
         if hasattr(m, "SinkDSMOemofInvestmentBlock"):
-            expr += m.SinkDSMOemofInvestmentBlock.cost
+            expr += m.SinkDSMOemofInvestmentBlock.investment_costs
 
         if hasattr(m, "SinkDSMDIWInvestmentBlock"):
-            expr += m.SinkDSMDIWInvestmentBlock.cost
+            expr += m.SinkDSMDIWInvestmentBlock.investment_costs
 
         if hasattr(m, "SinkDSMDLRInvestmentBlock"):
-            expr += m.SinkDSMDLRInvestmentBlock.cost
+            expr += m.SinkDSMDLRInvestmentBlock.investment_costs
 
         return expr <= limit
 
