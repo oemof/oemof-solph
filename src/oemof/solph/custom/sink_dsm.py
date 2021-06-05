@@ -785,9 +785,9 @@ class SinkDSMOemofBlock(SimpleBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=dsm_cost)
+        self.costs = Expression(expr=dsm_cost)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
@@ -1060,9 +1060,9 @@ class SinkDSMOemofMultiPeriodBlock(SimpleBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
-        self.cost = Expression(expr=variable_costs + fixed_costs)
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMOemofInvestmentBlock(SimpleBlock):
@@ -1363,9 +1363,10 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+        self.investment_costs = investment_costs
+        self.costs = Expression(expr=investment_costs + variable_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
@@ -1855,10 +1856,10 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
 
         self.investment_costs = investment_costs
         self.period_investment_costs = period_investment_costs
-        self.cost = Expression(
+        self.costs = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDIWBlock(SimpleBlock):
@@ -2496,9 +2497,9 @@ class SinkDSMDIWBlock(SimpleBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=dsm_cost)
+        self.costs = Expression(expr=dsm_cost)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
@@ -3045,9 +3046,9 @@ class SinkDSMDIWMultiPeriodBlock(SimpleBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
-        self.cost = Expression(expr=variable_costs + fixed_costs)
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDIWInvestmentBlock(SimpleBlock):
@@ -3727,9 +3728,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+        self.investment_costs = investment_costs
+        self.costs = Expression(expr=investment_costs + variable_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
@@ -4521,10 +4523,10 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
 
         self.investment_costs = investment_costs
         self.period_investment_costs = period_investment_costs
-        self.cost = Expression(
+        self.costs = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDLRBlock(SimpleBlock):
@@ -5487,9 +5489,9 @@ class SinkDSMDLRBlock(SimpleBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=dr_cost)
+        self.costs = Expression(expr=dr_cost)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
@@ -6342,9 +6344,9 @@ class SinkDSMDLRMultiPeriodBlock(SimpleBlock):
                         * ((1 + m.discount_rate) ** (-p))
                     )
 
-        self.cost = Expression(expr=variable_costs + fixed_costs)
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
@@ -7304,9 +7306,10 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                 ) * m.objective_weighting[t]
 
-        self.cost = Expression(expr=investment_costs + variable_costs)
+        self.investment_costs = investment_costs
+        self.costs = Expression(expr=investment_costs + variable_costs)
 
-        return self.cost
+        return self.costs
 
 
 class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
@@ -8398,6 +8401,6 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
 
         self.investment_costs = investment_costs
         self.period_investment_costs = period_investment_costs
-        self.cost = Expression(
+        self.costs = Expression(
             expr=investment_costs + fixed_costs + variable_costs)
-        return self.cost
+        return self.costs
