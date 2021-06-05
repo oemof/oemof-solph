@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from oemof import solph
 
@@ -54,3 +55,34 @@ def test_something_else():
         om.InvestmentFlow.invest[line21, bel1],
         name="my_name",
     )
+
+
+def test_multiperiodinvestment_limit_error1():
+    """Test errors getting thrown."""
+    msg1 = "multiperiodinvestment_limit is only applicable"
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    om = solph.models.Model(es)
+    with pytest.raises(ValueError, match=msg1):
+        solph.constraints.multiperiodinvestment_limit(om, limit=10)
+
+
+def test_multiperiodinvestment_limit_error2():
+    """Test errors getting thrown."""
+    msg1 = "multiperiodinvestment_limit_per_period is only applicable"
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    om = solph.models.Model(es)
+    with pytest.raises(ValueError, match=msg1):
+        solph.constraints.multiperiodinvestment_limit_per_period(om, limit=10)
+
+
+def test_multiperiodinvestment_limit_error3():
+    """Test errors getting thrown."""
+    msg1 = "You have to provide an investment limit for each period!"
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    es = solph.EnergySystem(timeindex=date_time_index)
+    om = solph.models.MultiPeriodModel(es)
+    with pytest.raises(ValueError, match=msg1):
+        solph.constraints.multiperiodinvestment_limit_per_period(
+            om, limit=None)

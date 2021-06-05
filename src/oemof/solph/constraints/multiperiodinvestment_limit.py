@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 from pyomo import environ as po
 
 from oemof.solph.models import MultiPeriodModel
+from oemof.solph.plumbing import sequence
 
 
 def multiperiodinvestment_limit(model, limit=None):
@@ -91,6 +92,14 @@ def multiperiodinvestment_limit_per_period(model, limit=None):
     if not isinstance(model, MultiPeriodModel):
         msg = ("multiperiodinvestment_limit_per_period is only applicable\n"
                "for MultiPeriodModels, not standard models.")
+        raise ValueError(msg)
+
+    if limit is not None:
+        limit = sequence(limit)
+    else:
+        msg = ("You have to provide an investment limit for each period!\n"
+               "If you provide a scalar value, this will be applied as a "
+               "limit for each period.")
         raise ValueError(msg)
 
     def multiperiodinvestment_period_rule(m, p):
