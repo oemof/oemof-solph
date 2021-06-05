@@ -1348,7 +1348,7 @@ class TestsConstraintMultiperiod:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             multiperiodinvestment=solph.MultiPeriodInvestment(
-                ep_cost=100, existing=50, minimum=33, maximum=100,
+                ep_costs=100, existing=50, minimum=33, maximum=100,
                 lifetime=20
             ),
         )
@@ -1366,7 +1366,7 @@ class TestsConstraintMultiperiod:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             multiperiodinvestment=solph.MultiPeriodInvestment(
-                ep_cost=100, existing=50, minimum=33, maximum=100,
+                ep_costs=100, existing=50, minimum=33, maximum=100,
                 lifetime=20
             ),
         )
@@ -1383,7 +1383,7 @@ class TestsConstraintMultiperiod:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             multiperiodinvestment=solph.MultiPeriodInvestment(
-                ep_cost=100, existing=50, minimum=33, maximum=100,
+                ep_costs=100, existing=50, minimum=33, maximum=100,
                 lifetime=20
             ),
         )
@@ -1392,6 +1392,88 @@ class TestsConstraintMultiperiod:
 
         self.compare_lp_files(
             "investment_limit_all_options_multiperiod.lp", my_om=om)
+
+    def test_multiperiodinvestment_limit_per_period_all_options(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.Bus(label="Bus1",
+                         multiperiod=True)
+        solph.components.GenericStorage(
+            label="storage_invest_limit",
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
+            inputs={bus1: solph.Flow(multiperiod=True)},
+            outputs={bus1: solph.Flow(multiperiod=True)},
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=145, lifetime=20),
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+        )
+        solph.Source(
+            label="Source",
+            outputs={
+                bus1: solph.Flow(
+                    multiperiodinvestment=solph.MultiPeriodInvestment(
+                        ep_costs=123, lifetime=20))
+            },
+        )
+        solph.custom.SinkDSM(
+            label="demand_dsm_DIW",
+            inputs={bus1: solph.Flow(multiperiod=True)},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DIW",
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=100, existing=50, minimum=33, maximum=100,
+                lifetime=20
+            ),
+        )
+        solph.custom.SinkDSM(
+            label="demand_dsm_DLR",
+            inputs={bus1: solph.Flow(multiperiod=True)},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DLR",
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=100, existing=50, minimum=33, maximum=100,
+                lifetime=20
+            ),
+        )
+        solph.custom.SinkDSM(
+            label="demand_dsm_oemof",
+            inputs={bus1: solph.Flow(multiperiod=True)},
+            demand=[1] * 6,
+            capacity_up=[0.5, 0.4, 0.5] * 2,
+            capacity_down=[0.5, 0.4, 0.5] * 2,
+            approach="oemof",
+            flex_share_up=1,
+            flex_share_down=1,
+            shift_interval=2,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+            multiperiodinvestment=solph.MultiPeriodInvestment(
+                ep_costs=100, existing=50, minimum=33, maximum=100,
+                lifetime=20
+            ),
+        )
+        om = self.get_om()
+        solph.constraints.multiperiodinvestment_limit_per_period(
+            om, limit=[300, 400, 500])
+
+        self.compare_lp_files(
+            "investment_limit_per_period_all_options_multiperiod.lp", my_om=om)
 
     def test_summed_min_investment_multiperiod(self):
         """Testing summed min for investment flows"""

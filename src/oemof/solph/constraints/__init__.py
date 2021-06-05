@@ -16,4 +16,7 @@ from .multiperiodinvestment_limit import (  # noqa: F401
 from .multiperiodinvestment_limit import (  # noqa: F401
     multiperiodinvestment_limit,
 )
+from .multiperiodinvestment_limit import (  # noqa: F401
+    multiperiodinvestment_limit_per_period,
+)
 from .shared_limit import shared_limit  # noqa: F401

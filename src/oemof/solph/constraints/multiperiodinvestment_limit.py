@@ -71,6 +71,67 @@ def multiperiodinvestment_limit(model, limit=None):
     return model
 
 
+def multiperiodinvestment_limit_per_period(model, limit=None):
+    r"""Set an absolute limit for the total investment costs of a
+    multiperiod investment optimization problem for each period
+    of the problem.
+
+    .. math:: \sum_{investment\_costs(p)} \leq limit(p)
+    \forall p in \textrm{PERIODS}
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which the constraint is added
+    limit : sequence of float, :math:`limit(p)`
+        Absolute limit of the investment for each period
+        (i.e. RHS of constraint)
+    """
+
+    if not isinstance(model, MultiPeriodModel):
+        msg = ("multiperiodinvestment_limit_per_period is only applicable\n"
+               "for MultiPeriodModels, not standard models.")
+        raise ValueError(msg)
+
+    def multiperiodinvestment_period_rule(m, p):
+        expr = 0
+
+        if hasattr(m, "MultiPeriodInvestmentFlow"):
+            expr += m.MultiPeriodInvestmentFlow.period_investment_costs[p]
+
+        if hasattr(m, "GenericMultiPeriodInvestmentStorageBlock"):
+            expr += (
+                (m.GenericMultiPeriodInvestmentStorageBlock
+                 .period_investment_costs[p])
+            )
+
+        if hasattr(m, "SinkDSMOemofMultiPeriodInvestmentBlock"):
+            expr += (
+                (m.SinkDSMOemofMultiPeriodInvestmentBlock
+                 .period_investment_costs[p])
+            )
+
+        if hasattr(m, "SinkDSMDIWMultiPeriodInvestmentBlock"):
+            expr += (
+                (m.SinkDSMDIWMultiPeriodInvestmentBlock
+                 .period_investment_costs[p])
+            )
+
+        if hasattr(m, "SinkDSMDLRMultiPeriodInvestmentBlock"):
+            expr += (
+                (m.SinkDSMDLRMultiPeriodInvestmentBlock
+                 .period_investment_costs[p])
+            )
+
+        return expr <= limit[p]
+
+    model.multiperiodinvestment_limit_per_period = po.Constraint(
+        model.PERIODS,
+        rule=multiperiodinvestment_period_rule)
+
+    return model
+
+
 def additional_multiperiodinvestment_flow_limit(model, keyword, limit=None):
     r"""
     Global limit for investment flows weighted by an attribute keyword.

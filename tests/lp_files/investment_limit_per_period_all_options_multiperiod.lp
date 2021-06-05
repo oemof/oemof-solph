@@ -86,23 +86,29 @@ objective:
 
 s.t.
 
-c_u_multiperiodinvestment_limit_:
+c_u_multiperiodinvestment_limit_per_period(0)_:
 +177.35448256334197 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_0)
-+173.87694368955096 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1)
-+170.46759185250093 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2)
 +150.44552658821425 MultiPeriodInvestmentFlow_invest(Source_Bus1_0)
-+147.49561430217082 MultiPeriodInvestmentFlow_invest(Source_Bus1_1)
-+144.60354343350082 MultiPeriodInvestmentFlow_invest(Source_Bus1_2)
 +122.31343625058068 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_0)
-+119.91513357900067 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_1)
-+117.56385645000064 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_2)
 +122.31343625058068 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_0)
-+119.91513357900067 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_1)
-+117.56385645000064 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_2)
 +122.31343625058068 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_0)
+<= 300
+
+c_u_multiperiodinvestment_limit_per_period(1)_:
++173.87694368955096 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_1)
++147.49561430217082 MultiPeriodInvestmentFlow_invest(Source_Bus1_1)
++119.91513357900067 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_1)
++119.91513357900067 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_1)
 +119.91513357900067 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_1)
+<= 400
+
+c_u_multiperiodinvestment_limit_per_period(2)_:
++170.46759185250093 GenericMultiPeriodInvestmentStorageBlock_invest(storage_invest_limit_2)
++144.60354343350082 MultiPeriodInvestmentFlow_invest(Source_Bus1_2)
++117.56385645000064 SinkDSMDIWMultiPeriodInvestmentBlock_invest(demand_dsm_DIW_2)
++117.56385645000064 SinkDSMDLRMultiPeriodInvestmentBlock_invest(demand_dsm_DLR_2)
 +117.56385645000064 SinkDSMOemofMultiPeriodInvestmentBlock_invest(demand_dsm_oemof_2)
-<= 1000
+<= 500
 
 c_e_MultiPeriodBus_balance(Bus1_0_0)_:
 -1 flow(Bus1_demand_dsm_DIW_0_0)
