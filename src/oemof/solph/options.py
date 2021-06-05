@@ -17,7 +17,9 @@ from oemof.solph.plumbing import sequence
 
 
 class Investment:
-    """
+    """Defines an Investment object holding all the specifications needed
+    for investment modeling.
+
     Parameters
     ----------
     maximum : float, :math:`P_{invest,max}` or :math:`E_{invest,max}`
@@ -41,8 +43,12 @@ class Investment:
 
 
     For the variables, constraints and parts of the objective function, which
-    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlow`
-    and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
+    are created, see
+    :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow`,
+    :py:class:`~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`
+    :py:class:`~oemof.solph.custom.sink_dsm.SinkDSMOemofInvestmentBlock`,
+    :py:class:`~oemof.solph.custom.sink_dsm.SinkDSMDLRInvestmentBlock` and
+    :py:class:`~oemof.solph.custom.sink_dsm.SinkDSMDIWInvestmentBlock`.
 
     """  # noqa: E501
 
@@ -103,7 +109,9 @@ class Investment:
 
 
 class NonConvex:
-    """
+    """Defines a NonConvex object holding all the specifications for NonConvex
+    Flows, i.e. Flows with binary variables associated to them.
+
     Parameters
     ----------
     startup_costs : numeric (iterable or scalar)
@@ -122,9 +130,9 @@ class NonConvex:
         Be aware that minimum up and downtimes can contradict each
         other and may to infeasible problems.
     maximum_startups : numeric (0 or positive integer)
-        Maximum number of start-ups.
+        Maximum number of start-ups in the optimization timeframe.
     maximum_shutdowns : numeric (0 or positive integer)
-        Maximum number of shutdowns.
+        Maximum number of shutdowns in the optimization timeframe.
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on). For minimum up and downtimes, the initial status
@@ -138,9 +146,9 @@ class NonConvex:
         A dictionary containing the following two keys:
 
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* on the positive difference (`flow[t-1] < flow[t]`) of
+           bound* of the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
+         * `'costs'`: numeric (scalar or None), the gradient cost per
            unit.
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
@@ -149,7 +157,7 @@ class NonConvex:
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
+          * `'costs'`: numeric (scalar or None), the gradient cost per
             unit.
     """
 
