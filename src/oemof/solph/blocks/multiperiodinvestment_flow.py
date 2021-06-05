@@ -640,6 +640,7 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
 
         m = self.parent_block()
         investment_costs = 0
+        period_investment_costs = {p: 0 for p in m.PERIODS}
         fixed_costs = 0
 
         for i, o in self.CONVEX_MULTIPERIODINVESTFLOWS:
@@ -659,10 +660,12 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     capex=m.flows[i, o].multiperiodinvestment.ep_costs[p],
                     n=lifetime,
                     wacc=interest)
-                investment_costs += (
+                investment_costs_increment = (
                     self.invest[i, o, p] * annuity * lifetime
                     * ((1 + m.discount_rate) ** (-p))
                 )
+                investment_costs += investment_costs_increment
+                period_investment_costs[p] += investment_costs_increment
         for i, o in self.NON_CONVEX_MULTIPERIODINVESTFLOWS:
             lifetime = m.flows[i, o].multiperiodinvestment.lifetime
             interest = m.flows[i, o].multiperiodinvestment.interest_rate
@@ -680,12 +683,14 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     capex=m.flows[i, o].multiperiodinvestment.ep_costs[p],
                     n=lifetime,
                     wacc=interest)
-                investment_costs += (
+                investment_costs_increment = (
                     (self.invest[i, o, p] * annuity * lifetime
                      + self.invest_status[i, o, p]
                      * m.flows[i, o].multiperiodinvestment.offset[p])
                     * ((1 + m.discount_rate) ** (-p))
                 )
+                investment_costs += investment_costs_increment
+                period_investment_costs[p] += investment_costs_increment
         for i, o in self.MULTIPERIODINVESTFLOWS:
             if m.flows[i, o].multiperiodinvestment.fixed_costs[0] is not None:
                 lifetime = m.flows[i, o].multiperiodinvestment.lifetime
@@ -701,5 +706,6 @@ class MultiPeriodInvestmentFlow(SimpleBlock):
                     )
 
         self.investment_costs = investment_costs
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(expr=investment_costs + fixed_costs)
         return self.costs

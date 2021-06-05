@@ -1799,6 +1799,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
         m = self.parent_block()
 
         investment_costs = 0
+        period_investment_costs = {p: 0 for p in m.PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
@@ -1820,10 +1821,12 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                         capex=g.multiperiodinvestment.ep_costs[p],
                         n=lifetime,
                         wacc=interest)
-                    investment_costs += (
+                    investment_costs_increment = (
                         self.invest[g, p] * annuity * lifetime
                         * ((1 + m.discount_rate) ** (-p))
                     )
+                    investment_costs += investment_costs_increment
+                    period_investment_costs[p] += investment_costs_increment
             else:
                 raise ValueError("Missing value for investment costs!")
             for p, t in m.TIMEINDEX:
@@ -1851,6 +1854,7 @@ class SinkDSMOemofMultiPeriodInvestmentBlock(SimpleBlock):
                     )
 
         self.investment_costs = investment_costs
+        self.period_investment_costs = period_investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
@@ -4459,6 +4463,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
         m = self.parent_block()
 
         investment_costs = 0
+        period_investment_costs = {p: 0 for p in m.PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
@@ -4480,10 +4485,12 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                         capex=g.multiperiodinvestment.ep_costs[p],
                         n=lifetime,
                         wacc=interest)
-                    investment_costs += (
+                    investment_costs_increment = (
                         self.invest[g, p] * annuity * lifetime
                         * ((1 + m.discount_rate) ** (-p))
                     )
+                    investment_costs += investment_costs_increment
+                    period_investment_costs[p] += investment_costs_increment
             else:
                 raise ValueError("Missing value for investment costs!")
 
@@ -4513,6 +4520,7 @@ class SinkDSMDIWMultiPeriodInvestmentBlock(SinkDSMDIWBlock):
                     )
 
         self.investment_costs = investment_costs
+        self.period_investment_costs = period_investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs
         )
@@ -8330,6 +8338,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
         m = self.parent_block()
 
         investment_costs = 0
+        period_investment_costs = {p: 0 for p in m.PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
@@ -8351,10 +8360,12 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                         capex=g.multiperiodinvestment.ep_costs[p],
                         n=lifetime,
                         wacc=interest)
-                    investment_costs += (
+                    investment_costs_increment = (
                         self.invest[g, p] * annuity * lifetime
                         * ((1 + m.discount_rate) ** (-p))
                     )
+                    investment_costs += investment_costs_increment
+                    period_investment_costs[p] += investment_costs_increment
             else:
                 raise ValueError("Missing value for investment costs!")
             for p, t in m.TIMEINDEX:
@@ -8386,6 +8397,7 @@ class SinkDSMDLRMultiPeriodInvestmentBlock(SinkDSMDLRBlock):
                     )
 
         self.investment_costs = investment_costs
+        self.period_investment_costs = period_investment_costs
         self.cost = Expression(
             expr=investment_costs + fixed_costs + variable_costs)
         return self.cost
