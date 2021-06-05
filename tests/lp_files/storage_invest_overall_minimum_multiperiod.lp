@@ -200,15 +200,7 @@ c_u_GenericMultiPeriodInvestmentStorageBlock_max_storage_content(storage1_2_5)_:
 -1 GenericMultiPeriodInvestmentStorageBlock_total(storage1_2)
 <= 0
 
-c_l_GenericMultiPeriodInvestmentStorageBlock_overall_minimum(storage1_0)_:
-+1 GenericMultiPeriodInvestmentStorageBlock_total(storage1_0)
->= 150
-
-c_l_GenericMultiPeriodInvestmentStorageBlock_overall_minimum(storage1_1)_:
-+1 GenericMultiPeriodInvestmentStorageBlock_total(storage1_1)
->= 150
-
-c_l_GenericMultiPeriodInvestmentStorageBlock_overall_minimum(storage1_2)_:
+c_l_GenericMultiPeriodInvestmentStorageBlock_overall_minimum(storage1)_:
 +1 GenericMultiPeriodInvestmentStorageBlock_total(storage1_2)
 >= 150
 

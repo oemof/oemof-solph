@@ -2216,16 +2216,16 @@ class GenericMultiPeriodInvestmentStorageBlock(SimpleBlock):
         def _overall_minimum_investflow_rule(block):
             """Rule definition for minimum overall investment
             in multiperiodinvestment case.
+
+            Note: This is only applicable for the last period
             """
             for n in self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES:
-                for p in m.PERIODS:
-                    expr = (n.multiperiodinvestment.overall_minimum
-                            <= self.total[n, p])
-                    self.overall_minimum.add((n, p), expr)
+                expr = (n.multiperiodinvestment.overall_minimum
+                        <= self.total[n, m.PERIODS[-1]])
+                self.overall_minimum.add(n, expr)
 
         self.overall_minimum = Constraint(
             self.OVERALL_MINIMUM_MULTIPERIODINVESTSTORAGES,
-            m.PERIODS,
             noruleinit=True)
         self.overall_minimum_build = BuildAction(
             rule=_overall_minimum_investflow_rule)
