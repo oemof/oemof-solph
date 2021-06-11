@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 
 """
-In-development functionality for demand-side management.
+Implementation of demand-side management (demand response) which allows for
+
+* modeling load shifting and/or shedding of a given baseline demand,
+* assessing both, a pure dispatch and an investment model and
+* choosing among different (storage-alike) implementations.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -11,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Julian Endres
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 
 SPDX-License-Identifier: MIT
@@ -34,38 +39,42 @@ from oemof.solph.plumbing import sequence
 
 class SinkDSM(Sink):
     r"""
-    Demand Side Management implemented as Sink with flexibility potential.
+    Demand Side Management implemented as a Sink with flexibility potential
+    to deviate from the baseline demand in upwards or downwards direction.
 
     There are several approaches possible which can be selected:
-    - DIW: Based on the paper by Zerrahn, Alexander and Schill, Wolf-Peter
-    (2015): `On the representation of demand-side management in power system
-    models <https://doi.org/10.1016/j.energy.2015.03.037>`_,
-    in: Energy (84), pp. 840-845, 10.1016/j.energy.2015.03.037,
-    accessed 08.01.2021, pp. 842-843.
-    - DLR: Based on the PhD thesis of Gils, Hans Christian (2015):
-    `Balancing of Intermittent Renewable Power Generation by Demand Response
-    and Thermal Energy Storage`, Stuttgart,
-    <http://dx.doi.org/10.18419/opus-6888>,
-    accessed 08.01.2021, pp. 67-70.
-    - oemof: Created by Julian Endres. A fairly simple DSM representation which
-    demands the energy balance to be levelled out in fixed cycles
+
+    * DIW: Based on the paper by Zerrahn, Alexander and Schill, Wolf-Peter
+      (2015): `On the representation of demand-side management in power system
+      models, in: Energy (84), pp. 840-845,
+      10.1016/j.energy.2015.03.037
+      <https://doi.org/10.1016/j.energy.2015.03.037>`_,
+      accessed 08.01.2021, pp. 842-843.
+    * DLR: Based on the PhD thesis of Gils, Hans Christian (2015):
+      `Balancing of Intermittent Renewable Power Generation by Demand Response
+      and Thermal Energy Storage`, Stuttgart,
+      `<http://dx.doi.org/10.18419/opus-6888>`_,
+      accessed 08.01.2021, pp. 67-70.
+    * oemof: Created by Julian Endres. A fairly simple DSM representation which
+      demands the energy balance to be levelled out in fixed cycles
 
     An evaluation of different modeling approaches has been carried out and
     presented at the INREC 2020. Some of the results are as follows:
-    - DIW: A solid implementation with the tendency of slight overestimization
-    of potentials since a shift_time is not accounted for. It may get
-    computationally expensive due to a high time-interlinkage in constraint
-    formulations.
-    - DLR: An extensive modeling approach for demand response which neither
-    leads to an over- nor underestimization of potentials and balances modeling
-    detail and computation intensity. :attr:`fixes` and :attr:`addition` should
-    both be set to True which is the default value.
-    - oemof: A very computationally efficient approach which only requires the
-    energy balance to be levelled out in certain intervals. If demand response
-    is not at the center of the research and/or parameter availability is
-    limited, this approach should be chosen. Note that approach `oemof` does
-    allow for load shedding, but does not impose a limit on maximum amount of
-    shedded energy.
+
+    * DIW: A solid implementation with the tendency of slight overestimization
+      of potentials since a `shift_time` is not included. It may get
+      computationally expensive due to a high time-interlinkage in constraint
+      formulations.
+    * DLR: An extensive modeling approach for demand response which neither
+      leads to an over- nor underestimization of potentials and balances
+      modeling detail and computation intensity. `fixes` and
+      `addition` should both be set to True which is the default value.
+    * oemof: A very computationally efficient approach which only requires the
+      energy balance to be levelled out in certain intervals. If demand
+      response is not at the center of the research and/or parameter
+      availability is limited, this approach should be chosen.
+      Note that approach `oemof` does allow for load shedding,
+      but does not impose a limit on maximum amount of shedded energy.
 
     SinkDSM adds additional constraints that allow to shift energy in certain
     time window constrained by :attr:`~capacity_up` and
@@ -83,7 +92,7 @@ class SinkDSM(Sink):
         maximum DSM capacity that may be increased (normalized)
     capacity_down: int or array
         maximum DSM capacity that may be reduced (normalized)
-    approach: 'oemof', 'DIW', 'DLR'
+    approach: str, one of 'oemof', 'DIW', 'DLR'
         Choose one of the DSM modeling approaches. Read notes about which
         parameters to be applied for which approach.
 
@@ -443,11 +452,11 @@ class SinkDSMOemofBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \quad DSM_{t}^{up} = 0 \quad \forall t
-        \quad if \space eligibility_{shift} = False \\
+        (1) \quad DSM_{t}^{up} = 0 \\
+        \forall t \quad if \space e_{shift} = False \\
         &
         (2) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
-        \quad if \space eligibility_{shed} = False \\
+        \quad if \space e_{shed} = False \\
         &
         (3) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max} + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
@@ -475,25 +484,28 @@ class SinkDSMOemofBlock(SimpleBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
+    apparently, this won't be rendered
+
+    ============================= ===================== ==== =======================================
+    symbol                        attribute             type explanation
+    ============================= ===================== ==== =======================================
+    :math:`DSM_{t}^{up}`          `dsm_up[g, t]`        V    DSM up shift (capacity shifted upwards)
+    :math:`DSM_{t}^{do, shift}`   `dsm_do_shift[g, t]`  V    DSM down shift (capacity shifted downwards)
+    :math:`DSM_{t}^{do, shed}`    `dsm_do_shed[g, t]`   V    DSM shedded (capacity shedded, i.e. not compensated for)
+    :math:`\dot{E}_{t}`           `SinkDSM.inputs`      V    Energy flowing in from (electrical) inflow bus
+    :math:`demand_{t}`            `demand[t]`           P    (Electrical) demand series (normalized)
+    :math:`demand_{max}`          `max_demand`          P    Maximum demand value
+    :math:`E_{t}^{do}`            `capacity_down[t]`    P    Capacity  allowed for a load adjustment downwards
+                                                             (normalized; shifting + shedding)
+    ============================= ===================== ==== =======================================
+
         .. csv-table:: Variables (V) and Parameters (P)
             :header: "symbol", "attribute", "type", "explanation"
             :widths: 1, 1, 1, 1
 
-            ":math:`DSM_{t}^{up}` ",
-            ":attr:`~SinkDSM.dsm_up[g, t]` ","V", "DSM
-            up shift (capacity shifted upwards)"
-            ":math:`DSM_{t}^{do, shift}` ",
-            ":attr:`~SinkDSM.dsm_do_shift[g, t]` ",
-            "V","DSM down shift (capacity shifted downwards)"
-            ":math:`DSM_{t}^{do, shed}` ",
-            ":attr:`~SinkDSM.dsm_do_shed[g, t]` ",
-            "V","DSM shedded (capacity shedded, i.e. not compensated for)"
-            ":math:`\dot{E}_{t}`",":attr:`~SinkDSM.inputs`","V", "Energy
-            flowing in from (electrical) inflow bus"
-            ":math:`demand_{t}`",":attr:`~SinkDSM.demand[t]`","P",
-            "(Electrical) demand series (normalized)"
-            ":math:`demand_{max}`",":attr:`~SinkDSM.max_demand`","P",
-            "Maximum demand value"
+
+
+
             ":math:`E_{t}^{do}`",":attr:`~SinkDSM.capacity_down[t]`","P",
             "Capacity  allowed for a load adjustment downwards (normalized)
             (DSM down shift + DSM shedded)"
@@ -510,11 +522,11 @@ class SinkDSMOemofBlock(SimpleBlock):
             ":math:`\eta`",":attr:`~SinkDSM.efficiency`","P", "Efficiency
             loss forload shifting processes"
             ":math:`\mathbb{T}` "," ","P", "Time steps"
-            ":math:`eligibility_{shift}` ",
+            ":math:`e_{shift}` ",
             ":attr:`~SinkDSM.shift_eligibility`","P",
             "Boolean parameter indicating if unit can be used for
             load shifting"
-            ":math:`eligibility_{shed}` ",
+            ":math:`e_{shed}` ",
             ":attr:`~SinkDSM.shed_eligibility`","P",
             "Boolean parameter indicating if unit can be used for
             load shedding"
@@ -526,7 +538,8 @@ class SinkDSMOemofBlock(SimpleBlock):
             ":math:`cost_{t}^{dsm, do, shed}` ",
             ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
             "Variable costs for shedding load"
-    """
+
+    """  # noqa: E501
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
