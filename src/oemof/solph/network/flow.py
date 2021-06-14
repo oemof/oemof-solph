@@ -232,3 +232,26 @@ class Flow(on.Edge):
                 + " flows! Investment is automatically attributed to standard"
                 + " objective.")
             warn(msg, UserWarning)
+
+        # Checking for impossible gradient combinations
+        if self.nonconvex:
+            if self.nonconvex.positive_gradient["ub"][0] is not None and (
+                self.positive_gradient["ub"][0] is not None
+                or self.negative_gradient["ub"][0] is not None
+            ):
+                raise ValueError(
+                    "You specified a positive gradient in your nonconvex "
+                    "option. This cannot be combined with a positive or a "
+                    "negative gradient for a standard flow!"
+                )
+
+        if self.nonconvex:
+            if self.nonconvex.negative_gradient["ub"][0] is not None and (
+                self.positive_gradient["ub"][0] is not None
+                or self.negative_gradient["ub"][0] is not None
+            ):
+                raise ValueError(
+                    "You specified a negative gradient in your nonconvex "
+                    "option. This cannot be combined with a positive or a "
+                    "negative gradient for a standard flow!"
+                )

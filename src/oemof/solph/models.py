@@ -114,7 +114,7 @@ class BaseModel(po.ConcreteModel):
             self._construct()
 
     def _construct(self):
-        """"""
+        """ """
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
@@ -288,7 +288,7 @@ class Model(BaseModel):
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
-        """"""
+        """ """
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
@@ -331,7 +331,7 @@ class Model(BaseModel):
         )
 
     def _add_parent_block_variables(self):
-        """"""
+        """ """
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for (o, i) in self.FLOWS:
