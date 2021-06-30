@@ -275,7 +275,7 @@ class MultiObjective:
                 "negative_gradient": {"ub": None, "costs": 0},
             }
 
-            self.variable_costs = sequence(kwargs.get("variable_costs"), 0)
+            self.variable_costs = sequence(kwargs.get("variable_costs", 0))
 
             for attribute in dictionaries:
                 value = kwargs.get(attribute, defaults.get(attribute))
