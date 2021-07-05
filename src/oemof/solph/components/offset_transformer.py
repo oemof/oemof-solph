@@ -26,7 +26,9 @@ from oemof.solph.plumbing import sequence as solph_sequence
 
 
 class OffsetTransformer(Transformer):
-    """An object with one input and one output.
+    """
+    An object with one input and one output and two coefficients to model
+    part load behaviour.
 
     Parameters
     ----------
