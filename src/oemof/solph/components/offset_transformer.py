@@ -17,15 +17,15 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
+from oemof.solph.network.transformer import Transformer
 from oemof.solph.plumbing import sequence as solph_sequence
 
 
-class OffsetTransformer(network.Transformer):
+class OffsetTransformer(Transformer):
     """An object with one input and one output.
 
     Parameters
