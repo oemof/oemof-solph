@@ -33,7 +33,7 @@ class OffsetTransformer(Transformer):
     Parameters
     ----------
 
-    coefficients : tuple
+    coefficients : tuple, (:math:`C_0(t)`, :math:`C_1(t)`)
         Tuple containing the first two polynomial coefficients
         i.e. the y-intersection and slope of a linear equation.
         The tuple values can either be a scalar or a sequence with length
