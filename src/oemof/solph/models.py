@@ -15,6 +15,9 @@ import logging
 import warnings
 from collections import defaultdict
 
+import numpy as np
+from pandas import DataFrame
+
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
@@ -586,3 +589,100 @@ class MultiObjectiveModel(Model):
             return solver_results
         else:
             raise Exception('Invalid optimization type')
+
+    def pareto(self, solver='cbc', solver_io='lp', **kwargs):
+        solve_kwargs = kwargs.get('solve_kwargs', {})
+        solver_cmdline_options = kwargs.get("cmdline_options", {})
+
+        opt = SolverFactory(solver, solver_io=solver_io)
+        # set command line options
+        options = opt.options
+        for k in solver_cmdline_options:
+            options[k] = solver_cmdline_options[k]
+
+
+        # number of dimensions
+        obj_list = kwargs.get('objectives', list())
+
+        # check if all objectives ar unique
+        objectives = []
+        for obj in obj_list:
+            if obj not in objectives:
+                objectives.append(obj)
+            else:
+                msg = ("Objectives should be given only once."
+                       + " Truncated {{obj_list}} to contain only"
+                       + " unique values")
+                warnings.warn(msg, UserWarning)
+
+        if len(objectives) <= 1:
+            raise ValueError(
+                'List of objectives must contain at'
+                + ' least 2 unique entries!')
+
+        # number of dimensions for grid
+        ndim = len(objectives)
+
+        # number of points per dimension
+        npoints = kwargs.get('npoints', 2)
+
+        # create unscaled grid of weights
+        weights_unscaled = np.meshgrid(
+            *(range(npoints) for i in range(ndim)))
+
+        # reshape (flatten) to 1d arrays
+        weights_unscaled = np.squeeze(np.array(
+            [np.reshape(w, (-1, 1))[1:, :] for w in weights_unscaled]))
+
+        # calculate unique weights scaled to 1
+        weights_scaled = np.unique(
+            weights_unscaled / weights_unscaled.sum(axis=0), axis=1).T
+
+        # create DataFrame to hold results for each point/objective
+        results = DataFrame(
+            index=range(weights_scaled.shape[0]),
+            data=0,
+            columns=objectives)
+
+        # add counter for current weight combination
+        j=0
+
+        # iterate over different weights
+        for weights in weights_scaled:
+            # delete objective if it exists
+            self.del_component('objective')
+
+            # initialise weighted sum of objectives
+            expr = 0
+
+            # iterate over unique objectives
+            for i in range(ndim):
+                # add to summed objective
+                expr += (
+                    weights[i]
+                    * self.objective_functions.get(objectives[i]))
+
+            # create objective
+            self.objective = po.Objective(sense=po.minimize, expr=expr)
+
+            # solve
+            opt.solve(self, **solve_kwargs)
+
+            for i in range(ndim):
+                results.at[j, objectives[i]] = (po.value(
+                    self.objective_functions.get(objectives[i])))
+
+            j += 1
+
+        # find weight combinations belonging to pareto frontier
+        costs = np.array(results)
+        pareto_indices = np.ones(costs.shape[0], dtype = bool)
+        for i, c in enumerate(costs):
+            if pareto_indices[i]:
+                # keep any point with a lower cost
+                pareto_indices[pareto_indices] = (
+                    np.any(costs[pareto_indices]<c, axis=1))
+                # and keep self
+                pareto_indices[i] = True
+
+        return results, weights_scaled, pareto_indices
