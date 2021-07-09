@@ -34,8 +34,8 @@ class Transformer(SimpleBlock):
 
     Linear relation :attr:`om.Transformer.relation[i,o,t]`
         .. math::
-            \P_{i,n}(t) \times \eta_{n,o}(t) = \
-            \P_{n,o}(t) \times \eta_{n,i}(t), \\
+            P_{i,n}(t) \cdot \eta_{n,o}(t) =
+            P_{n,o}(t) \cdot \eta_{n,i}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{TRANSFORMERS}, \\
             \forall i \in \textrm{INPUTS(n)}, \\
