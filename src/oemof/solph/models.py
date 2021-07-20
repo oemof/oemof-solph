@@ -284,7 +284,14 @@ class Model(BaseModel):
     ]
 
     def __init__(self, energysystem, **kwargs):
-        super().__init__(energysystem, **kwargs)
+        # the auto_construct shows underdefined behavior since the parent is
+        # not fully initialised => timeindex & timeincrement are not set properly
+        # There fore this "hack"
+        kwargs_ = kwargs.copy()
+        kwargs_.update({"auto_construct": False})
+        super().__init__(energysystem, **kwargs_)
+        if kwargs.get("auto_construct", True):
+            self._construct()
 
     def _add_parent_block_sets(self):
         """ """
@@ -292,8 +299,9 @@ class Model(BaseModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
+        # Calculation is done on increments
         self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+            initialize=range(len(self.timeincrement)), ordered=True
         )
 
         # previous timesteps
