@@ -19,9 +19,13 @@ from oemof.solph.helpers import calculate_timeincrement
 
 
 def test_timeincrement_with_valid_timeindex():
-    datetimeindex = pd.date_range("1/1/2012", periods=1, freq="H")
+    """Test if given a correct timeindex the calculation of the time
+    increments are correct
+    """
+    datetimeindex = pd.date_range("1/1/2012", periods=2, freq="H")
     es = solph.EnergySystem(timeindex=datetimeindex)
     m = solph.models.BaseModel(es)
+    assert len(m.timeincrement) == 1
     assert m.timeincrement[0] == 1
     assert es.timeindex.freq.nanos / 3.6e12 == 1
 
@@ -33,6 +37,7 @@ def test_timeincrement_with_non_valid_timeindex():
 
 
 def test_timeincrement_value():
+    """in this case a timeindex is ignored since a timeincrement is given"""
     es = solph.EnergySystem(timeindex=4)
     m = solph.models.BaseModel(es, timeincrement=3)
     assert m.timeincrement[0] == 3
@@ -42,6 +47,9 @@ def test_timeincrement_list():
     es = solph.EnergySystem(timeindex=4)
     m = solph.models.BaseModel(es, timeincrement=[0, 1, 2, 3])
     assert m.timeincrement[3] == 3
+    assert len(m.timeindex) == 4
+    assert m.timeindex[0] == pd.Timestamp("2020-01-01 01:00:00")
+    assert m.timeindex[-1] == pd.Timestamp("2020-01-01 04:00:00")
 
 
 def test_nonequ_timeincrement():

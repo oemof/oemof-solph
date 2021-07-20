@@ -21,6 +21,7 @@ from pyomo.opt import SolverFactory
 from oemof.solph import blocks
 from oemof.solph import processing
 from oemof.solph.plumbing import sequence
+import pandas as pd
 
 
 class BaseModel(po.ConcreteModel):
@@ -71,22 +72,59 @@ class BaseModel(po.ConcreteModel):
 
         self.name = kwargs.get("name", type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(
-            kwargs.get("timeincrement", self.es.timeincrement)
-        )
-        if self.timeincrement[0] is None:
-            try:
-                self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12
+        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
+        self.timeindex = kwargs.get("timeindex", self.es.timeindex)
+
+        if self.timeincrement is None:
+            if not isinstance(self.timeindex, pd.DatetimeIndex):
+                raise AttributeError(
+                    (
+                        "No valid self. found. Please pass a valid "
+                        "timeincremet parameter or pass an EnergySystem with "
+                        "a valid time index. Please note that a valid time"
+                        "index need to have a 'freq' attribute."
+                    )
                 )
-            except AttributeError:
-                msg = (
-                    "No valid time increment found. Please pass a valid "
-                    "timeincremet parameter or pass an EnergySystem with "
-                    "a valid time index. Please note that a valid time"
-                    "index need to have a 'freq' attribute."
+            # check if timeindex length is larger than 1
+            if len(self.timeindex) <= 1:
+                raise ValueError(
+                    "timeindex must have at least two entries. Given %d"
+                    % (len(self.timeindex))
                 )
-                raise AttributeError(msg)
+            # calculate the timeincrements
+
+            self.timeincrement = self.timeindex.to_series().diff().dropna()
+            # in order to be consistent with former versions
+            # now construct a sequenc with unit hour
+            self.timeincrement = sequence(
+                list(
+                    map(
+                        lambda ts: ts.total_seconds() / 3600.0,
+                        self.timeincrement,
+                    )
+                )
+            )
+            # here we need to cut the timeindex in order to comply with
+            # the current usage
+            self.timeindex = self.timeindex[1:]
+        elif self.timeincrement is not None:
+            # if both are given than the timeincrement is the leading parameter
+            t0 = pd.Timestamp("2020-01-01")
+            # from this follows the timeindex, now one has to assume again
+            # TODO Maybe a timeincrement unit by kwargs and default
+            if isinstance(self.timeincrement, int):
+                # This if is sign of that sequence is not fully defined
+                self.timeincrement = sequence([self.timeincrement])
+            else:
+                self.timeincrement = sequence(self.timeincrement)
+            #
+            self.timeindex = pd.date_range(
+                t0,
+                periods=len(self.timeincrement) + 1,
+                freq=kwargs.get("timeincrement_unit", "H"),
+                closed="right",
+            )
+
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
@@ -290,6 +328,8 @@ class Model(BaseModel):
         kwargs_ = kwargs.copy()
         kwargs_.update({"auto_construct": False})
         super().__init__(energysystem, **kwargs_)
+        print(self.timeincrement)
+        print(self.timeindex)
         if kwargs.get("auto_construct", True):
             self._construct()
 
@@ -300,6 +340,7 @@ class Model(BaseModel):
 
         # pyomo set for timesteps of optimization problem
         # Calculation is done on increments
+        print(len(self.timeincrement))
         self.TIMESTEPS = po.Set(
             initialize=range(len(self.timeincrement)), ordered=True
         )

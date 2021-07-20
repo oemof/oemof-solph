@@ -32,7 +32,9 @@ class TestsConstraint:
             r"^objective.*(?=s\.t\.)", re.DOTALL | re.MULTILINE
         )
 
-        cls.date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+        cls.date_time_index = pd.date_range(
+            "1/1/2012", periods=3 + 1, freq="H"
+        )
 
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)

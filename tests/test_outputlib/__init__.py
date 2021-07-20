@@ -122,7 +122,7 @@ heat_pump = Transformer(
     conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
 )
 
-datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
+datetimeindex = pd.date_range("1/1/2012", periods=25, freq="H")
 energysystem = EnergySystem(timeindex=datetimeindex)
 energysystem.add(
     bcoal,
@@ -145,11 +145,8 @@ energysystem.add(
     heat_source,
     heat_pump,
 )
-
 # ################################ optimization ###########################
-
 # create optimization model based on energy_system
 optimization_model = Model(energysystem=energysystem)
-
 # solve problem
 optimization_model.solve()

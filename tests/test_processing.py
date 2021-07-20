@@ -34,7 +34,7 @@ class TestParameterResult:
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
-                "2016-01-01", periods=cls.period, freq="H"
+                "2016-01-01", periods=cls.period+1, freq="H"
             )
         )
 

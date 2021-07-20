@@ -139,7 +139,8 @@ def results(om):
         df_dict[k].set_index("timestep", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         try:
-            df_dict[k].index = om.es.timeindex
+            # pick the timeindex according to the model
+            df_dict[k].index = om.timeindex
         except ValueError as e:
             msg = (
                 "\nFlow: {0}-{1}. This could be caused by NaN-values in"
@@ -166,7 +167,7 @@ def results(om):
         grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
             duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
-            df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=om.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
