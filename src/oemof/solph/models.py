@@ -50,6 +50,8 @@ class BaseModel(po.ConcreteModel):
     -----------
     timeincrement : sequence
         Time increments.
+    timeindex : pd.DatetimeIndex
+        The corresponding timeindex omitting the initial step.
     flows : dict
         Flows of the model.
     name : str
@@ -109,7 +111,7 @@ class BaseModel(po.ConcreteModel):
             self.timeindex = self.timeindex[1:]
         elif self.timeincrement is not None:
             # if both are given than the timeincrement is the leading parameter
-            t0 = pd.Timestamp("2020-01-01")
+            t0 = pd.Timestamp("2021-01-01")
             # from this follows the timeindex, now one has to assume again
             # TODO Maybe a timeincrement unit by kwargs and default
             if isinstance(self.timeincrement, int):
@@ -328,8 +330,6 @@ class Model(BaseModel):
         kwargs_ = kwargs.copy()
         kwargs_.update({"auto_construct": False})
         super().__init__(energysystem, **kwargs_)
-        print(self.timeincrement)
-        print(self.timeindex)
         if kwargs.get("auto_construct", True):
             self._construct()
 
@@ -340,7 +340,6 @@ class Model(BaseModel):
 
         # pyomo set for timesteps of optimization problem
         # Calculation is done on increments
-        print(len(self.timeincrement))
         self.TIMESTEPS = po.Set(
             initialize=range(len(self.timeincrement)), ordered=True
         )
