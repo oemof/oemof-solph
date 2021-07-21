@@ -63,6 +63,19 @@ class BaseModel(po.ConcreteModel):
     dual : ... or None
     rc : ... or None
 
+    Remark:
+    -------
+    The timeindex and timeincrement attribute have the following connection:
+    Timeindex at step i marks the **end** of timeincrement at step i. That
+    means all initial values are at timeindex[0]-timeincrement[0] and are not
+    part of the results table. Therefore all flow values at step i represent
+    the value between timeindex[i-1] and timeindex[i] or for the timerange
+    timeincrement[i].
+
+    The timeincrement and the timeindex have the same length due to this
+    interpretation.
+
+
     """
 
     CONSTRAINT_GROUPS = []
@@ -126,7 +139,6 @@ class BaseModel(po.ConcreteModel):
                 freq=kwargs.get("timeincrement_unit", "H"),
                 closed="right",
             )
-
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
