@@ -337,7 +337,8 @@ class Model(BaseModel):
 
     def __init__(self, energysystem, **kwargs):
         # the auto_construct shows underdefined behavior since the parent is
-        # not fully initialised => timeindex & timeincrement are not set properly
+        # not fully initialised => timeindex & timeincrement are not
+        # set properly
         # There fore this "hack"
         kwargs_ = kwargs.copy()
         kwargs_.update({"auto_construct": False})

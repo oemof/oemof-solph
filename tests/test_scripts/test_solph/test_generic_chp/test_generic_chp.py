@@ -32,7 +32,7 @@ def test_gen_chp():
     periods = len(data) - 1
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=periods+1, freq="H")
+    idx = pd.date_range("1/1/2017", periods=(periods + 1), freq="H")
     es = solph.EnergySystem(timeindex=idx)
     Node.registry = es
 

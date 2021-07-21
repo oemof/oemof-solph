@@ -32,7 +32,7 @@ def test_lopf(solver="cbc"):
     logging.info("Initialize the energy system")
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range("5/5/2012", periods=1+1, freq="H")
+    date_time_index = pd.date_range("5/5/2012", periods=(1 + 1), freq="H")
     es = EnergySystem(timeindex=date_time_index)
 
     ##########################################################################
