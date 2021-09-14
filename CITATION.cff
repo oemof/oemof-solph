@@ -1,0 +1,19 @@
+# YAML 1.2
+---
+cff-version: "1.1.0"
+doi: "10.5281/zenodo.596235"
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+title: "oemof.solph"
+abstract: "The oemof.solph package is part of the Open energy modelling framework (oemof). This an organisational framework to bundle tools for energy (system) modelling. oemof-solph is a model generator for energy system modelling and optimisation."
+authors:
+  -
+    family-names: Krien
+    given-names: Uwe
+  -
+    family-names: Kaldemeyer
+    given-names: Cord
+  -
+    family-names: Stephan
+    given-names: "Günther"
+...
