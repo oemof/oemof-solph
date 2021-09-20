@@ -21,39 +21,44 @@ from pyomo.core.base.block import SimpleBlock
 
 
 class Transformer(SimpleBlock):
-    r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.network.Transformer`
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.Transformer` objects.
+    r"""
+    Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.transformer.Transformer`
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.Transformer.relation[i,o,t]`
+    Linear relation `om.Transformer.relation[i,o,t]`
         .. math::
-            P_{i,n}(t) \cdot \eta_{n,o}(t) =
-            P_{n,o}(t) \cdot \eta_{n,i}(t), \\
+            P_{i}(t) \cdot \eta_{o}(t) =
+            P_{o}(t) \cdot \eta_{i}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{TRANSFORMERS}, \\
-            \forall i \in \textrm{INPUTS(n)}, \\
-            \forall o \in \textrm{OUTPUTS(n)},
+            \forall i \in \textrm{INPUTS}, \\
+            \forall o \in \textrm{OUTPUTS}
 
-    ======================  ============================  =============
+    While INPUTS is the set of Bus objects connected with the input of the
+    Transformer and OUPUTS the set of Bus objects connected with the output of
+    the Transformer. The constraint above will be created for all combinations
+    of INPUTS and OUTPUTS for all TIMESTEPS. A Transformer with two inflows and
+    two outflows for one day with an hourly resolution will lead to 96
+    constraints.
+
+    The index :math: n is the index for the Transformer node itself. Therefore,
+    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
+    time step t.
+
+    ======================  ============================  ====================
     symbol                  attribute                     explanation
-    ======================  ============================  =============
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               Transformer
-                                                                  inflow
+    ======================  ============================  ====================
+    :math:`P_{i}(t)`        `flow[i, n, t]`               Transformer, inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               Transformer
-                                                                  outflow
+    :math:`P_{o}(t)`        `flow[n, o, t]`               Transformer, outflow
 
-    :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
-                                                                  efficiency
+    :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
-    ======================  ============================  =============
+    :math:`\eta_{o}(t)`     `conversion_factor[n, o, t]`  Outflow, efficiency
+
+    ======================  ============================  ====================
+
     """
 
     def __init__(self, *args, **kwargs):

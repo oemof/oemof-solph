@@ -21,6 +21,9 @@ from oemof.solph import blocks
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to Bus.
 
+    The sum of all inputs of a Bus object must equal the sum of all outputs
+    within one time step.
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
