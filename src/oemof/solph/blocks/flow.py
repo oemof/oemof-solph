@@ -260,7 +260,6 @@ class Flow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        gradient_costs = 0
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
