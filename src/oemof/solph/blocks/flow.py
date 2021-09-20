@@ -271,18 +271,4 @@ class Flow(SimpleBlock):
                         * m.flows[i, o].variable_costs[t]
                     )
 
-            if m.flows[i, o].positive_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.positive_gradient[i, o, t]
-                        * m.flows[i, o].positive_gradient["costs"]
-                    )
-
-            if m.flows[i, o].negative_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.negative_gradient[i, o, t]
-                        * m.flows[i, o].negative_gradient["costs"]
-                    )
-
-        return variable_costs + gradient_costs
+        return variable_costs
