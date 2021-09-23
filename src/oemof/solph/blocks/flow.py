@@ -215,8 +215,6 @@ class Flow(SimpleBlock):
                         self.positive_gradient_constr.add(
                             (inp, out, ts), lhs <= rhs
                         )
-                    else:
-                        pass  # return(Constraint.Skip)
 
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
@@ -235,8 +233,6 @@ class Flow(SimpleBlock):
                         self.negative_gradient_constr.add(
                             (inp, out, ts), lhs <= rhs
                         )
-                    else:
-                        pass  # return(Constraint.Skip)
 
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
