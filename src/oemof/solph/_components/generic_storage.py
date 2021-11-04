@@ -26,9 +26,9 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph import network as solph_network
-from oemof.solph.options import Investment
-from oemof.solph.plumbing import sequence as solph_sequence
+from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._options import Investment
+from oemof.solph._plumbing import sequence as solph_sequence
 
 
 class GenericStorage(network.Node):
@@ -117,7 +117,7 @@ class GenericStorage(network.Node):
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
-    >>> my_investment_storage = solph.components.GenericStorage(
+    >>> my_investment_storage = solph.GenericStorage(
     ...     label='storage',
     ...     investment=solph.Investment(ep_costs=50),
     ...     inputs={my_bus: solph.Flow()},
@@ -247,8 +247,8 @@ class GenericStorage(network.Node):
 
     def _check_number_of_flows(self):
         msg = "Only one {0} flow allowed in the GenericStorage {1}."
-        solph_network.check_node_object_for_missing_attribute(self, "inputs")
-        solph_network.check_node_object_for_missing_attribute(self, "outputs")
+        check_node_object_for_missing_attribute(self, "inputs")
+        check_node_object_for_missing_attribute(self, "outputs")
         if len(self.inputs) > 1:
             raise AttributeError(msg.format("input", self.label))
         if len(self.outputs) > 1:
@@ -304,8 +304,8 @@ class GenericStorageBlock(SimpleBlock):
 
     Connect the invest variables of the input and the output flow.
         .. math::
-          InvestmentFlow.invest(source(n), n) + existing = \\
-          (InvestmentFlow.invest(n, target(n)) + existing) * \\
+          InvestmentFlowBlock.invest(source(n), n) + existing = \\
+          (InvestmentFlowBlock.invest(n, target(n)) + existing) * \\
           invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT}
 
@@ -509,10 +509,10 @@ class GenericStorageBlock(SimpleBlock):
             and output power
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
+                m.InvestmentFlowBlock.invest[n, o[n]]
                 + m.flows[n, o[n]].investment.existing
             ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
+                m.InvestmentFlowBlock.invest[i[n], n]
                 + m.flows[i[n], n].investment.existing
             )
             return expr
@@ -525,7 +525,7 @@ class GenericStorageBlock(SimpleBlock):
         r"""
         Objective expression for storages with no investment.
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`Flow`.
+        added in the Block :class:`FlowBlock`.
         """
         if not hasattr(self, "STORAGES"):
             return 0
@@ -701,9 +701,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         (before timestep 0)"
         ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable
         for the status of investment"
-        ":math:`P_{i,invest}`", ":attr:`InvestmentFlow.invest[i[n], n]`", "
+        ":math:`P_{i,invest}`", ":attr:`InvestmentFlowBlock.invest[i[n], n]`", "
         Invested (nominal) inflow (Investmentflow)"
-        ":math:`P_{o,invest}`", ":attr:`InvestmentFlow.invest[n, o[n]]`", "
+        ":math:`P_{o,invest}`", ":attr:`InvestmentFlowBlock.invest[n, o[n]]`", "
         Invested (nominal) outflow (Investmentflow)"
 
     .. csv-table:: List of Parameters
@@ -950,10 +950,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             and output power
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
+                m.InvestmentFlowBlock.invest[n, o[n]]
                 + m.flows[n, o[n]].investment.existing
             ) * n.invest_relation_input_output == (
-                m.InvestmentFlow.invest[i[n], n]
+                m.InvestmentFlowBlock.invest[i[n], n]
                 + m.flows[i[n], n].investment.existing
             )
             return expr
@@ -965,11 +965,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_inflow_invest_rule(block, n):
             """
             Rule definition of constraint connecting the inflow
-            `InvestmentFlow.invest of storage with invested capacity `invest`
+            `InvestmentFlowBlock.invest of storage with invested capacity `invest`
             by nominal_storage_capacity__inflow_ratio
             """
             expr = (
-                m.InvestmentFlow.invest[i[n], n]
+                m.InvestmentFlowBlock.invest[i[n], n]
                 + m.flows[i[n], n].investment.existing
             ) == (
                 n.investment.existing + self.invest[n]
@@ -983,11 +983,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_outflow_invest_rule(block, n):
             """
             Rule definition of constraint connecting outflow
-            `InvestmentFlow.invest` of storage and invested capacity `invest`
+            `InvestmentFlowBlock.invest` of storage and invested capacity `invest`
             by nominal_storage_capacity__outflow_ratio
             """
             expr = (
-                m.InvestmentFlow.invest[n, o[n]]
+                m.InvestmentFlowBlock.invest[n, o[n]]
                 + m.flows[n, o[n]].investment.existing
             ) == (
                 n.investment.existing + self.invest[n]

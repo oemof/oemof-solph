@@ -24,41 +24,10 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.network import Bus
-from oemof.solph.network import Flow
-from oemof.solph.plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._buses.electrical_bus import ElectricalBus
 
-
-class ElectricalBus(Bus):
-    r"""A electrical bus object. Every node has to be connected to Bus. This
-    Bus is used in combination with ElectricalLine objects for linear optimal
-    power flow (lopf) calculations.
-
-    Parameters
-    ----------
-    slack: boolean
-        If True Bus is slack bus for network
-    v_max: numeric
-        Maximum value of voltage angle at electrical bus
-    v_min: numeric
-        Mininum value of voltag angle at electrical bus
-
-    Note: This component is experimental. Use it with care.
-
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.bus.Bus`
-    The objects are also used inside:
-     * :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine`
-
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.slack = kwargs.get("slack", False)
-        self.v_max = kwargs.get("v_max", 1000)
-        self.v_min = kwargs.get("v_min", -1000)
+from .flow import Flow
 
 
 class ElectricalLine(Flow):

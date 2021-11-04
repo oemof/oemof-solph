@@ -22,7 +22,7 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
-from oemof.solph.plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence as solph_sequence
 
 
 class OffsetTransformer(network.Transformer):
@@ -40,7 +40,7 @@ class OffsetTransformer(network.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.offset_transformer.OffsetTransformerBlock`
+     * :py:class:`~oemof.solph._components.offset_transformer.OffsetTransformerBlock`
 
     Examples
     --------
@@ -50,7 +50,7 @@ class OffsetTransformer(network.Transformer):
     >>> bel = solph.Bus(label='bel')
     >>> bth = solph.Bus(label='bth')
 
-    >>> ostf = solph.components.OffsetTransformer(
+    >>> ostf = solph.OffsetTransformer(
     ...    label='ostf',
     ...    inputs={bel: solph.Flow(
     ...        nominal_value=60, min=0.5, max=1.0,
@@ -59,7 +59,7 @@ class OffsetTransformer(network.Transformer):
     ...    coefficients=(20, 0.5))
 
     >>> type(ostf)
-    <class 'oemof.solph.components.offset_transformer.OffsetTransformer'>
+    <class 'oemof.solph._components.offset_transformer.OffsetTransformer'>
     """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
@@ -93,7 +93,7 @@ class OffsetTransformer(network.Transformer):
 
 class OffsetTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.offset_transformer.OffsetTransformer`
+    :class:`~oemof.solph._components.offset_transformer.OffsetTransformer`
 
     **The following constraints are created:**
 
@@ -152,7 +152,7 @@ class OffsetTransformerBlock(SimpleBlock):
                 m.flow[list(n.inputs.keys())[0], n, t] * n.coefficients[1][t]
             )
             expr += (
-                m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t]
+                m.NonConvexFlowBlock.status[list(n.inputs.keys())[0], n, t]
                 * n.coefficients[0][t]
             )
             return expr == 0

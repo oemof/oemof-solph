@@ -274,7 +274,7 @@ class TestsConstraint:
         """ """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage_no_invest",
             inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
             outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
@@ -293,7 +293,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage1",
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
@@ -314,7 +314,7 @@ class TestsConstraint:
         """All can be free extended to their own cost."""
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage2",
             inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
             outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
@@ -330,7 +330,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage3",
             inputs={bel: solph.Flow(investment=solph.Investment(ep_costs=99))},
             outputs={bel: solph.Flow(investment=solph.Investment(ep_costs=9))},
@@ -342,7 +342,7 @@ class TestsConstraint:
         """Only the storage capacity can be extended."""
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage4",
             inputs={bel: solph.Flow(nominal_value=80)},
             outputs={bel: solph.Flow(nominal_value=100)},
@@ -358,7 +358,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage5",
             inputs={
                 bel: solph.Flow(
@@ -379,7 +379,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage6",
             inputs={
                 bel: solph.Flow(
@@ -400,7 +400,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage1",
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
@@ -415,7 +415,7 @@ class TestsConstraint:
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage1",
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
@@ -431,7 +431,7 @@ class TestsConstraint:
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage1",
             inputs={bel: solph.Flow()},
             outputs={bel: solph.Flow()},
@@ -448,7 +448,7 @@ class TestsConstraint:
         """ """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage_no_invest",
             inputs={bel: solph.Flow(nominal_value=16667, variable_costs=56)},
             outputs={bel: solph.Flow(nominal_value=16667, variable_costs=24)},
@@ -469,7 +469,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage1",
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
@@ -599,7 +599,7 @@ class TestsConstraint:
         bth = solph.Bus(label="heatBus")
         bgas = solph.Bus(label="commodityBus")
 
-        solph.components.ExtractionTurbineCHP(
+        solph.ExtractionTurbineCHP(
             label="variable_chp_gas1",
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
@@ -607,7 +607,7 @@ class TestsConstraint:
             conversion_factor_full_condensation={bel: 0.5},
         )
 
-        solph.components.ExtractionTurbineCHP(
+        solph.ExtractionTurbineCHP(
             label="variable_chp_gas2",
             inputs={bgas: solph.Flow(nominal_value=100)},
             outputs={bel: solph.Flow(), bth: solph.Flow()},
@@ -738,13 +738,13 @@ class TestsConstraint:
         """ """
         b1 = solph.Bus(label="bus")
 
-        storage1 = solph.components.GenericStorage(
+        storage1 = solph.GenericStorage(
             label="storage1",
             nominal_storage_capacity=5,
             inputs={b1: solph.Flow()},
             outputs={b1: solph.Flow()},
         )
-        storage2 = solph.components.GenericStorage(
+        storage2 = solph.GenericStorage(
             label="storage2",
             nominal_storage_capacity=5,
             inputs={b1: solph.Flow()},
@@ -801,7 +801,7 @@ class TestsConstraint:
     def test_equate_variables_constraint(self):
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.Bus(label="Bus1")
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage_constraint",
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
@@ -909,7 +909,7 @@ class TestsConstraint:
     def test_investment_limit(self):
         """Testing the investment_limit function in the constraint module."""
         bus1 = solph.Bus(label="Bus1")
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage_invest_limit",
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
@@ -1035,7 +1035,7 @@ class TestsConstraint:
         bgas = solph.Bus(label="gasBus")
         bth = solph.Bus(label="thermalBus")
 
-        solph.components.OffsetTransformer(
+        solph.OffsetTransformer(
             label="gasboiler",
             inputs={
                 bgas: solph.Flow(
@@ -1184,7 +1184,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage_non_convex",
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
@@ -1209,7 +1209,7 @@ class TestsConstraint:
         """
         bel = solph.Bus(label="electricityBus")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storagenon_convex",
             inputs={bel: solph.Flow(variable_costs=56)},
             outputs={bel: solph.Flow(variable_costs=24)},
@@ -1236,7 +1236,7 @@ class TestsConstraint:
         """All invest variables are free and nonconvex."""
         b1 = solph.Bus(label="bus1")
 
-        solph.components.GenericStorage(
+        solph.GenericStorage(
             label="storage_all_nonconvex",
             inputs={
                 b1: solph.Flow(

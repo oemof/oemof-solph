@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for nonconvex Flow objects.
+for nonconvex FlowBlock objects.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -25,7 +25,7 @@ from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
 
-class NonConvexFlow(SimpleBlock):
+class NonConvexFlowBlock(SimpleBlock):
     r"""
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
@@ -67,23 +67,23 @@ class NonConvexFlow(SimpleBlock):
 
     **The following variables are created:**
 
-    Status variable (binary) `om.NonConvexFlow.status`:
+    Status variable (binary) `om.NonConvexFlowBlock.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    Startup variable (binary) `om.NonConvexFlow.startup`:
+    Startup variable (binary) `om.NonConvexFlowBlock.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUPFLOWS
 
-    Shutdown variable (binary) `om.NonConvexFlow.shutdown`:
+    Shutdown variable (binary) `om.NonConvexFlowBlock.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWNFLOWS
 
-    Positive gradient (continuous) `om.NonConvexFlow.positive_gradient`:
+    Positive gradient (continuous) `om.NonConvexFlowBlock.positive_gradient`:
         Variable indicating the positive gradient, i.e. the load increase
         between two consecutive timesteps, indexed by
         POSITIVE_GRADIENT_FLOWS
 
-    Negative gradient (continuous) `om.NonConvexFlow.negative_gradient`:
+    Negative gradient (continuous) `om.NonConvexFlowBlock.negative_gradient`:
         Variable indicating the negative gradient, i.e. the load decrease
         between two consecutive timesteps, indexed by
         NEGATIVE_GRADIENT_FLOWS
@@ -91,21 +91,21 @@ class NonConvexFlow(SimpleBlock):
 
     **The following constraints are created:**
 
-    Minimum flow constraint `om.NonConvexFlow.min[i,o,t]`
+    Minimum flow constraint `om.NonConvexFlowBlock.min[i,o,t]`
         .. math::
             flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
-    Maximum flow constraint `om.NonConvexFlow.max[i,o,t]`
+    Maximum flow constraint `om.NonConvexFlowBlock.max[i,o,t]`
         .. math::
             flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
-    Startup constraint `om.NonConvexFlow.startup_constr[i,o,t]`
+    Startup constraint `om.NonConvexFlowBlock.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
@@ -113,13 +113,13 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
-      `om.NonConvexFlow.max_startup_constr[i,o,t]`
+      `om.NonConvexFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
 
-    Shutdown constraint `om.NonConvexFlow.shutdown_constr[i,o,t]`
+    Shutdown constraint `om.NonConvexFlowBlock.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
@@ -127,13 +127,13 @@ class NonConvexFlow(SimpleBlock):
             \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-      `om.NonConvexFlow.max_startup_constr[i,o,t]`
+      `om.NonConvexFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)
             \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
-    Minimum uptime constraint `om.NonConvexFlow.uptime_constr[i,o,t]`
+    Minimum uptime constraint `om.NonConvexFlowBlock.uptime_constr[i,o,t]`
         .. math::
             (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
             \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
@@ -148,7 +148,7 @@ class NonConvexFlow(SimpleBlock):
             \{t\_max-minimum\_uptime..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
 
-    Minimum downtime constraint `om.NonConvexFlow.downtime_constr[i,o,t]`
+    Minimum downtime constraint `om.NonConvexFlowBlock.downtime_constr[i,o,t]`
         .. math::
             (status(i, o, t-1)-status(i, o, t)) \
             \cdot minimum\_downtime(i, o) \\
@@ -166,7 +166,7 @@ class NonConvexFlow(SimpleBlock):
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
 
     Positive gradient constraint
-      `om.NonConvexFlow.positive_gradient_constr[i, o]`:
+      `om.NonConvexFlowBlock.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) \cdot status(i, o, t)
         - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
           positive\_gradient(i, o, t), \\
@@ -174,7 +174,7 @@ class NonConvexFlow(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
-      `om.NonConvexFlow.negative_gradient_constr[i, o]`:
+      `om.NonConvexFlowBlock.negative_gradient_constr[i, o]`:
         .. math::
           flow(i, o, t-1) \cdot status(i, o, t-1)
           - flow(i, o, t) \cdot status(i, o, t) \geq \
@@ -217,12 +217,12 @@ class NonConvexFlow(SimpleBlock):
 
     def _create(self, group=None):
         """Creates set, variables, constraints for all flow object with
-        an attribute flow of type class:`.NonConvexFlow`.
+        an attribute flow of type class:`.NonConvexFlowBlock`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.NonConvexFlow objects for which
+            List of oemof.solph.NonConvexFlowBlock objects for which
             the constraints are build.
         """
         if group is None:

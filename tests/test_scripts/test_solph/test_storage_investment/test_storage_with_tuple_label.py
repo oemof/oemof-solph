@@ -122,7 +122,7 @@ def test_tuples_as_labels_example(
     )
 
     # Investment storage
-    solph.components.GenericStorage(
+    solph.GenericStorage(
         label=Label("storage", "electricity", "battery"),
         nominal_storage_capacity=204685,
         inputs={bel: solph.Flow(variable_costs=10e10)},

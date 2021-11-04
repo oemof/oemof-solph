@@ -23,7 +23,9 @@ SPDX-License-Identifier: MIT
 
 from oemof.network import groupings as groupings
 
-from oemof.solph import blocks
+from oemof.solph._flows.investment_flow import InvestmentFlowBlock
+from oemof.solph._flows.flow import FlowBlock
+from oemof.solph._flows.non_convex_flow import NonConvexFlowBlock
 
 
 def constraint_grouping(node, fallback=lambda *xs, **ks: None):
@@ -56,7 +58,7 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     return cg()
 
 
-standard_flow_grouping = groupings.FlowsWithNodes(constant_key=blocks.Flow)
+standard_flow_grouping = groupings.FlowsWithNodes(constant_key=FlowBlock)
 
 
 def _investment_grouping(stf):
@@ -68,7 +70,7 @@ def _investment_grouping(stf):
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.InvestmentFlow,
+    constant_key=InvestmentFlowBlock,
     # stf: a tuple consisting of (source, target, flow), so stf[2] is the flow.
     filter=_investment_grouping,
 )
@@ -83,7 +85,7 @@ def _nonconvex_grouping(stf):
 
 
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=blocks.NonConvexFlow, filter=_nonconvex_grouping
+    constant_key=NonConvexFlowBlock, filter=_nonconvex_grouping
 )
 
 

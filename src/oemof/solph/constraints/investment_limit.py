@@ -31,8 +31,8 @@ def investment_limit(model, limit=None):
     def investment_rule(m):
         expr = 0
 
-        if hasattr(m, "InvestmentFlow"):
-            expr += m.InvestmentFlow.investment_costs
+        if hasattr(m, "InvestmentFlowBlock"):
+            expr += m.InvestmentFlowBlock.investment_costs
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
             expr += m.GenericInvestmentStorageBlock.investment_costs
@@ -63,15 +63,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | symbol        | attribute                     | type | explanation                                                  |
-    +===============+===============================+======+==============================================================+
-    | :math:`P_{i}` | `InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`   | `keyword`                     | P    | weight given to investment flow named according to `keyword` |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit` | `limit`                       | P    | global limit given by keyword `limit`                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | symbol        | attribute                          | type | explanation                                                  |
+    +===============+====================================+======+==============================================================+
+    | :math:`P_{i}` | `InvestmentFlowBlock.invest[i, o]` | V    | installed capacity of investment flow                        |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`   | `keyword`                          | P    | weight given to investment flow named according to `keyword` |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit` | `limit`                            | P    | global limit given by keyword `limit`                        |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
     ----------
@@ -122,7 +122,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                model.InvestmentFlow.invest[inflow, outflow]
+                model.InvestmentFlowBlock.invest[inflow, outflow]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
             )

@@ -54,7 +54,7 @@ def test_regression_investment_storage(solver="cbc"):
     )
 
     # Investment storage
-    solph.components.GenericStorage(
+    solph.GenericStorage(
         label="storage",
         inputs={
             bel: solph.Flow(

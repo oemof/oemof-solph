@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for Flow objects with investment option.
+for FlowBlock objects with investment option.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -24,18 +24,18 @@ from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
 
-class InvestmentFlow(SimpleBlock):
+class InvestmentFlowBlock(SimpleBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
 
-    See :class:`oemof.solph.network.Flow` for all parameters of the *Flow*
+    See :class:`oemof.solph.network.FlowBlock` for all parameters of the *FlowBlock*
     class.
 
     **Variables**
 
-    All *InvestmentFlow* are indexed by a starting and ending node
+    All *InvestmentFlowBlock* are indexed by a starting and ending node
     :math:`(i, o)`, which is omitted in the following for the sake
     of convenience. The following variables are created:
 
@@ -55,9 +55,9 @@ class InvestmentFlow(SimpleBlock):
 
     **Constraints**
 
-    Depending on the attributes of the *InvestmentFlow* and *Flow*, different
+    Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*, different
     constraints are created. The following constraint is created for all
-    *InvestmentFlow*:\
+    *InvestmentFlowBlock*:\
 
             Upper bound for the flow value
 
@@ -80,9 +80,9 @@ class InvestmentFlow(SimpleBlock):
             &
             P_{invest} \le P_{invest, max} \cdot b_{invest}\\
 
-    For all *InvestmentFlow* (independent of the attribute :attr:`nonconvex`),
+    For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
     the following additional constraints are created, if the appropriate
-    attribute of the *Flow* (see :class:`oemof.solph.network.Flow`) is set:
+    attribute of the *FlowBlock* (see :class:`oemof.solph.network.FlowBlock`) is set:
 
         * :attr:`fix` is not None
 
@@ -119,9 +119,9 @@ class InvestmentFlow(SimpleBlock):
 
     **Objective function**
 
-    The part of the objective function added by the *InvestmentFlow*
+    The part of the objective function added by the *InvestmentFlowBlock*
     also depends on whether a convex or nonconvex
-    *InvestmentFlow* is selected. The following parts of the objective function
+    *InvestmentFlowBlock* is selected. The following parts of the objective function
     are created:
 
         * :attr:`nonconvex = False`
@@ -135,8 +135,8 @@ class InvestmentFlow(SimpleBlock):
                 P_{invest} \cdot c_{invest,var}
                 + c_{invest,fix} \cdot b_{invest}\\
 
-    The total value of all costs of all *InvestmentFlow* can be retrieved
-    calling :meth:`om.InvestmentFlow.investment_costs.expr()`.
+    The total value of all costs of all *InvestmentFlowBlock* can be retrieved
+    calling :meth:`om.InvestmentFlowBlock.investment_costs.expr()`.
 
     .. csv-table:: List of Variables (in csv table syntax)
         :header: "symbol", "attribute", "explanation"
@@ -209,8 +209,8 @@ class InvestmentFlow(SimpleBlock):
 
     Note
     ----
-    See also :class:`oemof.solph.network.Flow`,
-    :class:`oemof.solph.blocks.Flow` and
+    See also :class:`oemof.solph.network.FlowBlock`,
+    :class:`oemof.solph.blocks.FlowBlock` and
     :class:`oemof.solph.options.Investment`
 
     """  # noqa: E501
@@ -219,7 +219,7 @@ class InvestmentFlow(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        r"""Creates sets, variables and constraints for Flow with investment
+        r"""Creates sets, variables and constraints for FlowBlock with investment
         attribute of type class:`.Investment`.
 
         Parameters

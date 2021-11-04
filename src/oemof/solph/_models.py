@@ -18,9 +18,14 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
-from oemof.solph import blocks
+from oemof.solph._buses.bus import BusBlock
+from oemof.solph._flows.investment_flow import InvestmentFlowBlock
+from oemof.solph._flows.flow import FlowBlock
+from oemof.solph._flows.non_convex_flow import NonConvexFlowBlock
+from oemof.solph._components.transformer import TransformerBlock
+
 from oemof.solph import processing
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 class BaseModel(po.ConcreteModel):
@@ -269,18 +274,18 @@ class Model(BaseModel):
     **The following basic variables are created**:
 
     flow
-        Flow from source to target indexed by FLOWS, TIMESTEPS.
+        FlowBlock from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
     """
 
     CONSTRAINT_GROUPS = [
-        blocks.Bus,
-        blocks.Transformer,
-        blocks.InvestmentFlow,
-        blocks.Flow,
-        blocks.NonConvexFlow,
+        BusBlock,
+        TransformerBlock,
+        InvestmentFlowBlock,
+        FlowBlock,
+        NonConvexFlowBlock,
     ]
 
     def __init__(self, energysystem, **kwargs):

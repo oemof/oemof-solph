@@ -22,7 +22,7 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 class Link(on.Transformer):
@@ -47,13 +47,13 @@ class Link(on.Transformer):
     --------
 
     >>> from oemof import solph
-    >>> bel0 = solph.Bus(label="el0")
-    >>> bel1 = solph.Bus(label="el1")
+    >>> bel0 = solph.BusBlock(label="el0")
+    >>> bel1 = solph.BusBlock(label="el1")
 
     >>> link = solph.custom.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.Flow(), bel1: solph.Flow()},
-    ...    outputs={bel0: solph.Flow(), bel1: solph.Flow()},
+    ...    inputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
+    ...    outputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
     ...    conversion_factors={(bel0, bel1): 0.92, (bel1, bel0): 0.99})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
     [0.92, 0.99]

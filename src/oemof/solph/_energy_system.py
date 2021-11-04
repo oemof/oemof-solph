@@ -36,7 +36,7 @@ class EnergySystem(es.EnergySystem):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
-        from oemof.solph.groupings import GROUPINGS
+        from oemof.solph import GROUPINGS
 
         kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
 

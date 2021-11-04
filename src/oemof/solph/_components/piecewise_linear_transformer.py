@@ -47,15 +47,15 @@ class PiecewiseLinearTransformer(on.Transformer):
     --------
     >>> import oemof.solph as solph
 
-    >>> b_gas = solph.Bus(label='biogas')
-    >>> b_el = solph.Bus(label='electricity')
+    >>> b_gas = solph.BusBlock(label='biogas')
+    >>> b_el = solph.BusBlock(label='electricity')
 
     >>> pwltf = solph.custom.PiecewiseLinearTransformer(
     ...    label='pwltf',
-    ...    inputs={b_gas: solph.Flow(
+    ...    inputs={b_gas: solph.FlowBlock(
     ...    nominal_value=100,
     ...    variable_costs=1)},
-    ...    outputs={b_el: solph.Flow()},
+    ...    outputs={b_el: solph.FlowBlock()},
     ...    in_breakpoints=[0,25,50,75,100],
     ...    conversion_function=lambda x: x**2,
     ...    pw_repn='CC')

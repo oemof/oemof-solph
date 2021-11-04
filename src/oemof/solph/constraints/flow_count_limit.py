@@ -43,7 +43,7 @@ def limit_active_flow_count(
 
     Note
     ----
-    Flow objects required to be NonConvex
+    FlowBlock objects required to be NonConvex
 
     **Constraint:**
 
@@ -77,7 +77,7 @@ def limit_active_flow_count(
 
     def _flow_count_rule(m):
         for ts in m.TIMESTEPS:
-            lhs = sum(m.NonConvexFlow.status[fi, fo, ts] for fi, fo in flows)
+            lhs = sum(m.NonConvexFlowBlock.status[fi, fo, ts] for fi, fo in flows)
             rhs = getattr(model, constraint_name)[ts]
             expr = lhs == rhs
             if expr is not True:
@@ -126,7 +126,7 @@ def limit_active_flow_count_by_keyword(
                             lower_limit=0, upper_limit=None)
     """
     flows = []
-    for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
+    for (i, o) in model.NonConvexFlowBlock.NONCONVEX_FLOWS:
         if hasattr(model.flows[i, o], keyword):
             flows.append((i, o))
 

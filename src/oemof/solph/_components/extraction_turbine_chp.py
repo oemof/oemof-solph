@@ -22,11 +22,11 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph import network as solph_network
-from oemof.solph.plumbing import sequence as solph_sequence
+from oemof.solph._components.transformer import Transformer
+from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class ExtractionTurbineCHP(solph_network.Transformer):
+class ExtractionTurbineCHP(Transformer):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.
@@ -60,7 +60,7 @@ class ExtractionTurbineCHP(solph_network.Transformer):
     >>> bel = solph.Bus(label='electricityBus')
     >>> bth = solph.Bus(label='heatBus')
     >>> bgas = solph.Bus(label='commodityBus')
-    >>> et_chp = solph.components.ExtractionTurbineCHP(
+    >>> et_chp = solph.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
     ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
     ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
@@ -137,7 +137,7 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     def _create(self, group=None):
         """Creates the linear constraint for the
-        :class:`oemof.solph.Transformer` block.
+        :class:`oemof.solph.TransformerBlock` block.
 
         Parameters
         ----------

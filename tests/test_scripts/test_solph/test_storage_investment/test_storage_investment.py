@@ -106,7 +106,7 @@ def test_optimise_storage_size(
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    solph.components.GenericStorage(
+    solph.GenericStorage(
         label="storage",
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},

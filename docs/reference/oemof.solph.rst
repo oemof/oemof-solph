@@ -205,7 +205,7 @@ oemof.solph.options module
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.plumbing module
+oemof.solph._plumbing module
 ---------------------------
 
 .. automodule:: oemof.solph.plumbing

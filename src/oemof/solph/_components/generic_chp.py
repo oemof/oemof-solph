@@ -26,7 +26,7 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence as solph_sequence
 
 
 class GenericCHP(network.Transformer):
@@ -98,7 +98,7 @@ class GenericCHP(network.Transformer):
     >>> bel = solph.Bus(label='electricityBus')
     >>> bth = solph.Bus(label='heatBus')
     >>> bgas = solph.Bus(label='commodityBus')
-    >>> ccet = solph.components.GenericCHP(
+    >>> ccet = solph.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
     ...    fuel_input={bgas: solph.Flow(
     ...        H_L_FG_share_max=[0.183])},
@@ -497,7 +497,7 @@ class GenericCHPBlock(SimpleBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`Flow`.
+        added in the Block :class:`FlowBlock`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0

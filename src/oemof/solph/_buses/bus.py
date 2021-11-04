@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 
-"""Creating sets, variables, constraints and parts of the objective function
-for Bus objects.
+"""
+solph version of oemof.network.bus
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
+SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
@@ -15,17 +16,40 @@ SPDX-License-Identifier: MIT
 
 """
 
+from oemof.network import network as on
+
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import SimpleBlock
 
 
-class Bus(SimpleBlock):
+class Bus(on.Bus):
+    """A balance object. Every node has to be connected to BusBlock.
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph.buses.bus.BusBlock`
+
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.balanced = kwargs.get("balanced", True)
+
+    def constraint_group(self):
+        if self.balanced:
+            return BusBlock
+        else:
+            return None
+
+
+class BusBlock(SimpleBlock):
     r"""Block for all balanced buses.
 
     **The following constraints are build:**
 
-    Bus balance  :attr:`om.Bus.balance[i, o, t]`
+    BusBlock balance  :attr:`om.BusBlock.balance[i, o, t]`
       .. math::
         \sum_{i \in INPUTS(n)} flow(i, n, t) =
         \sum_{o \in OUTPUTS(n)} flow(n, o, t), \\
@@ -37,7 +61,7 @@ class Bus(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the balance constraints for the class:`Bus` block.
+        """Creates the balance constraints for the class:`BusBlock` block.
 
         Parameters
         ----------

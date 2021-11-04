@@ -142,7 +142,7 @@ def results(om):
             df_dict[k].index = om.es.timeindex
         except ValueError as e:
             msg = (
-                "\nFlow: {0}-{1}. This could be caused by NaN-values in"
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
                 " your input data."
             )
             raise type(e)(
@@ -163,9 +163,9 @@ def results(om):
 
     # add dual variables for bus constraints
     if om.dual is not None:
-        grouped = groupby(sorted(om.Bus.balance.iterkeys()), lambda p: p[0])
+        grouped = groupby(sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0])
         for bus, timesteps in grouped:
-            duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
+            duals = [om.dual[om.BusBlock.balance[bus, t]] for _, t in timesteps]
             df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {

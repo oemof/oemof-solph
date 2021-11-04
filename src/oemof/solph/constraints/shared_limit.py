@@ -62,12 +62,12 @@ def shared_limit(
     >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
     >>> b1 = solph.Bus(label="Party1Bus")
     >>> b2 = solph.Bus(label="Party2Bus")
-    >>> storage1 = solph.components.GenericStorage(
+    >>> storage1 = solph.GenericStorage(
     ...     label="Party1Storage",
     ...     nominal_storage_capacity=5,
     ...     inputs={b1: solph.Flow()},
     ...     outputs={b1: solph.Flow()})
-    >>> storage2 = solph.components.GenericStorage(
+    >>> storage2 = solph.GenericStorage(
     ...     label="Party2Storage",
     ...     nominal_storage_capacity=5,
     ...     inputs={b1: solph.Flow()},

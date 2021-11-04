@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Creating sets, variables, constraints and parts of the objective function
-for Transformer objects.
+"""
+solph version of oemof.network.Transformer including
+sets, variables, constraints and parts of the objective function
+for TransformerBlock objects.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
@@ -19,20 +22,98 @@ from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import SimpleBlock
 
+from oemof.network import network as on
 
-class Transformer(SimpleBlock):
+from oemof.solph._plumbing import sequence
+
+from oemof.solph._helpers import check_node_object_for_missing_attribute
+
+
+class Transformer(on.Transformer):
+    """A linear TransformerBlock object with n inputs and n outputs.
+
+    Parameters
+    ----------
+    conversion_factors : dict
+        Dictionary containing conversion factors for conversion of each flow.
+        Keys are the connected bus objects.
+        The dictionary values can either be a scalar or an iterable with length
+        of time horizon for simulation.
+
+    Examples
+    --------
+    Defining an linear transformer:
+
+    >>> from oemof import solph
+    >>> bgas = solph.Bus(label='natural_gas')
+    >>> bcoal = solph.Bus(label='hard_coal')
+    >>> bel = solph.Bus(label='electricity')
+    >>> bheat = solph.Bus(label='heat')
+
+    >>> trsf = solph.Transformer(
+    ...    label='pp_gas_1',
+    ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5,
+    ...                        bgas: 0.8, bcoal: 0.2})
+    >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
+    [0.2, 0.3, 0.5, 0.8]
+
+    >>> type(trsf)
+    <class 'oemof.solph.network.transformer.TransformerBlock'>
+
+    >>> sorted([str(i) for i in trsf.inputs])
+    ['hard_coal', 'natural_gas']
+
+    >>> trsf_new = solph.Transformer(
+    ...    label='pp_gas_2',
+    ...    inputs={bgas: solph.Flow()},
+    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    conversion_factors={bel: 0.3, bheat: 0.5})
+    >>> trsf_new.conversion_factors[bgas][3]
+    1
+
+    Notes
+    -----
+    The following sets, variables, constraints and objective parts are created
+     * :py:class:`~oemof.solph._components.transformer.TransformerBlock`
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        check_node_object_for_missing_attribute(self, "inputs")
+        check_node_object_for_missing_attribute(self, "outputs")
+
+        self.conversion_factors = {
+            k: sequence(v)
+            for k, v in kwargs.get("conversion_factors", {}).items()
+        }
+
+        missing_conversion_factor_keys = (
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.conversion_factors)
+
+        for cf in missing_conversion_factor_keys:
+            self.conversion_factors[cf] = sequence(1)
+
+    def constraint_group(self):
+        return TransformerBlock
+
+
+class TransformerBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.network.Transformer`
+    :class:`~oemof.solph.network.TransformerBlock`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
     TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.Transformer` objects.
+        A set with all :class:`~oemof.solph.network.TransformerBlock` objects.
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.Transformer.relation[i,o,t]`
+    Linear relation :attr:`om.TransformerBlock.relation[i,o,t]`
         .. math::
             \P_{i,n}(t) \times \eta_{n,o}(t) = \
             \P_{n,o}(t) \times \eta_{n,i}(t), \\
@@ -44,10 +125,10 @@ class Transformer(SimpleBlock):
     ======================  ============================  =============
     symbol                  attribute                     explanation
     ======================  ============================  =============
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               Transformer
+    :math:`P_{i,n}(t)`      `flow[i, n, t]`               TransformerBlock
                                                                   inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               Transformer
+    :math:`P_{n,o}(t)`      `flow[n, o, t]`               TransformerBlock
                                                                   outflow
 
     :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
@@ -60,7 +141,7 @@ class Transformer(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the linear constraint for the class:`Transformer`
+        """Creates the linear constraint for the class:`TransformerBlock`
         block.
         Parameters
         ----------

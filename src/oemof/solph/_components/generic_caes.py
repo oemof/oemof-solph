@@ -40,13 +40,13 @@ class GenericCAES(on.Transformer):
     Parameters
     ----------
     electrical_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
         for the electrical input.
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
         for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
         for the electrical output.
 
     Note: This component is experimental. Use it with care.
@@ -62,9 +62,9 @@ class GenericCAES(on.Transformer):
     --------
 
     >>> from oemof import solph
-    >>> bel = solph.Bus(label='bel')
-    >>> bth = solph.Bus(label='bth')
-    >>> bgas = solph.Bus(label='bgas')
+    >>> bel = solph.BusBlock(label='bel')
+    >>> bth = solph.BusBlock(label='bth')
+    >>> bgas = solph.BusBlock(label='bgas')
     >>> # dictionary with parameters for a specific CAES plant
     >>> concept = {
     ...    'cav_e_in_b': 0,
@@ -90,9 +90,9 @@ class GenericCAES(on.Transformer):
     >>> # generic compressed air energy storage (caes) plant
     >>> caes = solph.custom.GenericCAES(
     ...    label='caes',
-    ...    electrical_input={bel: solph.Flow()},
-    ...    fuel_input={bgas: solph.Flow()},
-    ...    electrical_output={bel: solph.Flow()},
+    ...    electrical_input={bel: solph.FlowBlock()},
+    ...    fuel_input={bgas: solph.FlowBlock()},
+    ...    electrical_output={bel: solph.FlowBlock()},
     ...    params=concept, fixed_costs=0)
     >>> type(caes)
     <class 'oemof.solph.custom.generic_caes.GenericCAES'>

@@ -63,7 +63,7 @@ def test_gen_chp():
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    solph.components.GenericCHP(
+    solph.GenericCHP(
         label="combined_cycle_extraction_turbine",
         fuel_input={
             bgas: solph.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])

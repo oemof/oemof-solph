@@ -17,7 +17,7 @@ from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment
-from oemof.solph.blocks import InvestmentFlow as InvFlow
+from oemof.solph._flows.investment_flow import InvestmentFlowBlock
 from oemof.solph.helpers import extend_basic_path
 
 
@@ -59,10 +59,10 @@ class TestsGrouping:
         )
 
         ok_(
-            self.es.groups.get(InvFlow),
+            self.es.groups.get(InvestmentFlowBlock),
             (
                 "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
-            ).format(self.es.groups.get(InvFlow)),
+            ).format(self.es.groups.get(InvestmentFlowBlock)),
         )
 
 

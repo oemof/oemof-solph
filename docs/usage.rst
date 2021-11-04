@@ -445,7 +445,7 @@ at maximal heat extraction determine the right boundary of the operation range.
 
 .. code-block:: python
 
-    solph.components.GenericCHP(
+    solph.GenericCHP(
         label='combined_cycle_extraction_turbine',
         fuel_input={bgas: solph.Flow(
             H_L_FG_share_max=[0.19 for p in range(0, periods)])},
@@ -470,7 +470,7 @@ thermal condenser load to cooling water has to be zero, because there is no cond
 
 .. code-block:: python
 
-    solph.components.GenericCHP(
+    solph.GenericCHP(
         label='back_pressure_turbine',
         fuel_input={bgas: solph.Flow(
             H_L_FG_share_max=[0.19 for p in range(0, periods)])},
@@ -494,7 +494,7 @@ at minimal heat extraction have to be specified.
 
 .. code-block:: python
 
-    solph.components.GenericCHP(
+    solph.GenericCHP(
         label='motoric_chp',
         fuel_input={bgas: solph.Flow(
             H_L_FG_share_max=[0.18 for p in range(0, periods)],

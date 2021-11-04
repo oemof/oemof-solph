@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 class Investment:
@@ -41,7 +41,7 @@ class Investment:
 
 
     For the variables, constraints and parts of the objective function, which
-    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlow`
+    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlowBlock`
     and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
 
     """  # noqa: E501

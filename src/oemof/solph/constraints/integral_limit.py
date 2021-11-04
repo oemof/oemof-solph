@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 def emission_limit(om, flows=None, limit=None):

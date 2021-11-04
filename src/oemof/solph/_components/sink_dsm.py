@@ -27,9 +27,9 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.network import Sink
-from oemof.solph.options import Investment
-from oemof.solph.plumbing import sequence
+from oemof.solph._components import Sink
+from oemof.solph._options import Investment
+from oemof.solph._plumbing import sequence
 
 
 class SinkDSM(Sink):
@@ -2666,7 +2666,7 @@ class SinkDSMDLRBlock(SimpleBlock):
         def _input_output_relation_rule(block):
             """Relation between input data and pyomo variables.
             The actual demand after DR.
-            Bus outflow == Demand +- DR (i.e. effective Sink consumption)
+            BusBlock outflow == Demand +- DR (i.e. effective Sink consumption)
             """
             for t in m.TIMESTEPS:
                 for g in group:
@@ -3613,7 +3613,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         def _input_output_relation_rule(block):
             """Relation between input data and pyomo variables.
             The actual demand after DR.
-            Bus outflow == Demand +- DR (i.e. effective Sink consumption)
+            BusBlock outflow == Demand +- DR (i.e. effective Sink consumption)
             """
             for t in m.TIMESTEPS:
 
