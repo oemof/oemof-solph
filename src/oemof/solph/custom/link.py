@@ -18,8 +18,10 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network as on
+from pyomo.core import Binary
+from pyomo.core import Set
+from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
-from pyomo.core import Binary, Set, Var
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
