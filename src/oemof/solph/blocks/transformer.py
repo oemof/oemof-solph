@@ -41,19 +41,19 @@ class Transformer(SimpleBlock):
             \forall i \in \textrm{INPUTS(n)}, \\
             \forall o \in \textrm{OUTPUTS(n)},
 
-    ======================  ====================================  =============
-    symbol                  attribute                             explanation
-    ======================  ====================================  =============
-    :math:`P_{i,n}(t)`      :py:obj:`flow[i, n, t]`               Transformer
+    ======================  ============================  =============
+    symbol                  attribute                     explanation
+    ======================  ============================  =============
+    :math:`P_{i,n}(t)`      `flow[i, n, t]`               Transformer
                                                                   inflow
 
-    :math:`P_{n,o}(t)`      :py:obj:`flow[n, o, t]`               Transformer
+    :math:`P_{n,o}(t)`      `flow[n, o, t]`               Transformer
                                                                   outflow
 
-    :math:`\eta_{i,n}(t)`   :py:obj:`conversion_factor[i, n, t]`  Conversion
+    :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
                                                                   efficiency
 
-    ======================  ====================================  =============
+    ======================  ============================  =============
     """
 
     def __init__(self, *args, **kwargs):

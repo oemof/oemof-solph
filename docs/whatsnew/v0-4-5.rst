@@ -1,0 +1,32 @@
+v0.4.5 (?)
+----------
+
+
+API changes
+###########
+
+
+New features
+############
+
+
+Documentation
+#############
+
+
+Bug fixes
+#########
+
+
+Testing
+#######
+
+
+Other changes
+#############
+
+
+
+Contributors
+############
+

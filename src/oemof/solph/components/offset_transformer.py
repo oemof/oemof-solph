@@ -40,8 +40,7 @@ class OffsetTransformer(network.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:
-       `~oemof.solph.components.offset_transformer.OffsetTransformerBlock`
+     * :py:class:`~oemof.solph.components.offset_transformer.OffsetTransformerBlock`
 
     Examples
     --------
@@ -61,7 +60,7 @@ class OffsetTransformer(network.Transformer):
 
     >>> type(ostf)
     <class 'oemof.solph.components.offset_transformer.OffsetTransformer'>
-    """
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -109,13 +108,13 @@ class OffsetTransformerBlock(SimpleBlock):
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
 
-        ":math:`P_{out}(t)`", ":py:obj:`flow[n, o, t]`", "V", "Power of output"
-        ":math:`P_{in}(t)`", ":py:obj:`flow[i, n, t]`", "V","Power of input"
-        ":math:`Y(t)`", ":py:obj:`status[i, n, t]`", "V","binary
+        ":math:`P_{out}(t)`", "`flow[n, o, t]`", "V", "Power of output"
+        ":math:`P_{in}(t)`", "`flow[i, n, t]`", "V","Power of input"
+        ":math:`Y(t)`", "`status[i, n, t]`", "V","binary
         status variable of nonconvex input flow "
-        ":math:`C_1(t)`", ":py:obj:`coefficients[1][n, t]`", "P", "linear
+        ":math:`C_1(t)`", "`coefficients[1][n, t]`", "P", "linear
         coefficient 1 (slope)"
-        ":math:`C_0(t)`", ":py:obj:`coefficients[0][n, t]`", "P", "linear
+        ":math:`C_0(t)`", "`coefficients[0][n, t]`", "P", "linear
         coefficient 0 (y-intersection)"
 
 
