@@ -146,11 +146,11 @@ class LinkBlock(SimpleBlock):
 
         self.LINKS = Set(initialize=[g for g in group])
         self.LINK_1ST_INFLOWS = Set(
-            initialize=[(list(c)[0][0], n)
-                        for n, c in all_conversions.items()])
+            initialize=[(list(c)[0][0], n) for n, c in all_conversions.items()]
+        )
         self.LINK_2ND_INFLOWS = Set(
-            initialize=[(list(c)[1][0], n)
-                        for n, c in all_conversions.items()])
+            initialize=[(list(c)[1][0], n) for n, c in all_conversions.items()]
+        )
 
         #  0: Flows 1 connected; 1: Flows 2 connected
         self.direction = Var(self.LINKS, m.TIMESTEPS, within=Binary)
@@ -186,12 +186,11 @@ class LinkBlock(SimpleBlock):
 
         def _flow1_rule(block, i, link, t):
             """Rule definition for Eq. (2)."""
-            expr = (
-                1 >= (self.direction[link, t]
-                      + m.flow[i, link, t]
-                      * m.flows[i, link].max[t]
-                      * m.flows[i, link].nominal_value
-                     )
+            expr = 1 >= (
+                self.direction[link, t]
+                + m.flow[i, link, t]
+                * m.flows[i, link].max[t]
+                * m.flows[i, link].nominal_value
             )
             return expr
 
@@ -201,12 +200,11 @@ class LinkBlock(SimpleBlock):
 
         def _flow2_rule(block, i, link, t):
             """Rule definition for Eq. (3)."""
-            expr = (
-                0 <= (self.direction[link, t]
-                      - m.flow[i, link, t]
-                      * m.flows[i, link].max[t]
-                      * m.flows[i, link].nominal_value
-                     )
+            expr = 0 <= (
+                self.direction[link, t]
+                - m.flow[i, link, t]
+                * m.flows[i, link].max[t]
+                * m.flows[i, link].nominal_value
             )
             return expr
 
