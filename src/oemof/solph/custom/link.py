@@ -58,7 +58,7 @@ class Link(on.Transformer):
     ...    outputs={bel0: solph.Flow(), bel1: solph.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
-    [0.92, 0.99]
+    [0.8, 0.9]
 
     >>> type(link)
     <class 'oemof.solph.custom.link.Link'>
