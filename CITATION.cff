@@ -17,6 +17,11 @@ authors:
     family-names: "Günther"
     given-names: Stephan
   -
+    family-names: Simon
+    given-names: Hilpert
+  -
+    given-names: jnnr
+  -
     family-names: "Möller"
     given-names: Caroline
   -
@@ -26,11 +31,27 @@ authors:
     family-names: "Röder"
     given-names: Johannes
   -
+    given-names: gplssm
+  -
+    given-names: steffenGit
+  -
     family-names: Schachler
     given-names: Birgit
   -
+    given-names: cswh
+  -
+    given-names: henhuy
+  -
+    family-names: Pl
+    given-names: Franzi
+  -
     family-names: Endres
     given-names: Julian
+  -
+    family-names: TU
+    given-names: Fabian
+  -
+    given-names: pkassing
   -
     family-names: Lancien
     given-names: Bryan
@@ -38,9 +59,37 @@ authors:
     family-names: Kochems
     given-names: Johannes
   -
+    given-names: c-koehl
+  -
+    given-names: nesnoj
+  -
+    given-names: lmilletb
+  -
+    given-names: mloenneberga
+  -
     family-names: Delfs
     given-names: Jens-Olaf
   -
+    given-names: RD-OTH
+  -
+    family-names: Francesco
+    given-names: Witte
+  -
+    given-names: elisapap
+  -
+    family-names: Gaudchau
+    given-names: Elisa
+  -
     family-names: Smalla
     given-names: Tjark
+  -
+    given-names: escalacjo
+  -
+    given-names: ajimenezUCLA
+  -
+    given-names: chrisflei
+  -
+    given-names: stefansc1
+  -
+    given-names: jakob-wo
 ...
