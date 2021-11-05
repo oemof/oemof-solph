@@ -94,13 +94,13 @@ def test_connect_invest():
 
     constraints.equate_variables(
         om,
-        om.InvestmentFlow.invest[line12, bel2],
-        om.InvestmentFlow.invest[line21, bel1],
+        om.InvestmentFlowBlock.invest[line12, bel2],
+        om.InvestmentFlowBlock.invest[line21, bel1],
         2,
     )
     constraints.equate_variables(
         om,
-        om.InvestmentFlow.invest[line12, bel2],
+        om.InvestmentFlowBlock.invest[line12, bel2],
         om.GenericInvestmentStorageBlock.invest[storage],
     )
 
