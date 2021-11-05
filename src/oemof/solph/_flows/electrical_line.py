@@ -45,7 +45,7 @@ class ElectricalLine(Flow):
     Notes
     -----
     * To use this object the connected buses need to be of the type
-      :py:class:`~oemof.solph.custom.ElectricalBus`.
+      :py:class:`~oemof.solph.experimental.ElectricalBus`.
     * It does not work together with flows that have set the attr.`nonconvex`,
       i.e. unit commitment constraints are not possible
     * Input and output of this component are set equal, therefore just use
@@ -54,7 +54,7 @@ class ElectricalLine(Flow):
       differently by the user
 
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.electrical_line.ElectricalLineBlock`
+     * :py:class:`~oemof.solph.experimental.electrical_line.ElectricalLineBlock`
 
     """
 

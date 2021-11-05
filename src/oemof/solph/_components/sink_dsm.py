@@ -771,11 +771,11 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed}
         \quad  \forall t \in \mathbb{T} \\
 
-    See remarks in :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+    See remarks in :class:`oemof.solph.experimental.SinkDSMOemofBlock`.
 
     **Symbols and attribute names of variables and parameters**
 
-    Please refer to :class:`oemof.solph.custom.SinkDSMOemofBlock`.
+    Please refer to :class:`oemof.solph.experimental.SinkDSMOemofBlock`.
 
     The following variables and parameters are exclusively used for
     investment modeling:
@@ -1745,7 +1745,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
-    Please refer to :class:`oemof.solph.custom.SinkDSMDIWBlock`.
+    Please refer to :class:`oemof.solph.experimental.SinkDSMDIWBlock`.
 
     The following variables and parameters are exclusively used for
     investment modeling:
@@ -3464,7 +3464,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
-    Please refer to :class:`oemof.solph.custom.SinkDSMDLRBlock`.
+    Please refer to :class:`oemof.solph.experimental.SinkDSMDLRBlock`.
 
     The following variables and parameters are exclusively used for
     investment modeling:

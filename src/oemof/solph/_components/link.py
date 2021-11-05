@@ -41,7 +41,7 @@ class Link(on.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.custom.link.LinkBlock`
+     * :py:class:`~oemof.solph.experimental.link.LinkBlock`
 
     Examples
     --------
@@ -50,7 +50,7 @@ class Link(on.Transformer):
     >>> bel0 = solph.BusBlock(label="el0")
     >>> bel1 = solph.BusBlock(label="el1")
 
-    >>> link = solph.custom.Link(
+    >>> link = solph.experimental.Link(
     ...    label="transshipment_link",
     ...    inputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
     ...    outputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
@@ -59,7 +59,7 @@ class Link(on.Transformer):
     [0.92, 0.99]
 
     >>> type(link)
-    <class 'oemof.solph.custom.link.Link'>
+    <class 'oemof.solph.experimental.link.Link'>
 
     >>> sorted([str(i) for i in link.inputs])
     ['el0', 'el1']
@@ -91,7 +91,7 @@ class Link(on.Transformer):
 
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.custom.Link`
+    :class:`~oemof.solph.experimental.Link`
 
     Note: This component is experimental. Use it with care.
 
@@ -112,7 +112,7 @@ class LinkBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.custom.Link objects for which
+            List of oemof.solph.experimental.Link objects for which
             the relation of inputs and outputs is createdBuildAction
             e.g. group = [link1, link2, link3, ...]. The components inside
             the list need to hold an attribute `conversion_factors` of type

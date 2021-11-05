@@ -8,27 +8,27 @@ objective:
 
 s.t.
 
-c_e_Bus_balance(electricityBus_0)_:
+c_e_BusBlock_balance(electricityBus_0)_:
 +1 flow(pwltf_electricityBus_0)
 = 0
 
-c_e_Bus_balance(electricityBus_1)_:
+c_e_BusBlock_balance(electricityBus_1)_:
 +1 flow(pwltf_electricityBus_1)
 = 0
 
-c_e_Bus_balance(electricityBus_2)_:
+c_e_BusBlock_balance(electricityBus_2)_:
 +1 flow(pwltf_electricityBus_2)
 = 0
 
-c_e_Bus_balance(gasBus_0)_:
+c_e_BusBlock_balance(gasBus_0)_:
 +1 flow(gasBus_pwltf_0)
 = 0
 
-c_e_Bus_balance(gasBus_1)_:
+c_e_BusBlock_balance(gasBus_1)_:
 +1 flow(gasBus_pwltf_1)
 = 0
 
-c_e_Bus_balance(gasBus_2)_:
+c_e_BusBlock_balance(gasBus_2)_:
 +1 flow(gasBus_pwltf_2)
 = 0
 

@@ -131,7 +131,7 @@ class OffsetTransformerBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.custom.OffsetTransformer objects for which
+            List of oemof.solph.experimental.OffsetTransformer objects for which
             the relation of inputs and outputs is created
             e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
             the list need to hold an attribute `coefficients` of type dict

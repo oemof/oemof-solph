@@ -40,7 +40,7 @@ class ElectricalBus(Bus):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.bus.BusBlock`
     The objects are also used inside:
-     * :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine`
+     * :py:class:`~oemof.solph.experimental.electrical_line.ElectricalLine`
 
     """
 

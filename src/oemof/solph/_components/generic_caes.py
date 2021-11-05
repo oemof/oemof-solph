@@ -88,14 +88,14 @@ class GenericCAES(on.Transformer):
     ...    'tes_eta_temp': 1.0,
     ...    'tes_level_max': 0.0}
     >>> # generic compressed air energy storage (caes) plant
-    >>> caes = solph.custom.GenericCAES(
+    >>> caes = solph.experimental.GenericCAES(
     ...    label='caes',
     ...    electrical_input={bel: solph.FlowBlock()},
     ...    fuel_input={bgas: solph.FlowBlock()},
     ...    electrical_output={bel: solph.FlowBlock()},
     ...    params=concept, fixed_costs=0)
     >>> type(caes)
-    <class 'oemof.solph.custom.generic_caes.GenericCAES'>
+    <class 'oemof.solph.experimental.generic_caes.GenericCAES'>
     """
 
     def __init__(self, *args, **kwargs):
