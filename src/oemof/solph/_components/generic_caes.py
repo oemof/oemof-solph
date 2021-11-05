@@ -40,13 +40,13 @@ class GenericCAES(on.Transformer):
     Parameters
     ----------
     electrical_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical input.
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.FlowBlock` object
+        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the electrical output.
 
     Note: This component is experimental. Use it with care.

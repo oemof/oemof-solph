@@ -508,4 +508,3 @@ class FlowBlock(SimpleBlock):
                     )
 
         return variable_costs + gradient_costs
-

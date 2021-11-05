@@ -701,10 +701,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         (before timestep 0)"
         ":math:`b_{invest}`", ":attr:`invest_status[i, o]`", "Binary variable
         for the status of investment"
-        ":math:`P_{i,invest}`", ":attr:`InvestmentFlowBlock.invest[i[n], n]`", "
-        Invested (nominal) inflow (Investmentflow)"
-        ":math:`P_{o,invest}`", ":attr:`InvestmentFlowBlock.invest[n, o[n]]`", "
-        Invested (nominal) outflow (Investmentflow)"
+        ":math:`P_{i,invest}`", ":attr:`InvestmentFlowBlock.invest[i[n], n]`",
+            "Invested (nominal) inflow (Investmentflow)"
+        ":math:`P_{o,invest}`", ":attr:`InvestmentFlowBlock.invest[n, o[n]]`",
+            "Invested (nominal) outflow (Investmentflow)"
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
@@ -965,8 +965,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_inflow_invest_rule(block, n):
             """
             Rule definition of constraint connecting the inflow
-            `InvestmentFlowBlock.invest of storage with invested capacity `invest`
-            by nominal_storage_capacity__inflow_ratio
+            `InvestmentFlowBlock.invest of storage with invested capacity
+            `invest` by nominal_storage_capacity__inflow_ratio
             """
             expr = (
                 m.InvestmentFlowBlock.invest[i[n], n]
@@ -983,8 +983,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         def _storage_capacity_outflow_invest_rule(block, n):
             """
             Rule definition of constraint connecting outflow
-            `InvestmentFlowBlock.invest` of storage and invested capacity `invest`
-            by nominal_storage_capacity__outflow_ratio
+            `InvestmentFlowBlock.invest` of storage and invested capacity
+            `invest` by nominal_storage_capacity__outflow_ratio
             """
             expr = (
                 m.InvestmentFlowBlock.invest[n, o[n]]

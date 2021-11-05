@@ -219,8 +219,8 @@ class InvestmentFlowBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        r"""Creates sets, variables and constraints for FlowBlock with investment
-        attribute of type class:`.Investment`.
+        r"""Creates sets, variables and constraints for FlowBlock
+        with investment attribute of type class:`.Investment`.
 
         Parameters
         ----------
