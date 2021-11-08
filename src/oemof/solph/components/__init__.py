@@ -17,10 +17,15 @@ from ._sink import Sink
 from ._source import Source
 from ._transformer import Transformer
 
-__all__ = ["ExtractionTurbineCHP",
-           "GenericCHP",
-           "GenericStorage",
-           "OffsetTransformer",
-           "Sink",
-           "Source",
-           "Transformer"]
+from . import experimental
+
+__all__ = [
+    "ExtractionTurbineCHP",
+    "GenericCHP",
+    "GenericStorage",
+    "OffsetTransformer",
+    "Sink",
+    "Source",
+    "Transformer",
+    "experimental"
+]

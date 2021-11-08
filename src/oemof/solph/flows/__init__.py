@@ -13,4 +13,9 @@ experimental code should be included in oemof.experimental.
 
 from ._flow import Flow
 
-__all__ = ["Flow"]
+from . import experimental
+
+__all__ = [
+    "Flow",
+    "experimental",
+]

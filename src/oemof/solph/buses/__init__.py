@@ -11,4 +11,9 @@ experimental code should be included in oemof.experimental.
 
 from ._bus import Bus
 
-__all__ = ["Bus"]
+from . import experimental
+
+__all__ = [
+    "Bus",
+    "experimental",
+]
