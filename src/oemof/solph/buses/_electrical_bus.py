@@ -16,7 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from .bus import Bus
+from ._bus import Bus
 
 
 class ElectricalBus(Bus):

@@ -972,7 +972,7 @@ class TestsConstraint:
         """Testing PiecewiseLinearTransformer using CC formulation."""
         bgas = solph.Bus(label="gasBus")
         bel = solph.Bus(label="electricityBus")
-        solph.experimental.PiecewiseLinearTransformer(
+        solph.components.experimental.PiecewiseLinearTransformer(
             label="pwltf",
             inputs={bgas: solph.Flow(nominal_value=100, variable_costs=1)},
             outputs={bel: solph.Flow()},
@@ -986,7 +986,7 @@ class TestsConstraint:
         """Testing PiecewiseLinearTransformer using DCC formulation."""
         bgas = solph.Bus(label="gasBus")
         bel = solph.Bus(label="electricityBus")
-        solph.experimental.PiecewiseLinearTransformer(
+        solph.components.experimental.PiecewiseLinearTransformer(
             label="pwltf",
             inputs={bgas: solph.Flow(nominal_value=100, variable_costs=1)},
             outputs={bel: solph.Flow()},
@@ -1054,7 +1054,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=DLR"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
@@ -1074,7 +1074,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=DLR"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
@@ -1095,7 +1095,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=oemof"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
@@ -1115,7 +1115,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
@@ -1137,7 +1137,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
@@ -1160,7 +1160,7 @@ class TestsConstraint:
         """Constraint test of SinkDSM with approach=oemof and investments"""
 
         b_elec = solph.Bus(label="bus_elec")
-        solph.experimental.SinkDSM(
+        solph.components.experimental.SinkDSM(
             label="demand_dsm",
             inputs={b_elec: solph.Flow()},
             demand=[1] * 3,

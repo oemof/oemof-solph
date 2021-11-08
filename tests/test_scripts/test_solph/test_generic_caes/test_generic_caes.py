@@ -21,7 +21,7 @@ from oemof.network.network import Node
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
-from oemof.solph.experimental import GenericCAES
+from oemof.solph.components.experimental import GenericCAES
 from oemof.solph import Model
 from oemof.solph import Sink
 from oemof.solph import Source

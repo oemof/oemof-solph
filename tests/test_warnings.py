@@ -29,7 +29,7 @@ def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <test_sink> of <class"
-        " 'oemof.solph._components.sink.Sink'>"
+        " 'oemof.solph.components.sink.Sink'>"
     )
     with warnings.catch_warnings(record=True) as w:
         solph.Sink(label="test_sink", outputs={look_out: "A typo!"})
@@ -51,7 +51,7 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <outputs> is missing in Node <test_source> of <class"
-        " 'oemof.solph._components.source.Source'>."
+        " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.Source(label="test_source", inputs={look_out: "A typo!"})
@@ -64,7 +64,7 @@ def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <outputs> is missing in Node <solph_sink> of <class"
-        " 'oemof.solph._components.source.Source'>."
+        " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.Source(label="solph_sink", inputs={look_out: "A typo!"})
@@ -77,7 +77,7 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <no input> of <class"
-        " 'oemof.solph._components.transformer.Transformer'>."
+        " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.Transformer(label="no input", outputs={look_out: "No inputs!"})
@@ -85,7 +85,7 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
         assert msg in str(w[-1].message)
     msg = (
         "Attribute <outputs> is missing in Node <no output> of <class"
-        " 'oemof.solph._components.transformer.Transformer'>."
+        " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.Transformer(label="no output", inputs={look_out: "No outputs!"})
@@ -98,7 +98,7 @@ def test_storage_without_outputs(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <outputs> is missing in Node <storage without outputs>"
-        " of <class 'oemof.solph._components.generic_storage.GenericStorage'>."
+        " of <class 'oemof.solph.components.generic_storage.GenericStorage'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.GenericStorage(
@@ -113,7 +113,7 @@ def test_storage_without_inputs(warning_fixture):
     look_out = network.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <storage without inputs>"
-        " of <class 'oemof.solph._components.generic_storage.GenericStorage'>."
+        " of <class 'oemof.solph.components.generic_storage.GenericStorage'>."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.GenericStorage(

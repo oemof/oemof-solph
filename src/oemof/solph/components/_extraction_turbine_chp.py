@@ -22,7 +22,7 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph._components.transformer import Transformer
+from oemof.solph.components._transformer import Transformer
 from oemof.solph._plumbing import sequence as solph_sequence
 
 

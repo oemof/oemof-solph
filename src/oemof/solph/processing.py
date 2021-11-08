@@ -22,7 +22,7 @@ from oemof.network.network import Node
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
-from oemof.solph.helpers import flatten
+from .helpers import flatten
 
 
 def get_tuple(x):

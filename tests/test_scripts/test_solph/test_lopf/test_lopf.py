@@ -23,7 +23,8 @@ from oemof.solph import Investment
 from oemof.solph import Model
 from oemof.solph import Sink
 from oemof.solph import Source
-from oemof.solph import experimental
+from oemof.solph.buses import experimental as exp_bus
+from oemof.solph.flows import experimental as exp_flow
 from oemof.solph import processing
 from oemof.solph import views
 
@@ -41,16 +42,16 @@ def test_lopf(solver="cbc"):
 
     logging.info("Create oemof.solph objects")
 
-    b_el0 = experimental.ElectricalBus(label="b_0", v_min=-1, v_max=1)
+    b_el0 = exp_bus.ElectricalBus(label="b_0", v_min=-1, v_max=1)
 
-    b_el1 = experimental.ElectricalBus(label="b_1", v_min=-1, v_max=1)
+    b_el1 = exp_bus.ElectricalBus(label="b_1", v_min=-1, v_max=1)
 
-    b_el2 = experimental.ElectricalBus(label="b_2", v_min=-1, v_max=1)
+    b_el2 = exp_bus.ElectricalBus(label="b_2", v_min=-1, v_max=1)
 
     es.add(b_el0, b_el1, b_el2)
 
     es.add(
-        experimental.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
@@ -61,7 +62,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        experimental.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el1,
             output=b_el2,
             reactance=0.0001,
@@ -72,7 +73,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        experimental.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el2,
             output=b_el0,
             reactance=0.0001,

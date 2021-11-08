@@ -9,4 +9,4 @@ Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
 """
 
-from .bus import Bus  # noqa: F401
+from ._bus import Bus  # noqa: F401

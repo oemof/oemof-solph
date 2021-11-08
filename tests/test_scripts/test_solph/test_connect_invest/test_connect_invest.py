@@ -25,7 +25,7 @@ from oemof.solph import Model
 from oemof.solph import Sink
 from oemof.solph import Source
 from oemof.solph import Transformer
-from oemof.solph import _components as components
+from oemof.solph import components as components
 from oemof.solph import constraints
 from oemof.solph import processing
 from oemof.solph import views

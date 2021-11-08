@@ -76,7 +76,7 @@ class Transformer(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph._components.transformer.TransformerBlock`
+     * :py:class:`~oemof.solph.components.transformer.TransformerBlock`
     """
 
     def __init__(self, *args, **kwargs):
