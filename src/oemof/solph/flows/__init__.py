@@ -11,4 +11,6 @@ Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
 """
 
-from ._flow import Flow  # noqa: F401
+from ._flow import Flow
+
+__all__ = ["Flow"]
