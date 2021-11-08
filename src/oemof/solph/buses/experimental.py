@@ -8,4 +8,3 @@ so code referred to within this module might not have production quality.
 """
 
 from ._electrical_bus import ElectricalBus  # noqa: F401
-
