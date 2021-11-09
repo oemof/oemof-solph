@@ -23,8 +23,8 @@ SPDX-License-Identifier: MIT
 
 from oemof.network import groupings as groupings
 
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._flow import FlowBlock
+from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 
 

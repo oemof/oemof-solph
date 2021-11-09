@@ -15,17 +15,16 @@ SPDX-License-Identifier: MIT
 
 """
 
+from warnings import warn
+
+from oemof.network import network as on
+from oemof.tools import debugging
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
-
-from warnings import warn
-
-from oemof.network import network as on
-from oemof.tools import debugging
 
 from oemof.solph._plumbing import sequence
 

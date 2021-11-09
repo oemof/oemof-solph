@@ -369,7 +369,7 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+The :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
 the application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
@@ -392,7 +392,7 @@ incorporates the backpressure coefficient :math:`C_b`.
    :alt: variable_chp_plot.svg
    :align: center
 
-For now, :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` instances must
+For now, :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` instances must
 have one input and two output flows. The class allows the definition
 of a different efficiency for every time step that can be passed as a series
 of parameters that are fixed before the optimisation. In contrast to the
@@ -402,7 +402,7 @@ applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
 .. code-block:: python
 
-    solph.components.ExtractionTurbineCHP(
+    solph.components._extractionTurbineCHP(
         label='variable_chp_gas',
         inputs={b_gas: solph.flows.Flow(nominal_value=10e10)},
         outputs={b_el: solph.flows.Flow(), b_th: solph.flows.Flow()},
@@ -422,7 +422,7 @@ output of an example in the `example repository
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_caes_label:
@@ -524,7 +524,7 @@ If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.components.generic_chp.GenericCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._generic_chp.GenericCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_storage_label:
@@ -590,7 +590,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -641,7 +641,7 @@ The following example describes a battery with flows coupled to the capacity of 
         investment = solph.Investment(ep_costs=400))
 
 
-.. note:: See the :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class for all parameters and the mathematical background.
 
 
 OffsetTransformer (component)
@@ -712,7 +712,7 @@ which results in a nonlinear relation:
 
 The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 
-.. note:: See the :py:class:`~oemof.solph.components.offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
@@ -960,7 +960,7 @@ in the following relation for convex and nonconvex investments:
    :align: center
 
 See :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow` and
-:py:class:`~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock` for all the
+:py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock` for all the
 mathematical background, like variables and constraints, which are used.
 
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.

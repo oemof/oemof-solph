@@ -77,10 +77,10 @@ oemof.solph.components.Transformer
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.components.ExtractionTurbineCHP
+oemof.solph.components._extractionTurbineCHP
 -------------------------------------------
 
-.. automodule:: oemof.solph.components.extraction_turbine_chp
+.. automodule:: oemof.solph.components._extraction_turbine_chp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -88,7 +88,7 @@ oemof.solph.components.ExtractionTurbineCHP
 oemof.solph.components.GenericCHP
 ---------------------------------
 
-.. automodule:: oemof.solph.components.generic_chp
+.. automodule:: oemof.solph.components._generic_chp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -96,7 +96,7 @@ oemof.solph.components.GenericCHP
 oemof.solph.components.GenericStorage
 -------------------------------------
 
-.. automodule:: oemof.solph.components.generic_storage
+.. automodule:: oemof.solph.components._generic_storage
     :members:
     :undoc-members:
     :show-inheritance:
@@ -104,7 +104,7 @@ oemof.solph.components.GenericStorage
 oemof.solph.components.OffsetTransformer
 ----------------------------------------
 
-.. automodule:: oemof.solph.components.offset_transformer
+.. automodule:: oemof.solph.components._offset_transformer
     :members:
     :undoc-members:
     :show-inheritance:

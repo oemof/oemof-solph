@@ -22,8 +22,8 @@ from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph.components._transformer import Transformer
 from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph.components._transformer import Transformer
 
 
 class ExtractionTurbineCHP(Transformer):

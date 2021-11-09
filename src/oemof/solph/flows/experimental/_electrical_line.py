@@ -25,8 +25,8 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.flows._flow import Flow
 from oemof.solph.buses.experimental._electrical_bus import ElectricalBus
+from oemof.solph.flows._flow import Flow
 
 
 class ElectricalLine(Flow):

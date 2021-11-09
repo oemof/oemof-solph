@@ -27,9 +27,9 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph.components._sink import Sink
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
+from oemof.solph.components._sink import Sink
 
 
 class SinkDSM(Sink):

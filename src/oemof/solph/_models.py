@@ -18,14 +18,13 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
-from oemof.solph.buses._bus import BusBlock
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
-from oemof.solph.flows._flow import FlowBlock
-from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
-from oemof.solph.components._transformer import TransformerBlock
-
 from oemof.solph import processing
 from oemof.solph._plumbing import sequence
+from oemof.solph.buses._bus import BusBlock
+from oemof.solph.components._transformer import TransformerBlock
+from oemof.solph.flows._flow import FlowBlock
+from oemof.solph.flows._investment_flow import InvestmentFlowBlock
+from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 
 
 class BaseModel(po.ConcreteModel):

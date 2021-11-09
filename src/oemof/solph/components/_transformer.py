@@ -18,15 +18,13 @@ SPDX-License-Identifier: MIT
 
 """
 
+from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import SimpleBlock
 
-from oemof.network import network as on
-
-from oemof.solph._plumbing import sequence
-
 from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._plumbing import sequence
 
 
 class Transformer(on.Transformer):
@@ -76,7 +74,7 @@ class Transformer(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.transformer.TransformerBlock`
+     * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
     def __init__(self, *args, **kwargs):

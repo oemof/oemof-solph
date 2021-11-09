@@ -42,7 +42,7 @@ class Investment:
 
     For the variables, constraints and parts of the objective function, which
     are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlowBlock`
-    and :class:`oemof.solph.components.generic_storage.GenericInvestmentStorageBlock`.
+    and :class:`oemof.solph.components._generic_storage.GenericInvestmentStorageBlock`.
 
     """  # noqa: E501
 
