@@ -24,6 +24,92 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
+from oemof.solph._options import NonConvex
+from ._flow import Flow
+
+
+class NonConvexFlow(Flow):
+    r"""
+    Flow with a binary variable that states whether it is active or not.
+
+    Parameters
+    ----------
+    startup_costs : numeric (iterable or scalar)
+        Costs associated with a start of the flow (representing a unit).
+    shutdown_costs : numeric (iterable or scalar)
+        Costs associated with the shutdown of the flow (representing a unit).
+    activity_costs : numeric (iterable or scalar)
+        Costs associated with the active operation of the flow, independently
+        from the actual output.
+    minimum_uptime : numeric (1 or positive integer)
+        Minimum time that a flow must be greater then its minimum flow after
+        startup. Be aware that minimum up and downtimes can contradict each
+        other and may lead to infeasible problems.
+    minimum_downtime : numeric (1 or positive integer)
+        Minimum time a flow is forced to zero after shutting down.
+        Be aware that minimum up and downtimes can contradict each
+        other and may to infeasible problems.
+    maximum_startups : numeric (0 or positive integer)
+        Maximum number of start-ups.
+    maximum_shutdowns : numeric (0 or positive integer)
+        Maximum number of shutdowns.
+    initial_status : numeric (0 or 1)
+        Integer value indicating the status of the flow in the first time step
+        (0 = off, 1 = on). For minimum up and downtimes, the initial status
+        is set for the respective values in the edge regions e.g. if a
+        minimum uptime of four timesteps is defined, the initial status is
+        fixed for the four first and last timesteps of the optimization period.
+        If both, up and downtimes are defined, the initial status is set for
+        the maximum of both e.g. for six timesteps if a minimum downtime of
+        six timesteps is defined in addition to a four timestep minimum uptime.
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * `'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * `'costs``: numeric (scalar or None), the gradient cost per
+            unit.
+    """
+    def __init__(self,
+                 startup_costs=None,
+                 shutdown_costs=None,
+                 activity_costs=None,
+                 minimum_uptime=None,
+                 minimum_downtime=None,
+                 maximum_startups=None,
+                 maximum_shutdowns=None,
+                 initial_status=0,
+                 positive_gradient=None,
+                 negative_gradient=None,
+                 **kwargs):
+        default_gradient = {"ub": None, "costs": 0}
+        if positive_gradient is None:
+            positive_gradient = default_gradient
+        if negative_gradient is None:
+            negative_gradient = default_gradient
+        nonconvex = NonConvex(
+            startup_costs=startup_costs,
+            shutdown_costs=shutdown_costs,
+            activity_costs=activity_costs,
+            minimum_uptime=minimum_uptime,
+            minimum_downtime=minimum_downtime,
+            maximum_startups=maximum_startups,
+            maximum_shutdowns=maximum_shutdowns,
+            initial_status=initial_status,
+            positive_gradient=positive_gradient,
+            negative_gradient=negative_gradient)
+        super().__init__(nonconvex=nonconvex, **kwargs)
+
 
 class NonConvexFlowBlock(SimpleBlock):
     r"""

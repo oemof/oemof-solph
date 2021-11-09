@@ -23,6 +23,16 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
+from ._flow import Flow
+
+
+class InvestmentFlow(Flow):
+    r"""
+    Wrapper class to prepare separation of flow classes.
+    """
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+
 
 class InvestmentFlowBlock(SimpleBlock):
     r"""Block for all flows with :attr:`Investment` being not None.

@@ -408,12 +408,12 @@ class TestsConstraint:
         solph.components.GenericStorage(
             label="storage6",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.flows.InvestmentFlow(
                     investment=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.flows.InvestmentFlow(
                     investment=solph.Investment(existing=100)
                 )
             },
@@ -983,18 +983,16 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_min_down_constraints",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.flows.NonConvexFlow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    nonconvex=solph.NonConvex(
-                        minimum_downtime=4,
-                        minimum_uptime=2,
-                        initial_status=2,
-                        startup_costs=5,
-                        shutdown_costs=7,
-                    ),
+                    minimum_downtime=4,
+                    minimum_uptime=2,
+                    initial_status=2,
+                    startup_costs=5,
+                    shutdown_costs=7,
                 )
             },
         )
