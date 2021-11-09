@@ -21,12 +21,11 @@ from nose.tools import ok_
 from oemof.network.network import Node
 from pyomo import environ as po
 
-from oemof.solph import Bus
+from oemof.solph import components
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Transformer
+from oemof.solph.buses import Bus
+from oemof.solph.flows import Flow
 
 
 def test_add_constraints_example(solver="cbc", nologg=False):
@@ -41,17 +40,17 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     blig = Bus(label="lignite", balanced=False)
     b_el = Bus(label="b_el")
 
-    Sink(
+    components.Sink(
         label="Sink",
         inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
     )
-    pp_oil = Transformer(
+    pp_oil = components.Transformer(
         label="pp_oil",
         inputs={boil: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    Transformer(
+    components.Transformer(
         label="pp_lig",
         inputs={blig: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=10)},

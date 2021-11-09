@@ -47,15 +47,15 @@ class OffsetTransformer(network.Transformer):
 
     >>> from oemof import solph
 
-    >>> bel = solph.Bus(label='bel')
-    >>> bth = solph.Bus(label='bth')
+    >>> bel = solph.buses.Bus(label='bel')
+    >>> bth = solph.buses.Bus(label='bth')
 
-    >>> ostf = solph.OffsetTransformer(
+    >>> ostf = solph.components.OffsetTransformer(
     ...    label='ostf',
-    ...    inputs={bel: solph.Flow(
+    ...    inputs={bel: solph.flows.Flow(
     ...        nominal_value=60, min=0.5, max=1.0,
     ...        nonconvex=solph.NonConvex())},
-    ...    outputs={bth: solph.Flow()},
+    ...    outputs={bth: solph.flows.Flow()},
     ...    coefficients=(20, 0.5))
 
     >>> type(ostf)

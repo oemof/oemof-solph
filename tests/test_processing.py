@@ -16,14 +16,14 @@ from nose.tools import ok_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
-from oemof.solph import Bus
+from oemof.solph.buses import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
-from oemof.solph import GenericStorage
+from oemof.solph.flows import Flow
+from oemof.solph.components import GenericStorage
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Transformer
+from oemof.solph.components import Sink
+from oemof.solph.components import Transformer
 from oemof.solph import processing
 from oemof.solph import views
 

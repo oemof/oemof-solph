@@ -12,7 +12,7 @@ oemof.solph.EnergySystem
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Bus
+oemof.solph.buses.Bus
 ---------------
 
 .. automodule:: oemof.solph.network.bus
@@ -25,7 +25,7 @@ oemof.solph.Bus
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Flow
+oemof.solph.flows.Flow
 ----------------
 
 .. automodule:: oemof.solph.network.flow
@@ -48,7 +48,7 @@ oemof.solph.Flow
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Sink
+oemof.solph.components.Sink
 ----------------
 
 .. automodule:: oemof.solph.network.sink
@@ -56,7 +56,7 @@ oemof.solph.Sink
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Source
+oemof.solph.components.Source
 ------------------
 
 .. automodule:: oemof.solph.network.source
@@ -64,7 +64,7 @@ oemof.solph.Source
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Transformer
+oemof.solph.components.Transformer
 -----------------------
 
 .. automodule:: oemof.solph.network.transformer

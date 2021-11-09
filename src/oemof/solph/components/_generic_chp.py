@@ -95,19 +95,19 @@ class GenericCHP(network.Transformer):
     Examples
     --------
     >>> from oemof import solph
-    >>> bel = solph.Bus(label='electricityBus')
-    >>> bth = solph.Bus(label='heatBus')
-    >>> bgas = solph.Bus(label='commodityBus')
-    >>> ccet = solph.GenericCHP(
+    >>> bel = solph.buses.Bus(label='electricityBus')
+    >>> bth = solph.buses.Bus(label='heatBus')
+    >>> bgas = solph.buses.Bus(label='commodityBus')
+    >>> ccet = solph.components.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
-    ...    fuel_input={bgas: solph.Flow(
+    ...    fuel_input={bgas: solph.flows.Flow(
     ...        H_L_FG_share_max=[0.183])},
-    ...    electrical_output={bel: solph.Flow(
+    ...    electrical_output={bel: solph.flows.Flow(
     ...        P_max_woDH=[155.946],
     ...        P_min_woDH=[68.787],
     ...        Eta_el_max_woDH=[0.525],
     ...        Eta_el_min_woDH=[0.444])},
-    ...    heat_output={bth: solph.Flow(
+    ...    heat_output={bth: solph.flows.Flow(
     ...        Q_CW_min=[10.552])},
     ...    Beta=[0.122], back_pressure=False)
     >>> type(ccet)

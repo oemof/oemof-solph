@@ -94,12 +94,12 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> from oemof import solph
     >>> date_time_index = pd.date_range('1/1/2020', periods=5, freq='H')
     >>> es = solph.EnergySystem(timeindex=date_time_index)
-    >>> bus = solph.Bus(label='bus_1')
-    >>> sink = solph.Sink(label="sink", inputs={bus:
-    ...     solph.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
-    >>> src1 = solph.Source(label='source_0', outputs={bus: solph.Flow(
+    >>> bus = solph.buses.Bus(label='bus_1')
+    >>> sink = solph.components.Sink(label="sink", inputs={bus:
+    ...     solph.flows.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.components.Source(label='source_0', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=50, space=4))})
-    >>> src2 = solph.Source(label='source_1', outputs={bus: solph.Flow(
+    >>> src2 = solph.components.Source(label='source_1', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=100, space=1))})
     >>> es.add(bus, sink, src1, src2)
     >>> model = solph.Model(es)

@@ -45,15 +45,15 @@ class Transformer(on.Transformer):
     Defining an linear transformer:
 
     >>> from oemof import solph
-    >>> bgas = solph.Bus(label='natural_gas')
-    >>> bcoal = solph.Bus(label='hard_coal')
-    >>> bel = solph.Bus(label='electricity')
-    >>> bheat = solph.Bus(label='heat')
+    >>> bgas = solph.buses.Bus(label='natural_gas')
+    >>> bcoal = solph.buses.Bus(label='hard_coal')
+    >>> bel = solph.buses.Bus(label='electricity')
+    >>> bheat = solph.buses.Bus(label='heat')
 
-    >>> trsf = solph.Transformer(
+    >>> trsf = solph.components.Transformer(
     ...    label='pp_gas_1',
-    ...    inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
-    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
+    ...    outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5,
     ...                        bgas: 0.8, bcoal: 0.2})
     >>> print(sorted([x[1][5] for x in trsf.conversion_factors.items()]))
@@ -65,10 +65,10 @@ class Transformer(on.Transformer):
     >>> sorted([str(i) for i in trsf.inputs])
     ['hard_coal', 'natural_gas']
 
-    >>> trsf_new = solph.Transformer(
+    >>> trsf_new = solph.components.Transformer(
     ...    label='pp_gas_2',
-    ...    inputs={bgas: solph.Flow()},
-    ...    outputs={bel: solph.Flow(), bheat: solph.Flow()},
+    ...    inputs={bgas: solph.flows.Flow()},
+    ...    outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bheat: 0.5})
     >>> trsf_new.conversion_factors[bgas][3]
     1
@@ -146,7 +146,7 @@ class TransformerBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.Transformers objects for which
+            List of oemof.solph.components.Transformers objects for which
             the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of all inputs and all outputs

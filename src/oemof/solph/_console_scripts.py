@@ -24,18 +24,18 @@ def check_oemof_installation(silent=False):
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
 
-    bgas = solph.Bus(label="natural_gas")
-    bel = solph.Bus(label="electricity")
-    solph.Sink(label="excess_bel", inputs={bel: solph.Flow()})
-    solph.Source(label="rgas", outputs={bgas: solph.Flow()})
-    solph.Sink(
+    bgas = solph.buses.Bus(label="natural_gas")
+    bel = solph.buses.Bus(label="electricity")
+    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
+    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
+    solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)},
+        inputs={bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)},
     )
-    solph.Transformer(
+    solph.components.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
+        inputs={bgas: solph.flows.Flow()},
+        outputs={bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)},
         conversion_factors={bel: 0.58},
     )
     om = solph.Model(energysystem)

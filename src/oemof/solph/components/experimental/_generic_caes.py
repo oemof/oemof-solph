@@ -62,9 +62,9 @@ class GenericCAES(on.Transformer):
     --------
 
     >>> from oemof import solph
-    >>> bel = solph.BusBlock(label='bel')
-    >>> bth = solph.BusBlock(label='bth')
-    >>> bgas = solph.BusBlock(label='bgas')
+    >>> bel = solph.buses.BusBlock(label='bel')
+    >>> bth = solph.buses.BusBlock(label='bth')
+    >>> bgas = solph.buses.BusBlock(label='bgas')
     >>> # dictionary with parameters for a specific CAES plant
     >>> concept = {
     ...    'cav_e_in_b': 0,
@@ -90,9 +90,9 @@ class GenericCAES(on.Transformer):
     >>> # generic compressed air energy storage (caes) plant
     >>> caes = solph.experimental.GenericCAES(
     ...    label='caes',
-    ...    electrical_input={bel: solph.FlowBlock()},
-    ...    fuel_input={bgas: solph.FlowBlock()},
-    ...    electrical_output={bel: solph.FlowBlock()},
+    ...    electrical_input={bel: solph.flows.FlowBlock()},
+    ...    fuel_input={bgas: solph.flows.FlowBlock()},
+    ...    electrical_output={bel: solph.flows.FlowBlock()},
     ...    params=concept, fixed_costs=0)
     >>> type(caes)
     <class 'oemof.solph.experimental.generic_caes.GenericCAES'>

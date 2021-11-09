@@ -231,7 +231,7 @@ def node_weight_by_type(results, node_type):
 
     # solve oemof model 'm'
     # Then collect node weights
-    views.node_weight_by_type(m.results(), node_type=solph.GenericStorage)
+    views.node_weight_by_type(m.results(), node_type=solph.components.GenericStorage)
     """
 
     group = {
@@ -270,7 +270,7 @@ def node_input_by_type(results, node_type, droplevel=None):
 
     # solve oemof solph model 'm'
     # Then collect node weights
-    views.node_input_by_type(m.results(), node_type=solph.Sink)
+    views.node_input_by_type(m.results(), node_type=solph.components.Sink)
     """
     if droplevel is None:
         droplevel = []
@@ -308,7 +308,7 @@ def node_output_by_type(results, node_type, droplevel=None):
 
     # solve oemof solph model 'm'
     # Then collect node weights
-    views.node_output_by_type(m.results(), node_type=solph.Transformer)
+    views.node_output_by_type(m.results(), node_type=solph.components.Transformer)
     """
     if droplevel is None:
         droplevel = []
@@ -350,7 +350,7 @@ def net_storage_flow(results, node_type):
 
     # solve oemof solph model 'm'
     # Then collect node weights
-    views.net_storage_flow(m.results(), node_type=solph.GenericStorage)
+    views.net_storage_flow(m.results(), node_type=solph.components.GenericStorage)
     """
 
     group = {

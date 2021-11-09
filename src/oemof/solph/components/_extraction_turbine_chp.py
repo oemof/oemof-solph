@@ -57,13 +57,13 @@ class ExtractionTurbineCHP(Transformer):
     Examples
     --------
     >>> from oemof import solph
-    >>> bel = solph.Bus(label='electricityBus')
-    >>> bth = solph.Bus(label='heatBus')
-    >>> bgas = solph.Bus(label='commodityBus')
-    >>> et_chp = solph.ExtractionTurbineCHP(
+    >>> bel = solph.buses.Bus(label='electricityBus')
+    >>> bth = solph.buses.Bus(label='heatBus')
+    >>> bgas = solph.buses.Bus(label='commodityBus')
+    >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.Flow(nominal_value=10e10)},
-    ...    outputs={bel: solph.Flow(), bth: solph.Flow()},
+    ...    inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+    ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
     """  # noqa: E501
@@ -137,12 +137,12 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
     def _create(self, group=None):
         """Creates the linear constraint for the
-        :class:`oemof.solph.TransformerBlock` block.
+        :class:`oemof.solph.components.TransformerBlock` block.
 
         Parameters
         ----------
         group : list
-            List of :class:`oemof.solph.ExtractionTurbineCHP` (trsf) objects
+            List of :class:`oemof.solph.components.ExtractionTurbineCHP` (trsf) objects
             for which the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of the inputs and all outputs

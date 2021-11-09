@@ -32,7 +32,7 @@ def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.sink.Sink'>"
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.Sink(label="test_sink", outputs={look_out: "A typo!"})
+        solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -54,7 +54,7 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.Source(label="test_source", inputs={look_out: "A typo!"})
+        solph.components.Source(label="test_source", inputs={look_out: "A typo!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -67,7 +67,7 @@ def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.Source(label="solph_sink", inputs={look_out: "A typo!"})
+        solph.components.Source(label="solph_sink", inputs={look_out: "A typo!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -80,7 +80,7 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.Transformer(label="no input", outputs={look_out: "No inputs!"})
+        solph.components.Transformer(label="no input", outputs={look_out: "No inputs!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
     msg = (
@@ -88,7 +88,7 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.Transformer(label="no output", inputs={look_out: "No outputs!"})
+        solph.components.Transformer(label="no output", inputs={look_out: "No outputs!"})
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -101,7 +101,7 @@ def test_storage_without_outputs(warning_fixture):
         " of <class 'oemof.solph.components.generic_storage.GenericStorage'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.GenericStorage(
+        solph.components.GenericStorage(
             label="storage without outputs", inputs={look_out: "No outputs!"}
         )
         assert len(w) == 1
@@ -116,7 +116,7 @@ def test_storage_without_inputs(warning_fixture):
         " of <class 'oemof.solph.components.generic_storage.GenericStorage'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.GenericStorage(
+        solph.components.GenericStorage(
             label="storage without inputs", outputs={look_out: "No inputs!"}
         )
         assert len(w) == 1

@@ -17,18 +17,15 @@ import pandas as pd
 from nose.tools import eq_
 from oemof.network import network
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import Transformer
 from oemof.solph import components as components
 from oemof.solph import constraints
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
+from oemof.solph.flows import Flow
 
 
 def test_connect_invest():
@@ -50,17 +47,17 @@ def test_connect_invest():
     bel2 = Bus(label="electricity2")
 
     # create excess component for the electricity bus to allow overproduction
-    Sink(label="excess_bel", inputs={bel2: Flow()})
-    Source(label="shortage", outputs={bel2: Flow(variable_costs=50000)})
+    components.Sink(label="excess_bel", inputs={bel2: Flow()})
+    components.Source(label="shortage", outputs={bel2: Flow(variable_costs=50000)})
 
     # create fixed source object representing wind power plants
-    Source(
+    components.Source(
         label="wind",
         outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
     )
 
     # create simple sink object representing the electrical demand
-    Sink(
+    components.Sink(
         label="demand",
         inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
     )
@@ -78,13 +75,13 @@ def test_connect_invest():
         investment=Investment(ep_costs=0.2),
     )
 
-    line12 = Transformer(
+    line12 = components.Transformer(
         label="line12",
         inputs={bel1: Flow()},
         outputs={bel2: Flow(investment=Investment(ep_costs=20))},
     )
 
-    line21 = Transformer(
+    line21 = components.Transformer(
         label="line21",
         inputs={bel2: Flow()},
         outputs={bel1: Flow(investment=Investment(ep_costs=20))},

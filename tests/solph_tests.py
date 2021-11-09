@@ -39,17 +39,17 @@ class TestsGrouping:
         `InvestmentFlow` group is not empty.
         """
 
-        b = solph.Bus(label="Bus")
+        b = solph.buses.Bus(label="Bus")
 
-        solph.Source(
+        solph.components.Source(
             label="Source",
-            outputs={b: solph.Flow(fix=[12, 16, 14], nominal_value=1000000)},
+            outputs={b: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)},
         )
 
-        solph.Sink(
+        solph.components.Sink(
             label="Sink",
             inputs={
-                b: solph.Flow(
+                b: solph.flows.Flow(
                     summed_max=2.3,
                     variable_costs=25,
                     max=0.8,

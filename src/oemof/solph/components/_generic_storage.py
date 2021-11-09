@@ -104,24 +104,24 @@ class GenericStorage(network.Node):
 
     >>> from oemof import solph
 
-    >>> my_bus = solph.Bus('my_bus')
+    >>> my_bus = solph.buses.Bus('my_bus')
 
     >>> my_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     nominal_storage_capacity=1000,
-    ...     inputs={my_bus: solph.Flow(nominal_value=200, variable_costs=10)},
-    ...     outputs={my_bus: solph.Flow(nominal_value=200)},
+    ...     inputs={my_bus: solph.flows.Flow(nominal_value=200, variable_costs=10)},
+    ...     outputs={my_bus: solph.flows.Flow(nominal_value=200)},
     ...     loss_rate=0.01,
     ...     initial_storage_level=0,
     ...     max_storage_level = 0.9,
     ...     inflow_conversion_factor=0.9,
     ...     outflow_conversion_factor=0.93)
 
-    >>> my_investment_storage = solph.GenericStorage(
+    >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     investment=solph.Investment(ep_costs=50),
-    ...     inputs={my_bus: solph.Flow()},
-    ...     outputs={my_bus: solph.Flow()},
+    ...     inputs={my_bus: solph.flows.Flow()},
+    ...     outputs={my_bus: solph.flows.Flow()},
     ...     loss_rate=0.02,
     ...     initial_storage_level=None,
     ...     invest_relation_input_capacity=1/6,

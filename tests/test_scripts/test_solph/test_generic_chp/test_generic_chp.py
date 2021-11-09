@@ -37,46 +37,46 @@ def test_gen_chp():
     Node.registry = es
 
     # resources
-    bgas = solph.Bus(label="bgas")
+    bgas = solph.buses.Bus(label="bgas")
 
-    solph.Source(label="rgas", outputs={bgas: solph.Flow()})
+    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
 
     # heat
-    bth = solph.Bus(label="bth")
+    bth = solph.buses.Bus(label="bth")
 
-    solph.Source(
-        label="source_th", outputs={bth: solph.Flow(variable_costs=1000)}
+    solph.components.Source(
+        label="source_th", outputs={bth: solph.flows.Flow(variable_costs=1000)}
     )
 
-    solph.Sink(
+    solph.components.Sink(
         label="demand_th",
-        inputs={bth: solph.Flow(fix=data["demand_th"], nominal_value=200)},
+        inputs={bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=200)},
     )
 
     # power
-    bel = solph.Bus(label="bel")
+    bel = solph.buses.Bus(label="bel")
 
-    solph.Sink(
+    solph.components.Sink(
         label="demand_el",
-        inputs={bel: solph.Flow(variable_costs=data["price_el"])},
+        inputs={bel: solph.flows.Flow(variable_costs=data["price_el"])},
     )
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    solph.GenericCHP(
+    solph.components.GenericCHP(
         label="combined_cycle_extraction_turbine",
         fuel_input={
-            bgas: solph.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])
+            bgas: solph.flows.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])
         },
         electrical_output={
-            bel: solph.Flow(
+            bel: solph.flows.Flow(
                 P_max_woDH=data["P_max_woDH"],
                 P_min_woDH=data["P_min_woDH"],
                 Eta_el_max_woDH=data["Eta_el_max_woDH"],
                 Eta_el_min_woDH=data["Eta_el_min_woDH"],
             )
         },
-        heat_output={bth: solph.Flow(Q_CW_min=data["Q_CW_min"])},
+        heat_output={bth: solph.flows.Flow(Q_CW_min=data["Q_CW_min"])},
         Beta=data["Beta"],
         back_pressure=False,
     )

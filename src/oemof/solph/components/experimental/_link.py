@@ -47,13 +47,13 @@ class Link(on.Transformer):
     --------
 
     >>> from oemof import solph
-    >>> bel0 = solph.BusBlock(label="el0")
-    >>> bel1 = solph.BusBlock(label="el1")
+    >>> bel0 = solph.buses.BusBlock(label="el0")
+    >>> bel1 = solph.buses.BusBlock(label="el1")
 
     >>> link = solph.experimental.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
-    ...    outputs={bel0: solph.FlowBlock(), bel1: solph.FlowBlock()},
+    ...    inputs={bel0: solph.flows.FlowBlock(), bel1: solph.flows.FlowBlock()},
+    ...    outputs={bel0: solph.flows.FlowBlock(), bel1: solph.flows.FlowBlock()},
     ...    conversion_factors={(bel0, bel1): 0.92, (bel1, bel0): 0.99})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
     [0.92, 0.99]
