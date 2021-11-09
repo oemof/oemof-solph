@@ -58,7 +58,7 @@ class Transformer(on.Transformer):
     [0.2, 0.3, 0.5, 0.8]
 
     >>> type(trsf)
-    <class 'oemof.solph.network.transformer.TransformerBlock'>
+    <class 'oemof.solph.components._transformer.Transformer'>
 
     >>> sorted([str(i) for i in trsf.inputs])
     ['hard_coal', 'natural_gas']
@@ -101,13 +101,14 @@ class Transformer(on.Transformer):
 
 class TransformerBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.network.TransformerBlock`
+    :class:`~oemof.solph.components._transformer.TransformerBlock`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
     TRANSFORMERS
-        A set with all :class:`~oemof.solph.network.TransformerBlock` objects.
+        A set with all
+        :class:`~oemof.solph.components._transformer.Transformer` objects.
 
     **The following constraints are created:**
 

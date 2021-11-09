@@ -66,8 +66,8 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     >>> line21 = energysystem.groups['powerline_2_1']
     >>> solph.constraints.equate_variables(
     ...    om,
-    ...    om.InvestmentFlow.invest[line12, bel2],
-    ...    om.InvestmentFlow.invest[line21, bel1])
+    ...    om.InvestmentFlowBlock.invest[line12, bel2],
+    ...    om.InvestmentFlowBlock.invest[line21, bel1])
     """
     if name is None:
         name = "_".join(["equate", str(var1), str(var2)])

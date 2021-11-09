@@ -47,21 +47,21 @@ class PiecewiseLinearTransformer(on.Transformer):
     --------
     >>> import oemof.solph as solph
 
-    >>> b_gas = solph.buses.BusBlock(label='biogas')
-    >>> b_el = solph.buses.BusBlock(label='electricity')
+    >>> b_gas = solph.buses.Bus(label='biogas')
+    >>> b_el = solph.buses.Bus(label='electricity')
 
-    >>> pwltf = solph.experimental.PiecewiseLinearTransformer(
+    >>> pwltf = solph.components.experimental.PiecewiseLinearTransformer(
     ...    label='pwltf',
-    ...    inputs={b_gas: solph.flows.FlowBlock(
+    ...    inputs={b_gas: solph.flows.Flow(
     ...    nominal_value=100,
     ...    variable_costs=1)},
-    ...    outputs={b_el: solph.flows.FlowBlock()},
+    ...    outputs={b_el: solph.flows.Flow()},
     ...    in_breakpoints=[0,25,50,75,100],
     ...    conversion_function=lambda x: x**2,
     ...    pw_repn='CC')
 
     >>> type(pwltf)
-    <class 'oemof.solph.experimental.piecewise_linear_transformer.\
+    <class 'oemof.solph.components.experimental._piecewise_linear_transformer.\
 PiecewiseLinearTransformer'>
     """
 
@@ -91,7 +91,7 @@ PiecewiseLinearTransformer'>
 
 class PiecewiseLinearTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.experimental.piecewise_linear_transformer.PiecewiseLinearTransformer`
+    :class:`~oemof.solph.experimental._piecewise_linear_transformer.PiecewiseLinearTransformer`
 
     **The following constraints are created:**
 
