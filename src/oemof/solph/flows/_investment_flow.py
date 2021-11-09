@@ -30,6 +30,7 @@ class InvestmentFlow(Flow):
     r"""
     Wrapper class to prepare separation of flow classes.
     """
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 

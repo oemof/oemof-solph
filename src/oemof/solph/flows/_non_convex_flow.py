@@ -25,6 +25,7 @@ from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
 from oemof.solph._options import NonConvex
+
 from ._flow import Flow
 
 
@@ -80,18 +81,21 @@ class NonConvexFlow(Flow):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
     """
-    def __init__(self,
-                 startup_costs=None,
-                 shutdown_costs=None,
-                 activity_costs=None,
-                 minimum_uptime=None,
-                 minimum_downtime=None,
-                 maximum_startups=None,
-                 maximum_shutdowns=None,
-                 initial_status=0,
-                 positive_gradient=None,
-                 negative_gradient=None,
-                 **kwargs):
+
+    def __init__(
+        self,
+        startup_costs=None,
+        shutdown_costs=None,
+        activity_costs=None,
+        minimum_uptime=None,
+        minimum_downtime=None,
+        maximum_startups=None,
+        maximum_shutdowns=None,
+        initial_status=0,
+        positive_gradient=None,
+        negative_gradient=None,
+        **kwargs,
+    ):
         default_gradient = {"ub": None, "costs": 0}
         if positive_gradient is None:
             positive_gradient = default_gradient
@@ -107,7 +111,8 @@ class NonConvexFlow(Flow):
             maximum_shutdowns=maximum_shutdowns,
             initial_status=initial_status,
             positive_gradient=positive_gradient,
-            negative_gradient=negative_gradient)
+            negative_gradient=negative_gradient,
+        )
         super().__init__(nonconvex=nonconvex, **kwargs)
 
 
