@@ -15,12 +15,12 @@ import numpy as np
 import pandas as pd
 
 import oemof.solph as solph
-from oemof.solph.buses import Bus
 from oemof.solph import EnergySystem
-from oemof.solph.flows import Flow
 from oemof.solph import Model
-from oemof.solph.components import Sink
 from oemof.solph import processing
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.flows import Flow
 
 
 def test_pwltf():

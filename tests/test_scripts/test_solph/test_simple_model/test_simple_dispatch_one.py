@@ -14,15 +14,15 @@ SPDX-License-Identifier: MIT
 from nose.tools import eq_
 from oemof.network.network import Node
 
-from oemof.solph.buses import Bus
 from oemof.solph import EnergySystem
-from oemof.solph.flows import Flow
 from oemof.solph import Model
+from oemof.solph import processing
+from oemof.solph import views
+from oemof.solph.buses import Bus
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
 from oemof.solph.components import Transformer
-from oemof.solph import processing
-from oemof.solph import views
+from oemof.solph.flows import Flow
 
 
 def test_dispatch_one_time_step(solver="cbc"):

@@ -18,15 +18,15 @@ import pandas as pd
 from nose.tools import eq_
 
 from oemof.solph import EnergySystem
-from oemof.solph.flows import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph.components import Sink
-from oemof.solph.components import Source
-from oemof.solph.buses import experimental as exp_bus
-from oemof.solph.flows import experimental as exp_flow
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import experimental as exp_bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.flows import Flow
+from oemof.solph.flows import experimental as exp_flow
 
 
 def test_lopf(solver="cbc"):
