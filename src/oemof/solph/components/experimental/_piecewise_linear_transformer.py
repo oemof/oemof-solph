@@ -107,8 +107,9 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.components.experimental.PiecewiseLinearTransformer objects
-            for which the relation of inputs and outputs is created
+            List of
+            oemof.solph.components.experimental.PiecewiseLinearTransformer
+            objects for which the relation of inputs and outputs is created
             e.g. group = [pwltf1, pwltf2, pwltf3, ...].
 
         """
