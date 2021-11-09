@@ -91,7 +91,7 @@ PiecewiseLinearTransformer'>
 
 class PiecewiseLinearTransformerBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.experimental._piecewise_linear_transformer.PiecewiseLinearTransformer`
+    :class:`~oemof.solph.components.experimental._piecewise_linear_transformer.PiecewiseLinearTransformer`
 
     **The following constraints are created:**
 
@@ -107,7 +107,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.experimental.PiecewiseLinearTransformer objects
+            List of oemof.solph.components.experimental.PiecewiseLinearTransformer objects
             for which the relation of inputs and outputs is created
             e.g. group = [pwltf1, pwltf2, pwltf3, ...].
 

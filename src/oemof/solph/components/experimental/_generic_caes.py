@@ -95,7 +95,7 @@ class GenericCAES(on.Transformer):
     ...    electrical_output={bel: solph.flows.Flow()},
     ...    params=concept, fixed_costs=0)
     >>> type(caes)
-    <class 'oemof.solph.experimental._generic_caes.GenericCAES'>
+    <class 'oemof.solph.components.experimental._generic_caes.GenericCAES'>
     """
 
     def __init__(self, *args, **kwargs):

@@ -41,7 +41,7 @@ class Link(on.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.experimental._link.LinkBlock`
+     * :py:class:`~oemof.solph.components.experimental._link.LinkBlock`
 
     Examples
     --------
@@ -93,7 +93,7 @@ class Link(on.Transformer):
 
 class LinkBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.experimental.Link`
+    :class:`~oemof.solph.components.experimental.Link`
 
     Note: This component is experimental. Use it with care.
 
@@ -114,7 +114,7 @@ class LinkBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.experimental.Link objects for which
+            List of oemof.solph.components.experimental.Link objects for which
             the relation of inputs and outputs is createdBuildAction
             e.g. group = [link1, link2, link3, ...]. The components inside
             the list need to hold an attribute `conversion_factors` of type
