@@ -142,12 +142,12 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         Parameters
         ----------
         group : list
-            List of :class:`oemof.solph.components.ExtractionTurbineCHP` (trsf) objects
-            for which the linear relation of inputs and outputs is created
-            e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
-            is created for all existing relations of the inputs and all outputs
-            of the transformer. The components inside the list need to hold
-            all needed attributes.
+            List of :class:`oemof.solph.components.ExtractionTurbineCHP`
+            (trsf) objects for which the linear relation of inputs and outputs
+            is created e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the
+            relation is created for all existing relations of the inputs and
+            all outputs of the transformer. The components inside the list need
+            to hold all needed attributes.
         """
         if group is None:
             return None
