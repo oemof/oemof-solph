@@ -223,7 +223,7 @@ def test_results_with_old_dump():
 
 def test_solph_transformer_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
-       of `solph.components.Transformer`"""
+    of `solph.components.Transformer`"""
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
