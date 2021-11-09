@@ -16,7 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from ._bus import Bus
+from oemof.solph.buses._bus import Bus
 
 
 class ElectricalBus(Bus):

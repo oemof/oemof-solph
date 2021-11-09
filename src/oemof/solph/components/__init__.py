@@ -9,6 +9,7 @@ Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
 """
 
+from . import experimental
 from ._extraction_turbine_chp import ExtractionTurbineCHP
 from ._generic_chp import GenericCHP
 from ._generic_storage import GenericStorage
@@ -17,9 +18,8 @@ from ._sink import Sink
 from ._source import Source
 from ._transformer import Transformer
 
-from . import experimental
-
 __all__ = [
+    "experimental",
     "ExtractionTurbineCHP",
     "GenericCHP",
     "GenericStorage",
@@ -27,5 +27,4 @@ __all__ = [
     "Sink",
     "Source",
     "Transformer",
-    "experimental"
 ]

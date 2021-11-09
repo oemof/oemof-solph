@@ -7,9 +7,16 @@ Requirements for documentation and unit tests are relaxed,
 so code referred to within this module might not have production quality.
 """
 
-from ._generic_caes import GenericCAES  # noqa: F401
-from ._link import Link  # noqa: F401
-from ._piecewise_linear_transformer import (  # noqa: F401
+from ._generic_caes import GenericCAES
+from ._link import Link
+from ._piecewise_linear_transformer import (
     PiecewiseLinearTransformer,
 )
-from ._sink_dsm import SinkDSM  # noqa: F401
+from ._sink_dsm import SinkDSM
+
+__all__ = [
+    "GenericCAES",
+    "Link",
+    "PiecewiseLinearTransformer",
+    "SinkDSM",
+]

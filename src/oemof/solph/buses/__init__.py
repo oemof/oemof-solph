@@ -9,11 +9,10 @@ Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
 """
 
+from . import experimental
 from ._bus import Bus
 
-from . import experimental
-
 __all__ = [
-    "Bus",
     "experimental",
+    "Bus",
 ]
