@@ -54,7 +54,9 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Source(label="test_source", inputs={look_out: "A typo!"})
+        solph.components.Source(
+            label="test_source", inputs={look_out: "A typo!"}
+        )
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -67,7 +69,9 @@ def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.source.Source'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Source(label="solph_sink", inputs={look_out: "A typo!"})
+        solph.components.Source(
+            label="solph_sink", inputs={look_out: "A typo!"}
+        )
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -80,7 +84,9 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Transformer(label="no input", outputs={look_out: "No inputs!"})
+        solph.components.Transformer(
+            label="no input", outputs={look_out: "No inputs!"}
+        )
         assert len(w) == 1
         assert msg in str(w[-1].message)
     msg = (
@@ -88,7 +94,9 @@ def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
         " 'oemof.solph.components.transformer.Transformer'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Transformer(label="no output", inputs={look_out: "No outputs!"})
+        solph.components.Transformer(
+            label="no output", inputs={look_out: "No outputs!"}
+        )
         assert len(w) == 1
         assert msg in str(w[-1].message)
 

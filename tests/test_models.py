@@ -94,8 +94,16 @@ def test_optimal_solution():
     es = solph.EnergySystem(timeindex=[1])
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
-    es.add(solph.components.Sink(inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}))
-    es.add(solph.components.Source(outputs={bel: solph.flows.Flow(variable_costs=5)}))
+    es.add(
+        solph.components.Sink(
+            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+        )
+    )
+    es.add(
+        solph.components.Source(
+            outputs={bel: solph.flows.Flow(variable_costs=5)}
+        )
+    )
     m = solph.Model(es, timeincrement=1)
     m.solve("cbc")
     m.results()
@@ -109,12 +117,16 @@ def test_infeasible_model():
             bel = solph.buses.Bus(label="bus")
             es.add(bel)
             es.add(
-                solph.components.Sink(inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])})
+                solph.components.Sink(
+                    inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+                )
             )
             es.add(
                 solph.components.Source(
                     outputs={
-                        bel: solph.flows.Flow(nominal_value=4, variable_costs=5)
+                        bel: solph.flows.Flow(
+                            nominal_value=4, variable_costs=5
+                        )
                     }
                 )
             )

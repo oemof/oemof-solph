@@ -48,7 +48,9 @@ def test_connect_invest():
 
     # create excess component for the electricity bus to allow overproduction
     components.Sink(label="excess_bel", inputs={bel2: Flow()})
-    components.Source(label="shortage", outputs={bel2: Flow(variable_costs=50000)})
+    components.Source(
+        label="shortage", outputs={bel2: Flow(variable_costs=50000)}
+    )
 
     # create fixed source object representing wind power plants
     components.Source(

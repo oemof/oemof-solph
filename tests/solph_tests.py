@@ -43,7 +43,9 @@ class TestsGrouping:
 
         solph.components.Source(
             label="Source",
-            outputs={b: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)},
+            outputs={
+                b: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)
+            },
         )
 
         solph.components.Sink(

@@ -100,7 +100,9 @@ def test_tuples_as_labels_example(
 
     solph.components.Source(
         label=Label("renewable", "electricity", "wind"),
-        outputs={bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)},
+        outputs={
+            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+        },
     )
 
     solph.components.Source(
@@ -117,7 +119,9 @@ def test_tuples_as_labels_example(
     solph.components.Transformer(
         label=Label("pp", "electricity", "natural_gas"),
         inputs={bgas: solph.flows.Flow()},
-        outputs={bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)},
+        outputs={
+            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+        },
         conversion_factors={bel: 0.58},
     )
 

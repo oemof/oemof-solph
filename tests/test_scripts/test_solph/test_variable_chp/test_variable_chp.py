@@ -57,10 +57,18 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     bth2 = solph.buses.Bus(label=("heat", 2))
 
     # create excess components for the elec/heat bus to allow overproduction
-    solph.components.Sink(label=("excess", "bth_2"), inputs={bth2: solph.flows.Flow()})
-    solph.components.Sink(label=("excess", "bth_1"), inputs={bth: solph.flows.Flow()})
-    solph.components.Sink(label=("excess", "bel_2"), inputs={bel2: solph.flows.Flow()})
-    solph.components.Sink(label=("excess", "bel_1"), inputs={bel: solph.flows.Flow()})
+    solph.components.Sink(
+        label=("excess", "bth_2"), inputs={bth2: solph.flows.Flow()}
+    )
+    solph.components.Sink(
+        label=("excess", "bth_1"), inputs={bth: solph.flows.Flow()}
+    )
+    solph.components.Sink(
+        label=("excess", "bel_2"), inputs={bel2: solph.flows.Flow()}
+    )
+    solph.components.Sink(
+        label=("excess", "bel_1"), inputs={bel: solph.flows.Flow()}
+    )
 
     # create simple sink object for electrical demand for each electrical bus
     solph.components.Sink(
@@ -69,17 +77,23 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     )
     solph.components.Sink(
         label=("demand", "elec2"),
-        inputs={bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={
+            bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+        },
     )
 
     # create simple sink object for heat demand for each thermal bus
     solph.components.Sink(
         label=("demand", "therm1"),
-        inputs={bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)},
+        inputs={
+            bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)
+        },
     )
     solph.components.Sink(
         label=("demand", "therm2"),
-        inputs={bth2: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)},
+        inputs={
+            bth2: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)
+        },
     )
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses

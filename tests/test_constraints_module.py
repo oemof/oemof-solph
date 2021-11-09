@@ -32,7 +32,9 @@ def test_something_else():
             label="powerline_1_2",
             inputs={bel1: solph.flows.Flow()},
             outputs={
-                bel2: solph.flows.Flow(investment=solph.Investment(ep_costs=20))
+                bel2: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=20)
+                )
             },
         )
     )
@@ -41,7 +43,9 @@ def test_something_else():
             label="powerline_2_1",
             inputs={bel2: solph.flows.Flow()},
             outputs={
-                bel1: solph.flows.Flow(investment=solph.Investment(ep_costs=20))
+                bel1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=20)
+                )
             },
         )
     )

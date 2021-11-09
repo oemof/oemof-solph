@@ -88,7 +88,9 @@ def test_optimise_storage_size(
 
     solph.components.Source(
         label="wind",
-        outputs={bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)},
+        outputs={
+            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+        },
     )
 
     solph.components.Source(
@@ -100,7 +102,9 @@ def test_optimise_storage_size(
     PP_GAS = solph.components.Transformer(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
-        outputs={bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)},
+        outputs={
+            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+        },
         conversion_factors={bel: 0.58},
     )
 

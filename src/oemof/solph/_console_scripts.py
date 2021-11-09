@@ -30,12 +30,16 @@ def check_oemof_installation(silent=False):
     solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
     solph.components.Sink(
         label="demand",
-        inputs={bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)},
+        inputs={
+            bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)
+        },
     )
     solph.components.Transformer(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
-        outputs={bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)},
+        outputs={
+            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+        },
         conversion_factors={bel: 0.58},
     )
     om = solph.Model(energysystem)

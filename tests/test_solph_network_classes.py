@@ -34,24 +34,29 @@ class TestTransformerClass:
         assert len(transf.conversion_factors.keys()) == 0
 
     def test_default_conversion_factor(self):
-        transf = solph.components.Transformer(inputs={self.bus: solph.flows.Flow()})
+        transf = solph.components.Transformer(
+            inputs={self.bus: solph.flows.Flow()}
+        )
         assert transf.conversion_factors[self.bus][2] == 1
 
     def test_sequence_conversion_factor_from_scalar(self):
         transf = solph.components.Transformer(
-            inputs={self.bus: solph.flows.Flow()}, conversion_factors={self.bus: 2}
+            inputs={self.bus: solph.flows.Flow()},
+            conversion_factors={self.bus: 2},
         )
         assert transf.conversion_factors[self.bus][6] == 2
 
     def test_sequence_conversion_factor_from_list_correct_length(self):
         transf = solph.components.Transformer(
-            inputs={self.bus: solph.flows.Flow()}, conversion_factors={self.bus: [2]}
+            inputs={self.bus: solph.flows.Flow()},
+            conversion_factors={self.bus: [2]},
         )
         assert len(transf.conversion_factors[self.bus]) == 1
 
     def test_sequence_conversion_factor_from_list_wrong_length(self):
         transf = solph.components.Transformer(
-            inputs={self.bus: solph.flows.Flow()}, conversion_factors={self.bus: [2]}
+            inputs={self.bus: solph.flows.Flow()},
+            conversion_factors={self.bus: [2]},
         )
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
@@ -66,7 +71,9 @@ def test_wrong_combination_invest_and_nominal_value():
 def test_wrong_combination_of_options():
     msg = "Investment flows cannot be combined with nonconvex flows!"
     with pytest.raises(ValueError, match=msg):
-        solph.flows.Flow(investment=solph.Investment(), nonconvex=solph.NonConvex())
+        solph.flows.Flow(
+            investment=solph.Investment(), nonconvex=solph.NonConvex()
+        )
 
 
 def test_error_of_deprecated_fixed_costs():

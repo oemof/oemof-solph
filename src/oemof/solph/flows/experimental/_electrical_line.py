@@ -55,7 +55,7 @@ class ElectricalLine(Flow):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.experimental.electrical_line.ElectricalLineBlock`
 
-    """   # noqa: E501
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
