@@ -1,9 +1,15 @@
-v0.4.5 (?)
-----------
+v0.5.0
+------
 
 
 API changes
 ###########
+
+* Parts of the energy system graph are now clearly structured into `buses`, `components`, and `flows`.
+* Public and private API are be more distinguished now. ('_' signifies private, public API is defined in init files.)
+* Started API for distinct `Flow`, `InvestmentFlow`, and `NonConvexFlow`.
+* Experimental code is now sitting in submodules called `experimental` (replaces "custom").
+
 
 
 New features
@@ -29,4 +35,6 @@ Other changes
 
 Contributors
 ############
+
+* Patrik Schönfeldt
 
