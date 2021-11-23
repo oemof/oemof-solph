@@ -31,8 +31,8 @@ def investment_limit(model, limit=None):
     def investment_rule(m):
         expr = 0
 
-        if hasattr(m, "InvestmentFlow"):
-            expr += m.InvestmentFlow.investment_costs
+        if hasattr(m, "InvestmentFlowBlock"):
+            expr += m.InvestmentFlowBlock.investment_costs
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
             expr += m.GenericInvestmentStorageBlock.investment_costs
@@ -63,15 +63,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | symbol        | attribute                     | type | explanation                                                  |
-    +===============+===============================+======+==============================================================+
-    | :math:`P_{i}` | `InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`   | `keyword`                     | P    | weight given to investment flow named according to `keyword` |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit` | `limit`                       | P    | global limit given by keyword `limit`                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | symbol        | attribute                          | type | explanation                                                  |
+    +===============+====================================+======+==============================================================+
+    | :math:`P_{i}` | `InvestmentFlowBlock.invest[i, o]` | V    | installed capacity of investment flow                        |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`   | `keyword`                          | P    | weight given to investment flow named according to `keyword` |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit` | `limit`                            | P    | global limit given by keyword `limit`                        |
+    +---------------+------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
     ----------
@@ -94,12 +94,12 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> from oemof import solph
     >>> date_time_index = pd.date_range('1/1/2020', periods=5, freq='H')
     >>> es = solph.EnergySystem(timeindex=date_time_index)
-    >>> bus = solph.Bus(label='bus_1')
-    >>> sink = solph.Sink(label="sink", inputs={bus:
-    ...     solph.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
-    >>> src1 = solph.Source(label='source_0', outputs={bus: solph.Flow(
+    >>> bus = solph.buses.Bus(label='bus_1')
+    >>> sink = solph.components.Sink(label="sink", inputs={bus:
+    ...     solph.flows.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.components.Source(label='source_0', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=50, space=4))})
-    >>> src2 = solph.Source(label='source_1', outputs={bus: solph.Flow(
+    >>> src2 = solph.components.Source(label='source_1', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=100, space=1))})
     >>> es.add(bus, sink, src1, src2)
     >>> model = solph.Model(es)
@@ -122,7 +122,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                model.InvestmentFlow.invest[inflow, outflow]
+                model.InvestmentFlowBlock.invest[inflow, outflow]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
             )

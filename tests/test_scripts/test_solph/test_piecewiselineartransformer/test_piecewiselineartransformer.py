@@ -15,12 +15,12 @@ import numpy as np
 import pandas as pd
 
 import oemof.solph as solph
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import Sink
 from oemof.solph import processing
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.flows import Flow
 
 
 def test_pwltf():
@@ -49,10 +49,10 @@ def test_pwltf():
     out_breakpoints = conv_func(in_breakpoints)
 
     # Create and add PiecewiseLinearTransformer
-    pwltf = solph.custom.PiecewiseLinearTransformer(
+    pwltf = solph.components.experimental.PiecewiseLinearTransformer(
         label="pwltf",
-        inputs={b_gas: solph.Flow(nominal_value=100, variable_costs=1)},
-        outputs={b_el: solph.Flow()},
+        inputs={b_gas: solph.flows.Flow(nominal_value=100, variable_costs=1)},
+        outputs={b_el: solph.flows.Flow()},
         in_breakpoints=in_breakpoints,
         out_breakpoints=out_breakpoints,
         conversion_function=conv_func,

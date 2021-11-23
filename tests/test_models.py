@@ -21,7 +21,7 @@ from oemof.solph.helpers import calculate_timeincrement
 def test_timeincrement_with_valid_timeindex():
     datetimeindex = pd.date_range("1/1/2012", periods=1, freq="H")
     es = solph.EnergySystem(timeindex=datetimeindex)
-    m = solph.models.BaseModel(es)
+    m = solph._models.BaseModel(es)
     assert m.timeincrement[0] == 1
     assert es.timeindex.freq.nanos / 3.6e12 == 1
 
@@ -29,18 +29,18 @@ def test_timeincrement_with_valid_timeindex():
 def test_timeincrement_with_non_valid_timeindex():
     with pytest.raises(AttributeError):
         es = solph.EnergySystem(timeindex=4)
-        solph.models.BaseModel(es)
+        solph._models.BaseModel(es)
 
 
 def test_timeincrement_value():
     es = solph.EnergySystem(timeindex=4)
-    m = solph.models.BaseModel(es, timeincrement=3)
+    m = solph._models.BaseModel(es, timeincrement=3)
     assert m.timeincrement[0] == 3
 
 
 def test_timeincrement_list():
     es = solph.EnergySystem(timeindex=4)
-    m = solph.models.BaseModel(es, timeincrement=[0, 1, 2, 3])
+    m = solph._models.BaseModel(es, timeincrement=[0, 1, 2, 3])
     assert m.timeincrement[3] == 3
 
 
@@ -92,11 +92,19 @@ def test_nonequ_with_non_valid_fill():
 
 def test_optimal_solution():
     es = solph.EnergySystem(timeindex=[1])
-    bel = solph.Bus(label="bus")
+    bel = solph.buses.Bus(label="bus")
     es.add(bel)
-    es.add(solph.Sink(inputs={bel: solph.Flow(nominal_value=5, fix=[1])}))
-    es.add(solph.Source(outputs={bel: solph.Flow(variable_costs=5)}))
-    m = solph.models.Model(es, timeincrement=1)
+    es.add(
+        solph.components.Sink(
+            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+        )
+    )
+    es.add(
+        solph.components.Source(
+            outputs={bel: solph.flows.Flow(variable_costs=5)}
+        )
+    )
+    m = solph.Model(es, timeincrement=1)
     m.solve("cbc")
     m.results()
     solph.processing.meta_results(m)
@@ -106,19 +114,23 @@ def test_infeasible_model():
     with pytest.raises(ValueError, match=""):
         with warnings.catch_warnings(record=True) as w:
             es = solph.EnergySystem(timeindex=[1])
-            bel = solph.Bus(label="bus")
+            bel = solph.buses.Bus(label="bus")
             es.add(bel)
             es.add(
-                solph.Sink(inputs={bel: solph.Flow(nominal_value=5, fix=[1])})
+                solph.components.Sink(
+                    inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+                )
             )
             es.add(
-                solph.Source(
+                solph.components.Source(
                     outputs={
-                        bel: solph.Flow(nominal_value=4, variable_costs=5)
+                        bel: solph.flows.Flow(
+                            nominal_value=4, variable_costs=5
+                        )
                     }
                 )
             )
-            m = solph.models.Model(es, timeincrement=1)
+            m = solph.Model(es, timeincrement=1)
             m.solve(solver="cbc")
             assert "Optimization ended with status" in str(w[0].message)
             solph.processing.meta_results(m)

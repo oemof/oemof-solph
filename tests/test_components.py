@@ -14,11 +14,11 @@ import warnings
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
-from oemof.solph import Bus
-from oemof.solph import Flow
 from oemof.solph import Investment
-from oemof.solph import NonConvex
-from oemof.solph import components
+from oemof.solph import components as components
+from oemof.solph.buses import Bus
+from oemof.solph.flows import Flow
+from oemof.solph.flows import NonConvexFlow
 
 # ********* GenericStorage *********
 
@@ -245,12 +245,8 @@ def test_offsettransformer__too_many_input_flows():
         components.OffsetTransformer(
             label="ostf_2_in",
             inputs={
-                bgas: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                ),
-                bcoal: Flow(
-                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
-                ),
+                bgas: NonConvexFlow(nominal_value=60, min=0.5, max=1.0),
+                bcoal: NonConvexFlow(nominal_value=30, min=0.3, max=1.0),
             },
             coefficients=(20, 0.5),
         )
@@ -266,11 +262,7 @@ def test_offsettransformer_too_many_output_flows():
 
         components.OffsetTransformer(
             label="ostf_2_out",
-            inputs={
-                bm1: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                )
-            },
+            inputs={bm1: NonConvexFlow(nominal_value=60, min=0.5, max=1.0)},
             outputs={bm1: Flow(), bm2: Flow()},
             coefficients=(20, 0.5),
         )

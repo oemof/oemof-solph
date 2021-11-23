@@ -5,7 +5,7 @@ New features
 ^^^^^^^^^^^^^^^^^^^^
 
 * There's now a `flexible transformer
-  <oemof.core.network.entities.components.transformers.TwoInputsOneOutput>`
+  <oemof.core.network.entities.components._transformers.TwoInputsOneOutput>`
   with two inputs and one output.
   (`Issue #116 <https://github.com/oemof/oemof-solph/pull/116>`_)
 * You now have the option create special groups of entities in your energy
