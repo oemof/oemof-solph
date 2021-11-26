@@ -107,7 +107,4 @@ class Transformer(on.Transformer):
                     self.multiperiod = False
 
     def constraint_group(self):
-        if not self.multiperiod:
-            return blocks.Transformer
-        else:
-            return blocks.MultiPeriodTransformer
+        return blocks.Transformer

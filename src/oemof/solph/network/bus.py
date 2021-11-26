@@ -38,9 +38,7 @@ class Bus(on.Bus):
         self.multiperiod = kwargs.get("multiperiod", False)
 
     def constraint_group(self):
-        if self.balanced and not self.multiperiod:
+        if self.balanced:
             return blocks.Bus
-        if self.balanced and self.multiperiod:
-            return blocks.MultiPeriodBus
         else:
             return None
