@@ -102,7 +102,7 @@ class BaseModel(po.ConcreteModel):
             i
             for i in self.es.groups
             if hasattr(i, "CONSTRAINT_GROUP")
-            and i not in self._constraint_groups
+               and i not in self._constraint_groups
         ]
 
         self.flows = self.es.flows()
@@ -140,7 +140,7 @@ class BaseModel(po.ConcreteModel):
         """
 
         for group in self._constraint_groups:
-            # create instance for block
+            # create instance for block passing the model
             block = group()
             # Add block to model
             self.add_component(str(block), block)
@@ -285,8 +285,10 @@ class Model(BaseModel):
         blocks.NonConvexFlow,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(self, energysystem, discount_rate=None, **kwargs):
         super().__init__(energysystem, **kwargs)
+        if discount_rate is not None:
+            self.discount_rate = discount_rate
 
     def _add_parent_block_sets(self):
         """ """
@@ -294,9 +296,27 @@ class Model(BaseModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
+
+        # pyomo set for timeindex of optimization problem
+        self.TIMEINDEX = po.Set(
+            initialize=list(
+                zip([self.es.periods[p] for p in self.es.timeindex.year],
+                    range(len(self.es.timeindex)))
+            ),
+            ordered=True
         )
+
+        self.PERIODS = po.Set(
+            initialize=sorted(list(set(self.es.periods.values())))
+        )
+
+        # (Re-)Map timesteps to periods
+        timesteps_in_period = {p: [] for p in self.PERIODS}
+        for p, t in self.TIMEINDEX:
+            timesteps_in_period[p].append(t)
+        self.TIMESTEPS_IN_PERIOD = timesteps_in_period
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
@@ -333,37 +353,36 @@ class Model(BaseModel):
 
     def _add_parent_block_variables(self):
         """ """
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
+        self.flow = po.Var(
+            self.FLOWS, self.TIMEINDEX, within=po.Reals
+        )
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
-                        )
-                        self.flow[o, i, t].fix()
+                            * self.flows[o, i].nominal_value)
+                        self.flow[o, i, p, t].fix()
                 else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
-                        )
+                            * self.flows[o, i].nominal_value)
 
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
-                            )
+                                * self.flows[o, i].nominal_value)
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setlb(0)
 
 
 class MultiPeriodModel(BaseModel):
