@@ -177,8 +177,8 @@ class Flow(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.SUMMED_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
-                    for ts in m.TIMESTEPS
+                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    for p, ts in m.TIMEINDEX
                 )
                 rhs = (
                     m.flows[inp, out].summed_max
@@ -193,8 +193,8 @@ class Flow(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.SUMMED_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
-                    for ts in m.TIMESTEPS
+                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    for p, ts in m.TIMEINDEX
                 )
                 rhs = (
                     m.flows[inp, out].summed_min
@@ -208,16 +208,23 @@ class Flow(SimpleBlock):
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
-                for ts in m.TIMESTEPS:
-                    if ts > 0:
-                        lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts - 1]
-                        rhs = self.positive_gradient[inp, out, ts]
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index][0],
+                                      m.TIMEINDEX[index][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                        m.TIMEINDEX[index - 1][1]])
+                        rhs = self.positive_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
                         self.positive_gradient_constr.add(
-                            (inp, out, ts), lhs <= rhs
-                        )
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
+                    else:
+                        pass  # return(Constraint.Skip)
 
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule
@@ -226,27 +233,32 @@ class Flow(SimpleBlock):
         def _negative_gradient_flow_rule(model):
             """Rule definition for negative gradient constraint."""
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
-                for ts in m.TIMESTEPS:
-                    if ts > 0:
-                        lhs = m.flow[inp, out, ts - 1] - m.flow[inp, out, ts]
-                        rhs = self.negative_gradient[inp, out, ts]
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                      m.TIMEINDEX[index - 1][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index][0],
+                                        m.TIMEINDEX[index][1]])
+                        rhs = self.negative_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
                         self.negative_gradient_constr.add(
-                            (inp, out, ts), lhs <= rhs
-                        )
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
 
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule
         )
 
-        def _integer_flow_rule(block, ii, oi, ti):
+        def _integer_flow_rule(block, ii, oi, pi, ti):
             """Force flow variable to NonNegativeInteger values."""
-            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
+            return self.integer_flow[ii, oi, pi, ti] == m.flow[ii, oi, pi, ti]
 
         self.integer_flow_constr = Constraint(
-            self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
+            self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule
         )
 
     def _objective_expression(self):
@@ -256,14 +268,36 @@ class Flow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
+        fixed_costs = 0
 
-        for i, o in m.FLOWS:
-            if m.flows[i, o].variable_costs[0] is not None:
-                for t in m.TIMESTEPS:
-                    variable_costs += (
-                        m.flow[i, o, t]
-                        * m.objective_weighting[t]
-                        * m.flows[i, o].variable_costs[t]
-                    )
+        if not m.es.multi_period:
+            for i, o in m.FLOWS:
+                if m.flows[i, o].variable_costs[0] is not None:
+                    for p, t in m.TIMESTEPS:
+                        variable_costs += (
+                            m.flow[i, o, t]
+                            * m.objective_weighting[t]
+                            * m.flows[i, o].variable_costs[t]
+                        )
 
-        return variable_costs
+        else:
+            for i, o in m.FLOWS:
+                if m.flows[i, o].variable_costs[0] is not None:
+                    for p, t in m.TIMEINDEX:
+                        variable_costs += (
+                            m.flow[i, o, p, t]
+                            * m.objective_weighting[t]
+                            * m.flows[i, o].variable_costs[p]
+                            * ((1 + m.discount_rate) ** -p)
+                        )
+
+                if (m.flows[i, o].fixed_costs[0] is not None
+                        and m.flows[i, o].nominal_value is not None):
+                    for p in m.PERIODS:
+                        fixed_costs += (
+                            m.flows[i, o].nominal_value
+                            * m.flows[i, o].fixed_costs[p]
+                            * ((1 + m.discount_rate) ** -p)
+                        )
+
+        return variable_costs + fixed_costs

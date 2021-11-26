@@ -324,32 +324,32 @@ class NonConvexFlow(SimpleBlock):
                 self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS
             )
 
-        def _minimum_flow_rule(block, i, o, t):
+        def _minimum_flow_rule(block, i, o, p, t):
             """Rule definition for MILP minimum flow constraints."""
             expr = (
                 self.status[i, o, t]
                 * m.flows[i, o].min[t]
                 * m.flows[i, o].nominal_value
-                <= m.flow[i, o, t]
+                <= m.flow[i, o, p, t]
             )
             return expr
 
         self.min = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule
+            self.MIN_FLOWS, m.TIMEINDEX, rule=_minimum_flow_rule
         )
 
-        def _maximum_flow_rule(block, i, o, t):
+        def _maximum_flow_rule(block, i, o, p, t):
             """Rule definition for MILP maximum flow constraints."""
             expr = (
                 self.status[i, o, t]
                 * m.flows[i, o].max[t]
                 * m.flows[i, o].nominal_value
-                >= m.flow[i, o, t]
+                >= m.flow[i, o, p, t]
             )
             return expr
 
         self.max = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule
+            self.MIN_FLOWS, m.TIMEINDEX, rule=_maximum_flow_rule
         )
 
         def _startup_rule(block, i, o, t):
@@ -468,21 +468,28 @@ class NonConvexFlow(SimpleBlock):
         def _positive_gradient_flow_rule(block):
             """Rule definition for positive gradient constraint."""
             for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
                         lhs = (
-                            m.flow[i, o, t] * self.status[i, o, t]
-                            - m.flow[i, o, t - 1] * self.status[i, o, t - 1]
+                            m.flow[i, o, m.TIMEINDEX[index][0],
+                                   m.TIMEINDEX[index][1]]
+                            * self.status[i, o, m.TIMEINDEX[index][1]]
+                            - m.flow[i, o, m.TIMEINDEX[index - 1][0],
+                                     m.TIMEINDEX[index - 1][1]]
+                            * self.status[i, o, m.TIMEINDEX[index - 1][1]]
                         )
-                        rhs = self.positive_gradient[i, o, t]
+                        rhs = self.positive_gradient[i, o,
+                                                     m.TIMEINDEX[index][1]]
                         self.positive_gradient_constr.add(
-                            (i, o, t), lhs <= rhs
+                            (i, o, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs
                         )
                     else:
                         pass  # return(Constraint.Skip)
 
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule
@@ -491,21 +498,28 @@ class NonConvexFlow(SimpleBlock):
         def _negative_gradient_flow_rule(block):
             """Rule definition for negative gradient constraint."""
             for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
                         lhs = (
-                            m.flow[i, o, t - 1] * self.status[i, o, t - 1]
-                            - m.flow[i, o, t] * self.status[i, o, t]
+                            m.flow[i, o, m.TIMEINDEX[index - 1][0],
+                                   m.TIMEINDEX[index - 1][1]]
+                            * self.status[i, o, m.TIMEINDEX[index - 1][1]]
+                            - m.flow[i, o, m.TIMEINDEX[index][0],
+                                     m.TIMEINDEX[index][1]]
+                            * self.status[i, o, m.TIMEINDEX[index][1]]
                         )
-                        rhs = self.negative_gradient[i, o, t]
+                        rhs = self.negative_gradient[i, o,
+                                                     m.TIMEINDEX[index][1]]
                         self.negative_gradient_constr.add(
-                            (i, o, t), lhs <= rhs
+                            (i, o, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs
                         )
                     else:
                         pass  # return(Constraint.Skip)
 
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule
@@ -523,59 +537,139 @@ class NonConvexFlow(SimpleBlock):
         activity_costs = 0
         gradient_costs = 0
 
-        if self.STARTUPFLOWS:
-            for i, o in self.STARTUPFLOWS:
-                if m.flows[i, o].nonconvex.startup_costs[0] is not None:
-                    startup_costs += sum(
-                        self.startup[i, o, t]
-                        * m.flows[i, o].nonconvex.startup_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-            self.startup_costs = Expression(expr=startup_costs)
+        if not m.em.multi_period:
+            if self.STARTUPFLOWS:
+                for i, o in self.STARTUPFLOWS:
+                    if m.flows[i, o].nonconvex.startup_costs[0] is not None:
+                        startup_costs += sum(
+                            self.startup[i, o, t]
+                            * m.flows[i, o].nonconvex.startup_costs[t]
+                            for t in m.TIMESTEPS
+                        )
+                self.startup_costs = Expression(expr=startup_costs)
 
-        if self.SHUTDOWNFLOWS:
-            for i, o in self.SHUTDOWNFLOWS:
-                if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
-                    shutdown_costs += sum(
-                        self.shutdown[i, o, t]
-                        * m.flows[i, o].nonconvex.shutdown_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-            self.shutdown_costs = Expression(expr=shutdown_costs)
+            if self.SHUTDOWNFLOWS:
+                for i, o in self.SHUTDOWNFLOWS:
+                    if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
+                        shutdown_costs += sum(
+                            self.shutdown[i, o, t]
+                            * m.flows[i, o].nonconvex.shutdown_costs[t]
+                            for t in m.TIMESTEPS
+                        )
+                self.shutdown_costs = Expression(expr=shutdown_costs)
 
-        if self.ACTIVITYCOSTFLOWS:
-            for i, o in self.ACTIVITYCOSTFLOWS:
-                if m.flows[i, o].nonconvex.activity_costs[0] is not None:
-                    activity_costs += sum(
-                        self.status[i, o, t]
-                        * m.flows[i, o].nonconvex.activity_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-
-            self.activity_costs = Expression(expr=activity_costs)
-
-        if self.POSITIVE_GRADIENT_FLOWS:
-            for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.positive_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.positive_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.positive_gradient["costs"]
+            if self.ACTIVITYCOSTFLOWS:
+                for i, o in self.ACTIVITYCOSTFLOWS:
+                    if m.flows[i, o].nonconvex.activity_costs[0] is not None:
+                        activity_costs += sum(
+                            self.status[i, o, t]
+                            * m.flows[i, o].nonconvex.activity_costs[t]
+                            for t in m.TIMESTEPS
                         )
 
-        if self.NEGATIVE_GRADIENT_FLOWS:
-            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.negative_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.negative_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.negative_gradient["costs"]
-                        )
+                self.activity_costs = Expression(expr=activity_costs)
 
-            self.gradient_costs = Expression(expr=gradient_costs)
+            if self.POSITIVE_GRADIENT_FLOWS:
+                for i, o in self.POSITIVE_GRADIENT_FLOWS:
+                    if (
+                        m.flows[i, o].nonconvex.positive_gradient["ub"][0]
+                        is not None
+                    ):
+                        for t in m.TIMESTEPS:
+                            gradient_costs += (
+                                self.positive_gradient[i, o, t] * (
+                                    m.flows[i, o].nonconvex.positive_gradient[
+                                        "costs"]
+                                )
+                            )
+
+            if self.NEGATIVE_GRADIENT_FLOWS:
+                for i, o in self.NEGATIVE_GRADIENT_FLOWS:
+                    if (
+                        m.flows[i, o].nonconvex.negative_gradient["ub"][0]
+                        is not None
+                    ):
+                        for t in m.TIMESTEPS:
+                            gradient_costs += (
+                                self.negative_gradient[i, o, t] * (
+                                    m.flows[i, o].nonconvex.negative_gradient[
+                                        "costs"]
+                                )
+                            )
+
+                self.gradient_costs = Expression(expr=gradient_costs)
+
+            else:
+                if self.STARTUPFLOWS:
+                    for i, o in self.STARTUPFLOWS:
+                        if (m.flows[i, o].nonconvex.startup_costs[0]
+                                is not None):
+                            startup_costs += sum(
+                                self.startup[i, o, t]
+                                * m.flows[i, o].nonconvex.startup_costs[p]
+                                * m.objective_weighting[t]
+                                * ((1 + m.discount_rate) ** -p)
+                                for p, t in m.TIMEINDEX
+                            )
+                    self.startup_costs = Expression(expr=startup_costs)
+
+                if self.SHUTDOWNFLOWS:
+                    for i, o in self.SHUTDOWNFLOWS:
+                        if (m.flows[i, o].nonconvex.shutdown_costs[0]
+                                is not None):
+                            shutdown_costs += sum(
+                                self.shutdown[i, o, t]
+                                * m.flows[i, o].nonconvex.shutdown_costs[p]
+                                * m.objective_weighting[t]
+                                * ((1 + m.discount_rate) ** -p)
+                                for p, t in m.TIMEINDEX
+                            )
+                    self.shutdown_costs = Expression(expr=shutdown_costs)
+
+                if self.ACTIVITYCOSTFLOWS:
+                    for i, o in self.ACTIVITYCOSTFLOWS:
+                        if (m.flows[i, o].nonconvex.activity_costs[0]
+                                is not None):
+                            activity_costs += sum(
+                                self.status[i, o, t]
+                                * m.flows[i, o].nonconvex.activity_costs[p]
+                                * m.objective_weighting[t]
+                                * ((1 + m.discount_rate) ** -p)
+                                for p, t in m.TIMEINDEX
+                            )
+                    self.activity_costs = Expression(expr=activity_costs)
+
+                if self.POSITIVE_GRADIENT_FLOWS:
+                    for i, o in self.POSITIVE_GRADIENT_FLOWS:
+                        if (
+                            m.flows[i, o].nonconvex.positive_gradient["ub"][0]
+                            is not None
+                        ):
+                            gradient_costs += sum(
+                                self.positive_gradient[i, o, t]
+                                * (m.flows[i, o].nonconvex
+                                    .positive_gradient["costs"])
+                                * m.objective_weighting[t]
+                                * ((1 + m.discount_rate) ** -p)
+                                for p, t in m.TIMEINDEX
+                            )
+
+                if self.NEGATIVE_GRADIENT_FLOWS:
+                    for i, o in self.NEGATIVE_GRADIENT_FLOWS:
+                        if (
+                            (m.flows[i, o].nonconvex
+                                .negative_gradient["ub"][0])
+                            is not None
+                        ):
+                            gradient_costs += sum(
+                                self.negative_gradient[i, o, t]
+                                * (m.flows[i, o].nonconvex
+                                    .negative_gradient["costs"])
+                                * m.objective_weighting[t]
+                                * ((1 + m.discount_rate) ** -p)
+                                for p, t in m.TIMEINDEX
+                            )
+
+                    self.gradient_costs = Expression(expr=gradient_costs)
 
         return startup_costs + shutdown_costs + activity_costs + gradient_costs
