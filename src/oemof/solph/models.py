@@ -286,9 +286,16 @@ class Model(BaseModel):
     ]
 
     def __init__(self, energysystem, discount_rate=None, **kwargs):
-        super().__init__(energysystem, **kwargs)
         if discount_rate is not None:
             self.discount_rate = discount_rate
+        elif energysystem.multi_period:
+            self.discount_rate = 0.02
+            msg = (f"By default, a discount_rate of {self.discount_rate} "
+                   f"is used for a multi-period model. "
+                   f"If you want to use another value, "
+                   f"you have to specify the `discount_rate` attribute.")
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
         """ """
