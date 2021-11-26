@@ -18,6 +18,9 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network as on
+from pyomo.core import Binary
+from pyomo.core import Set
+from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -54,11 +57,12 @@ class Link(on.Transformer):
 
     >>> link = solph.custom.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.Flow(), bel1: solph.Flow()},
+    ...    inputs={bel0: solph.Flow(nominal_value=4),
+    ...            bel1: solph.Flow(nominal_value=2)},
     ...    outputs={bel0: solph.Flow(), bel1: solph.Flow()},
-    ...    conversion_factors={(bel0, bel1): 0.92, (bel1, bel0): 0.99})
+    ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
-    [0.92, 0.99]
+    [0.8, 0.9]
 
     >>> type(link)
     <class 'oemof.solph.custom.link.Link'>
@@ -67,7 +71,7 @@ class Link(on.Transformer):
     ['el0', 'el1']
 
     >>> link.conversion_factors[(bel0, bel1)][3]
-    0.92
+    0.8
     """
 
     def __init__(self, *args, **kwargs):
@@ -103,8 +107,21 @@ class LinkBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
-    TODO: Add tests
+    .. _Link-equations:
+
+    .. math::
+        &
+        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+            \quad \forall t \in T, \forall n in {1,2} \\
+        &
+        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(t)
+                                 / P_{\mathrm{in},1,\mathrm{max}}
+            \quad \forall t \in T \\
+        &
+        (3) \qquad 0 \le \hat{S} - P_{\mathrm{in},2}(t)
+                                 / P_{2\mathrm{in},2,\mathrm{max}}
+            \quad \forall t \in T \\
+        &
 
     """
     CONSTRAINT_GROUP = True
@@ -135,6 +152,17 @@ class LinkBlock(SimpleBlock):
                 k: v for k, v in n.conversion_factors.items()
             }
 
+        self.LINKS = Set(initialize=[g for g in group])
+        self.LINK_1ST_INFLOWS = Set(
+            initialize=[(list(c)[0][0], n) for n, c in all_conversions.items()]
+        )
+        self.LINK_2ND_INFLOWS = Set(
+            initialize=[(list(c)[1][0], n) for n, c in all_conversions.items()]
+        )
+
+        #  0: Flows 1 connected; 1: Flows 2 connected
+        self.direction = Var(self.LINKS, m.TIMESTEPS, within=Binary)
+
         def _input_output_relation(block):
             for t in m.TIMESTEPS:
                 for n, conversion in all_conversions.items():
@@ -164,28 +192,32 @@ class LinkBlock(SimpleBlock):
         )
         self.relation_build = BuildAction(rule=_input_output_relation)
 
-        def _exclusive_direction_relation(block):
-            for t in m.TIMESTEPS:
-                for n, cf in all_conversions.items():
-                    cf_keys = list(cf.keys())
-                    expr = (
-                        m.flow[cf_keys[0][0], n, t] * cf[cf_keys[0]][t]
-                        + m.flow[cf_keys[1][0], n, t] * cf[cf_keys[1]][t]
-                        == m.flow[n, cf_keys[0][1], t]
-                        + m.flow[n, cf_keys[1][1], t]
-                    )
-                    block.relation_exclusive_direction.add((n, t), expr)
+        def _flow1_rule(block, i, link, t):
+            """Rule definition for Eq. (2)."""
+            expr = 1 >= (
+                self.direction[link, t]
+                + m.flow[i, link, t]
+                * m.flows[i, link].max[t]
+                * m.flows[i, link].nominal_value
+            )
+            return expr
 
-        self.relation_exclusive_direction = Constraint(
-            [
-                (n, t)
-                for t in m.TIMESTEPS
-                for n, conversion in all_conversions.items()
-            ],
-            noruleinit=True,
+        self.flow1 = Constraint(
+            self.LINK_1ST_INFLOWS, m.TIMESTEPS, rule=_flow1_rule
         )
-        self.relation_exclusive_direction_build = BuildAction(
-            rule=_exclusive_direction_relation
+
+        def _flow2_rule(block, i, link, t):
+            """Rule definition for Eq. (3)."""
+            expr = 0 <= (
+                self.direction[link, t]
+                - m.flow[i, link, t]
+                * m.flows[i, link].max[t]
+                * m.flows[i, link].nominal_value
+            )
+            return expr
+
+        self.flow2 = Constraint(
+            self.LINK_2ND_INFLOWS, m.TIMESTEPS, rule=_flow2_rule
         )
 
 

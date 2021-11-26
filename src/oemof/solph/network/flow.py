@@ -53,8 +53,7 @@ class Flow(on.Edge):
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
-           unit.
+         * `'costs``: REMOVED!
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
@@ -63,8 +62,7 @@ class Flow(on.Edge):
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
-            unit.
+          * `'costs``: REMOVED!
 
     summed_max : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
@@ -157,8 +155,8 @@ class Flow(on.Edge):
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "variable_costs": 0,
-            "positive_gradient": {"ub": None, "costs": 0},
-            "negative_gradient": {"ub": None, "costs": 0},
+            "positive_gradient": {"ub": None},
+            "negative_gradient": {"ub": None},
         }
         keys = [k for k in kwargs if k != "label"]
 
@@ -201,13 +199,24 @@ class Flow(on.Edge):
         if kwargs.get("max") is None:
             defaults["max"] = 1
 
+        # Check gradient dictionaries for non-valid keys
+        for gradient_dict in ["negative_gradient", "positive_gradient"]:
+            if gradient_dict in kwargs:
+                if list(kwargs[gradient_dict].keys()) != list(
+                    defaults[gradient_dict].keys()
+                ):
+                    msg = (
+                        "Only the key 'ub' is allowed for the '{0}' attribute"
+                    )
+                    raise AttributeError(msg.format(gradient_dict))
+
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(
                     self,
                     attribute,
-                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                    {"ub": sequence(value["ub"])},
                 )
 
             else:

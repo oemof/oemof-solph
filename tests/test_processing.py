@@ -99,8 +99,6 @@ class TestParameterResult:
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
-                    "negative_gradient_costs": 0,
-                    "positive_gradient_costs": 0,
                     "variable_costs": 0,
                     "label": str(b_el2.outputs[demand].label),
                 }
@@ -132,9 +130,7 @@ class TestParameterResult:
             "max": 1,
             "min": 0,
             "negative_gradient_ub": None,
-            "negative_gradient_costs": 0,
             "positive_gradient_ub": None,
-            "positive_gradient_costs": 0,
             "variable_costs": 0,
             "flow": None,
             "values": None,

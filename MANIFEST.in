@@ -10,6 +10,7 @@ include .editorconfig
 
 include AUTHORS.rst
 include CHANGELOG.rst
+include CITATION.cff
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
