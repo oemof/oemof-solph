@@ -14,8 +14,8 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
-
 from pyomo.core import Binary
+from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
@@ -281,125 +281,275 @@ class InvestmentFlow(SimpleBlock):
             ]
         )
 
+        self.OVERALL_MAXIMUM_INVESTFLOWS = Set(
+            initialize=[
+                (g[0], g[1]) for g in group
+                if g[2].investment.overall_maximum is not None]
+        )
+
+        self.OVERALL_MINIMUM_INVESTFLOWS = Set(
+            initialize=[
+                (g[0], g[1]) for g in group
+                if g[2].investment.overall_minimum is not None]
+        )
+
         # ######################### VARIABLES #################################
-        def _investvar_bound_rule(block, i, o):
+        def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of invest variable."""
             if (i, o) in self.CONVEX_INVESTFLOWS:
                 return (
-                    m.flows[i, o].investment.minimum,
-                    m.flows[i, o].investment.maximum,
+                    m.flows[i, o].investment.minimum[p],
+                    m.flows[i, o].investment.maximum[p],
                 )
             elif (i, o) in self.NON_CONVEX_INVESTFLOWS:
-                return 0, m.flows[i, o].investment.maximum
+                return 0, m.flows[i, o].investment.maximum[p]
 
-        # create invest variable for a investment flow
+        # create invest variable for an investment flow
         self.invest = Var(
             self.INVESTFLOWS,
+            m.PERIODS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )
 
-        # create status variable for a non-convex investment flow
-        self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
-        # ######################### CONSTRAINTS ###############################
+        # Total capacity
+        self.total = Var(self.INVESTFLOWS,
+                         m.PERIODS,
+                         within=NonNegativeReals)
 
-        def _min_invest_rule(block, i, o):
+        # Old capacity to be decommissioned (due to lifetime)
+        # Old capacity is built out of old exogenous and endogenous capacities
+        self.old = Var(self.INVESTFLOWS,
+                       m.PERIODS,
+                       within=NonNegativeReals)
+
+        # Old endogenous capacity to be decommissioned (due to lifetime)
+        self.old_end = Var(self.INVESTFLOWS,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # Old exogenous capacity to be decommissioned (due to lifetime)
+        self.old_exo = Var(self.INVESTFLOWS,
+                           m.PERIODS,
+                           within=NonNegativeReals)
+
+        # create status variable for a non-convex investment flow
+        self.invest_status = Var(
+            self.NON_CONVEX_INVESTFLOWS,
+            m.PERIODS,
+            within=Binary
+        )
+
+        # ######################### CONSTRAINTS ###############################
+        def _min_invest_rule(block):
             """Rule definition for applying a minimum investment"""
-            expr = (
-                m.flows[i, o].investment.minimum * self.invest_status[i, o]
-                <= self.invest[i, o]
-            )
-            return expr
+            for i, o in self.NON_CONVEX_INVESTFLOWS:
+                for p in m.PERIODS:
+                    expr = (m.flows[i, o].investment.minimum[p]
+                            * self.invest_status[i, o, p]
+                            <= self.invest[i, o, p])
+                    self.minimum_rule.add((i, o, p), expr)
 
         self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS,
+            noruleinit=True
+        )
+        self.minimum_rule_build = BuildAction(
+            rule=_min_invest_rule
         )
 
-        def _max_invest_rule(block, i, o):
-            """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= (
-                m.flows[i, o].investment.maximum * self.invest_status[i, o]
-            )
-            return expr
+        def _max_invest_rule(block):
+            """Rule definition for applying a minimum investment
+            """
+            for i, o in self.NON_CONVEX_INVESTFLOWS:
+                for p in m.PERIODS:
+                    expr = self.invest[i, o, p] <= (
+                        m.flows[i, o].investment.maximum[p]
+                        * self.invest_status[i, o, p])
+                    self.maximum_rule.add((i, o, p), expr)
 
         self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule
-        )
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS,
+            noruleinit=True)
+        self.maximum_rule_build = BuildAction(
+            rule=_max_invest_rule)
 
-        def _investflow_fixed_rule(block, i, o, t):
+        # Handle unit lifetimes
+        def _total_capacity_rule(block):
+            """Rule definition for determining total installed
+            capacity (taking decommissioning into account)
+            """
+            for i, o in self.INVESTFLOWS:
+                for p in m.PERIODS:
+                    if p == 0:
+                        expr = (self.total[i, o, p]
+                                == self.invest[i, o, p]
+                                + m.flows[i, o].investment.existing)
+                        self.total_rule.add((i, o, p), expr)
+                    else:
+                        expr = (self.total[i, o, p]
+                                == self.invest[i, o, p]
+                                + self.total[i, o, p - 1]
+                                - self.old[i, o, p])
+                        self.total_rule.add((i, o, p), expr)
+
+        self.total_rule = Constraint(
+            self.INVESTFLOWS, m.PERIODS,
+            noruleinit=True
+        )
+        self.total_rule_build = BuildAction(
+            rule=_total_capacity_rule)
+
+        def _old_capacity_rule_end(block):
+            """Rule definition for determining old endogenously installed
+            capacity to be decommissioned due to reaching its lifetime
+            """
+            for i, o in self.INVESTFLOWS:
+                lifetime = m.flows[i, o].investment.lifetime
+                for p in m.PERIODS:
+                    if lifetime <= p:
+                        expr = (self.old_end[i, o, p]
+                                == self.invest[i, o, p - lifetime])
+                        self.old_rule_end.add((i, o, p), expr)
+                    else:
+                        expr = (self.old_end[i, o, p]
+                                == 0)
+                        self.old_rule_end.add((i, o, p), expr)
+
+        self.old_rule_end = Constraint(
+            self.INVESTFLOWS, m.PERIODS,
+            noruleinit=True
+        )
+        self.old_rule_end_build = BuildAction(
+            rule=_old_capacity_rule_end)
+
+        def _old_capacity_rule_exo(block):
+            """Rule definition for determining old exogenously given capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for i, o in self.INVESTFLOWS:
+                age = m.flows[i, o].investment.age
+                lifetime = m.flows[i, o].investment.lifetime
+                for p in m.PERIODS:
+                    if lifetime - age == p:
+                        expr = (
+                            self.old_exo[i, o, p]
+                            == m.flows[i, o].investment.existing)
+                        self.old_rule_exo.add((i, o, p), expr)
+                    else:
+                        expr = (self.old_exo[i, o, p]
+                                == 0)
+                        self.old_rule_exo.add((i, o, p), expr)
+
+        self.old_rule_exo = Constraint(
+            self.INVESTFLOWS, m.PERIODS,
+            noruleinit=True
+        )
+        self.old_rule_exo_build = BuildAction(
+            rule=_old_capacity_rule_exo)
+
+        def _old_capacity_rule(block):
+            """Rule definition for determining (overall) old capacity
+            to be decommissioned due to reaching its lifetime
+            """
+            for i, o in self.INVESTFLOWS:
+                for p in m.PERIODS:
+                    expr = (
+                        self.old[i, o, p]
+                        == self.old_end[i, o, p] + self.old_exo[i, o, p])
+                    self.old_rule.add((i, o, p), expr)
+
+        self.old_rule = Constraint(
+            self.INVESTFLOWS, m.PERIODS,
+            noruleinit=True
+        )
+        self.old_rule_build = BuildAction(
+            rule=_old_capacity_rule)
+
+        def _investflow_fixed_rule(block):
             """Rule definition of constraint to fix flow variable
             of investment flow to (normed) actual value
             """
-            expr = m.flow[i, o, t] == (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].fix[t]
-            )
-
-            return expr
+            for i, o in self.FIXED_INVESTFLOWS:
+                for p, t in m.TIMEINDEX:
+                    expr = (m.flow[i, o, p, t] == (
+                        self.total[i, o, p]
+                        * m.flows[i, o].fix[t]))
+                    self.fixed.add((i, o, p, t), expr)
 
         self.fixed = Constraint(
-            self.FIXED_INVESTFLOWS, m.TIMESTEPS, rule=_investflow_fixed_rule
+            self.FIXED_INVESTFLOWS,
+            m.TIMEINDEX,
+            noruleinit=True
         )
+        self.fixed_build = BuildAction(
+            rule=_investflow_fixed_rule)
 
-        def _max_investflow_rule(block, i, o, t):
+        def _max_investflow_rule(block):
             """Rule definition of constraint setting an upper bound of flow
             variable in investment case.
             """
-            expr = m.flow[i, o, t] <= (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].max[t]
-            )
-            return expr
+            for i, o in self.NON_FIXED_INVESTFLOWS:
+                for p, t in m.TIMEINDEX:
+                    expr = (m.flow[i, o, p, t] <= (
+                        self.total[i, o, p]
+                        * m.flows[i, o].max[t]))
+                    self.max.add((i, o, p, t), expr)
 
-        self.max = Constraint(
-            self.NON_FIXED_INVESTFLOWS, m.TIMESTEPS, rule=_max_investflow_rule
-        )
+        self.max = Constraint(self.NON_FIXED_INVESTFLOWS,
+                              m.TIMEINDEX,
+                              noruleinit=True)
+        self.max_build = BuildAction(
+            rule=_max_investflow_rule)
 
-        def _min_investflow_rule(block, i, o, t):
+        def _min_investflow_rule(block):
             """Rule definition of constraint setting a lower bound on flow
             variable in investment case.
             """
-            expr = m.flow[i, o, t] >= (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].min[t]
-            )
-            return expr
+            for i, o in self.MIN_INVESTFLOWS:
+                for p, t in m.TIMEINDEX:
+                    expr = (m.flow[i, o, p, t] >= (
+                        self.total[i, o, p]
+                        * m.flows[i, o].min[t]))
+                    self.min.add((i, o, p, t), expr)
 
-        self.min = Constraint(
-            self.MIN_INVESTFLOWS, m.TIMESTEPS, rule=_min_investflow_rule
+        self.min = Constraint(self.MIN_INVESTFLOWS, m.TIMEINDEX,
+                              noruleinit=True)
+        self.min_build = BuildAction(
+            rule=_min_investflow_rule
         )
 
         def _summed_max_investflow_rule(block, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
-            expr = sum(
-                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
-            ) <= m.flows[i, o].summed_max * (
-                self.invest[i, o] + m.flows[i, o].investment.existing
-            )
+            expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
+                        for p, t in m.TIMEINDEX)
+                    <= (m.flows[i, o].summed_max
+                        * sum(self.total[i, o, p] for p in m.PERIODS)))
             return expr
 
         self.summed_max = Constraint(
-            self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule
+            self.SUMMED_MAX_INVESTFLOWS,
+            rule=_summed_max_investflow_rule
         )
 
         def _summed_min_investflow_rule(block, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
-            expr = sum(
-                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
-            ) >= (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].summed_min
-            )
+            expr = (sum(m.flow[i, o, p, t] * m.timeincrement[t]
+                        for p, t in m.TIMEINDEX)
+                    >= (sum(self.total[i, o, p] for p in m.PERIODS)
+                        * m.flows[i, o].summed_min))
             return expr
 
         self.summed_min = Constraint(
-            self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule
+            self.SUMMED_MIN_INVESTFLOWS,
+            rule=_summed_min_investflow_rule
         )
 
+    # TODO: RESUME HERE
     def _objective_expression(self):
         r"""Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
