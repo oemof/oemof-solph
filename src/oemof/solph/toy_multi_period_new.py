@@ -180,7 +180,7 @@ pp_hardcoal = network.Transformer(
         investment=options.Investment(
             maximum=1000,
             ep_costs=1.6e6,
-            existing=0,
+            existing=2,
             lifetime=20,
             age=0,
             interest_rate=0.02,
@@ -409,7 +409,7 @@ results = processing.results(test)
 # Show inflows and outflows from electricity bus
 bus_el_flow_res = views.node(results, bus_el)['sequences']
 # Collect all investment results
-invest_units = [bus_el, dsm_unit]  # , storage_el]
+invest_units = [bus_el, ]  # dsm_unit]  # , storage_el]
 # invest_units = [bus_el]
 
 invest_res = {}

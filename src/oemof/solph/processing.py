@@ -131,19 +131,11 @@ def create_dataframe(om):
     # columns for the oemof tuple and timestep are created
     df["oemof_tuple"] = df["pyomo_tuple"].map(get_tuple)
     df = df[df["oemof_tuple"].map(lambda x: x is not None)]
-    time_col = "timestep"
-    methods_dict = {"get": get_timestep,
-                    "remove": remove_timestep}
 
-    if isinstance(om, models.MultiPeriodModel):
-        time_col = "timeindex"
-        methods_dict = {"get": get_timeindex,
-                        "remove": remove_timeindex}
-
-    df[time_col] = df["oemof_tuple"].map(methods_dict["get"])
-    df["oemof_tuple"] = df["oemof_tuple"].map(methods_dict["remove"])
+    df["timeindex"] = df["oemof_tuple"].map(get_timeindex)
+    df["oemof_tuple"] = df["oemof_tuple"].map(remove_timeindex)
     # order the data by oemof tuple and timestep
-    df = df.sort_values(["oemof_tuple", time_col],
+    df = df.sort_values(["oemof_tuple", "timeindex"],
                         ascending=[True, True])
 
     # drop empty decision variables
@@ -164,32 +156,28 @@ def results(om):
     and flows e.g. `results[n, n]['sequences']` for a standard model.
     """
     df = create_dataframe(om)
-    time_col = "timestep"
-    scalars_col = "scalars"
 
-    if isinstance(om, models.MultiPeriodModel):
-        # Note: timeindex differs dependent on variables!
-        period_indexed = [
-            "invest",
-            "total",
-            "old",
-            "old_exo",
-            "old_end"
-        ]
-        period_timestep_indexed = ["flow"]
-        # TODO: Take care of initial storage content instead of just ignoring
-        to_be_ignored = ["init_content"]
-        timestep_indexed = [el for el in df["variable_name"].unique()
-                            if el not in period_indexed
-                            and el not in period_timestep_indexed
-                            and el not in to_be_ignored]
-        time_col = "timeindex"
-        scalars_col = "period_scalars"
+    period_indexed = [
+        "invest",
+        "total",
+        "old",
+        "old_exo",
+        "old_end"
+    ]
+    period_timestep_indexed = ["flow"]
+    # TODO: Take care of initial storage content instead of just ignoring
+    to_be_ignored = ["init_content"]
+    timestep_indexed = [el for el in df["variable_name"].unique()
+                        if el not in period_indexed
+                        and el not in period_timestep_indexed
+                        and el not in to_be_ignored]
+    scalars_col = "period_scalars"
 
     # create a dict of dataframes keyed by oemof tuples
+    # TODO / QUESTION: Could this be sped up using DFs / arrays instead?!
     df_dict = {
         k if len(k) > 1 else (k[0], None):
-        v[[time_col, "variable_name", "value"]]
+        v[["timeindex", "variable_name", "value"]]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -197,79 +185,70 @@ def results(om):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
     for k in df_dict:
-        df_dict[k].set_index(time_col, inplace=True)
+        df_dict[k].set_index("timeindex", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        if not isinstance(om, models.MultiPeriodModel):
-            try:
-                df_dict[k].index = om.es.timeindex
-            except ValueError as e:
-                msg = (
-                    "\nFlow: {0}-{1}. This could be caused by NaN-values in"
-                    " your input data."
-                )
-                raise type(e)(
-                    str(e) + msg.format(k[0].label, k[1].label)
-                ).with_traceback(sys.exc_info()[2])
-            try:
-                condition = df_dict[k].isnull().any()
-                scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-                sequences = df_dict[k].loc[:, ~condition]
-                result[k] = {scalars_col: scalars, "sequences": sequences}
-            except IndexError:
-                error_message = (
-                    "Cannot access index on result data. "
-                    + "Did the optimization terminate"
-                    + " without errors?"
-                )
-                raise IndexError(error_message)
+
+        # if not isinstance(om, models.MultiPeriodModel):
+        #     try:
+        #         df_dict[k].index = om.es.timeindex
+        #     except ValueError as e:
+        #         msg = (
+        #             "\nFlow: {0}-{1}. This could be caused by NaN-values in"
+        #             " your input data."
+        #         )
+        #         raise type(e)(
+        #             str(e) + msg.format(k[0].label, k[1].label)
+        #         ).with_traceback(sys.exc_info()[2])
+        #     try:
+        #         condition = df_dict[k].isnull().any()
+        #         scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+        #         sequences = df_dict[k].loc[:, ~condition]
+        #         result[k] = {"period_scalars": scalars, "sequences": sequences}
+        #     except IndexError:
+        #         error_message = (
+        #             "Cannot access index on result data. "
+        #             + "Did the optimization terminate"
+        #             + " without errors?"
+        #         )
+        #         raise IndexError(error_message)
+
         # TODO: Revise and potentially speed up
-        else:
-            # Split data set
-            timeindex_cols = [col for col in df_dict[k].columns
-                              if col in timestep_indexed or col == "flow"]
-            period_cols = [col for col in df_dict[k].columns
-                           if col not in timeindex_cols]
-            sequences = df_dict[k][timeindex_cols].dropna()
-            if sequences.empty:
-                sequences = pd.DataFrame(index=om.es.timeindex)
-            # periods equal to years (will probably be the standard use case)
-            periods = sorted(list(set(om.es.timeindex.year)))
-            d = dict(zip([(el, ) for el in range(len(periods))], periods))
-            period_scalars = df_dict[k][period_cols].dropna()
-            if period_scalars.empty:
-                period_scalars = pd.DataFrame(index=d.values())
-            try:
-                sequences.index = om.es.timeindex
-                period_scalars.rename(index=d, inplace=True)
-                period_scalars.index.name = "period"
-                result[k] = {scalars_col: period_scalars,
-                             "sequences": sequences}
-            except IndexError:
-                error_message = (
-                    "Some indices seem to be not matching.\n"
-                    "Cannot properly extract model results."
-                )
-                raise IndexError(error_message)
+        # Split data set
+        timeindex_cols = [col for col in df_dict[k].columns
+                          if col in timestep_indexed or col == "flow"]
+        period_cols = [col for col in df_dict[k].columns
+                       if col not in timeindex_cols]
+        sequences = df_dict[k][timeindex_cols].dropna()
+        if sequences.empty:
+            sequences = pd.DataFrame(index=om.es.timeindex)
+        # periods equal to years (will probably be the standard use case)
+        periods = sorted(list(set(om.es.timeindex.year)))
+        d = dict(zip([(el, ) for el in range(len(periods))], periods))
+        period_scalars = df_dict[k][period_cols].dropna()
+        if period_scalars.empty:
+            period_scalars = pd.DataFrame(index=d.values())
+        try:
+            sequences.index = om.es.timeindex
+            period_scalars.rename(index=d, inplace=True)
+            period_scalars.index.name = "period"
+            result[k] = {scalars_col: period_scalars,
+                         "sequences": sequences}
+        except IndexError:
+            error_message = (
+                "Some indices seem to be not matching.\n"
+                "Cannot properly extract model results."
+            )
+            raise IndexError(error_message)
 
     # add dual variables for bus constraints
     if om.dual is not None:
-        df = pd.DataFrame()
-
-        if not isinstance(om, models.MultiPeriodModel):
-            grouped = groupby(sorted(om.Bus.balance.iterkeys()),
-                              lambda p: p[0])
-            for bus, timesteps in grouped:
-                duals = [om.dual[om.Bus.balance[bus, t]] for _, t in timesteps]
-                df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
-                append_duals(result, bus, df, scalars_col, duals)
-        else:
-            grouped = groupby(sorted(om.MultiPeriodBus.balance.iterkeys()),
-                              lambda p: p[0])
-            for bus, timeindex in grouped:
-                duals = [om.dual[om.MultiPeriodBus.balance[bus, p, t]]
-                         for _, p, t in timeindex]
-                df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
-                append_duals(result, bus, df, scalars_col, duals)
+        grouped = groupby(sorted(om.Bus.balance.iterkeys()),
+                          lambda p: p[0])
+        for bus, timeindex in grouped:
+            duals = [om.dual[om.Bus.balance[bus, p, t]]
+                     for _, p, t in timeindex]
+            df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+            append_duals(result, bus, df, scalars_col, duals)
 
     return result
 
