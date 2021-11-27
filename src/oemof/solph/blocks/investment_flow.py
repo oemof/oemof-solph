@@ -639,7 +639,7 @@ class InvestmentFlow(SimpleBlock):
         period_investment_costs = {p: 0 for p in m.PERIODS}
         fixed_costs = 0
 
-        if not self.es.multi_period:
+        if not m.es.multi_period:
             for i, o in self.CONVEX_INVESTFLOWS:
                 for p in m.PERIODS:
                     investment_costs += (

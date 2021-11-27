@@ -62,44 +62,36 @@ es = network.EnergySystem(timeindex=timeindex,
 # Create buses
 bus_lignite = network.Bus(label='DE_bus_lignite',
                           # balanced=True)
-                          balanced=True,
-                          multiperiod=True)
+                          balanced=True)
 bus_hardcoal = network.Bus(label='DE_bus_hardcoal',
                            # balanced=True)
-                           balanced=True,
-                           multiperiod=True)
+                           balanced=True)
 bus_natgas = network.Bus(label='DE_bus_natgas',
                          # balanced=True)
-                         balanced=True,
-                         multiperiod=True)
+                         balanced=True)
 bus_el = network.Bus(label='DE_bus_el',
                      # balanced=True)
-                     balanced=True,
-                     multiperiod=True)
-bus_el_FR = network.Bus(label='FR_bus_el',
-                        # balanced=True)
-                        balanced=True,
-                        multiperiod=True)
+                     balanced=True)
+# bus_el_FR = network.Bus(label='FR_bus_el',
+#                         # balanced=True)
+#                         balanced=True)
 
 # Create sources
 source_lignite = network.Source(
     label='DE_source_lignite',
     outputs={bus_lignite: network.Flow(
         # variable_costs=5)})
-        variable_costs=5,
-        multiperiod=True)})
+        variable_costs=5)})
 source_hardcoal = network.Source(
     label='DE_source_hardcoal',
     outputs={bus_hardcoal: network.Flow(
         # variable_costs=10)})
-        variable_costs=10,
-        multiperiod=True)})
+        variable_costs=10)})
 source_natgas = network.Source(
     label='DE_source_natgas',
     outputs={bus_natgas: network.Flow(
         # variable_costs=20)})
-        variable_costs=20,
-        multiperiod=True)})
+        variable_costs=20)})
 source_wind = network.Source(
     label='DE_source_wind',
     outputs={bus_el: network.Flow(  # variable_costs=0)})
@@ -107,31 +99,27 @@ source_wind = network.Source(
         # fix=[90] * len(timeindex),
         fix=[110] + [90] * (len(timeindex) - 1),
         # nominal_value=1)})
-        nominal_value=1,
-        multiperiod=True)})
+        nominal_value=1)})
 source_shortage = network.Source(
     label='DE_source_shortage',
     outputs={bus_el: network.Flow(
         variable_costs=1e10,
         # nominal_value=1e10)})
-        nominal_value=1e10,
-        multiperiod=True)})
+        nominal_value=1e10)})
 
-source_wind_FR = network.Source(
-    label='FR_source_wind',
-    outputs={bus_el_FR: network.Flow(  # variable_costs=0)})
-        variable_costs=0,
-        fix=[45] * len(timeindex),
-        # nominal_value=1)})
-        nominal_value=1,
-        multiperiod=True)})
-source_shortage_FR = network.Source(
-    label='FR_source_shortage',
-    outputs={bus_el_FR: network.Flow(
-        variable_costs=1e10,
-        # nominal_value=1e10)})
-        nominal_value=1e10,
-        multiperiod=True)})
+# source_wind_FR = network.Source(
+#     label='FR_source_wind',
+#     outputs={bus_el_FR: network.Flow(  # variable_costs=0)})
+#         variable_costs=0,
+#         fix=[45] * len(timeindex),
+#         # nominal_value=1)})
+#         nominal_value=1)})
+# source_shortage_FR = network.Source(
+#     label='FR_source_shortage',
+#     outputs={bus_el_FR: network.Flow(
+#         variable_costs=1e10,
+#         # nominal_value=1e10)})
+#         nominal_value=1e10)})
 
 # Create sinks
 sink_el = network.Sink(
@@ -142,8 +130,7 @@ sink_el = network.Sink(
         # Use this when simulating only the basic config, without the above
         # fix=[100] * len(timeindex),
         # nominal_value=1)})
-        nominal_value=1,
-        multiperiod=True)})
+        nominal_value=1)})
 
 sink_excess = network.Sink(
     label='DE_sink_excess',
@@ -151,31 +138,28 @@ sink_excess = network.Sink(
         # variable_costs=1e3,
         variable_costs=1e10,
         # nominal_value=1e10)})
-        nominal_value=1e10,
-        multiperiod=True)})
-sink_excess_FR = network.Sink(
-    label='FR_sink_excess',
-    inputs={bus_el_FR: network.Flow(
-        variable_costs=1e3,
-        # nominal_value=1e10)})
-        nominal_value=1e10,
-        multiperiod=True)})
+        nominal_value=1e10)})
 
-sink_el_FR = network.Sink(
-    label='FR_sink_el',
-    inputs={bus_el_FR: network.Flow(fix=[50] * len(timeindex),
-                                    # nominal_value=1)})
-                                    nominal_value=1,
-                                    multiperiod=True)})
+# sink_excess_FR = network.Sink(
+#     label='FR_sink_excess',
+#     inputs={bus_el_FR: network.Flow(
+#         variable_costs=1e3,
+#         # nominal_value=1e10)})
+#         nominal_value=1e10)})
+#
+# sink_el_FR = network.Sink(
+#     label='FR_sink_el',
+#     inputs={bus_el_FR: network.Flow(fix=[50] * len(timeindex),
+#                                     # nominal_value=1)})
+#                                     nominal_value=1)})
 
 # Create multiperiod transformers
 pp_lignite = network.Transformer(
     label='DE_pp_lignite',
-    inputs={bus_lignite: network.Flow(  # )},
-        multiperiod=True)},
+    inputs={bus_lignite: network.Flow()},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
+        investment=options.Investment(
             maximum=1000,
             ep_costs=2e6,
             existing=0,
@@ -190,11 +174,10 @@ pp_lignite = network.Transformer(
 
 pp_hardcoal = network.Transformer(
     label='DE_pp_hardcoal',
-    inputs={bus_hardcoal: network.Flow(  # )},
-        multiperiod=True)},
+    inputs={bus_hardcoal: network.Flow()},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
+        investment=options.Investment(
             maximum=1000,
             ep_costs=1.6e6,
             existing=0,
@@ -209,11 +192,10 @@ pp_hardcoal = network.Transformer(
 
 pp_natgas_CCGT = network.Transformer(
     label='DE_pp_natgas_CCGT',
-    inputs={bus_natgas: network.Flow(  # )},
-        multiperiod=True)},
+    inputs={bus_natgas: network.Flow()},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
+        investment=options.Investment(
             maximum=1000,
             ep_costs=1e6,
             existing=0,
@@ -230,11 +212,10 @@ pp_natgas_CCGT = network.Transformer(
 
 pp_natgas_GT = network.Transformer(
     label='DE_pp_natgas_GT',
-    inputs={bus_natgas: network.Flow(  # )},
-        multiperiod=True)},
+    inputs={bus_natgas: network.Flow()},
     outputs={bus_el: network.Flow(
         # investment=options.Investment(
-        multiperiodinvestment=options.MultiPeriodInvestment(
+        investment=options.Investment(
             maximum=1000,
             # ep_costs=0.6e6,
             # ep_costs=[0.6e6, 0.5e6, 0.8e6],
@@ -256,22 +237,21 @@ pp_natgas_GT = network.Transformer(
         # min=0.1,
         # max=0.9,
         # fix=1,
-        # multiperiod=True,
         # nominal_value=100,
         variable_costs=4,
         # fixed_costs=30
     )},
     conversion_factors={bus_el: 0.4})
 
+# Add storage
 # storage_el = components.GenericStorage(
 #     label='DE_storage_el',
 #     inputs={bus_el: network.Flow(
 #         # nominal_value=20,
 #         variable_costs=0,
 #         max=1,
-#         # multiperiod=True
 #         # investment=options.Investment(
-#         multiperiodinvestment=options.MultiPeriodInvestment(
+#         investment=options.Investment(
 #             maximum=20,
 #             ep_costs=1000,
 #             existing=10,
@@ -286,9 +266,8 @@ pp_natgas_GT = network.Transformer(
 #         # nominal_value=20,
 #         variable_costs=0,
 #         max=1,
-#         # multiperiod=True
 #         # investment=options.Investment(
-#         multiperiodinvestment=options.MultiPeriodInvestment(
+#         investment=options.Investment(
 #             maximum=20,
 #             ep_costs=1000,
 #             existing=10,
@@ -310,10 +289,9 @@ pp_natgas_GT = network.Transformer(
 #     invest_relation_input_output=1,
 #     invest_relation_input_capacity=None,
 #     invest_relation_output_capacity=None,
-#     # multiperiod=True,
 #     fixed_costs=10,
 #     # investment=options.Investment(
-#     multiperiodinvestment=options.MultiPeriodInvestment(
+#     investment=options.Investment(
 #         maximum=20,
 #         ep_costs=1000,
 #         existing=10,
@@ -334,84 +312,76 @@ pp_natgas_GT = network.Transformer(
 #     inputs={
 #         bus_el: network.Flow(
 #             # nominal_value=10)},
-#             nominal_value=10,
-#             multiperiod=True),
+#             nominal_value=10),
 #         bus_el_FR: network.Flow(
 #             # nominal_value=10)},
-#             nominal_value=10,
-#             multiperiod=True)
+#             nominal_value=10)
 #     },
 #     outputs={
-#         bus_el_FR: network.Flow(
-#             multiperiod=True
-#         ),
-#         bus_el: network.Flow(
-#             multiperiod=True
-#         )
+#         bus_el_FR: network.Flow(),
+#         bus_el: network.Flow()
 #     },
 #     conversion_factors={
 #         (bus_el, bus_el_FR): 0.999999,
 #         (bus_el_FR, bus_el): 0.999999},
-#     multiperiod=True
 # )
 
-approach = 'DLR'
-
-kwargs_all = {
-    'label': 'demand_dsm',
-    'inputs': {bus_el: network.Flow(
-        variable_costs=0,
-        multiperiod=True
-    )},
-    'demand': [1] * len(timeindex),
-    'capacity_up': [1] * len(timeindex),
-    'capacity_down': [1] * len(timeindex),
-    'delay_time': 4,
-    'shed_time': 2,
-    'recovery_time_shift': 0,
-    'recovery_time_shed': 24,
-    'cost_dsm_up': 0.01,
-    'cost_dsm_down_shift': 0.01,
-    'cost_dsm_down_shed': 1000,
-    'efficiency': 1.0,
-    'shed_eligibility': False,
-    'shift_eligibility': True,
-    # 'max_demand': 20,
-    # 'max_capacity_down': 10,
-    # 'max_capacity_up': 10,
-    'flex_share_down': 1,
-    'flex_share_up': 1,
-    'shift_time': 2}
-
-kwargs_dict = {
-    'oemof': {'shift_interval': 24},
-
-    'DIW': {},
-
-    'DLR': {'ActivateYearLimit': True,
-            'ActivateDayLimit': True,
-            'n_yearLimit_shift': 2,
-            'n_yearLimit_shed': 10,
-            't_dayLimit': 2,
-            'addition': True,
-            'fixes': True},
-}
-
-dsm_unit = custom.SinkDSM(
-    **kwargs_all,
-    approach=approach,
-    **kwargs_dict[approach],
-    # multiperiod=True,
-    multiperiodinvestment=options.MultiPeriodInvestment(
-        # investment=options.Investment(
-        existing=10,
-        maximum=20,
-        ep_costs=10,
-        lifetime=2,
-        age=1,
-        interest_rate=0.02
-    )
-)
+# Add demand response
+# approach = 'DLR'
+#
+# kwargs_all = {
+#     'label': 'demand_dsm',
+#     'inputs': {bus_el: network.Flow(
+#         variable_costs=0,
+#     )},
+#     'demand': [1] * len(timeindex),
+#     'capacity_up': [1] * len(timeindex),
+#     'capacity_down': [1] * len(timeindex),
+#     'delay_time': 4,
+#     'shed_time': 2,
+#     'recovery_time_shift': 0,
+#     'recovery_time_shed': 24,
+#     'cost_dsm_up': 0.01,
+#     'cost_dsm_down_shift': 0.01,
+#     'cost_dsm_down_shed': 1000,
+#     'efficiency': 1.0,
+#     'shed_eligibility': False,
+#     'shift_eligibility': True,
+#     # 'max_demand': 20,
+#     # 'max_capacity_down': 10,
+#     # 'max_capacity_up': 10,
+#     'flex_share_down': 1,
+#     'flex_share_up': 1,
+#     'shift_time': 2}
+#
+# kwargs_dict = {
+#     'oemof': {'shift_interval': 24},
+#
+#     'DIW': {},
+#
+#     'DLR': {'ActivateYearLimit': True,
+#             'ActivateDayLimit': True,
+#             'n_yearLimit_shift': 2,
+#             'n_yearLimit_shed': 10,
+#             't_dayLimit': 2,
+#             'addition': True,
+#             'fixes': True},
+# }
+#
+# dsm_unit = custom.SinkDSM(
+#     **kwargs_all,
+#     approach=approach,
+#     **kwargs_dict[approach],
+#     investment=options.Investment(
+#         # investment=options.Investment(
+#         existing=10,
+#         maximum=20,
+#         ep_costs=10,
+#         lifetime=2,
+#         age=1,
+#         interest_rate=0.02
+#     )
+# )
 
 es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        source_shortage,
@@ -420,7 +390,7 @@ es.add(source_lignite, source_hardcoal, source_natgas, source_wind,
        sink_el, sink_excess,  # storage_el,
        # source_wind_FR, source_shortage_FR,
        # bus_el_FR, sink_el_FR, sink_excess_FR, link_DE_FR,
-       dsm_unit,
+       # dsm_unit,
        )
 
 # test = models.Model(es)
