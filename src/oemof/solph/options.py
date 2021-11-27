@@ -13,7 +13,9 @@ SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
+from oemof.tools import debugging
 from oemof.solph.plumbing import sequence
 
 
@@ -55,15 +57,27 @@ class Investment:
         existing=0,
         nonconvex=False,
         offset=0,
+        overall_maximum=None,
+        overall_minimum=None,
+        lifetime=20,
+        age=0,
+        interest_rate=0,
+        fixed_costs=None,
         **kwargs,
     ):
 
-        self.maximum = maximum
-        self.minimum = minimum
-        self.ep_costs = ep_costs
+        self.maximum = sequence(maximum)
+        self.minimum = sequence(minimum)
+        self.ep_costs = sequence(ep_costs)
         self.existing = existing
         self.nonconvex = nonconvex
-        self.offset = offset
+        self.offset = sequence(offset)
+        self.overall_maximum = overall_maximum
+        self.overall_minimum = overall_minimum
+        self.lifetime = lifetime
+        self.age = age
+        self.interest_rate = interest_rate
+        self.fixed_costs = sequence(fixed_costs)
 
         for attribute in kwargs.keys():
             value = kwargs.get(attribute)
@@ -72,6 +86,7 @@ class Investment:
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
+        self._check_age_and_lifetime()
 
     def _check_invest_attributes(self):
         if (self.existing != 0) and (self.nonconvex is True):
@@ -83,10 +98,10 @@ class Investment:
             raise AttributeError(e1)
 
     def _check_invest_attributes_maximum(self):
-        if (self.maximum == float("+inf")) and (self.nonconvex is True):
+        if (self.maximum[0] == float("+inf")) and (self.nonconvex is True):
             e2 = (
-                "Please provide an maximum investment value in case of"
-                " nonconvex investemnt (nonconvex=True), which is in the"
+                "Please provide a maximum investment value in case of"
+                " nonconvex investment (nonconvex=True), which is in the"
                 " expected magnitude."
                 " \nVery high maximum values (> 10e8) as maximum investment"
                 " limit might lead to numeric issues, so that no investment"
@@ -95,12 +110,24 @@ class Investment:
             raise AttributeError(e2)
 
     def _check_invest_attributes_offset(self):
-        if (self.offset != 0) and (self.nonconvex is False):
+        if (self.offset[0] != 0) and (self.nonconvex is False):
             e3 = (
                 "If `nonconvex` is `False`, the `offset` parameter will be"
                 " ignored."
             )
             raise AttributeError(e3)
+
+    def _check_age_and_lifetime(self):
+        if self.lifetime == 20:
+            w1 = ("Using a lifetime of 20 periods,"
+                  " which is the default value.\nIf you don't consider a"
+                  " multi-period investment model, you can safely ignore "
+                  " this warning - all fine!")
+            warn(w1, debugging.SuspiciousUsageWarning)
+        if self.age >= self.lifetime:
+            e4 = ("A unit's age must be smaller than its "
+                  "expected lifetime.")
+            raise AttributeError(e4)
 
 
 class MultiPeriodInvestment:

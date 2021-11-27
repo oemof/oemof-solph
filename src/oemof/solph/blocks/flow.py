@@ -274,9 +274,9 @@ class Flow(SimpleBlock):
         if not m.es.multi_period:
             for i, o in m.FLOWS:
                 if m.flows[i, o].variable_costs[0] is not None:
-                    for p, t in m.TIMESTEPS:
+                    for p, t in m.TIMEINDEX:
                         variable_costs += (
-                            m.flow[i, o, t]
+                            m.flow[i, o, p, t]
                             * m.objective_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                         )
