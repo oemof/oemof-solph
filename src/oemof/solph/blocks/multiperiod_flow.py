@@ -255,7 +255,6 @@ class MultiPeriodFlow(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        gradient_costs = 0
         fixed_costs = 0
 
         for i, o in m.FLOWS:
@@ -266,22 +265,6 @@ class MultiPeriodFlow(SimpleBlock):
                                        * m.flows[i, o].variable_costs[p]
                                        * ((1 + m.discount_rate) ** -p))
 
-            if m.flows[i, o].positive_gradient['ub'][0] is not None:
-                for p, t in m.TIMEINDEX:
-                    gradient_costs += (self.positive_gradient[i, o, t]
-                                       * m.objective_weighting[t]
-                                       * m.flows[i, o].positive_gradient[
-                                           'costs']
-                                       * ((1 + m.discount_rate) ** -p))
-
-            if m.flows[i, o].negative_gradient['ub'][0] is not None:
-                for p, t in m.TIMEINDEX:
-                    gradient_costs += (self.negative_gradient[i, o, t]
-                                       * m.objective_weighting[t]
-                                       * m.flows[i, o].negative_gradient[
-                                           'costs']
-                                       * ((1 + m.discount_rate) ** -p))
-
             if (m.flows[i, o].fixed_costs[0] is not None
                     and m.flows[i, o].nominal_value is not None):
                 for p in m.PERIODS:
@@ -289,4 +272,4 @@ class MultiPeriodFlow(SimpleBlock):
                                     * m.flows[i, o].fixed_costs[p]
                                     * ((1 + m.discount_rate) ** -p))
 
-        return variable_costs + gradient_costs + fixed_costs
+        return variable_costs + fixed_costs
