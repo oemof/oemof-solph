@@ -96,8 +96,8 @@ source_wind = network.Source(
     label='DE_source_wind',
     outputs={bus_el: network.Flow(  # variable_costs=0)})
         variable_costs=0,
-        # fix=[90] * len(timeindex),
-        fix=[110] + [90] * (len(timeindex) - 1),
+        fix=[90] * len(timeindex),
+        # fix=[110] + [90] * (len(timeindex) - 1),
         # nominal_value=1)})
         nominal_value=1)})
 source_shortage = network.Source(
@@ -126,9 +126,9 @@ sink_el = network.Sink(
     label='DE_sink_el',
     inputs={bus_el: network.Flow(
         # Use this when using storage / demand response / exchange
-        fix=[80] * len(timeindex),
+        # fix=[80] * len(timeindex),
         # Use this when simulating only the basic config, without the above
-        # fix=[100] * len(timeindex),
+        fix=[100] * len(timeindex),
         # nominal_value=1)})
         nominal_value=1)})
 
