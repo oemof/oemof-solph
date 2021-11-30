@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 
 SPDX-License-Identifier: MIT
 
@@ -76,10 +77,9 @@ class OffsetTransformer(network.Transformer):
 
         if len(self.inputs) == 1:
             for k, v in self.inputs.items():
-                if not (v.nonconvex or v.multiperiodnonconvex):
+                if not v.nonconvex:
                     raise TypeError(
                         "Input flows must be of type NonConvexFlow"
-                        " or MultiPeriodNonConvexFlow!"
                     )
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
@@ -90,10 +90,7 @@ class OffsetTransformer(network.Transformer):
 
     def constraint_group(self):
         for v in self.inputs.values():
-            if v.nonconvex:
-                return OffsetTransformerBlock
-            else:
-                return OffsetTransformerMultiPeriodBlock
+            return OffsetTransformerBlock
 
 
 class OffsetTransformerBlock(SimpleBlock):
@@ -149,21 +146,22 @@ class OffsetTransformerBlock(SimpleBlock):
 
         self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
 
-        def _relation_rule(block, n, t):
+        def _relation_rule(block, n, p, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
             expr += (
-                m.flow[list(n.inputs.keys())[0], n, t] * n.coefficients[1][t]
+                m.flow[list(n.inputs.keys())[0], n, p, t]
+                * n.coefficients[1][t]
             )
             expr += (
-                m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t]
+                (m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t])
                 * n.coefficients[0][t]
             )
             return expr == 0
 
         self.relation = Constraint(
-            self.OFFSETTRANSFORMERS, m.TIMESTEPS, rule=_relation_rule
+            self.OFFSETTRANSFORMERS, m.TIMEINDEX, rule=_relation_rule
         )
 
 

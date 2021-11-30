@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 
 SPDX-License-Identifier: MIT
 
@@ -74,13 +75,9 @@ class ExtractionTurbineCHP(solph_network.Transformer):
             k: solph_sequence(v)
             for k, v in conversion_factor_full_condensation.items()
         }
-        self.multiperiod = kwargs.get("multiperiod", False)
 
     def constraint_group(self):
-        if not self.multiperiod:
-            return ExtractionTurbineCHPBlock
-        else:
-            return ExtractionTurbineCHPMultiPeriodBlock
+        return ExtractionTurbineCHPBlock
 
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
@@ -184,18 +181,18 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output."""
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for g in group:
-                    lhs = m.flow[g.inflow, g, t]
+                    lhs = m.flow[g.inflow, g, p, t]
                     rhs = (
-                        m.flow[g, g.main_output, t]
-                        + m.flow[g, g.tapped_output, t]
-                        * g.main_flow_loss_index[t]
-                    ) / g.conversion_factor_full_condensation_sq[t]
-                    block.input_output_relation.add((g, t), (lhs == rhs))
+                              m.flow[g, g.main_output, p, t]
+                              + m.flow[g, g.tapped_output, p, t]
+                              * g.main_flow_loss_index[t]
+                          ) / g.conversion_factor_full_condensation_sq[t]
+                    block.input_output_relation.add((g, p, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMESTEPS, noruleinit=True
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -203,17 +200,17 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
 
         def _out_flow_relation_rule(block):
             """Relation between main and tapped output in full chp mode."""
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for g in group:
-                    lhs = m.flow[g, g.main_output, t]
+                    lhs = m.flow[g, g.main_output, p, t]
                     rhs = (
-                        m.flow[g, g.tapped_output, t]
+                        m.flow[g, g.tapped_output, p, t]
                         * g.flow_relation_index[t]
                     )
-                    block.out_flow_relation.add((g, t), (lhs >= rhs))
+                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
 
         self.out_flow_relation = Constraint(
-            group, m.TIMESTEPS, noruleinit=True
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule
