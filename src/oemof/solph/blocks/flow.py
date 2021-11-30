@@ -288,7 +288,7 @@ class Flow(SimpleBlock):
                         variable_costs += (
                             m.flow[i, o, p, t]
                             * m.objective_weighting[t]
-                            * m.flows[i, o].variable_costs[p]
+                            * m.flows[i, o].variable_costs[t]
                             * ((1 + m.discount_rate) ** -p)
                         )
 
