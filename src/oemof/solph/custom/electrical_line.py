@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -92,7 +93,6 @@ class ElectricalLine(Flow):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
-        self.multiperiod = kwargs.get("multiperiod", False)
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:
@@ -108,10 +108,7 @@ class ElectricalLine(Flow):
         self.bidirectional = True
 
     def constraint_group(self):
-        if not self.multiperiod:
-            return ElectricalLineBlock
-        else:
-            return ElectricalLineMultiPeriodBlock
+        return ElectricalLineBlock
 
 
 class ElectricalLineBlock(SimpleBlock):
@@ -168,11 +165,12 @@ class ElectricalLineBlock(SimpleBlock):
             initialize=[n for n in m.es.nodes if isinstance(n, ElectricalBus)]
         )
 
-        def _voltage_angle_bounds(block, b, t):
+        def _voltage_angle_bounds(block, b):
             return b.v_min, b.v_max
 
         self.voltage_angle = Var(
-            self.ELECTRICAL_BUSES, m.TIMESTEPS, bounds=_voltage_angle_bounds
+            self.ELECTRICAL_BUSES, m.TIMESTEPS,
+            bounds=_voltage_angle_bounds
         )
 
         if True not in [b.slack for b in self.ELECTRICAL_BUSES]:
@@ -187,13 +185,13 @@ class ElectricalLineBlock(SimpleBlock):
             bus.slack = True
 
         def _voltage_angle_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     if n.input.slack is True:
                         self.voltage_angle[n.output, t].value = 0
                         self.voltage_angle[n.output, t].fix()
                     try:
-                        lhs = m.flow[n.input, n.output, t]
+                        lhs = m.flow[n.input, n.output, p, t]
                         rhs = (
                             1
                             / n.reactance[t]
@@ -204,12 +202,12 @@ class ElectricalLineBlock(SimpleBlock):
                         )
                     except ValueError:
                         raise ValueError(
-                            "Error in constraint creation",
+                            "Error in constraint creation ",
                             "of node {}".format(n.label),
                         )
-                    block.electrical_flow.add((n, t), (lhs == rhs))
+                    block.electrical_flow.add((n, p, t), (lhs == rhs))
 
-        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMEINDEX, noruleinit=True)
 
         self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)
 
