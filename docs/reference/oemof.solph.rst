@@ -28,22 +28,17 @@ oemof.solph.buses.Bus
 oemof.solph.flows
 -----------------
 
-.. automodule:: oemof.solph.flows
+.. automodule:: oemof.solph.flows._flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.flow
+.. automodule:: oemof.solph.flows._investment_flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.investment_flow
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-.. automodule:: oemof.solph.blocks.non_convex_flow
+.. automodule:: oemof.solph.flows._non_convex_flow
     :members:
     :undoc-members:
     :show-inheritance:
