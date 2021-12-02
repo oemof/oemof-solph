@@ -7,7 +7,7 @@ Submodules
 oemof.solph.EnergySystem
 ------------------------
 
-.. automodule:: oemof.solph.network.energy_system
+.. automodule:: oemof.solph._energy_system
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,15 +15,11 @@ oemof.solph.EnergySystem
 oemof.solph.buses.Bus
 ---------------
 
-.. automodule:: oemof.solph.network.bus
+.. automodule:: oemof.solph.buses
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.bus
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 oemof.solph.flows
 -----------------

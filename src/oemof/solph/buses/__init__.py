@@ -11,8 +11,10 @@ experimental code should be included in oemof.experimental.
 
 from . import experimental
 from ._bus import Bus
+from ._bus import BusBlock
 
 __all__ = [
     "experimental",
     "Bus",
+    "BusBlock",
 ]
