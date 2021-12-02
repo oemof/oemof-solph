@@ -69,7 +69,7 @@ class InvestmentFlow(Flow):
         existing=0,
         nonconvex=False,
         offset=0,
-        **kwargs,
+        **flow_kwargs
     ):
         investment = Investment(
             maximum=maximum,
@@ -79,7 +79,28 @@ class InvestmentFlow(Flow):
             nonconvex=nonconvex,
             offset=offset,
         )
-        super().__init__(Investment=investment, **kwargs)
+
+        flow_keys = [
+            "nominal_value",
+            "summed_max",
+            "summed_min",
+            "integer",
+            "fix",
+            "variable_costs",
+            "min",
+            "max",
+            "positive_gradient",
+            "negative_gradient",
+        ]
+
+        for key in flow_kwargs.keys():
+            if key not in flow_keys:
+                raise AttributeError(
+                    "{} is not an Attribute of the Flow class"
+                    " of oemof.solph.".format(key)
+                )
+
+        super().__init__(Investment=investment, **flow_kwargs)
 
 
 class InvestmentFlowBlock(SimpleBlock):
