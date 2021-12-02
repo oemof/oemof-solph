@@ -166,6 +166,8 @@ class GenericStorage(network.Node):
 
         # Check number of flows.
         self._check_number_of_flows()
+        # Check for infeasible parameter combinations
+        self._check_infeasible_parameter_combinations()
 
         # Check attributes for the investment mode.
         if self._invest_group is True:
@@ -253,6 +255,16 @@ class GenericStorage(network.Node):
             raise AttributeError(msg.format("input", self.label))
         if len(self.outputs) > 1:
             raise AttributeError(msg.format("output", self.label))
+
+    def _check_infeasible_parameter_combinations(self):
+        """Checks for infeasible parameter combinations and raises error"""
+        msg = ("initial_storage_level must be greater or equal to "
+               "min_storage_level and smaller or equal to "
+               "max_storage_level.")
+        if self.initial_storage_level is not None:
+            if (self.initial_storage_level < self.min_storage_level[0]
+                    or self.initial_storage_level > self.max_storage_level[0]):
+                raise ValueError(msg)
 
     def constraint_group(self):
         if self._invest_group is True:
