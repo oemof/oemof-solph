@@ -258,11 +258,11 @@ class GenericStorage(network.Node):
 
     def _check_infeasible_parameter_combinations(self):
         """Checks for infeasible parameter combinations and raises error"""
-        msg = ("initial_storage_level must be geater or equal to "
+        msg = ("initial_storage_level must be greater or equal to "
                "min_storage_level and smaller or equal to "
                "max_storage_level.")
-        if (self.initial_storage_level < self.min_storage_level
-                or self.initial_storage_level > self.max_storage_level):
+        if (self.initial_storage_level < self.min_storage_level[0]
+                or self.initial_storage_level > self.max_storage_level[0]):
             raise ValueError(msg)
 
     def constraint_group(self):
