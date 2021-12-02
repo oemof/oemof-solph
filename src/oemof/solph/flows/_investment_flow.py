@@ -23,17 +23,36 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
 
+from oemof.solph._options import Investment
+
 from ._flow import Flow
 
 
 class InvestmentFlow(Flow):
     r"""
     Flow with a variable flow capacity usually for investment optimisations.
-    
+
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+    def __init__(
+        self,
+        maximum=float("+inf"),
+        minimum=0,
+        ep_costs=0,
+        existing=0,
+        nonconvex=False,
+        offset=0,
+        **kwargs,
+    ):
+        instvestment = Investment(
+            maximum=maximum,
+            minimum=minimum,
+            ep_costs=ep_costs,
+            existing=existing,
+            nonconvex=nonconvex,
+            offset=offset,
+        )
+        super().__init__(Investment=instvestment, **kwargs)
 
 
 class InvestmentFlowBlock(SimpleBlock):
