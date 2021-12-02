@@ -37,4 +37,4 @@ Contributors
 ############
 
 * Patrik Schönfeldt
-
+* Johannes Röder
