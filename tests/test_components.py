@@ -76,6 +76,27 @@ def test_generic_storage_3():
     )
 
 
+def test_generic_storage_4():
+    """Infeasible parameter combination for initial_storage_level"""
+    bel = Bus()
+    with pytest.raises(
+        ValueError,
+        match="initial_storage_level must be greater"
+    ):
+        components.GenericStorage(
+            label="storage4",
+            nominal_storage_capacity=10,
+            inputs={bel: Flow(variable_costs=10e10)},
+            outputs={bel: Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+        )
+
 def test_generic_storage_with_old_parameters():
     deprecated = {
         "nominal_capacity": 45,
