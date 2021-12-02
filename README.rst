@@ -155,7 +155,7 @@ But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
-Check the solver installation by executing the test_installation example below (section `Installation Test <check_installation_label>`_).
+Check the solver installation by executing the test_installation example below (section :ref:`Installation Test <check_installation_label>`).
 
 **Linux**
 
