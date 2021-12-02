@@ -167,6 +167,9 @@ class GenericStorage(network.Node):
         # Check number of flows.
         self._check_number_of_flows()
 
+        # Check infeasible parameter combinations
+        self._check_infeasible_parameter_combinations()
+
         # Check attributes for the investment mode.
         if self._invest_group is True:
             self._check_invest_attributes()
