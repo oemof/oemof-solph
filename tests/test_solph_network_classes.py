@@ -92,6 +92,15 @@ def test_flow_with_fix_and_min_max():
         solph.flows.Flow(fix=[1, 3], max=[0, 5], min=[4, 9])
 
 
+def test_summed_min_and_summed_max():
+    msg1 = "If summed_max is set in a dispatch model,"
+    msg2 = "If summed_min is set in a dispatch model,"
+    with pytest.raises(AssertionError, match=msg1):
+        solph.flows.Flow(summed_max=0.3)
+    with pytest.raises(AssertionError, match=msg2):
+        solph.flows.Flow(summed_min=0.3)
+
+
 def test_min_max_values_for_bidirectional_flow():
     a = solph.flows.Flow(bidirectional=True)  # use default values
     b = solph.flows.Flow(bidirectional=True, min=-0.9, max=0.9)
