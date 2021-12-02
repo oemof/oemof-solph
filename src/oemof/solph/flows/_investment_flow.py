@@ -71,7 +71,7 @@ class InvestmentFlow(Flow):
         offset=0,
         **kwargs,
     ):
-        instvestment = Investment(
+        investment = Investment(
             maximum=maximum,
             minimum=minimum,
             ep_costs=ep_costs,
@@ -79,7 +79,7 @@ class InvestmentFlow(Flow):
             nonconvex=nonconvex,
             offset=offset,
         )
-        super().__init__(Investment=instvestment, **kwargs)
+        super().__init__(Investment=investment, **kwargs)
 
 
 class InvestmentFlowBlock(SimpleBlock):
