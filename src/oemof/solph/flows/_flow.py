@@ -14,7 +14,6 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
-import math
 from warnings import warn
 
 from oemof.network import network as on
