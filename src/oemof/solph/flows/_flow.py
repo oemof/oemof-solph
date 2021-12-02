@@ -225,14 +225,13 @@ class Flow(on.Edge):
                 "nominal_value must be set as well.\n"
                 "Otherwise, it won't have any effect."
             )
-            if self.summed_max is not None:
-                if self.nominal_value is None:
+            if self.nominal_value is None:
+                if self.summed_max is not None:
                     warn(
                         warn_msg.format("summed_max"),
                         debugging.SuspiciousUsageWarning,
                     )
-            if self.summed_min is not None:
-                if self.nominal_value is None:
+                if self.summed_min is not None:
                     warn(
                         warn_msg.format("summed_min"),
                         debugging.SuspiciousUsageWarning,
