@@ -72,12 +72,16 @@
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+.. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/75789b1578035d0b658c4b97fcc41fc3ca61638e/docs/_logo/logo_oemof_solph_big.svg
+    :align: center
+
+------------------------------
+
 ===========
 oemof.solph
 ===========
 
 **A model generator for energy system modelling and optimisation (LP/MILP)**
-
 
 .. contents::
     :depth: 2
@@ -151,7 +155,7 @@ But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
-Check the solver installation by executing the test_installation example below (section `Installation test`).
+Check the solver installation by executing the test_installation example below (section `Installation Test <check_installation_label>`_).
 
 **Linux**
 
