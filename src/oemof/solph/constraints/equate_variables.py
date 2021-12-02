@@ -14,13 +14,8 @@ from pyomo import environ as po
 
 def equate_variables(model, var1, var2, factor1=1, name=None):
     r"""
-    Adds a constraint to the given model that set two variables to equal
+    Adds a constraint to the given model that sets two variables to equal
     adaptable by a factor.
-
-    **The following constraints are build:**
-
-      .. math::
-        var\textit{1} \cdot factor\textit{1} = var\textit{2}
 
     Parameters
     ----------
@@ -36,6 +31,27 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
         name is: equate + string representation of var1 and var2.
     model : oemof.solph.Model
         Model to which the constraint is added.
+
+    **The following constraints are build:**
+
+      .. math::
+        var_1 \cdot factor_1 = var_1
+
+     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| symbol           | attribute           | type | explanation                                                                                                                                    |
++==================+=====================+======+================================================================================================================================================+
+| :math:`var_1`    | pyomo.environ.Var`  | V    | First variable, to be set to equal with :math:`var_2` and multiplied with :math:`factor_1`var_1                                             |
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| :math:`var_2`    | pyomo.environ.Var`  | V    | Second variable, to be set equal to :math:`var_1 \cdot factor_1`                                                                               |
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| :math:`factor_1` | `float`             | P    | Factor to define the proportion between the variables. The default value is 1.                                                                 |
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| name             | `str`               | P    | Optional name for the equation e.g. in the LP file. By default the name is: equate + string representation of :math:`var_1` and :math:`var_2`. |
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
+| model            | `oemof.solph.Model` | P    | Model to which the constraint is added                                                                                                        |
++------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
 
     Examples
     --------

@@ -64,6 +64,24 @@ def limit_active_flow_count(
     :math:`N_{X,min}`  P    lower_limit
     :math:`N_{X,max}`  P    lower_limit
     ================== ==== ===================================================
+
+
+
+     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+
++-------------------+--------------------+------+----------------------------------------------------------+
+| symbol            | attribute          | type | explanation                                              |
++===================+====================+======+==========================================================+
+| model             | `oemof.solph.Model`| P    | Model to which constraints are added                     |
++-------------------+--------------------+------+----------------------------------------------------------+
+| `constraint_name` | `str`              | P    | Name for the constraint                                  |
++-------------------+--------------------+------+----------------------------------------------------------+
+| flows             | list of flows      | V    | Flows (have to be NonConvex) in the format `[(in, out)]` |
++-------------------+--------------------+------+----------------------------------------------------------+
+| `lower_limit`     | `int`              | P    | Minimum number of active flows in the list               |
++-------------------+--------------------+------+----------------------------------------------------------+
+| `upper_limit`     | `int`              | P    | Maximum number of active flows in the list               |
++-------------------+--------------------+------+----------------------------------------------------------+
     """
 
     # number of concurrent active flows
