@@ -25,10 +25,10 @@ oemof.solph.buses.Bus
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.flows.Flow
-----------------
+oemof.solph.flows
+-----------------
 
-.. automodule:: oemof.solph.network.flow
+.. automodule:: oemof.solph.flows
     :members:
     :undoc-members:
     :show-inheritance:
