@@ -254,6 +254,13 @@ class GenericStorage(network.Node):
         if len(self.outputs) > 1:
             raise AttributeError(msg.format("output", self.label))
 
+    def _check_infeasible_parameter_combinations(self):
+        """Check for infeasible parameter combinations and raise errors"""
+        msg = ("The initial storage level must be smaller"
+               " or equal to the minimum storage level.")
+        if self.min_storage_level < self.initial_storage_level:
+            raise ValueError(msg)
+
     def constraint_group(self):
         if self._invest_group is True:
             return GenericInvestmentStorageBlock
