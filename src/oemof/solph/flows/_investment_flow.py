@@ -75,6 +75,7 @@ class InvestmentFlow(Flow):
             "max",
             "positive_gradient",
             "negative_gradient",
+            "investment"  # needs to be removed ?
         ]
 
         for key in flow_kwargs.keys():
