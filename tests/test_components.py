@@ -80,8 +80,7 @@ def test_generic_storage_4():
     """Infeasible parameter combination for initial_storage_level"""
     bel = Bus()
     with pytest.raises(
-        ValueError,
-        match="initial_storage_level must be greater"
+        ValueError, match="initial_storage_level must be greater"
     ):
         components.GenericStorage(
             label="storage4",
