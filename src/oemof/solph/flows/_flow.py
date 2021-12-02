@@ -221,20 +221,23 @@ class Flow(on.Edge):
             )
 
         if not self.investment:
-            assumption_msg = (
+            warn_msg = (
                 "If {} is set in a dispatch model, "
-                "nominal_value must be set as well."
+                "nominal_value must be set as well.\n"
+                "Otherwise, it won't have any effect."
             )
             if self.summed_max is not None:
-                assert (
-                    math.isfinite(self.nominal_value),
-                    assumption_msg.format("summed_max")
-                )
-            if self.summex_min is not None:
-                assert (
-                    math.isfinite(self.nominal_value),
-                    assumption_msg.format("summed_min")
-                )
+                if self.nominal_value is None:
+                    warn(
+                        warn_msg.format("summed_max"),
+                        debugging.SuspiciousUsageWarning,
+                    )
+            if self.summed_min is not None:
+                if self.nominal_value is None:
+                    warn(
+                        warn_msg.format("summed_min"),
+                        debugging.SuspiciousUsageWarning,
+                    )
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
