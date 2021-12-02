@@ -28,7 +28,8 @@ from ._flow import Flow
 
 class InvestmentFlow(Flow):
     r"""
-    Wrapper class to prepare separation of flow classes.
+    Flow with a variable flow capacity usually for investment optimisations.
+    
     """
 
     def __init__(self, **kwargs):
