@@ -32,7 +32,33 @@ class InvestmentFlow(Flow):
     r"""
     Flow with a variable flow capacity usually for investment optimisations.
 
-    """
+    Parameters
+    ----------
+    maximum : float, :math:`P_{invest,max}` or :math:`E_{invest,max}`
+        Maximum of the additional invested capacity
+    minimum : float, :math:`P_{invest,min}` or :math:`E_{invest,min}`
+        Minimum of the additional invested capacity. If `nonconvex` is `True`,
+        `minimum` defines the threshold for the invested capacity.
+    ep_costs : float, :math:`c_{invest,var}`
+        Equivalent periodical costs for the investment per flow capacity.
+    existing : float, :math:`P_{exist}` or :math:`E_{exist}`
+        Existing / installed capacity. The invested capacity is added on top
+        of this value. Not applicable if `nonconvex` is set to `True`.
+    nonconvex : bool
+        If `True`, a binary variable for the status of the investment is
+        created. This enables additional fix investment costs (*offset*)
+        independent of the invested flow capacity. Therefore, use the `offset`
+        parameter.
+    offset : float, :math:`c_{invest,fix}`
+        Additional fix investment costs. Only applicable if `nonconvex` is set
+        to `True`.
+
+
+    For the variables, constraints and parts of the objective function, which
+    are created,
+    see :class:`oemof.solph.flows._investment_flow.InvestmentFlowBlock`.
+
+    """  # noqa: E501
 
     def __init__(
         self,
