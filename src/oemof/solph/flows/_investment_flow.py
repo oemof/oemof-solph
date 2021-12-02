@@ -52,7 +52,8 @@ class InvestmentFlow(Flow):
     offset : float, :math:`c_{invest,fix}`
         Additional fix investment costs. Only applicable if `nonconvex` is set
         to `True`.
-
+    **kwargs :
+        Parameter of the :class:`oemof.solph.flows._flow.Flow`
 
     For the variables, constraints and parts of the objective function, which
     are created,
