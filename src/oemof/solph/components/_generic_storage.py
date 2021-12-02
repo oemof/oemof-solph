@@ -261,9 +261,10 @@ class GenericStorage(network.Node):
         msg = ("initial_storage_level must be greater or equal to "
                "min_storage_level and smaller or equal to "
                "max_storage_level.")
-        if (self.initial_storage_level < self.min_storage_level[0]
-                or self.initial_storage_level > self.max_storage_level[0]):
-            raise ValueError(msg)
+        if self.initial_storage_level is not None:
+            if (self.initial_storage_level < self.min_storage_level[0]
+                    or self.initial_storage_level > self.max_storage_level[0]):
+                raise ValueError(msg)
 
     def constraint_group(self):
         if self._invest_group is True:

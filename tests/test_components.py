@@ -97,6 +97,7 @@ def test_generic_storage_4():
             outflow_conversion_factor=0.8,
         )
 
+
 def test_generic_storage_with_old_parameters():
     deprecated = {
         "nominal_capacity": 45,
