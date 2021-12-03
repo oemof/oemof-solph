@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 
 SPDX-License-Identifier: MIT
 
@@ -71,7 +72,6 @@ PiecewiseLinearTransformer'>
         self.in_breakpoints = list(kwargs.get("in_breakpoints"))
         self.conversion_function = kwargs.get("conversion_function")
         self.pw_repn = kwargs.get("pw_repn")
-        self.multiperiod = kwargs.get("multiperiod", False)
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError(
@@ -87,10 +87,7 @@ PiecewiseLinearTransformer'>
             )
 
     def constraint_group(self):
-        if not self.multiperiod:
-            return PiecewiseLinearTransformerBlock
-        else:
-            return PiecewiseLinearTransformerMultiPeriodBlock
+        return PiecewiseLinearTransformerBlock
 
 
 class PiecewiseLinearTransformerBlock(SimpleBlock):
@@ -129,7 +126,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             self.pw_repn = pw_repns[0]
         else:
             print(
-                "Cannot different piecewise representations ",
+                "Cannot model different piecewise representations ",
                 [n.pw_repn for n in group],
             )
 
@@ -172,26 +169,26 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds
         )
 
-        def _in_equation(block, n, t):
+        def _in_equation(block, n, p, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[list(n.inputs.keys())[0], n, t]
+            expr += -m.flow[list(n.inputs.keys())[0], n, p, t]
             expr += self.inflow[n, t]
             return expr == 0
 
         self.equate_in = Constraint(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_in_equation
+            self.PWLINEARTRANSFORMERS, m.TIMEINDEX, rule=_in_equation
         )
 
-        def _out_equation(block, n, t):
+        def _out_equation(block, n, p, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
             expr += self.outflow[n, t]
             return expr == 0
 
         self.equate_out = Constraint(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_out_equation
+            self.PWLINEARTRANSFORMERS, m.TIMEINDEX, rule=_out_equation
         )
 
         self.piecewise = Piecewise(

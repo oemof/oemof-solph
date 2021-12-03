@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 
 SPDX-License-Identifier: MIT
 
@@ -30,8 +31,6 @@ from oemof.solph.plumbing import sequence
 
 class Link(on.Transformer):
     """A Link object with 1...2 inputs and 1...2 outputs.
-
-    For a MultiPeriodModel, :attr:`multiperiod` has to be set to True.
 
     Parameters
     ----------
@@ -81,7 +80,6 @@ class Link(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get("conversion_factors", {}).items()
         }
-        self.multiperiod = kwargs.get("multiperiod", False)
 
         wrong_args_message = (
             "Component `Link` must have exactly"
@@ -93,10 +91,7 @@ class Link(on.Transformer):
         assert len(self.conversion_factors) == 2, wrong_args_message
 
     def constraint_group(self):
-        if not self.multiperiod:
-            return LinkBlock
-        else:
-            return LinkMultiPeriodBlock
+        return LinkBlock
 
 
 class LinkBlock(SimpleBlock):
@@ -164,13 +159,13 @@ class LinkBlock(SimpleBlock):
         self.direction = Var(self.LINKS, m.TIMESTEPS, within=Binary)
 
         def _input_output_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
                             expr = (
-                                m.flow[n, cidx[1], t]
-                                == c[t] * m.flow[cidx[0], n, t]
+                                m.flow[n, cidx[1], p, t]
+                                == c[t] * m.flow[cidx[0], n, p, t]
                             )
                         except ValueError:
                             raise ValueError(
@@ -179,12 +174,12 @@ class LinkBlock(SimpleBlock):
                                     cidx[0], cidx[1], n
                                 ),
                             )
-                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                        block.relation.add((n, cidx[0], cidx[1], p, t), expr)
 
         self.relation = Constraint(
             [
-                (n, cidx[0], cidx[1], t)
-                for t in m.TIMESTEPS
+                (n, cidx[0], cidx[1], p, t)
+                for p, t in m.TIMEINDEX
                 for n, conversion in all_conversions.items()
                 for cidx, c in conversion.items()
             ],
@@ -192,32 +187,32 @@ class LinkBlock(SimpleBlock):
         )
         self.relation_build = BuildAction(rule=_input_output_relation)
 
-        def _flow1_rule(block, i, link, t):
+        def _flow1_rule(block, i, link, p, t):
             """Rule definition for Eq. (2)."""
             expr = 1 >= (
                 self.direction[link, t]
-                + m.flow[i, link, t]
+                + m.flow[i, link, p, t]
                 * m.flows[i, link].max[t]
                 * m.flows[i, link].nominal_value
             )
             return expr
 
         self.flow1 = Constraint(
-            self.LINK_1ST_INFLOWS, m.TIMESTEPS, rule=_flow1_rule
+            self.LINK_1ST_INFLOWS, m.TIMEINDEX, rule=_flow1_rule
         )
 
-        def _flow2_rule(block, i, link, t):
+        def _flow2_rule(block, i, link, p, t):
             """Rule definition for Eq. (3)."""
             expr = 0 <= (
                 self.direction[link, t]
-                - m.flow[i, link, t]
+                - m.flow[i, link, p, t]
                 * m.flows[i, link].max[t]
                 * m.flows[i, link].nominal_value
             )
             return expr
 
         self.flow2 = Constraint(
-            self.LINK_2ND_INFLOWS, m.TIMESTEPS, rule=_flow2_rule
+            self.LINK_2ND_INFLOWS, m.TIMEINDEX, rule=_flow2_rule
         )
 
 
