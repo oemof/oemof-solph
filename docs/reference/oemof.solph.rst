@@ -169,7 +169,7 @@ oemof.solph.constraints.shared_limit
     :show-inheritance:
 
 
-oemof.solph.console\_scripts module
+oemof.solph._console_scripts module
 -----------------------------------
 
 .. automodule:: oemof.solph._console_scripts
