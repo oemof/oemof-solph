@@ -264,43 +264,49 @@ oemof.solph.buses.electrical_bus
     :undoc-members:
     :show-inheritance:
 
+Flows
+-----
 
-oemof.solph.custom.ElectricalLine
----------------------------------
+oemof.solph.flows.experimental.ElectricalLine
+^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.custom.electrical_line
+.. automodule:: oemof.solph.flows.experimental.ElectricalLine
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.custom.GenericCAES
-------------------------------
 
-.. automodule:: oemof.solph.custom.generic_caes
+Components
+----------
+
+oemof.solph.components.experimental.GenericCAES
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components.experimental.GenericCAES
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.custom.Link
------------------------
+oemof.solph.components.experimental.Link
+^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.custom.link
+.. automodule:: oemof.solph.components.experimental.Link
     :members:
     :undoc-members:
     :show-inheritance:
 
 oemof.solph.custom.PiecewiseLinearTransformer
----------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.custom.piecewise_linear_transformer
+.. automodule:: oemof.solph.components.experimental.PiecewiseLinearTransformer
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.custom.SinkDSM
----------------------------------------------
+oemof.solph.components.experimental.SinkDSM
+^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.custom.sink_dsm
+.. automodule:: oemof.solph.components.experimental.SinkDSM
     :members:
     :undoc-members:
     :show-inheritance:
