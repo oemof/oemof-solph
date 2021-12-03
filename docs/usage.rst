@@ -375,7 +375,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../src/oemof/solph/components/extraction_turbine_chp.py
+.. include:: ../src/oemof/solph/components/_extraction_turbine_chp.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -514,13 +514,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -694,7 +694,7 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/offset_transformer.py
+.. include:: ../src/oemof/solph/components/_offset_transformer.py
   :start-after: _OffsetTransformer-equations:
   :end-before: """
 
@@ -733,7 +733,7 @@ GenericCAES (custom)
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../src/oemof/solph/custom/generic_caes.py
+.. include:: ../src/oemof/solph/custom/_generic_caes.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
