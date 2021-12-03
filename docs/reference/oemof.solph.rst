@@ -25,7 +25,7 @@ oemof.solph.Flow
     :show-inheritance:
 
 oemof.solph.InvestmentFlow
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows._investment_flow
     :members:
@@ -33,7 +33,7 @@ oemof.solph.InvestmentFlow
     :show-inheritance:
 
 oemof.solph.NonConvexFlow
-^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows._non_convex_flow
     :members:
@@ -45,7 +45,7 @@ Components
 ----------
 
 oemof.solph.components.Sink
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._sink
     :members:
@@ -53,7 +53,7 @@ oemof.solph.components.Sink
     :show-inheritance:
 
 oemof.solph.components.Source
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._source
     :members:
@@ -61,7 +61,7 @@ oemof.solph.components.Source
     :show-inheritance:
 
 oemof.solph.components.Transformer
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._transformer
     :members:
@@ -69,7 +69,7 @@ oemof.solph.components.Transformer
     :show-inheritance:
 
 oemof.solph.components.extractionTurbineCHP
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._extraction_turbine_chp
     :members:
@@ -77,7 +77,7 @@ oemof.solph.components.extractionTurbineCHP
     :show-inheritance:
 
 oemof.solph.components.GenericCHP
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._generic_chp
     :members:
@@ -85,7 +85,7 @@ oemof.solph.components.GenericCHP
     :show-inheritance:
 
 oemof.solph.components.GenericStorage
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._generic_storage
     :members:
@@ -93,7 +93,7 @@ oemof.solph.components.GenericStorage
     :show-inheritance:
 
 oemof.solph.components.OffsetTransformer
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._offset_transformer
     :members:
@@ -105,7 +105,7 @@ Additional constraints
 ----------------------
 
 oemof.solph.constraints.equate_variables
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.equate_variables
     :members:
@@ -113,7 +113,7 @@ oemof.solph.constraints.equate_variables
     :show-inheritance:
 
 oemof.solph.constraints.limit_active_flow_count
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.limit_active_flow_count
     :members:
@@ -121,7 +121,7 @@ oemof.solph.constraints.limit_active_flow_count
     :show-inheritance:
 
 oemof.solph.constraints.limit_active_flow_count_by_keyword
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.limit_active_flow_count_by_keyword
     :members:
@@ -129,7 +129,7 @@ oemof.solph.constraints.limit_active_flow_count_by_keyword
     :show-inheritance:
 
 oemof.solph.constraints.emission_limit
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.emission_limit
     :members:
@@ -137,7 +137,7 @@ oemof.solph.constraints.emission_limit
     :show-inheritance:
 
 oemof.solph.constraints.generic_integral_limit
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.generic_integral_limit
     :members:
@@ -145,7 +145,7 @@ oemof.solph.constraints.generic_integral_limit
     :show-inheritance:
 
 oemof.solph.constraints.additional_investment_flow_limit
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.additional_investment_flow_limit
     :members:
@@ -153,7 +153,7 @@ oemof.solph.constraints.additional_investment_flow_limit
     :show-inheritance:
 
 oemof.solph.constraints.investment_limit
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.investment_limit
     :members:
@@ -161,7 +161,7 @@ oemof.solph.constraints.investment_limit
     :show-inheritance:
 
 oemof.solph.constraints.shared_limit
-^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.constraints.shared_limit
     :members:
@@ -178,7 +178,7 @@ oemof.solph.console\_scripts module
     :show-inheritance:
 
 oemof.solph._energy_system module
-------------------------
+---------------------------------
 
 .. automodule:: oemof.solph._energy_system
     :members:
@@ -186,7 +186,7 @@ oemof.solph._energy_system module
     :show-inheritance:
 
 oemof.solph._groupings module
----------------------
+---------------------------------
 
 .. automodule:: oemof.solph._groupings
     :members:
@@ -194,7 +194,7 @@ oemof.solph._groupings module
     :show-inheritance:
 
 oemof.solph._helpers module
--------------------
+---------------------------------
 
 .. automodule:: oemof.solph._helpers
     :members:
@@ -202,7 +202,7 @@ oemof.solph._helpers module
     :show-inheritance:
 
 oemof.solph._models module
--------------------------
+---------------------------------
 
 .. automodule:: oemof.solph._models
     :members:
@@ -210,7 +210,7 @@ oemof.solph._models module
     :show-inheritance:
 
 oemof.solph._options module
---------------------------
+---------------------------
 
 .. automodule:: oemof.solph._options
     :members:
@@ -218,7 +218,7 @@ oemof.solph._options module
     :show-inheritance:
 
 oemof.solph._plumbing module
----------------------------
+----------------------------
 
 .. automodule:: oemof.solph._plumbing
     :members:
@@ -226,7 +226,7 @@ oemof.solph._plumbing module
     :show-inheritance:
 
 oemof.solph.helpers module
--------------------
+--------------------------
 
 .. automodule:: oemof.solph.helpers
     :members:
@@ -234,7 +234,7 @@ oemof.solph.helpers module
     :show-inheritance:
 
 oemof.solph.processing module
-----------------------
+-----------------------------
 
 .. automodule:: oemof.solph.processing
     :members:
@@ -242,7 +242,7 @@ oemof.solph.processing module
     :show-inheritance:
 
 oemof.solph.views module
----------------------------------
+------------------------
 
 .. automodule:: oemof.solph.views
     :members:
@@ -257,7 +257,7 @@ Buses
 -----
 
 oemof.solph.buses.electrical_bus
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.buses.experimental._electrical_bus
     :members:
@@ -268,7 +268,7 @@ Flows
 -----
 
 oemof.solph.flows.experimental.ElectricalLine
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows.experimental.ElectricalLine
     :members:
@@ -280,7 +280,7 @@ Components
 ----------
 
 oemof.solph.components.experimental.GenericCAES
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components.experimental.GenericCAES
     :members:
@@ -288,7 +288,7 @@ oemof.solph.components.experimental.GenericCAES
     :show-inheritance:
 
 oemof.solph.components.experimental.Link
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components.experimental.Link
     :members:
@@ -296,7 +296,7 @@ oemof.solph.components.experimental.Link
     :show-inheritance:
 
 oemof.solph.custom.PiecewiseLinearTransformer
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components.experimental.PiecewiseLinearTransformer
     :members:
@@ -304,7 +304,7 @@ oemof.solph.custom.PiecewiseLinearTransformer
     :show-inheritance:
 
 oemof.solph.components.experimental.SinkDSM
-^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components.experimental.SinkDSM
     :members:
