@@ -1,21 +1,22 @@
-oemof.solph package
-===================
-
 Submodules
-----------
+==========
+
+Buses
+-----
+
+oemof.solph.buses.Bus
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.buses
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 oemof.solph.EnergySystem
 ------------------------
 
 .. automodule:: oemof.solph._energy_system
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.buses.Bus
----------------
-
-.. automodule:: oemof.solph.buses
     :members:
     :undoc-members:
     :show-inheritance:
@@ -216,6 +217,21 @@ oemof.solph.views module
 ---------------------------------
 
 .. automodule:: oemof.solph.views
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Submodules (experimental)
+=========================
+
+Buses
+-----
+
+oemof.solph.buses.electrical_bus
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.buses.experimental._electrical_bus
     :members:
     :undoc-members:
     :show-inheritance:
