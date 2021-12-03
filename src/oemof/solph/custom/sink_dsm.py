@@ -612,10 +612,10 @@ class SinkDSMOemofBlock(SimpleBlock):
             The actual demand after DSM.
             Generator Production == Demand_el +- DSM
             """
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for g in group:
                     # Inflow from bus
-                    lhs = m.flow[g.inflow, g, t]
+                    lhs = m.flow[g.inflow, g, p, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
@@ -626,10 +626,10 @@ class SinkDSMOemofBlock(SimpleBlock):
                     )
 
                     # add constraint
-                    block.input_output_relation.add((g, t), (lhs == rhs))
+                    block.input_output_relation.add((g, p, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMESTEPS, noruleinit=True
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -719,21 +719,50 @@ class SinkDSMOemofBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        dsm_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for t in m.TIMESTEPS:
+        if not m.es.multi_period:
+            for t in m.TIMESTEPS:
+                for g in self.dsm:
+                    variable_costs += (
+                        self.dsm_up[g, t]
+                        * g.cost_dsm_up[t]
+                        * m.objective_weighting[t]
+                    )
+                    variable_costs += (
+                        self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
+
+        else:
             for g in self.dsm:
-                dsm_cost += (
-                    self.dsm_up[g, t]
-                    * g.cost_dsm_up[t]
-                    * m.objective_weighting[t]
-                )
-                dsm_cost += (
-                    self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
-                    + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                ) * m.objective_weighting[t]
+                for p, t in m.TIMEINDEX:
+                    variable_costs += (
+                        self.dsm_up[g, t]
+                        * m.objective_weighting[t]
+                        * g.cost_dsm_up[p]
+                        * ((1 + m.discount_rate) ** -p)
+                    )
+                    variable_costs += (
+                        (self.dsm_do_shift[g, t]
+                         * g.cost_dsm_down_shift[p]
+                         + self.dsm_do_shed[g, t]
+                         * g.cost_dsm_down_shed[p])
+                        * m.objective_weighting[t]
+                        * ((1 + m.discount_rate) ** -p)
+                    )
 
-        self.costs = Expression(expr=dsm_cost)
+                if g.fixed_costs[0] is not None:
+                    for p in m.PERIODS:
+                        fixed_costs += (
+                            g.max_demand
+                            * max(g.demand)
+                            * g.fixed_costs[p]
+                            * ((1 + m.discount_rate) ** (-p))
+                        )
+
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
 
@@ -2003,13 +2032,13 @@ class SinkDSMDIWBlock(SimpleBlock):
             The actual demand after DSM.
             Sink Inflow == Demand +- DSM
             """
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for g in group:
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
 
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, t]
+                        lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand
@@ -2022,13 +2051,15 @@ class SinkDSMDIWBlock(SimpleBlock):
                         )
 
                         # add constraint
-                        block.input_output_relation.add((g, t), (lhs == rhs))
+                        block.input_output_relation.add(
+                            (g, p, t), (lhs == rhs)
+                        )
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
 
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, t]
+                        lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand
@@ -2041,13 +2072,15 @@ class SinkDSMDIWBlock(SimpleBlock):
                             - self.dsm_do_shed[g, t])
 
                         # add constraint
-                        block.input_output_relation.add((g, t), (lhs == rhs))
+                        block.input_output_relation.add(
+                            (g, p, t), (lhs == rhs)
+                        )
 
                     # last time steps: end - delay time
                     else:
 
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, t]
+                        lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand
@@ -2060,10 +2093,12 @@ class SinkDSMDIWBlock(SimpleBlock):
                             - self.dsm_do_shed[g, t])
 
                         # add constraint
-                        block.input_output_relation.add((g, t), (lhs == rhs))
+                        block.input_output_relation.add(
+                            (g, p, t), (lhs == rhs)
+                        )
 
         self.input_output_relation = Constraint(
-            group, m.TIMESTEPS, noruleinit=True
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -2430,22 +2465,51 @@ class SinkDSMDIWBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        dsm_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for t in m.TIMESTEPS:
-            for g in self.dsm:
-                dsm_cost += (
+        if not m.es.multi_period:
+            for t in m.TIMESTEPS:
+                for g in self.dsm:
+                    variable_costs += (
+                        self.dsm_up[g, t]
+                        * g.cost_dsm_up[t]
+                        * m.objective_weighting[t]
+                    )
+                    variable_costs += (
+                        sum(self.dsm_do_shift[g, tt, t] for tt in m.TIMESTEPS)
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
+
+        for g in self.dsm:
+            for p, t in m.TIMEINDEX:
+                variable_costs += (
                     self.dsm_up[g, t]
-                    * g.cost_dsm_up[t]
                     * m.objective_weighting[t]
+                    * g.cost_dsm_up[p]
+                    * ((1 + m.discount_rate) ** -p)
                 )
-                dsm_cost += (
-                    sum(self.dsm_do_shift[g, tt, t] for tt in m.TIMESTEPS)
-                    * g.cost_dsm_down_shift[t]
-                    + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                ) * m.objective_weighting[t]
+                variable_costs += (
+                    (sum(self.dsm_do_shift[g, tt, t]
+                         for tt in m.TIMESTEPS)
+                     * g.cost_dsm_down_shift[p]
+                     + self.dsm_do_shed[g, t]
+                     * g.cost_dsm_down_shed[p])
+                    * m.objective_weighting[t]
+                    * ((1 + m.discount_rate) ** -p)
+                )
 
-        self.costs = Expression(expr=dsm_cost)
+            if g.fixed_costs[0] is not None:
+                for p in m.PERIODS:
+                    fixed_costs += (
+                        g.max_demand
+                        * max(g.demand)
+                        * g.fixed_costs[p]
+                        * ((1 + m.discount_rate) ** (-p))
+                    )
+
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
 
@@ -4795,10 +4859,10 @@ class SinkDSMDLRBlock(SimpleBlock):
             The actual demand after DR.
             Bus outflow == Demand +- DR (i.e. effective Sink consumption)
             """
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for g in group:
                     # outflow from bus
-                    lhs = m.flow[g.inflow, g, t]
+                    lhs = m.flow[g.inflow, g, p, t]
 
                     # Demand +- DR
                     rhs = (
@@ -4814,10 +4878,10 @@ class SinkDSMDLRBlock(SimpleBlock):
                     )
 
                     # add constraint
-                    block.input_output_relation.add((g, t), (lhs == rhs))
+                    block.input_output_relation.add((g, p, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMESTEPS, noruleinit=True
+            group, m.TIMEINDEX, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -5077,12 +5141,11 @@ class SinkDSMDLRBlock(SimpleBlock):
                     # avoid timesteps prior to t = 0
                     if t > 0:
                         # increases minus balancing of reductions
-                        lhs = m.timeincrement[t] * sum(
-                            (
-                                self.dsm_up[g, h, t] * g.efficiency
-                                - self.balance_dsm_up[g, h, t]
-                            )
-                            for h in g.delay_time
+                        lhs = (
+                            m.timeincrement[t]
+                            * sum((self.dsm_up[g, h, t] * g.efficiency
+                                   - self.balance_dsm_up[g, h, t])
+                                  for h in g.delay_time)
                         )
 
                         # load increase storage level transition
@@ -5176,24 +5239,28 @@ class SinkDSMDLRBlock(SimpleBlock):
             for g in group:
 
                 if g.shed_eligibility:
-                    # sum of all load reductions
-                    lhs = sum(self.dsm_do_shed[g, t] for t in m.TIMESTEPS)
+                    for p in m.PERIODS:
+                        # sum of all load reductions
+                        lhs = sum(self.dsm_do_shed[g, t]
+                                  for pp, t in m.TIMEINDEX if pp == p)
 
-                    # year limit
-                    rhs = (
-                        g.capacity_down_mean
-                        * g.max_capacity_down
-                        * g.shed_time
-                        * g.n_yearLimit_shed
-                    )
+                        # year limit
+                        rhs = (
+                            g.capacity_down_mean
+                            * g.max_capacity_down
+                            * g.shed_time
+                            * g.n_yearLimit_shed
+                        )
 
-                    # add constraint
-                    block.dr_yearly_limit_shed.add(g, (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_shed.add((g, p), (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
 
-        self.dr_yearly_limit_shed = Constraint(group, noruleinit=True)
+        self.dr_yearly_limit_shed = Constraint(
+            group, m.PERIODS, noruleinit=True
+        )
         self.dr_yearly_limit_shed_build = BuildAction(
             rule=dr_yearly_limit_shed_rule
         )
@@ -5208,27 +5275,31 @@ class SinkDSMDLRBlock(SimpleBlock):
             for g in group:
 
                 if g.ActivateYearLimit:
-                    # sum of all load reductions
-                    lhs = sum(
-                        sum(self.dsm_do_shift[g, h, t] for h in g.delay_time)
-                        for t in m.TIMESTEPS
-                    )
+                    for p in m.PERIODS:
+                        # sum of all load reductions
+                        lhs = sum(
+                            sum(self.dsm_do_shift[g, h, t]
+                                for h in g.delay_time)
+                            for pp, t in m.TIMEINDEX if pp == p
+                        )
 
-                    # year limit
-                    rhs = (
-                        g.capacity_down_mean
-                        * g.max_capacity_down
-                        * g.shift_time
-                        * g.n_yearLimit_shift
-                    )
+                        # year limit
+                        rhs = (
+                            g.capacity_down_mean
+                            * g.max_capacity_down
+                            * g.shift_time
+                            * g.n_yearLimit_shift
+                        )
 
-                    # add constraint
-                    block.dr_yearly_limit_red.add(g, (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_red.add((g, p), (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
 
-        self.dr_yearly_limit_red = Constraint(group, noruleinit=True)
+        self.dr_yearly_limit_red = Constraint(
+            group, m.PERIODS, noruleinit=True
+        )
         self.dr_yearly_limit_red_build = BuildAction(
             rule=dr_yearly_limit_red_rule
         )
@@ -5241,27 +5312,30 @@ class SinkDSMDLRBlock(SimpleBlock):
             for g in group:
 
                 if g.ActivateYearLimit:
-                    # sum of all load increases
-                    lhs = sum(
-                        sum(self.dsm_up[g, h, t] for h in g.delay_time)
-                        for t in m.TIMESTEPS
-                    )
+                    for p in m.PERIODS:
+                        # sum of all load increases
+                        lhs = sum(
+                            sum(self.dsm_up[g, h, t] for h in g.delay_time)
+                            for pp, t in m.TIMEINDEX if pp == p
+                        )
 
-                    # year limit
-                    rhs = (
-                        g.capacity_up_mean
-                        * g.max_capacity_up
-                        * g.shift_time
-                        * g.n_yearLimit_shift
-                    )
+                        # year limit
+                        rhs = (
+                            g.capacity_up_mean
+                            * g.max_capacity_up
+                            * g.shift_time
+                            * g.n_yearLimit_shift
+                        )
 
-                    # add constraint
-                    block.dr_yearly_limit_inc.add(g, (lhs <= rhs))
+                        # add constraint
+                        block.dr_yearly_limit_inc.add((g, p), (lhs <= rhs))
 
                 else:
                     pass  # return(Constraint.Skip)
 
-        self.dr_yearly_limit_inc = Constraint(group, noruleinit=True)
+        self.dr_yearly_limit_inc = Constraint(
+            group, m.PERIODS, noruleinit=True
+        )
         self.dr_yearly_limit_inc_build = BuildAction(
             rule=dr_yearly_limit_inc_rule
         )
@@ -5415,29 +5489,62 @@ class SinkDSMDLRBlock(SimpleBlock):
         """
         m = self.parent_block()
 
-        dr_cost = 0
+        variable_costs = 0
+        fixed_costs = 0
 
-        for t in m.TIMESTEPS:
+        if not m.es.multi_period:
+            for t in m.TIMESTEPS:
+                for g in self.DR:
+                    variable_costs += (
+                        sum(
+                            self.dsm_up[g, h, t] + self.balance_dsm_do[g, h, t]
+                            for h in g.delay_time
+                        )
+                        * g.cost_dsm_up[t]
+                        * m.objective_weighting[t]
+                    )
+                    variable_costs += (
+                        sum(
+                            self.dsm_do_shift[g, h, t]
+                            + self.balance_dsm_up[g, h, t]
+                            for h in g.delay_time
+                        )
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
+
+        else:
             for g in self.DR:
-                dr_cost += (
-                    sum(
-                        self.dsm_up[g, h, t] + self.balance_dsm_do[g, h, t]
-                        for h in g.delay_time
+                for p, t in m.TIMEINDEX:
+                    variable_costs += (
+                        (sum(self.dsm_up[g, h, t]
+                             + self.balance_dsm_do[g, h, t]
+                             for h in g.delay_time)
+                         * g.cost_dsm_up[t])
+                        * m.objective_weighting[t]
+                        * ((1 + m.discount_rate) ** -p)
                     )
-                    * g.cost_dsm_up[t]
-                    * m.objective_weighting[t]
-                )
-                dr_cost += (
-                    sum(
-                        self.dsm_do_shift[g, h, t]
-                        + self.balance_dsm_up[g, h, t]
-                        for h in g.delay_time
+                    variable_costs += (
+                        (sum(self.dsm_do_shift[g, h, t]
+                             + self.balance_dsm_up[g, h, t]
+                             for h in g.delay_time)
+                         * g.cost_dsm_down_shift[t]
+                         + self.dsm_do_shed[g, t]
+                         * g.cost_dsm_down_shed[t])
+                        * m.objective_weighting[t]
+                        * ((1 + m.discount_rate) ** -p)
                     )
-                    * g.cost_dsm_down_shift[t]
-                    + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                ) * m.objective_weighting[t]
 
-        self.costs = Expression(expr=dr_cost)
+                if g.fixed_costs[0] is not None:
+                    for p in m.PERIODS:
+                        fixed_costs += (
+                            g.max_demand
+                            * max(g.demand)
+                            * g.fixed_costs[p]
+                            * ((1 + m.discount_rate) ** (-p))
+                        )
+
+        self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
 
