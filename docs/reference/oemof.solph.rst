@@ -13,64 +13,63 @@ oemof.solph.buses.Bus
     :show-inheritance:
 
 
-oemof.solph.EnergySystem
-------------------------
+Flows
+-----
 
-.. automodule:: oemof.solph._energy_system
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-oemof.solph.flows
------------------
+oemof.solph.Flow
+^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows._flow
     :members:
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.InvestmentFlow
+^^^^^^^^^^^^^^^^
+
 .. automodule:: oemof.solph.flows._investment_flow
     :members:
     :undoc-members:
     :show-inheritance:
+
+oemof.solph.NonConvexFlow
+^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows._non_convex_flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.components.Sink
-----------------
 
-.. automodule:: oemof.solph.network.sink
+Components
+----------
+
+oemof.solph.components.Sink
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components._sink
     :members:
     :undoc-members:
     :show-inheritance:
 
 oemof.solph.components.Source
-------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.network.source
+.. automodule:: oemof.solph.components._source
     :members:
     :undoc-members:
     :show-inheritance:
 
 oemof.solph.components.Transformer
------------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
-.. automodule:: oemof.solph.network.transformer
+.. automodule:: oemof.solph.components._transformer
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.transformer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.components._extractionTurbineCHP
--------------------------------------------
+oemof.solph.components.extractionTurbineCHP
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._extraction_turbine_chp
     :members:
@@ -78,7 +77,7 @@ oemof.solph.components._extractionTurbineCHP
     :show-inheritance:
 
 oemof.solph.components.GenericCHP
----------------------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._generic_chp
     :members:
@@ -86,7 +85,7 @@ oemof.solph.components.GenericCHP
     :show-inheritance:
 
 oemof.solph.components.GenericStorage
--------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._generic_storage
     :members:
@@ -94,28 +93,177 @@ oemof.solph.components.GenericStorage
     :show-inheritance:
 
 oemof.solph.components.OffsetTransformer
-----------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._offset_transformer
     :members:
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.constraints module
-------------------------------
 
-.. automodule:: oemof.solph.constraints
-    :members: equate_variables, limit_active_flow_count, limit_active_flow_count_by_keyword, emission_limit, generic_integral_limit, additional_investment_flow_limit, investment_limit, shared_limit
+Additional constraints
+----------------------
+
+oemof.solph.constraints.equate_variables
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.equate_variables
+    :members:
     :undoc-members:
     :show-inheritance:
+
+oemof.solph.constraints.limit_active_flow_count
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.limit_active_flow_count
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.limit_active_flow_count_by_keyword
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.limit_active_flow_count_by_keyword
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.emission_limit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.emission_limit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.generic_integral_limit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.generic_integral_limit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.additional_investment_flow_limit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.additional_investment_flow_limit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.investment_limit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.investment_limit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.constraints.shared_limit
+^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.constraints.shared_limit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 oemof.solph.console\_scripts module
 -----------------------------------
 
-.. automodule:: oemof.solph.console_scripts
+.. automodule:: oemof.solph._console_scripts
     :members:
     :undoc-members:
     :show-inheritance:
+
+oemof.solph._energy_system module
+------------------------
+
+.. automodule:: oemof.solph._energy_system
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph._groupings module
+---------------------
+
+.. automodule:: oemof.solph._groupings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph._helpers module
+-------------------
+
+.. automodule:: oemof.solph._helpers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph._models module
+-------------------------
+
+.. automodule:: oemof.solph._models
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph._options module
+--------------------------
+
+.. automodule:: oemof.solph._options
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph._plumbing module
+---------------------------
+
+.. automodule:: oemof.solph._plumbing
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.helpers module
+-------------------
+
+.. automodule:: oemof.solph.helpers
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.processing module
+----------------------
+
+.. automodule:: oemof.solph.processing
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.views module
+---------------------------------
+
+.. automodule:: oemof.solph.views
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+Submodules (experimental)
+=========================
+
+Buses
+-----
+
+oemof.solph.buses.electrical_bus
+^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.buses.experimental._electrical_bus
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 oemof.solph.custom.ElectricalLine
 ---------------------------------
@@ -153,85 +301,6 @@ oemof.solph.custom.SinkDSM
 ---------------------------------------------
 
 .. automodule:: oemof.solph.custom.sink_dsm
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.groupings module
-----------------------------
-
-.. automodule:: oemof.solph.groupings
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.helpers module
---------------------------
-
-.. automodule:: oemof.solph.helpers
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.models module
--------------------------
-
-.. automodule:: oemof.solph.models
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.network module
---------------------------
-
-.. automodule:: oemof.solph.network
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.options module
---------------------------
-
-.. automodule:: oemof.solph.options
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph._plumbing module
----------------------------
-
-.. automodule:: oemof.solph.plumbing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.processing module
----------------------------------
-
-.. automodule:: oemof.solph.processing
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.views module
----------------------------------
-
-.. automodule:: oemof.solph.views
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Submodules (experimental)
-=========================
-
-Buses
------
-
-oemof.solph.buses.electrical_bus
-^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.buses.experimental._electrical_bus
     :members:
     :undoc-members:
     :show-inheritance:
