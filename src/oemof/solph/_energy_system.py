@@ -8,6 +8,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -32,7 +33,19 @@ class EnergySystem(es.EnergySystem):
     oemof.network directly.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, multi_period=False, periods=None, **kwargs):
+        """Initialize an EnergySystem
+
+        Parameters
+        ----------
+        multi_period : boolean
+            If True, a multi period model is used; defaults to False
+
+        periods : dict
+            The periods of a multi period model
+            Keys are years as integer values,
+            values are the respective number of the period starting with zero
+        """
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
@@ -41,3 +54,31 @@ class EnergySystem(es.EnergySystem):
         kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
 
         super().__init__(**kwargs)
+        self.multi_period = multi_period
+        self._add_periods(periods)
+
+    def _add_periods(self, periods):
+        """Add periods to the energy system
+
+        * For a single model, periods only contain one value.
+        * For a multi period model, periods must equal to years used in the
+          timeindex. As a default, each year in the timeindex is mapped to
+          its own period.
+
+        Parameters
+        ----------
+        periods : dict
+            The periods of a multi period model
+            Keys are years as integer values,
+            values are the respective number of the period starting with zero
+        """
+        if not self.multi_period:
+            periods = {"single_period": 0}
+        elif periods is None:
+            years = sorted(
+                list(
+                    set(getattr(self.timeindex, 'year'))
+                )
+            )
+            periods = dict(zip(years, range(len(years))))
+        self.periods = periods
