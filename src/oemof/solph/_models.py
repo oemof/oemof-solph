@@ -7,6 +7,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -14,6 +15,7 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
+from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
@@ -287,7 +289,16 @@ class Model(BaseModel):
         NonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(self, energysystem, discount_rate=None, **kwargs):
+        if discount_rate is not None:
+            self.discount_rate = discount_rate
+        elif energysystem.multi_period:
+            self.discount_rate = 0.02
+            msg = (f"By default, a discount_rate of {self.discount_rate} "
+                   f"is used for a multi-period model. "
+                   f"If you want to use another value, "
+                   f"you have to specify the `discount_rate` attribute.")
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
@@ -296,9 +307,27 @@ class Model(BaseModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
+                                ordered=True)
+
+        # pyomo set for timeindex of optimization problem
+        self.TIMEINDEX = po.Set(
+            initialize=list(
+                zip([self.es.periods[p] for p in self.es.timeindex.year],
+                    range(len(self.es.timeindex)))
+            ),
+            ordered=True
         )
+
+        self.PERIODS = po.Set(
+            initialize=sorted(list(set(self.es.periods.values())))
+        )
+
+        # (Re-)Map timesteps to periods
+        timesteps_in_period = {p: [] for p in self.PERIODS}
+        for p, t in self.TIMEINDEX:
+            timesteps_in_period[p].append(t)
+        self.TIMESTEPS_IN_PERIOD = timesteps_in_period
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
@@ -335,34 +364,33 @@ class Model(BaseModel):
 
     def _add_parent_block_variables(self):
         """ """
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
+        self.flow = po.Var(
+            self.FLOWS, self.TIMEINDEX, within=po.Reals
+        )
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
-                        )
-                        self.flow[o, i, t].fix()
+                            * self.flows[o, i].nominal_value)
+                        self.flow[o, i, p, t].fix()
                 else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
-                        )
+                            * self.flows[o, i].nominal_value)
 
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
-                            )
+                                * self.flows[o, i].nominal_value)
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setlb(0)
