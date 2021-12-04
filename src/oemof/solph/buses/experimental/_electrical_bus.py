@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -20,7 +21,7 @@ from oemof.solph.buses._bus import Bus
 
 
 class ElectricalBus(Bus):
-    r"""A electrical bus object. Every node has to be connected to BusBlock.
+    r"""An electrical bus object. Every node has to be connected to BusBlock.
     This BusBlock is used in combination with ElectricalLine objects
     for linear optimal power flow (lopf) calculations.
 
