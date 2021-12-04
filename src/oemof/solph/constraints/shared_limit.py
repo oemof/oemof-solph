@@ -45,7 +45,7 @@ def shared_limit(
     lower_limit : numeric
         the lower limit
     upper_limit : numeric
-        the lower limit
+        the upper limit
 
     Examples
     --------

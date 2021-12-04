@@ -105,7 +105,7 @@ def create_dataframe(om):
 
     Results from Pyomo are written into pandas DataFrame where separate columns
     are created for the variable index e.g. for tuples of the flows and
-    components or the timesteps.
+    components or the timesteps / timeindices.
     """
     # get all pyomo variables including their block
     block_vars = list(
