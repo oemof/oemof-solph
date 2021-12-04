@@ -6,6 +6,8 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Johannes Giehl
 
 SPDX-License-Identifier: MIT
 
@@ -26,6 +28,21 @@ def emission_limit(om, flows=None, limit=None):
 
     """
     generic_integral_limit(
+        om, keyword="emission_factor", flows=flows, limit=limit
+    )
+
+
+def emission_limit_per_period(om, flows=None, limit=None):
+    r"""
+    Short handle for generic_periodical_integral_limit()
+    with keyword="emission_factor". Only applicable for multi-period models.
+
+    Note
+    ----
+    Flow objects required an attribute "emission_factor"!
+
+    """
+    generic_periodical_integral_limit(
         om, keyword="emission_factor", flows=flows, limit=limit
     )
 
@@ -94,6 +111,128 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     >>> model = solph.constraints.generic_integral_limit(
     ...     model, "my_factor", flow_with_keyword, limit=777)
     """
+    flows = _check_and_set_flows(om, flows, keyword)
+    limit_name = "integral_limit_" + keyword
+
+    setattr(
+        om,
+        limit_name,
+        po.Expression(
+            expr=sum(
+                om.flow[inflow, outflow, p, t]
+                * om.timeincrement[t]
+                * sequence(getattr(flows[inflow, outflow], keyword))[t]
+                for (inflow, outflow) in flows
+                for p, t in om.TIMEINDEX
+            )
+        ),
+    )
+
+    setattr(
+        om,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(om, limit_name) <= limit)),
+    )
+
+    return om
+
+
+def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
+    r"""Set a global limit for flows for each period of a multi-period model
+    which is weighted by attribute called keyword.
+    The attribute named by keyword has to be added
+    to every flow you want to take into account.
+
+    Total value of keyword attributes after optimization can be retrieved
+    calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
+
+    Parameters
+    ----------
+    om : oemof.solph.Model
+        Model to which constraints are added.
+    flows : dict
+        Dictionary holding the flows that should be considered in constraint.
+        Keys are (source, target) objects of the Flow. If no dictionary is
+        given all flows containing the keyword attribute will be
+        used.
+    keyword : string
+        attribute to consider
+    limit : sequence of float
+        Absolute limit of keyword attribute for the energy system.
+
+    Note
+    ----
+    Flow objects required an attribute named like keyword!
+
+    **Constraint:**
+
+    .. math:: \sum_{i \in F_I} \sum_{t \in T} P_i(t) \cdot w_i(t)
+               \cdot \tau(t) \leq L(p) \forall p in \textrm{PERIODS}
+
+
+    For the parameter and variable explanation, please refer to the docs
+    of generic_integral_limit.
+
+    """
+    flows = _check_and_set_flows(om, flows, keyword)
+    limit_name = "integral_limit_" + keyword
+
+    if not om.es.multi_period:
+        msg = ("generic_periodical_integral_limit is only applicable\n"
+               "for multi-period models.\nFor standard models, use "
+               "generic_integral_limit instead.")
+        raise ValueError(msg)
+
+    if limit is not None:
+        limit = sequence(limit)
+    else:
+        msg = ("You have to provide a limit for each period!\n"
+               "If you provide a scalar value, this will be applied as a "
+               "limit for each period.")
+        raise ValueError(msg)
+
+    def _periodical_integral_limit_rule(m, p):
+        expr = sum(
+            om.flow[inflow, outflow, p, t]
+            * om.timeincrement[t]
+            * sequence(getattr(flows[inflow, outflow], keyword))[t]
+            for (inflow, outflow) in flows
+            for t in m.TIMESTEPS_IN_PERIOD[p]
+        )
+
+        return expr <= limit[p]
+
+    om.periodical_integral_limit = po.Constraint(
+        om.PERIODS,
+        rule=_periodical_integral_limit_rule,
+        name=limit_name + "_constraint"
+    )
+
+    return om
+
+
+def _check_and_set_flows(om, flows, keyword):
+    """Checks and sets flows if needed
+
+    Parameters
+    ----------
+    om : oemof.solph.Model
+        Model to which constraints are added.
+
+    flows : dict
+        Dictionary holding the flows that should be considered in constraint.
+        Keys are (source, target) objects of the Flow. If no dictionary is
+        given all flows containing the keyword attribute will be
+        used.
+
+    keyword : string
+        attribute to consider
+
+    Returns
+    -------
+    flows : dict
+        the flows to be considered
+    """
     if flows is None:
         flows = {}
         for (i, o) in om.flows:
@@ -109,27 +248,3 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
                         "has no attribute {2}."
                     ).format(i.label, o.label, keyword)
                 )
-
-    limit_name = "integral_limit_" + keyword
-
-    setattr(
-        om,
-        limit_name,
-        po.Expression(
-            expr=sum(
-                om.flow[inflow, outflow, t]
-                * om.timeincrement[t]
-                * sequence(getattr(flows[inflow, outflow], keyword))[t]
-                for (inflow, outflow) in flows
-                for t in om.TIMESTEPS
-            )
-        ),
-    )
-
-    setattr(
-        om,
-        limit_name + "_constraint",
-        po.Constraint(expr=(getattr(om, limit_name) <= limit)),
-    )
-
-    return om
