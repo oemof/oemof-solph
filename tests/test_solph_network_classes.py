@@ -93,8 +93,8 @@ def test_flow_with_fix_and_min_max():
 
 
 def test_summed_min_and_summed_max():
-    msg1 = "If summed_max is set in a dispatch model,"
-    msg2 = "If summed_min is set in a dispatch model,"
+    msg1 = "If summed_max is set in a flow "
+    msg2 = "If summed_min is set in a flow "
     with pytest.warns(SuspiciousUsageWarning, match=msg1):
         solph.flows.Flow(summed_max=0.3)
     with pytest.warns(SuspiciousUsageWarning, match=msg2):
