@@ -221,7 +221,7 @@ class Flow(on.Edge):
 
         if not self.investment:
             warn_msg = (
-                "If {} is set in a dispatch model, "
+                "If {} is set in a flow (except InvestmentFlow), "
                 "nominal_value must be set as well.\n"
                 "Otherwise, it won't have any effect."
             )
