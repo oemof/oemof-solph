@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -163,8 +164,8 @@ class TransformerBlock(SimpleBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, t)
-                for t in m.TIMESTEPS
+                (n, i, o, p, t)
+                for p, t in m.TIMEINDEX
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -173,17 +174,17 @@ class TransformerBlock(SimpleBlock):
         )
 
         def _input_output_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
                                 lhs = (
-                                    m.flow[i, n, t]
+                                    m.flow[i, n, p, t]
                                     * n.conversion_factors[o][t]
                                 )
                                 rhs = (
-                                    m.flow[n, o, t]
+                                    m.flow[n, o, p, t]
                                     * n.conversion_factors[i][t]
                                 )
                             except ValueError:
@@ -193,6 +194,6 @@ class TransformerBlock(SimpleBlock):
                                         n.label, o.label
                                     ),
                                 )
-                            block.relation.add((n, i, o, t), (lhs == rhs))
+                            block.relation.add((n, i, o, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)
