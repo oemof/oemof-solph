@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -144,19 +145,20 @@ class OffsetTransformerBlock(SimpleBlock):
 
         self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
 
-        def _relation_rule(block, n, t):
+        def _relation_rule(block, n, p, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
             expr += (
-                m.flow[list(n.inputs.keys())[0], n, t] * n.coefficients[1][t]
+                m.flow[list(n.inputs.keys())[0], n, p, t]
+                * n.coefficients[1][t]
             )
             expr += (
-                m.NonConvexFlowBlock.status[list(n.inputs.keys())[0], n, t]
+                (m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t])
                 * n.coefficients[0][t]
             )
             return expr == 0
 
         self.relation = Constraint(
-            self.OFFSETTRANSFORMERS, m.TIMESTEPS, rule=_relation_rule
+            self.OFFSETTRANSFORMERS, m.TIMEINDEX, rule=_relation_rule
         )
