@@ -151,13 +151,13 @@ class ElectricalLineBlock(SimpleBlock):
             bus.slack = True
 
         def _voltage_angle_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     if n.input.slack is True:
                         self.voltage_angle[n.output, t].value = 0
                         self.voltage_angle[n.output, t].fix()
                     try:
-                        lhs = m.flow[n.input, n.output, t]
+                        lhs = m.flow[n.input, n.output, p, t]
                         rhs = (
                             1
                             / n.reactance[t]
@@ -171,8 +171,8 @@ class ElectricalLineBlock(SimpleBlock):
                             "Error in constraint creation",
                             "of node {}".format(n.label),
                         )
-                    block.electrical_flow.add((n, t), (lhs == rhs))
+                    block.electrical_flow.add((n, p, t), (lhs == rhs))
 
-        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMEINDEX, noruleinit=True)
 
         self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)

@@ -10,6 +10,7 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -60,8 +61,7 @@ class Flow(on.Edge):
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
-           unit.
+         * `'costs``: REMOVED!
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
@@ -70,8 +70,7 @@ class Flow(on.Edge):
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
-            unit.
+          * `'costs``: REMOVED!
 
     summed_max : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
@@ -82,6 +81,7 @@ class Flow(on.Edge):
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
+        Note: In a multi-period model, nominal costs have to be used.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
@@ -104,12 +104,12 @@ class Flow(on.Edge):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph..flows.flow.FlowBlock`
-     * :py:class:`~oemof.solph..flows.investment_flow.InvestmentFlowBlock`
+     * :py:class:`~oemof.solph.flows.flow.FlowBlock`
+     * :py:class:`~oemof.solph.flows.investment_flow.InvestmentFlowBlock`
         (additionally if Investment object is present)
-     * :py:class:`~oemof.solph..flows.non_convex_flow.NonConvexFlowBlock`
+     * :py:class:`~oemof.solph.flows.non_convex_flow.NonConvexFlowBlock`
         (If nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.flows.flow.FlowBlock`
+        :py:class:`~oemof.solphflows.flow.FlowBlock`
         class and a MILP will be build)
 
     Examples
@@ -146,19 +146,21 @@ class Flow(on.Edge):
             "nonconvex",
             "integer",
         ]
-        sequences = ["fix", "variable_costs", "min", "max"]
+        sequences = ["fix", "variable_costs", "fixed_costs", "min", "max"]
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "variable_costs": 0,
-            "positive_gradient": {"ub": None, "costs": 0},
-            "negative_gradient": {"ub": None, "costs": 0},
+            "positive_gradient": {"ub": None},
+            "negative_gradient": {"ub": None},
         }
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
-            raise AttributeError(
-                "The `fixed_costs` attribute has been removed" " with v0.2!"
-            )
+            msg = ("Be aware that the fixed costs attribute is only\n"
+                   "meant to be used for multi-period models.\n"
+                   "It has been decided to remove the `fixed_costs` "
+                   "attribute with v0.2 for regular uses!")
+            warn(msg, debugging.SuspiciousUsageWarning)
 
         if "actual_value" in keys:
             raise AttributeError(
@@ -192,13 +194,24 @@ class Flow(on.Edge):
         if kwargs.get("max") is None:
             defaults["max"] = 1
 
+        # Check gradient dictionaries for non-valid keys
+        for gradient_dict in ["negative_gradient", "positive_gradient"]:
+            if gradient_dict in kwargs:
+                if list(kwargs[gradient_dict].keys()) != list(
+                    defaults[gradient_dict].keys()
+                ):
+                    msg = (
+                        "Only the key 'ub' is allowed for the '{0}' attribute"
+                    )
+                    raise AttributeError(msg.format(gradient_dict))
+
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(
                     self,
                     attribute,
-                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                    {"ub": sequence(value["ub"])},
                 )
 
             else:
@@ -398,8 +411,8 @@ class FlowBlock(SimpleBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.SUMMED_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
-                    for ts in m.TIMESTEPS
+                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    for p, ts in m.TIMEINDEX
                 )
                 rhs = (
                     m.flows[inp, out].summed_max
@@ -414,8 +427,8 @@ class FlowBlock(SimpleBlock):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.SUMMED_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
-                    for ts in m.TIMESTEPS
+                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    for p, ts in m.TIMEINDEX
                 )
                 rhs = (
                     m.flows[inp, out].summed_min
@@ -429,18 +442,23 @@ class FlowBlock(SimpleBlock):
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
-                for ts in m.TIMESTEPS:
-                    if ts > 0:
-                        lhs = m.flow[inp, out, ts] - m.flow[inp, out, ts - 1]
-                        rhs = self.positive_gradient[inp, out, ts]
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index][0],
+                                      m.TIMEINDEX[index][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                        m.TIMEINDEX[index - 1][1]])
+                        rhs = self.positive_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
                         self.positive_gradient_constr.add(
-                            (inp, out, ts), lhs <= rhs
-                        )
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
 
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule
@@ -449,29 +467,34 @@ class FlowBlock(SimpleBlock):
         def _negative_gradient_flow_rule(model):
             """Rule definition for negative gradient constraint."""
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
-                for ts in m.TIMESTEPS:
-                    if ts > 0:
-                        lhs = m.flow[inp, out, ts - 1] - m.flow[inp, out, ts]
-                        rhs = self.negative_gradient[inp, out, ts]
+                for index in range(1, len(m.TIMEINDEX) + 1):
+                    if m.TIMEINDEX[index][1] > 0:
+                        lhs = (m.flow[inp, out, m.TIMEINDEX[index - 1][0],
+                                      m.TIMEINDEX[index - 1][1]]
+                               - m.flow[inp, out, m.TIMEINDEX[index][0],
+                                        m.TIMEINDEX[index][1]])
+                        rhs = self.negative_gradient[
+                            inp, out, m.TIMEINDEX[index][1]]
                         self.negative_gradient_constr.add(
-                            (inp, out, ts), lhs <= rhs
-                        )
+                            (inp, out, m.TIMEINDEX[index][0],
+                             m.TIMEINDEX[index][1]),
+                            lhs <= rhs)
                     else:
                         pass  # return(Constraint.Skip)
 
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
         )
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule
         )
 
-        def _integer_flow_rule(block, ii, oi, ti):
+        def _integer_flow_rule(block, ii, oi, pi, ti):
             """Force flow variable to NonNegativeInteger values."""
-            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
+            return self.integer_flow[ii, oi, pi, ti] == m.flow[ii, oi, pi, ti]
 
         self.integer_flow_constr = Constraint(
-            self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
+            self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule
         )
 
     def _objective_expression(self):
@@ -481,29 +504,36 @@ class FlowBlock(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        gradient_costs = 0
+        fixed_costs = 0
 
-        for i, o in m.FLOWS:
-            if m.flows[i, o].variable_costs[0] is not None:
-                for t in m.TIMESTEPS:
-                    variable_costs += (
-                        m.flow[i, o, t]
-                        * m.objective_weighting[t]
-                        * m.flows[i, o].variable_costs[t]
-                    )
+        if not m.es.multi_period:
+            for i, o in m.FLOWS:
+                if m.flows[i, o].variable_costs[0] is not None:
+                    for p, t in m.TIMEINDEX:
+                        variable_costs += (
+                            m.flow[i, o, p, t]
+                            * m.objective_weighting[t]
+                            * m.flows[i, o].variable_costs[t]
+                        )
 
-            if m.flows[i, o].positive_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.positive_gradient[i, o, t]
-                        * m.flows[i, o].positive_gradient["costs"]
-                    )
+        else:
+            for i, o in m.FLOWS:
+                if m.flows[i, o].variable_costs[0] is not None:
+                    for p, t in m.TIMEINDEX:
+                        variable_costs += (
+                            m.flow[i, o, p, t]
+                            * m.objective_weighting[t]
+                            * m.flows[i, o].variable_costs[t]
+                            * ((1 + m.discount_rate) ** -p)
+                        )
 
-            if m.flows[i, o].negative_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.negative_gradient[i, o, t]
-                        * m.flows[i, o].negative_gradient["costs"]
-                    )
+                if (m.flows[i, o].fixed_costs[0] is not None
+                        and m.flows[i, o].nominal_value is not None):
+                    for p in m.PERIODS:
+                        fixed_costs += (
+                            m.flows[i, o].nominal_value
+                            * m.flows[i, o].fixed_costs[p]
+                            * ((1 + m.discount_rate) ** -p)
+                        )
 
-        return variable_costs + gradient_costs
+        return variable_costs + fixed_costs
