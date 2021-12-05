@@ -216,10 +216,10 @@ def results(om):
 
     # add dual variables for bus constraints
     if om.dual is not None:
-        grouped = groupby(sorted(om.Bus.balance.iterkeys()),
+        grouped = groupby(sorted(om.BusBlock.balance.iterkeys()),
                           lambda p: p[0])
         for bus, timeindex in grouped:
-            duals = [om.dual[om.Bus.balance[bus, p, t]]
+            duals = [om.dual[om.BusBlock.balance[bus, p, t]]
                      for _, p, t in timeindex]
             df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
