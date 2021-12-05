@@ -15,7 +15,7 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
-from oemof.solph import sequence
+from oemof.solph._plumbing import sequence
 
 
 def investment_limit(model, limit=None):
