@@ -28,18 +28,18 @@ from oemof import solph
 solver = "cbc"  # 'glpk', 'gurobi',...
 solver_verbose = False  # show/hide solver output
 
-date_time_index = pd.date_range(
-    "1/1/2000", periods=8, freq="15T"
-)
+date_time_index = pd.date_range("1/1/2000", periods=8, freq="15T")
 
 energy_system = solph.EnergySystem(timeindex=date_time_index)
 
 bus = solph.buses.Bus(label="bus")
 source = solph.components.Source(
     label="source",
-    outputs={bus: solph.flows.Flow(nominal_value=1,
-                                   variable_costs=-1,
-                                   max=[0, 0, 0, 0, 1, 1, 1, 1])}
+    outputs={
+        bus: solph.flows.Flow(
+            nominal_value=1, variable_costs=-1, max=[0, 0, 0, 0, 1, 1, 1, 1]
+        )
+    },
 )
 storage = solph.components.GenericStorage(
     label="storage",
@@ -50,8 +50,9 @@ storage = solph.components.GenericStorage(
 )
 sink = solph.components.Sink(
     label="sink",
-    inputs={bus: solph.flows.Flow(nominal_value=1,
-                                  max=[1, 1, 1, 1, 0, 0, 0, 0])}
+    inputs={
+        bus: solph.flows.Flow(nominal_value=1, max=[1, 1, 1, 1, 0, 0, 0, 0])
+    },
 )
 
 energy_system.add(bus, source, sink, storage)
