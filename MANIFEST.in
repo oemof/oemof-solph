@@ -21,4 +21,5 @@ include pytest.ini
 include tox.ini
 include *.yml
 
+recursive-exclude examples *.py
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
