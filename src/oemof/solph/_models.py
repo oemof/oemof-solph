@@ -310,14 +310,24 @@ class Model(BaseModel):
         self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
                                 ordered=True)
 
-        # pyomo set for timeindex of optimization problem
-        self.TIMEINDEX = po.Set(
-            initialize=list(
-                zip([self.es.periods[p] for p in self.es.timeindex.year],
-                    range(len(self.es.timeindex)))
-            ),
-            ordered=True
-        )
+        # TODO: Generalize!
+        if not self.es.multi_period:
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip([0] * len(self.es.timeindex.year),
+                        range(len(self.es.timeindex)))
+                ),
+                ordered=True
+            )
+        else:
+            # pyomo set for timeindex of optimization problem
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip([self.es.periods[p] for p in self.es.timeindex.year],
+                        range(len(self.es.timeindex)))
+                ),
+                ordered=True
+            )
 
         self.PERIODS = po.Set(
             initialize=sorted(list(set(self.es.periods.values())))
