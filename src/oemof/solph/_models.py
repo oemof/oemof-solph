@@ -75,22 +75,7 @@ class BaseModel(po.ConcreteModel):
 
         self.name = kwargs.get("name", type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(
-            kwargs.get("timeincrement", self.es.timeincrement)
-        )
-        if self.timeincrement[0] is None:
-            try:
-                self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12
-                )
-            except AttributeError:
-                msg = (
-                    "No valid time increment found. Please pass a valid "
-                    "timeincremet parameter or pass an EnergySystem with "
-                    "a valid time index. Please note that a valid time"
-                    "index need to have a 'freq' attribute."
-                )
-                raise AttributeError(msg)
+        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
@@ -297,7 +282,7 @@ class Model(BaseModel):
 
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+            initialize=range(len(self.es.timeincrement)), ordered=True
         )
 
         # previous timesteps

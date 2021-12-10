@@ -132,6 +132,12 @@ def results(om):
         for k, v in df.groupby("oemof_tuple")
     }
 
+    # Define index
+    if om.es.timeindex is None:
+        result_index = list(range(len(om.es.timeincrement)))
+    else:
+        result_index = om.es.timeindex
+
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
@@ -139,7 +145,7 @@ def results(om):
         df_dict[k].set_index("timestep", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         try:
-            df_dict[k].index = om.es.timeindex
+            df_dict[k].index = result_index
         except ValueError as e:
             msg = (
                 "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"

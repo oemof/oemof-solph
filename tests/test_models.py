@@ -91,7 +91,7 @@ def test_nonequ_with_non_valid_fill():
 
 
 def test_optimal_solution():
-    es = solph.EnergySystem(timeindex=[1])
+    es = solph.EnergySystem(timeincrement=[1])
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
     es.add(
@@ -104,16 +104,17 @@ def test_optimal_solution():
             outputs={bel: solph.flows.Flow(variable_costs=5)}
         )
     )
-    m = solph.Model(es, timeincrement=1)
+    m = solph.Model(es)
     m.solve("cbc")
     m.results()
     solph.processing.meta_results(m)
 
 
 def test_infeasible_model():
+    warnings.filterwarnings("ignore", category=FutureWarning)
     with pytest.raises(ValueError, match=""):
         with warnings.catch_warnings(record=True) as w:
-            es = solph.EnergySystem(timeindex=[1])
+            es = solph.EnergySystem(timeincrement=[1])
             bel = solph.buses.Bus(label="bus")
             es.add(bel)
             es.add(
@@ -130,7 +131,7 @@ def test_infeasible_model():
                     }
                 )
             )
-            m = solph.Model(es, timeincrement=1)
+            m = solph.Model(es)
             m.solve(solver="cbc")
             assert "Optimization ended with status" in str(w[0].message)
             solph.processing.meta_results(m)
