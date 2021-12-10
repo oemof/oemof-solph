@@ -4549,7 +4549,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
         # Equation 4.16
         def dr_storage_limit_inc_rule(block):
-            """Fictious demand response storage level for load increase limit"""
+            """Fictious demand response storage level
+            for load increase limit"""
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # fictious demand response load reduction storage level
