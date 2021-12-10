@@ -158,8 +158,12 @@ class Flow(on.Edge):
         if "fixed_costs" in keys:
             msg = ("Be aware that the fixed costs attribute is only\n"
                    "meant to be used for multi-period models.\n"
+                   "If you wish to set up a multi-period model, set the"
+                   " multi_period attribute of your energy system to True.\n"
                    "It has been decided to remove the `fixed_costs` "
-                   "attribute with v0.2 for regular uses!")
+                   "attribute with v0.2 for regular uses.\n"
+                   "If you specify `fixed_costs` for a regular model, "
+                   "it will simply be ignored.")
             warn(msg, debugging.SuspiciousUsageWarning)
 
         if "actual_value" in keys:
