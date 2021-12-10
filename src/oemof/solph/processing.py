@@ -72,7 +72,7 @@ def remove_timestep(x):
 
 def get_timeindex(x):
     """
-    Get the timeindex from oemof tuples for multiperiod models.
+    Get the timeindex from oemof tuples.
     Slice int values (timeindex, timesteps or periods) dependent on how
     the variable is indexed.
 
@@ -87,7 +87,7 @@ def get_timeindex(x):
 
 def remove_timeindex(x):
     """
-    Remove the timeindex from oemof tuples for mulitperiod models.
+    Remove the timeindex from oemof tuples.
     Slice up to integer values (node labels)
 
     The timestep is removed from tuples of type `(n, n, int, int)`,
@@ -133,8 +133,7 @@ def create_dataframe(om):
     df["timeindex"] = df["oemof_tuple"].map(get_timeindex)
     df["oemof_tuple"] = df["oemof_tuple"].map(remove_timeindex)
     # order the data by oemof tuple and timestep
-    df = df.sort_values(["oemof_tuple", "timeindex"],
-                        ascending=[True, True])
+    df = df.sort_values(["oemof_tuple", "timeindex"], ascending=[True, True])
 
     # drop empty decision variables
     df = df.dropna(subset=["value"])
@@ -148,79 +147,49 @@ def results(om):
 
     Results from Pyomo are written into a dictionary of pandas objects where
     a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows for a standard model. For a MultiPeriodModel, the investment
+    and flows for a standard model. For a multi-period model, the investment
     values are given in a DataFrame indexed by periods.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[n, n]['sequences']` for a standard model.
     """
+    # Extraction steps that are the same for both model types
     df = create_dataframe(om)
-
-    period_indexed = [
-        "invest",
-        "total",
-        "old",
-        "old_exo",
-        "old_end"
-    ]
-    period_timestep_indexed = ["flow"]
-    # TODO: Take care of initial storage content instead of just ignoring
-    to_be_ignored = ["init_content"]
-    timestep_indexed = [el for el in df["variable_name"].unique()
-                        if el not in period_indexed
-                        and el not in period_timestep_indexed
-                        and el not in to_be_ignored]
-    scalars_col = "period_scalars"
+    period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
 
     # create a dict of dataframes keyed by oemof tuples
-    # TODO / QUESTION: Could this be sped up using DFs / arrays instead?!
     df_dict = {
-        k if len(k) > 1 else (k[0], None):
-        v[["timeindex", "variable_name", "value"]]
+        k
+        if len(k) > 1
+        else (k[0], None): v[["timeindex", "variable_name", "value"]]
         for k, v in df.groupby("oemof_tuple")
     }
 
-    # create final result dictionary by splitting up the dataframes in the
-    # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
-    for k in df_dict:
-        df_dict[k].set_index("timeindex", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
 
-        # TODO: Revise and potentially speed up
-        # Split data set
-        timeindex_cols = [col for col in df_dict[k].columns
-                          if col in timestep_indexed or col == "flow"]
-        period_cols = [col for col in df_dict[k].columns
-                       if col not in timeindex_cols]
-        sequences = df_dict[k][timeindex_cols].dropna()
-        if sequences.empty:
-            sequences = pd.DataFrame(index=om.es.timeindex)
-        # periods equal to years (will probably be the standard use case)
-        periods = sorted(list(set(om.es.timeindex.year)))
-        d = dict(zip([(el, ) for el in range(len(periods))], periods))
-        period_scalars = df_dict[k][period_cols].dropna()
-        if period_scalars.empty:
-            period_scalars = pd.DataFrame(index=d.values())
-        try:
-            sequences.index = om.es.timeindex
-            period_scalars.rename(index=d, inplace=True)
-            period_scalars.index.name = "period"
-            result[k] = {scalars_col: period_scalars,
-                         "sequences": sequences}
-        except IndexError:
-            error_message = (
-                "Some indices seem to be not matching.\n"
-                "Cannot properly extract model results."
-            )
-            raise IndexError(error_message)
+    # Standard model results extraction
+    if not om.es.multi_period:
+        result = _extract_standard_model_result(
+            om, df_dict, period_indexed, result
+        )
+        scalars_col = "scalars"
+
+    # Results extraction for a multi-period model
+    else:
+        result = _extract_multi_period_model_result(
+            om, df, df_dict, period_indexed, result
+        )
+        scalars_col = "period_scalars"
 
     # add dual variables for bus constraints
     if om.dual is not None:
-        grouped = groupby(sorted(om.BusBlock.balance.iterkeys()),
-                          lambda p: p[0])
+        grouped = groupby(
+            sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0]
+        )
         for bus, timeindex in grouped:
-            duals = [om.dual[om.BusBlock.balance[bus, p, t]]
-                     for _, p, t in timeindex]
+            duals = [
+                om.dual[om.BusBlock.balance[bus, p, t]]
+                for _, p, t in timeindex
+            ]
             df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
@@ -229,6 +198,144 @@ def results(om):
                 }
             else:
                 result[(bus, None)]["sequences"]["duals"] = duals
+
+    return result
+
+
+def _extract_standard_model_result(
+    om, df_dict, period_indexed=None, result=None
+):
+    """Extract and return the results of a standard model
+
+    Parameters
+    ----------
+    om : oemof.solph.models.Model
+        The optimization model
+    df_dict : dict
+        dictionary of results DataFrames
+    period_indexed : list
+        list of variables that are indexed by periods
+    result : dict
+        dictionary to store the results
+    """
+    for k in df_dict:
+        df_dict[k].set_index("timeindex", inplace=True)
+        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
+        try:
+            # Enable reindexing by replacing period by first timeindex
+            try:
+                df_dict[k].loc[
+                    [(0, 0)],
+                    [
+                        col
+                        for col in df_dict[k].columns
+                        if col in period_indexed
+                    ],
+                ] = (
+                    df_dict[k]
+                    .loc[
+                        [(0,)],
+                        [
+                            col
+                            for col in df_dict[k].columns
+                            if col in period_indexed
+                        ],
+                    ]
+                    .values
+                )
+                df_dict[k].drop(index=[(0,)], inplace=True)
+            except KeyError:
+                pass
+            df_dict[k].index = om.es.timeindex
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
+                " your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
+        try:
+            condition = df_dict[k].isnull().any()
+            scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+            sequences = df_dict[k].loc[:, ~condition]
+            result[k] = {"scalars": scalars, "sequences": sequences}
+        except IndexError:
+            error_message = (
+                "Cannot access index on result data. "
+                + "Did the optimization terminate"
+                + " without errors?"
+            )
+            raise IndexError(error_message)
+
+    return result
+
+
+def _extract_multi_period_model_result(
+    om, df, df_dict, period_indexed=None, result=None
+):
+    """Extract and return the results of a multi-period model
+
+    Parameters
+    ----------
+    om : oemof.solph.models.Model
+        The ptimization model
+    df : DataFrame
+        DataFrame containing all results
+    df_dict : dict
+        dictionary of results DataFrames
+    period_indexed : list
+        list of variables that are indexed by periods
+    result : dict
+        dictionary to store the results
+    """
+    period_timestep_indexed = ["flow"]
+    # TODO: Take care of initial storage content instead of just ignoring
+    to_be_ignored = ["init_content"]
+    timestep_indexed = [
+        el
+        for el in df["variable_name"].unique()
+        if el not in period_indexed
+        and el not in period_timestep_indexed
+        and el not in to_be_ignored
+    ]
+
+    for k in df_dict:
+        df_dict[k].set_index("timeindex", inplace=True)
+        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
+        # TODO: Revise and potentially speed up
+        # Split data set
+        timeindex_cols = [
+            col
+            for col in df_dict[k].columns
+            if col in timestep_indexed or col == "flow"
+        ]
+        period_cols = [
+            col for col in df_dict[k].columns if col not in timeindex_cols
+        ]
+        sequences = df_dict[k][timeindex_cols].dropna()
+        if sequences.empty:
+            sequences = pd.DataFrame(index=om.es.timeindex)
+        # periods equal to years (will probably be the standard use case)
+        periods = sorted(list(set(om.es.timeindex.year)))
+        d = dict(zip([(el,) for el in range(len(periods))], periods))
+        period_scalars = df_dict[k][period_cols].dropna()
+        if period_scalars.empty:
+            period_scalars = pd.DataFrame(index=d.values())
+        try:
+            sequences.index = om.es.timeindex
+            period_scalars.rename(index=d, inplace=True)
+            period_scalars.index.name = "period"
+            result[k] = {
+                "period_scalars": period_scalars,
+                "sequences": sequences,
+            }
+        except IndexError:
+            error_message = (
+                "Some indices seem to be not matching.\n"
+                "Cannot properly extract model results."
+            )
+            raise IndexError(error_message)
 
     return result
 
