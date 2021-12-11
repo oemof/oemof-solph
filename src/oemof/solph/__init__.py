@@ -13,6 +13,7 @@ from ._models import Model
 from ._options import Investment
 from ._options import NonConvex
 from ._plumbing import sequence
+from ._periods import Period
 
 __all__ = [
     "buses",
@@ -28,4 +29,5 @@ __all__ = [
     "Investment",
     "NonConvex",
     "sequence",
+    "Period"
 ]
