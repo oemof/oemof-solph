@@ -88,9 +88,9 @@ class BaseModel(po.ConcreteModel):
             except AttributeError:
                 msg = (
                     "No valid time increment found. Please pass a valid "
-                    "timeincremet parameter or pass an EnergySystem with "
+                    "timeincrement parameter or pass an EnergySystem with "
                     "a valid time index. Please note that a valid time"
-                    "index need to have a 'freq' attribute."
+                    "index needs to have a 'freq' attribute."
                 )
                 raise AttributeError(msg)
 
