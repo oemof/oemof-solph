@@ -16,6 +16,8 @@ SPDX-License-Identifier: MIT
 
 from oemof.network import energy_system as es
 
+from oemof.solph._periods import Period
+
 
 class EnergySystem(es.EnergySystem):
     """A variant of the class EnergySystem from
@@ -55,23 +57,29 @@ class EnergySystem(es.EnergySystem):
 
         super().__init__(**kwargs)
         self.multi_period = multi_period
-        self._add_periods(periods)
-        self.periods_length = {k: v.periods_length for k, v in periods.items()}
+        self.periods = self._add_periods(periods)
+        self._extract_periods_lengths_and_gap()
 
     def _add_periods(self, periods):
-        """Add periods to the energy system
+        """Returns periods to be added to the energy system
 
         * For a single model, periods only contain one value.
-        * For a multi period model, periods must equal to years used in the
+        * For a multi-period model, periods are based on the years used in the
           timeindex. As a default, each year in the timeindex is mapped to
           its own period.
 
         Parameters
         ----------
         periods : dict
-            The periods of a multi period model
+            Periods of a (multi-period) model
             Keys are years as integer values,
-            values are the respective number of the period starting with zero
+            values are the periods defined by their first and last timestep.
+            For a standard model, only one period is used.
+
+        Returns
+        -------
+        periods : dict
+            Periods of the energy system
         """
         # if not self.multi_period:
         #     periods = {"single_period": 0}
@@ -85,7 +93,37 @@ class EnergySystem(es.EnergySystem):
         # self.periods = periods
         if not self.multi_period:
             periods = [0]
-        # TODO: Define a default
         elif periods is None:
-            pass
-        self.periods = periods
+            years = sorted(
+                        list(
+                            set(getattr(self.timeindex, 'year'))
+                        )
+                    )
+
+            periods = {}
+            filter_series = self.timeindex.to_series()
+            for number, year in enumerate(years):
+                start = filter_series.loc[
+                    filter_series.index.year == year].min()
+                end = filter_series.loc[filter_series.index.year == year].max()
+                periods[number] = Period(start, end)
+
+        return periods
+
+    def _extract_periods_lengths_and_gap(self):
+        """Determine length of one and diff between two subsequent periods"""
+        periods_gap = {0: 0}
+        if not self.multi_period:
+            periods_length = {0: 1}
+        else:
+            periods_length = {}
+
+            previous_end = None
+            for number, (k, v) in enumerate(self.periods.items()):
+                periods_length[k] = v.periods_length
+                if number >= 1:
+                    periods_gap[k] = v.start.year - previous_end.year - 1
+                previous_end = v.end
+
+        self.periods_length = periods_length
+        self.periods_gap = periods_gap

@@ -21,18 +21,20 @@ class Period:
 
         Parameters
         ----------
-        start : str
-            String representation for the starting timestamp of a period
+        start : pd.Timestamp or str
+            Starting timestamp of a period or its string representation
         end : str
-            String representation for the last timestamp of a period
+            Last timestamp of a period or its string representation
         """
         e1 = (
             "Please define a valid {} time.\n"
-            "It has to be of type str and a valid date string representation."
+            "It has to be either of type pandas.Timestamp or "
+            "of type str and in that case needs to be a valid "
+            "date string representation."
         )
-        if start is None or not isinstance(start, str):
+        if start is None or type(start) not in [str, pd.Timestamp]:
             raise ValueError(e1.format("start"))
-        if end is None or not isinstance(start, str):
+        if end is None or type(end) not in [str, pd.Timestamp]:
             raise ValueError(e1.format("end"))
 
         e2 = (
@@ -40,14 +42,20 @@ class Period:
             " is needed for converting {} time to a pandas.Timestamp object.\n"
             "Please refer to the pandas date and time documentation."
         )
-        try:
-            self.start = pd.Timestamp(start)
-        except ValueError:
-            raise ValueError(e2.format("start"))
-        try:
-            self.end = pd.Timestamp(end)
-        except ValueError:
-            raise ValueError(e2.format("end"))
+        if isinstance(start, str):
+            try:
+                self.start = pd.Timestamp(start)
+            except ValueError:
+                raise ValueError(e2.format("start"))
+        else:
+            self.start = start
+        if isinstance(end, str):
+            try:
+                self.end = pd.Timestamp(end)
+            except ValueError:
+                raise ValueError(e2.format("end"))
+        else:
+            self.end = end
 
     def _extract_periods_length(self):
         """Extracts the periods length in full years"""
