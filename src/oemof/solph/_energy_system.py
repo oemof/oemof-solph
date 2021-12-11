@@ -56,6 +56,7 @@ class EnergySystem(es.EnergySystem):
         super().__init__(**kwargs)
         self.multi_period = multi_period
         self._add_periods(periods)
+        self.periods_length = {k: v.periods_length for k, v in periods.items()}
 
     def _add_periods(self, periods):
         """Add periods to the energy system
@@ -72,13 +73,19 @@ class EnergySystem(es.EnergySystem):
             Keys are years as integer values,
             values are the respective number of the period starting with zero
         """
+        # if not self.multi_period:
+        #     periods = {"single_period": 0}
+        # elif periods is None:
+        #     years = sorted(
+        #         list(
+        #             set(getattr(self.timeindex, 'year'))
+        #         )
+        #     )
+        #     periods = dict(zip(years, range(len(years))))
+        # self.periods = periods
         if not self.multi_period:
-            periods = {"single_period": 0}
+            periods = [0]
+        # TODO: Define a default
         elif periods is None:
-            years = sorted(
-                list(
-                    set(getattr(self.timeindex, 'year'))
-                )
-            )
-            periods = dict(zip(years, range(len(years))))
+            pass
         self.periods = periods
