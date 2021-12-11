@@ -41,6 +41,25 @@ class Investment:
     offset : float, :math:`c_{invest,fix}`
         Additional fix investment costs. Only applicable if `nonconvex` is set
         to `True`.
+    overall_maximum : float
+        Overall maximum capacity investment, i.e. the amount of capacity
+        that can be totally installed at maximum in any period (taking into
+        account decommissionings); only applicable for multi-period models
+    overall_minimum : float
+        Overall minimum capacity investment that needs to be installed
+        in the last period of the simulation (taking into account
+        decommissionings); only applicable for multi-period models
+    lifetime : int
+        Units lifetime, given in years; only applicable for multi-period
+        models
+    age : int
+        Units start age, given in years at the beginning of the simulation;
+        only applicable for multi-period models
+    interest_rate : float
+        Interest rate for calculating annuities when investing in that unit;
+        only applicable for multi-period models
+    fixed_costs : list of float
+        Fixed costs in each period; only applicable for multi-period models
 
 
     For the variables, constraints and parts of the objective function, which
