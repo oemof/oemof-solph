@@ -320,17 +320,21 @@ class Model(BaseModel):
                 ordered=True
             )
         else:
-            # pyomo set for timeindex of optimization problem
+            nested_list = [
+                [k] * len(self.es.periods[k]) for k in self.es.periods.keys()
+            ]
+            flattened_list = [
+                item for sublist in nested_list for item in sublist
+            ]
             self.TIMEINDEX = po.Set(
                 initialize=list(
-                    zip([self.es.periods[p] for p in self.es.timeindex.year],
-                        range(len(self.es.timeindex)))
+                    zip(flattened_list, range(len(self.es.timeindex)))
                 ),
                 ordered=True
             )
 
         self.PERIODS = po.Set(
-            initialize=sorted(list(set(self.es.periods.values())))
+            initialize=sorted(list(set(self.es.periods.keys())))
         )
 
         # (Re-)Map timesteps to periods

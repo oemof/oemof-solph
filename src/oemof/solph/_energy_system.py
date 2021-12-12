@@ -13,7 +13,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
-
+import pandas as pd
 from oemof.network import energy_system as es
 
 from oemof.solph._periods import Period
@@ -81,16 +81,6 @@ class EnergySystem(es.EnergySystem):
         periods : dict
             Periods of the energy system
         """
-        # if not self.multi_period:
-        #     periods = {"single_period": 0}
-        # elif periods is None:
-        #     years = sorted(
-        #         list(
-        #             set(getattr(self.timeindex, 'year'))
-        #         )
-        #     )
-        #     periods = dict(zip(years, range(len(years))))
-        # self.periods = periods
         if not self.multi_period:
             periods = [0]
         elif periods is None:
@@ -106,7 +96,11 @@ class EnergySystem(es.EnergySystem):
                 start = filter_series.loc[
                     filter_series.index.year == year].min()
                 end = filter_series.loc[filter_series.index.year == year].max()
-                periods[number] = Period(start, end)
+                periods[number] = pd.date_range(start, end, freq="H")
+        else:
+            for k in periods.keys():
+                if not isinstance(k, int):
+                    raise ValueError("Period keys must be of type int.")
 
         return periods
 
@@ -120,10 +114,10 @@ class EnergySystem(es.EnergySystem):
 
             previous_end = None
             for number, (k, v) in enumerate(self.periods.items()):
-                periods_length[k] = v.periods_length
+                periods_length[k] = v.max().year - v.min().year + 1
                 if number >= 1:
-                    periods_gap[k] = v.start.year - previous_end.year - 1
-                previous_end = v.end
+                    periods_gap[k] = v.min().year - previous_end.year - 1
+                previous_end = v.max()
 
         self.periods_length = periods_length
         self.periods_gap = periods_gap
