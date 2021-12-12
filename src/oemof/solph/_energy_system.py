@@ -16,8 +16,6 @@ SPDX-License-Identifier: MIT
 import pandas as pd
 from oemof.network import energy_system as es
 
-from oemof.solph._periods import Period
-
 
 class EnergySystem(es.EnergySystem):
     """A variant of the class EnergySystem from
