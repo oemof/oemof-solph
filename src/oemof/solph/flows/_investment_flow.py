@@ -435,9 +435,19 @@ class InvestmentFlowBlock(SimpleBlock):
             for i, o in self.INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
                 for p in m.PERIODS:
-                    if lifetime <= p:
+                    # No shutdown in first period
+                    if p == 0:
+                        expr = (self.old_end[i, o, p] == 0)
+                        self.old_rule_end.add((i, o, p), expr)
+                    elif lifetime <= m.es.periods_years[p]:
+                        # Obtain commissioning period
+                        comm_p = 0
+                        for k, v in m.es.periods_years.items():
+                            if m.es.periods_years[p] - lifetime - v < 0:
+                                comm_p = k - 1
+                                break
                         expr = (self.old_end[i, o, p]
-                                == self.invest[i, o, p - lifetime])
+                                == self.invest[i, o, comm_p])
                         self.old_rule_end.add((i, o, p), expr)
                     else:
                         expr = (self.old_end[i, o, p] == 0)
