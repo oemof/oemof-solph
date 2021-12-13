@@ -35,7 +35,7 @@ class EnergySystem(es.EnergySystem):
     """
 
     def __init__(
-        self, timeindex=None, timeincrement=None, mode="implicit", **kwargs
+        self, timeindex=None, timeincrement=None, timemode="implicit", **kwargs
     ):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
@@ -54,7 +54,9 @@ class EnergySystem(es.EnergySystem):
             )
             raise TypeError(msg.format(type(timeindex)))
 
-        if mode == "implicit" and timeindex is not None:
+        self.timemode = timemode
+
+        if timemode == "implicit" and timeindex is not None:
             # Add one timestep to the timeindex.
             timeindex = timeindex.union(
                 pd.date_range(
