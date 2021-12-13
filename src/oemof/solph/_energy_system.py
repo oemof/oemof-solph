@@ -79,9 +79,6 @@ class EnergySystem(es.EnergySystem):
                 (timedelta / np.timedelta64(1, "h"))[1:].set_index(0).index
             )
 
-        if mode == "implicit" and timeindex is not None:
-            timeindex = timeindex[1:]
-
         super().__init__(
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
