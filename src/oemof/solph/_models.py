@@ -284,6 +284,9 @@ class Model(BaseModel):
         self.TIMESTEPS = po.Set(
             initialize=range(len(self.es.timeincrement)), ordered=True
         )
+        self.TIMEPOINTS = po.Set(
+            initialize=range(len(self.es.timeincrement)+1), ordered=True
+        )
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
