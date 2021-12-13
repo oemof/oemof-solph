@@ -310,7 +310,6 @@ class Model(BaseModel):
         self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
                                 ordered=True)
 
-        # TODO: Generalize!
         if not self.es.multi_period:
             self.TIMEINDEX = po.Set(
                 initialize=list(

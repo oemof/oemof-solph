@@ -61,7 +61,7 @@ class EnergySystem(es.EnergySystem):
     def _add_periods(self, periods):
         """Returns periods to be added to the energy system
 
-        * For a single model, periods only contain one value.
+        * For a standard model, periods only contain one value.
         * For a multi-period model, periods are based on the years used in the
           timeindex. As a default, each year in the timeindex is mapped to
           its own period.
@@ -103,7 +103,12 @@ class EnergySystem(es.EnergySystem):
         return periods
 
     def _extract_periods_lengths_and_gap(self):
-        """Determine length of one and diff between two subsequent periods"""
+        """Determine length of one and difference between subsequent periods
+
+        * `periods_length` contains the length of a period in full years
+        * `periods_gap` is the difference in years between subsequent periods,
+          attributed to the latter one
+        """
         periods_gap = {0: 0}
         if not self.multi_period:
             periods_length = {0: 1}
