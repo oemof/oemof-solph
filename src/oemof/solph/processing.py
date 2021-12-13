@@ -112,6 +112,38 @@ def create_dataframe(om):
     return df
 
 
+def divide_scalars_sequences(df_dict, k):
+    try:
+        condition = df_dict[k][1:].isnull().any()
+        scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+        sequences = df_dict[k].loc[:, ~condition]
+        return {"scalars": scalars, "sequences": sequences}
+    except IndexError:
+        error_message = (
+            "Cannot access index on result data. "
+            + "Did the optimization terminate"
+            + " without errors?"
+        )
+        raise IndexError(error_message)
+
+
+def set_result_index(df_dict, k, result_index):
+    try:
+        df_dict[k].index = result_index
+    except ValueError:
+        try:
+            df_dict[k] = df_dict[k][1:]
+            df_dict[k].index = result_index
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values "
+                "in your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
+
+
 def results(om):
     """
     Create a result dictionary from the result DataFrame.
@@ -134,38 +166,41 @@ def results(om):
 
     # Define index
     if om.es.timeindex is None:
-        result_index = list(range(len(om.es.timeincrement)))
+        result_index = list(range(len(om.es.timeincrement) + 1))
     else:
         result_index = om.es.timeindex
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
-    for k in df_dict:
-        df_dict[k].set_index("timestep", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        try:
-            df_dict[k].index = result_index
-        except ValueError as e:
-            msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
-                " your input data."
+    if om.es.timemode == "implicit":
+        # In the implicit time mode the first time point is removed.
+        # The values of intervals belong to the time at the end of the
+        # interval.
+        result_index = result_index[1:]
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
             )
-            raise type(e)(
-                str(e) + msg.format(k[0].label, k[1].label)
-            ).with_traceback(sys.exc_info()[2])
-        try:
-            condition = df_dict[k].isnull().any()
-            scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~condition]
-            result[k] = {"scalars": scalars, "sequences": sequences}
-        except IndexError:
-            error_message = (
-                "Cannot access index on result data. "
-                + "Did the optimization terminate"
-                + " without errors?"
+            set_result_index(df_dict, k, result_index)
+            result[k] = divide_scalars_sequences(df_dict, k)
+    elif om.es.timemode == "explicit":
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
             )
-            raise IndexError(error_message)
+            # Add empty row on top
+            df_dict[k] = pd.concat(
+                [
+                    pd.DataFrame(columns=df_dict[k].columns, index=[0]),
+                    df_dict[k],
+                ],
+                ignore_index=True,
+            )
+            set_result_index(df_dict, k, result_index)
+            result[k] = divide_scalars_sequences(df_dict, k)
 
     # add dual variables for bus constraints
     if om.dual is not None:
