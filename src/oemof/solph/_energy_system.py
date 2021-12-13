@@ -56,7 +56,7 @@ class EnergySystem(es.EnergySystem):
         super().__init__(**kwargs)
         self.multi_period = multi_period
         self.periods = self._add_periods(periods)
-        self._extract_periods_lengths_and_gap()
+        self._extract_periods_lengths_gap_and_years()
 
     def _add_periods(self, periods):
         """Returns periods to be added to the energy system
@@ -102,25 +102,37 @@ class EnergySystem(es.EnergySystem):
 
         return periods
 
-    def _extract_periods_lengths_and_gap(self):
+    # TODO: Check if length and gap are needed (no decommissions within period)
+    def _extract_periods_lengths_gap_and_years(self):
         """Determine length of one and difference between subsequent periods
+        and map periods to simulation years starting with 0
 
         * `periods_length` contains the length of a period in full years
         * `periods_gap` is the difference in years between subsequent periods,
-          attributed to the latter one
+          attributed to the prior one
+        * `periods_years` is the simulation year corresponding to the start
+          of a period, starting with 0
         """
-        periods_gap = {0: 0}
+        periods_gap = {}
         if not self.multi_period:
             periods_length = {0: 1}
         else:
             periods_length = {}
+            periods_years = {0: 0}
 
             previous_end = None
-            for number, (k, v) in enumerate(self.periods.items()):
+            for k, v in self.periods.items():
                 periods_length[k] = v.max().year - v.min().year + 1
-                if number >= 1:
-                    periods_gap[k] = v.min().year - previous_end.year - 1
+                if k >= 1:
+                    periods_gap[k-1] = v.min().year - previous_end.year - 1
+                    periods_years[k] = (
+                        sum(
+                            periods_length[kk] + periods_gap[kk]
+                            for kk in range(k)
+                        )
+                    )
                 previous_end = v.max()
 
         self.periods_length = periods_length
         self.periods_gap = periods_gap
+        self.periods_years = periods_years
