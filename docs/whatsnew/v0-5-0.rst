@@ -15,6 +15,7 @@ API changes
 New features
 ############
 
+* Add `inactivity_costs` as an option for `NonConvexFlow`.
 
 Documentation
 #############

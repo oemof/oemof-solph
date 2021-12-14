@@ -113,6 +113,8 @@ class NonConvex:
     activity_costs : numeric (iterable or scalar)
         Costs associated with the active operation of the flow, independently
         from the actual output.
+    inactivity_costs : numeric (iterable or scalar)
+        Costs associated with not operating the flow.
     minimum_uptime : numeric (1 or positive integer)
         Minimum time that a flow must be greater then its minimum flow after
         startup. Be aware that minimum up and downtimes can contradict each
@@ -161,7 +163,12 @@ class NonConvex:
             "maximum_startups",
             "maximum_shutdowns",
         ]
-        sequences = ["startup_costs", "shutdown_costs", "activity_costs"]
+        sequences = [
+            "startup_costs",
+            "shutdown_costs",
+            "activity_costs",
+            "inactivity_costs",
+        ]
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "initial_status": 0,
