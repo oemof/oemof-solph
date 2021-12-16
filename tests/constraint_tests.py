@@ -1004,7 +1004,7 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_activity_costs",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.flows.NonConvexFlow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
