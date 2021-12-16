@@ -704,4 +704,5 @@ class NonConvexFlowBlock(SimpleBlock):
             + shutdown_costs
             + activity_costs
             + inactivity_costs
-            + gradient_costs)
+            + gradient_costs
+        )
