@@ -699,4 +699,9 @@ class NonConvexFlowBlock(SimpleBlock):
 
             self.gradient_costs = Expression(expr=gradient_costs)
 
-        return startup_costs + shutdown_costs + activity_costs + gradient_costs
+        return (
+            startup_costs
+            + shutdown_costs
+            + activity_costs
+            + inactivity_costs
+            + gradient_costs)

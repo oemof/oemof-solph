@@ -1015,6 +1015,23 @@ class TestsConstraint:
         )
         self.compare_lp_files("activity_costs.lp")
 
+    def test_inactivity_costs(self):
+        """Testing inactivity_costs attribute for nonconvex flows."""
+        bus_t = solph.buses.Bus(label="Bus_C")
+        solph.components.Source(
+            label="cheap_plant_inactivity_costs",
+            outputs={
+                bus_t: solph.flows.Flow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    nonconvex=solph.NonConvex(inactivity_costs=2),
+                )
+            },
+        )
+        self.compare_lp_files("inactivity_costs.lp")
+
     def test_piecewise_linear_transformer_cc(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
         bgas = solph.buses.Bus(label="gasBus")
