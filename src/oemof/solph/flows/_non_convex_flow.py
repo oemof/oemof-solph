@@ -106,7 +106,7 @@ class NonConvexFlow(Flow):
             startup_costs=startup_costs,
             shutdown_costs=shutdown_costs,
             activity_costs=activity_costs,
-            inactivity_costs=activity_costs,
+            inactivity_costs=inactivity_costs,
             minimum_uptime=minimum_uptime,
             minimum_downtime=minimum_downtime,
             maximum_startups=maximum_startups,
