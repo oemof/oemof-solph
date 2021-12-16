@@ -12,6 +12,14 @@ oemof.solph.buses.Bus
     :undoc-members:
     :show-inheritance:
 
+oemof.solph.buses.electrical_bus
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.buses.experimental._electrical_bus
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Flows
 -----
@@ -36,6 +44,14 @@ oemof.solph.NonConvexFlow
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.flows._non_convex_flow
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.flows.experimental.ElectricalLine
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.flows.experimental.ElectricalLine
     :members:
     :undoc-members:
     :show-inheritance:
@@ -96,6 +112,38 @@ oemof.solph.components.OffsetTransformer
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. automodule:: oemof.solph.components._offset_transformer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.components.experimental.GenericCAES
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components.experimental.GenericCAES
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.components.experimental.Link
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components.experimental.Link
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.custom.PiecewiseLinearTransformer
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components.experimental.PiecewiseLinearTransformer
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+oemof.solph.components.experimental.SinkDSM
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. automodule:: oemof.solph.components.experimental.SinkDSM
     :members:
     :undoc-members:
     :show-inheritance:
@@ -249,64 +297,3 @@ oemof.solph.views module
     :undoc-members:
     :show-inheritance:
 
-
-Submodules (experimental)
-=========================
-
-Buses
------
-
-oemof.solph.buses.electrical_bus
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.buses.experimental._electrical_bus
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-Flows
------
-
-oemof.solph.flows.experimental.ElectricalLine
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.flows.experimental.ElectricalLine
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Components
-----------
-
-oemof.solph.components.experimental.GenericCAES
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.components.experimental.GenericCAES
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.components.experimental.Link
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.components.experimental.Link
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.custom.PiecewiseLinearTransformer
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.components.experimental.PiecewiseLinearTransformer
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.components.experimental.SinkDSM
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-.. automodule:: oemof.solph.components.experimental.SinkDSM
-    :members:
-    :undoc-members:
-    :show-inheritance:
