@@ -75,17 +75,21 @@ def investment_limit_per_period(model, limit=None):
     """
 
     if not model.es.multi_period:
-        msg = ("investment_limit_per_period is only applicable "
-               "for multi-period models.\nIn order to create such a model, "
-               "set attribute `multi_period` of your energy system to True.")
+        msg = (
+            "investment_limit_per_period is only applicable "
+            "for multi-period models.\nIn order to create such a model, "
+            "set attribute `multi_period` of your energy system to True."
+        )
         raise ValueError(msg)
 
     if limit is not None:
         limit = sequence(limit)
     else:
-        msg = ("You have to provide an investment limit for each period!\n"
-               "If you provide a scalar value, this will be applied as a "
-               "limit for each period.")
+        msg = (
+            "You have to provide an investment limit for each period!\n"
+            "If you provide a scalar value, this will be applied as a "
+            "limit for each period."
+        )
         raise ValueError(msg)
 
     def investment_period_rule(m, p):
@@ -109,8 +113,7 @@ def investment_limit_per_period(model, limit=None):
         return expr <= limit[p]
 
     model.investment_limit_per_period = po.Constraint(
-        model.PERIODS,
-        rule=investment_period_rule
+        model.PERIODS, rule=investment_period_rule
     )
 
     return model
@@ -201,11 +204,8 @@ def additional_investment_flow_limit(model, keyword, limit=None):
             model.add_limit.add(p, (lhs <= rhs))
 
     model.add_limit = po.Constraint(
-        model.PERIODS,
-        noruleinit=True,
-        name=limit_name + "_constraint"
+        model.PERIODS, noruleinit=True, name=limit_name + "_constraint"
     )
-    model.add_limit_build = po.BuildAction(
-        rule=_additional_limit_rule)
+    model.add_limit_build = po.BuildAction(rule=_additional_limit_rule)
 
     return model

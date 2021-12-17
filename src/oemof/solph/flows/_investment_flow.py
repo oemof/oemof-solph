@@ -299,14 +299,18 @@ class InvestmentFlowBlock(SimpleBlock):
 
         self.OVERALL_MAXIMUM_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group
-                if g[2].investment.overall_maximum is not None]
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.overall_maximum is not None
+            ]
         )
 
         self.OVERALL_MINIMUM_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group
-                if g[2].investment.overall_minimum is not None]
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.overall_minimum is not None
+            ]
         )
 
         # ######################### VARIABLES #################################
@@ -329,38 +333,26 @@ class InvestmentFlowBlock(SimpleBlock):
         )
 
         # Total capacity
-        self.total = Var(
-            self.INVESTFLOWS,
-            m.PERIODS,
-            within=NonNegativeReals
-        )
+        self.total = Var(self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals)
 
         if m.es.multi_period:
             self.old = Var(
-                self.INVESTFLOWS,
-                m.PERIODS,
-                within=NonNegativeReals
+                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
             )
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
             self.old_end = Var(
-                self.INVESTFLOWS,
-                m.PERIODS,
-                within=NonNegativeReals
+                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
             )
 
             # Old exogenous capacity to be decommissioned (due to lifetime)
             self.old_exo = Var(
-                self.INVESTFLOWS,
-                m.PERIODS,
-                within=NonNegativeReals
+                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
             )
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
-            self.NON_CONVEX_INVESTFLOWS,
-            m.PERIODS,
-            within=Binary
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, within=Binary
         )
 
         # ######################### CONSTRAINTS ###############################
@@ -376,31 +368,24 @@ class InvestmentFlowBlock(SimpleBlock):
                     self.minimum_rule.add((i, o, p), expr)
 
         self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, m.PERIODS,
-            noruleinit=True
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, noruleinit=True
         )
-        self.minimum_rule_build = BuildAction(
-            rule=_min_invest_rule
-        )
+        self.minimum_rule_build = BuildAction(rule=_min_invest_rule)
 
         def _max_invest_rule(block):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 for p in m.PERIODS:
-                    expr = (
-                        self.invest[i, o, p]
-                        <= (m.flows[i, o].investment.maximum[p]
-                            * self.invest_status[i, o, p])
+                    expr = self.invest[i, o, p] <= (
+                        m.flows[i, o].investment.maximum[p]
+                        * self.invest_status[i, o, p]
                     )
                     self.maximum_rule.add((i, o, p), expr)
 
         self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, m.PERIODS,
-            noruleinit=True
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, noruleinit=True
         )
-        self.maximum_rule_build = BuildAction(
-            rule=_max_invest_rule
-        )
+        self.maximum_rule_build = BuildAction(rule=_max_invest_rule)
 
         # Handle unit lifetimes
         def _total_capacity_rule(block):
@@ -410,26 +395,29 @@ class InvestmentFlowBlock(SimpleBlock):
             for i, o in self.INVESTFLOWS:
                 for p in m.PERIODS:
                     if p == 0:
-                        expr = (self.total[i, o, p]
-                                == self.invest[i, o, p]
-                                + m.flows[i, o].investment.existing)
+                        expr = (
+                            self.total[i, o, p]
+                            == self.invest[i, o, p]
+                            + m.flows[i, o].investment.existing
+                        )
                         self.total_rule.add((i, o, p), expr)
                     # applicable for multi-period model only
                     else:
-                        expr = (self.total[i, o, p]
-                                == self.invest[i, o, p]
-                                + self.total[i, o, p - 1]
-                                - self.old[i, o, p])
+                        expr = (
+                            self.total[i, o, p]
+                            == self.invest[i, o, p]
+                            + self.total[i, o, p - 1]
+                            - self.old[i, o, p]
+                        )
                         self.total_rule.add((i, o, p), expr)
 
         self.total_rule = Constraint(
-            self.INVESTFLOWS, m.PERIODS,
-            noruleinit=True
+            self.INVESTFLOWS, m.PERIODS, noruleinit=True
         )
-        self.total_rule_build = BuildAction(
-            rule=_total_capacity_rule)
+        self.total_rule_build = BuildAction(rule=_total_capacity_rule)
 
         if m.es.multi_period:
+
             def _old_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
                 capacity to be decommissioned due to reaching its lifetime
@@ -437,15 +425,17 @@ class InvestmentFlowBlock(SimpleBlock):
                 for i, o in self.INVESTFLOWS:
                     lifetime = m.flows[i, o].investment.lifetime
                     if lifetime is None:
-                        msg = ("You have to specify a lifetime "
-                               "for an InvestmentFlow in "
-                               "a multi-period model! Value for {} "
-                               "is missing.".format((i, o)))
+                        msg = (
+                            "You have to specify a lifetime "
+                            "for an InvestmentFlow in "
+                            "a multi-period model! Value for {} "
+                            "is missing.".format((i, o))
+                        )
                         raise ValueError(msg)
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_end[i, o, p] == 0)
+                            expr = self.old_end[i, o, p] == 0
                             self.old_rule_end.add((i, o, p), expr)
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
@@ -455,20 +445,19 @@ class InvestmentFlowBlock(SimpleBlock):
                                     # change of sign is detected
                                     comm_p = k - 1
                                     break
-                            expr = (self.old_end[i, o, p]
-                                    == self.invest[i, o, comm_p])
+                            expr = (
+                                self.old_end[i, o, p]
+                                == self.invest[i, o, comm_p]
+                            )
                             self.old_rule_end.add((i, o, p), expr)
                         else:
-                            expr = (self.old_end[i, o, p] == 0)
+                            expr = self.old_end[i, o, p] == 0
                             self.old_rule_end.add((i, o, p), expr)
 
             self.old_rule_end = Constraint(
-                self.INVESTFLOWS, m.PERIODS,
-                noruleinit=True
+                self.INVESTFLOWS, m.PERIODS, noruleinit=True
             )
-            self.old_rule_end_build = BuildAction(
-                rule=_old_capacity_rule_end
-            )
+            self.old_rule_end_build = BuildAction(rule=_old_capacity_rule_end)
 
             def _old_capacity_rule_exo(block):
                 """Rule definition for determining old exogenously given
@@ -481,7 +470,7 @@ class InvestmentFlowBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_exo[i, o, p] == 0)
+                            expr = self.old_exo[i, o, p] == 0
                             self.old_rule_exo.add((i, o, p), expr)
                         elif lifetime - age <= m.es.periods_years[p]:
                             # Track decommissioning status
@@ -492,19 +481,16 @@ class InvestmentFlowBlock(SimpleBlock):
                                 )
                                 is_decommissioned = True
                             else:
-                                expr = (self.old_exo[i, o, p] == 0)
+                                expr = self.old_exo[i, o, p] == 0
                             self.old_rule_exo.add((i, o, p), expr)
                         else:
-                            expr = (self.old_exo[i, o, p] == 0)
+                            expr = self.old_exo[i, o, p] == 0
                             self.old_rule_exo.add((i, o, p), expr)
 
             self.old_rule_exo = Constraint(
-                self.INVESTFLOWS, m.PERIODS,
-                noruleinit=True
+                self.INVESTFLOWS, m.PERIODS, noruleinit=True
             )
-            self.old_rule_exo_build = BuildAction(
-                rule=_old_capacity_rule_exo
-            )
+            self.old_rule_exo_build = BuildAction(rule=_old_capacity_rule_exo)
 
             def _old_capacity_rule(block):
                 """Rule definition for determining (overall) old capacity
@@ -514,16 +500,14 @@ class InvestmentFlowBlock(SimpleBlock):
                     for p in m.PERIODS:
                         expr = (
                             self.old[i, o, p]
-                            == self.old_end[i, o, p] + self.old_exo[i, o, p])
+                            == self.old_end[i, o, p] + self.old_exo[i, o, p]
+                        )
                         self.old_rule.add((i, o, p), expr)
 
             self.old_rule = Constraint(
-                self.INVESTFLOWS, m.PERIODS,
-                noruleinit=True
+                self.INVESTFLOWS, m.PERIODS, noruleinit=True
             )
-            self.old_rule_build = BuildAction(
-                rule=_old_capacity_rule
-            )
+            self.old_rule_build = BuildAction(rule=_old_capacity_rule)
 
         def _investflow_fixed_rule(block):
             """Rule definition of constraint to fix flow variable
@@ -538,13 +522,9 @@ class InvestmentFlowBlock(SimpleBlock):
                     self.fixed.add((i, o, p, t), expr)
 
         self.fixed = Constraint(
-            self.FIXED_INVESTFLOWS,
-            m.TIMEINDEX,
-            noruleinit=True
+            self.FIXED_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
         )
-        self.fixed_build = BuildAction(
-            rule=_investflow_fixed_rule
-        )
+        self.fixed_build = BuildAction(rule=_investflow_fixed_rule)
 
         def _max_investflow_rule(block):
             """Rule definition of constraint setting an upper bound of flow
@@ -559,13 +539,9 @@ class InvestmentFlowBlock(SimpleBlock):
                     self.max.add((i, o, p, t), expr)
 
         self.max = Constraint(
-            self.NON_FIXED_INVESTFLOWS,
-            m.TIMEINDEX,
-            noruleinit=True
+            self.NON_FIXED_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
         )
-        self.max_build = BuildAction(
-            rule=_max_investflow_rule
-        )
+        self.max_build = BuildAction(rule=_max_investflow_rule)
 
         def _min_investflow_rule(block):
             """Rule definition of constraint setting a lower bound on flow
@@ -580,49 +556,44 @@ class InvestmentFlowBlock(SimpleBlock):
                     self.min.add((i, o, p, t), expr)
 
         self.min = Constraint(
-            self.MIN_INVESTFLOWS,
-            m.TIMEINDEX,
-            noruleinit=True
+            self.MIN_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
         )
-        self.min_build = BuildAction(
-            rule=_min_investflow_rule
-        )
+        self.min_build = BuildAction(rule=_min_investflow_rule)
 
         def _summed_max_investflow_rule(block, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
-            expr = (
-                sum(m.flow[i, o, p, t] * m.timeincrement[t]
-                    for p, t in m.TIMEINDEX)
-                <= (m.flows[i, o].summed_max
-                    * sum(self.total[i, o, p] for p in m.PERIODS))
+            expr = sum(
+                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+            ) <= (
+                m.flows[i, o].summed_max
+                * sum(self.total[i, o, p] for p in m.PERIODS)
             )
             return expr
 
         self.summed_max = Constraint(
-            self.SUMMED_MAX_INVESTFLOWS,
-            rule=_summed_max_investflow_rule
+            self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule
         )
 
         def _summed_min_investflow_rule(block, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
-            expr = (
-                sum(m.flow[i, o, p, t] * m.timeincrement[t]
-                    for p, t in m.TIMEINDEX)
-                >= (sum(self.total[i, o, p] for p in m.PERIODS)
-                    * m.flows[i, o].summed_min)
+            expr = sum(
+                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+            ) >= (
+                sum(self.total[i, o, p] for p in m.PERIODS)
+                * m.flows[i, o].summed_min
             )
             return expr
 
         self.summed_min = Constraint(
-            self.SUMMED_MIN_INVESTFLOWS,
-            rule=_summed_min_investflow_rule
+            self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule
         )
 
         if m.es.multi_period:
+
             def _overall_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -636,9 +607,7 @@ class InvestmentFlowBlock(SimpleBlock):
                         self.overall_maximum.add((i, o, p), expr)
 
             self.overall_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTFLOWS,
-                m.PERIODS,
-                noruleinit=True
+                self.OVERALL_MAXIMUM_INVESTFLOWS, m.PERIODS, noruleinit=True
             )
             self.overall_maximum_build = BuildAction(
                 rule=_overall_maximum_investflow_rule
@@ -658,7 +627,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
             self.overall_minimum = Constraint(
                 self.OVERALL_MINIMUM_INVESTFLOWS,
-                rule=_overall_minimum_investflow_rule
+                rule=_overall_minimum_investflow_rule,
             )
 
     def _objective_expression(self):
@@ -705,19 +674,22 @@ class InvestmentFlowBlock(SimpleBlock):
                 lifetime = m.flows[i, o].investment.lifetime
                 interest = m.flows[i, o].investment.interest_rate
                 if interest == 0:
-                    warn(msg.format(m.discount_rate),
-                         debugging.SuspiciousUsageWarning)
+                    warn(
+                        msg.format(m.discount_rate),
+                        debugging.SuspiciousUsageWarning,
+                    )
                     interest = m.discount_rate
                 for p in m.PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,
-                        wacc=interest
+                        wacc=interest,
                     )
                     investment_costs_increment = (
-                        self.invest[i, o, p] * annuity * lifetime
-                        * ((1 + m.discount_rate)
-                           ** (-m.es.periods_years[p]))
+                        self.invest[i, o, p]
+                        * annuity
+                        * lifetime
+                        * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
@@ -726,22 +698,22 @@ class InvestmentFlowBlock(SimpleBlock):
                 lifetime = m.flows[i, o].investment.lifetime
                 interest = m.flows[i, o].investment.interest_rate
                 if interest == 0:
-                    warn(msg.format(m.discount_rate),
-                         debugging.SuspiciousUsageWarning)
+                    warn(
+                        msg.format(m.discount_rate),
+                        debugging.SuspiciousUsageWarning,
+                    )
                     interest = m.discount_rate
                 for p in m.PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,
-                        wacc=interest
+                        wacc=interest,
                     )
                     investment_costs_increment = (
-                        (self.invest[i, o, p] * annuity * lifetime
-                         + self.invest_status[i, o, p]
-                         * m.flows[i, o].investment.offset[p])
-                        * ((1 + m.discount_rate)
-                           ** (-m.es.periods_years[p]))
-                    )
+                        self.invest[i, o, p] * annuity * lifetime
+                        + self.invest_status[i, o, p]
+                        * m.flows[i, o].investment.offset[p]
+                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -749,17 +721,15 @@ class InvestmentFlowBlock(SimpleBlock):
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += (
-                            sum(self.invest[i, o, p]
-                                * m.flows[i, o].investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[p],
-                                    m.es.periods_years[p] + lifetime)
-                                )
-                            * ((1 + m.discount_rate)
-                               ** (-m.es.periods_years[p]))
-                        )
+                        fixed_costs += sum(
+                            self.invest[i, o, p]
+                            * m.flows[i, o].investment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime,
+                            )
+                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = Expression(expr=period_investment_costs)

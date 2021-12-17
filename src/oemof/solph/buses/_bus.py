@@ -85,7 +85,7 @@ class BusBlock(SimpleBlock):
                 for g in group:
                     lhs = sum(m.flow[i, g, p, t] for i in ins[g])
                     rhs = sum(m.flow[g, o, p, t] for o in outs[g])
-                    expr = (lhs == rhs)
+                    expr = lhs == rhs
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
                         block.balance.add((g, p, t), expr)

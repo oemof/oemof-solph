@@ -738,8 +738,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -747,8 +746,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -757,8 +755,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -962,6 +959,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
         if m.es.multi_period:
+
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
                 capacity to be decommissioned due to reaching its lifetime
@@ -971,7 +969,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_end[g, p] == 0)
+                            expr = self.old_end[g, p] == 0
                             self.old_rule_end.add((g, p), expr)
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
@@ -981,8 +979,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                                     # change of sign is detected
                                     comm_p = k - 1
                                     break
-                            expr = (self.old_end[g, p]
-                                    == self.invest[g, comm_p])
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
                             self.old_rule_end.add((g, p), expr)
                         else:
                             expr = self.old_end[g, p] == 0
@@ -1006,7 +1003,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_exo[g, p] == 0)
+                            expr = self.old_exo[g, p] == 0
                             self.old_rule_exo.add((g, p), expr)
                         elif lifetime - age <= m.es.periods_years[p]:
                             # Track decommissioning status
@@ -1017,7 +1014,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                                 )
                                 is_decommissioned = True
                             else:
-                                expr = (self.old_exo[g, p] == 0)
+                                expr = self.old_exo[g, p] == 0
                             self.old_rule_exo.add((g, p), expr)
                         else:
                             expr = self.old_exo[g, p] == 0
@@ -1180,6 +1177,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -1277,8 +1275,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -1292,8 +1289,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1301,8 +1297,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -1315,10 +1310,9 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                                m.es.periods_years[p] + lifetime,
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -1986,8 +1980,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1999,8 +1992,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -2009,8 +2001,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -2782,6 +2773,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -2880,8 +2872,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -2895,8 +2886,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -2908,8 +2898,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -2922,10 +2911,9 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                                m.es.periods_years[p] + lifetime,
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -3931,8 +3919,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -3945,8 +3932,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -3955,8 +3941,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -5013,6 +4998,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -5119,8 +5105,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -5140,8 +5125,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -5154,8 +5138,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -5168,10 +5151,9 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                                m.es.periods_years[p] + lifetime,
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)

@@ -156,14 +156,16 @@ class Flow(on.Edge):
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
-            msg = ("Be aware that the fixed costs attribute is only\n"
-                   "meant to be used for multi-period models.\n"
-                   "If you wish to set up a multi-period model, set the"
-                   " multi_period attribute of your energy system to True.\n"
-                   "It has been decided to remove the `fixed_costs` "
-                   "attribute with v0.2 for regular uses.\n"
-                   "If you specify `fixed_costs` for a regular model, "
-                   "it will simply be ignored.")
+            msg = (
+                "Be aware that the fixed costs attribute is only\n"
+                "meant to be used for multi-period models.\n"
+                "If you wish to set up a multi-period model, set the"
+                " multi_period attribute of your energy system to True.\n"
+                "It has been decided to remove the `fixed_costs` "
+                "attribute with v0.2 for regular uses.\n"
+                "If you specify `fixed_costs` for a regular model, "
+                "it will simply be ignored."
+            )
             warn(msg, debugging.SuspiciousUsageWarning)
 
         if "actual_value" in keys:
@@ -448,16 +450,32 @@ class FlowBlock(SimpleBlock):
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMEINDEX) + 1):
                     if m.TIMEINDEX[index][1] > 0:
-                        lhs = (m.flow[inp, out, m.TIMEINDEX[index][0],
-                                      m.TIMEINDEX[index][1]]
-                               - m.flow[inp, out, m.TIMEINDEX[index - 1][0],
-                                        m.TIMEINDEX[index - 1][1]])
+                        lhs = (
+                            m.flow[
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ]
+                            - m.flow[
+                                inp,
+                                out,
+                                m.TIMEINDEX[index - 1][0],
+                                m.TIMEINDEX[index - 1][1],
+                            ]
+                        )
                         rhs = self.positive_gradient[
-                            inp, out, m.TIMEINDEX[index][1]]
+                            inp, out, m.TIMEINDEX[index][1]
+                        ]
                         self.positive_gradient_constr.add(
-                            (inp, out, m.TIMEINDEX[index][0],
-                             m.TIMEINDEX[index][1]),
-                            lhs <= rhs)
+                            (
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs <= rhs,
+                        )
                     else:
                         pass  # return(Constraint.Skip)
 
@@ -473,16 +491,32 @@ class FlowBlock(SimpleBlock):
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMEINDEX) + 1):
                     if m.TIMEINDEX[index][1] > 0:
-                        lhs = (m.flow[inp, out, m.TIMEINDEX[index - 1][0],
-                                      m.TIMEINDEX[index - 1][1]]
-                               - m.flow[inp, out, m.TIMEINDEX[index][0],
-                                        m.TIMEINDEX[index][1]])
+                        lhs = (
+                            m.flow[
+                                inp,
+                                out,
+                                m.TIMEINDEX[index - 1][0],
+                                m.TIMEINDEX[index - 1][1],
+                            ]
+                            - m.flow[
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ]
+                        )
                         rhs = self.negative_gradient[
-                            inp, out, m.TIMEINDEX[index][1]]
+                            inp, out, m.TIMEINDEX[index][1]
+                        ]
                         self.negative_gradient_constr.add(
-                            (inp, out, m.TIMEINDEX[index][0],
-                             m.TIMEINDEX[index][1]),
-                            lhs <= rhs)
+                            (
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs <= rhs,
+                        )
                     else:
                         pass  # return(Constraint.Skip)
 
@@ -528,18 +562,18 @@ class FlowBlock(SimpleBlock):
                             m.flow[i, o, p, t]
                             * m.objective_weighting[t]
                             * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
-                if (m.flows[i, o].fixed_costs[0] is not None
-                        and m.flows[i, o].nominal_value is not None):
+                if (
+                    m.flows[i, o].fixed_costs[0] is not None
+                    and m.flows[i, o].nominal_value is not None
+                ):
                     for p in m.PERIODS:
                         fixed_costs += (
                             m.flows[i, o].nominal_value
                             * m.flows[i, o].fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)

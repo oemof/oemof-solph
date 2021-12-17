@@ -294,10 +294,12 @@ class Model(BaseModel):
             self.discount_rate = discount_rate
         elif energysystem.multi_period:
             self.discount_rate = 0.02
-            msg = (f"By default, a discount_rate of {self.discount_rate} "
-                   f"is used for a multi-period model. "
-                   f"If you want to use another value, "
-                   f"you have to specify the `discount_rate` attribute.")
+            msg = (
+                f"By default, a discount_rate of {self.discount_rate} "
+                f"is used for a multi-period model. "
+                f"If you want to use another value, "
+                f"you have to specify the `discount_rate` attribute."
+            )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         super().__init__(energysystem, **kwargs)
 
@@ -307,16 +309,19 @@ class Model(BaseModel):
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         # pyomo set for timesteps of optimization problem
-        self.TIMESTEPS = po.Set(initialize=range(len(self.es.timeindex)),
-                                ordered=True)
+        self.TIMESTEPS = po.Set(
+            initialize=range(len(self.es.timeindex)), ordered=True
+        )
 
         if not self.es.multi_period:
             self.TIMEINDEX = po.Set(
                 initialize=list(
-                    zip([0] * len(self.es.timeindex.year),
-                        range(len(self.es.timeindex)))
+                    zip(
+                        [0] * len(self.es.timeindex.year),
+                        range(len(self.es.timeindex)),
+                    )
                 ),
-                ordered=True
+                ordered=True,
             )
         else:
             nested_list = [
@@ -329,7 +334,7 @@ class Model(BaseModel):
                 initialize=list(
                     zip(flattened_list, range(len(self.es.timeindex)))
                 ),
-                ordered=True
+                ordered=True,
             )
 
         self.PERIODS = po.Set(
@@ -377,9 +382,7 @@ class Model(BaseModel):
 
     def _add_parent_block_variables(self):
         """ """
-        self.flow = po.Var(
-            self.FLOWS, self.TIMEINDEX, within=po.Reals
-        )
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX, within=po.Reals)
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
@@ -387,19 +390,22 @@ class Model(BaseModel):
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value)
+                            * self.flows[o, i].nominal_value
+                        )
                         self.flow[o, i, p, t].fix()
                 else:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value)
+                            * self.flows[o, i].nominal_value
+                        )
 
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value)
+                                * self.flows[o, i].nominal_value
+                            )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(0)

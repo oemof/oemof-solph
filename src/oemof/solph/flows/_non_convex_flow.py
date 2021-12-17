@@ -580,19 +580,32 @@ class NonConvexFlowBlock(SimpleBlock):
                 for index in range(1, len(m.TIMEINDEX) + 1):
                     if m.TIMEINDEX[index][1] > 0:
                         lhs = (
-                            m.flow[i, o, m.TIMEINDEX[index][0],
-                                   m.TIMEINDEX[index][1]]
+                            m.flow[
+                                i,
+                                o,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ]
                             * self.status[i, o, m.TIMEINDEX[index][1]]
-                            - m.flow[i, o, m.TIMEINDEX[index - 1][0],
-                                     m.TIMEINDEX[index - 1][1]]
+                            - m.flow[
+                                i,
+                                o,
+                                m.TIMEINDEX[index - 1][0],
+                                m.TIMEINDEX[index - 1][1],
+                            ]
                             * self.status[i, o, m.TIMEINDEX[index - 1][1]]
                         )
-                        rhs = self.positive_gradient[i, o,
-                                                     m.TIMEINDEX[index][1]]
+                        rhs = self.positive_gradient[
+                            i, o, m.TIMEINDEX[index][1]
+                        ]
                         self.positive_gradient_constr.add(
-                            (i, o, m.TIMEINDEX[index][0],
-                             m.TIMEINDEX[index][1]),
-                            lhs <= rhs
+                            (
+                                i,
+                                o,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs <= rhs,
                         )
                     else:
                         pass  # return(Constraint.Skip)
@@ -610,19 +623,32 @@ class NonConvexFlowBlock(SimpleBlock):
                 for index in range(1, len(m.TIMEINDEX) + 1):
                     if m.TIMEINDEX[index][1] > 0:
                         lhs = (
-                            m.flow[i, o, m.TIMEINDEX[index - 1][0],
-                                   m.TIMEINDEX[index - 1][1]]
+                            m.flow[
+                                i,
+                                o,
+                                m.TIMEINDEX[index - 1][0],
+                                m.TIMEINDEX[index - 1][1],
+                            ]
                             * self.status[i, o, m.TIMEINDEX[index - 1][1]]
-                            - m.flow[i, o, m.TIMEINDEX[index][0],
-                                     m.TIMEINDEX[index][1]]
+                            - m.flow[
+                                i,
+                                o,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ]
                             * self.status[i, o, m.TIMEINDEX[index][1]]
                         )
-                        rhs = self.negative_gradient[i, o,
-                                                     m.TIMEINDEX[index][1]]
+                        rhs = self.negative_gradient[
+                            i, o, m.TIMEINDEX[index][1]
+                        ]
                         self.negative_gradient_constr.add(
-                            (i, o, m.TIMEINDEX[index][0],
-                             m.TIMEINDEX[index][1]),
-                            lhs <= rhs
+                            (
+                                i,
+                                o,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs <= rhs,
                         )
                     else:
                         pass  # return(Constraint.Skip)
@@ -695,11 +721,12 @@ class NonConvexFlowBlock(SimpleBlock):
                         is not None
                     ):
                         for t in m.TIMESTEPS:
-                            gradient_costs += (
-                                self.positive_gradient[i, o, t] * (
-                                    m.flows[i, o].nonconvex.positive_gradient[
-                                        "costs"]
-                                )
+                            gradient_costs += self.positive_gradient[
+                                i, o, t
+                            ] * (
+                                m.flows[i, o].nonconvex.positive_gradient[
+                                    "costs"
+                                ]
                             )
 
             if self.NEGATIVE_GRADIENT_FLOWS:
@@ -709,50 +736,45 @@ class NonConvexFlowBlock(SimpleBlock):
                         is not None
                     ):
                         for t in m.TIMESTEPS:
-                            gradient_costs += (
-                                self.negative_gradient[i, o, t] * (
-                                    m.flows[i, o].nonconvex.negative_gradient[
-                                        "costs"]
-                                )
+                            gradient_costs += self.negative_gradient[
+                                i, o, t
+                            ] * (
+                                m.flows[i, o].nonconvex.negative_gradient[
+                                    "costs"
+                                ]
                             )
 
         else:
             if self.STARTUPFLOWS:
                 for i, o in self.STARTUPFLOWS:
-                    if (m.flows[i, o].nonconvex.startup_costs[0]
-                            is not None):
+                    if m.flows[i, o].nonconvex.startup_costs[0] is not None:
                         startup_costs += sum(
                             self.startup[i, o, t]
                             * m.flows[i, o].nonconvex.startup_costs[t]
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
             if self.SHUTDOWNFLOWS:
                 for i, o in self.SHUTDOWNFLOWS:
-                    if (m.flows[i, o].nonconvex.shutdown_costs[0]
-                            is not None):
+                    if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
                         shutdown_costs += sum(
                             self.shutdown[i, o, t]
                             * m.flows[i, o].nonconvex.shutdown_costs[t]
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
             if self.ACTIVITYCOSTFLOWS:
                 for i, o in self.ACTIVITYCOSTFLOWS:
-                    if (m.flows[i, o].nonconvex.activity_costs[0]
-                            is not None):
+                    if m.flows[i, o].nonconvex.activity_costs[0] is not None:
                         activity_costs += sum(
                             self.status[i, o, t]
                             * m.flows[i, o].nonconvex.activity_costs[t]
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
@@ -763,8 +785,7 @@ class NonConvexFlowBlock(SimpleBlock):
                             (1 - self.status[i, o, t])
                             * m.flows[i, o].nonconvex.inactivity_costs[t]
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
@@ -776,28 +797,30 @@ class NonConvexFlowBlock(SimpleBlock):
                     ):
                         gradient_costs += sum(
                             self.positive_gradient[i, o, t]
-                            * (m.flows[i, o].nonconvex
-                                .positive_gradient["costs"])
+                            * (
+                                m.flows[i, o].nonconvex.positive_gradient[
+                                    "costs"
+                                ]
+                            )
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
             if self.NEGATIVE_GRADIENT_FLOWS:
                 for i, o in self.NEGATIVE_GRADIENT_FLOWS:
                     if (
-                        (m.flows[i, o].nonconvex
-                            .negative_gradient["ub"][0])
-                        is not None
-                    ):
+                        m.flows[i, o].nonconvex.negative_gradient["ub"][0]
+                    ) is not None:
                         gradient_costs += sum(
                             self.negative_gradient[i, o, t]
-                            * (m.flows[i, o].nonconvex
-                                .negative_gradient["costs"])
+                            * (
+                                m.flows[i, o].nonconvex.negative_gradient[
+                                    "costs"
+                                ]
+                            )
                             * m.objective_weighting[t]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                             for p, t in m.TIMEINDEX
                         )
 
@@ -809,8 +832,11 @@ class NonConvexFlowBlock(SimpleBlock):
 
         self.costs = Expression(
             expr=(
-                startup_costs + shutdown_costs
-                + activity_costs + inactivity_costs + gradient_costs
+                startup_costs
+                + shutdown_costs
+                + activity_costs
+                + inactivity_costs
+                + gradient_costs
             )
         )
 

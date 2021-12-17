@@ -97,17 +97,14 @@ class EnergySystem(es.EnergySystem):
         if not self.multi_period:
             periods = {0: 0}
         elif periods is None:
-            years = sorted(
-                        list(
-                            set(getattr(self.timeindex, 'year'))
-                        )
-                    )
+            years = sorted(list(set(getattr(self.timeindex, "year"))))
 
             periods = {}
             filter_series = self.timeindex.to_series()
             for number, year in enumerate(years):
                 start = filter_series.loc[
-                    filter_series.index.year == year].min()
+                    filter_series.index.year == year
+                ].min()
                 end = filter_series.loc[filter_series.index.year == year].max()
                 periods[number] = pd.date_range(start, end, freq="H")
         else:
@@ -140,12 +137,9 @@ class EnergySystem(es.EnergySystem):
             for k, v in self.periods.items():
                 periods_length[k] = v.max().year - v.min().year + 1
                 if k >= 1:
-                    periods_gap[k-1] = v.min().year - previous_end.year - 1
-                    periods_years[k] = (
-                        sum(
-                            periods_length[kk] + periods_gap[kk]
-                            for kk in range(k)
-                        )
+                    periods_gap[k - 1] = v.min().year - previous_end.year - 1
+                    periods_years[k] = sum(
+                        periods_length[kk] + periods_gap[kk] for kk in range(k)
                     )
                 previous_end = v.max()
 

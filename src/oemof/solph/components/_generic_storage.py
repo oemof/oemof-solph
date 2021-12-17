@@ -901,8 +901,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         # Total capacity
         self.total = Var(
-            self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals,
-            initialize=0
+            self.INVESTSTORAGES,
+            m.PERIODS,
+            within=NonNegativeReals,
+            initialize=0,
         )
 
         if m.es.multi_period:
@@ -967,6 +969,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _old_storage_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
                 capacity to be decommissioned due to reaching its lifetime
@@ -974,15 +977,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 for n in self.INVESTSTORAGES:
                     lifetime = n.investment.lifetime
                     if lifetime is None:
-                        msg = ("You have to specify a lifetime "
-                               "for an InvestmentFlow in "
-                               "a multi-period model! Value for {} "
-                               "is missing.".format(n))
+                        msg = (
+                            "You have to specify a lifetime "
+                            "for an InvestmentFlow in "
+                            "a multi-period model! Value for {} "
+                            "is missing.".format(n)
+                        )
                         raise ValueError(msg)
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_end[n, p] == 0)
+                            expr = self.old_end[n, p] == 0
                             self.old_rule_end.add((n, p), expr)
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
@@ -992,10 +997,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                     # change of sign is detected
                                     comm_p = k - 1
                                     break
-                            expr = (
-                                self.old_end[n, p]
-                                == self.invest[n, comm_p]
-                            )
+                            expr = self.old_end[n, p] == self.invest[n, comm_p]
                             self.old_rule_end.add((n, p), expr)
                         else:
                             expr = self.old_end[n, p] == 0
@@ -1020,18 +1022,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_exo[n, p] == 0)
+                            expr = self.old_exo[n, p] == 0
                             self.old_rule_exo.add((n, p), expr)
                         elif lifetime - age <= m.es.periods_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
-                                    self.old_exo[n, p]
-                                    == n.investment.existing
+                                    self.old_exo[n, p] == n.investment.existing
                                 )
                                 is_decommissioned = True
                             else:
-                                expr = (self.old_exo[n, p] == 0)
+                                expr = self.old_exo[n, p] == 0
                             self.old_rule_exo.add((n, p), expr)
                         else:
                             expr = self.old_exo[n, p] == 0
@@ -1067,14 +1068,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """Constraint for a variable initial storage capacity."""
             for n in self.INVESTSTORAGES_NO_INIT_CONTENT:
                 for p in m.PERIODS:
-                    expr = (block.init_content[n, p]
-                            <= block.total[n, p])
+                    expr = block.init_content[n, p] <= block.total[n, p]
                 block.init_content_limit.add((n, p), expr)
 
         self.init_content_limit = Constraint(
-            self.INVESTSTORAGES_NO_INIT_CONTENT,
-            m.PERIODS,
-            noruleinit=True
+            self.INVESTSTORAGES_NO_INIT_CONTENT, m.PERIODS, noruleinit=True
         )
         self.init_content_limit_build = BuildAction(
             rule=_inv_storage_init_content_max_rule
@@ -1087,27 +1085,19 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     if p == 0:
                         expr = (
                             block.init_content[n, p]
-                            == n.initial_storage_level
-                            * block.total[n, p]
+                            == n.initial_storage_level * block.total[n, p]
                         )
                         self.init_content_fix.add((n, p), expr)
                     else:
-                        expr = (
-                            block.init_content[n, p]
-                            == n.initial_storage_level
-                            * min(
-                                0, value(
-                                    block.total[n, p]
-                                    - block.total[n, p-1]
-                                )
-                            )
+                        expr = block.init_content[
+                            n, p
+                        ] == n.initial_storage_level * min(
+                            0, value(block.total[n, p] - block.total[n, p - 1])
                         )
                         self.init_content_fix.add((n, p), expr)
 
         self.init_content_fix = Constraint(
-            self.INVESTSTORAGES_INIT_CONTENT,
-            m. PERIODS,
-            noruleinit=True
+            self.INVESTSTORAGES_INIT_CONTENT, m.PERIODS, noruleinit=True
         )
         self.init_content_fix_build = BuildAction(
             rule=_inv_storage_init_content_fix_rule
@@ -1191,6 +1181,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         if not m.es.multi_period:
+
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMESTEPS[-1]]
@@ -1202,6 +1193,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             )
 
         else:
+
             def _lifetime_balanced_storage_rule(block):
                 for n in self.INVESTSTORAGES_BALANCED:
                     lifetime = n.investment.lifetime
@@ -1216,9 +1208,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                     comm_p = k - 1
                                     break
                             last_step = m.TIMESTEPS_IN_PERIOD[p][-1]
-                            first_step = (
-                                m.TIMESTEPS_IN_PERIOD[comm_p][0]
-                            )
+                            first_step = m.TIMESTEPS_IN_PERIOD[comm_p][0]
                             expr = (
                                 block.storage_content[n, last_step]
                                 == block.storage_content[n, first_step]
@@ -1228,9 +1218,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                             pass
 
             self.lifetime_balanced_cstr = Constraint(
-                self.INVESTSTORAGES_BALANCED,
-                m.PERIODS,
-                noruleinit=True
+                self.INVESTSTORAGES_BALANCED, m.PERIODS, noruleinit=True
             )
             self.lifetime_balanced_cstr_build = BuildAction(
                 rule=_lifetime_balanced_storage_rule
@@ -1367,6 +1355,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_storage_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -1457,8 +1446,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         self.invest[n, p]
                         * annuity
                         * lifetime
-                        * ((1 + m.discount_rate)
-                           ** (-m.es.periods_years[p]))
+                        * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
@@ -1479,12 +1467,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         wacc=interest,
                     )
                     investment_costs_increment = (
-                        (
-                            self.invest[n, p] * annuity * lifetime
-                            + self.invest_status[n, p] * n.investment.offset[p]
-                        ) * ((1 + m.discount_rate)
-                             ** (-m.es.periods_years[p]))
-                    )
+                        self.invest[n, p] * annuity * lifetime
+                        + self.invest_status[n, p] * n.investment.offset[p]
+                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1492,18 +1477,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += (
-                            sum(
-                                self.invest[n, p]
-                                * n.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[p],
-                                    m.es.periods_years[p] + lifetime
-                                )
-                            ) * ((1 + m.discount_rate)
-                                 ** (-m.es.periods_years[p]))
-                        )
+                        fixed_costs += sum(
+                            self.invest[n, p]
+                            * n.investment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime,
+                            )
+                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = Expression(expr=period_investment_costs)

@@ -154,9 +154,8 @@ class OffsetTransformerBlock(SimpleBlock):
                 * n.coefficients[1][t]
             )
             expr += (
-                (m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t])
-                * n.coefficients[0][t]
-            )
+                m.NonConvexFlow.status[list(n.inputs.keys())[0], n, t]
+            ) * n.coefficients[0][t]
             return expr == 0
 
         self.relation = Constraint(

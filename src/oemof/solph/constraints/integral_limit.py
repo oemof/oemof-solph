@@ -178,17 +178,21 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     limit_name = "integral_limit_" + keyword
 
     if not om.es.multi_period:
-        msg = ("generic_periodical_integral_limit is only applicable\n"
-               "for multi-period models.\nFor standard models, use "
-               "generic_integral_limit instead.")
+        msg = (
+            "generic_periodical_integral_limit is only applicable\n"
+            "for multi-period models.\nFor standard models, use "
+            "generic_integral_limit instead."
+        )
         raise ValueError(msg)
 
     if limit is not None:
         limit = sequence(limit)
     else:
-        msg = ("You have to provide a limit for each period!\n"
-               "If you provide a scalar value, this will be applied as a "
-               "limit for each period.")
+        msg = (
+            "You have to provide a limit for each period!\n"
+            "If you provide a scalar value, this will be applied as a "
+            "limit for each period."
+        )
         raise ValueError(msg)
 
     def _periodical_integral_limit_rule(m, p):
@@ -205,7 +209,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     om.periodical_integral_limit = po.Constraint(
         om.PERIODS,
         rule=_periodical_integral_limit_rule,
-        name=limit_name + "_constraint"
+        name=limit_name + "_constraint",
     )
 
     return om
