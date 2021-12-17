@@ -96,6 +96,7 @@ class TestParameterResult:
             param_results[(b_el2, demand)]["scalars"].sort_index(),
             pandas.Series(
                 {
+                    "fixed": True,
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
@@ -108,7 +109,7 @@ class TestParameterResult:
         )
         assert_frame_equal(
             param_results[(b_el2, demand)]["sequences"],
-            pandas.DataFrame({"fix": self.demand_values}),
+            pandas.DataFrame({"value": self.demand_values}),
             check_like=True,
         )
 
@@ -119,6 +120,7 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
+            'fixed': True,
             "integer": None,
             "investment": None,
             "nominal_value": 1,
@@ -141,9 +143,9 @@ class TestParameterResult:
             pandas.Series(scalar_attributes).sort_index(),
         )
         sequences_attributes = {
-            "fix": self.demand_values,
+            "value": self.demand_values,
         }
-        default_sequences = ["fix"]
+        default_sequences = ["value"]
         for attr in default_sequences:
             if attr not in sequences_attributes:
                 sequences_attributes[attr] = [None]

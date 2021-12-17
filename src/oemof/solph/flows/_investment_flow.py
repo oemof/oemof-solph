@@ -198,7 +198,7 @@ class InvestmentFlowBlock(SimpleBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
         Fix investment costs"
-        ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
+        ":math:`f_{fix}`", ":py:obj:`flows[i, o].value[t]`", "Normed
         fixed value for the flow variable"
         ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
         value of the flow"
@@ -265,11 +265,11 @@ class InvestmentFlowBlock(SimpleBlock):
         )
 
         self.FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not None]
+            initialize=[(g[0], g[1]) for g in group if g[2].fixed is True]
         )
 
         self.NON_FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
+            initialize=[(g[0], g[1]) for g in group if g[2].fixed is False]
         )
 
         self.SUMMED_MAX_INVESTFLOWS = Set(
@@ -343,7 +343,7 @@ class InvestmentFlowBlock(SimpleBlock):
             """
             expr = m.flow[i, o, t] == (
                 (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].fix[t]
+                * m.flows[i, o].value[t]
             )
 
             return expr
