@@ -24,6 +24,7 @@ from warnings import warn
 from oemof.network import network
 from oemof.tools import debugging
 from oemof.tools import economics
+from pyomo.core import value
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -1062,23 +1063,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
-        def _storage_level_no_investments(block):
-            """Rule definition to force storage level to zero
-            as long as no investments have occurred
-            """
-            for n in self.INVESTSTORAGES:
-                for p, t in m.TIMEINDEX:
-                    expr = block.storage_content[n, t] <= self.total[n, p]
-                    block.storage_level_noinv_rule.add((n, p, t), expr)
-
-        self.storage_level_noinv_rule = Constraint(
-            self.INVESTSTORAGES, m.TIMEINDEX, noruleinit=True
-        )
-
-        self.storage_level_noinv_rule_build = BuildAction(
-            rule=_storage_level_no_investments
-        )
-
         def _inv_storage_init_content_max_rule(block):
             """Constraint for a variable initial storage capacity."""
             for n in self.INVESTSTORAGES_NO_INIT_CONTENT:
@@ -1111,7 +1095,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         expr = (
                             block.init_content[n, p]
                             == n.initial_storage_level
-                            * min(0, block.total[n, p] > block.total[n, p-1])
+                            * min(
+                                0, value(
+                                    block.total[n, p]
+                                    - block.total[n, p-1]
+                                )
+                            )
                         )
                         self.init_content_fix.add((n, p), expr)
 
@@ -1218,10 +1207,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     for p in m.PERIODS:
-                        if p == lifetime - age:
+                        if lifetime - age <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
                             last_step = m.TIMESTEPS_IN_PERIOD[p][-1]
                             first_step = (
-                                m.TIMESTEPS_IN_PERIOD[p - lifetime + age][0]
+                                m.TIMESTEPS_IN_PERIOD[comm_p][0]
                             )
                             expr = (
                                 block.storage_content[n, last_step]
@@ -1370,48 +1366,44 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             self.NON_CONVEX_INVESTSTORAGES, m.PERIODS, rule=smallest_invest
         )
 
-        def _overall_storage_maximum_investflow_rule(block):
-            """Rule definition for maximum overall investment
-            in investment case.
+        if m.es.multi_period:
+            def _overall_storage_maximum_investflow_rule(block):
+                """Rule definition for maximum overall investment
+                in investment case.
+                """
+                for n in self.OVERALL_MAXIMUM_INVESTSTORAGES:
+                    for p in m.PERIODS:
+                        expr = self.total[n, p] <= n.investment.overall_maximum
+                        self.overall_storage_maximum.add((n, p), expr)
 
-            Note: There are two different options to define an overall maximum:
-            1.) overall_max = limit for (net) installed capacity
-            for each period
-            2.) overall max = sum of all (gross) investments occurring
-            """
-            for n in self.OVERALL_MAXIMUM_INVESTSTORAGES:
-                for p in m.PERIODS:
-                    expr = self.total[n, p] <= n.investment.overall_maximum
-                    self.overall_storage_maximum.add((n, p), expr)
+            self.overall_storage_maximum = Constraint(
+                self.OVERALL_MAXIMUM_INVESTSTORAGES, m.PERIODS, noruleinit=True
+            )
 
-        self.overall_storage_maximum = Constraint(
-            self.OVERALL_MAXIMUM_INVESTSTORAGES, m.PERIODS, noruleinit=True
-        )
+            self.overall_maximum_build = BuildAction(
+                rule=_overall_storage_maximum_investflow_rule
+            )
 
-        self.overall_maximum_build = BuildAction(
-            rule=_overall_storage_maximum_investflow_rule
-        )
+            def _overall_minimum_investflow_rule(block):
+                """Rule definition for minimum overall investment
+                in investment case.
 
-        def _overall_minimum_investflow_rule(block):
-            """Rule definition for minimum overall investment
-            in investment case.
+                Note: This is only applicable for the last period
+                """
+                for n in self.OVERALL_MINIMUM_INVESTSTORAGES:
+                    expr = (
+                        n.investment.overall_minimum
+                        <= self.total[n, m.PERIODS[-1]]
+                    )
+                    self.overall_minimum.add(n, expr)
 
-            Note: This is only applicable for the last period
-            """
-            for n in self.OVERALL_MINIMUM_INVESTSTORAGES:
-                expr = (
-                    n.investment.overall_minimum
-                    <= self.total[n, m.PERIODS[-1]]
-                )
-                self.overall_minimum.add(n, expr)
+            self.overall_minimum = Constraint(
+                self.OVERALL_MINIMUM_INVESTSTORAGES, noruleinit=True
+            )
 
-        self.overall_minimum = Constraint(
-            self.OVERALL_MINIMUM_INVESTSTORAGES, noruleinit=True
-        )
-
-        self.overall_minimum_build = BuildAction(
-            rule=_overall_minimum_investflow_rule
-        )
+            self.overall_minimum_build = BuildAction(
+                rule=_overall_minimum_investflow_rule
+            )
 
     def _objective_expression(self):
         """Objective expression with fixed and investment costs."""
