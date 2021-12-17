@@ -414,6 +414,7 @@ class InvestmentFlowBlock(SimpleBlock):
                                 == self.invest[i, o, p]
                                 + m.flows[i, o].investment.existing)
                         self.total_rule.add((i, o, p), expr)
+                    # applicable for multi-period model only
                     else:
                         expr = (self.total[i, o, p]
                                 == self.invest[i, o, p]
@@ -445,6 +446,7 @@ class InvestmentFlowBlock(SimpleBlock):
                             comm_p = 0
                             for k, v in m.es.periods_years.items():
                                 if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
                                     comm_p = k - 1
                                     break
                             expr = (self.old_end[i, o, p]
@@ -476,6 +478,7 @@ class InvestmentFlowBlock(SimpleBlock):
                             expr = (self.old_exo[i, o, p] == 0)
                             self.old_rule_exo.add((i, o, p), expr)
                         elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
                                     self.old_exo[i, o, p]
@@ -689,11 +692,13 @@ class InvestmentFlowBlock(SimpleBlock):
                     )
 
         else:
-            msg = ("You did not specify an interest rate.\n"
-                   "It will be set equal to the discount_rate of {} "
-                   "of the model as a default.\nThis corresponds to a "
-                   "social planner point of view and does not reflect "
-                   "microeconomic interest requirements.")
+            msg = (
+                "You did not specify an interest rate.\n"
+                "It will be set equal to the discount_rate of {} "
+                "of the model as a default.\nThis corresponds to a "
+                "social planner point of view and does not reflect "
+                "microeconomic interest requirements."
+            )
 
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime

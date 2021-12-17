@@ -912,19 +912,21 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             initialize=0
         )
 
-        # Old capacity to be decommissioned (due to lifetime)
-        # Old capacity is built out of old exogenous and endogenous capacities
-        self.old = Var(self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals)
+        if m.es.multi_period:
+            # Old capacity to be decommissioned (due to lifetime)
+            self.old = Var(
+                self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(
-            self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
-        )
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(
-            self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
-        )
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
+            )
 
         self.init_content = Var(
             self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
@@ -971,70 +973,96 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             rule=_total_storage_capacity_rule
         )
 
-        def _old_storage_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for n in self.INVESTSTORAGES:
-                lifetime = n.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime <= p:
+        if m.es.multi_period:
+            def _old_storage_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for n in self.INVESTSTORAGES:
+                    lifetime = n.investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = (self.old_end[n, p] == 0)
+                            self.old_rule_end.add((n, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
+                            expr = (
+                                self.old_end[n, p]
+                                == self.invest[n, comm_p]
+                            )
+                            self.old_rule_end.add((n, p), expr)
+                        else:
+                            expr = self.old_end[n, p] == 0
+                            self.old_rule_end.add((n, p), expr)
+
+            self.old_rule_end = Constraint(
+                self.INVESTSTORAGES, m.PERIODS, noruleinit=True
+            )
+
+            self.old_rule_end_build = BuildAction(
+                rule=_old_storage_capacity_rule_end
+            )
+
+            def _old_storage_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for n in self.INVESTSTORAGES:
+                    age = n.investment.age
+                    lifetime = n.investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = (self.old_exo[n, p] == 0)
+                            self.old_rule_exo.add((n, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[n, p]
+                                    == n.investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = (self.old_exo[n, p] == 0)
+                            self.old_rule_exo.add((n, p), expr)
+                        else:
+                            expr = self.old_exo[n, p] == 0
+                            self.old_rule_exo.add((n, p), expr)
+
+            self.old_rule_exo = Constraint(
+                self.INVESTSTORAGES, m.PERIODS, noruleinit=True
+            )
+
+            self.old_rule_exo_build = BuildAction(
+                rule=_old_storage_capacity_rule_exo
+            )
+
+            def _old_storage_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for n in self.INVESTSTORAGES:
+                    for p in m.PERIODS:
                         expr = (
-                            self.old_end[n, p] == self.invest[n, p - lifetime]
+                            self.old[n, p]
+                            == self.old_end[n, p] + self.old_exo[n, p]
                         )
-                        self.old_rule_end.add((n, p), expr)
-                    else:
-                        expr = self.old_end[n, p] == 0
-                        self.old_rule_end.add((n, p), expr)
+                        self.old_rule.add((n, p), expr)
 
-        self.old_rule_end = Constraint(
-            self.INVESTSTORAGES, m.PERIODS, noruleinit=True
-        )
+            self.old_rule = Constraint(
+                self.INVESTSTORAGES, m.PERIODS, noruleinit=True
+            )
 
-        self.old_rule_end_build = BuildAction(
-            rule=_old_storage_capacity_rule_end
-        )
-
-        def _old_storage_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for n in self.INVESTSTORAGES:
-                age = n.investment.age
-                lifetime = n.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime - age == p:
-                        expr = self.old_exo[n, p] == n.investment.existing
-                        self.old_rule_exo.add((n, p), expr)
-                    else:
-                        expr = self.old_exo[n, p] == 0
-                        self.old_rule_exo.add((n, p), expr)
-
-        self.old_rule_exo = Constraint(
-            self.INVESTSTORAGES, m.PERIODS, noruleinit=True
-        )
-
-        self.old_rule_exo_build = BuildAction(
-            rule=_old_storage_capacity_rule_exo
-        )
-
-        def _old_storage_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for n in self.INVESTSTORAGES:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[n, p]
-                        == self.old_end[n, p] + self.old_exo[n, p]
-                    )
-                    self.old_rule.add((n, p), expr)
-
-        self.old_rule = Constraint(
-            self.INVESTSTORAGES, m.PERIODS, noruleinit=True
-        )
-
-        self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
+            self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
         def _storage_level_no_investments(block):
             """Rule definition to force storage level to zero
