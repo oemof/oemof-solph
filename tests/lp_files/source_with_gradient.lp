@@ -2,12 +2,6 @@
 
 min
 objective:
-+8 FlowBlock_negative_gradient(powerplant_electricityBus_0)
-+8 FlowBlock_negative_gradient(powerplant_electricityBus_1)
-+8 FlowBlock_negative_gradient(powerplant_electricityBus_2)
-+7 FlowBlock_positive_gradient(powerplant_electricityBus_0)
-+7 FlowBlock_positive_gradient(powerplant_electricityBus_1)
-+7 FlowBlock_positive_gradient(powerplant_electricityBus_2)
 +23 flow(powerplant_electricityBus_0)
 +23 flow(powerplant_electricityBus_1)
 +23 flow(powerplant_electricityBus_2)

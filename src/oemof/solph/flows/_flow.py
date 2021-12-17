@@ -436,8 +436,6 @@ class FlowBlock(SimpleBlock):
                         self.positive_gradient_constr.add(
                             (inp, out, ts), lhs <= rhs
                         )
-                    else:
-                        pass  # return(Constraint.Skip)
 
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
@@ -456,8 +454,6 @@ class FlowBlock(SimpleBlock):
                         self.negative_gradient_constr.add(
                             (inp, out, ts), lhs <= rhs
                         )
-                    else:
-                        pass  # return(Constraint.Skip)
 
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
@@ -481,7 +477,6 @@ class FlowBlock(SimpleBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        gradient_costs = 0
 
         for i, o in m.FLOWS:
             if m.flows[i, o].variable_costs[0] is not None:
@@ -492,18 +487,4 @@ class FlowBlock(SimpleBlock):
                         * m.flows[i, o].variable_costs[t]
                     )
 
-            if m.flows[i, o].positive_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.positive_gradient[i, o, t]
-                        * m.flows[i, o].positive_gradient["costs"]
-                    )
-
-            if m.flows[i, o].negative_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.negative_gradient[i, o, t]
-                        * m.flows[i, o].negative_gradient["costs"]
-                    )
-
-        return variable_costs + gradient_costs
+        return variable_costs
