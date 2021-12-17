@@ -95,7 +95,7 @@ class EnergySystem(es.EnergySystem):
             Periods of the energy system
         """
         if not self.multi_period:
-            periods = [0]
+            periods = {0: 0}
         elif periods is None:
             years = sorted(
                         list(
@@ -131,6 +131,7 @@ class EnergySystem(es.EnergySystem):
         periods_gap = {}
         if not self.multi_period:
             periods_length = {0: 1}
+            periods_years = {0: 0}
         else:
             periods_length = {}
             periods_years = {0: 0}
