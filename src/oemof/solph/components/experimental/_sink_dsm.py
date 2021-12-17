@@ -873,6 +873,18 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         # Set of DSM Components
         self.investdsm = Set(initialize=[n for n in group])
 
+        self.OVERALL_MAXIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_maximum is not None
+            ]
+        )
+
+        self.OVERALL_MINIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_minimum is not None
+            ]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -1166,6 +1178,45 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         self.dsm_sum_constraint_build = BuildAction(
             rule=dsm_sum_constraint_rule
         )
+
+        if m.es.multi_period:
+            def _overall_dsm_maximum_investflow_rule(block):
+                """Rule definition for maximum overall investment
+                in investment case.
+                """
+                for g in self.OVERALL_MAXIMUM_INVESTDSM:
+                    for p in m.PERIODS:
+                        expr = self.total[g, p] <= g.investment.overall_maximum
+                        self.overall_dsm_maximum.add((g, p), expr)
+
+            self.overall_dsm_maximum = Constraint(
+                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+            )
+
+            self.overall_maximum_build = BuildAction(
+                rule=_overall_dsm_maximum_investflow_rule
+            )
+
+            def _overall_minimum_dsm_investflow_rule(block):
+                """Rule definition for minimum overall investment
+                in investment case.
+
+                Note: This is only applicable for the last period
+                """
+                for g in self.OVERALL_MINIMUM_INVESTDSM:
+                    expr = (
+                        g.investment.overall_minimum
+                        <= self.total[g, m.PERIODS[-1]]
+                    )
+                    self.overall_minimum.add(g, expr)
+
+            self.overall_minimum = Constraint(
+                self.OVERALL_MINIMUM_INVESTDSM, noruleinit=True
+            )
+
+            self.overall_minimum_build = BuildAction(
+                rule=_overall_minimum_dsm_investflow_rule
+            )
 
     def _objective_expression(self):
         r"""Objective expression with variable and investment costs for DSM"""
@@ -2096,6 +2147,18 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         # Set of DSM Components
         self.investdsm = Set(initialize=[g for g in group])
 
+        self.OVERALL_MAXIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_maximum is not None
+            ]
+        )
+
+        self.OVERALL_MINIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_minimum is not None
+            ]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -2717,6 +2780,45 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         self.shed_limit_constraint_build = BuildAction(
             rule=shed_limit_constraint_rule
         )
+
+        if m.es.multi_period:
+            def _overall_dsm_maximum_investflow_rule(block):
+                """Rule definition for maximum overall investment
+                in investment case.
+                """
+                for g in self.OVERALL_MAXIMUM_INVESTDSM:
+                    for p in m.PERIODS:
+                        expr = self.total[g, p] <= g.investment.overall_maximum
+                        self.overall_dsm_maximum.add((g, p), expr)
+
+            self.overall_dsm_maximum = Constraint(
+                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+            )
+
+            self.overall_maximum_build = BuildAction(
+                rule=_overall_dsm_maximum_investflow_rule
+            )
+
+            def _overall_minimum_dsm_investflow_rule(block):
+                """Rule definition for minimum overall investment
+                in investment case.
+
+                Note: This is only applicable for the last period
+                """
+                for g in self.OVERALL_MINIMUM_INVESTDSM:
+                    expr = (
+                        g.investment.overall_minimum
+                        <= self.total[g, m.PERIODS[-1]]
+                    )
+                    self.overall_minimum.add(g, expr)
+
+            self.overall_minimum = Constraint(
+                self.OVERALL_MINIMUM_INVESTDSM, noruleinit=True
+            )
+
+            self.overall_minimum_build = BuildAction(
+                rule=_overall_minimum_dsm_investflow_rule
+            )
 
     def _objective_expression(self):
         r"""Objective expression with variable and investment costs for DSM"""
@@ -4080,6 +4182,18 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             ],
         )
 
+        self.OVERALL_MAXIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_maximum is not None
+            ]
+        )
+
+        self.OVERALL_MINIMUM_INVESTDSM = Set(
+            initialize=[
+                g for g in group if g.investment.overall_minimum is not None
+            ]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -4897,6 +5011,45 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         self.dr_logical_constraint_build = BuildAction(
             rule=dr_logical_constraint_rule
         )
+
+        if m.es.multi_period:
+            def _overall_dsm_maximum_investflow_rule(block):
+                """Rule definition for maximum overall investment
+                in investment case.
+                """
+                for g in self.OVERALL_MAXIMUM_INVESTDSM:
+                    for p in m.PERIODS:
+                        expr = self.total[g, p] <= g.investment.overall_maximum
+                        self.overall_dsm_maximum.add((g, p), expr)
+
+            self.overall_dsm_maximum = Constraint(
+                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+            )
+
+            self.overall_maximum_build = BuildAction(
+                rule=_overall_dsm_maximum_investflow_rule
+            )
+
+            def _overall_minimum_dsm_investflow_rule(block):
+                """Rule definition for minimum overall investment
+                in investment case.
+
+                Note: This is only applicable for the last period
+                """
+                for g in self.OVERALL_MINIMUM_INVESTDSM:
+                    expr = (
+                        g.investment.overall_minimum
+                        <= self.total[g, m.PERIODS[-1]]
+                    )
+                    self.overall_minimum.add(g, expr)
+
+            self.overall_minimum = Constraint(
+                self.OVERALL_MINIMUM_INVESTDSM, noruleinit=True
+            )
+
+            self.overall_minimum_build = BuildAction(
+                rule=_overall_minimum_dsm_investflow_rule
+            )
 
     def _objective_expression(self):
         r"""Objective expression with variable and investment costs for DSM;

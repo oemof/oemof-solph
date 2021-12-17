@@ -622,49 +622,44 @@ class InvestmentFlowBlock(SimpleBlock):
             rule=_summed_min_investflow_rule
         )
 
-        def _overall_maximum_investflow_rule(block):
-            """Rule definition for maximum overall investment
-            in investment case.
+        if m.es.multi_period:
+            def _overall_maximum_investflow_rule(block):
+                """Rule definition for maximum overall investment
+                in investment case.
+                """
+                for i, o in self.OVERALL_MAXIMUM_INVESTFLOWS:
+                    for p in m.PERIODS:
+                        expr = (
+                            self.total[i, o, p]
+                            <= m.flows[i, o].investment.overall_maximum
+                        )
+                        self.overall_maximum.add((i, o, p), expr)
 
-            Note: In general, there are two different options to define
-            an overall maximum:
-            1.) overall_max = limit for (net) installed capacity
-            for each period. This is the constraint used here
-            2.) overall max = sum of all (gross) investments occurring
-            """
-            for i, o in self.OVERALL_MAXIMUM_INVESTFLOWS:
-                for p in m.PERIODS:
-                    expr = (
-                        self.total[i, o, p]
-                        <= m.flows[i, o].investment.overall_maximum
-                    )
-                    self.overall_maximum.add((i, o, p), expr)
-
-        self.overall_maximum = Constraint(
-            self.OVERALL_MAXIMUM_INVESTFLOWS,
-            m.PERIODS,
-            noruleinit=True
-        )
-        self.overall_maximum_build = BuildAction(
-            rule=_overall_maximum_investflow_rule
-        )
-
-        def _overall_minimum_investflow_rule(block, i, o):
-            """Rule definition for minimum overall investment
-            in investment case.
-
-            Note: This is only applicable for the last period
-            """
-            expr = (
-                m.flows[i, o].investment.overall_minimum
-                <= self.total[i, o, m.PERIODS[-1]]
+            self.overall_maximum = Constraint(
+                self.OVERALL_MAXIMUM_INVESTFLOWS,
+                m.PERIODS,
+                noruleinit=True
             )
-            return expr
+            self.overall_maximum_build = BuildAction(
+                rule=_overall_maximum_investflow_rule
+            )
 
-        self.overall_minimum = Constraint(
-            self.OVERALL_MINIMUM_INVESTFLOWS,
-            rule=_overall_minimum_investflow_rule
-        )
+            def _overall_minimum_investflow_rule(block, i, o):
+                """Rule definition for minimum overall investment
+                in investment case.
+
+                Note: This is only applicable for the last period
+                """
+                expr = (
+                    m.flows[i, o].investment.overall_minimum
+                    <= self.total[i, o, m.PERIODS[-1]]
+                )
+                return expr
+
+            self.overall_minimum = Constraint(
+                self.OVERALL_MINIMUM_INVESTFLOWS,
+                rule=_overall_minimum_investflow_rule
+            )
 
     def _objective_expression(self):
         r"""Objective expression for flows with investment attribute of type
