@@ -144,7 +144,7 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
-def results(om):
+def results(model, remove_last_time_point=None):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -153,8 +153,28 @@ def results(om):
     and flows.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[n, n]['sequences']`.
+
+    Parameters
+    ----------
+    model : oemof.solph.BaseModel
+        A solved oemof.solph model.
+    remove_last_time_point : bool
+        The last time point of all TIMEPOINT variables is removed to get the
+        same length as the TIMESTEP (interval) variables without getting
+        nan-values. By default the last time point is removed if it has not
+        been defined by the user in the EnergySystem but inferred. If all
+        time points has been defined explicitly by the user the last time point
+        will not be removed by default. In that case all interval variables
+        will get one row with nan-values to have the same index for all
+        variables.
     """
-    df = create_dataframe(om)
+    if remove_last_time_point is None:
+        if model.es.timemode == "implicit":
+            remove_last_time_point = True
+        else:
+            remove_last_time_point = False
+
+    df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
@@ -165,15 +185,15 @@ def results(om):
     }
 
     # Define index
-    if om.es.timeindex is None:
-        result_index = list(range(len(om.es.timeincrement) + 1))
+    if model.es.timeindex is None:
+        result_index = list(range(len(model.es.timeincrement) + 1))
     else:
-        result_index = om.es.timeindex
+        result_index = model.es.timeindex
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
-    if om.es.timemode == "implicit":
+    if remove_last_time_point is True:
         # In the implicit time mode the first time point is removed.
         # The values of intervals belong to the time at the end of the
         # interval.
@@ -185,33 +205,27 @@ def results(om):
             )
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
-    elif om.es.timemode == "explicit":
+    else:
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)
             df_dict[k] = df_dict[k].pivot(
                 columns="variable_name", values="value"
             )
-            # Add empty row on top
-            df_dict[k] = pd.concat(
-                [
-                    pd.DataFrame(columns=df_dict[k].columns, index=[0]),
-                    df_dict[k],
-                ],
-                ignore_index=True,
-            )
+            # Add empty row at the end
+            df_dict[k] = df_dict[k].append(pd.Series(), ignore_index=True)
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
 
     # add dual variables for bus constraints
-    if om.dual is not None:
+    if model.dual is not None:
         grouped = groupby(
-            sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
         )
         for bus, timesteps in grouped:
             duals = [
-                om.dual[om.BusBlock.balance[bus, t]] for _, t in timesteps
+                model.dual[model.BusBlock.balance[bus, t]] for _, t in timesteps
             ]
-            df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=model.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,

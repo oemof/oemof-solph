@@ -79,7 +79,7 @@ def test_dispatch_one_time_step(solver="cbc"):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1])
+    energysystem = EnergySystem(timeincrement=[1], timemode="explicit")
     energysystem.add(
         bgas,
         bel,
@@ -106,12 +106,12 @@ def test_dispatch_one_time_step(solver="cbc"):
     optimization_model.results()
 
     # ################################ results ################################
-    data = views.node(processing.results(om=optimization_model), "b_el")
+    data = views.node(processing.results(model=optimization_model), "b_el")
 
     # generate results to be evaluated in tests
     results = data["sequences"].sum(axis=0).to_dict()
 
-    print("*************", data["sequences"].index)
+    print("DateTimeIndex:", data["sequences"].index)
 
     test_results = {
         (("wind", "b_el"), "flow"): 33,
