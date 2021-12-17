@@ -32,10 +32,23 @@ class EnergySystem(es.EnergySystem):
     solph.GROUPINGS <oemof.solph.GROUPINGS>, you can just use
     EnergySystem <oemof.network.network.energy_system.EnergySystem>` of
     oemof.network directly.
+
+    Parameters
+    ----------
+    timeindex : pandas.DatetimeIndex
+
+    timeincrement : iterable
+
+    timemode
+    kwargs
     """
 
     def __init__(
-        self, timeindex=None, timeincrement=None, timemode="implicit", **kwargs
+        self,
+        timeindex=None,
+        timeincrement=None,
+        infer_last_interval=True,
+        **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
@@ -54,10 +67,14 @@ class EnergySystem(es.EnergySystem):
             )
             raise TypeError(msg.format(type(timeindex)))
 
-        self.timemode = timemode
+        if infer_last_interval is True:
+            self.timemode = "implicit"
+        else:
+            self.timemode = "explicit"
 
-        if timemode == "implicit" and timeindex is not None:
-            # Add one timestep to the timeindex.
+        if infer_last_interval is True and timeindex is not None:
+            # Add one time interval to the timeindex by adding one time point.
+
             timeindex = timeindex.union(
                 pd.date_range(
                     timeindex[-1] + timeindex.freq,
