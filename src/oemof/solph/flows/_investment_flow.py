@@ -335,26 +335,26 @@ class InvestmentFlowBlock(SimpleBlock):
             within=NonNegativeReals
         )
 
-        # Old capacity is built out of old exogenous and endogenous capacities
-        self.old = Var(
-            self.INVESTFLOWS,
-            m.PERIODS,
-            within=NonNegativeReals
-        )
+        if m.es.multi_period:
+            self.old = Var(
+                self.INVESTFLOWS,
+                m.PERIODS,
+                within=NonNegativeReals
+            )
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(
-            self.INVESTFLOWS,
-            m.PERIODS,
-            within=NonNegativeReals
-        )
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.INVESTFLOWS,
+                m.PERIODS,
+                within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(
-            self.INVESTFLOWS,
-            m.PERIODS,
-            within=NonNegativeReals
-        )
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.INVESTFLOWS,
+                m.PERIODS,
+                within=NonNegativeReals
+            )
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
@@ -428,82 +428,93 @@ class InvestmentFlowBlock(SimpleBlock):
         self.total_rule_build = BuildAction(
             rule=_total_capacity_rule)
 
-        def _old_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for i, o in self.INVESTFLOWS:
-                lifetime = m.flows[i, o].investment.lifetime
-                for p in m.PERIODS:
-                    # No shutdown in first period
-                    if p == 0:
-                        expr = (self.old_end[i, o, p] == 0)
-                        self.old_rule_end.add((i, o, p), expr)
-                    elif lifetime <= m.es.periods_years[p]:
-                        # Obtain commissioning period
-                        comm_p = 0
-                        for k, v in m.es.periods_years.items():
-                            if m.es.periods_years[p] - lifetime - v < 0:
-                                comm_p = k - 1
-                                break
-                        expr = (self.old_end[i, o, p]
-                                == self.invest[i, o, comm_p])
-                        self.old_rule_end.add((i, o, p), expr)
-                    else:
-                        expr = (self.old_end[i, o, p] == 0)
-                        self.old_rule_end.add((i, o, p), expr)
+        if m.es.multi_period:
+            def _old_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for i, o in self.INVESTFLOWS:
+                    lifetime = m.flows[i, o].investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = (self.old_end[i, o, p] == 0)
+                            self.old_rule_end.add((i, o, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    comm_p = k - 1
+                                    break
+                            expr = (self.old_end[i, o, p]
+                                    == self.invest[i, o, comm_p])
+                            self.old_rule_end.add((i, o, p), expr)
+                        else:
+                            expr = (self.old_end[i, o, p] == 0)
+                            self.old_rule_end.add((i, o, p), expr)
 
-        self.old_rule_end = Constraint(
-            self.INVESTFLOWS, m.PERIODS,
-            noruleinit=True
-        )
-        self.old_rule_end_build = BuildAction(
-            rule=_old_capacity_rule_end
-        )
+            self.old_rule_end = Constraint(
+                self.INVESTFLOWS, m.PERIODS,
+                noruleinit=True
+            )
+            self.old_rule_end_build = BuildAction(
+                rule=_old_capacity_rule_end
+            )
 
-        def _old_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for i, o in self.INVESTFLOWS:
-                age = m.flows[i, o].investment.age
-                lifetime = m.flows[i, o].investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime - age == p:
+            def _old_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for i, o in self.INVESTFLOWS:
+                    age = m.flows[i, o].investment.age
+                    lifetime = m.flows[i, o].investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = (self.old_exo[i, o, p] == 0)
+                            self.old_rule_exo.add((i, o, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[i, o, p]
+                                    == m.flows[i, o].investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = (self.old_exo[i, o, p] == 0)
+                            self.old_rule_exo.add((i, o, p), expr)
+                        else:
+                            expr = (self.old_exo[i, o, p] == 0)
+                            self.old_rule_exo.add((i, o, p), expr)
+
+            self.old_rule_exo = Constraint(
+                self.INVESTFLOWS, m.PERIODS,
+                noruleinit=True
+            )
+            self.old_rule_exo_build = BuildAction(
+                rule=_old_capacity_rule_exo
+            )
+
+            def _old_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for i, o in self.INVESTFLOWS:
+                    for p in m.PERIODS:
                         expr = (
-                            self.old_exo[i, o, p]
-                            == m.flows[i, o].investment.existing)
-                        self.old_rule_exo.add((i, o, p), expr)
-                    else:
-                        expr = (self.old_exo[i, o, p] == 0)
-                        self.old_rule_exo.add((i, o, p), expr)
+                            self.old[i, o, p]
+                            == self.old_end[i, o, p] + self.old_exo[i, o, p])
+                        self.old_rule.add((i, o, p), expr)
 
-        self.old_rule_exo = Constraint(
-            self.INVESTFLOWS, m.PERIODS,
-            noruleinit=True
-        )
-        self.old_rule_exo_build = BuildAction(
-            rule=_old_capacity_rule_exo
-        )
-
-        def _old_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for i, o in self.INVESTFLOWS:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[i, o, p]
-                        == self.old_end[i, o, p] + self.old_exo[i, o, p])
-                    self.old_rule.add((i, o, p), expr)
-
-        self.old_rule = Constraint(
-            self.INVESTFLOWS, m.PERIODS,
-            noruleinit=True
-        )
-        self.old_rule_build = BuildAction(
-            rule=_old_capacity_rule
-        )
+            self.old_rule = Constraint(
+                self.INVESTFLOWS, m.PERIODS,
+                noruleinit=True
+            )
+            self.old_rule_build = BuildAction(
+                rule=_old_capacity_rule
+            )
 
         def _investflow_fixed_rule(block):
             """Rule definition of constraint to fix flow variable
