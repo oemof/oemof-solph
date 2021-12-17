@@ -13,8 +13,11 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+import warnings
+
 import pandas as pd
 from oemof.network import energy_system as es
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):
@@ -54,6 +57,18 @@ class EnergySystem(es.EnergySystem):
         kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
 
         super().__init__(**kwargs)
+
+        if multi_period:
+            msg = (
+                "CAUTION! You specified 'multi_period=True' for your "
+                "energy system.\n This will lead to creating "
+                "a multi-period optimization modeling which can be "
+                "used e.g. for long-term investment modeling.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.multi_period = multi_period
         self.periods = self._add_periods(periods)
         self._extract_periods_lengths_gap_and_years()
