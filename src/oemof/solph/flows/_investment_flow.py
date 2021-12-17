@@ -436,6 +436,12 @@ class InvestmentFlowBlock(SimpleBlock):
                 """
                 for i, o in self.INVESTFLOWS:
                     lifetime = m.flows[i, o].investment.lifetime
+                    if lifetime is None:
+                        msg = ("You have to specify a lifetime "
+                               "for an InvestmentFlow in "
+                               "a multi-period model! Value for {} "
+                               "is missing.".format((i, o)))
+                        raise ValueError(msg)
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
@@ -715,7 +721,8 @@ class InvestmentFlowBlock(SimpleBlock):
                     )
                     investment_costs_increment = (
                         self.invest[i, o, p] * annuity * lifetime
-                        * ((1 + m.discount_rate) ** (-p))
+                        * ((1 + m.discount_rate)
+                           ** (-m.es.periods_years[p]))
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
@@ -737,7 +744,8 @@ class InvestmentFlowBlock(SimpleBlock):
                         (self.invest[i, o, p] * annuity * lifetime
                          + self.invest_status[i, o, p]
                          * m.flows[i, o].investment.offset[p])
-                        * ((1 + m.discount_rate) ** (-p))
+                        * ((1 + m.discount_rate)
+                           ** (-m.es.periods_years[p]))
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
@@ -750,12 +758,17 @@ class InvestmentFlowBlock(SimpleBlock):
                             sum(self.invest[i, o, p]
                                 * m.flows[i, o].investment.fixed_costs[pp]
                                 * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(p, p + lifetime))
-                            * ((1 + m.discount_rate) ** (-p))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime)
+                                )
+                            * ((1 + m.discount_rate)
+                               ** (-m.es.periods_years[p]))
                         )
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = period_investment_costs
+        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=investment_costs + fixed_costs)
 
         return self.costs

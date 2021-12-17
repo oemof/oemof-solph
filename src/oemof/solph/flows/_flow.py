@@ -20,7 +20,7 @@ from warnings import warn
 
 from oemof.network import network as on
 from oemof.tools import debugging
-from pyomo.core import BuildAction
+from pyomo.core import BuildAction, Expression
 from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
@@ -528,7 +528,8 @@ class FlowBlock(SimpleBlock):
                             m.flow[i, o, p, t]
                             * m.objective_weighting[t]
                             * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate) ** -p)
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
 
                 if (m.flows[i, o].fixed_costs[0] is not None
@@ -537,7 +538,12 @@ class FlowBlock(SimpleBlock):
                         fixed_costs += (
                             m.flows[i, o].nominal_value
                             * m.flows[i, o].fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -p)
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
 
-        return variable_costs + fixed_costs
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.costs = Expression(expr=variable_costs + fixed_costs)
+
+        return self.costs

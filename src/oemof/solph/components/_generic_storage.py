@@ -171,8 +171,8 @@ class GenericStorage(network.Node):
             "invest_relation_output_capacity"
         )
         self._invest_group = isinstance(self.investment, Investment)
-        self.lifetime_inflow = kwargs.get("lifetime_inflow", 20)
-        self.lifetime_outflow = kwargs.get("lifetime_outflow", 20)
+        self.lifetime_inflow = kwargs.get("lifetime_inflow", None)
+        self.lifetime_outflow = kwargs.get("lifetime_outflow", None)
 
         # Check number of flows.
         self._check_number_of_flows()
@@ -254,14 +254,6 @@ class GenericStorage(network.Node):
                 "or investment.minimum has to be non-zero."
             )
             raise AttributeError(e3)
-        if self.lifetime_inflow == 20 or self.lifetime_outflow == 20:
-            w1 = (
-                "Using a lifetime of 20 periods,"
-                " which is the default value.\nIf you don't consider a"
-                " multi-period investment model, you can safely ignore "
-                " this warning - all fine!"
-            )
-            warn(w1, debugging.SuspiciousUsageWarning)
 
         self._set_flows()
 
@@ -980,6 +972,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 """
                 for n in self.INVESTSTORAGES:
                     lifetime = n.investment.lifetime
+                    if lifetime is None:
+                        msg = ("You have to specify a lifetime "
+                               "for an InvestmentFlow in "
+                               "a multi-period model! Value for {} "
+                               "is missing.".format(n))
+                        raise ValueError(msg)
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
@@ -1416,7 +1414,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         )
 
     def _objective_expression(self):
-        """Objective expression with fixed and investement costs."""
+        """Objective expression with fixed and investment costs."""
         m = self.parent_block()
 
         if not hasattr(self, "INVESTSTORAGES"):
@@ -1467,7 +1465,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         self.invest[n, p]
                         * annuity
                         * lifetime
-                        * ((1 + m.discount_rate) ** (-p))
+                        * ((1 + m.discount_rate)
+                           ** (-m.es.periods_years[p]))
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
@@ -1488,9 +1487,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         wacc=interest,
                     )
                     investment_costs_increment = (
-                        self.invest[n, p] * annuity * lifetime
-                        + self.invest_status[n, p] * n.investment.offset[p]
-                    ) * ((1 + m.discount_rate) ** (-p))
+                        (
+                            self.invest[n, p] * annuity * lifetime
+                            + self.invest_status[n, p] * n.investment.offset[p]
+                        ) * ((1 + m.discount_rate)
+                             ** (-m.es.periods_years[p]))
+                    )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1498,15 +1500,22 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += sum(
-                            self.invest[n, p]
-                            * n.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(p, p + lifetime)
-                        ) * ((1 + m.discount_rate) ** (-p))
+                        fixed_costs += (
+                            sum(
+                                self.invest[n, p]
+                                * n.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime
+                                )
+                            ) * ((1 + m.discount_rate)
+                                 ** (-m.es.periods_years[p]))
+                        )
 
-        self.investment_costs = investment_costs
-        self.period_investment_costs = period_investment_costs
+        self.investment_costs = Expression(expr=investment_costs)
+        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=investment_costs + fixed_costs)
 
         return self.costs

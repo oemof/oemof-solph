@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
+from _ast import Expression
 from warnings import warn
 
 from numpy import mean
@@ -737,7 +738,8 @@ class SinkDSMOemofBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -745,7 +747,8 @@ class SinkDSMOemofBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -754,9 +757,12 @@ class SinkDSMOemofBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
 
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
@@ -1220,7 +1226,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -1234,7 +1241,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1242,7 +1250,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -1253,11 +1262,17 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(p, p + lifetime)
-                        ) * ((1 + m.discount_rate) ** (-p))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime
+                            )
+                        ) * ((1 + m.discount_rate)
+                             ** -m.es.periods_years[p])
 
-        self.investment_costs = investment_costs
-        self.period_investment_costs = period_investment_costs
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.investment_costs = Expression(expr=investment_costs)
+        self.period_investment_costs = Expression(expr=period_investment_costs)
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )
@@ -1920,7 +1935,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1932,7 +1948,8 @@ class SinkDSMDIWBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -1941,9 +1958,12 @@ class SinkDSMDIWBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
 
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
@@ -2758,7 +2778,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -2772,7 +2793,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -2784,7 +2806,8 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -2795,13 +2818,19 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(p, p + lifetime)
-                        ) * ((1 + m.discount_rate) ** (-p))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime
+                            )
+                        ) * ((1 + m.discount_rate)
+                             ** -m.es.periods_years[p])
 
-        self.investment_costs = investment_costs
-        self.period_investment_costs = period_investment_costs
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.investment_costs = Expression(expr=investment_costs)
+        self.period_investment_costs = Expression(expr=period_investment_costs)
         self.costs = Expression(
-            expr=investment_costs + fixed_costs + variable_costs
+            expr=investment_costs + variable_costs + fixed_costs
         )
 
         return self.costs
@@ -3800,7 +3829,8 @@ class SinkDSMDLRBlock(SimpleBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -3813,7 +3843,8 @@ class SinkDSMDLRBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -3822,9 +3853,12 @@ class SinkDSMDLRBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
 
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=variable_costs + fixed_costs)
 
         return self.costs
@@ -4880,7 +4914,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                 for p in m.PERIODS:
                     if g.investment.ep_costs is not None:
                         investment_costs += (
-                            self.invest[g] * g.investment.ep_costs
+                            self.invest[g, p] * g.investment.ep_costs[p]
                         )
                     else:
                         raise ValueError("Missing value for investment costs!")
@@ -4932,7 +4966,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate) ** (-p))
+                            * ((1 + m.discount_rate)
+                               ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -4952,7 +4987,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -4965,7 +5001,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -p)
+                        * ((1 + m.discount_rate)
+                           ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
@@ -4976,13 +5013,19 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(p, p + lifetime)
-                        ) * ((1 + m.discount_rate) ** (-p))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime
+                            )
+                        ) * ((1 + m.discount_rate)
+                             ** -m.es.periods_years[p])
 
-        self.investment_costs = investment_costs
-        self.period_investment_costs = period_investment_costs
+        self.variable_costs = Expression(expr=variable_costs)
+        self.fixed_costs = Expression(expr=fixed_costs)
+        self.investment_costs = Expression(expr=investment_costs)
+        self.period_investment_costs = Expression(expr=period_investment_costs)
         self.costs = Expression(
-            expr=investment_costs + fixed_costs + variable_costs
+            expr=investment_costs + variable_costs + fixed_costs
         )
 
         return self.costs

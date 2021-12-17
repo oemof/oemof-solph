@@ -78,7 +78,7 @@ class Investment:
         offset=0,
         overall_maximum=None,
         overall_minimum=None,
-        lifetime=20,
+        lifetime=None,
         age=0,
         interest_rate=0,
         fixed_costs=None,
@@ -137,16 +137,11 @@ class Investment:
             raise AttributeError(e3)
 
     def _check_age_and_lifetime(self):
-        if self.lifetime == 20:
-            w1 = ("Using a lifetime of 20 periods,"
-                  " which is the default value.\nIf you don't consider a"
-                  " multi-period investment model, you can safely ignore "
-                  " this warning - all fine!")
-            warn(w1, debugging.SuspiciousUsageWarning)
-        if self.age >= self.lifetime:
-            e4 = ("A unit's age must be smaller than its "
-                  "expected lifetime.")
-            raise AttributeError(e4)
+        if self.lifetime is not None:
+            if self.age >= self.lifetime:
+                e4 = ("A unit's age must be smaller than its "
+                      "expected lifetime.")
+                raise AttributeError(e4)
 
 
 class NonConvex:
