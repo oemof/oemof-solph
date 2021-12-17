@@ -74,6 +74,14 @@ class EnergySystem(es.EnergySystem):
 
         if infer_last_interval is True and timeindex is not None:
             # Add one time interval to the timeindex by adding one time point.
+            if timeindex.freq is None:
+                msg = (
+                    "You cannot infer the last interval if the 'freq' "
+                    "attribute of your DatetimeIndex is None. Set "
+                    " 'infer_last_interval=False' or specify a DatetimeIndex "
+                    "with a valid frequency."
+                )
+                raise AttributeError(msg)
 
             timeindex = timeindex.union(
                 pd.date_range(
@@ -83,11 +91,21 @@ class EnergySystem(es.EnergySystem):
                 )
             )
 
+        # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            raise AttributeError("Don't do it.")
+            msg = (
+                "Specifying the timeincrement and the timeindex parameter at "
+                "the same time is not allowed since these might be "
+                "conflicting to each other."
+            )
+            raise AttributeError(msg)
 
         elif timeincrement is None and timeindex is None:
-            pass
+            msg = (
+                "You have to either define the parameter timeincrement or "
+                "timeindex to initialise a valid EnergySystem."
+            )
+            raise AttributeError(msg)
 
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
