@@ -498,7 +498,7 @@ class GenericCHPBlock(SimpleBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`FlowBlock`.
+        added in the Block :class:`Flow`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0
