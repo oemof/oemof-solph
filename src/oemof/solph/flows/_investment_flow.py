@@ -297,6 +297,14 @@ class InvestmentFlowBlock(SimpleBlock):
             ]
         )
 
+        self.EXISTING_INVESTFLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.existing is not None
+            ]
+        )
+
         self.OVERALL_MAXIMUM_INVESTFLOWS = Set(
             initialize=[
                 (g[0], g[1])
@@ -730,6 +738,17 @@ class InvestmentFlowBlock(SimpleBlock):
                                 m.es.periods_years[p] + lifetime,
                             )
                         ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+
+            for i, o in self.EXISTING_INVESTFLOWS:
+                if m.flows[i, o].investment.fixed_costs[0] is not None:
+                    lifetime = m.flows[i, o].investment.lifetime
+                    age = m.flows[i, o].investment.age
+                    fixed_costs += sum(
+                        m.flows[i, o].investment.existing
+                        * m.flows[i, o].investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = Expression(expr=period_investment_costs)
