@@ -923,9 +923,10 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
             )
 
-        self.init_content = Var(
-            self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
-        )
+        else:
+            self.init_content = Var(
+                self.INVESTSTORAGES, within=NonNegativeReals
+            )
 
         # create status variable for a non-convex investment storage
         self.invest_status = Var(
@@ -968,6 +969,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             rule=_total_storage_capacity_rule
         )
 
+        # multi-period storage implementation for time intervals
         if m.es.multi_period:
 
             def _old_storage_capacity_rule_end(block):
@@ -1064,102 +1066,92 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
-        def _inv_storage_init_content_max_rule(block):
-            """Constraint for a variable initial storage capacity."""
-            for n in self.INVESTSTORAGES_NO_INIT_CONTENT:
-                for p in m.PERIODS:
-                    expr = block.init_content[n, p] <= block.total[n, p]
-                    block.init_content_limit.add((n, p), expr)
-
-        self.init_content_limit = Constraint(
-            self.INVESTSTORAGES_NO_INIT_CONTENT, m.PERIODS, noruleinit=True
-        )
-        self.init_content_limit_build = BuildAction(
-            rule=_inv_storage_init_content_max_rule
-        )
-
-        def _inv_storage_init_content_fix_rule(block):
-            """Constraint for a fixed initial storage capacity."""
-            for n in self.INVESTSTORAGES_INIT_CONTENT:
-                is_invested = False
-                for p in m.PERIODS:
-                    if p == 0:
-                        expr = (
-                            block.init_content[n, p]
-                            == n.initial_storage_level * block.total[n, p]
-                        )
-                        self.init_content_fix.add((n, p), expr)
-                    else:
-                        if not is_invested:
-                            expr = block.init_content[
-                                n, p
-                            ] == n.initial_storage_level * block.total[n, p]
+            def _init_content_multi_period_rule(block):
+                """Rule defining the initial storage level
+                for a multi-period model
+                """
+                for n in self.INVESTSTORAGES_INIT_CONTENT:
+                    is_commissioned = False
+                    for p in m.PERIODS:
+                        if not is_commissioned:
+                            expr = (
+                                self.storage_content[
+                                    n, m.TIMESTEPS_IN_PERIOD[p][0]
+                                ]
+                                == n.initial_storage_level * self.total[n, p]
+                            )
+                            is_commissioned = True
+                            self.init_content_multi_period.add((n, p), expr)
                         else:
-                            expr = block.init_content[
-                                n, p
-                            ] == self.storage_content[
-                                m.TIMESTEPS_IN_PERIOD[p-1][-1]
-                            ]
+                            pass
+            self.init_content_multi_period = Constraint(
+                self.INVESTSTORAGES_INIT_CONTENT, m.PERIODS, noruleinit=True
+            )
+            self.init_content_multi_period_rule_build = BuildAction(
+                rule=_init_content_multi_period_rule
+            )
 
-                        self.init_content_fix.add((n, p), expr)
+        # Standard storage implementation for discrete time points
+        else:
+            def _inv_storage_init_content_max_rule(block, n):
+                """Constraint for a variable initial storage capacity."""
+                return (
+                    block.init_content[n]
+                    <= n.investment.existing + block.invest[n, 0]
+                )
 
-        self.init_content_fix = Constraint(
-            self.INVESTSTORAGES_INIT_CONTENT, m.PERIODS, noruleinit=True
-        )
-        self.init_content_fix_build = BuildAction(
-            rule=_inv_storage_init_content_fix_rule
-        )
+            self.init_content_limit = Constraint(
+                self.INVESTSTORAGES_NO_INIT_CONTENT,
+                rule=_inv_storage_init_content_max_rule,
+            )
 
-        # TODO: Check new init_content implementation!
-        def _storage_balance_first_rule(block):
-            """
-            Rule definition for the storage balance of every storage n for the
-            first time step of every period.
-            """
-            for n in self.INVESTSTORAGES:
-                for p in m.PERIODS:
-                    first_step = m.TIMESTEPS_IN_PERIOD[p][0]
+            def _inv_storage_init_content_fix_rule(block, n):
+                """Constraint for a fixed initial storage capacity."""
+                return (
+                    block.init_content[n]
+                    <= n.investment.existing + block.invest[n, 0]
+                )
 
-                    lhs = 0
-                    lhs += block.storage_content[n, first_step]
-                    lhs += (
-                        -block.init_content[n, p]
-                        * (1 - n.loss_rate[first_step])
-                        ** m.timeincrement[first_step]
-                    )
-                    lhs += (
-                        n.fixed_losses_relative[first_step]
-                        * block.total[n, p]
-                        * m.timeincrement[first_step]
-                    )
-                    lhs += (
-                        n.fixed_losses_absolute[first_step]
-                        * m.timeincrement[first_step]
-                    )
-                    lhs += (
-                        -m.flow[i[n], n, p, first_step]
-                        * n.inflow_conversion_factor[first_step]
-                    ) * m.timeincrement[first_step]
-                    lhs += (
-                        m.flow[n, o[n], p, first_step]
-                        / n.outflow_conversion_factor[first_step]
-                    ) * m.timeincrement[first_step]
-                    rhs = 0
-                    self.balance_first.add((n, p), (lhs == rhs))
+            self.init_content_fix = Constraint(
+                self.INVESTSTORAGES_INIT_CONTENT,
+                rule=_inv_storage_init_content_fix_rule,
+            )
 
-        self.balance_first = Constraint(
-            self.INVESTSTORAGES,
-            m.PERIODS,
-            noruleinit=True,
-        )
-        self.balance_first_build = BuildAction(
-            rule=_storage_balance_first_rule
-        )
+            def _storage_balance_first_rule(block, n):
+                """
+                Rule definition for the storage balance of every storage n
+                for the first time step.
+                """
+                expr = 0
+                expr += block.storage_content[n, 0]
+                expr += (
+                    -block.init_content[n]
+                    * (1 - n.loss_rate[0]) ** m.timeincrement[0]
+                )
+                expr += (
+                    n.fixed_losses_relative[0]
+                    * (n.investment.existing + self.invest[n, 0])
+                    * m.timeincrement[0]
+                )
+                expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
+                expr += (
+                            -m.flow[i[n], n, 0, 0]
+                            * n.inflow_conversion_factor[0]
+                        ) * m.timeincrement[0]
+                expr += (
+                            m.flow[n, o[n], 0, 0]
+                            / n.outflow_conversion_factor[0]
+                        ) * m.timeincrement[0]
+                return expr == 0
+
+            self.balance_first = Constraint(
+                self.INVESTSTORAGES, rule=_storage_balance_first_rule
+            )
 
         def _storage_balance_rule(block, n, p, t):
             """
-            Rule definition for the storage balance of every storage n for the
-            every time step but the first.
+            Rule definition for the storage balance of every storage n
+            for every time step but the first.
             """
             expr = 0
             expr += block.storage_content[n, t]
@@ -1192,7 +1184,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMESTEPS[-1]]
-                    == block.init_content[n, 0]
+                    == block.init_content[n]
                 )
 
             self.balanced_cstr = Constraint(
