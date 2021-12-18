@@ -146,7 +146,7 @@ class Flow(on.Edge):
             "nonconvex",
             "integer",
             "lifetime",
-            "age"
+            "age",
         ]
         sequences = ["fix", "variable_costs", "fixed_costs", "min", "max"]
         dictionaries = ["positive_gradient", "negative_gradient"]
@@ -562,8 +562,9 @@ class FlowBlock(SimpleBlock):
                         if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
                             lhs = m.flow[inp, out, p, ts]
                             rhs = 0
-                            self.lifetime_output.add((inp, out, p, ts),
-                                                     (lhs == rhs))
+                            self.lifetime_output.add(
+                                (inp, out, p, ts), (lhs == rhs)
+                            )
                         else:
                             pass  # return Constraint.skip()
 
@@ -581,14 +582,14 @@ class FlowBlock(SimpleBlock):
                 for inp, out in self.LIFETIME_AGE_FLOWS:
                     for p, ts in m.TIMEINDEX:
                         if (
-                            m.flows[inp, out].lifetime
-                            - m.flows[inp, out].age
+                            m.flows[inp, out].lifetime - m.flows[inp, out].age
                             <= m.es.periods_years[p]
                         ):
                             lhs = m.flow[inp, out, p, ts]
                             rhs = 0
-                            self.lifetime_age_output.add((inp, out, p, ts),
-                                                         (lhs == rhs))
+                            self.lifetime_age_output.add(
+                                (inp, out, p, ts), (lhs == rhs)
+                            )
                         else:
                             pass  # return Constraint.skip()
 
@@ -659,8 +660,9 @@ class FlowBlock(SimpleBlock):
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, m.flows[i, o].lifetime
-                                        - m.flows[i, o].age)
+                        for pp in range(
+                            0, m.flows[i, o].lifetime - m.flows[i, o].age
+                        )
                     )
 
         self.variable_costs = Expression(expr=variable_costs)

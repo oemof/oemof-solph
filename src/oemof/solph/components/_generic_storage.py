@@ -1084,6 +1084,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                             self.init_content_multi_period.add((n, p), expr)
                         else:
                             pass
+
             self.init_content_multi_period = Constraint(
                 self.INVESTSTORAGES_INIT_CONTENT, m.PERIODS, noruleinit=True
             )
@@ -1093,6 +1094,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         # Standard storage implementation for discrete time points
         else:
+
             def _inv_storage_init_content_max_rule(block, n):
                 """Constraint for a variable initial storage capacity."""
                 return (
@@ -1135,13 +1137,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 )
                 expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
                 expr += (
-                            -m.flow[i[n], n, 0, 0]
-                            * n.inflow_conversion_factor[0]
-                        ) * m.timeincrement[0]
+                    -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+                ) * m.timeincrement[0]
                 expr += (
-                            m.flow[n, o[n], 0, 0]
-                            / n.outflow_conversion_factor[0]
-                        ) * m.timeincrement[0]
+                    m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+                ) * m.timeincrement[0]
                 return expr == 0
 
             self.balance_first = Constraint(
@@ -1476,15 +1476,21 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += sum(
-                            self.invest[n, p]
-                            * n.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(
-                                m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                        fixed_costs += (
+                            sum(
+                                self.invest[n, p]
+                                * n.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime,
+                                )
                             )
-                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                            * (
+                                (1 + m.discount_rate)
+                                ** (-m.es.periods_years[p])
+                            )
+                        )
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = Expression(expr=period_investment_costs)
