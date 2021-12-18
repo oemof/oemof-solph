@@ -1069,7 +1069,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             for n in self.INVESTSTORAGES_NO_INIT_CONTENT:
                 for p in m.PERIODS:
                     expr = block.init_content[n, p] <= block.total[n, p]
-                block.init_content_limit.add((n, p), expr)
+                    block.init_content_limit.add((n, p), expr)
 
         self.init_content_limit = Constraint(
             self.INVESTSTORAGES_NO_INIT_CONTENT, m.PERIODS, noruleinit=True
@@ -1080,7 +1080,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
         def _inv_storage_init_content_fix_rule(block):
             """Constraint for a fixed initial storage capacity."""
-            for n in self.INVESTSTORAGES:
+            for n in self.INVESTSTORAGES_INIT_CONTENT:
+                is_invested = False
                 for p in m.PERIODS:
                     if p == 0:
                         expr = (
@@ -1089,11 +1090,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         )
                         self.init_content_fix.add((n, p), expr)
                     else:
-                        expr = block.init_content[
-                            n, p
-                        ] == n.initial_storage_level * min(
-                            0, value(block.total[n, p] - block.total[n, p - 1])
-                        )
+                        if not is_invested:
+                            expr = block.init_content[
+                                n, p
+                            ] == n.initial_storage_level * block.total[n, p]
+                        else:
+                            expr = block.init_content[
+                                n, p
+                            ] == self.storage_content[
+                                m.TIMESTEPS_IN_PERIOD[p-1][-1]
+                            ]
+
                         self.init_content_fix.add((n, p), expr)
 
         self.init_content_fix = Constraint(
@@ -1236,7 +1243,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                     ) * n.invest_relation_input_output == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
-                self.power_coupled.add((n, p), expr)
+                    self.power_coupled.add((n, p), expr)
 
         self.power_coupled = Constraint(
             self.INVEST_REL_IN_OUT, m.PERIODS, noruleinit=True
