@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
+import math
 from warnings import warn
 
 from oemof.network import network as on
@@ -219,6 +220,10 @@ class Flow(on.Edge):
                 + "nonconvex flows!"
             )
 
+        infinite_error_msg = (
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
+        )
         if not self.investment:
             warn_msg = (
                 "If {} is set in a flow (except InvestmentFlow), "
@@ -236,6 +241,11 @@ class Flow(on.Edge):
                         warn_msg.format("summed_min"),
                         debugging.SuspiciousUsageWarning,
                     )
+            else:
+                assert math.isfinite(
+                    self.nominal_value
+                ), infinite_error_msg.format("nominal_value")
+        assert math.isfinite(self.max[0]), infinite_error_msg.format("max")
 
         # Checking for impossible gradient combinations
         if self.nonconvex:

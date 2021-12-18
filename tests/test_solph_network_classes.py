@@ -92,6 +92,15 @@ def test_flow_with_fix_and_min_max():
         solph.flows.Flow(fix=[1, 3], max=[0, 5], min=[4, 9])
 
 
+def test_infinite_values():
+    msg1 = "nominal_value must be a finite value"
+    msg2 = "max must be a finite value"
+    with pytest.raises(AssertionError, match=msg1):
+        solph.flows.Flow(nominal_value=float("+inf"))
+    with pytest.raises(AssertionError, match=msg2):
+        solph.flows.Flow(max=float("+inf"))
+
+
 def test_summed_min_and_summed_max():
     msg1 = "If summed_max is set in a flow "
     msg2 = "If summed_min is set in a flow "
