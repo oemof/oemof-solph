@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +23 flow(powerplant_electricityBus_0)
 +23 flow(powerplant_electricityBus_1)
@@ -44,17 +44,15 @@ c_u_FlowBlock_negative_gradient_constr(powerplant_electricityBus_2)_:
 -1 flow(powerplant_electricityBus_2)
 <= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds
    0 <= flow(powerplant_electricityBus_0) <= 999
    0 <= flow(powerplant_electricityBus_1) <= 999
    0 <= flow(powerplant_electricityBus_2) <= 999
-    -inf <= FlowBlock_positive_gradient(powerplant_electricityBus_0) <= 29.969999999999999
     -inf <= FlowBlock_positive_gradient(powerplant_electricityBus_1) <= 29.969999999999999
     -inf <= FlowBlock_positive_gradient(powerplant_electricityBus_2) <= 29.969999999999999
-    -inf <= FlowBlock_negative_gradient(powerplant_electricityBus_0) <= 49.950000000000003
     -inf <= FlowBlock_negative_gradient(powerplant_electricityBus_1) <= 49.950000000000003
     -inf <= FlowBlock_negative_gradient(powerplant_electricityBus_2) <= 49.950000000000003
 end
