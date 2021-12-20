@@ -39,7 +39,11 @@ class EnergySystem(es.EnergySystem):
 
     timeincrement : iterable
 
-    timemode
+    infer_last_interval : bool
+        Add an interval to the last time point. The end time of this interval
+        is unknown so it does only work for an equidistant DatetimeIndex with
+        a 'freq' attribute that is not None. The parameter has no effect on the
+        timeincrement parameter.
     kwargs
     """
 
