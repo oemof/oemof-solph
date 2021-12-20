@@ -402,7 +402,10 @@ class GenericStorageBlock(SimpleBlock):
         )
 
         self.STORAGES_INITITAL_LEVEL = Set(
-            initialize=[n for n in group if n.initial_storage_level is not None])
+            initialize=[
+                n for n in group if n.initial_storage_level is not None
+            ]
+        )
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
@@ -444,7 +447,7 @@ class GenericStorageBlock(SimpleBlock):
             every timestep.
             """
             expr = 0
-            expr += block.storage_content[n, t+1]
+            expr += block.storage_content[n, t + 1]
             expr += (
                 -block.storage_content[n, t]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
