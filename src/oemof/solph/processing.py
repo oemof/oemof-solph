@@ -114,7 +114,7 @@ def create_dataframe(om):
 
 def divide_scalars_sequences(df_dict, k):
     try:
-        condition = df_dict[k][1:].isnull().any()
+        condition = df_dict[k][:-1].isnull().any()
         scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
         sequences = df_dict[k].loc[:, ~condition]
         return {"scalars": scalars, "sequences": sequences}
@@ -132,7 +132,7 @@ def set_result_index(df_dict, k, result_index):
         df_dict[k].index = result_index
     except ValueError:
         try:
-            df_dict[k] = df_dict[k][1:]
+            df_dict[k] = df_dict[k][:-1]
             df_dict[k].index = result_index
         except ValueError as e:
             msg = (
@@ -197,13 +197,12 @@ def results(model, remove_last_time_point=None):
         # In the implicit time mode the first time point is removed.
         # The values of intervals belong to the time at the end of the
         # interval.
-        result_index = result_index[1:]
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)
             df_dict[k] = df_dict[k].pivot(
                 columns="variable_name", values="value"
             )
-            set_result_index(df_dict, k, result_index)
+            set_result_index(df_dict, k, result_index[:-1])
             result[k] = divide_scalars_sequences(df_dict, k)
     else:
         for k in df_dict:
@@ -223,9 +222,10 @@ def results(model, remove_last_time_point=None):
         )
         for bus, timesteps in grouped:
             duals = [
-                model.dual[model.BusBlock.balance[bus, t]] for _, t in timesteps
+                model.dual[model.BusBlock.balance[bus, t]]
+                for _, t in timesteps
             ]
-            df = pd.DataFrame({"duals": duals}, index=model.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
