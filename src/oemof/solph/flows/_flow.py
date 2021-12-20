@@ -150,8 +150,8 @@ class Flow(on.Edge):
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "variable_costs": 0,
-            "positive_gradient": {"ub": None, "costs": 0},
-            "negative_gradient": {"ub": None, "costs": 0},
+            "positive_gradient": {"ub": None},
+            "negative_gradient": {"ub": None},
         }
         keys = [k for k in kwargs if k != "label"]
 
