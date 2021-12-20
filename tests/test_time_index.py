@@ -116,6 +116,28 @@ def test_timeincrement_with_non_valid_timeindex():
         solph.EnergySystem(timeindex=4)
 
 
+def test_conflicting_time_index():
+    msg = (
+        "Specifying the timeincrement and the timeindex parameter at the same "
+        "time is not allowed"
+    )
+    with pytest.raises(AttributeError, match=msg):
+        solph.EnergySystem(
+            timeindex=pd.date_range("1/1/2012", periods=2, freq="H"),
+            timeincrement=[1, 2, 3, 4],
+        )
+
+
+def test_missing_timeincrement():
+    msg = (
+        "The EnergySystem needs to have a valid 'timeincrement' attribute to "
+        "build a model."
+    )
+    es = solph.EnergySystem()
+    with pytest.raises(AttributeError, match=msg):
+        solph.Model(es)
+
+
 def test_overwrite_timeincrement():
     es = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=2, freq="H")

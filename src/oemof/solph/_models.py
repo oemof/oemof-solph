@@ -279,7 +279,7 @@ class Model(BaseModel):
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
-        if not hasattr(self.es, "timeincrement"):
+        if self.es.timeincrement is None:
             msg = (
                 "The EnergySystem needs to have a valid 'timeincrement' "
                 "attribute to build a model."
