@@ -280,12 +280,19 @@ class Model(BaseModel):
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
+        if not hasattr(self.es, "timeincrement"):
+            msg = (
+                "The EnergySystem needs to have a valid 'timeincrement' "
+                "attribute to build a model."
+            )
+            raise AttributeError(msg)
+
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = po.Set(
             initialize=range(len(self.es.timeincrement)), ordered=True
         )
         self.TIMEPOINTS = po.Set(
-            initialize=range(len(self.es.timeincrement)+1), ordered=True
+            initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
         # previous timesteps

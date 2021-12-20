@@ -104,19 +104,20 @@ class EnergySystem(es.EnergySystem):
             )
             raise AttributeError(msg)
 
-        elif timeincrement is None and timeindex is None:
-            msg = (
-                "You have to either define the parameter timeincrement or "
-                "timeindex to initialise a valid EnergySystem."
-            )
-            raise AttributeError(msg)
-
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
             timedelta = df.diff()
-            timeincrement = (
+            timeincrement = pd.Series(
                 (timedelta / np.timedelta64(1, "h"))[1:].set_index(0).index
             )
+
+        if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
+            msg = (
+                "The time increment is inconsistent. Negative values and zero "
+                "is not allowed.\nThis is caused by a inconsistent "
+                "timeincrement parameter or an incorrect timeindex."
+            )
+            raise TypeError(msg)
 
         super().__init__(
             timeindex=timeindex, timeincrement=timeincrement, **kwargs

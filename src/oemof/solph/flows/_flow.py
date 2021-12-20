@@ -192,6 +192,17 @@ class Flow(on.Edge):
         if kwargs.get("max") is None:
             defaults["max"] = 1
 
+        # Check gradient dictionaries for non-valid keys
+        for gradient_dict in ["negative_gradient", "positive_gradient"]:
+            if gradient_dict in kwargs:
+                if list(kwargs[gradient_dict].keys()) != list(
+                    defaults[gradient_dict].keys()
+                ):
+                    msg = (
+                        "Only the key 'ub' is allowed for the '{0}' attribute"
+                    )
+                    raise AttributeError(msg.format(gradient_dict))
+
         for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
