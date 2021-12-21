@@ -93,14 +93,14 @@ There are different ways to add components to an *energy system*. The following 
 
 .. code-block:: python
 
-    my_energysystem.add(solph.Bus())
+    my_energysystem.add(solph.buses.Bus())
 
 It is also possible to assign the bus to a variable and add it afterwards. In that case it is easy to add as many objects as you like.
 
 .. code-block:: python
 
-    my_bus1 = solph.Bus()
-    my_bus2 = solph.Bus()
+    my_bus1 = solph.buses.Bus()
+    my_bus2 = solph.buses.Bus()
     my_energysystem.add(my_bus1, my_bus2)
 
 Therefore it is also possible to add lists or dictionaries with components but you have to dissolve them.
@@ -123,8 +123,8 @@ To make it easier to connect the bus to a component you can optionally assign a 
 
 .. code-block:: python
 
-    solph.Bus(label='natural_gas')
-    electricity_bus = solph.Bus(label='electricity')
+    solph.buses.Bus(label='natural_gas')
+    electricity_bus = solph.buses.Bus(label='electricity')
 
 .. note:: See the :py:class:`~oemof.solph.network.bus.Bus` class for all parameters and the mathematical background.
 
@@ -138,7 +138,7 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.netw
 
 .. code-block:: python
 
-    solph.Flow()
+    solph.flows.Flow()
 
 Oemof has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
 
@@ -250,14 +250,14 @@ Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be
 
 .. code-block:: python
 
-    solph.Sink(label='electricity_demand', inputs={electricity_bus: solph.Flow(
+    solph.components.Sink(label='electricity_demand', inputs={electricity_bus: solph.flows.Flow(
         fix=my_demand_series, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
 .. code-block:: python
 
-    solph.Sink(label='electricity_excess', inputs={electricity_bus: solph.Flow()})
+    solph.components.Sink(label='electricity_excess', inputs={electricity_bus: solph.flows.Flow()})
 
 .. note:: The Sink class is only a plug and provides no additional constraints or variables.
 
@@ -277,12 +277,12 @@ The *nominal_value* sets the installed capacity.
 
 .. code-block:: python
 
-    solph.Source(
+    solph.components.Source(
         label='import_natural_gas',
-        outputs={my_energysystem.groups['natural_gas']: solph.Flow(
+        outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
             nominal_value=1000, summed_max=1000000, variable_costs=50)})
 
-    solph.Source(label='wind', outputs={electricity_bus: solph.Flow(
+    solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
         fix=wind_power_feedin_series, nominal_value=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
@@ -300,24 +300,24 @@ A condensing power plant can be defined by a transformer with one input (fuel) a
 
 .. code-block:: python
 
-    b_gas = solph.Bus(label='natural_gas')
-    b_el = solph.Bus(label='electricity')
+    b_gas = solph.buses.Bus(label='natural_gas')
+    b_el = solph.buses.Bus(label='electricity')
 
-    solph.Transformer(
+    solph.components.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={b_el: solph.Flow(nominal_value=10e10)},
+        inputs={bgas: solph.flows.Flow()},
+        outputs={b_el: solph.flows.Flow(nominal_value=10e10)},
         conversion_factors={electricity_bus: 0.58})
 
 A CHP power plant would be defined in the same manner but with two outputs:
 
 .. code-block:: python
 
-    b_gas = solph.Bus(label='natural_gas')
-    b_el = solph.Bus(label='electricity')
-    b_th = solph.Bus(label='heat')
+    b_gas = solph.buses.Bus(label='natural_gas')
+    b_el = solph.buses.Bus(label='electricity')
+    b_th = solph.buses.Bus(label='heat')
 
-    solph.Transformer(
+    solph.components.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -328,12 +328,12 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
 
 .. code-block:: python
 
-    b_gas = solph.Bus(label='natural_gas')
-    b_coal = solph.Bus(label='hard_coal')
-    b_el = solph.Bus(label='electricity')
-    b_th = solph.Bus(label='heat')
+    b_gas = solph.buses.Bus(label='natural_gas')
+    b_coal = solph.buses.Bus(label='hard_coal')
+    b_el = solph.buses.Bus(label='electricity')
+    b_th = solph.buses.Bus(label='heat')
 
-    solph.Transformer(
+    solph.components.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -345,15 +345,15 @@ A heat pump would be defined in the same manner. New buses are defined to make t
 
 .. code-block:: python
 
-    b_el = solph.Bus(label='electricity')
-    b_th_low = solph.Bus(label='low_temp_heat')
-    b_th_high = solph.Bus(label='high_temp_heat')
+    b_el = solph.buses.Bus(label='electricity')
+    b_th_low = solph.buses.Bus(label='low_temp_heat')
+    b_th_high = solph.buses.Bus(label='high_temp_heat')
 
     # The cop (coefficient of performance) of the heat pump can be defined as
     # a scalar or a sequence.
     cop = 3
 
-    solph.Transformer(
+    solph.components.Transformer(
         label='heat_pump',
         inputs={b_el: Flow(), b_th_low: Flow()},
         outputs={b_th_high: Flow()},
@@ -369,7 +369,7 @@ If the low-temperature reservoir is nearly infinite (ambient air heat pump) the 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+The :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
 the application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
@@ -392,7 +392,7 @@ incorporates the backpressure coefficient :math:`C_b`.
    :alt: variable_chp_plot.svg
    :align: center
 
-For now, :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` instances must
+For now, :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` instances must
 have one input and two output flows. The class allows the definition
 of a different efficiency for every time step that can be passed as a series
 of parameters that are fixed before the optimisation. In contrast to the
@@ -402,10 +402,10 @@ applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
 .. code-block:: python
 
-    solph.ExtractionTurbineCHP(
+    solph.components._extractionTurbineCHP(
         label='variable_chp_gas',
-        inputs={b_gas: solph.Flow(nominal_value=10e10)},
-        outputs={b_el: solph.Flow(), b_th: solph.Flow()},
+        inputs={b_gas: solph.flows.Flow(nominal_value=10e10)},
+        outputs={b_el: solph.flows.Flow(), b_th: solph.flows.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_full_condensation={b_el: 0.5})
 
@@ -422,7 +422,7 @@ output of an example in the `example repository
    :alt: variable_chp_plot.svg
    :align: center
 
-.. note:: See the :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_caes_label:
@@ -447,14 +447,14 @@ at maximal heat extraction determine the right boundary of the operation range.
 
     solph.components.GenericCHP(
         label='combined_cycle_extraction_turbine',
-        fuel_input={bgas: solph.Flow(
+        fuel_input={bgas: solph.flows.Flow(
             H_L_FG_share_max=[0.19 for p in range(0, periods)])},
-        electrical_output={bel: solph.Flow(
+        electrical_output={bel: solph.flows.Flow(
             P_max_woDH=[200 for p in range(0, periods)],
             P_min_woDH=[80 for p in range(0, periods)],
             Eta_el_max_woDH=[0.53 for p in range(0, periods)],
             Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
-        heat_output={bth: solph.Flow(
+        heat_output={bth: solph.flows.Flow(
             Q_CW_min=[30 for p in range(0, periods)])},
         Beta=[0.19 for p in range(0, periods)],
         back_pressure=False)
@@ -472,14 +472,14 @@ thermal condenser load to cooling water has to be zero, because there is no cond
 
     solph.components.GenericCHP(
         label='back_pressure_turbine',
-        fuel_input={bgas: solph.Flow(
+        fuel_input={bgas: solph.flows.Flow(
             H_L_FG_share_max=[0.19 for p in range(0, periods)])},
-        electrical_output={bel: solph.Flow(
+        electrical_output={bel: solph.flows.Flow(
             P_max_woDH=[200 for p in range(0, periods)],
             P_min_woDH=[80 for p in range(0, periods)],
             Eta_el_max_woDH=[0.53 for p in range(0, periods)],
             Eta_el_min_woDH=[0.43 for p in range(0, periods)])},
-        heat_output={bth: solph.Flow(
+        heat_output={bth: solph.flows.Flow(
             Q_CW_min=[0 for p in range(0, periods)])},
         Beta=[0 for p in range(0, periods)],
         back_pressure=True)
@@ -496,15 +496,15 @@ at minimal heat extraction have to be specified.
 
     solph.components.GenericCHP(
         label='motoric_chp',
-        fuel_input={bgas: solph.Flow(
+        fuel_input={bgas: solph.flows.Flow(
             H_L_FG_share_max=[0.18 for p in range(0, periods)],
             H_L_FG_share_min=[0.41 for p in range(0, periods)])},
-        electrical_output={bel: solph.Flow(
+        electrical_output={bel: solph.flows.Flow(
             P_max_woDH=[200 for p in range(0, periods)],
             P_min_woDH=[100 for p in range(0, periods)],
             Eta_el_max_woDH=[0.44 for p in range(0, periods)],
             Eta_el_min_woDH=[0.40 for p in range(0, periods)])},
-        heat_output={bth: solph.Flow(
+        heat_output={bth: solph.flows.Flow(
             Q_CW_min=[0 for p in range(0, periods)])},
         Beta=[0 for p in range(0, periods)],
         back_pressure=False)
@@ -524,7 +524,7 @@ If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.components.generic_chp.GenericCHP` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._generic_chp.GenericCHP` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_components_generic_storage_label:
@@ -540,10 +540,10 @@ Furthermore, an efficiency for loading, unloading and a loss rate can be defined
 
 .. code-block:: python
 
-    solph.GenericStorage(
+    solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
         loss_rate=0.001, nominal_storage_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
@@ -562,10 +562,10 @@ The following code block shows an example of the storage parametrization for the
 
 .. code-block:: python
 
-    solph.GenericStorage(
+    solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.Flow(nominal_value=25, variable_costs=10)},
+        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
         loss_rate=0.001, nominal_storage_capacity=50,
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
@@ -590,7 +590,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
 
 
 Using an investment object with the GenericStorage component
@@ -617,10 +617,10 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
 .. code-block:: python
 
-    solph.GenericStorage(
+    solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.Flow(investment= solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
@@ -629,10 +629,10 @@ The following example describes a battery with flows coupled to the capacity of 
 
 .. code-block:: python
 
-    solph.GenericStorage(
+    solph.components.GenericStorage(
         label='battery',
-        inputs={b_el: solph.Flow()},
-        outputs={b_el: solph.Flow()},
+        inputs={b_el: solph.flows.Flow()},
+        outputs={b_el: solph.flows.Flow()},
         loss_rate=0.001,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
@@ -641,7 +641,7 @@ The following example describes a battery with flows coupled to the capacity of 
         investment = solph.Investment(ep_costs=400))
 
 
-.. note:: See the :py:class:`~oemof.solph.components.generic_storage.GenericStorage` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class for all parameters and the mathematical background.
 
 
 OffsetTransformer (component)
@@ -669,12 +669,12 @@ The following example illustrates how to define an OffsetTransformer for given i
     # define OffsetTransformer
     solph.custom.OffsetTransformer(
         label='boiler',
-        inputs={bfuel: solph.Flow(
+        inputs={bfuel: solph.flows.Flow(
             nominal_value=P_in_max,
             max=1,
             min=P_in_min/P_in_max,
             nonconvex=solph.NonConvex())},
-        outputs={bth: solph.Flow()},
+        outputs={bth: solph.flows.Flow()},
         coefficients = [c0, c1])
 
 This example represents a boiler, which is supplied by fuel and generates heat.
@@ -712,7 +712,7 @@ which results in a nonlinear relation:
 
 The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 
-.. note:: See the :py:class:`~oemof.solph.components.offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
@@ -797,27 +797,27 @@ This small example of PV, grid and SinkDSM shows how to use the component
     Node.registry = es
 
     # Create bus representing electricity grid
-    b_elec = solph.Bus(label='Electricity bus')
+    b_elec = solph.buses.Bus(label='Electricity bus')
 
     # Create a back supply
-    grid = solph.Source(label='Grid',
+    grid = solph.components.Source(label='Grid',
                         outputs={
-                            b_elec: solph.Flow(
+                            b_elec: solph.flows.Flow(
                                 nominal_value=10000,
                                 variable_costs=50)}
                         )
 
     # PV supply from time series
-    s_wind = solph.Source(label='wind',
+    s_wind = solph.components.Source(label='wind',
                           outputs={
-                              b_elec: solph.Flow(
+                              b_elec: solph.flows.Flow(
                                   fix=data['pv'],
                                   nominal_value=3.5)}
                           )
 
     # Create DSM Sink
     demand_dsm = solph.custom.SinkDSM(label="DSM",
-                                      inputs={b_elec: solph.Flow()},
+                                      inputs={b_elec: solph.flows.Flow()},
                                       demand=data['demand_el'],
                                       capacity_up=data["Cap_up"],
                                       capacity_down=data["Cap_do"],
@@ -874,7 +874,7 @@ turbines.
 
 .. code-block:: python
 
-    solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
+    solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
 	investment=solph.Investment(ep_costs=epc, maximum=50000))})
 
@@ -884,7 +884,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 
 .. code-block:: python
 
-    solph.Source(label='new_wind_pp', outputs={electricity: solph.Flow(
+    solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
 	    investment=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
@@ -917,10 +917,10 @@ example of an transformer:
 
 .. code-block:: python
 
-    trafo = solph.Transformer(
+    trafo = solph.components.Transformer(
         label='transformer_nonconvex',
-        inputs={bus_0: solph.Flow()},
-        outputs={bus_1: solph.Flow(
+        inputs={bus_0: solph.flows.Flow()},
+        outputs={bus_1: solph.flows.Flow(
             investment=solph.Investment(
                 ep_costs=4,
                 maximum=100,
@@ -960,7 +960,7 @@ in the following relation for convex and nonconvex investments:
    :align: center
 
 See :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow` and
-:py:class:`~oemof.solph.components.generic_storage.GenericInvestmentStorageBlock` for all the
+:py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock` for all the
 mathematical background, like variables and constraints, which are used.
 
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
@@ -981,11 +981,11 @@ you have to do is to invoke a class instance inside your Flow() - declaration:
 
 .. code-block:: python
 
-    b_gas = solph.Bus(label='natural_gas')
-    b_el = solph.Bus(label='electricity')
-    b_th = solph.Bus(label='heat')
+    b_gas = solph.buses.Bus(label='natural_gas')
+    b_el = solph.buses.Bus(label='electricity')
+    b_th = solph.buses.Bus(label='heat')
 
-    solph.Transformer(
+    solph.components.Transformer(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30,
@@ -1177,7 +1177,7 @@ The following will give you all flows which are outputs of transformer:
 .. code-block:: python
 
     flows_from_transformer = [x for x in flows if isinstance(
-        x[0], solph.Transformer)]
+        x[0], solph.components.Transformer)]
 
 You can filter your flows, if the label of in- or output contains a given
 string, e.g.:

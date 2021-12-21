@@ -65,42 +65,46 @@ def test_optimise_storage_size(
     data = pd.read_csv(full_filename, sep=",")
 
     # Buses
-    bgas = solph.Bus(label="natural_gas")
-    bel = solph.Bus(label="electricity")
+    bgas = solph.buses.Bus(label="natural_gas")
+    bel = solph.buses.Bus(label="electricity")
 
     # Sinks
-    solph.Sink(label="excess_bel", inputs={bel: solph.Flow()})
+    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
 
-    solph.Sink(
+    solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
     # Sources
-    solph.Source(
+    solph.components.Source(
         label="rgas",
         outputs={
-            bgas: solph.Flow(
+            bgas: solph.flows.Flow(
                 nominal_value=194397000 * 400 / 8760, summed_max=1
             )
         },
     )
 
-    solph.Source(
+    solph.components.Source(
         label="wind",
-        outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
+        outputs={
+            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+        },
     )
 
-    solph.Source(
+    solph.components.Source(
         label="pv",
-        outputs={bel: solph.Flow(fix=data["pv"], nominal_value=582000)},
+        outputs={bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)},
     )
 
     # Transformer
-    PP_GAS = solph.Transformer(
+    PP_GAS = solph.components.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
+        inputs={bgas: solph.flows.Flow()},
+        outputs={
+            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+        },
         conversion_factors={bel: 0.58},
     )
 
@@ -108,8 +112,8 @@ def test_optimise_storage_size(
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
     solph.components.GenericStorage(
         label="storage",
-        inputs={bel: solph.Flow(variable_costs=10e10)},
-        outputs={bel: solph.Flow(variable_costs=10e10)},
+        inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+        outputs={bel: solph.flows.Flow(variable_costs=10e10)},
         loss_rate=0.00,
         initial_storage_level=0,
         invest_relation_input_capacity=1 / 6,
@@ -218,7 +222,8 @@ def test_results_with_old_dump():
 
 
 def test_solph_transformer_attributes_before_dump_and_after_restore():
-    """dump/restore should preserve all attributes of `solph.Transformer`"""
+    """dump/restore should preserve all attributes
+    of `solph.components.Transformer`"""
     energysystem = solph.EnergySystem()
     energysystem.restore()
 

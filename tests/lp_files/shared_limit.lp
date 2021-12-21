@@ -24,21 +24,21 @@ c_e_limit_storage_constraint(2)_:
 -1 limit_storage(2)
 = 0
 
-c_e_Bus_balance(bus_0)_:
+c_e_BusBlock_balance(bus_0)_:
 -1 flow(bus_storage1_0)
 -1 flow(bus_storage2_0)
 +1 flow(storage1_bus_0)
 +1 flow(storage2_bus_0)
 = 0
 
-c_e_Bus_balance(bus_1)_:
+c_e_BusBlock_balance(bus_1)_:
 -1 flow(bus_storage1_1)
 -1 flow(bus_storage2_1)
 +1 flow(storage1_bus_1)
 +1 flow(storage2_bus_1)
 = 0
 
-c_e_Bus_balance(bus_2)_:
+c_e_BusBlock_balance(bus_2)_:
 -1 flow(bus_storage1_2)
 -1 flow(bus_storage2_2)
 +1 flow(storage1_bus_2)
