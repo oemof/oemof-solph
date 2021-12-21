@@ -81,7 +81,7 @@
      :alt: Relative date
      :target: https://github.com/oemof/oemof/issues/99
 
-.. |chat| image:: https://img.shields.io/badge/chat-matrix-%238ADCF7
+.. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat
      :target: https://matrix.to/#/#oemof:matrix.org
 
