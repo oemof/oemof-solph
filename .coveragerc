@@ -7,8 +7,8 @@ source =
     src
     tests
 parallel = true
-omit = *custom*
-       */experimental/*
+omit = */experimental/*
+
 [report]
 show_missing = true
 precision = 2
