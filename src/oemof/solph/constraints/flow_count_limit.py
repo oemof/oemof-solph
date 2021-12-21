@@ -65,7 +65,7 @@ def limit_active_flow_count(
     +-------------------+------+--------------------------------------------------------------+
     | :math:`N_{X,max}  | P    | upper_limit                                                  |
     +-------------------+------+--------------------------------------------------------------+
-    """
+    """  # noqa: E501
 
     # number of concurrent active flows
     setattr(model, constraint_name, po.Var(model.TIMESTEPS))

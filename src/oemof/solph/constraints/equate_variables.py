@@ -18,18 +18,25 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
 
     Parameters
     ----------
-    var1 : pyomo.environ.Var First variable, to be set to equal with Var2 and multiplied with factor1.
-    var2 : pyomo.environ.Var Second variable, to be set equal to (Var1 * factor1).
-    factor1 : float Factor to define the proportion between the variables.
-    name : str Optional name for the equation e.g. in the LP file. By default the name is:
-        equate + string representation of var1 and var2.
-    model : oemof.solph.Model Model to which the constraint is added.
+    var1 : pyomo.environ.Var
+        First variable, to be set to equal with Var2 and multiplied with
+        factor1.
+    var2 : pyomo.environ.Var
+        Second variable, to be set equal to (Var1 * factor1).
+    factor1 : float
+        Factor to define the proportion between the variables.
+    name : str
+        Optional name for the equation e.g. in the LP file. By default the
+        name is: equate + string representation of var1 and var2.
+    model : oemof.solph.Model
+        Model to which the constraint is added.
 
      **The following constraints are build:**
 
      .. math:: var_1 \cdot factor_1 = var_1
 
-     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+     The symbols used are defined as follows (with Variables (V) and Parameters
+      (P)):
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | symbol           | attribute           | type | explanation                                                                                                                                    |
     +==================+=====================+======+================================================================================================================================================+
@@ -75,7 +82,7 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     ...    om,
     ...    om.InvestmentFlowBlock.invest[line12, bel2],
     ...    om.InvestmentFlowBlock.invest[line21, bel1])
-    """
+    """  # noqa: E501
     if name is None:
         name = "_".join(["equate", str(var1), str(var2)])
 

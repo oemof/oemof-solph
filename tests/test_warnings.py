@@ -24,6 +24,7 @@ def warning_fixture():
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
 
+
 def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
