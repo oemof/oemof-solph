@@ -172,8 +172,8 @@ class NonConvex:
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "initial_status": 0,
-            "positive_gradient": {"ub": None, "costs": 0},
-            "negative_gradient": {"ub": None, "costs": 0},
+            "positive_gradient": {"ub": None},
+            "negative_gradient": {"ub": None},
         }
 
         for attribute in set(
@@ -184,7 +184,7 @@ class NonConvex:
                 setattr(
                     self,
                     attribute,
-                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                    {"ub": sequence(value["ub"])},
                 )
             else:
                 setattr(
