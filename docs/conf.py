@@ -51,7 +51,7 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
-html_logo = "./_logo/logo_oemof_solph_COMPACT.svg"
+html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
