@@ -6,10 +6,9 @@ on:
     branches:
       - master
       - dev
+      - v0.5
   pull_request:
-    branches:
-      - master
-      - dev
+
   workflow_dispatch:
   schedule:
     - cron: "0 5 * * 6"  # 5:00 UTC every Saturday

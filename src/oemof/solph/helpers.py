@@ -22,7 +22,7 @@ from collections.abc import MutableMapping
 
 import pandas as pd
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 def get_basic_path():

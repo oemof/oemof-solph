@@ -60,18 +60,18 @@ def shared_limit(
     >>> from oemof import solph
     >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
     >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
-    >>> b1 = solph.Bus(label="Party1Bus")
-    >>> b2 = solph.Bus(label="Party2Bus")
+    >>> b1 = solph.buses.Bus(label="Party1Bus")
+    >>> b2 = solph.buses.Bus(label="Party2Bus")
     >>> storage1 = solph.components.GenericStorage(
     ...     label="Party1Storage",
     ...     nominal_storage_capacity=5,
-    ...     inputs={b1: solph.Flow()},
-    ...     outputs={b1: solph.Flow()})
+    ...     inputs={b1: solph.flows.Flow()},
+    ...     outputs={b1: solph.flows.Flow()})
     >>> storage2 = solph.components.GenericStorage(
     ...     label="Party2Storage",
     ...     nominal_storage_capacity=5,
-    ...     inputs={b1: solph.Flow()},
-    ...     outputs={b1: solph.Flow()})
+    ...     inputs={b1: solph.flows.Flow()},
+    ...     outputs={b1: solph.flows.Flow()})
     >>> energysystem.add(b1, b2, storage1, storage2)
     >>> components = [storage1, storage2]
     >>> model = solph.Model(energysystem)

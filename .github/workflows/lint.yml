@@ -5,10 +5,8 @@ on:
     branches:
       - master
       - dev
+      - v0.5
   pull_request:
-    branches:
-      - master
-      - dev
 
 jobs:
   run-linters:

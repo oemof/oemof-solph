@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Example that illustrates how to use custom component `GenericCHP` can be used.
+Example that illustrates how to use component `GenericCHP` can be used.
 
 In this case it is used to model a combined cycle extraction turbine.
 
@@ -18,15 +18,15 @@ import pandas as pd
 from nose.tools import eq_
 from oemof.network.network import Node
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import custom
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.components.experimental import GenericCAES
+from oemof.solph.flows import Flow
 
 
 def test_gen_caes():
@@ -86,7 +86,7 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    custom.GenericCAES(
+    GenericCAES(
         label="caes",
         electrical_input={bel_source: Flow()},
         fuel_input={bgas: Flow()},
