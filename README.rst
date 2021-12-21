@@ -1,4 +1,3 @@
-.. start-badges
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
@@ -6,11 +5,10 @@
 
 |wheel| |packaging| |supported-versions|
 
-|zenodo| |docs|
+|docs| |zenodo|
 
 |version| |commits-since| |meeting| |chat|
 
-.. end-badges
 
 ------------------------------
 
@@ -72,7 +70,7 @@
     :target: https://github.com/oemof/oemof-solph/compare/v0.4.4...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
-    :alt: DOI
+    :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
@@ -87,9 +85,9 @@
      :alt: matrix-chat
      :target: https://matrix.to/#/#oemof:matrix.org
 
+
 .. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/492e3f5a0dda7065be30d33a37b0625027847518/docs/_logo/logo_oemof_solph_FULL.svg
     :align: center
-
 
 ------------------------------
 
