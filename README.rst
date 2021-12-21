@@ -24,9 +24,9 @@
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
 
-.. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
-    :alt: Requirements Status
-    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+.. |requires| image:: https://img.shields.io/requires/github/oemof/oemof-solph/dev
+     :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+     :alt: Requirements Status
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
