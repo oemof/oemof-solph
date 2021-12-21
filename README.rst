@@ -72,7 +72,7 @@
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
-.. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/75789b1578035d0b658c4b97fcc41fc3ca61638e/docs/_logo/logo_oemof_solph_FULL.svg
+.. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/492e3f5a0dda7065be30d33a37b0625027847518/docs/_logo/logo_oemof_solph_FULL.svg
     :align: center
 
 ------------------------------
