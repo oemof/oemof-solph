@@ -1,9 +1,16 @@
-|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
+.. start-badges
 
-|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
+|tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|version| |wheel| |supported-versions| |supported-implementations|
-|commits-since| |zenodo|
+|scrutinizer| |codacy| |codeclimate| |requires|
+
+|wheel| |packaging| |supported-versions|
+
+|zenodo| |docs|
+
+|version| |commits-since| 
+
+.. end-badges
 
 ------------------------------
 
