@@ -8,7 +8,7 @@
 
 |zenodo| |docs|
 
-|version| |commits-since| 
+|version| |commits-since| |meeting| |chat|
 
 .. end-badges
 
@@ -79,8 +79,17 @@
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+.. |meeting| image:: https://img.shields.io/date/1652864400?color=%23094714&label=Next%20meeting&logoColor=%230947ff
+     :alt: Relative date
+     :target: https://github.com/oemof/oemof/issues/99
+
+.. |chat| image:: https://img.shields.io/badge/chat-matrix-%238ADCF7
+     :alt: matrix-chat
+     :target: https://matrix.to/#/#oemof:matrix.org
+
 .. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/492e3f5a0dda7065be30d33a37b0625027847518/docs/_logo/logo_oemof_solph_FULL.svg
     :align: center
+
 
 ------------------------------
 
