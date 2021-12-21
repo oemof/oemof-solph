@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 
 import pytest
 
-from oemof.solph import Flow
+from oemof.solph.flows import Flow
 
 
 def test_error_in_gradient_attribute():
