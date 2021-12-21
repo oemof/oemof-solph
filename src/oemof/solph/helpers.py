@@ -18,18 +18,18 @@ SPDX-License-Identifier: MIT
 
 import datetime as dt
 import os
-from collections import MutableMapping
+from collections.abc import MutableMapping
 
 import pandas as pd
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 def get_basic_path():
     """Returns the basic oemof path and creates it if necessary.
     The basic path is the '.oemof' folder in the $HOME directory.
     """
-    basicpath = os.path.join(os.path.expanduser('~'), '.oemof')
+    basicpath = os.path.join(os.path.expanduser("~"), ".oemof")
     if not os.path.isdir(basicpath):
         os.mkdir(basicpath)
     return basicpath
@@ -37,7 +37,7 @@ def get_basic_path():
 
 def extend_basic_path(subfolder):
     """Returns a path based on the basic oemof path and creates it if
-     necessary. The subfolder is the name of the path extension.
+    necessary. The subfolder is the name of the path extension.
     """
     extended_path = os.path.join(get_basic_path(), subfolder)
     if not os.path.isdir(extended_path):
@@ -45,7 +45,7 @@ def extend_basic_path(subfolder):
     return extended_path
 
 
-def flatten(d, parent_key='', sep='_'):
+def flatten(d, parent_key="", sep="_"):
     """
     Flatten dictionary by compressing keys.
 
@@ -80,9 +80,11 @@ def calculate_timeincrement(timeindex, fill_value=None):
     fill_value: numerical
         timeincrement for first timestep in hours
     """
-    if isinstance(timeindex, pd.DatetimeIndex) and \
-        (fill_value and isinstance(fill_value, pd.Timedelta) or
-         fill_value is None):
+    if isinstance(timeindex, pd.DatetimeIndex) and (
+        fill_value
+        and isinstance(fill_value, pd.Timedelta)
+        or fill_value is None
+    ):
         if len(set(timeindex)) != len(timeindex):
             raise IndexError("No equal DatetimeIndex allowed!")
         timeindex = timeindex.to_series()
@@ -90,13 +92,13 @@ def calculate_timeincrement(timeindex, fill_value=None):
         if fill_value:
             timeincrement = timeindex_sorted.diff().fillna(value=fill_value)
         else:
-            timeincrement = timeindex_sorted.diff().fillna(method='bfill')
+            timeincrement = timeindex_sorted.diff().fillna(method="bfill")
         timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
-        timeincrement_hourly = list(timeincrement_sec.map(
-                                    lambda x: x/3600))
+        timeincrement_hourly = list(timeincrement_sec.map(lambda x: x / 3600))
         timeincrement = sequence(timeincrement_hourly)
         return timeincrement
     else:
         raise AttributeError(
-            "'timeindex' must be of type 'DatetimeIndex' and " +
-            "'fill_value' of type 'Timedelta'.")
+            "'timeindex' must be of type 'DatetimeIndex' and "
+            + "'fill_value' of type 'Timedelta'."
+        )

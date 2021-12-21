@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min 
+min
 objective:
 +50 flow(gasBus_CHPpowerplantGas_0)
 +50 flow(gasBus_CHPpowerplantGas_1)
@@ -8,73 +8,73 @@ objective:
 
 s.t.
 
-c_e_Bus_balance(electricityBus_0)_:
+c_e_BusBlock_balance(electricityBus_0)_:
 +1 flow(CHPpowerplantGas_electricityBus_0)
 = 0
 
-c_e_Bus_balance(electricityBus_1)_:
+c_e_BusBlock_balance(electricityBus_1)_:
 +1 flow(CHPpowerplantGas_electricityBus_1)
 = 0
 
-c_e_Bus_balance(electricityBus_2)_:
+c_e_BusBlock_balance(electricityBus_2)_:
 +1 flow(CHPpowerplantGas_electricityBus_2)
 = 0
 
-c_e_Bus_balance(gasBus_0)_:
+c_e_BusBlock_balance(gasBus_0)_:
 +1 flow(gasBus_CHPpowerplantGas_0)
 = 0
 
-c_e_Bus_balance(gasBus_1)_:
+c_e_BusBlock_balance(gasBus_1)_:
 +1 flow(gasBus_CHPpowerplantGas_1)
 = 0
 
-c_e_Bus_balance(gasBus_2)_:
+c_e_BusBlock_balance(gasBus_2)_:
 +1 flow(gasBus_CHPpowerplantGas_2)
 = 0
 
-c_e_Bus_balance(heatBus_0)_:
+c_e_BusBlock_balance(heatBus_0)_:
 +1 flow(CHPpowerplantGas_heatBus_0)
 = 0
 
-c_e_Bus_balance(heatBus_1)_:
+c_e_BusBlock_balance(heatBus_1)_:
 +1 flow(CHPpowerplantGas_heatBus_1)
 = 0
 
-c_e_Bus_balance(heatBus_2)_:
+c_e_BusBlock_balance(heatBus_2)_:
 +1 flow(CHPpowerplantGas_heatBus_2)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_0)_:
--2.5 flow(CHPpowerplantGas_electricityBus_0)
-+1 flow(gasBus_CHPpowerplantGas_0)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_electricityBus_0)_:
+-1 flow(CHPpowerplantGas_electricityBus_0)
++0.40000000000000002 flow(gasBus_CHPpowerplantGas_0)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_1)_:
--2.5 flow(CHPpowerplantGas_electricityBus_1)
-+1 flow(gasBus_CHPpowerplantGas_1)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_electricityBus_1)_:
+-1 flow(CHPpowerplantGas_electricityBus_1)
++0.40000000000000002 flow(gasBus_CHPpowerplantGas_1)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_electricityBus_2)_:
--2.5 flow(CHPpowerplantGas_electricityBus_2)
-+1 flow(gasBus_CHPpowerplantGas_2)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_electricityBus_2)_:
+-1 flow(CHPpowerplantGas_electricityBus_2)
++0.40000000000000002 flow(gasBus_CHPpowerplantGas_2)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_0)_:
--2 flow(CHPpowerplantGas_heatBus_0)
-+1 flow(gasBus_CHPpowerplantGas_0)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_heatBus_0)_:
+-1 flow(CHPpowerplantGas_heatBus_0)
++0.5 flow(gasBus_CHPpowerplantGas_0)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_1)_:
--2 flow(CHPpowerplantGas_heatBus_1)
-+1 flow(gasBus_CHPpowerplantGas_1)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_heatBus_1)_:
+-1 flow(CHPpowerplantGas_heatBus_1)
++0.5 flow(gasBus_CHPpowerplantGas_1)
 = 0
 
-c_e_Transformer_relation(CHPpowerplantGas_gasBus_heatBus_2)_:
--2 flow(CHPpowerplantGas_heatBus_2)
-+1 flow(gasBus_CHPpowerplantGas_2)
+c_e_TransformerBlock_relation(CHPpowerplantGas_gasBus_heatBus_2)_:
+-1 flow(CHPpowerplantGas_heatBus_2)
++0.5 flow(gasBus_CHPpowerplantGas_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT: 
+c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds

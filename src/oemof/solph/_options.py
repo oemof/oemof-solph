@@ -13,7 +13,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.solph.plumbing import sequence
+from oemof.solph._plumbing import sequence
 
 
 class Investment:
@@ -41,12 +41,21 @@ class Investment:
 
 
     For the variables, constraints and parts of the objective function, which
-    are created, see :class:`oemof.solph.blocks.InvestmentFlow` and
-    :class:`oemof.solph.components.GenericInvestmentStorageBlock`.
+    are created, see :class:`oemof.solph.blocks.investment_flow.InvestmentFlowBlock`
+    and :class:`oemof.solph.components._generic_storage.GenericInvestmentStorageBlock`.
 
-    """
-    def __init__(self, maximum=float('+inf'), minimum=0, ep_costs=0,
-                 existing=0, nonconvex=False, offset=0, **kwargs):
+    """  # noqa: E501
+
+    def __init__(
+        self,
+        maximum=float("+inf"),
+        minimum=0,
+        ep_costs=0,
+        existing=0,
+        nonconvex=False,
+        offset=0,
+        **kwargs,
+    ):
 
         self.maximum = maximum
         self.minimum = minimum
@@ -65,25 +74,31 @@ class Investment:
 
     def _check_invest_attributes(self):
         if (self.existing != 0) and (self.nonconvex is True):
-            e1 = ("Values for 'offset' and 'existing' are given in"
-                  " investement attributes. \n These two options cannot be "
-                  "considered at the same time.")
+            e1 = (
+                "Values for 'offset' and 'existing' are given in"
+                " investement attributes. \n These two options cannot be "
+                "considered at the same time."
+            )
             raise AttributeError(e1)
 
     def _check_invest_attributes_maximum(self):
-        if (self.maximum == float('+inf')) and (self.nonconvex is True):
-            e2 = ("Please provide an maximum investment value in case of"
-                  " nonconvex investemnt (nonconvex=True), which is in the"
-                  " expected magnitude."
-                  " \nVery high maximum values (> 10e8) as maximum investment"
-                  " limit might lead to numeric issues, so that no investment"
-                  " is done, although it is the optimal solution!")
+        if (self.maximum == float("+inf")) and (self.nonconvex is True):
+            e2 = (
+                "Please provide an maximum investment value in case of"
+                " nonconvex investemnt (nonconvex=True), which is in the"
+                " expected magnitude."
+                " \nVery high maximum values (> 10e8) as maximum investment"
+                " limit might lead to numeric issues, so that no investment"
+                " is done, although it is the optimal solution!"
+            )
             raise AttributeError(e2)
 
     def _check_invest_attributes_offset(self):
         if (self.offset != 0) and (self.nonconvex is False):
-            e3 = ("If `nonconvex` is `False`, the `offset` parameter will be"
-                  " ignored.")
+            e3 = (
+                "If `nonconvex` is `False`, the `offset` parameter will be"
+                " ignored."
+            )
             raise AttributeError(e3)
 
 
@@ -98,6 +113,8 @@ class NonConvex:
     activity_costs : numeric (iterable or scalar)
         Costs associated with the active operation of the flow, independently
         from the actual output.
+    inactivity_costs : numeric (iterable or scalar)
+        Costs associated with not operating the flow.
     minimum_uptime : numeric (1 or positive integer)
         Minimum time that a flow must be greater then its minimum flow after
         startup. Be aware that minimum up and downtimes can contradict each
@@ -119,17 +136,62 @@ class NonConvex:
         If both, up and downtimes are defined, the initial status is set for
         the maximum of both e.g. for six timesteps if a minimum downtime of
         six timesteps is defined in addition to a four timestep minimum uptime.
-    """
-    def __init__(self, **kwargs):
-        scalars = ['minimum_uptime', 'minimum_downtime', 'initial_status',
-                   'maximum_startups', 'maximum_shutdowns']
-        sequences = ['startup_costs', 'shutdown_costs', 'activity_costs']
-        defaults = {'initial_status': 0}
+    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
 
-        for attribute in set(scalars + sequences + list(kwargs)):
+         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+           bound* on the positive difference (`flow[t-1] < flow[t]`) of
+           two consecutive flow values.
+         * `'costs``: numeric (scalar or None), the gradient cost per
+           unit.
+
+    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+        A dictionary containing the following two keys:
+
+          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
+            bound* on the negative difference (`flow[t-1] > flow[t]`) of
+            two consecutive flow values.
+          * `'costs``: numeric (scalar or None), the gradient cost per
+            unit.
+    """
+
+    def __init__(self, **kwargs):
+        scalars = [
+            "minimum_uptime",
+            "minimum_downtime",
+            "initial_status",
+            "maximum_startups",
+            "maximum_shutdowns",
+        ]
+        sequences = [
+            "startup_costs",
+            "shutdown_costs",
+            "activity_costs",
+            "inactivity_costs",
+        ]
+        dictionaries = ["positive_gradient", "negative_gradient"]
+        defaults = {
+            "initial_status": 0,
+            "positive_gradient": {"ub": None, "costs": 0},
+            "negative_gradient": {"ub": None, "costs": 0},
+        }
+
+        for attribute in set(
+            scalars + sequences + dictionaries + list(kwargs)
+        ):
             value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(self, attribute,
-                    sequence(value) if attribute in sequences else value)
+            if attribute in dictionaries:
+                setattr(
+                    self,
+                    attribute,
+                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                )
+            else:
+                setattr(
+                    self,
+                    attribute,
+                    sequence(value) if attribute in sequences else value,
+                )
 
         self._max_up_down = None
 

@@ -18,14 +18,15 @@ import pandas as pd
 from nose.tools import eq_
 
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import custom
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import experimental as exp_bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.flows import Flow
+from oemof.solph.flows import experimental as exp_flow
 
 
 def test_lopf(solver="cbc"):
@@ -41,16 +42,16 @@ def test_lopf(solver="cbc"):
 
     logging.info("Create oemof.solph objects")
 
-    b_el0 = custom.ElectricalBus(label="b_0", v_min=-1, v_max=1)
+    b_el0 = exp_bus.ElectricalBus(label="b_0", v_min=-1, v_max=1)
 
-    b_el1 = custom.ElectricalBus(label="b_1", v_min=-1, v_max=1)
+    b_el1 = exp_bus.ElectricalBus(label="b_1", v_min=-1, v_max=1)
 
-    b_el2 = custom.ElectricalBus(label="b_2", v_min=-1, v_max=1)
+    b_el2 = exp_bus.ElectricalBus(label="b_2", v_min=-1, v_max=1)
 
     es.add(b_el0, b_el1, b_el2)
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
@@ -61,7 +62,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el1,
             output=b_el2,
             reactance=0.0001,
@@ -72,7 +73,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el2,
             output=b_el0,
             reactance=0.0001,
@@ -99,11 +100,7 @@ def test_lopf(solver="cbc"):
     es.add(
         Sink(
             label="load",
-            inputs={
-                b_el2: Flow(
-                    nominal_value=100, fix=1
-                )
-            },
+            inputs={b_el2: Flow(nominal_value=100, fix=1)},
         )
     )
 
