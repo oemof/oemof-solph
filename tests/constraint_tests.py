@@ -230,7 +230,10 @@ class TestsConstraint:
         self.compare_lp_files("nominal_value_to_zero.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Wrong constraints for fixed source + invest sink w. `summed_max`."""
+        """
+        Wrong constraints for fixed source + invest sink w.
+        `max_capacity_factor`.
+        """
 
         bel = solph.buses.Bus(label="electricityBus")
 
@@ -245,7 +248,7 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    max_capacity_factor=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1343,7 +1346,7 @@ class TestsConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    max_capacity_factor=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1362,7 +1365,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    max_capacity_factor=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1385,7 +1388,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    max_capacity_factor=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(

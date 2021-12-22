@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +500 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest)
 +25 flow(electricityBus_sink_nonconvex_invest_0)
@@ -46,14 +46,14 @@ c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_2)_:
 +1 flow(electricityBus_sink_nonconvex_invest_2)
 <= 0
 
-c_u_InvestmentFlowBlock_summed_max(electricityBus_sink_nonconvex_invest)_:
+c_u_InvestmentFlowBlock_max_capacity_factor(electricityBus_sink_nonconvex_invest)_:
 -2.2999999999999998 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest)
 +1 flow(electricityBus_sink_nonconvex_invest_0)
 +1 flow(electricityBus_sink_nonconvex_invest_1)
 +1 flow(electricityBus_sink_nonconvex_invest_2)
 <= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds

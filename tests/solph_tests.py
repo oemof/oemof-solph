@@ -52,7 +52,7 @@ class TestsGrouping:
             label="Sink",
             inputs={
                 b: solph.flows.InvestmentFlow(
-                    summed_max=2.3,
+                    max_capacity_factor=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=Investment(ep_costs=500, maximum=10e5),

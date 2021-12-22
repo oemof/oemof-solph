@@ -81,7 +81,7 @@ def test_optimise_storage_size(
         label="rgas",
         outputs={
             bgas: solph.flows.Flow(
-                nominal_value=194397000 * 400 / 8760, summed_max=1
+                nominal_value=194397000 * 400 / 8760, max_capacity_factor=1
             )
         },
     )

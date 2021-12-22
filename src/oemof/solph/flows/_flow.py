@@ -73,10 +73,10 @@ class Flow(on.Edge):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    summed_max : numeric, :math:`f_{sum,max}`
+    max_capacity_factor : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    summed_min : numeric, :math:`f_{sum,min}`
+    min_capacity_factor : numeric, :math:`f_{sum,min}`
         see above
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
@@ -140,8 +140,8 @@ class Flow(on.Edge):
 
         scalars = [
             "nominal_value",
-            "summed_max",
-            "summed_min",
+            "max_capacity_factor",
+            "min_capacity_factor",
             "investment",
             "nonconvex",
             "integer",
@@ -259,10 +259,12 @@ class FlowBlock(SimpleBlock):
 
     **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
-    SUMMED_MAX_FLOWS
-        A set of flows with the attribute :attr:`summed_max` being not None.
-    SUMMED_MIN_FLOWS
-        A set of flows with the attribute :attr:`summed_min` being not None.
+    MAX_CAPACITY_FACTOR_FLOWS
+        A set of flows with the attribute :attr:`max_capacity_factor` being not
+        None.
+    MIN_CAPACITY_FACTOR_FLOWS
+        A set of flows with the attribute :attr:`min_capacity_factor` being not
+        None.
     NEGATIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`negative_gradient` being not
         None.
@@ -275,13 +277,13 @@ class FlowBlock(SimpleBlock):
 
     **The following constraints are build:**
 
-    FlowBlock max sum :attr:`om.FlowBlock.summed_max[i, o]`
+    FlowBlock max sum :attr:`om.FlowBlock.max_capacity_factor[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
             \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
-    FlowBlock min sum :attr:`om.FlowBlock.summed_min[i, o]`
+    FlowBlock min sum :attr:`om.FlowBlock.min_capacity_factor[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
@@ -333,20 +335,20 @@ class FlowBlock(SimpleBlock):
 
         # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
-        self.SUMMED_MAX_FLOWS = Set(
+        self.MAX_CAPACITY_FACTOR_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].summed_max is not None
+                if g[2].max_capacity_factor is not None
                 and g[2].nominal_value is not None
             ]
         )
 
-        self.SUMMED_MIN_FLOWS = Set(
+        self.MIN_CAPACITY_FACTOR_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].summed_min is not None
+                if g[2].min_capacity_factor is not None
                 and g[2].nominal_value is not None
             ]
         )
@@ -394,37 +396,45 @@ class FlowBlock(SimpleBlock):
 
         # ######################### CONSTRAINTS ###############################
 
-        def _flow_summed_max_rule(model):
+        def _flow_max_capacity_factor_rule(model):
             """Rule definition for build action of max. sum flow constraint."""
-            for inp, out in self.SUMMED_MAX_FLOWS:
+            for inp, out in self.MAX_CAPACITY_FACTOR_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].summed_max
+                    m.flows[inp, out].max_capacity_factor
                     * m.flows[inp, out].nominal_value
                 )
-                self.summed_max.add((inp, out), lhs <= rhs)
+                self.max_capacity_factor.add((inp, out), lhs <= rhs)
 
-        self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
-        self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
+        self.max_capacity_factor = Constraint(
+            self.MAX_CAPACITY_FACTOR_FLOWS, noruleinit=True
+        )
+        self.max_capacity_factor_build = BuildAction(
+            rule=_flow_max_capacity_factor_rule
+        )
 
-        def _flow_summed_min_rule(model):
+        def _flow_min_capacity_factor_rule(model):
             """Rule definition for build action of min. sum flow constraint."""
-            for inp, out in self.SUMMED_MIN_FLOWS:
+            for inp, out in self.MIN_CAPACITY_FACTOR_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].summed_min
+                    m.flows[inp, out].min_capacity_factor
                     * m.flows[inp, out].nominal_value
                 )
-                self.summed_min.add((inp, out), lhs >= rhs)
+                self.min_capacity_factor.add((inp, out), lhs >= rhs)
 
-        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
-        self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
+        self.min_capacity_factor = Constraint(
+            self.MIN_CAPACITY_FACTOR_FLOWS, noruleinit=True
+        )
+        self.min_capacity_factor_build = BuildAction(
+            rule=_flow_min_capacity_factor_rule
+        )
 
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint."""
