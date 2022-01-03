@@ -136,6 +136,20 @@ class Flow(on.Edge):
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
+        # --- BEGIN: The following code can be removed for versions > v0.6 ---
+        msg = (
+            "\nThe parameter 'summed_{0}' ist deprecated and will be removed "
+            "in version v0.6.\nRename the parameter to '{0}_capacity_factor', "
+            "to avoid this warning and future problems. "
+        )
+        if "summed_max" in kwargs:
+            warn(msg.format("max"), FutureWarning)
+            kwargs["max_capacity_factor"] = kwargs["summed_max"]
+        if "summed_min" in kwargs:
+            warn(msg.format("max"), FutureWarning)
+            kwargs["min_capacity_factor"] = kwargs["summed_min"]
+        # --- END ---
+
         super().__init__()
 
         scalars = [
