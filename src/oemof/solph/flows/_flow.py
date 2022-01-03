@@ -73,10 +73,10 @@ class Flow(on.Edge):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    max_capacity_factor : numeric, :math:`f_{sum,max}`
+    max_capacity_factor : numeric, :math:`f_{capacity,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    min_capacity_factor : numeric, :math:`f_{sum,min}`
+    min_capacity_factor : numeric, :math:`f_{capacity,min}`
         see above
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
