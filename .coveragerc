@@ -5,9 +5,9 @@ source = src
 branch = true
 source =
     src
+    tests
 parallel = true
 omit = */experimental/*
-       */tests/*
 
 [report]
 show_missing = true

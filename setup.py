@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
-
 import io
 import re
 from glob import glob
@@ -68,11 +65,11 @@ setup(
         "Topic :: Utilities",
     ],
     project_urls={
-        "Documentation": "https://oemofsolph.readthedocs.io/",
+        "Documentation": "https://oemof-solph.readthedocs.io/",
         "Changelog": (
-            "https://oemofsolph.readthedocs.io/en/latest/changelog.html"
+            "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
         ),
-        "Issue Tracker": "https://github.com/uvchik/oemof.solph/issues",
+        "Issue Tracker": "https://github.com/oemof/oemof-solph/issues",
     },
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
