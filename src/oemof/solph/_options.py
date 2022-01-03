@@ -184,7 +184,7 @@ class NonConvex:
                 setattr(
                     self,
                     attribute,
-                    {"ub": sequence(value["ub"]), "costs": value["costs"]},
+                    {"ub": sequence(value["ub"])},
                 )
             else:
                 setattr(
