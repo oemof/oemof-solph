@@ -111,6 +111,7 @@ def test_optimal_solution():
 
 
 def test_infeasible_model():
+    warnings.filterwarnings("ignore", category=FutureWarning)
     with pytest.raises(ValueError, match=""):
         with warnings.catch_warnings(record=True) as w:
             es = solph.EnergySystem(timeindex=[1])
