@@ -87,6 +87,7 @@ class NonConvexFlow(Flow):
         startup_costs=None,
         shutdown_costs=None,
         activity_costs=None,
+        inactivity_costs=None,
         minimum_uptime=None,
         minimum_downtime=None,
         maximum_startups=None,
@@ -105,6 +106,7 @@ class NonConvexFlow(Flow):
             startup_costs=startup_costs,
             shutdown_costs=shutdown_costs,
             activity_costs=activity_costs,
+            inactivity_costs=inactivity_costs,
             minimum_uptime=minimum_uptime,
             minimum_downtime=minimum_downtime,
             maximum_startups=maximum_startups,
@@ -129,6 +131,9 @@ class NonConvexFlowBlock(SimpleBlock):
     ACTIVITYCOSTFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         `activity_costs` being not None.
+    INACTIVITYCOSTFLOWS
+        A subset of set NONCONVEX_FLOWS with the attribute
+        `inactivity_costs` being not None.
     STARTUPFLOWS
         A subset of set NONCONVEX_FLOWS with the attribute
         `maximum_startups` or `startup_costs`
@@ -291,6 +296,11 @@ class NonConvexFlowBlock(SimpleBlock):
             \sum_{i, o \in ACTIVITYCOSTFLOWS} \sum_t status(i, o, t) \
             \cdot activity\_costs(i, o)
 
+    If `nonconvex.inactivity_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in INACTIVITYCOSTFLOWS} \sum_t (1 - status(i, o, t)) \
+            \cdot inactivity\_costs(i, o)
+
     If `nonconvex.positive_gradient["costs"]` is set by the user:
         .. math::
             \sum_{i, o \in POSITIVE_GRADIENT_FLOWS} \sum_t
@@ -377,6 +387,14 @@ class NonConvexFlowBlock(SimpleBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].nonconvex.activity_costs[0] is not None
+            ]
+        )
+
+        self.INACTIVITYCOSTFLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].nonconvex.inactivity_costs[0] is not None
             ]
         )
 
@@ -612,6 +630,7 @@ class NonConvexFlowBlock(SimpleBlock):
         startup_costs = 0
         shutdown_costs = 0
         activity_costs = 0
+        inactivity_costs = 0
         gradient_costs = 0
 
         if self.STARTUPFLOWS:
@@ -645,28 +664,21 @@ class NonConvexFlowBlock(SimpleBlock):
 
             self.activity_costs = Expression(expr=activity_costs)
 
-        if self.POSITIVE_GRADIENT_FLOWS:
-            for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.positive_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.positive_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.positive_gradient["costs"]
-                        )
+        if self.INACTIVITYCOSTFLOWS:
+            for i, o in self.INACTIVITYCOSTFLOWS:
+                if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
+                    inactivity_costs += sum(
+                        (1 - self.status[i, o, t])
+                        * m.flows[i, o].nonconvex.inactivity_costs[t]
+                        for t in m.TIMESTEPS
+                    )
 
-        if self.NEGATIVE_GRADIENT_FLOWS:
-            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.negative_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.negative_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.negative_gradient["costs"]
-                        )
+            self.inactivity_costs = Expression(expr=inactivity_costs)
 
-            self.gradient_costs = Expression(expr=gradient_costs)
-
-        return startup_costs + shutdown_costs + activity_costs + gradient_costs
+        return (
+            startup_costs
+            + shutdown_costs
+            + activity_costs
+            + inactivity_costs
+            + gradient_costs
+        )

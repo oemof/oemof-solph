@@ -912,8 +912,8 @@ class TestsConstraint:
                     nominal_value=999,
                     variable_costs=23,
                     nonconvex=solph.NonConvex(
-                        positive_gradient={"ub": 0.03, "costs": 7},
-                        negative_gradient={"ub": 0.05, "costs": 8},
+                        positive_gradient={"ub": 0.03},
+                        negative_gradient={"ub": 0.05},
                     ),
                 )
             },
@@ -932,7 +932,7 @@ class TestsConstraint:
         with pytest.raises(ValueError, match=msg):
             solph.flows.Flow(
                 nonconvex=solph.NonConvex(
-                    positive_gradient={"ub": 0.03, "costs": 7},
+                    positive_gradient={"ub": 0.03},
                 ),
                 positive_gradient={"ub": 0.03},
             )
@@ -1004,16 +1004,33 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_activity_costs",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.flows.NonConvexFlow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    nonconvex=solph.NonConvex(activity_costs=2),
+                    activity_costs=2,
                 )
             },
         )
         self.compare_lp_files("activity_costs.lp")
+
+    def test_inactivity_costs(self):
+        """Testing inactivity_costs attribute for nonconvex flows."""
+        bus_t = solph.buses.Bus(label="Bus_C")
+        solph.components.Source(
+            label="cheap_plant_inactivity_costs",
+            outputs={
+                bus_t: solph.flows.NonConvexFlow(
+                    nominal_value=10,
+                    min=0.5,
+                    max=1.0,
+                    variable_costs=10,
+                    inactivity_costs=2,
+                )
+            },
+        )
+        self.compare_lp_files("inactivity_costs.lp")
 
     def test_piecewise_linear_transformer_cc(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
