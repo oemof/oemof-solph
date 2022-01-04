@@ -146,7 +146,7 @@ class Flow(on.Edge):
             warn(msg.format("max"), FutureWarning)
             kwargs["max_capacity_factor"] = kwargs["summed_max"]
         if "summed_min" in kwargs:
-            warn(msg.format("max"), FutureWarning)
+            warn(msg.format("min"), FutureWarning)
             kwargs["min_capacity_factor"] = kwargs["summed_min"]
         # --- END ---
 
