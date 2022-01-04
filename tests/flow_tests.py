@@ -9,8 +9,9 @@ available from its original location oemof/tests/test_components.py
 SPDX-License-Identifier: MIT
 """
 
-import pytest
 import warnings
+
+import pytest
 
 from oemof.solph.flows import Flow
 
@@ -39,4 +40,3 @@ def test_summed_min_future_warning():
         Flow(summed_min=2)
         assert len(w) == 1
         assert msg in str(w[-1].message)
-
