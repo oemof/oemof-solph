@@ -252,3 +252,5 @@ def _check_and_set_flows(om, flows, keyword):
                         "has no attribute {2}."
                     ).format(i.label, o.label, keyword)
                 )
+
+    return flows
