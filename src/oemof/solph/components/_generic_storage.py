@@ -808,6 +808,24 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         if group is None:
             return None
 
+        # ########################## CHECKS ###################################
+        if m.es.multi_period:
+            for n in group:
+                e1 = (
+                    "For a multi-period model, fixed absolute losses"
+                    " are not supported. Please remove parameter."
+                )
+                if n.fixed_losses_absolute.default != 0:
+                    raise ValueError(e1)
+                e2 = (
+                    "For a multi-period model, initial_storage_level is"
+                    " not supported. Please remove parameter. storage_content"
+                    " will be zero, until there is some storage capacity"
+                    " installed."
+                )
+                if n.initial_storage_level is not None:
+                    raise ValueError(e2)
+
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
@@ -1066,32 +1084,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
-            def _init_content_multi_period_rule(block):
-                """Rule defining the initial storage level
-                for a multi-period model
-                """
-                for n in self.INVESTSTORAGES_INIT_CONTENT:
-                    is_commissioned = False
-                    for p in m.PERIODS:
-                        if not is_commissioned:
-                            expr = (
-                                self.storage_content[
-                                    n, m.TIMESTEPS_IN_PERIOD[p][0]
-                                ]
-                                == n.initial_storage_level * self.total[n, p]
-                            )
-                            is_commissioned = True
-                            self.init_content_multi_period.add((n, p), expr)
-                        else:
-                            pass
-
-            self.init_content_multi_period = Constraint(
-                self.INVESTSTORAGES_INIT_CONTENT, m.PERIODS, noruleinit=True
-            )
-            self.init_content_multi_period_rule_build = BuildAction(
-                rule=_init_content_multi_period_rule
-            )
-
         # Standard storage implementation for discrete time points
         else:
 
@@ -1111,7 +1103,9 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 """Constraint for a fixed initial storage capacity."""
                 return (
                     block.init_content[n]
-                    <= n.investment.existing + block.invest[n, 0]
+                    == n.initial_storage_level * (
+                        n.investment.existing + block.invest[n, 0]
+                    )
                 )
 
             self.init_content_fix = Constraint(
@@ -1191,38 +1185,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 self.INVESTSTORAGES_BALANCED, rule=_balanced_storage_rule
             )
 
-        else:
-
-            def _lifetime_balanced_storage_rule(block):
-                for n in self.INVESTSTORAGES_BALANCED:
-                    lifetime = n.investment.lifetime
-                    age = n.investment.age
-                    for p in m.PERIODS:
-                        if lifetime - age <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in m.es.periods_years.items():
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            last_step = m.TIMESTEPS_IN_PERIOD[p][-1]
-                            first_step = m.TIMESTEPS_IN_PERIOD[comm_p][0]
-                            expr = (
-                                block.storage_content[n, last_step]
-                                == block.storage_content[n, first_step]
-                            )
-                            self.lifetime_balanced_cstr.add((n, p), expr)
-                        else:
-                            pass
-
-            self.lifetime_balanced_cstr = Constraint(
-                self.INVESTSTORAGES_BALANCED, m.PERIODS, noruleinit=True
-            )
-            self.lifetime_balanced_cstr_build = BuildAction(
-                rule=_lifetime_balanced_storage_rule
-            )
-
         def _power_coupled(block):
             """
             Rule definition for constraint to connect the input power
@@ -1252,7 +1214,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             for n in self.INVEST_REL_CAP_IN:
                 for p in m.PERIODS:
                     expr = (
-                        m.InvestmentFlow.total[i[n], n, p]
+                        m.InvestmentFlowBlock.total[i[n], n, p]
                         == self.total[n, p] * n.invest_relation_input_capacity
                     )
                     self.storage_capacity_inflow.add((n, p), expr)
@@ -1273,9 +1235,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             """
             for n in self.INVEST_REL_CAP_OUT:
                 for p in m.PERIODS:
-                    expr = (m.InvestmentFlow.total[n, o[n], p]) == self.total[
-                        n, p
-                    ] * n.invest_relation_output_capacity
+                    expr = (
+                        m.InvestmentFlowBlock.total[n, o[n], p]
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity
+                    )
                     self.storage_capacity_outflow.add((n, p), expr)
 
         self.storage_capacity_outflow = Constraint(
