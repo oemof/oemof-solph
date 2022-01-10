@@ -4,16 +4,19 @@
 General description
 -------------------
 
-A minimal example to show how (non-hourly) time steps work.
+A minimal example to show how time steps work.
 
-*   One purpose is to illustrate that the nominal_value in Flows
-    has to be interpreted in means of power:
-    We have nominal_value=1, but the storage content of an ideal
-    storage just changes in steps of 0.25, when having four time
-    steps per hour.
-*   Also, the initial_storage_level of a GenericStorage is given
-    _before_ the first time step. If the storage is balanced,
+*   Flows are defined in time intervals, storage content at points in time.
+    Thus, there is one more value for storage contents then for the
+    flow values.
+*   Time intervals are named by the time at the beginning of that interval.
+    The quantity changes to the given value at the given point in time.
+*   The initial_storage_level of a GenericStorage is given
+    at the first time step. If the storage is balanced,
     this is the same storage level as in the last time step.
+*   The nominal_value in Flows has to be interpreted in means of power:
+    We have nominal_value=0.5, but the maximum change of the storage content
+    of an ideal storage is 0.125.
 
 Installation requirements
 -------------------------
@@ -24,6 +27,11 @@ This example requires oemof.solph, install by:
 """
 import pandas as pd
 from oemof import solph
+
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    plt = None
 
 solver = "cbc"  # 'glpk', 'gurobi',...
 solver_verbose = False  # show/hide solver output
@@ -37,7 +45,9 @@ source = solph.components.Source(
     label="source",
     outputs={
         bus: solph.flows.Flow(
-            nominal_value=1, variable_costs=-1, max=[0, 0, 0, 0, 1, 1, 1, 1]
+            nominal_value=2,
+            variable_costs=0.2,
+            max=[0, 0, 0, 0, 1, 0.25, 0.75, 1]
         )
     },
 )
@@ -51,7 +61,10 @@ storage = solph.components.GenericStorage(
 sink = solph.components.Sink(
     label="sink",
     inputs={
-        bus: solph.flows.Flow(nominal_value=1, max=[1, 1, 1, 1, 0, 0, 0, 0])
+        bus: solph.flows.Flow(
+            nominal_value=2,
+            variable_costs=0.1,
+            fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0])
     },
 )
 
@@ -61,4 +74,21 @@ model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 
 results = solph.processing.results(model)
 
-print(results[(storage, None)]["sequences"])
+results_df = results[(storage, None)]["sequences"].copy()
+results_df["storage_inflow"] = results[(bus, storage)]["sequences"]["flow"]
+results_df["storage_outflow"] = results[(storage, bus)]["sequences"]["flow"]
+
+print(results_df)
+
+if plt is not None:
+    plt.plot(results[(bus, storage)]["sequences"],
+             drawstyle="steps-post",
+             label="Storage inflow")
+    plt.plot(results[(storage, None)]["sequences"],
+             label="Storage content")
+    plt.plot(results[(storage, bus)]["sequences"],
+             drawstyle="steps-post",
+             label="Storage outflow")
+
+    plt.legend(loc="lower left")
+    plt.show()
