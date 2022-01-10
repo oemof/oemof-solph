@@ -47,7 +47,7 @@ source = solph.components.Source(
         bus: solph.flows.Flow(
             nominal_value=2,
             variable_costs=0.2,
-            max=[0, 0, 0, 0, 1, 0.25, 0.75, 1]
+            max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
         )
     },
 )
@@ -64,7 +64,8 @@ sink = solph.components.Sink(
         bus: solph.flows.Flow(
             nominal_value=2,
             variable_costs=0.1,
-            fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0])
+            fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0],
+        )
     },
 )
 
@@ -81,14 +82,17 @@ results_df["storage_outflow"] = results[(storage, bus)]["sequences"]["flow"]
 print(results_df)
 
 if plt is not None:
-    plt.plot(results[(bus, storage)]["sequences"],
-             drawstyle="steps-post",
-             label="Storage inflow")
-    plt.plot(results[(storage, None)]["sequences"],
-             label="Storage content")
-    plt.plot(results[(storage, bus)]["sequences"],
-             drawstyle="steps-post",
-             label="Storage outflow")
+    plt.plot(
+        results[(bus, storage)]["sequences"],
+        drawstyle="steps-post",
+        label="Storage inflow",
+    )
+    plt.plot(results[(storage, None)]["sequences"], label="Storage content")
+    plt.plot(
+        results[(storage, bus)]["sequences"],
+        drawstyle="steps-post",
+        label="Storage outflow",
+    )
 
     plt.legend(loc="lower left")
     plt.show()
