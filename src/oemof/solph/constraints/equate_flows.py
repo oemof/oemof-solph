@@ -40,6 +40,8 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
         po.BuildAction(rule=_equate_flow_groups_rule),
     )
 
+    return model
+
 
 def equate_flows_by_keyword(model, keyword1, keyword2, factor1=1, name="equate_flows"):
     r"""
