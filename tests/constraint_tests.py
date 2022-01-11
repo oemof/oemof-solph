@@ -883,6 +883,42 @@ class TestsConstraint:
 
         self.compare_lp_files("connect_investment.lp", my_om=om)
 
+    def test_equate_flows_constraint(self):
+        """Testing the equate_flows function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        storage = solph.components.GenericStorage(
+            label="storage_constraint",
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
+            inputs={bus1: solph.flows.Flow()},
+            outputs={bus1: solph.flows.Flow()},
+            investment=solph.Investment(ep_costs=145),
+        )
+        sink = solph.components.Sink(
+            label="Sink",
+            inputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=500)
+                )
+            },
+        )
+        source = solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123)
+                )
+            },
+        )
+        om = self.get_om()
+        solph.constraints.equate_flows(
+            om,
+            [(source, bus1)],
+            [(bus1, sink)],
+            2,
+        )
+        self.compare_lp_files("equate_flows.lp", my_om=om)
+
     def test_gradient(self):
         """Testing gradient constraints and costs."""
         bel = solph.buses.Bus(label="electricityBus")
