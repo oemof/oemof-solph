@@ -39,3 +39,24 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
         name + "_build",
         po.BuildAction(rule=_equate_flow_groups_rule),
     )
+
+
+def equate_flows_by_keyword(model, keyword1, keyword2, factor1=1, name="equate_flows"):
+    r"""
+    This wrapper for equate_flows allows to equate groups of flows by using a keyword
+    instead of a list of flows.
+    """
+    flows = {}
+    for n, keyword in enumerate([keyword1, keyword2]):
+        flows[n] = []
+        for (i, o) in model.flows:
+            if hasattr(model.flows[i, o], keyword):
+                flows[n].append((i, o))
+
+    return equate_flows(
+        model,
+        flows[0],
+        flows[1],
+        factor1=factor1,
+        name=name
+    )

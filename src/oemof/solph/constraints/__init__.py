@@ -4,6 +4,7 @@ Additional constraints to be used in an oemof energy model.
 """
 
 from .equate_flows import equate_flows  # noqa: F401
+from .equate_flows import equate_flows_by_keyword  # noqa: F401
 from .equate_variables import equate_variables  # noqa: F401
 from .flow_count_limit import limit_active_flow_count  # noqa: F401
 from .flow_count_limit import limit_active_flow_count_by_keyword  # noqa: F401

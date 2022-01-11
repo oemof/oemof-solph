@@ -898,7 +898,8 @@ class TestsConstraint:
             label="Sink",
             inputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=500)
+                    investment=solph.Investment(ep_costs=500),
+                    outgoing_flow=True,
                 )
             },
         )
@@ -906,15 +907,16 @@ class TestsConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    investment=solph.Investment(ep_costs=123),
+                    incoming_flow=True,
                 )
             },
         )
         om = self.get_om()
-        solph.constraints.equate_flows(
+        solph.constraints.equate_flows_by_keyword(
             om,
-            [(source, bus1)],
-            [(bus1, sink)],
+            "incoming_flow",
+            "outgoing_flow",
             2,
         )
         self.compare_lp_files("equate_flows.lp", my_om=om)
