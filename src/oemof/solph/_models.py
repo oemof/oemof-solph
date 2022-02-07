@@ -311,6 +311,19 @@ class Model(BaseModel):
             initialize=self.flows.keys(), ordered=True, dimen=2
         )
 
+
+        self.FIRSTSTAGE_FLOWS = po.Set(
+            initialize=[
+                k
+                for (k, v) in self.flows.items()
+                if hasattr(v, "firststage")
+            ],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
+
+
         self.BIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
                 k

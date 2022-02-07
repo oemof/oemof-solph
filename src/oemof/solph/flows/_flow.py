@@ -24,6 +24,8 @@ from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
 from pyomo.core import Var
+from pyomo.core import Expression
+from pyomo.core import quicksum
 from pyomo.core.base.block import SimpleBlock
 
 from oemof.solph._plumbing import sequence
@@ -394,6 +396,18 @@ class FlowBlock(SimpleBlock):
 
         # ######################### CONSTRAINTS ###############################
 
+        # def _fix_value_rule(model):
+        #     """"""
+        #     for inp, out in m.FIRSTSTAGE_FLOWS:
+        #         for t in m.TIMESTEPS:
+        #             self.fix_value_constr.add(
+        #                 (inp, out, t),
+        #                 m.flow[inp, out, t] ==
+        #                 m.flows[inp, out].fix[t] * m.flows[inp, out].nominal_value)
+        #
+        # self.fix_value_constr = Constraint(m.FIRSTSTAGE_FLOWS, m.TIMESTEPS, noruleinit=True)
+        # self.fix_value_build = BuildAction(rule=_fix_value_rule)
+
         def _flow_summed_max_rule(model):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.SUMMED_MAX_FLOWS:
@@ -480,30 +494,59 @@ class FlowBlock(SimpleBlock):
         """
         m = self.parent_block()
 
-        variable_costs = 0
-        gradient_costs = 0
+        self.first_stage_variable_costs = quicksum(
+            m.flow[i, o, t]
+            * m.objective_weighting[t]
+            * m.flows[i, o].variable_costs[t]
+            for t in m.TIMESTEPS
+            for i, o in m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].variable_costs[0] is not None
+        )
 
-        for i, o in m.FLOWS:
-            if m.flows[i, o].variable_costs[0] is not None:
-                for t in m.TIMESTEPS:
-                    variable_costs += (
-                        m.flow[i, o, t]
-                        * m.objective_weighting[t]
-                        * m.flows[i, o].variable_costs[t]
-                    )
+        self.variable_costs = quicksum(
+            m.flow[i, o, t]
+            * m.objective_weighting[t]
+            * m.flows[i, o].variable_costs[t]
+            for t in m.TIMESTEPS
+            for i, o in m.FLOWS
+            if m.flows[i, o].variable_costs[0] is not None
+        )
 
-            if m.flows[i, o].positive_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.positive_gradient[i, o, t]
-                        * m.flows[i, o].positive_gradient["costs"]
-                    )
+        self.first_stage_gradient_costs = quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].positive_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].positive_gradient["ub"][0] is not None
+        )
 
-            if m.flows[i, o].negative_gradient["ub"][0] is not None:
-                for t in m.TIMESTEPS:
-                    gradient_costs += (
-                        self.negative_gradient[i, o, t]
-                        * m.flows[i, o].negative_gradient["costs"]
-                    )
+        self.gradient_costs = quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].positive_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FLOWS
+            if m.flows[i, o].positive_gradient["ub"][0] is not None
+        )
 
-        return variable_costs + gradient_costs
+        self.first_stage_gradient_costs += quicksum(
+            self.negative_gradient[i, o, t]
+            * m.flows[i, o].positive_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].negative_gradient["ub"][0] is not None
+        )
+
+        self.gradient_costs += quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].negative_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FLOWS
+            if m.flows[i, o].negative_gradient["ub"][0] is not None
+        )
+
+        return (
+            self.variable_costs
+            + self.first_stage_variable_costs
+            + self.gradient_costs
+            + self.first_stage_gradient_costs
+        )
