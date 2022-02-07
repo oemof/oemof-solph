@@ -17,3 +17,7 @@ exclude = '''
   | ci
 )/
 '''
+
+[build-system]
+requires = ["setuptools<60.0", "wheel"]
+build-backend = "setuptools.build_meta"
