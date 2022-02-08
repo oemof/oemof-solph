@@ -93,13 +93,20 @@ def test_flow_with_fix_and_min_max():
 
 
 def test_min_max_values_for_bidirectional_flow():
-    a = solph.flows.Flow(bidirectional=True)  # use default values
-    b = solph.flows.Flow(bidirectional=True, min=-0.9, max=0.9)
+    a = solph.flows.Flow(
+        bidirectional=True,
+        nominal_value=1,
+    )  # use default values
+    b = solph.flows.Flow(
+        bidirectional=True,
+        nominal_value=1,
+        min=-0.8,
+        max=0.9)
     assert a.bidirectional
     assert a.max[0] == 1
     assert a.min[0] == -1
     assert b.max[0] == 0.9
-    assert b.min[0] == -0.9
+    assert b.min[0] == -0.8
 
 
 def test_deprecated_actual_value():
