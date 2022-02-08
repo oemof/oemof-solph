@@ -98,10 +98,8 @@ def test_min_max_values_for_bidirectional_flow():
         nominal_value=1,
     )  # use default values
     b = solph.flows.Flow(
-        bidirectional=True,
-        nominal_value=1,
-        min=-0.8,
-        max=0.9)
+        bidirectional=True, nominal_value=1, min=-0.8, max=0.9
+    )
     assert a.bidirectional
     assert a.max[0] == 1
     assert a.min[0] == -1
@@ -111,8 +109,10 @@ def test_min_max_values_for_bidirectional_flow():
 
 def test_limit_without_nominal_value():
     """Deprecated error for actual_warning is not raised correctly."""
-    msg = ("The arguments `min`/`max`/`fix` need either"
-           + "`nominal_value` or `investment` to be defined as well.")
+    msg = (
+        "The arguments `min`/`max`/`fix` need either"
+        + "`nominal_value` or `investment` to be defined as well."
+    )
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(max=0.8)
 
