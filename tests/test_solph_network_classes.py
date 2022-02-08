@@ -112,7 +112,7 @@ def test_min_max_values_for_bidirectional_flow():
 def test_limit_without_nominal_value():
     """Deprecated error for actual_warning is not raised correctly."""
     msg = ("The arguments `min`/`max`/`fix` need either"
-            + "`nominal_value` or `investment` to be defined as well.")
+           + "`nominal_value` or `investment` to be defined as well.")
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(max=0.8)
 
