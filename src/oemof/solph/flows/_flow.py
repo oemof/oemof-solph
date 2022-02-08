@@ -116,7 +116,7 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(nominal_vlaue=2, fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_value=2, fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
