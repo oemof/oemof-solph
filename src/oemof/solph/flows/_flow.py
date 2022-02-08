@@ -180,7 +180,7 @@ class Flow(on.Edge):
             kwargs.get("min") is not None or kwargs.get("max") is not None
         ):
             raise AttributeError(
-                "It is not allowed to define min/max if fix is defined."
+                "It is not allowed to define `min`/`max` if `fix` is defined."
             )
         if (
             kwargs.get("nominal_value") is None
@@ -191,8 +191,8 @@ class Flow(on.Edge):
             or kwargs.get("max") is not None
         ):
             raise AttributeError(
-                "The arguments min/max/fix need either"
-                + "nominal_value or investment to be defined as well."
+                "The arguments `min`/`max`/`fix` need either"
+                + "`nominal_value` or `investment` to be defined as well."
             )
 
         # Set default value for min and max

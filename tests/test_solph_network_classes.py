@@ -83,7 +83,7 @@ def test_error_of_deprecated_fixed_costs():
 
 
 def test_flow_with_fix_and_min_max():
-    msg = "It is not allowed to define min/max if fix is defined."
+    msg = "It is not allowed to define `min`/`max` if `fix` is defined."
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(fix=[1, 3], min=[0, 5])
     with pytest.raises(AttributeError, match=msg):
@@ -107,6 +107,14 @@ def test_min_max_values_for_bidirectional_flow():
     assert a.min[0] == -1
     assert b.max[0] == 0.9
     assert b.min[0] == -0.8
+
+
+def test_limit_without_nominal_value():
+    """Deprecated error for actual_warning is not raised correctly."""
+    msg = ("The arguments `min`/`max`/`fix` need either"
+            + "`nominal_value` or `investment` to be defined as well.")
+    with pytest.raises(AttributeError, match=msg):
+        solph.flows.Flow(max=0.8)
 
 
 def test_deprecated_actual_value():
