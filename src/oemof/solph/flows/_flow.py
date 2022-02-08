@@ -116,7 +116,7 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_vlaue=2, fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
@@ -181,6 +181,14 @@ class Flow(on.Edge):
         ):
             raise AttributeError(
                 "It is not allowed to define min/max if fix is defined."
+            )
+        if kwargs.get("nominal_value") is None and (
+            kwargs.get("fix") is not None
+            or kwargs.get("min") is not None
+            or kwargs.get("max") is not None
+        ):
+            raise AttributeError(
+                "The arguments min/max/fix need nominal_value to be defined."
             )
 
         # Set default value for min and max
