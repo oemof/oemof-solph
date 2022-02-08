@@ -886,7 +886,7 @@ class TestsConstraint:
     def test_equate_flows_constraint(self):
         """Testing the equate_flows function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
-        sink = solph.components.Sink(
+        solph.components.Sink(
             label="Sink",
             inputs={
                 bus1: solph.flows.Flow(
@@ -896,7 +896,7 @@ class TestsConstraint:
                 )
             },
         )
-        source1 = solph.components.Source(
+        solph.components.Source(
             label="Source1",
             outputs={
                 bus1: solph.flows.Flow(
@@ -906,7 +906,7 @@ class TestsConstraint:
                 )
             },
         )
-        source2 = solph.components.Source(
+        solph.components.Source(
             label="Source2",
             outputs={
                 bus1: solph.flows.Flow(
