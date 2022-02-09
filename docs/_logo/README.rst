@@ -10,23 +10,27 @@ support the font used in the logo.
 Available Logos
 ---------------
 
+Full logo
+^^^^^^^^^
+
 .. figure:: logo_oemof_solph_FULL.svg
    :alt: Full logo
 
-   Full logo
+Compact version
+^^^^^^^^^^^^^^^
 
 .. figure:: logo_oemof_solph_COMPACT.svg
    :alt: Compact logo
 
-   Compact logo
+Logo without text
+^^^^^^^^^^^^^^^^^
 
 .. figure:: logo_oemof_solph_NOTEXT.svg
    :alt: No text
 
-   Logo without text
+Icon
+^^^^
 
 .. figure:: logo_oemof_solph_ICON.svg
    :alt: Icon
-
-   Icon
 
