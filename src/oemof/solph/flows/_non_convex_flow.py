@@ -675,30 +675,6 @@ class NonConvexFlowBlock(SimpleBlock):
 
             self.inactivity_costs = Expression(expr=inactivity_costs)
 
-        if self.POSITIVE_GRADIENT_FLOWS:
-            for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.positive_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.positive_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.positive_gradient["costs"]
-                        )
-
-        if self.NEGATIVE_GRADIENT_FLOWS:
-            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                if (
-                    m.flows[i, o].nonconvex.negative_gradient["ub"][0]
-                    is not None
-                ):
-                    for t in m.TIMESTEPS:
-                        gradient_costs += self.negative_gradient[i, o, t] * (
-                            m.flows[i, o].nonconvex.negative_gradient["costs"]
-                        )
-
-            self.gradient_costs = Expression(expr=gradient_costs)
-
         return (
             startup_costs
             + shutdown_costs

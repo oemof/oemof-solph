@@ -1,13 +1,7 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
-+8 NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_0)
-+8 NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_1)
-+8 NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_2)
-+7 NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_0)
-+7 NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_1)
-+7 NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_2)
 +23 flow(powerplant_electricityBus_0)
 +23 flow(powerplant_electricityBus_1)
 +23 flow(powerplant_electricityBus_2)
@@ -85,7 +79,7 @@ c_u_NonConvexFlowBlock_negative_gradient_constr(powerplant_electricityBus_2)_:
 ]
 <= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds
@@ -95,10 +89,8 @@ bounds
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_0) <= 1
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_1) <= 1
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_2) <= 1
-    -inf <= NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_0) <= +inf
     -inf <= NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_1) <= +inf
     -inf <= NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_2) <= +inf
-    -inf <= NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_0) <= +inf
     -inf <= NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_1) <= +inf
     -inf <= NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_2) <= +inf
 binary
