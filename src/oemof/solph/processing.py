@@ -18,6 +18,7 @@ SPDX-License-Identifier: MIT
 import sys
 from itertools import groupby
 
+import numpy as np
 import pandas as pd
 from oemof.network.network import Node
 from pyomo.core.base.piecewise import IndexedPiecewise
@@ -155,6 +156,12 @@ def results(om):
     # Extraction steps that are the same for both model types
     df = create_dataframe(om)
     period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
+    period_timestep_indexed = ["flow"]
+    timestep_indexed = [
+        el
+        for el in df["variable_name"].unique()
+        if el not in period_indexed and el not in period_timestep_indexed
+    ]
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
@@ -169,14 +176,19 @@ def results(om):
     # Standard model results extraction
     if not om.es.multi_period:
         result = _extract_standard_model_result(
-            om, df_dict, period_indexed, result
+            om,
+            df_dict,
+            period_indexed,
+            timestep_indexed,
+            period_timestep_indexed,
+            result,
         )
         scalars_col = "scalars"
 
     # Results extraction for a multi-period model
     else:
         result = _extract_multi_period_model_result(
-            om, df, df_dict, period_indexed, result
+            om, df_dict, timestep_indexed, period_timestep_indexed, result
         )
         scalars_col = "period_scalars"
 
@@ -203,7 +215,12 @@ def results(om):
 
 
 def _extract_standard_model_result(
-    om, df_dict, period_indexed=None, result=None
+    om,
+    df_dict,
+    period_indexed=None,
+    timestep_indexed=None,
+    period_timestep_indexed=None,
+    result=None,
 ):
     """Extract and return the results of a standard model
 
@@ -215,37 +232,30 @@ def _extract_standard_model_result(
         dictionary of results DataFrames
     period_indexed : list
         list of variables that are indexed by periods
+    timestep_indexed : list
+        list of variables that are indexed by timesteps
+    period_timestep_indexed : list
+        list of variables that are indexed by period and timesteps (timeindex)
     result : dict
         dictionary to store the results
+
+    Returns
+    -------
+    result : dict
+        dictionary with results stored
     """
     for k in df_dict:
         df_dict[k].set_index("timeindex", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         try:
-            # Enable reindexing by replacing period by first timeindex
-            try:
-                df_dict[k].loc[
-                    [(0, 0)],
-                    [
-                        col
-                        for col in df_dict[k].columns
-                        if col in period_indexed
-                    ],
-                ] = (
-                    df_dict[k]
-                    .loc[
-                        [(0,)],
-                        [
-                            col
-                            for col in df_dict[k].columns
-                            if col in period_indexed
-                        ],
-                    ]
-                    .values
-                )
-                df_dict[k].drop(index=[(0,)], inplace=True)
-            except KeyError:
-                pass
+            # Enable reindexing by replacing period and timestep indices
+            print(k)
+            df_dict[k] = _replace_non_timeindex_indices(
+                df_dict[k],
+                period_indexed,
+                timestep_indexed,
+                period_timestep_indexed,
+            )
             df_dict[k].index = om.es.timeindex
         except ValueError as e:
             msg = (
@@ -271,8 +281,65 @@ def _extract_standard_model_result(
     return result
 
 
+def _replace_non_timeindex_indices(
+    df, period_indexed, timestep_indexed, period_timestep_indexed
+):
+    """Replace period and timestpes indices by timeindex values
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        DataFrame obtained from the dict of results DataFrames
+    period_indexed : list
+        List of all values that are indexed by periods
+    timestep_indexed : list
+        List of all values that are indexed by timesteps
+    period_timestep_indexed : list
+        list of variables that are indexed by period and timesteps (timeindex)
+
+    Returns
+    -------
+    df : pd.DataFrame
+        Manipulated DataFrame containing only timestep indices
+    """
+    rename_dict = {key: (0, key[0]) for key in df.index if len(key) == 1}
+    to_concat = []
+    # Split into different data sets dependent on indexation
+    period_timestep_indexed_df = df[
+        [col for col in df.columns if col in period_timestep_indexed]
+    ]
+    timestep_indexed_df = df[
+        [col for col in df.columns if col in timestep_indexed]
+    ]
+    period_indexed_df = df[
+        [col for col in df.columns if col in period_indexed]
+    ]
+
+    period_timestep_indexed_df = period_timestep_indexed_df.dropna()
+    if not period_timestep_indexed_df.empty:
+        to_concat.append(period_timestep_indexed_df)
+
+    period_indexed_df = period_indexed_df.dropna()
+    period_indexed_df = period_indexed_df.rename(index={(0,): (0, 0)})
+    if not period_indexed_df.empty:
+        to_concat.append(period_indexed_df)
+
+    timestep_indexed_df = timestep_indexed_df.dropna()
+    timestep_indexed_df = timestep_indexed_df.rename(index=rename_dict)
+    if not timestep_indexed_df.empty:
+        to_concat.append(timestep_indexed_df)
+
+    df = pd.concat(to_concat, axis=1)
+
+    return df
+
+
 def _extract_multi_period_model_result(
-    om, df, df_dict, period_indexed=None, result=None
+    om,
+    df_dict,
+    timestep_indexed=None,
+    period_timestep_indexed=None,
+    result=None,
 ):
     """Extract and return the results of a multi-period model
 
@@ -280,24 +347,18 @@ def _extract_multi_period_model_result(
     ----------
     om : oemof.solph.models.Model
         The ptimization model
-    df : DataFrame
-        DataFrame containing all results
     df_dict : dict
         dictionary of results DataFrames
-    period_indexed : list
-        list of variables that are indexed by periods
+    timestep_indexed : list
+        list of variables that are indexed by timesteps
+    period_timestep_indexed : list
+        list of variables that are indexed by periods and timesteps (timeindex)
     result : dict
         dictionary to store the results
     """
-    period_timestep_indexed = ["flow"]
-    # TODO: Take care of initial storage content instead of just ignoring
     to_be_ignored = ["init_content"]
     timestep_indexed = [
-        el
-        for el in df["variable_name"].unique()
-        if el not in period_indexed
-        and el not in period_timestep_indexed
-        and el not in to_be_ignored
+        var for var in timestep_indexed if var not in to_be_ignored
     ]
 
     for k in df_dict:
@@ -308,7 +369,7 @@ def _extract_multi_period_model_result(
         timeindex_cols = [
             col
             for col in df_dict[k].columns
-            if col in timestep_indexed or col == "flow"
+            if col in timestep_indexed or col in period_timestep_indexed
         ]
         period_cols = [
             col for col in df_dict[k].columns if col not in timeindex_cols
