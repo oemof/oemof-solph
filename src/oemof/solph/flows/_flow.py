@@ -109,7 +109,7 @@ class Flow(on.Edge):
         (additionally if Investment object is present)
      * :py:class:`~oemof.solph.flows.non_convex_flow.NonConvexFlowBlock`
         (If nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solphflows.flow.FlowBlock`
+        :py:class:`~oemof.solph.flows.flow.FlowBlock`
         class and a MILP will be build)
 
     Examples
