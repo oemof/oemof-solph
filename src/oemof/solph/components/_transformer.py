@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._plumbing import sequence
@@ -99,7 +99,7 @@ class Transformer(on.Transformer):
         return TransformerBlock
 
 
-class TransformerBlock(SimpleBlock):
+class TransformerBlock(ScalarBlock):
     r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.components._transformer.TransformerBlock`
 

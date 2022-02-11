@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
@@ -91,7 +91,7 @@ class OffsetTransformer(network.Transformer):
         return OffsetTransformerBlock
 
 
-class OffsetTransformerBlock(SimpleBlock):
+class OffsetTransformerBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components._offset_transformer.OffsetTransformer`
 

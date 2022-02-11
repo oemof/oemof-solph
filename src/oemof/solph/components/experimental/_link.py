@@ -21,7 +21,7 @@ from oemof.network import network as on
 from pyomo.core import Binary
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
@@ -94,7 +94,7 @@ class Link(on.Transformer):
         return LinkBlock
 
 
-class LinkBlock(SimpleBlock):
+class LinkBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components.experimental.Link`
 
