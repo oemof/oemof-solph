@@ -24,7 +24,6 @@ from warnings import warn
 from oemof.network import network
 from oemof.tools import debugging
 from oemof.tools import economics
-from pyomo.core import value
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -811,20 +810,21 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         # ########################## CHECKS ###################################
         if m.es.multi_period:
             for n in group:
-                e1 = (
+                error = (
                     "For a multi-period model, fixed absolute losses"
                     " are not supported. Please remove parameter."
                 )
                 if n.fixed_losses_absolute.default != 0:
-                    raise ValueError(e1)
-                e2 = (
+                    raise ValueError(error)
+                warning = (
                     "For a multi-period model, initial_storage_level is"
-                    " not supported. Please remove parameter. storage_content"
-                    " will be zero, until there is some storage capacity"
-                    " installed."
+                    " not supported.\nIt is suggested to remove that"
+                    " parameter since it has no effect.\nstorage_content"
+                    " will be zero, until there is some usable storage "
+                    " capacity installed."
                 )
                 if n.initial_storage_level is not None:
-                    raise ValueError(e2)
+                    warn(warning, debugging.SuspiciousUsageWarning)
 
         # ########################## SETS #####################################
 
@@ -1101,11 +1101,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
             def _inv_storage_init_content_fix_rule(block, n):
                 """Constraint for a fixed initial storage capacity."""
-                return (
-                    block.init_content[n]
-                    == n.initial_storage_level * (
-                        n.investment.existing + block.invest[n, 0]
-                    )
+                return block.init_content[n] == n.initial_storage_level * (
+                    n.investment.existing + block.invest[n, 0]
                 )
 
             self.init_content_fix = Constraint(
@@ -1237,8 +1234,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                        == self.total[n, p]
-                        * n.invest_relation_output_capacity
+                        == self.total[n, p] * n.invest_relation_output_capacity
                     )
                     self.storage_capacity_outflow.add((n, p), expr)
 
