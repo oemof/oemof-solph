@@ -27,6 +27,12 @@ from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 
 
+class LoggingError(BaseException):
+    """Raised when the wrong logging level is used."""
+
+    pass
+
+
 class BaseModel(po.ConcreteModel):
     """The BaseModel for other solph-models (Model, MultiPeriodModel, etc.)
 
@@ -70,6 +76,25 @@ class BaseModel(po.ConcreteModel):
 
     def __init__(self, energysystem, **kwargs):
         super().__init__()
+
+        # Check root logger. Due to a problem with pyomo the building of the
+        # model will take up to a 100 times longer if the root logger is set
+        # to DEBUG
+        from logging import getLogger
+
+        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+            msg = (
+                "The root logger level is 'DEBUG'.\nDue to a communication "
+                "problem between solph and the pyomo package,\nusing the "
+                "DEBUG level will slow down the modelling process by the "
+                "factor ~100.\nIf you need the debug-logging you can "
+                "initialise the Model with 'debug=True`\nYou should only do "
+                "this for small models. To avoid the slow-down use the "
+                "logger\nfunction of oemof.tools (read docstring) or "
+                "change the level of the root logger:\n\nimport logging\n"
+                "logging.getLogger().setLevel(logging.INFO)"
+            )
+            raise LoggingError(msg)
 
         # ########################  Arguments #################################
 
