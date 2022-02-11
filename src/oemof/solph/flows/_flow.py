@@ -495,7 +495,17 @@ class FlowBlock(SimpleBlock):
                             lhs <= rhs,
                         )
                     else:
-                        pass  # return(Constraint.Skip)
+                        lhs = self.positive_gradient[inp, out, 0]
+                        rhs = 0
+                        self.positive_gradient_constr.add(
+                            (
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs == rhs,
+                        )
 
         self.positive_gradient_constr = Constraint(
             self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
@@ -536,7 +546,17 @@ class FlowBlock(SimpleBlock):
                             lhs <= rhs,
                         )
                     else:
-                        pass  # return(Constraint.Skip)
+                        lhs = self.negative_gradient[inp, out, 0]
+                        rhs = 0
+                        self.negative_gradient_constr.add(
+                            (
+                                inp,
+                                out,
+                                m.TIMEINDEX[index][0],
+                                m.TIMEINDEX[index][1],
+                            ),
+                            lhs == rhs,
+                        )
 
         self.negative_gradient_constr = Constraint(
             self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
