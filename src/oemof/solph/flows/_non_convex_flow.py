@@ -673,7 +673,7 @@ class NonConvexFlowBlock(SimpleBlock):
         inactivity_costs = 0
         gradient_costs = 0
 
-        if not m.em.multi_period:
+        if not m.es.multi_period:
             if self.STARTUPFLOWS:
                 for i, o in self.STARTUPFLOWS:
                     if m.flows[i, o].nonconvex.startup_costs[0] is not None:

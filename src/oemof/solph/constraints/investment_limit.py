@@ -196,7 +196,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     def _additional_limit_rule(block):
         for p in model.PERIODS:
             lhs = sum(
-                model.InvestmentFlow.invest[inflow, outflow, p]
+                model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
             )
