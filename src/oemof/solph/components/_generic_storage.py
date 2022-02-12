@@ -539,9 +539,9 @@ class GenericStorageBlock(SimpleBlock):
             for n in self.STORAGES_WITH_INVEST_FLOW_REL:
                 for p in m.PERIODS:
                     expr = (
-                        m.InvestmentFlow.total[n, o[n], p]
+                        m.InvestmentFlowBlock.total[n, o[n], p]
                     ) * n.invest_relation_input_output == (
-                        m.InvestmentFlow.total[i[n], n, p]
+                        m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
 
