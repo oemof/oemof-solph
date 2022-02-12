@@ -528,7 +528,7 @@ class TestsConstraint:
         bth = solph.buses.Bus(label="thermalBus")
 
         solph.components.Transformer(
-            label="powerplantGasCoal",
+            label="powerplantGasBiomass",
             inputs={bbms: solph.flows.Flow(), bgas: solph.flows.Flow()},
             outputs={
                 bel: solph.flows.Flow(variable_costs=50),
@@ -598,7 +598,7 @@ class TestsConstraint:
         solph.components.Transformer(
             label="CHPpowerplantGas",
             inputs={
-                bgas: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+                bgas: solph.flows.Flow(nominal_value=1e11, variable_costs=50)
             },
             outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5},
@@ -628,7 +628,7 @@ class TestsConstraint:
         self.compare_lp_files("linear_transformer_chp_invest.lp")
 
     def test_variable_chp(self):
-        """ """
+        """Test ExctractionTurbineCHP basic functionality"""
         bel = solph.buses.Bus(label="electricityBus")
         bth = solph.buses.Bus(label="heatBus")
         bgas = solph.buses.Bus(label="commodityBus")
@@ -652,7 +652,7 @@ class TestsConstraint:
         self.compare_lp_files("variable_chp.lp")
 
     def test_generic_invest_limit(self):
-        """ """
+        """Test a generic keyword investment limit"""
         bus = solph.buses.Bus(label="bus_1")
 
         solph.components.Source(
@@ -689,7 +689,7 @@ class TestsConstraint:
         self.compare_lp_files("generic_invest_limit.lp", my_om=om)
 
     def test_emission_constraints(self):
-        """ """
+        """Test emissions constraint"""
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
@@ -719,7 +719,7 @@ class TestsConstraint:
         self.compare_lp_files("emission_limit.lp", my_om=om)
 
     def test_flow_count_limit(self):
-        """ """
+        """Test limiting the count of nonconvex flows"""
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
@@ -773,7 +773,7 @@ class TestsConstraint:
         self.compare_lp_files("flow_count_limit.lp", my_om=om)
 
     def test_shared_limit(self):
-        """ """
+        """Test an overall limit shared among components"""
         b1 = solph.buses.Bus(label="bus")
 
         storage1 = solph.components.GenericStorage(
@@ -805,7 +805,7 @@ class TestsConstraint:
         self.compare_lp_files("shared_limit.lp", my_om=model)
 
     def test_flow_without_emission_for_emission_constraint(self):
-        """ """
+        """Test AttributeError if passed flow misses emission attribute"""
 
         def define_emission_limit():
             bel = solph.buses.Bus(label="electricityBus")
@@ -827,7 +827,7 @@ class TestsConstraint:
         assert_raises(AttributeError, define_emission_limit)
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
-        """ """
+        """Test that no error is thrown if no flows are explicity passed"""
         bel = solph.buses.Bus(label="electricityBus")
         solph.components.Source(
             label="source1",
@@ -841,11 +841,13 @@ class TestsConstraint:
         om = self.get_om()
         solph.constraints.emission_limit(om, limit=777)
 
+        self.compare_lp_files("emission_limit_no_error.lp", my_om=om)
+
     def test_equate_variables_constraint(self):
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
         storage = solph.components.GenericStorage(
-            label="storage_constraint",
+            label="storage",
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.flows.Flow()},
@@ -871,20 +873,20 @@ class TestsConstraint:
         om = self.get_om()
         solph.constraints.equate_variables(
             om,
-            om.InvestmentFlowBlock.invest[source, bus1],
-            om.InvestmentFlowBlock.invest[bus1, sink],
+            om.InvestmentFlowBlock.invest[source, bus1, 0],
+            om.InvestmentFlowBlock.invest[bus1, sink, 0],
             2,
         )
         solph.constraints.equate_variables(
             om,
-            om.InvestmentFlowBlock.invest[source, bus1],
-            om.GenericInvestmentStorageBlock.invest[storage],
+            om.InvestmentFlowBlock.invest[source, bus1, 0],
+            om.GenericInvestmentStorageBlock.invest[storage, 0],
         )
 
         self.compare_lp_files("connect_investment.lp", my_om=om)
 
     def test_gradient(self):
-        """Testing gradient constraints and costs."""
+        """Testing gradient constraints"""
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
@@ -902,7 +904,7 @@ class TestsConstraint:
         self.compare_lp_files("source_with_gradient.lp")
 
     def test_nonconvex_gradient(self):
-        """Testing gradient constraints and costs."""
+        """Testing gradient constraints"""
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
@@ -990,7 +992,7 @@ class TestsConstraint:
                     variable_costs=10,
                     minimum_downtime=4,
                     minimum_uptime=2,
-                    initial_status=2,
+                    initial_status=1,
                     startup_costs=5,
                     shutdown_costs=7,
                 )
