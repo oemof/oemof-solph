@@ -209,7 +209,7 @@ class TestsConstraint:
             label="wind",
             outputs={
                 bel: solph.flows.Flow(
-                    fix=[0.43, 0.72, 0.29], nominal_value=10e5
+                    fix=[0.43, 0.72, 0.29], nominal_value=1e6
                 )
             },
         )
@@ -230,14 +230,14 @@ class TestsConstraint:
         self.compare_lp_files("nominal_value_to_zero.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Wrong constraints for fixed source + invest sink w. `summed_max`."""
+        """Constraints test for fixed source + invest sink w. `summed_max`"""
 
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
             label="wind",
             outputs={
-                bel: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)
+                bel: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1e6)
             },
         )
 
@@ -249,7 +249,7 @@ class TestsConstraint:
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
-                        ep_costs=500, maximum=10e5, existing=50
+                        ep_costs=500, maximum=1e6, existing=50
                     ),
                 )
             },
@@ -276,7 +276,7 @@ class TestsConstraint:
         solph.components.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(fix=[0.5, 0.8, 0.3], nominal_value=10e4)
+                bel: solph.flows.Flow(fix=[0.5, 0.8, 0.3], nominal_value=1e5)
             },
         )
 
@@ -294,7 +294,7 @@ class TestsConstraint:
             outputs={
                 bel: solph.flows.Flow(nominal_value=16667, variable_costs=24)
             },
-            nominal_storage_capacity=10e4,
+            nominal_storage_capacity=1e5,
             loss_rate=0.13,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
