@@ -83,9 +83,9 @@ class SinkDSM(Sink):
         demand timeseries and the cumulated (fixed) infeed time series
         for normalization, because the balancing potential may be determined by
         both. Elsewise, underinvestments may occur.
-    capacity_up: int or array
+    capacity_up: int or iterable
         maximum DSM capacity that may be increased (normalized)
-    capacity_down: int or array
+    capacity_down: int or iterable
         maximum DSM capacity that may be reduced (normalized)
     approach: 'oemof', 'DIW', 'DLR'
         Choose one of the DSM modeling approaches. Read notes about which
