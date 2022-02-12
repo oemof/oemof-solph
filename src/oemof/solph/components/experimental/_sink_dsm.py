@@ -1009,8 +1009,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
-                                    self.old_exo[g, p]
-                                    == g.investment.existing
+                                    self.old_exo[g, p] == g.investment.existing
                                 )
                                 is_decommissioned = True
                             else:
@@ -2173,15 +2172,20 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         # Total capacity
         self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        # Old capacity to be decommissioned (due to lifetime)
-        # Old capacity is built out of old exogenous and endogenous capacities
-        self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+        if m.es.multi_period:
+            # Old capacity to be decommissioned (due to lifetime)
+            # Old capacity is built out of old exogenous and endogenous capacities
+            self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.investdsm, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.investdsm, m.PERIODS, within=NonNegativeReals
+            )
 
         # Variable load shift down
         self.dsm_do_shift = Var(
@@ -2229,87 +2233,88 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        def _old_dsm_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    # No shutdown in first period
-                    if p == 0:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    elif lifetime <= m.es.periods_years[p]:
-                        # Obtain commissioning period
-                        comm_p = 0
-                        for k, v in m.es.periods_years.items():
-                            if m.es.periods_years[p] - lifetime - v < 0:
-                                # change of sign is detected
-                                comm_p = k - 1
-                                break
-                        expr = self.old_end[g, p] == self.invest[g, comm_p]
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    else:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
+        if m.es.multi_period:
 
-        self.old_dsm_rule_end = Constraint(
-            group, m.PERIODS, noruleinit=True
-        )
-        self.old_dsm_rule_end_build = BuildAction(
-            rule=_old_dsm_capacity_rule_end
-        )
+            def _old_dsm_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    lifetime = g.investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        else:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
 
-        def _old_dsm_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                age = g.investment.age
-                lifetime = g.investment.lifetime
-                is_decommissioned = False
-                for p in m.PERIODS:
-                    # No shutdown in first period
-                    if p == 0:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    elif lifetime - age <= m.es.periods_years[p]:
-                        # Track decommissioning status
-                        if not is_decommissioned:
-                            expr = (
-                                self.old_exo[g, p]
-                                == g.investment.existing
-                            )
-                            is_decommissioned = True
+            self.old_dsm_rule_end = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_end_build = BuildAction(
+                rule=_old_dsm_capacity_rule_end
+            )
+
+            def _old_dsm_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    age = g.investment.age
+                    lifetime = g.investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[g, p] == g.investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
                         else:
                             expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    else:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
+                            self.old_dsm_rule_exo.add((g, p), expr)
 
-        self.old_dsm_rule_exo = Constraint(
-            group, m.PERIODS, noruleinit=True
-        )
-        self.old_dsm_rule_exo_build = BuildAction(
-            rule=_old_dsm_capacity_rule_exo
-        )
+            self.old_dsm_rule_exo = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_exo_build = BuildAction(
+                rule=_old_dsm_capacity_rule_exo
+            )
 
-        def _old_dsm_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[g, p]
-                        == self.old_end[g, p] + self.old_exo[g, p]
-                    )
-                    self.old_dsm_rule.add((g, p), expr)
+            def _old_dsm_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    for p in m.PERIODS:
+                        expr = (
+                            self.old[g, p]
+                            == self.old_end[g, p] + self.old_exo[g, p]
+                        )
+                        self.old_dsm_rule.add((g, p), expr)
 
-        self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
+            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
             """Force shifting resp. shedding variables to zero dependent
@@ -4231,14 +4236,19 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         # Total capacity
         self.total = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
-        # Old capacity to be decommissioned (due to lifetime)
-        self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+        if m.es.multi_period:
+            # Old capacity to be decommissioned (due to lifetime)
+            self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+            )
 
         # Variable load shift down (capacity)
         self.dsm_do_shift = Var(
@@ -4302,87 +4312,88 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        def _old_dsm_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    # No shutdown in first period
-                    if p == 0:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    elif lifetime <= m.es.periods_years[p]:
-                        # Obtain commissioning period
-                        comm_p = 0
-                        for k, v in m.es.periods_years.items():
-                            if m.es.periods_years[p] - lifetime - v < 0:
-                                # change of sign is detected
-                                comm_p = k - 1
-                                break
-                        expr = self.old_end[g, p] == self.invest[g, comm_p]
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    else:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
+        if m.es.multi_period:
 
-        self.old_dsm_rule_end = Constraint(
-            group, m.PERIODS, noruleinit=True
-        )
-        self.old_dsm_rule_end_build = BuildAction(
-            rule=_old_dsm_capacity_rule_end
-        )
+            def _old_dsm_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    lifetime = g.investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        else:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
 
-        def _old_dsm_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                age = g.investment.age
-                lifetime = g.investment.lifetime
-                is_decommissioned = False
-                for p in m.PERIODS:
-                    # No shutdown in first period
-                    if p == 0:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    elif lifetime - age <= m.es.periods_years[p]:
-                        # Track decommissioning status
-                        if not is_decommissioned:
-                            expr = (
-                                self.old_exo[g, p]
-                                == g.investment.existing
-                            )
-                            is_decommissioned = True
+            self.old_dsm_rule_end = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_end_build = BuildAction(
+                rule=_old_dsm_capacity_rule_end
+            )
+
+            def _old_dsm_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    age = g.investment.age
+                    lifetime = g.investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[g, p] == g.investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
                         else:
                             expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    else:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
+                            self.old_dsm_rule_exo.add((g, p), expr)
 
-        self.old_dsm_rule_exo = Constraint(
-            group, m.PERIODS, noruleinit=True
-        )
-        self.old_dsm_rule_exo_build = BuildAction(
-            rule=_old_dsm_capacity_rule_exo
-        )
+            self.old_dsm_rule_exo = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_exo_build = BuildAction(
+                rule=_old_dsm_capacity_rule_exo
+            )
 
-        def _old_dsm_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[g, p]
-                        == self.old_end[g, p] + self.old_exo[g, p]
-                    )
-                    self.old_dsm_rule.add((g, p), expr)
+            def _old_dsm_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    for p in m.PERIODS:
+                        expr = (
+                            self.old[g, p]
+                            == self.old_end[g, p] + self.old_exo[g, p]
+                        )
+                        self.old_dsm_rule.add((g, p), expr)
 
-        self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
+            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
             """Force shifting resp. shedding variables to zero dependent
