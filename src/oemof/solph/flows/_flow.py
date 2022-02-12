@@ -23,6 +23,7 @@ from oemof.tools import debugging
 from pyomo.core import BuildAction, Expression
 from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
+from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
@@ -409,9 +410,13 @@ class FlowBlock(SimpleBlock):
         )
         # ######################### Variables  ################################
 
-        self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS)
+        self.positive_gradient = Var(
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+        )
 
-        self.negative_gradient = Var(self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS)
+        self.negative_gradient = Var(
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+        )
 
         self.integer_flow = Var(
             self.INTEGER_FLOWS, m.TIMESTEPS, within=NonNegativeIntegers
