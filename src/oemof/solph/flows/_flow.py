@@ -494,15 +494,6 @@ class FlowBlock(SimpleBlock):
         """
         m = self.parent_block()
 
-        self.first_stage_variable_costs = quicksum(
-            m.flow[i, o, t]
-            * m.objective_weighting[t]
-            * m.flows[i, o].variable_costs[t]
-            for t in m.TIMESTEPS
-            for i, o in m.FIRSTSTAGE_FLOWS
-            if m.flows[i, o].variable_costs[0] is not None
-        )
-
         self.variable_costs = quicksum(
             m.flow[i, o, t]
             * m.objective_weighting[t]
@@ -510,14 +501,6 @@ class FlowBlock(SimpleBlock):
             for t in m.TIMESTEPS
             for i, o in m.FLOWS
             if m.flows[i, o].variable_costs[0] is not None
-        )
-
-        self.first_stage_gradient_costs = quicksum(
-            self.positive_gradient[i, o, t]
-            * m.flows[i, o].positive_gradient["costs"]
-            for t in m.TIMESTEPS
-            for (i, o) in m.FIRSTSTAGE_FLOWS
-            if m.flows[i, o].positive_gradient["ub"][0] is not None
         )
 
         self.gradient_costs = quicksum(
@@ -528,7 +511,67 @@ class FlowBlock(SimpleBlock):
             if m.flows[i, o].positive_gradient["ub"][0] is not None
         )
 
-        self.first_stage_gradient_costs += quicksum(
+        self.gradient_costs += quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].negative_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FLOWS
+            if m.flows[i, o].negative_gradient["ub"][0] is not None
+        )
+
+        return (
+            self.variable_costs
+            + self.gradient_costs
+        )
+
+    def _stochastic_objective_expression(self):
+        r"""First stage objective expression for all stochastic flows
+        """
+        m = self.parent_block()
+
+        self.variable_costs = quicksum(
+            m.flow[i, o, t]
+            * m.objective_weighting[t]
+            * m.flows[i, o].variable_costs[t]
+            for t in m.TIMESTEPS
+            for i, o in m.FLOWS - m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].variable_costs[0] is not None
+        )
+
+        self.gradient_costs = quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].positive_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FLOWS - m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].positive_gradient["ub"][0] is not None
+        )
+
+        self.gradient_costs += quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].negative_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FLOWS - m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].negative_gradient["ub"][0] is not None
+        )
+
+        self.firststage_variable_costs = quicksum(
+            m.flow[i, o, t]
+            * m.objective_weighting[t]
+            * m.flows[i, o].variable_costs[t]
+            for t in m.TIMESTEPS
+            for i, o in m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].variable_costs[0] is not None
+        )
+
+        self.firststage_gradient_costs = quicksum(
+            self.positive_gradient[i, o, t]
+            * m.flows[i, o].positive_gradient["costs"]
+            for t in m.TIMESTEPS
+            for (i, o) in m.FIRSTSTAGE_FLOWS
+            if m.flows[i, o].positive_gradient["ub"][0] is not None
+        )
+
+        self.firststage_gradient_costs += quicksum(
             self.negative_gradient[i, o, t]
             * m.flows[i, o].positive_gradient["costs"]
             for t in m.TIMESTEPS
@@ -536,6 +579,12 @@ class FlowBlock(SimpleBlock):
             if m.flows[i, o].negative_gradient["ub"][0] is not None
         )
 
+        return (
+            self.variable_costs +
+            self.gradient_costs +
+            self.firststage_variable_costs
+            + self.firststage_gradient_costs
+        )
         self.gradient_costs += quicksum(
             self.positive_gradient[i, o, t]
             * m.flows[i, o].negative_gradient["costs"]

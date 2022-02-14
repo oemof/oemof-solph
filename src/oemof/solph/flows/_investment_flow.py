@@ -434,3 +434,46 @@ class InvestmentFlowBlock(SimpleBlock):
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
+
+    def _stochastic_objective_expression(self):
+        r"""Objective expression for flows with investment attribute of type
+        class:`.Investment`.
+        """
+        if not hasattr(self, "INVESTFLOWS"):
+            return 0
+
+        m = self.parent_block()
+        investment_costs = 0
+        firststage_investment_costs = 0
+
+        for i, o in self.CONVEX_INVESTFLOWS:
+            if (i, o) not in m.FIRSTSTAGE_INVESTFLOWS:
+                investment_costs += (
+                    self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                )
+            else:
+                firststage_investment_costs += (
+                    self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                )
+
+        for i, o in self.NON_CONVEX_INVESTFLOWS:
+            if (i, o) not in m.FIRSTSTAGE_INVESTFLOWS:
+                firststage_investment_costs += (
+                    self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                    + self.invest_status[i, o]
+                    * m.flows[i, o].investment.offset
+                )
+            else:
+                investment_costs += (
+                    self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                    + self.invest_status[i, o]
+                    * m.flows[i, o].investment.offset
+                )
+
+        self.investment_costs = Expression(expr=investment_costs)
+        self.firststage_investment_costs = Expression(
+            expr=firststage_investment_costs
+        )
+
+        return self.investment_costs + self.firststage_investment_costs
+

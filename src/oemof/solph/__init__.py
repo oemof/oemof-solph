@@ -10,6 +10,7 @@ from . import views
 from ._energy_system import EnergySystem
 from ._groupings import GROUPINGS
 from ._models import Model
+from ._models import StochasticModel
 from ._options import Investment
 from ._options import NonConvex
 from ._plumbing import sequence

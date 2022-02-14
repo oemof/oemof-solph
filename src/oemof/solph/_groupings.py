@@ -88,8 +88,31 @@ nonconvex_flow_grouping = groupings.FlowsWithNodes(
     constant_key=NonConvexFlowBlock, filter=_nonconvex_grouping
 )
 
+def _stochastic_investflow_grouping(stf):
+    if hasattr(stf[2], "investment"):
+        if stf[2].investment is not None:
+            if stf[2].investment.firststage == True:
+                return True
+    else:
+        return False
+
+stochastic_investflow_grouping = groupings.FlowsWithNodes(
+    constant_key="FirstStageInvestFlows", filter=_stochastic_investflow_grouping
+)
+
+def _stochastic_flow_grouping(stf):
+    if hasattr(stf[2], "firststage"):
+        return True
+    else:
+        return False
+
+stochastic_flow_grouping = groupings.FlowsWithNodes(
+    constant_key="FirstStageFlows", filter=_stochastic_flow_grouping
+)
 
 GROUPINGS = [
+    stochastic_investflow_grouping,
+    stochastic_flow_grouping,
     constraint_grouping,
     investment_flow_grouping,
     standard_flow_grouping,

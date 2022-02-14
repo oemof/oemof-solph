@@ -16,6 +16,7 @@ import warnings
 
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
+from pyomo.core.expr import current as EXPR
 from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
@@ -23,7 +24,9 @@ from oemof.solph._plumbing import sequence
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
 from oemof.solph.flows._flow import FlowBlock
+from oemof.solph.flows._flow import StochasticFlowBlock
 from oemof.solph.flows._investment_flow import InvestmentFlowBlock
+from oemof.solph.flows._investment_flow import StochasticInvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 
 
@@ -164,7 +167,6 @@ class BaseModel(po.ConcreteModel):
         for block in self.component_data_objects():
             if hasattr(block, "_objective_expression"):
                 expr += block._objective_expression()
-
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
@@ -311,19 +313,6 @@ class Model(BaseModel):
             initialize=self.flows.keys(), ordered=True, dimen=2
         )
 
-
-        self.FIRSTSTAGE_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if hasattr(v, "firststage")
-            ],
-            ordered=True,
-            dimen=2,
-            within=self.FLOWS,
-        )
-
-
         self.BIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
                 k
@@ -379,3 +368,84 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
+
+
+class StochasticModel(Model):
+    """
+
+    """
+    def __init__(self, energysystem, **kwargs):
+        super().__init__(energysystem, **kwargs)
+
+    def _add_stage_sets(self):
+        """
+        """
+
+        if self.es.groups.get("FirstStageFlows"):
+            initialize = [(i,o) for i,o,f in self.es.groups.get("FirstStageFlows")]
+        else:
+            initialize = []
+
+        self.FIRSTSTAGE_FLOWS = po.Set(
+            initialize=initialize,
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
+
+
+        if self.es.groups.get("FirstStageInvestFlows"):
+            initialize = [(i,o) for i,o,f in self.es.groups.get("FirstStageInvestFlows")]
+        else:
+            initialize = []
+        self.FIRSTSTAGE_INVESTFLOWS = po.Set(
+            initialize=[
+                (i,o) for i,o,f in self.es.groups.get("FirstStageInvestFlows")],
+            ordered=True,
+            dimen=2,
+            within=self.FLOWS,
+        )
+
+    def get_firststage_vars(self):
+        """
+        """
+        first_stage_vars = [
+            var for var in
+            EXPR.identify_variables(self.FlowBlock.firststage_variable_costs)
+        ]
+        first_stage_vars += [
+            var for var in
+            EXPR.identify_variables(self.FlowBlock.firststage_gradient_costs)
+        ]
+        first_stage_vars += [
+            var for var in
+            EXPR.identify_variables(self.InvestmentFlowBlock.firststage_investment_costs)
+        ]
+        return first_stage_vars
+
+    def _construct(self):
+        """ """
+        self._add_parent_block_sets()
+        self._add_stage_sets()
+
+        self._add_parent_block_variables()
+        self._add_child_blocks()
+
+        self._add_objective()
+
+        self.firststage_vars = self.get_firststage_vars()
+
+    def _add_objective(self, sense=po.minimize, update=False):
+        """
+        """
+        if update:
+            self.del_component("objective")
+
+        expr = 0
+
+        for block in self.component_data_objects():
+            if hasattr(block, "_stochastic_objective_expression"):
+                expr += block._stochastic_objective_expression()
+            elif hasattr(block, "_objective_expression"):
+                expr += block._objective_expression()
+        self.objective = po.Objective(sense=sense, expr=expr)
