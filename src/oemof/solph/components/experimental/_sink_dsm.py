@@ -2131,13 +2131,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2156,13 +2153,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2181,13 +2175,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -4222,13 +4213,10 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         )
 
                         # maximum capacity eligibly for load shifting
-                        rhs = (
-                            max(
-                                g.capacity_down[t] * g.flex_share_down,
-                                g.capacity_up[t] * g.flex_share_up,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_down[t] * g.flex_share_down,
+                            g.capacity_up[t] * g.flex_share_up,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.dr_logical_constraint.add((g, t), (lhs <= rhs))
