@@ -43,7 +43,7 @@ def test_pwltf():
 
     # Define conversion function and breakpoints
     def conv_func(x):
-        return 0.01 * x ** 2
+        return 0.01 * x**2
 
     in_breakpoints = np.arange(0, 110, 25)
     out_breakpoints = conv_func(in_breakpoints)
