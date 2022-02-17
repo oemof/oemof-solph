@@ -100,6 +100,18 @@ stochastic_investflow_grouping = groupings.FlowsWithNodes(
     constant_key="FirstStageInvestFlows", filter=_stochastic_investflow_grouping
 )
 
+def _stochastic_investnode_grouping(stf):
+    if hasattr(stf[0], "investment"):
+        if stf[0].investment is not None:
+            if stf[0].investment.firststage == True:
+                return True
+    else:
+        return False
+
+stochastic_investnode_grouping = groupings.FlowsWithNodes(
+    constant_key="FirstStageInvestNodes", filter=_stochastic_investnode_grouping
+)
+
 def _stochastic_flow_grouping(stf):
     if hasattr(stf[2], "firststage"):
         return True
@@ -110,8 +122,11 @@ stochastic_flow_grouping = groupings.FlowsWithNodes(
     constant_key="FirstStageFlows", filter=_stochastic_flow_grouping
 )
 
+
+
 GROUPINGS = [
     stochastic_investflow_grouping,
+    stochastic_investnode_grouping,
     stochastic_flow_grouping,
     constraint_grouping,
     investment_flow_grouping,

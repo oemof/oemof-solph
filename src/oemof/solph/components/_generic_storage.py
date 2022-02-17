@@ -1096,3 +1096,38 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         self.investment_costs = Expression(expr=investment_costs)
 
         return investment_costs
+
+    def _stochastic_objective_expression(self):
+        """Objective expression with fixed and investement costs."""
+
+        m = self.parent_block()
+
+        if not hasattr(self, "INVESTSTORAGES"):
+            return 0
+
+        investment_costs = 0
+        firststage_investment_costs = 0
+
+        for n in self.CONVEX_INVESTSTORAGES - m.FIRSTSTAGE_INVESTNODES:
+            investment_costs += self.invest[n] * n.investment.ep_costs
+        for n in self.NON_CONVEX_INVESTSTORAGES - m.FIRSTSTAGE_INVESTNODES:
+            investment_costs += (
+                self.invest[n] * n.investment.ep_costs
+                + self.invest_status[n] * n.investment.offset
+            )
+        self.investment_costs = Expression(expr=investment_costs)
+
+        for n in self.CONVEX_INVESTSTORAGES:
+            if n in m.FIRSTSTAGE_INVESTNODES:
+                firststage_investment_costs += self.invest[n] * n.investment.ep_costs
+
+        for n in self.NON_CONVEX_INVESTSTORAGES:
+            if n in m.FIRSTSTAGE_INVESTNODES:
+                firststage_investment_costs += (
+                    self.invest[n] * n.investment.ep_costs
+                    + self.invest_status[n] * n.investment.offset
+                )
+
+        self.firststage_investment_costs = Expression(expr=firststage_investment_costs)
+
+        return self.investment_costs + self.firststage_investment_costs

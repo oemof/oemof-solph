@@ -406,6 +406,13 @@ class StochasticModel(Model):
             within=self.FLOWS,
         )
 
+        self.FIRSTSTAGE_INVESTNODES = po.Set(
+            initialize=[
+                i for i,o,f in self.es.groups.get("FirstStageInvestNodes")],
+            ordered=True,
+            dimen=1,
+        )
+
     def get_firststage_vars(self):
         """
         """
@@ -420,6 +427,10 @@ class StochasticModel(Model):
         first_stage_vars += [
             var for var in
             EXPR.identify_variables(self.InvestmentFlowBlock.firststage_investment_costs)
+        ]
+        first_stage_vars += [
+            var for var in
+            EXPR.identify_variables(self.GenericInvestmentStorageBlock.firststage_investment_costs)
         ]
         return first_stage_vars
 
