@@ -45,8 +45,8 @@ def test_regression_investment_storage(solver="cbc"):
     # Sources
     solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
 
-    # Transformer
-    solph.components.Transformer(
+    # Converter
+    solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={bel: solph.flows.Flow(nominal_value=300000)},

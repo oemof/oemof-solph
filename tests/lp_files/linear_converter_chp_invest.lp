@@ -45,32 +45,32 @@ c_e_BusBlock_balance(heatBus_2)_:
 +1 flow(chp_powerplant_gas_heatBus_2)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_electricityBus_0)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_electricityBus_0)_:
 -1 flow(chp_powerplant_gas_electricityBus_0)
 +0.40000000000000002 flow(gasBus_chp_powerplant_gas_0)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_electricityBus_1)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_electricityBus_1)_:
 -1 flow(chp_powerplant_gas_electricityBus_1)
 +0.40000000000000002 flow(gasBus_chp_powerplant_gas_1)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_electricityBus_2)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_electricityBus_2)_:
 -1 flow(chp_powerplant_gas_electricityBus_2)
 +0.40000000000000002 flow(gasBus_chp_powerplant_gas_2)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_heatBus_0)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_heatBus_0)_:
 -1 flow(chp_powerplant_gas_heatBus_0)
 +0.5 flow(gasBus_chp_powerplant_gas_0)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_heatBus_1)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_heatBus_1)_:
 -1 flow(chp_powerplant_gas_heatBus_1)
 +0.5 flow(gasBus_chp_powerplant_gas_1)
 = 0
 
-c_e_TransformerBlock_relation(chp_powerplant_gas_gasBus_heatBus_2)_:
+c_e_ConverterBlock_relation(chp_powerplant_gas_gasBus_heatBus_2)_:
 -1 flow(chp_powerplant_gas_heatBus_2)
 +0.5 flow(gasBus_chp_powerplant_gas_2)
 = 0

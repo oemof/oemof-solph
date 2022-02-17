@@ -51,12 +51,12 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     >>> bel1 = solph.buses.Bus(label='electricity1')
     >>> bel2 = solph.buses.Bus(label='electricity2')
     >>> energysystem.add(bel1, bel2)
-    >>> energysystem.add(solph.components.Transformer(
+    >>> energysystem.add(solph.components.Converter(
     ...    label='powerline_1_2',
     ...    inputs={bel1: solph.flows.Flow()},
     ...    outputs={bel2: solph.flows.Flow(
     ...        investment=solph.Investment(ep_costs=20))}))
-    >>> energysystem.add(solph.components.Transformer(
+    >>> energysystem.add(solph.components.Converter(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.flows.Flow()},
     ...   outputs={bel1: solph.flows.Flow(

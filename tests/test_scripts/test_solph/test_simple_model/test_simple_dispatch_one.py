@@ -21,7 +21,7 @@ from oemof.solph import views
 from oemof.solph.buses import Bus
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Transformer
+from oemof.solph.components import Converter
 from oemof.solph.flows import Flow
 
 
@@ -56,7 +56,7 @@ def test_dispatch_one_time_step(solver="cbc"):
     )
 
     # combined heat and power plant (chp)
-    pp_chp = Transformer(
+    pp_chp = Converter(
         label="pp_chp",
         inputs={bgas: Flow()},
         outputs={
@@ -72,7 +72,7 @@ def test_dispatch_one_time_step(solver="cbc"):
     heat_source = Source(label="heat_source", outputs={b_heat_source: Flow()})
 
     cop = 3
-    heat_pump = Transformer(
+    heat_pump = Converter(
         label="heat_pump",
         inputs={bel: Flow(), b_heat_source: Flow()},
         outputs={bth: Flow(nominal_value=10)},

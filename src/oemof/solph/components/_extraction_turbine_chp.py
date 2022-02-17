@@ -23,10 +23,10 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
 from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.components._transformer import Transformer
+from oemof.solph.components._converter import Converter
 
 
-class ExtractionTurbineCHP(Transformer):
+class ExtractionTurbineCHP(Converter):
     r"""
     A CHP with an extraction turbine in a linear model. For more options see
     the :class:`~oemof.solph.components.GenericCHP` class.

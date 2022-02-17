@@ -29,32 +29,32 @@ class TestTransformerClass:
         warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
     def test_empty_transformer(self):
-        transf = solph.components.Transformer()
+        transf = solph.components.Converter()
         assert isinstance(transf.conversion_factors, dict)
         assert len(transf.conversion_factors.keys()) == 0
 
     def test_default_conversion_factor(self):
-        transf = solph.components.Transformer(
+        transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()}
         )
         assert transf.conversion_factors[self.bus][2] == 1
 
     def test_sequence_conversion_factor_from_scalar(self):
-        transf = solph.components.Transformer(
+        transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: 2},
         )
         assert transf.conversion_factors[self.bus][6] == 2
 
     def test_sequence_conversion_factor_from_list_correct_length(self):
-        transf = solph.components.Transformer(
+        transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )
         assert len(transf.conversion_factors[self.bus]) == 1
 
     def test_sequence_conversion_factor_from_list_wrong_length(self):
-        transf = solph.components.Transformer(
+        transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )

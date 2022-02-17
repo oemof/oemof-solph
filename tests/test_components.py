@@ -230,7 +230,7 @@ def test_offsettransformer_wrong_flow_type():
         TypeError, match=r"Input flows must be of type NonConvexFlow!"
     ):
         bgas = Bus(label="gasBus")
-        components.OffsetTransformer(
+        components.OffsetConverter(
             label="gasboiler", inputs={bgas: Flow()}, coefficients=(-17, 0.9)
         )
 
@@ -240,7 +240,7 @@ def test_offsettransformer_not_enough_coefficients():
         ValueError,
         match=r"Two coefficients or coefficient series have to be given.",
     ):
-        components.OffsetTransformer(label="of1", coefficients=([1, 4, 7]))
+        components.OffsetConverter(label="of1", coefficients=([1, 4, 7]))
 
 
 def test_offsettransformer_too_many_coefficients():
@@ -248,22 +248,22 @@ def test_offsettransformer_too_many_coefficients():
         ValueError,
         match=r"Two coefficients or coefficient series have to be given.",
     ):
-        components.OffsetTransformer(label="of2", coefficients=(1, 4, 7))
+        components.OffsetConverter(label="of2", coefficients=(1, 4, 7))
 
 
 def test_offsettransformer_empty():
     """No NonConvexFlow for Inflow defined."""
-    components.OffsetTransformer()
+    components.OffsetConverter()
 
 
 def test_offsettransformer__too_many_input_flows():
     """Too many Input Flows defined."""
     with pytest.raises(
-        ValueError, match=r"OffsetTransformer` must not have more than 1"
+        ValueError, match=r"OffsetConverter` must not have more than 1"
     ):
         bgas = Bus(label="GasBus")
         bcoal = Bus(label="CoalBus")
-        components.OffsetTransformer(
+        components.OffsetConverter(
             label="ostf_2_in",
             inputs={
                 bgas: NonConvexFlow(nominal_value=60, min=0.5, max=1.0),
@@ -276,12 +276,12 @@ def test_offsettransformer__too_many_input_flows():
 def test_offsettransformer_too_many_output_flows():
     """Too many Output Flows defined."""
     with pytest.raises(
-        ValueError, match="OffsetTransformer` must not have more than 1"
+        ValueError, match="OffsetConverter` must not have more than 1"
     ):
         bm1 = Bus(label="my_offset_Bus1")
         bm2 = Bus(label="my_offset_Bus2")
 
-        components.OffsetTransformer(
+        components.OffsetConverter(
             label="ostf_2_out",
             inputs={bm1: NonConvexFlow(nominal_value=60, min=0.5, max=1.0)},
             outputs={bm1: Flow(), bm2: Flow()},

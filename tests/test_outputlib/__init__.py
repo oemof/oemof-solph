@@ -7,7 +7,7 @@ from oemof.solph import Model
 from oemof.solph.buses import Bus
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Transformer
+from oemof.solph.components import Converter
 from oemof.solph.flows import Flow
 
 filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
@@ -70,28 +70,28 @@ demand_th = Sink(
 )
 
 # power plants
-pp_coal = Transformer(
+pp_coal = Converter(
     label="pp_coal",
     inputs={bcoal: Flow()},
     outputs={bel: Flow(nominal_value=20.2, variable_costs=25)},
     conversion_factors={bel: 0.39},
 )
 
-pp_lig = Transformer(
+pp_lig = Converter(
     label="pp_lig",
     inputs={blig: Flow()},
     outputs={bel: Flow(nominal_value=11.8, variable_costs=19)},
     conversion_factors={bel: 0.41},
 )
 
-pp_gas = Transformer(
+pp_gas = Converter(
     label="pp_gas",
     inputs={bgas: Flow()},
     outputs={bel: Flow(nominal_value=41, variable_costs=40)},
     conversion_factors={bel: 0.50},
 )
 
-pp_oil = Transformer(
+pp_oil = Converter(
     label="pp_oil",
     inputs={boil: Flow()},
     outputs={bel: Flow(nominal_value=5, variable_costs=50)},
@@ -99,7 +99,7 @@ pp_oil = Transformer(
 )
 
 # combined heat and power plant (chp)
-pp_chp = Transformer(
+pp_chp = Converter(
     label="pp_chp",
     inputs={bgas: Flow()},
     outputs={
@@ -115,7 +115,7 @@ b_heat_source = Bus(label="b_heat_source")
 heat_source = Source(label="heat_source", outputs={b_heat_source: Flow()})
 
 cop = 3
-heat_pump = Transformer(
+heat_pump = Converter(
     label="heat_pump",
     inputs={bel: Flow(), b_heat_source: Flow()},
     outputs={bth: Flow(nominal_value=10)},

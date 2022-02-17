@@ -77,13 +77,13 @@ def test_connect_invest():
         investment=Investment(ep_costs=0.2),
     )
 
-    line12 = components.Transformer(
+    line12 = components.Converter(
         label="line12",
         inputs={bel1: Flow()},
         outputs={bel2: Flow(investment=Investment(ep_costs=20))},
     )
 
-    line21 = components.Transformer(
+    line21 = components.Converter(
         label="line21",
         inputs={bel2: Flow()},
         outputs={bel1: Flow(investment=Investment(ep_costs=20))},

@@ -9,12 +9,12 @@ so code referred to within this module might not have production quality.
 
 from ._generic_caes import GenericCAES
 from ._link import Link
-from ._piecewise_linear_transformer import PiecewiseLinearTransformer
+from ._piecewise_linear_converter import PiecewiseLinearConverter
 from ._sink_dsm import SinkDSM
 
 __all__ = [
     "GenericCAES",
     "Link",
-    "PiecewiseLinearTransformer",
+    "PiecewiseLinearConverter",
     "SinkDSM",
 ]

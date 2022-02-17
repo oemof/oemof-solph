@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -
 
 """
-OffsetTransformer and associated individual constraints (blocks) and groupings.
+OffsetConverter and associated individual constraints (blocks) and groupings.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -25,7 +25,7 @@ from pyomo.environ import Set
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class OffsetTransformer(network.Transformer):
+class OffsetConverter(network.Transformer):
     """An object with one input and one output.
 
     Parameters
@@ -40,7 +40,7 @@ class OffsetTransformer(network.Transformer):
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._offset_transformer.OffsetTransformerBlock`
+     * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
 
     Examples
     --------
@@ -50,7 +50,7 @@ class OffsetTransformer(network.Transformer):
     >>> bel = solph.buses.Bus(label='bel')
     >>> bth = solph.buses.Bus(label='bth')
 
-    >>> ostf = solph.components.OffsetTransformer(
+    >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow(
     ...        nominal_value=60, min=0.5, max=1.0,
@@ -59,7 +59,7 @@ class OffsetTransformer(network.Transformer):
     ...    coefficients=(20, 0.5))
 
     >>> type(ostf)
-    <class 'oemof.solph.components._offset_transformer.OffsetTransformer'>
+    <class 'oemof.solph.components._offset_converter.OffsetConverter'>
     """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
@@ -83,21 +83,21 @@ class OffsetTransformer(network.Transformer):
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError(
-                "Component `OffsetTransformer` must not have "
+                "Component `OffsetConverter` must not have "
                 + "more than 1 input and 1 output!"
             )
 
     def constraint_group(self):
-        return OffsetTransformerBlock
+        return OffsetConverterBlock
 
 
-class OffsetTransformerBlock(SimpleBlock):
+class OffsetConverterBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components._offset_transformer.OffsetTransformer`
+    :class:`~oemof.solph.components._offset_converter.OffsetConverter`
 
     **The following constraints are created:**
 
-    .. _OffsetTransformer-equations:
+    .. _OffsetConverter-equations:
 
     .. math::
         &
@@ -126,12 +126,12 @@ class OffsetTransformerBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the relation for the class:`OffsetTransformer`.
+        """Creates the relation for the class:`OffsetConverter`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.experimental.OffsetTransformer objects for
+            List of oemof.solph.experimental.OffsetConverter objects for
             which the relation of inputs and outputs is created
             e.g. group = [ostf1, ostf2, ostf3, ...]. The components inside
             the list need to hold an attribute `coefficients` of type dict
@@ -142,7 +142,7 @@ class OffsetTransformerBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
+        self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
         def _relation_rule(block, n, t):
             """Link binary input and output flow to component outflow."""
@@ -158,5 +158,5 @@ class OffsetTransformerBlock(SimpleBlock):
             return expr == 0
 
         self.relation = Constraint(
-            self.OFFSETTRANSFORMERS, m.TIMESTEPS, rule=_relation_rule
+            self.OFFSETCONVERTERS, m.TIMESTEPS, rule=_relation_rule
         )

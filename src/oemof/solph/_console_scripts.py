@@ -34,7 +34,7 @@ def check_oemof_installation(silent=False):
             bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)
         },
     )
-    solph.components.Transformer(
+    solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={

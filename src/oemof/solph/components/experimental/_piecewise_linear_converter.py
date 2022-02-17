@@ -25,8 +25,8 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class PiecewiseLinearTransformer(on.Transformer):
-    """Component to model a transformer with one input and one output
+class PiecewiseLinearConverter(on.Transformer):
+    """Component to model an energy converter with one input and one output
     and an arbitrary piecewise linear conversion function.
 
     Parameters
@@ -50,7 +50,7 @@ class PiecewiseLinearTransformer(on.Transformer):
     >>> b_gas = solph.buses.Bus(label='biogas')
     >>> b_el = solph.buses.Bus(label='electricity')
 
-    >>> pwltf = solph.components.experimental.PiecewiseLinearTransformer(
+    >>> pwltf = solph.components.experimental.PiecewiseLinearConverter(
     ...    label='pwltf',
     ...    inputs={b_gas: solph.flows.Flow(
     ...    nominal_value=100,
@@ -61,8 +61,8 @@ class PiecewiseLinearTransformer(on.Transformer):
     ...    pw_repn='CC')
 
     >>> type(pwltf)
-    <class 'oemof.solph.components.experimental._piecewise_linear_transformer.\
-PiecewiseLinearTransformer'>
+    <class 'oemof.solph.components.experimental._piecewise_linear_converter.\
+PiecewiseLinearConverter'>
     """
 
     def __init__(self, *args, **kwargs):
@@ -74,7 +74,7 @@ PiecewiseLinearTransformer'>
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError(
-                "Component `PiecewiseLinearTransformer` cannot have "
+                "Component `PiecewiseLinearConverter` cannot have "
                 + "more than 1 input and 1 output!"
             )
 
@@ -86,12 +86,12 @@ PiecewiseLinearTransformer'>
             )
 
     def constraint_group(self):
-        return PiecewiseLinearTransformerBlock
+        return PiecewiseLinearConverterBlock
 
 
-class PiecewiseLinearTransformerBlock(SimpleBlock):
+class PiecewiseLinearConverterBlock(SimpleBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.experimental._piecewise_linear_transformer.PiecewiseLinearTransformer`
+    :class:`~oemof.solph.components.experimental._piecewise_linear_converter.PiecewiseLinearConverter`
 
     **The following constraints are created:**
 
@@ -102,13 +102,13 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the relation for the class:`PiecewiseLinearTransformer`.
+        """Creates the relation for the class:`PiecewiseLinearConverter`.
 
         Parameters
         ----------
         group : list
             List of
-            oemof.solph.components.experimental.PiecewiseLinearTransformer
+            oemof.solph.components.experimental.PiecewiseLinearConverter
             objects for which the relation of inputs and outputs is created
             e.g. group = [pwltf1, pwltf2, pwltf3, ...].
 
@@ -118,7 +118,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
 
         m = self.parent_block()
 
-        self.PWLINEARTRANSFORMERS = Set(initialize=[n for n in group])
+        self.PWLINEARCONVERTERS = Set(initialize=[n for n in group])
 
         pw_repns = [n.pw_repn for n in group]
         if all(x == pw_repns[0] for x in pw_repns):
@@ -136,7 +136,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
                 self.breakpoints[(n, t)] = n.in_breakpoints
 
         self.breakpoint_build = BuildAction(
-            self.PWLINEARTRANSFORMERS, rule=build_breakpoints
+            self.PWLINEARCONVERTERS, rule=build_breakpoints
         )
 
         def _conversion_function(block, n, t, x):
@@ -162,10 +162,10 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return lower_bound_out[n], upper_bound_out[n]
 
         self.inflow = Var(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_inflow_bounds
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, bounds=get_inflow_bounds
         )
         self.outflow = Var(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, bounds=get_outflow_bounds
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, bounds=get_outflow_bounds
         )
 
         def _in_equation(block, n, t):
@@ -176,7 +176,7 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return expr == 0
 
         self.equate_in = Constraint(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_in_equation
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, rule=_in_equation
         )
 
         def _out_equation(block, n, t):
@@ -187,11 +187,11 @@ class PiecewiseLinearTransformerBlock(SimpleBlock):
             return expr == 0
 
         self.equate_out = Constraint(
-            self.PWLINEARTRANSFORMERS, m.TIMESTEPS, rule=_out_equation
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, rule=_out_equation
         )
 
         self.piecewise = Piecewise(
-            self.PWLINEARTRANSFORMERS,
+            self.PWLINEARCONVERTERS,
             m.TIMESTEPS,
             self.outflow,
             self.inflow,

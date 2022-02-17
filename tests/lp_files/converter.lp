@@ -59,62 +59,62 @@ c_e_BusBlock_balance(thermalBus_2)_:
 +1 flow(powerplantGasCoal_thermalBus_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_electricityBus_0)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_electricityBus_0)_:
 +0.29999999999999999 flow(biomassBus_powerplantGasCoal_0)
 -0.10000000000000001 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_electricityBus_1)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_electricityBus_1)_:
 +0.29999999999999999 flow(biomassBus_powerplantGasCoal_1)
 -0.10000000000000001 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_electricityBus_2)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_electricityBus_2)_:
 +0.29999999999999999 flow(biomassBus_powerplantGasCoal_2)
 -0.10000000000000001 flow(powerplantGasCoal_electricityBus_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_thermalBus_0)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_thermalBus_0)_:
 +0.5 flow(biomassBus_powerplantGasCoal_0)
 -0.10000000000000001 flow(powerplantGasCoal_thermalBus_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_thermalBus_1)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_thermalBus_1)_:
 +0.5 flow(biomassBus_powerplantGasCoal_1)
 -0.10000000000000001 flow(powerplantGasCoal_thermalBus_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_biomassBus_thermalBus_2)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_biomassBus_thermalBus_2)_:
 +0.5 flow(biomassBus_powerplantGasCoal_2)
 -0.10000000000000001 flow(powerplantGasCoal_thermalBus_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_electricityBus_0)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_electricityBus_0)_:
 +0.29999999999999999 flow(gasBus_powerplantGasCoal_0)
 -0.40000000000000002 flow(powerplantGasCoal_electricityBus_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_electricityBus_1)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_electricityBus_1)_:
 +0.29999999999999999 flow(gasBus_powerplantGasCoal_1)
 -0.40000000000000002 flow(powerplantGasCoal_electricityBus_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_electricityBus_2)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_electricityBus_2)_:
 +0.29999999999999999 flow(gasBus_powerplantGasCoal_2)
 -0.40000000000000002 flow(powerplantGasCoal_electricityBus_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_thermalBus_0)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_thermalBus_0)_:
 +0.5 flow(gasBus_powerplantGasCoal_0)
 -0.40000000000000002 flow(powerplantGasCoal_thermalBus_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_thermalBus_1)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_thermalBus_1)_:
 +0.5 flow(gasBus_powerplantGasCoal_1)
 -0.40000000000000002 flow(powerplantGasCoal_thermalBus_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasCoal_gasBus_thermalBus_2)_:
+c_e_ConverterBlock_relation(powerplantGasCoal_gasBus_thermalBus_2)_:
 +0.5 flow(gasBus_powerplantGasCoal_2)
 -0.40000000000000002 flow(powerplantGasCoal_thermalBus_2)
 = 0

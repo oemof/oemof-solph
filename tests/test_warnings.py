@@ -78,24 +78,24 @@ def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
 
 
 def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
-    """Transformer doesn't warn about potentially erroneous usage."""
+    """Converter doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <no input> of <class"
-        " 'oemof.solph.components._transformer.Transformer'>."
+        " 'oemof.solph.components._converter.Converter'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Transformer(
+        solph.components.Converter(
             label="no input", outputs={look_out: "No inputs!"}
         )
         assert len(w) == 1
         assert msg in str(w[-1].message)
     msg = (
         "Attribute <outputs> is missing in Node <no output> of <class"
-        " 'oemof.solph.components._transformer.Transformer'>."
+        " 'oemof.solph.components._converter.Converter'>."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Transformer(
+        solph.components.Converter(
             label="no output", inputs={look_out: "No outputs!"}
         )
         assert len(w) == 1

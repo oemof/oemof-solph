@@ -141,12 +141,12 @@ class TestsConstraint:
                 )
 
     def test_linear_transformer(self):
-        """Constraint test of a Transformer without Investment."""
+        """Constraint test of a Converter without Investment."""
         bgas = solph.buses.Bus(label="gas")
 
         bel = solph.buses.Bus(label="electricity")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerplantGas",
             inputs={bgas: solph.flows.Flow()},
             outputs={
@@ -155,16 +155,16 @@ class TestsConstraint:
             conversion_factors={bel: 0.58},
         )
 
-        self.compare_lp_files("linear_transformer.lp")
+        self.compare_lp_files("linear_converter.lp")
 
     def test_linear_transformer_invest(self):
-        """Constraint test of a Transformer with Investment."""
+        """Constraint test of a Converter with Investment."""
 
         bgas = solph.buses.Bus(label="gas")
 
         bel = solph.buses.Bus(label="electricity")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerplant_gas",
             inputs={bgas: solph.flows.Flow()},
             outputs={
@@ -176,7 +176,7 @@ class TestsConstraint:
             conversion_factors={bel: 0.58},
         )
 
-        self.compare_lp_files("linear_transformer_invest.lp")
+        self.compare_lp_files("linear_converter_invest.lp")
 
     def test_max_source_min_sink(self):
         """ """
@@ -527,7 +527,7 @@ class TestsConstraint:
         bel = solph.buses.Bus(label="electricityBus")
         bth = solph.buses.Bus(label="thermalBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerplantGasCoal",
             inputs={bbms: solph.flows.Flow(), bgas: solph.flows.Flow()},
             outputs={
@@ -537,7 +537,7 @@ class TestsConstraint:
             conversion_factors={bgas: 0.4, bbms: 0.1, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer.lp")
+        self.compare_lp_files("converter.lp")
 
     def test_transformer_invest(self):
         """Constraint test of a LinearN1Transformer with Investment."""
@@ -547,7 +547,7 @@ class TestsConstraint:
         bel = solph.buses.Bus(label="electricityBus")
         bth = solph.buses.Bus(label="thermalBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerplant_gas_coal",
             inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
             outputs={
@@ -560,7 +560,7 @@ class TestsConstraint:
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer_invest.lp")
+        self.compare_lp_files("converter_invest.lp")
 
     def test_transformer_invest_with_existing(self):
         """Constraint test of a LinearN1Transformer with Investment."""
@@ -570,7 +570,7 @@ class TestsConstraint:
         bel = solph.buses.Bus(label="electricityBus")
         bth = solph.buses.Bus(label="thermalBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerplant_gas_coal",
             inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
             outputs={
@@ -585,17 +585,17 @@ class TestsConstraint:
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
 
-        self.compare_lp_files("transformer_invest_with_existing.lp")
+        self.compare_lp_files("converter_invest_with_existing.lp")
 
     def test_linear_transformer_chp(self):
         """
-        Constraint test of a Transformer without Investment (two outputs).
+        Constraint test of a Converter without Investment (two outputs).
         """
         bgas = solph.buses.Bus(label="gasBus")
         bheat = solph.buses.Bus(label="heatBus")
         bel = solph.buses.Bus(label="electricityBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="CHPpowerplantGas",
             inputs={
                 bgas: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
@@ -604,16 +604,16 @@ class TestsConstraint:
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
 
-        self.compare_lp_files("linear_transformer_chp.lp")
+        self.compare_lp_files("linear_converter_chp.lp")
 
     def test_linear_transformer_chp_invest(self):
-        """Constraint test of a Transformer with Investment (two outputs)."""
+        """Constraint test of a Converter with Investment (two outputs)."""
 
         bgas = solph.buses.Bus(label="gasBus")
         bheat = solph.buses.Bus(label="heatBus")
         bel = solph.buses.Bus(label="electricityBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="chp_powerplant_gas",
             inputs={
                 bgas: solph.flows.Flow(
@@ -625,7 +625,7 @@ class TestsConstraint:
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
 
-        self.compare_lp_files("linear_transformer_chp_invest.lp")
+        self.compare_lp_files("linear_converter_chp_invest.lp")
 
     def test_variable_chp(self):
         """ """
@@ -1033,10 +1033,10 @@ class TestsConstraint:
         self.compare_lp_files("inactivity_costs.lp")
 
     def test_piecewise_linear_transformer_cc(self):
-        """Testing PiecewiseLinearTransformer using CC formulation."""
+        """Testing PiecewiseLinearConverter using CC formulation."""
         bgas = solph.buses.Bus(label="gasBus")
         bel = solph.buses.Bus(label="electricityBus")
-        solph.components.experimental.PiecewiseLinearTransformer(
+        solph.components.experimental.PiecewiseLinearConverter(
             label="pwltf",
             inputs={
                 bgas: solph.flows.Flow(nominal_value=100, variable_costs=1)
@@ -1046,13 +1046,13 @@ class TestsConstraint:
             conversion_function=lambda x: x**2,
             pw_repn="CC",
         )
-        self.compare_lp_files("piecewise_linear_transformer_cc.lp")
+        self.compare_lp_files("piecewise_linear_converter_cc.lp")
 
     def test_piecewise_linear_transformer_dcc(self):
-        """Testing PiecewiseLinearTransformer using DCC formulation."""
+        """Testing PiecewiseLinearConverter using DCC formulation."""
         bgas = solph.buses.Bus(label="gasBus")
         bel = solph.buses.Bus(label="electricityBus")
-        solph.components.experimental.PiecewiseLinearTransformer(
+        solph.components.experimental.PiecewiseLinearConverter(
             label="pwltf",
             inputs={
                 bgas: solph.flows.Flow(nominal_value=100, variable_costs=1)
@@ -1062,7 +1062,7 @@ class TestsConstraint:
             conversion_function=lambda x: x**2,
             pw_repn="DCC",
         )
-        self.compare_lp_files("piecewise_linear_transformer_dcc.lp")
+        self.compare_lp_files("piecewise_linear_converter_dcc.lp")
 
     def test_maximum_startups(self):
         """Testing maximum_startups attribute for nonconvex flows."""
@@ -1098,12 +1098,12 @@ class TestsConstraint:
         )
         self.compare_lp_files("maximum_shutdowns.lp")
 
-    def test_offsettransformer(self):
-        """Constraint test of a OffsetTransformer."""
+    def test_offsetconverter(self):
+        """Constraint test of a OffsetConverter."""
         bgas = solph.buses.Bus(label="gasBus")
         bth = solph.buses.Bus(label="thermalBus")
 
-        solph.components.OffsetTransformer(
+        solph.components.OffsetConverter(
             label="gasboiler",
             inputs={
                 bgas: solph.flows.Flow(
@@ -1116,7 +1116,7 @@ class TestsConstraint:
             coefficients=[-17, 0.9],
         )
 
-        self.compare_lp_files("offsettransformer.lp")
+        self.compare_lp_files("offset_converter.lp")
 
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""

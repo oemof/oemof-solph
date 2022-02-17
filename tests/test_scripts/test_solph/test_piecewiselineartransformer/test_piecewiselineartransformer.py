@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Example that illustrates how to use custom component
-`PiecewiseLinearTransformer` can be used.
+`PiecewiseLinearConverter` can be used.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
@@ -48,8 +48,8 @@ def test_pwltf():
     in_breakpoints = np.arange(0, 110, 25)
     out_breakpoints = conv_func(in_breakpoints)
 
-    # Create and add PiecewiseLinearTransformer
-    pwltf = solph.components.experimental.PiecewiseLinearTransformer(
+    # Create and add PiecewiseLinearConverter
+    pwltf = solph.components.experimental.PiecewiseLinearConverter(
         label="pwltf",
         inputs={b_gas: solph.flows.Flow(nominal_value=100, variable_costs=1)},
         outputs={b_el: solph.flows.Flow()},

@@ -150,9 +150,9 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
 
         * :attr:`NodeOption.All`: `'all'`: Returns all nodes
         * :attr:`NodeOption.HasOutputs`: `'has_outputs'`:
-            Returns nodes with an output flow (eg. Transformer, Source)
+            Returns nodes with an output flow (eg. Converter, Source)
         * :attr:`NodeOption.HasInputs`: `'has_inputs'`:
-            Returns nodes with an input flow (eg. Transformer, Sink)
+            Returns nodes with an input flow (eg. Converter, Sink)
         * :attr:`NodeOption.HasOnlyOutputs`: `'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
         * :attr:`NodeOption.HasOnlyInputs`: `'has_only_inputs'`:
@@ -313,7 +313,7 @@ def node_output_by_type(results, node_type, droplevel=None):
     # Then collect node weights
     views.node_output_by_type(
         m.results(),
-        node_type=solph.components.Transformer
+        node_type=solph.components.Converter
     )
     """
     if droplevel is None:
