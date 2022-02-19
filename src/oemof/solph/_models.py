@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
+import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -184,7 +185,7 @@ class BaseModel(po.ConcreteModel):
         """Returns a nested dictionary of the results of this optimization"""
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+    def solve(self, solver="gurobi", solver_io="lp", **kwargs):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -317,7 +318,7 @@ class Model(BaseModel):
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
-                        [0] * len(self.es.timeindex.year),
+                        [0] * len(self.es.timeindex),
                         range(len(self.es.timeindex)),
                     )
                 ),
