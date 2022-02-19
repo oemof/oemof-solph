@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 
-import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality

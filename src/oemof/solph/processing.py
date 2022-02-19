@@ -18,7 +18,6 @@ SPDX-License-Identifier: MIT
 import sys
 from itertools import groupby
 
-import numpy as np
 import pandas as pd
 from oemof.network.network import Node
 from pyomo.core.base.piecewise import IndexedPiecewise
