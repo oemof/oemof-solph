@@ -426,12 +426,16 @@ class NonConvexFlowBlock(SimpleBlock):
 
         if self.POSITIVE_GRADIENT_FLOWS:
             self.positive_gradient = Var(
-                self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+                self.POSITIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
             )
 
         if self.NEGATIVE_GRADIENT_FLOWS:
             self.negative_gradient = Var(
-                self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+                self.NEGATIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
             )
 
         # set upper bound of gradient variable
@@ -439,12 +443,14 @@ class NonConvexFlowBlock(SimpleBlock):
             if m.flows[i, o].nonconvex.positive_gradient["ub"][0] is not None:
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.nonconvex.positive_gradient["ub"][t] * f.nominal_value
+                        f.nonconvex.positive_gradient["ub"][t]
+                        * f.nominal_value
                     )
             if m.flows[i, o].nonconvex.negative_gradient["ub"][0] is not None:
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.nonconvex.negative_gradient["ub"][t] * f.nominal_value
+                        f.nonconvex.negative_gradient["ub"][t]
+                        * f.nominal_value
                     )
 
         def _minimum_flow_rule(block, i, o, p, t):
