@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
-from _ast import Expression
 from warnings import warn
 
 from numpy import mean
