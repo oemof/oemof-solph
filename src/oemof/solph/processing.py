@@ -249,7 +249,6 @@ def _extract_standard_model_result(
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         try:
             # Enable reindexing by replacing period and timestep indices
-            print(k)
             df_dict[k] = _replace_non_timeindex_indices(
                 df_dict[k],
                 period_indexed,
@@ -324,7 +323,9 @@ def _replace_non_timeindex_indices(
     if not period_indexed_df.empty:
         to_concat.append(period_indexed_df)
 
-    timestep_indexed_df = timestep_indexed_df.dropna()
+    # Handle storages differently
+    if "storage_content" not in timestep_indexed_df.columns:
+        timestep_indexed_df = timestep_indexed_df.dropna()
     timestep_indexed_df = timestep_indexed_df.rename(index=rename_dict)
     if not timestep_indexed_df.empty:
         to_concat.append(timestep_indexed_df)
