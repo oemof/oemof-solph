@@ -185,7 +185,7 @@ class BaseModel(po.ConcreteModel):
         """Returns a nested dictionary of the results of this optimization"""
         return processing.results(self)
 
-    def solve(self, solver="gurobi", solver_io="lp", **kwargs):
+    def solve(self, solver="cbc", solver_io="lp", **kwargs):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
