@@ -2174,7 +2174,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
 
         if m.es.multi_period:
             # Old capacity to be decommissioned (due to lifetime)
-            # Old capacity is built out of old exogenous and endogenous capacities
+            # Old capacity built out of old exogenous and endogenous capacities
             self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
