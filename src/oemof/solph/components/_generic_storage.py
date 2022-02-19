@@ -247,7 +247,7 @@ class GenericStorage(network.Node):
             self.investment
             and sum(solph_sequence(self.fixed_losses_absolute)) != 0
             and self.investment.existing == 0
-            and self.investment.minimum == 0
+            and self.investment.minimum[0] == 0
         ):
             e3 = (
                 "With fixed_losses_absolute > 0, either investment.existing "

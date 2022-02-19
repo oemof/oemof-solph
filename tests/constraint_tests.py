@@ -1181,6 +1181,91 @@ class TestsConstraint:
         )
         self.compare_lp_files("dsm_module_oemof.lp")
 
+    def test_dsm_module_DIW_extended(self):
+        """Constraint test of SinkDSM with approach=DLR
+
+        Test all possible parameters and constraints
+        """
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8],
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.3, 0.3, 0.4],
+            approach="DIW",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shift=2,
+            recovery_time_shed=2,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_DIW_extended.lp")
+
+    def test_dsm_module_DLR_extended(self):
+        """Constraint test of SinkDSM with approach=DLR"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8],
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.3, 0.3, 0.4],
+            approach="DLR",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shed=2,
+            ActivateYearLimit=True,
+            ActivateDayLimit=True,
+            n_yearLimit_shift=100,
+            n_yearLimit_shed=50,
+            t_dayLimit=3,
+            addition=False,
+            fixes=False,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_DLR_extended.lp")
+
+    def test_dsm_module_oemof_extended(self):
+        """Constraint test of SinkDSM with approach=oemof"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8],
+            capacity_up=[0.5, 0.4, 0.5],
+            capacity_down=[0.3, 0.3, 0.4],
+            approach="oemof",
+            shift_interval=2,
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shed=2,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_oemof_extended.lp")
+
     def test_dsm_module_DIW_invest(self):
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
@@ -1195,8 +1280,12 @@ class TestsConstraint:
             flex_share_up=1,
             flex_share_down=1,
             delay_time=1,
-            cost_dsm_down_shift=2,
-            shed_eligibility=False,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
             investment=solph.Investment(
                 ep_cost=100, existing=50, minimum=33, maximum=100
             ),
@@ -1218,8 +1307,13 @@ class TestsConstraint:
             flex_share_down=1,
             delay_time=2,
             shift_time=1,
-            cost_dsm_down_shift=2,
-            shed_eligibility=False,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            n_yearLimit_shed=50,
             investment=solph.Investment(
                 ep_cost=100, existing=50, minimum=33, maximum=100
             ),
@@ -1240,8 +1334,12 @@ class TestsConstraint:
             flex_share_up=1,
             flex_share_down=1,
             shift_interval=2,
-            cost_dsm_down_shift=2,
-            shed_eligibility=False,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
             investment=solph.Investment(
                 ep_cost=100, existing=50, minimum=33, maximum=100
             ),
@@ -1280,7 +1378,7 @@ class TestsConstraint:
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.GenericStorage(
-            label="storagenon_convex",
+            label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
