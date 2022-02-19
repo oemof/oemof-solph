@@ -116,7 +116,9 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=False
         )
-        scalar_attributes = {
+        default_attributes = {
+            "age": None,
+            "lifetime": None,
             "integer": None,
             "investment": None,
             "nominal_value": 1,
@@ -128,13 +130,14 @@ class TestParameterResult:
             "negative_gradient_ub": None,
             "positive_gradient_ub": None,
             "variable_costs": 0,
+            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),
         }
         assert_series_equal(
             param_results[(b_el2, demand)]["scalars"].sort_index(),
-            pandas.Series(scalar_attributes).sort_index(),
+            pandas.Series(default_attributes).sort_index(),
         )
         sequences_attributes = {
             "fix": self.demand_values,
@@ -159,13 +162,16 @@ class TestParameterResult:
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_ep_costs": 0.4,
+                    "investment_age": 0,
                     "investment_existing": 0,
+                    "investment_interest_rate": 0,
+                    "investment_nonconvex": False,
+                    "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
-                    "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
+                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
@@ -195,13 +201,16 @@ class TestParameterResult:
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_ep_costs": 0.4,
+                    "investment_age": 0,
                     "investment_existing": 0,
+                    "investment_interest_rate": 0,
+                    "investment_nonconvex": False,
+                    "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
-                    "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
+                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
@@ -256,7 +265,7 @@ class TestParameterResult:
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]
-        self.mod.flow[trsf, bus, 5] = float("nan")
+        self.mod.flow[trsf, bus, 0, 5] = float("nan")
         with assert_raises(ValueError):
             processing.results(self.mod)
 
@@ -270,7 +279,7 @@ class TestParameterResult:
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        eq_(round(float(storage_content.sum()), 6), 1437.500003)
+        eq_(round(float(storage_content.sum()), 1), 1437.5)
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)

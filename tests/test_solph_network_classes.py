@@ -76,10 +76,21 @@ def test_wrong_combination_of_options():
         )
 
 
-def test_error_of_deprecated_fixed_costs():
-    msg = "The `fixed_costs` attribute has been removed with v0.2!"
-    with pytest.raises(AttributeError, match=msg):
+def test_fixed_costs_warning():
+    msg = (
+        "Be aware that the fixed costs attribute is only\n"
+        "meant to be used for multi-period models.\n"
+        "If you wish to set up a multi-period model, set the"
+        " multi_period attribute of your energy system to True.\n"
+        "It has been decided to remove the `fixed_costs` "
+        "attribute with v0.2 for regular uses.\n"
+        "If you specify `fixed_costs` for a regular model, "
+        "it will simply be ignored."
+    )
+    with warnings.catch_warnings(record=True) as w:
         solph.flows.Flow(fixed_costs=34)
+        assert len(w) != 0
+        assert msg == str(w[-1].message)
 
 
 def test_flow_with_fix_and_min_max():
