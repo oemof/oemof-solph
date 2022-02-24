@@ -267,9 +267,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
             "registry",
             "inputs",
             "outputs",
-            "register",
             "Label",
-            "from_object",
             "input",
             "output",
             "constraint_group",
@@ -277,7 +275,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
         attrs = [
             i
             for i in dir(com)
-            if not (callable(i) or i.startswith(exclusions))
+            if not (callable(getattr(com, i)) or i.startswith(exclusions))
         ]
 
         for a in attrs:
