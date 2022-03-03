@@ -369,7 +369,8 @@ def __separate_attrs(
             if len(value) == 0 or value[0] is None:
                 del com["sequences"][ckey]
 
-    exclude_attrs = exclude_attrs or []
+    if exclude_attrs is None:
+        exclude_attrs = []
 
     # Check if system is es or om:
     if system.__class__.__name__ == "EnergySystem":
@@ -411,7 +412,8 @@ def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
     dict: Parameters for all nodes and flows
     """
 
-    exclude_attrs = exclude_attrs or []
+    if exclude_attrs is None:
+        exclude_attrs = []
 
     flow_data = __separate_attrs(
         system, exclude_attrs, get_flows=True, exclude_none=exclude_none
