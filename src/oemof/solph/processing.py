@@ -243,7 +243,7 @@ def meta_results(om, undefined=False):
 
 
 def __separate_attrs(
-    system, exclude_attrs, get_flows=False, exclude_none=True
+    system, exclude_attrs=None, get_flows=False, exclude_none=True
 ):
     """
     Create a dictionary with flow scalars and series.
@@ -368,6 +368,8 @@ def __separate_attrs(
         for ckey, value in list(com["sequences"].items()):
             if len(value) == 0 or value[0] is None:
                 del com["sequences"][ckey]
+    
+    exclude_attrs = exclude_attrs or []
 
     # Check if system is es or om:
     if system.__class__.__name__ == "EnergySystem":
