@@ -368,7 +368,7 @@ def __separate_attrs(
         for ckey, value in list(com["sequences"].items()):
             if len(value) == 0 or value[0] is None:
                 del com["sequences"][ckey]
-    
+
     exclude_attrs = exclude_attrs or []
 
     # Check if system is es or om:
