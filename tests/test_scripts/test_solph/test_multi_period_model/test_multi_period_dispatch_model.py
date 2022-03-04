@@ -1,5 +1,5 @@
 """
-Test for creating an MultiPeriod dispatch optimization model
+Test for creating an multi-period dispatch optimization model
 
 Create an energy system consisting of the following fleets
 - lignite
@@ -34,49 +34,39 @@ def test_multi_period_dispatch_model(solver="cbc"):
     t_idx_3 = pd.date_range("1/1/2040", periods=3, freq="H")
 
     # Create an overall timeindex
-    t_idx_1_Series = pd.Series(index=t_idx_1, dtype="float64")
-    t_idx_2_Series = pd.Series(index=t_idx_2, dtype="float64")
-    t_idx_3_Series = pd.Series(index=t_idx_3, dtype="float64")
+    t_idx_1_series = pd.Series(index=t_idx_1, dtype="float64")
+    t_idx_2_series = pd.Series(index=t_idx_2, dtype="float64")
+    t_idx_3_series = pd.Series(index=t_idx_3, dtype="float64")
 
     timeindex = pd.concat(
-        [t_idx_1_Series, t_idx_2_Series, t_idx_3_Series]
+        [t_idx_1_series, t_idx_2_series, t_idx_3_series]
     ).index
 
     es = EnergySystem(
-        timeindex=timeindex, timeincrement=[1] * len(timeindex), multi_period=True
+        timeindex=timeindex,
+        timeincrement=[1] * len(timeindex),
+        multi_period=True,
     )
 
     # Create buses
-    bus_lignite = buses.Bus(
-        label="DE_bus_lignite", balanced=True
-    )
-    bus_hardcoal = buses.Bus(
-        label="DE_bus_hardcoal", balanced=True
-    )
-    bus_natgas = buses.Bus(
-        label="DE_bus_natgas", balanced=True
-    )
+    bus_lignite = buses.Bus(label="DE_bus_lignite", balanced=True)
+    bus_hardcoal = buses.Bus(label="DE_bus_hardcoal", balanced=True)
+    bus_natgas = buses.Bus(label="DE_bus_natgas", balanced=True)
     bus_el = buses.Bus(label="DE_bus_el", balanced=True)
-    bus_el_FR = buses.Bus(label="FR_bus_el", balanced=True)
+    bus_el_fr = buses.Bus(label="FR_bus_el", balanced=True)
 
     # Create sources
     source_lignite = components.Source(
         label="DE_source_lignite",
-        outputs={
-            bus_lignite: flows.Flow(variable_costs=5)
-        },
+        outputs={bus_lignite: flows.Flow(variable_costs=5)},
     )
     source_hardcoal = components.Source(
         label="DE_source_hardcoal",
-        outputs={
-            bus_hardcoal: flows.Flow(variable_costs=10)
-        },
+        outputs={bus_hardcoal: flows.Flow(variable_costs=10)},
     )
     source_natgas = components.Source(
         label="DE_source_natgas",
-        outputs={
-            bus_natgas: flows.Flow(variable_costs=20)
-        },
+        outputs={bus_natgas: flows.Flow(variable_costs=20)},
     )
     source_wind = components.Source(
         label="DE_source_wind",
@@ -90,28 +80,22 @@ def test_multi_period_dispatch_model(solver="cbc"):
     )
     source_shortage = components.Source(
         label="DE_source_shortage",
-        outputs={
-            bus_el: flows.Flow(
-                variable_costs=1e10, nominal_value=1e10
-            )
-        },
+        outputs={bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)},
     )
-    source_wind_FR = components.Source(
+    source_wind_fr = components.Source(
         label="FR_source_wind",
         outputs={
-            bus_el_FR: flows.Flow(
+            bus_el_fr: flows.Flow(
                 variable_costs=0,
                 fix=[45] * len(timeindex),
                 nominal_value=1,
             )
         },
     )
-    source_shortage_FR = components.Source(
+    source_shortage_fr = components.Source(
         label="FR_source_shortage",
         outputs={
-            bus_el_FR: flows.Flow(
-                variable_costs=1e10, nominal_value=1e10
-            )
+            bus_el_fr: flows.Flow(variable_costs=1e10, nominal_value=1e10)
         },
     )
 
@@ -119,34 +103,22 @@ def test_multi_period_dispatch_model(solver="cbc"):
     sink_el = components.Sink(
         label="DE_sink_el",
         inputs={
-            bus_el: flows.Flow(
-                fix=[80] * len(timeindex), nominal_value=1
-            )
+            bus_el: flows.Flow(fix=[80] * len(timeindex), nominal_value=1)
         },
     )
     sink_excess = components.Sink(
         label="DE_sink_excess",
-        inputs={
-            bus_el: flows.Flow(
-                variable_costs=1e10, nominal_value=1e10
-            )
-        },
+        inputs={bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)},
     )
-    sink_el_FR = components.Sink(
+    sink_el_fr = components.Sink(
         label="FR_sink_el",
         inputs={
-            bus_el_FR: flows.Flow(
-                fix=[50] * len(timeindex), nominal_value=1
-            )
+            bus_el_fr: flows.Flow(fix=[50] * len(timeindex), nominal_value=1)
         },
     )
-    sink_excess_FR = components.Sink(
+    sink_excess_fr = components.Sink(
         label="FR_sink_excess",
-        inputs={
-            bus_el_FR: flows.Flow(
-                variable_costs=1e3, nominal_value=1e10
-            )
-        },
+        inputs={bus_el_fr: flows.Flow(variable_costs=1e3, nominal_value=1e10)},
     )
 
     # Create transformers
@@ -164,7 +136,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         conversion_factors={bus_el: 0.45},
     )
 
-    pp_natgas_CCGT = components.Transformer(
+    pp_natgas_ccgt = components.Transformer(
         label="DE_pp_natgas_CCGT",
         inputs={bus_natgas: flows.Flow()},
         outputs={
@@ -176,7 +148,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         conversion_factors={bus_el: 0.6},
     )
 
-    pp_natgas_GT = components.Transformer(
+    pp_natgas_gt = components.Transformer(
         label="DE_pp_natgas_GT",
         inputs={bus_natgas: flows.Flow()},
         outputs={
@@ -190,15 +162,9 @@ def test_multi_period_dispatch_model(solver="cbc"):
 
     storage_el = components.GenericStorage(
         label="DE_storage_el",
-        inputs={
-            bus_el: flows.Flow(
-                nominal_value=20, variable_costs=0, max=1
-            )
-        },
+        inputs={bus_el: flows.Flow(nominal_value=20, variable_costs=0, max=1)},
         outputs={
-            bus_el: flows.Flow(
-                nominal_value=20, variable_costs=0, max=1
-            )
+            bus_el: flows.Flow(nominal_value=20, variable_costs=0, max=1)
         },
         nominal_storage_capacity=20,
         loss_rate=0,
@@ -211,19 +177,19 @@ def test_multi_period_dispatch_model(solver="cbc"):
         fixed_costs=10,
     )
 
-    link_DE_FR = components.experimental.Link(
+    link_de_fr = components.experimental.Link(
         label="link_DE_FR",
         inputs={
             bus_el: flows.Flow(nominal_value=10),
-            bus_el_FR: flows.Flow(nominal_value=10),
+            bus_el_fr: flows.Flow(nominal_value=10),
         },
         outputs={
-            bus_el_FR: flows.Flow(),
+            bus_el_fr: flows.Flow(),
             bus_el: flows.Flow(),
         },
         conversion_factors={
-            (bus_el, bus_el_FR): 0.999999,
-            (bus_el_FR, bus_el): 0.999999,
+            (bus_el, bus_el_fr): 0.999999,
+            (bus_el_fr, bus_el): 0.999999,
         },
     )
 
@@ -284,17 +250,17 @@ def test_multi_period_dispatch_model(solver="cbc"):
         bus_el,
         pp_lignite,
         pp_hardcoal,
-        pp_natgas_CCGT,
-        pp_natgas_GT,
+        pp_natgas_ccgt,
+        pp_natgas_gt,
         sink_el,
         sink_excess,
         storage_el,
-        source_wind_FR,
-        source_shortage_FR,
-        bus_el_FR,
-        sink_el_FR,
-        sink_excess_FR,
-        link_DE_FR,
+        source_wind_fr,
+        source_shortage_fr,
+        bus_el_fr,
+        sink_el_fr,
+        sink_excess_fr,
+        link_de_fr,
         dsm_unit,
     )
 
