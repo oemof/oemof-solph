@@ -134,6 +134,7 @@ def test_optimise_storage_size(
 
 
 def test_results_with_actual_dump():
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -184,6 +185,7 @@ def test_results_with_actual_dump():
 def test_solph_transformer_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
     of `solph.components.Transformer`"""
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
