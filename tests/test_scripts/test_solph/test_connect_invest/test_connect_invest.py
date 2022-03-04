@@ -93,26 +93,34 @@ def test_connect_invest():
 
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.InvestmentFlowBlock.invest[line21, bel1, 0],
         2,
     )
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.GenericInvestmentStorageBlock.invest[storage],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.GenericInvestmentStorageBlock.invest[storage, 0],
     )
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc")
+    om.solve(solver="cbc", tee=True)
 
     # check if the new result object is working for custom components
     results = processing.results(om)
 
     my_results = dict()
-    my_results["line12"] = float(views.node(results, "line12")["scalars"])
-    my_results["line21"] = float(views.node(results, "line21")["scalars"])
+    my_results["line12"] = float(
+        views.node(results, "line12")["scalars"].loc[
+            [(("line12", "electricity2"), "invest")]
+        ]
+    )
+    my_results["line21"] = float(
+        views.node(results, "line21")["scalars"].loc[
+            [(("line21", "electricity1"), "invest")]
+        ]
+    )
     stor_res = views.node(results, "storage")["scalars"]
     my_results["storage_in"] = stor_res[
         [(("electricity1", "storage"), "invest")]
