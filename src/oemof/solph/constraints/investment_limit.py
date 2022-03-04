@@ -193,19 +193,23 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
     limit_name = "invest_limit_" + keyword
 
-    def _additional_limit_rule(block):
-        for p in model.PERIODS:
-            lhs = sum(
+    setattr(
+        model,
+        limit_name,
+        po.Expression(
+            expr=sum(
                 model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
+                for p in model.PERIODS
             )
-            rhs = limit
-            model.add_limit.add(p, (lhs <= rhs))
-
-    model.add_limit = po.Constraint(
-        model.PERIODS, noruleinit=True, name=limit_name + "_constraint"
+        ),
     )
-    model.add_limit_build = po.BuildAction(rule=_additional_limit_rule)
+
+    setattr(
+        model,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    )
 
     return model

@@ -8,7 +8,7 @@ objective:
 
 s.t.
 
-c_u_add_limit(0)_:
+c_u_invest_limit_space_constraint_:
 +4 InvestmentFlowBlock_invest(source_0_bus_1_0)
 +1 InvestmentFlowBlock_invest(source_1_bus_1_0)
 <= 20
