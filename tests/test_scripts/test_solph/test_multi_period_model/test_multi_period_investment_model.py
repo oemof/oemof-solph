@@ -17,11 +17,12 @@ Add wind source and demand sink for FR and links for exchange.
 import pandas as pd
 from nose.tools import eq_
 
-from oemof.solph import flows, _options
-from oemof.solph import components
-from oemof.solph import buses
 from oemof.solph import EnergySystem
 from oemof.solph import Model
+from oemof.solph import _options
+from oemof.solph import buses
+from oemof.solph import components
+from oemof.solph import flows
 from oemof.solph import processing
 from oemof.solph import views
 

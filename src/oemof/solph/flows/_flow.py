@@ -20,8 +20,9 @@ from warnings import warn
 
 from oemof.network import network as on
 from oemof.tools import debugging
-from pyomo.core import BuildAction, Expression
+from pyomo.core import BuildAction
 from pyomo.core import Constraint
+from pyomo.core import Expression
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
