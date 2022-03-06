@@ -1,4 +1,4 @@
-"""Tests of the energy_system module.
+"""Tests of the _energy_system module.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,

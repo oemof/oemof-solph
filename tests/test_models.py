@@ -135,3 +135,35 @@ def test_infeasible_model():
             m.solve(solver="cbc")
             assert "Optimization ended with status" in str(w[0].message)
             solph.processing.meta_results(m)
+
+
+def test_multi_period_default_discount_rate():
+    """Test error being thrown for default multi-period discount rate"""
+    warnings.filterwarnings("ignore", category=FutureWarning)
+    timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
+    es = solph.EnergySystem(timeindex=timeindex, multi_period=True)
+    bel = solph.buses.Bus()
+    es.add(bel)
+    es.add(
+        solph.components.Sink(
+            inputs={bel: solph.flows.Flow(
+                nominal_value=5,
+                fix=[1] * len(timeindex))
+            }
+        )
+    )
+    es.add(
+        solph.components.Source(
+            outputs={
+                bel: solph.flows.Flow(
+                    nominal_value=4, variable_costs=5
+                )
+            }
+        )
+    )
+    msg = (
+        "By default, a discount_rate of 0.02 is used for a multi-period model."
+    )
+    with warnings.catch_warnings(record=True) as w:
+        solph.Model(es)
+        assert msg in str(w[0].message)
