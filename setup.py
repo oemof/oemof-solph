@@ -92,7 +92,7 @@ setup(
     entry_points={
         "console_scripts": [
             "oemof_installation_test = "
-            + "oemof.solph.console_scripts:check_oemof_installation"
+            + "oemof.solph._console_scripts:check_oemof_installation"
         ]
     },
 )

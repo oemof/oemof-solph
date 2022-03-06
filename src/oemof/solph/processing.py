@@ -282,7 +282,7 @@ def _extract_standard_model_result(
 def _replace_non_timeindex_indices(
     df, period_indexed, timestep_indexed, period_timestep_indexed
 ):
-    """Replace period and timestpes indices by timeindex values
+    """Replace timeindex values by timesteps values; we only have one period
 
     Parameters
     ----------
@@ -300,7 +300,7 @@ def _replace_non_timeindex_indices(
     df : pd.DataFrame
         Manipulated DataFrame containing only timestep indices
     """
-    rename_dict = {key: (0, key[0]) for key in df.index if len(key) == 1}
+    rename_dict = {key: (key[1],) for key in df.index if len(key) > 1}
     to_concat = []
     # Split into different data sets dependent on indexation
     period_timestep_indexed_df = df[
@@ -314,18 +314,19 @@ def _replace_non_timeindex_indices(
     ]
 
     period_timestep_indexed_df = period_timestep_indexed_df.dropna()
+    period_timestep_indexed_df = period_timestep_indexed_df.rename(
+        index=rename_dict
+    )
     if not period_timestep_indexed_df.empty:
         to_concat.append(period_timestep_indexed_df)
 
     period_indexed_df = period_indexed_df.dropna()
-    period_indexed_df = period_indexed_df.rename(index={(0,): (0, 0)})
     if not period_indexed_df.empty:
         to_concat.append(period_indexed_df)
 
     # Handle storages differently
     if "storage_content" not in timestep_indexed_df.columns:
         timestep_indexed_df = timestep_indexed_df.dropna()
-    timestep_indexed_df = timestep_indexed_df.rename(index=rename_dict)
     if not timestep_indexed_df.empty:
         to_concat.append(timestep_indexed_df)
 
