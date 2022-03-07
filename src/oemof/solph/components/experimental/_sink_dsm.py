@@ -148,12 +148,12 @@ class SinkDSM(Sink):
     flex_share_up: float
         Flexible share of installed capacity
         eligible for upshifts (used for invest mode)
-    cost_dsm_up : int
+    cost_dsm_up : float
         Cost per unit of DSM activity that increases the demand
-    cost_dsm_down_shift : int
+    cost_dsm_down_shift : float
         Cost per unit of DSM activity that decreases the demand
         for load shifting
-    cost_dsm_down_shed : int
+    cost_dsm_down_shed : float
         Cost per unit of DSM activity that decreases the demand
         for load shedding
     efficiency : float

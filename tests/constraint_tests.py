@@ -979,6 +979,136 @@ class TestsConstraint:
 
         self.compare_lp_files("investment_limit.lp", my_om=om)
 
+    def test_investment_limit_with_dsm1(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123)
+                )
+            },
+        )
+        solph.components.experimental.SinkDSM(
+            label="sink_dsm_DIW",
+            approach="DIW",
+            inputs={bus1: solph.flows.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=0.5,
+            cost_dsm_up=0.5,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_costs=100, existing=50, minimum=33, maximum=100
+            ),
+        )
+        om = self.get_om()
+        solph.constraints.investment_limit(om, limit=900)
+
+        self.compare_lp_files("investment_limit_with_dsm_DIW.lp", my_om=om)
+
+    def test_investment_limit_with_dsm2(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123)
+                )
+            },
+        )
+        solph.components.experimental.SinkDSM(
+            label="sink_dsm_DLR",
+            approach="DLR",
+            inputs={bus1: solph.flows.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            shift_time=1,
+            cost_dsm_down_shift=0.5,
+            cost_dsm_up=0.5,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_costs=100, existing=50, minimum=33, maximum=100
+            ),
+        )
+        om = self.get_om()
+        solph.constraints.investment_limit(om, limit=900)
+
+        self.compare_lp_files("investment_limit_with_dsm_DLR.lp", my_om=om)
+
+    def test_investment_limit_with_dsm3(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123)
+                )
+            },
+        )
+        solph.components.experimental.SinkDSM(
+            label="sink_dsm_oemof",
+            approach="oemof",
+            inputs={bus1: solph.flows.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            shift_interval=2,
+            cost_dsm_down_shift=0.5,
+            cost_dsm_up=0.5,
+            shed_eligibility=False,
+            investment=solph.Investment(
+                ep_costs=100, existing=50, minimum=33, maximum=100
+            ),
+        )
+        om = self.get_om()
+        solph.constraints.investment_limit(om, limit=900)
+
+        self.compare_lp_files("investment_limit_with_dsm_oemof.lp", my_om=om)
+
+    def test_investment_limit_per_period_error_no_multi_period(self):
+        """Test error being thrown if model is not a multi-period model"""
+        bus1 = solph.buses.Bus(label="Bus1")
+        solph.components.GenericStorage(
+            label="storage_invest_limit",
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
+            inputs={bus1: solph.flows.Flow()},
+            outputs={bus1: solph.flows.Flow()},
+            investment=solph.Investment(ep_costs=145),
+        )
+        solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123)
+                )
+            },
+        )
+        om = self.get_om()
+
+        msg = (
+            "investment_limit_per_period is only applicable "
+            "for multi-period models.\nIn order to create such a model, "
+            "set attribute `multi_period` of your energy system to True."
+        )
+        with pytest.raises(ValueError, match=msg):
+            solph.constraints.investment_limit_per_period(om, limit=900)
+
     def test_min_max_runtime(self):
         """Testing min and max runtimes for nonconvex flows."""
         bus_t = solph.buses.Bus(label="Bus_T")
@@ -1045,7 +1175,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x**2,
+            conversion_function=lambda x: x ** 2,
             pw_repn="CC",
         )
         self.compare_lp_files("piecewise_linear_transformer_cc.lp")
@@ -1061,7 +1191,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x**2,
+            conversion_function=lambda x: x ** 2,
             pw_repn="DCC",
         )
         self.compare_lp_files("piecewise_linear_transformer_dcc.lp")
@@ -1287,7 +1417,7 @@ class TestsConstraint:
             recovery_time_shed=2,
             shed_time=2,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         self.compare_lp_files("dsm_module_DIW_invest.lp")
@@ -1315,7 +1445,7 @@ class TestsConstraint:
             shed_time=2,
             n_yearLimit_shed=50,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         self.compare_lp_files("dsm_module_DLR_invest.lp")
@@ -1341,7 +1471,7 @@ class TestsConstraint:
             recovery_time_shed=2,
             shed_time=2,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                ep_costs=100, existing=50, minimum=33, maximum=100
             ),
         )
         self.compare_lp_files("dsm_module_oemof_invest.lp")
@@ -1495,3 +1625,29 @@ class TestsConstraint:
             },
         )
         self.compare_lp_files("flow_invest_with_offset_no_minimum.lp")
+
+    def test_integral_limit_error_no_multi_period(self):
+        """Test error being thrown if model is not a multi-period model"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="pv_source",
+            inputs={
+                bel: solph.flows.Flow(
+                    nominal_value=100,
+                    variable_costs=20,
+                    space=40,
+                    fix=[0.3, 0.5, 0.8],
+                )
+            },
+        )
+        om = self.get_om()
+        msg = (
+            "generic_periodical_integral_limit is only applicable\n"
+            "for multi-period models.\nFor standard models, use "
+            "generic_integral_limit instead."
+        )
+        with pytest.raises(ValueError, match=msg):
+            solph.constraints.generic_periodical_integral_limit(
+                om, keyword="space"
+            )

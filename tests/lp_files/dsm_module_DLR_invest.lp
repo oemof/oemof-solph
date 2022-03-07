@@ -29,6 +29,7 @@ objective:
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_2_0)
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_2_1)
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_2_2)
++100 SinkDSMDLRInvestmentBlock_invest(demand_dsm_0)
 
 s.t.
 
