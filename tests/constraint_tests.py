@@ -827,7 +827,7 @@ class TestsConstraint:
         assert_raises(AttributeError, define_emission_limit)
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
-        """Test that no error is thrown if no flows are explicity passed"""
+        """Test that no error is thrown if no flows are explicitly passed"""
         bel = solph.buses.Bus(label="electricityBus")
         solph.components.Source(
             label="source1",
