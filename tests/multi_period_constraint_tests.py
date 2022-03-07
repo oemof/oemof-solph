@@ -363,3 +363,112 @@ class TestsMultiPeriodConstraint:
         )
 
         self.compare_lp_files("fixed_source_variable_sink_multi_period.lp")
+
+    def test_nominal_value_to_zero(self):
+        """If the nominal value is set to zero nothing should happen."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="s1", outputs={bel: solph.flows.Flow(nominal_value=0)}
+        )
+        self.compare_lp_files("nominal_value_to_zero_multi_period.lp")
+
+    def test_fixed_source_invest_sink(self):
+        """Constraints test for fixed source + invest sink w. `summed_max`"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="wind",
+            outputs={
+                bel: solph.flows.Flow(
+                    fix=[12, 16, 14, 18, 18, 18], nominal_value=1e6
+                )
+            },
+        )
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500, maximum=1e6, existing=50, lifetime=20
+                    ),
+                )
+            },
+        )
+
+        self.compare_lp_files("fixed_source_invest_sink_multi_period.lp")
+
+    def test_investment_lifetime_missing(self):
+        """Test error raised if lifetime attribute is missing"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500, maximum=1e6, existing=50
+                    ),
+                )
+            },
+        )
+
+        msg = (
+            "You have to specify a lifetime "
+            "for an InvestmentFlow in a multi-period model!"
+        )
+        with pytest.raises(ValueError, match=msg):
+            self.get_om()
+
+    def test_invest_source_fixed_sink(self):
+        """Constraint test with a fixed sink and a dispatch invest source."""
+
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="pv",
+            outputs={
+                bel: solph.flows.Flow(
+                    max=[45, 83, 65, 67, 33, 96],
+                    variable_costs=13,
+                    investment=solph.Investment(ep_costs=123, lifetime=25),
+                )
+            },
+        )
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    fix=[0.5, 0.8, 0.3, 0.6, 0.7, 0.2], nominal_value=1e5
+                )
+            },
+        )
+
+        self.compare_lp_files("invest_source_fixed_sink_multi_period.lp")
+
+    def test_storage(self):
+        """ """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.GenericStorage(
+            label="storage_no_invest",
+            inputs={
+                bel: solph.flows.Flow(nominal_value=16667, variable_costs=56)
+            },
+            outputs={
+                bel: solph.flows.Flow(nominal_value=16667, variable_costs=24)
+            },
+            nominal_storage_capacity=1e5,
+            loss_rate=0.13,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            initial_storage_level=0.4,
+        )
+
+        self.compare_lp_files("storage_multi_period.lp")
