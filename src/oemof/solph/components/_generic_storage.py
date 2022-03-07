@@ -217,13 +217,13 @@ class GenericStorage(network.Node):
                 self.invest_relation_input_capacity is not None
                 and not isinstance(flow.investment, Investment)
             ):
-                flow.investment = Investment()
+                flow.investment = Investment(lifetime=self.lifetime_inflow)
         for flow in self.outputs.values():
             if (
                 self.invest_relation_output_capacity is not None
                 and not isinstance(flow.investment, Investment)
             ):
-                flow.investment = Investment()
+                flow.investment = Investment(lifetime=self.lifetime_outflow)
 
     def _check_invest_attributes(self):
         if self.investment and self.nominal_storage_capacity is not None:
