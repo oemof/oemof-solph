@@ -757,7 +757,7 @@ class InvestmentFlowBlock(SimpleBlock):
                     )
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=investment_costs + fixed_costs)
 

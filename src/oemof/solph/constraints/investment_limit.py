@@ -95,8 +95,8 @@ def investment_limit_per_period(model, limit=None):
     def investment_period_rule(m, p):
         expr = 0
 
-        if hasattr(m, "InvestmentFlow"):
-            expr += m.InvestmentFlow.period_investment_costs[p]
+        if hasattr(m, "InvestmentFlowBlock"):
+            expr += m.InvestmentFlowBlock.period_investment_costs[p]
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
             expr += m.GenericInvestmentStorageBlock.period_investment_costs[p]

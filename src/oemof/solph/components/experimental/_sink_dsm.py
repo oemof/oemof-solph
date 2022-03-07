@@ -1318,7 +1318,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )
@@ -2954,7 +2954,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )
@@ -5229,7 +5229,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )

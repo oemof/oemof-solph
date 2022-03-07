@@ -811,8 +811,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         if m.es.multi_period:
             for n in group:
                 error = (
-                    "For a multi-period model, fixed absolute losses"
-                    " are not supported. Please remove parameter."
+                    "For a multi-period investment model, fixed absolute"
+                    " losses are not supported. Please remove parameter."
                 )
                 if n.fixed_losses_absolute.default != 0:
                     raise ValueError(error)
@@ -1453,7 +1453,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                         )
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.fixed_costs = Expression(expr=fixed_costs)
         self.costs = Expression(expr=investment_costs + fixed_costs)
 

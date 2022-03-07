@@ -325,6 +325,7 @@ def _replace_non_timeindex_indices(
         to_concat.append(period_indexed_df)
 
     # Handle storages differently
+    # TODO: Handle SinkDSM for DIW and DLR approach!
     if "storage_content" not in timestep_indexed_df.columns:
         timestep_indexed_df = timestep_indexed_df.dropna()
     if not timestep_indexed_df.empty:
