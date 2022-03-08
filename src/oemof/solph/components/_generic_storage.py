@@ -896,6 +896,13 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 n for n in group if n.investment.overall_minimum is not None
             ]
         )
+
+        self.EXISTING_INVESTSTORAGES = Set(
+            initialize=[
+                n for n in group if n.investment.existing is not None
+            ]
+        )
+
         # ######################### Variables  ################################
         self.storage_content = Var(
             self.INVESTSTORAGES, m.TIMESTEPS, within=NonNegativeReals
@@ -1451,6 +1458,17 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                                 ** (-m.es.periods_years[p])
                             )
                         )
+
+            for n in self.EXISTING_INVESTSTORAGES:
+                if n.investment.fixed_costs[0] is not None:
+                    lifetime = n.investment.lifetime
+                    age = n.investment.age
+                    fixed_costs += sum(
+                        n.investment.existing
+                        * n.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = period_investment_costs

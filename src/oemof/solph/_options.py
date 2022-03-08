@@ -56,7 +56,7 @@ class Investment:
     interest_rate : float
         Interest rate for calculating annuities when investing in that unit;
         only applicable for multi-period models
-    fixed_costs : list of float
+    fixed_costs : float or list of float
         Fixed costs in each period; only applicable for multi-period models
 
 

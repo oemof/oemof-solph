@@ -881,6 +881,10 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -1314,6 +1318,17 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             )
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -2151,6 +2166,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -2950,6 +2969,17 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             )
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -4215,6 +4245,10 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -5225,6 +5259,17 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             )
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
