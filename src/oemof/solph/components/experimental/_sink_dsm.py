@@ -174,7 +174,6 @@ class SinkDSM(Sink):
         Minimum time between the end of one load shifting process
         and the start of another for load shifting processes
     recovery_time_shed : int
-        Only used when :attr:`~approach` is set to 'DIW'.
         Minimum time between the end of one load shifting process
         and the start of another for load shedding processes
     ActivateYearLimit : boolean
