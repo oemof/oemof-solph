@@ -42,12 +42,14 @@ class EnergySystem(es.EnergySystem):
         Parameters
         ----------
         multi_period : boolean
-            If True, a multi period model is used; defaults to False
+            If True, a multi-period model is used; defaults to False
 
         periods : dict
-            The periods of a multi period model
-            Keys are years as integer values,
-            values are the respective number of the period starting with zero
+            The periods of a multi-period model;
+            Keys are the numbers of the respective period, starting with zero,
+            values are pd.date_range objects carrying the timeindex for the
+            respective period;
+            For a standard model, periods only holds one entry, i.e. {0: 0}
         """
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
@@ -77,22 +79,23 @@ class EnergySystem(es.EnergySystem):
         """Returns periods to be added to the energy system
 
         * For a standard model, periods only contain one value {0: 0}
-        * For a multi-period model, periods are based on the years used in the
-          timeindex. As a default, each year in the timeindex is mapped to
-          its own period.
+        * For a multi-period model, periods are indexed with integer values
+          starting from zero. The keys are the time indices for the resective
+          period given by a pd.date_range object. As a default,
+          each year in the timeindex is mapped to its own period.
 
         Parameters
         ----------
         periods : dict
             Periods of a (multi-period) model
             Keys are periods as increasing integer values, starting from 0,
-            values are the periods defined by a pandas.date_range
+            values are the periods defined by a pd.date_range object;
             For a standard model, only one period is used.
 
         Returns
         -------
         periods : dict
-            Periods of the energy system (ensure it being set)
+            Periods of the energy system (to ensure it being set)
         """
         if not self.multi_period:
             periods = {0: 0}
@@ -115,10 +118,13 @@ class EnergySystem(es.EnergySystem):
         return periods
 
     def _extract_periods_years(self):
-        """Map simulation years to the respective period based on timeindices
+        """Map simulation years to the respective period based on time indices
 
-        * `periods_years` is the simulation year corresponding to the start
-          of a period, starting with 0
+        Returns
+        -------
+        periods_years: dict
+            the simulation year of the start of each a period,
+            relative to the start of the optimization rund and starting with 0
         """
         periods_years = {0: 0}
         if self.multi_period:
