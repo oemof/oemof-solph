@@ -591,8 +591,6 @@ class FlowBlock(SimpleBlock):
                             self.lifetime_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
                             )
-                        else:
-                            pass  # return Constraint.skip()
 
             self.lifetime_output = Constraint(
                 self.LIFETIME_FLOWS, m.TIMEINDEX, noruleinit=True
@@ -616,8 +614,6 @@ class FlowBlock(SimpleBlock):
                             self.lifetime_age_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
                             )
-                        else:
-                            pass  # return Constraint.skip()
 
             self.lifetime_age_output = Constraint(
                 self.LIFETIME_AGE_FLOWS, m.TIMEINDEX, noruleinit=True

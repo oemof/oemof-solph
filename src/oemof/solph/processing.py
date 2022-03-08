@@ -44,32 +44,6 @@ def get_tuple(x):
         return x
 
 
-def get_timestep(x):
-    """
-    Get the timestep from oemof tuples.
-
-    The timestep from tuples `(n, n, int)`, `(n, n)`, `(n, int)` and (n,)
-    is fetched as the last element. For time-independent data (scalars)
-    zero ist returned.
-    """
-    if all(issubclass(type(n), Node) for n in x):
-        return 0
-    else:
-        return x[-1]
-
-
-def remove_timestep(x):
-    """
-    Remove the timestep from oemof tuples.
-
-    The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
-    """
-    if all(issubclass(type(n), Node) for n in x):
-        return x
-    else:
-        return x[:-1]
-
-
 def get_timeindex(x):
     """
     Get the timeindex from oemof tuples.
