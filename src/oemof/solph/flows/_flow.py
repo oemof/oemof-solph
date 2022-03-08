@@ -573,7 +573,7 @@ class FlowBlock(SimpleBlock):
 
         def _integer_flow_rule(block, ii, oi, pi, ti):
             """Force flow variable to NonNegativeInteger values."""
-            return self.integer_flow[ii, oi, pi, ti] == m.flow[ii, oi, pi, ti]
+            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, pi, ti]
 
         self.integer_flow_constr = Constraint(
             self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule

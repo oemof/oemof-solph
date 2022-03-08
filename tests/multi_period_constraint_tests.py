@@ -546,6 +546,31 @@ class TestsMultiPeriodConstraint:
 
         self.compare_lp_files("storage_invest_minimum_multi_period.lp")
 
+    def test_storage_invest_multi_period(self):
+        """Test multi-period attributes such as age, fixed_costs, ..."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.GenericStorage(
+            label="storage1",
+            inputs={bel: solph.flows.Flow()},
+            outputs={bel: solph.flows.Flow()},
+            investment=solph.Investment(
+                ep_costs=145,
+                minimum=100,
+                maximum=200,
+                lifetime=40,
+                existing=50,
+                age=39,
+                overall_minimum=10,
+                overall_maximum=500,
+                fixed_costs=5,
+            ),
+            lifetime_inflow=40,
+            lifetime_outflow=40,
+        )
+
+        self.compare_lp_files("storage_invest_multi_period.lp")
+
     def test_storage_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
         bel = solph.buses.Bus(label="electricityBus")
@@ -661,6 +686,40 @@ class TestsMultiPeriodConstraint:
         with warnings.catch_warnings(record=True) as w:
             self.get_om()
             assert msg in str(w[1].message)
+
+    def test_storage_invest_1_missing_lifetime(self):
+        """Test error thrown if storage misses necessary lifetime"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.GenericStorage(
+            label="storage1",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            lifetime_inflow=40,
+            lifetime_outflow=40,
+            investment=solph.Investment(
+                ep_costs=145,
+                maximum=234,
+                interest_rate=0.05,
+                overall_maximum=1000,
+                overall_minimum=2,
+            ),
+        )
+
+        msg = (
+            "You have to specify a lifetime "
+            "for an InvestmentFlow in a multi-period model!"
+        )
+        with pytest.raises(ValueError, match=msg):
+            self.get_om()
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment."""
@@ -1232,6 +1291,32 @@ class TestsMultiPeriodConstraint:
             "periodical_investment_limit_with_dsm_oemof.lp", my_om=om
         )
 
+    def test_periodical_investment_limit_missing(self):
+        """Testing the investment_limit function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        solph.components.GenericStorage(
+            label="storage_invest_limit",
+            invest_relation_input_capacity=0.2,
+            invest_relation_output_capacity=0.2,
+            inputs={bus1: solph.flows.Flow()},
+            outputs={bus1: solph.flows.Flow()},
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            investment=solph.Investment(ep_costs=145, lifetime=30),
+        )
+        solph.components.Source(
+            label="Source",
+            outputs={
+                bus1: solph.flows.Flow(
+                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                )
+            },
+        )
+        om = self.get_om()
+        msg = "You have to provide an investment limit for each period!"
+        with pytest.raises(ValueError, match=msg):
+            solph.constraints.investment_limit_per_period(om, limit=None)
+
     def test_min_max_runtime(self):
         """Testing min and max runtimes for nonconvex flows."""
         bus_t = solph.buses.Bus(label="Bus_T")
@@ -1376,3 +1461,531 @@ class TestsMultiPeriodConstraint:
         )
 
         self.compare_lp_files("offsettransformer_multi_period.lp")
+
+    def test_dsm_module_DIW(self):
+        """Constraint test of SinkDSM with approach=DLR"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DIW",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+        )
+        self.compare_lp_files("dsm_module_DIW_multi_period.lp")
+
+    def test_dsm_module_DLR(self):
+        """Constraint test of SinkDSM with approach=DLR"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DLR",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+        )
+        self.compare_lp_files("dsm_module_DLR_multi_period.lp")
+
+    def test_dsm_module_oemof(self):
+        """Constraint test of SinkDSM with approach=oemof"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            approach="oemof",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            shift_interval=2,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+        )
+        self.compare_lp_files("dsm_module_oemof_multi_period.lp")
+
+    def test_dsm_module_DIW_extended(self):
+        """Constraint test of SinkDSM with approach=DLR
+
+        Test all possible parameters and constraints
+        """
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8, 0.7, 0.7, 0.7],
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.3, 0.3, 0.4, 0.3, 0.3, 0.3],
+            approach="DIW",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shift=2,
+            recovery_time_shed=2,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_DIW_extended_multi_period.lp")
+
+    def test_dsm_module_DLR_extended(self):
+        """Constraint test of SinkDSM with approach=DLR"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8, 0.7, 0.7, 0.7],
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.3, 0.3, 0.4, 0.3, 0.3, 0.3],
+            approach="DLR",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shed=2,
+            ActivateYearLimit=True,
+            ActivateDayLimit=True,
+            n_yearLimit_shift=100,
+            n_yearLimit_shed=50,
+            t_dayLimit=3,
+            addition=False,
+            fixes=False,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_DLR_extended_multi_period.lp")
+
+    def test_dsm_module_oemof_extended(self):
+        """Constraint test of SinkDSM with approach=oemof"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1, 0.9, 0.8, 0.7, 0.7, 0.7],
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.3, 0.3, 0.4, 0.3, 0.3, 0.3],
+            approach="oemof",
+            shift_interval=2,
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=2,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            efficiency=0.99,
+            recovery_time_shed=2,
+            shed_time=2,
+        )
+        self.compare_lp_files("dsm_module_oemof_extended_multi_period.lp")
+
+    def test_dsm_module_DIW_invest(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DIW",
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.compare_lp_files("dsm_module_DIW_invest_multi_period.lp")
+
+    def test_dsm_module_DLR_invest(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DLR",
+            flex_share_up=1,
+            flex_share_down=1,
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            n_yearLimit_shed=50,
+            investment=solph.Investment(
+                ep_costs=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.compare_lp_files("dsm_module_DLR_invest_multi_period.lp")
+
+    def test_dsm_module_oemof_invest(self):
+        """Constraint test of SinkDSM with approach=oemof and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            approach="oemof",
+            flex_share_up=0.9,
+            flex_share_down=0.9,
+            shift_interval=2,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.compare_lp_files("dsm_module_oemof_invest_multi_period.lp")
+
+    def test_nonconvex_investment_storage_without_offset(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.GenericStorage(
+            label="storage_non_convex",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            investment=solph.Investment(
+                ep_costs=141,
+                maximum=244,
+                minimum=12,
+                nonconvex=True,
+                lifetime=20,
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_without_offset_multi_period.lp")
+
+    def test_nonconvex_investment_storage_with_offset(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.GenericStorage(
+            label="storage_non_convex",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            investment=solph.Investment(
+                ep_costs=145,
+                minimum=19,
+                offset=5,
+                nonconvex=True,
+                maximum=1454,
+                lifetime=20,
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_with_offset_multi_period.lp")
+
+    def test_nonconvex_invest_storage_all_nonconvex(self):
+        """All invest variables are free and nonconvex."""
+        b1 = solph.buses.Bus(label="bus1")
+
+        solph.components.GenericStorage(
+            label="storage_all_nonconvex",
+            inputs={
+                b1: solph.flows.Flow(
+                    investment=solph.Investment(
+                        nonconvex=True,
+                        minimum=5,
+                        offset=10,
+                        maximum=30,
+                        ep_costs=10,
+                        lifetime=20,
+                    )
+                )
+            },
+            outputs={
+                b1: solph.flows.Flow(
+                    investment=solph.Investment(
+                        nonconvex=True,
+                        minimum=8,
+                        offset=15,
+                        ep_costs=10,
+                        maximum=20,
+                        lifetime=20,
+                    )
+                )
+            },
+            investment=solph.Investment(
+                nonconvex=True,
+                ep_costs=20,
+                offset=30,
+                minimum=20,
+                maximum=100,
+                lifetime=20,
+            ),
+        )
+
+        self.compare_lp_files("storage_invest_all_nonconvex_multi_period.lp")
+
+    def test_nonconvex_invest_sink_without_offset(self):
+        """Non convex invest flow without offset, with minimum."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="sink_nonconvex_invest",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        minimum=15,
+                        nonconvex=True,
+                        maximum=172,
+                        lifetime=20,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("flow_invest_without_offset_multi_period.lp")
+
+    def test_nonconvex_invest_source_with_offset(self):
+        """Non convex invest flow with offset, with minimum."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="source_nonconvex_invest",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        minimum=15,
+                        maximum=20,
+                        offset=34,
+                        nonconvex=True,
+                        lifetime=20,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files("flow_invest_with_offset_multi_period.lp")
+
+    def test_nonconvex_invest_source_with_offset_no_minimum(self):
+        """Non convex invest flow with offset, without minimum."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="source_nonconvex_invest",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        maximum=1234,
+                        offset=34,
+                        nonconvex=True,
+                        lifetime=20,
+                    ),
+                )
+            },
+        )
+        self.compare_lp_files(
+            "flow_invest_with_offset_no_minimum_multi_period.lp"
+        )
+
+    def test_summed_min_max_source(self):
+        """Test sink with summed_min and summed_max attribute"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_min=3,
+                    summed_max=100,
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10
+                )
+            },
+        )
+
+        self.compare_lp_files("summed_min_source_multi_period.lp")
+
+    def test_flow_reaching_lifetime(self):
+        """Test flow forced to zero once exceeding its lifetime"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10,
+                    lifetime=2
+                )
+            },
+        )
+
+        self.compare_lp_files("flow_reaching_lifetime.lp")
+
+    def test_flow_reaching_lifetime_initial_age(self):
+        """Test flow forced to zero once exceeding its lifetime with age"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10,
+                    lifetime=2,
+                    age=1
+                )
+            },
+        )
+
+        self.compare_lp_files("flow_reaching_lifetime_initial_age.lp")
+
+    def test_fixed_costs(self):
+        """Test fixed_cost attribute for different kinds of flows"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Source(
+            label="pv_forever",
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10,
+                    fixed_costs=3
+                )
+            },
+        )
+
+        solph.components.Source(
+            label="pv_with_lifetime",
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10,
+                    fixed_costs=3,
+                    lifetime=20
+                )
+            },
+        )
+
+        solph.components.Source(
+            label="pv_with_lifetime_and_age",
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10,
+                    fixed_costs=3,
+                    lifetime=20,
+                    age=18
+                )
+            },
+        )
+
+        self.compare_lp_files("fixed_costs_sources.lp")

@@ -1651,3 +1651,41 @@ class TestsConstraint:
             solph.constraints.generic_periodical_integral_limit(
                 om, keyword="space"
             )
+
+    def test_summed_min_max_source(self):
+        """Constraints test summed_min and summed_max attribute of flow"""
+
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_min=3,
+                    summed_max=100,
+                    variable_costs=25,
+                    max=0.8,
+                    nominal_value=10
+                )
+            },
+        )
+
+        self.compare_lp_files("summed_min_source.lp")
+
+    def test_integer_flow_source(self):
+        """Test source with integer output"""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Sink(
+            label="excess",
+            inputs={
+                bel: solph.flows.Flow(
+                    variable_costs=25,
+                    max=1,
+                    nominal_value=10,
+                    integer=True
+                )
+            },
+        )
+
+        self.compare_lp_files("integer_source.lp")
