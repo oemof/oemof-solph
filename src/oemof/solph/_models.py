@@ -275,8 +275,7 @@ class Model(BaseModel):
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
 
-    Sets and variables:
-    -------------------
+
     **The following basic sets are created**:
 
     NODES

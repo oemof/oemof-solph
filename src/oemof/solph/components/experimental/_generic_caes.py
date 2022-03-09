@@ -307,13 +307,13 @@ class GenericCAESBlock(SimpleBlock):
         ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
          (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
+        `flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
          (external) into Expansion"
 
     """

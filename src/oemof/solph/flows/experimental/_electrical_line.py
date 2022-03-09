@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -88,9 +89,9 @@ class ElectricalLineBlock(SimpleBlock):
 
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
-            flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
+            flow(n, o, p, t) =  1 / reactance(n, t) \\cdot ()
             voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
-            \forall t \\in \\textrm{TIMESTEPS}, \\
+            \forall p, t \\in \\textrm{TIMEINDEX}, \\
             \forall n \\in \\textrm{ELECTRICAL\_LINES}.
 
     TODO: Add equate constraint of flows

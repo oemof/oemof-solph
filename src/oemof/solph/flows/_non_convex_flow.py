@@ -190,16 +190,16 @@ class NonConvexFlowBlock(SimpleBlock):
 
     Minimum flow constraint `om.NonConvexFlowBlock.min[i,o,t]`
         .. math::
-            flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value \
+            flow(i, o, p, t) \geq min(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
-            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Maximum flow constraint `om.NonConvexFlowBlock.max[i,o,t]`
         .. math::
-            flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value \
+            flow(i, o, p, t) \leq max(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
-            \forall t \in \textrm{TIMESTEPS}, \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Startup constraint `om.NonConvexFlowBlock.startup_constr[i,o,t]`
@@ -264,20 +264,26 @@ class NonConvexFlowBlock(SimpleBlock):
 
     Positive gradient constraint
       `om.NonConvexFlowBlock.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) \cdot status(i, o, t)
-        - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
+        .. math:: flow(i, o, p t) \cdot status(i, o, t)
+        - flow(i, o, p, t-1) \cdot status(i, o, t-1)  \geq \
           positive\_gradient(i, o, t), \\
           \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+          \forall p, t \in \textrm{TIMEINDEX}.
 
     Negative gradient constraint
       `om.NonConvexFlowBlock.negative_gradient_constr[i, o]`:
         .. math::
-          flow(i, o, t-1) \cdot status(i, o, t-1)
-          - flow(i, o, t) \cdot status(i, o, t) \geq \
+          flow(i, o, p, t-1) \cdot status(i, o, t-1)
+          - flow(i, o, p, t) \cdot status(i, o, t) \geq \
           negative\_gradient(i, o, t), \\
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+          \forall p, t \in \textrm{TIMEINDEX}.
+
+    Note
+    ----
+    The gradient implementations combine a timestep and its predecessor.
+    This predecessor might also lie in the previous period which is taken
+    care of by checking the previous indices of the TIMEINDEX set.
 
 
     **The following parts of the objective function are created:**

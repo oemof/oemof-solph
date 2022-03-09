@@ -399,18 +399,17 @@ class GenericStorageBlock(SimpleBlock):
 
     **The following parts of the objective function are created:**
 
-    Standard model
-    --------------
+    *Standard model*
 
     Nothing added to the objective function.
 
-    Multi-period model
-    ------------------
+    *Multi-period model*
 
     * :attr:`fixed_costs` not None
 
         .. math::
-            \sum_{p}^{PERIODS} E_{nom} \cdot c_{fixed}(p)  \cdot DF^{-p}
+            \sum_{p \in \textrm{PERIODS}} E_{nom}
+            \cdot c_{fixed}(p) \cdot DF^{-p}
 
     whereby:
     :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
@@ -855,8 +854,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     investment option is selected. The following parts of the objective
     function are created:
 
-    Standard model
-    --------------
+    *Standard model*
 
         * :attr:`nonconvex = False`
 
@@ -873,8 +871,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
     can be retrieved calling
     :math:`om.GenericInvestmentStorageBlock.investment_costs.expr()`.
 
-    Multi-period model
-    ------------------
+    *Multi-period model*
 
         * :attr:`nonconvex = False`
 
@@ -898,7 +895,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
 
             .. math::
                 &
-                (\sum_{p} \sum_{pp=year(p)}^{year(p)+l}
+                \sum_{pp=year(p)}^{year(p)+l}
                 E_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
                 \cdot DF^{-p}\\
                 &
@@ -941,11 +938,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         | Old (nominal) capacity of the storage
         | to be decommissioned in period p
         | which was exogenously given by :math:`E_{exist}`"
-         ":math:`E_{old,end}(p)`", ":attr:`old_end[n, p]`", "
-         | Old (nominal) capacity of the storage
-         | to be decommissioned in period p
-         | which was endogenously determined by :math:`E_{invest}(p_{comm})`
-         | whereby :math:`p_{comm}` is the commissioning period"
+        ":math:`E_{old,end}(p)`", ":attr:`old_end[n, p]`", "
+        | Old (nominal) capacity of the storage
+        | to be decommissioned in period p
+        | which was endogenously determined by :math:`E_{invest}(p_{comm})`
+        | whereby :math:`p_{comm}` is the commissioning period"
         ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity
         (before timestep 0)"
         ":math:`b_{invest}(p)`", ":attr:`invest_status[i, o, p]`", "Binary

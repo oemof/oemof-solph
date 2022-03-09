@@ -21,6 +21,7 @@ from oemof.solph._plumbing import sequence
 def emission_limit(om, flows=None, limit=None):
     r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
+    Can be used to impose an emissions budget limit in a multi-period model.
 
     Note
     ----
@@ -36,6 +37,7 @@ def emission_limit_per_period(om, flows=None, limit=None):
     r"""
     Short handle for generic_periodical_integral_limit()
     with keyword="emission_factor". Only applicable for multi-period models.
+    Puts a limit on each period's emissions.
 
     Note
     ----
@@ -75,7 +77,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     **Constraint:**
 
-    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(t) \cdot w_i(t)
+    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
                \cdot \tau(t) \leq M
 
 
@@ -85,14 +87,14 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    ================ ==== =====================================================
-    math. symbol     type explanation
-    ================ ==== =====================================================
-    :math:`P_n(t)`   V    power flow :math:`n` at time step :math:`t`
-    :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
-    :math:`\tau(t)`  P    width of time step :math:`t`
-    :math:`L`        P    global limit given by keyword `limit`
-    ================ ==== =====================================================
+    ================= ==== ====================================================
+    math. symbol      type explanation
+    ================= ==== ====================================================
+    :math:`P_n(p, t)` V    power flow :math:`n` at time index :math:`p, t`
+    :math:`w_N(t)`    P    weight given to Flow named according to `keyword`
+    :math:`\tau(t)`   P    width of time step :math:`t`
+    :math:`L`         P    global limit given by keyword `limit`
+    ================= ==== ====================================================
 
     Examples
     --------

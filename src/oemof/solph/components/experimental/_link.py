@@ -30,7 +30,7 @@ from oemof.solph._plumbing import sequence
 
 
 class Link(on.Transformer):
-    """A Link object with 1...2 inputs and 1...2 outputs.
+    """A Link object with 2 inputs and 2 outputs.
 
     Parameters
     ----------
@@ -107,10 +107,11 @@ class LinkBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+        (1) \qquad P_{\mathrm{in},n}(p, t) = c_n(t)
+        \times P_{\mathrm{out},n}(p, t)
             \quad \forall t \in T, \forall n in {1,2} \\
         &
-        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(t)
+        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(p, t)
                                  / P_{\mathrm{in},1,\mathrm{max}}
             \quad \forall t \in T \\
         &

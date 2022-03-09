@@ -20,7 +20,7 @@ from oemof.solph._plumbing import sequence
 
 def investment_limit(model, limit=None):
     r"""Set an absolute limit for the total investment costs of an investment
-    optimization problem:
+    optimization problem (over all periods in case of a multi-period model):
 
     .. math:: \sum_{investment\_costs} \leq limit
 
@@ -60,7 +60,7 @@ def investment_limit(model, limit=None):
 def investment_limit_per_period(model, limit=None):
     r"""Set an absolute limit for the total investment costs of a
      investment optimization problem for each period
-    of the problem.
+    of the multi-period problem.
 
     .. math:: \sum_{investment\_costs(p)} \leq limit(p)
     \forall p in \textrm{PERIODS}
@@ -131,7 +131,9 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
 
-    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+    .. math::
+        \sum_{p \in \textrm{PERIODS}}
+        \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
     limit.
@@ -139,15 +141,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    +---------------+------------------------------------+------+--------------------------------------------------------------+
-    | symbol        | attribute                          | type | explanation                                                  |
-    +===============+====================================+======+==============================================================+
-    | :math:`P_{i}` | `InvestmentFlowBlock.invest[i, o]` | V    | installed capacity of investment flow                        |
-    +---------------+------------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`   | `keyword`                          | P    | weight given to investment flow named according to `keyword` |
-    +---------------+------------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit` | `limit`                            | P    | global limit given by keyword `limit`                        |
-    +---------------+------------------------------------+------+--------------------------------------------------------------+
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol           | attribute                             | type | explanation                                                  |
+    +==================+=======================================+======+==============================================================+
+    | :math:`P_{i}(p)` | `InvestmentFlowBlock.invest[i, o, p]` | V    | invested capacity of investment flow in period p             |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
     ----------
