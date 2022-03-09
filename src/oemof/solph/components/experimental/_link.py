@@ -92,7 +92,11 @@ class Link(on.Transformer):
             + "disable the SuspiciousUsageWarning globally."
         )
 
-        if len(self.inputs) != 2 or len(self.outputs) != 2 or len(self.conversion_factors) != 2:
+        if (
+            len(self.inputs) != 2
+            or len(self.outputs) != 2
+            or len(self.conversion_factors) != 2
+        ):
             warn(msg, debugging.SuspiciousUsageWarning)
 
     def constraint_group(self):
