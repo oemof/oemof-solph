@@ -86,7 +86,8 @@ class Link(on.Transformer):
         msg = (
             "Component `Link` should have exactly "
             + "2 inputs, 2 outputs, and 2 "
-            + "conversion factors connecting these. "
+            + "conversion factors connecting these. You are initializing a `Link` "
+            + "without obeying this specification. "
             + "If this is intended and you know what you are doing you can "
             + "disable the SuspiciousUsageWarning globally."
         )
