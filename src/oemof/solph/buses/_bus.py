@@ -26,6 +26,12 @@ from pyomo.core.base.block import SimpleBlock
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to BusBlock.
 
+    Attributes
+    ----------
+    balanced: boolean
+        Indicates if bus is balanced, i.e. if the sum of inflows equals to
+        the sum of outflows for each timestep; defaults to True
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
@@ -49,12 +55,15 @@ class BusBlock(SimpleBlock):
 
     **The following constraints are build:**
 
-    BusBlock balance  :attr:`om.BusBlock.balance[i, o, t]`
-      .. math::
-        \sum_{i \in INPUTS(n)} flow(i, n, t) =
-        \sum_{o \in OUTPUTS(n)} flow(n, o, t), \\
-        \forall n \in \textrm{BUSES},
-        \forall t \in \textrm{TIMESTEPS}.
+    BusBlock balance  :attr:`om.BusBlock.balance[i, o, p, t]`
+
+        .. math::
+            &
+            \sum_{i \in INPUTS(n)} flow(i, n, p, t) =
+            \sum_{o \in OUTPUTS(n)} flow(n, o, p, t), \\
+            &
+            \forall n \in \textrm{BUSES},
+            \forall p, t \in \textrm{TIMEINDEX}.
     """
 
     def __init__(self, *args, **kwargs):

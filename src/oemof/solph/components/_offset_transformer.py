@@ -102,15 +102,15 @@ class OffsetTransformerBlock(SimpleBlock):
 
     .. math::
         &
-        P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
+        P_{out}(p, t) = C_1(t) \cdot P_{in}(p, t) + C_0(t) \cdot Y(t) \\
 
 
     .. csv-table:: Variables (V) and Parameters (P)
         :header: "symbol", "attribute", "type", "explanation"
         :widths: 1, 1, 1, 1
 
-        ":math:`P_{out}(t)`", "`flow[n, o, t]`", "V", "Power of output"
-        ":math:`P_{in}(t)`", "`flow[i, n, t]`", "V","Power of input"
+        ":math:`P_{out}(p, t)`", "`flow[n, o, p, t]`", "V", "Power of output"
+        ":math:`P_{in}(p, t)`", "`flow[i, n, p, t]`", "V","Power of input"
         ":math:`Y(t)`", "`status[i, n, t]`", "V","binary
         status variable of nonconvex input flow "
         ":math:`C_1(t)`", "`coefficients[1][n, t]`", "P", "linear

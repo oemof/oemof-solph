@@ -56,29 +56,31 @@ class GenericCHP(network.Transformer):
 
     Note
     ----
-    An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
-    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
-    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum heat extraction `H_L_FG_min` as share of
-    the fuel flow `H_F` e.g. for motoric CHPs.
-    The boolean component parameter `back_pressure` can be set to model
-    back-pressure characteristics.
+    * An adaption for the flow parameter `H_L_FG_share_max` has been made to
+      set the flue gas losses at maximum heat extraction `H_L_FG_max` as share
+      of the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    * The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+      losses at minimum heat extraction `H_L_FG_min` as share of
+      the fuel flow `H_F` e.g. for motoric CHPs.
+    * The boolean component parameter `back_pressure` can be set to model
+      back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
     Parameters
     ----------
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output. Related parameters like `P_max_woDH` are
-        passed as attributes of the `oemof.Flow` object.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the electrical output.
+        Related parameters like `P_max_woDH` are passed as
+        attributes of the `oemof.Flow` object.
     heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the heat output. Related parameters like `Q_CW_min` are passed as
+        Dictionary with key-value-pair of `oemof.solph.Bus`
+        and `oemof.solph.Flow` objects for the heat output.
+        Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
     Beta : list of numerical values
         Beta values in same dimension as all other parameters (length of
@@ -91,7 +93,7 @@ class GenericCHP(network.Transformer):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._generic_chp.GenericCHPBlock`
+    * :class:`.GenericCHPBlock`
 
     Examples
     --------
@@ -498,7 +500,7 @@ class GenericCHPBlock(SimpleBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`Flow`.
+        added in the Block :class:`.FlowBlock`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0

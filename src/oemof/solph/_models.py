@@ -263,7 +263,7 @@ class BaseModel(po.ConcreteModel):
 
 
 class Model(BaseModel):
-    """An  energy system model for operational and/or investment
+    """An energy system model for operational and/or investment
     optimization.
 
     Parameters
@@ -275,6 +275,8 @@ class Model(BaseModel):
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
 
+    Sets and variables:
+    -------------------
     **The following basic sets are created**:
 
     NODES

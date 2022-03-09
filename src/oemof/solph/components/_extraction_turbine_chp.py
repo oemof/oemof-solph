@@ -29,14 +29,15 @@ from oemof.solph.components._transformer import Transformer
 
 class ExtractionTurbineCHP(Transformer):
     r"""
-    A CHP with an extraction turbine in a linear model. For more options see
-    the :class:`~oemof.solph.components.GenericCHP` class.
+    A CHP with an extraction turbine in a linear model. For a more
+    detailled modelling approach providing more options, also see
+    the :class:`.GenericCHP` class.
 
     One main output flow has to be defined and is tapped by the remaining flow.
     The conversion factors have to be defined for the maximum tapped flow (
-    full CHP mode) and for no tapped flow (full condensing mode). Even though
+    full CHP mode) and for no tapped flow (full condensing mode). Even though,
     it is possible to limit the variability of the tapped flow, so that the
-    full condensing mode will never be reached.
+    full condensing might never be reached.
 
     Parameters
     ----------
@@ -53,7 +54,7 @@ class ExtractionTurbineCHP(Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHPBlock`
+     * :class:`.ExtractionTurbineCHPBlock`
 
     Examples
     --------
@@ -82,7 +83,7 @@ class ExtractionTurbineCHP(Transformer):
 
 class ExtractionTurbineCHPBlock(SimpleBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.components.ExtractionTurbineCHP`
+    :class:`oemof.solph.components.experimental._ExtractionTurbineCHP`
 
     **The following two constraints are created:**
 
@@ -113,11 +114,11 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     ========================= ============================================ ==== =========
     symbol                    attribute                                    type explanation
     ========================= ============================================ ==== =========
-    :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
+    :math:`\dot H_{Fuel}`     `flow[i, n, p, t]`                           V    fuel input flow
 
-    :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
+    :math:`P_{el}`            `flow[n, main_output, p, t]`                 V    electric power
 
-    :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
+    :math:`\dot Q_{th}`       `flow[n, tapped_output, p, t]`               V    thermal output
 
     :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
 
@@ -137,18 +138,19 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the linear constraint for the
-        :class:`oemof.solph.components.TransformerBlock` block.
+        """Creates the constraints for
+        :class:`oemof.solph.components.experimental._extraction_turbine_chp.ExtractionTurbineCHPBlock`.
 
         Parameters
         ----------
         group : list
-            List of :class:`oemof.solph.components.ExtractionTurbineCHP`
-            (trsf) objects for which the linear relation of inputs and outputs
-            is created e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the
-            relation is created for all existing relations of the inputs and
-            all outputs of the transformer. The components inside the list need
-            to hold all needed attributes.
+            List of
+            :class:`oemof.solph.components.experimental._extraction_turbine_chp.ExtractionTurbineCHP`
+            (trsf) objects for which the linear relation of inputs
+            and outputs is created e.g. group = [trsf1, trsf2, trsf3, ...].
+            Note that the relation is created for all existing relations
+            of the inputs and all outputs of the transformer-like object.
+            The components inside the list need to hold all needed attributes.
         """
         if group is None:
             return None
