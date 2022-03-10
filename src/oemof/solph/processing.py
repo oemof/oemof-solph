@@ -75,11 +75,16 @@ def remove_timeindex(x):
 
 def create_dataframe(om):
     """
-    Create a result dataframe with all optimization data.
+    Create a result DataFrame with all optimization data.
 
-    Results from Pyomo are written into pandas DataFrame where separate columns
-    are created for the variable index e.g. for tuples of the flows and
-    components or the timesteps / timeindices.
+    Results from Pyomo are written into one common pandas.DataFrame where
+    separate columns are created for the variable index e.g. for tuples
+    of the flows and components or the timeindex.
+
+    Note: The "timeindex" column holds values for variables indexed
+    in timeindex (flow), periods (investment variables)
+    or timesteps (remainder) or even differently
+    (SinkDSM for approaches "DLR" and "DIW").
     """
     # get all pyomo variables including their block
     block_vars = list(
@@ -117,14 +122,38 @@ def create_dataframe(om):
 
 def results(om):
     """
-    Create a result dictionary from the result DataFrame.
+    Create a nested result dictionary from the result DataFrame.
 
-    Results from Pyomo are written into a dictionary of pandas objects where
-    a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows for a standard model. For a multi-period model, the investment
-    values are given in a DataFrame indexed by periods.
-    The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[n, n]['sequences']` for a standard model.
+    The already rearranged results from Pyomo from the result DataFrame are
+    transferred into a nested dictionary of pandas objects.
+    The first level key of that dictionary is a node (denoting the respective
+    flow or component).
+
+    The second level keys are "sequences" and "scalars" for a *standard model*:
+
+    * A pd.DataFrame holds all results that are time-dependent, i.e. given as
+      a sequence and can be indexed with the energy system's timeindex.
+    * A pd.Series holds all scalar values which are applicable for timestep 0
+      (i.e. investments).
+
+    For a *multi-period model*, the second level key for "sequences" remains
+    the same while instead of "scalars", the key "period_scalars" is used:
+
+    * For sequences, see standard model.
+    * Instead of a pd.Series, a pd.DataFrame holds scalar values indexed
+      by periods. These hold investment-related variables.
+
+    Since with the introduction of the multi-period feature, variables are now
+    indexed differently, this needs to be sorted out again. I.e., dependent on
+    the variable type, the proper index has to be mapped to the timestep resp.
+    timeindex indices.
+
+    Examples
+    --------
+    * *Standard model*: `results[idx]['scalars']`
+    and flows `results[n, n]['sequences']`.
+    * *Multi-period model*: `results[idx]['period_scalars']`
+    and flows `results[n, n]['sequences']`.
     """
     # Extraction steps that are the same for both model types
     df = create_dataframe(om)
@@ -161,7 +190,12 @@ def results(om):
     # Results extraction for a multi-period model
     else:
         result = _extract_multi_period_model_result(
-            om, df_dict, timestep_indexed, period_timestep_indexed, result
+            om,
+            df_dict,
+            period_indexed,
+            timestep_indexed,
+            period_timestep_indexed,
+            result,
         )
         scalars_col = "period_scalars"
 
@@ -197,6 +231,13 @@ def _extract_standard_model_result(
 ):
     """Extract and return the results of a standard model
 
+    * Set index to timeindex and pivot results such that values are displayed
+      for the respective variables. Replace / map indices such that everything
+      is ultimately indexed by timesteps (not periods or timeindex) and reindex
+      with the energy system's timeindex.
+    * Filter for columns with nan values to retreive scalar variables. Split
+      up the DataFrame into sequences and scalars and return it.
+
     Parameters
     ----------
     om : oemof.solph.models.Model
@@ -221,12 +262,12 @@ def _extract_standard_model_result(
         df_dict[k].set_index("timeindex", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         try:
-            # Enable reindexing by replacing period and timestep indices
-            df_dict[k] = _replace_non_timeindex_indices(
+            # Enable reindexing by replacing period and timeindex indices
+            df_dict[k] = _replace_non_timestep_indices(
                 df_dict[k],
-                period_indexed,
                 timestep_indexed,
                 period_timestep_indexed,
+                period_indexed,
             )
             df_dict[k].index = om.es.timeindex
         except ValueError as e:
@@ -253,21 +294,24 @@ def _extract_standard_model_result(
     return result
 
 
-def _replace_non_timeindex_indices(
-    df, period_indexed, timestep_indexed, period_timestep_indexed
+def _replace_non_timestep_indices(
+    df, timestep_indexed, period_timestep_indexed, period_indexed=None
 ):
-    """Replace timeindex values by timesteps values; we only have one period
+    """Replace timeindex values by timesteps values
+
+    Use subsets defining how variables are indexed and rename the timeindexed
+    ones by replacing the tuple by its last entry, i.e. the timestep
 
     Parameters
     ----------
     df : pd.DataFrame
         DataFrame obtained from the dict of results DataFrames
-    period_indexed : list
-        List of all values that are indexed by periods
     timestep_indexed : list
         List of all values that are indexed by timesteps
     period_timestep_indexed : list
         list of variables that are indexed by period and timesteps (timeindex)
+    period_indexed : list or None
+        List of all values that are indexed by periods
 
     Returns
     -------
@@ -276,15 +320,11 @@ def _replace_non_timeindex_indices(
     """
     rename_dict = {key: (key[1],) for key in df.index if len(key) > 1}
     to_concat = []
+
     # Split into different data sets dependent on indexation
+    # Variables indexed by periods and timestep (i.e. timeindex)
     period_timestep_indexed_df = df[
         [col for col in df.columns if col in period_timestep_indexed]
-    ]
-    timestep_indexed_df = df[
-        [col for col in df.columns if col in timestep_indexed]
-    ]
-    period_indexed_df = df[
-        [col for col in df.columns if col in period_indexed]
     ]
 
     period_timestep_indexed_df = period_timestep_indexed_df.dropna()
@@ -294,18 +334,32 @@ def _replace_non_timeindex_indices(
     if not period_timestep_indexed_df.empty:
         to_concat.append(period_timestep_indexed_df)
 
-    period_indexed_df = period_indexed_df.dropna()
-    if not period_indexed_df.empty:
-        to_concat.append(period_indexed_df)
+    # Variables indexed by timestep
+    timestep_indexed_df = df[
+        [col for col in df.columns if col in timestep_indexed]
+    ]
 
+    # TODO: Also handle SinkDSM for DIW and DLR approach!
     # Handle storages differently
-    # TODO: Handle SinkDSM for DIW and DLR approach!
     if "storage_content" not in timestep_indexed_df.columns:
         timestep_indexed_df = timestep_indexed_df.dropna()
     if not timestep_indexed_df.empty:
         to_concat.append(timestep_indexed_df)
 
-    df = pd.concat(to_concat, axis=1)
+    # Variables indexed by periods (standard model only)
+    if period_indexed is not None:
+        period_indexed_df = df[
+            [col for col in df.columns if col in period_indexed]
+        ]
+        period_indexed_df = period_indexed_df.dropna()
+        if not period_indexed_df.empty:
+            to_concat.append(period_indexed_df)
+
+    # HACK! For now simply skip SinkDSM units not properly handled!
+    if len(to_concat) >= 1:
+        df = pd.concat(to_concat, axis=1)
+    else:
+        df = df.dropna()
 
     return df
 
@@ -313,11 +367,15 @@ def _replace_non_timeindex_indices(
 def _extract_multi_period_model_result(
     om,
     df_dict,
+    period_indexed=None,
     timestep_indexed=None,
     period_timestep_indexed=None,
     result=None,
 ):
     """Extract and return the results of a multi-period model
+
+    * Set index to timeindex and pivot results such that values are displayed
+      for the respective variables.
 
     Parameters
     ----------
@@ -325,6 +383,8 @@ def _extract_multi_period_model_result(
         The ptimization model
     df_dict : dict
         dictionary of results DataFrames
+    period_indexed : list
+        list of variables that are indexed by periods
     timestep_indexed : list
         list of variables that are indexed by timesteps
     period_timestep_indexed : list
@@ -340,27 +400,33 @@ def _extract_multi_period_model_result(
     for k in df_dict:
         df_dict[k].set_index("timeindex", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        # TODO: Revise and potentially speed up
+        try:
+            # Enable reindexing by replacing period and timeindex indices
+            sequences = _replace_non_timestep_indices(
+                df_dict[k], timestep_indexed, period_timestep_indexed
+            )
+            sequences.index = om.es.timeindex
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
+                " your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
         # Split data set
-        timeindex_cols = [
-            col
-            for col in df_dict[k].columns
-            if col in timestep_indexed or col in period_timestep_indexed
-        ]
         period_cols = [
-            col for col in df_dict[k].columns if col not in timeindex_cols
+            col for col in df_dict[k].columns if col in period_indexed
         ]
-        sequences = df_dict[k][timeindex_cols].dropna()
-        if sequences.empty:
-            sequences = pd.DataFrame(index=om.es.timeindex)
-        # periods equal to years (will probably be the standard use case)
-        periods = sorted(list(set(om.es.timeindex.year)))
-        d = dict(zip([(el,) for el in range(len(periods))], periods))
+        # map periods to their start years for displaying period results
+        d = {
+            (key,): val + om.es.periods[0].min().year
+            for key, val in om.es.periods_years.items()
+        }
         period_scalars = df_dict[k][period_cols].dropna()
         if period_scalars.empty:
             period_scalars = pd.DataFrame(index=d.values())
         try:
-            sequences.index = om.es.timeindex
             period_scalars.rename(index=d, inplace=True)
             period_scalars.index.name = "period"
             result[k] = {
