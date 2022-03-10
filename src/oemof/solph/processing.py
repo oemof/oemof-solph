@@ -73,6 +73,30 @@ def remove_timeindex(x):
     return x
 
 
+def get_timestep(x):
+    """
+    Get the timestep from oemof tuples.
+    The timestep from tuples `(n, n, int)`, `(n, n)`, `(n, int)` and (n,)
+    is fetched as the last element. For time-independent data (scalars)
+    zero ist returned.
+    """
+    if all(issubclass(type(n), Node) for n in x):
+        return 0
+    else:
+        return x[-1]
+
+
+def remove_timestep(x):
+    """
+    Remove the timestep from oemof tuples.
+    The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
+    """
+    if all(issubclass(type(n), Node) for n in x):
+        return x
+    else:
+        return x[:-1]
+
+
 def create_dataframe(om):
     """
     Create a result DataFrame with all optimization data.
@@ -110,6 +134,11 @@ def create_dataframe(om):
     df["oemof_tuple"] = df["pyomo_tuple"].map(get_tuple)
     df = df[df["oemof_tuple"].map(lambda x: x is not None)]
     df["timeindex"] = df["oemof_tuple"].map(get_timeindex)
+    # Add standard results extraction needed only for SinkDSM results
+    # where first time index holds additional information
+    # for approaches "DLR" and "DIW"
+    df["timestep"] = df["oemof_tuple"].map(get_timestep)
+    df["oemof_tuple_extended"] = df["oemof_tuple"].map(remove_timestep)
     df["oemof_tuple"] = df["oemof_tuple"].map(remove_timeindex)
     # order the data by oemof tuple and timestep
     df = df.sort_values(["oemof_tuple", "timeindex"], ascending=[True, True])
@@ -159,10 +188,15 @@ def results(om):
     df = create_dataframe(om)
     period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
     period_timestep_indexed = ["flow"]
+
+    double_indexed_vars = _check_and_return_double_indexed_vars(om)
+
     timestep_indexed = [
         el
         for el in df["variable_name"].unique()
-        if el not in period_indexed and el not in period_timestep_indexed
+        if el not in period_indexed
+        and el not in period_timestep_indexed
+        and el not in double_indexed_vars
     ]
 
     # create a dict of dataframes keyed by oemof tuples
@@ -219,6 +253,35 @@ def results(om):
                 result[(bus, None)]["sequences"]["duals"] = duals
 
     return result
+
+
+def _check_and_return_double_indexed_vars(om):
+    """Checks if there are any double indexed vars; returns a list of these
+
+    Double indexed vars are variables with a tuple as timeindex which does NOT
+    correspond to the timeindex of the model, but contain some other time-
+    related information.
+
+    So far, this is only used for SinkDSM with approaches "DLR" and "DIW".
+    """
+    double_indexed_vars = []
+    if hasattr(om, "SinkDSMDLRBlock") or hasattr(
+        om, "SinkDSMDLRInvestmentBlock"
+    ):
+        double_indexed_vars = [
+            "balance_dsm_do",
+            "balance_dsm_up",
+            "dsm_do_shift",
+            "dsm_up",
+        ]
+    elif hasattr(om, "SinkDSMDIWBlock") or hasattr(
+        om, "SinkDSMDIWInvestmentBlock"
+    ):
+        double_indexed_vars = [
+            "dsm_do_shift"
+        ]
+
+    return double_indexed_vars
 
 
 def _extract_standard_model_result(
