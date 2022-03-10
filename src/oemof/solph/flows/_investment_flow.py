@@ -43,58 +43,144 @@ class InvestmentFlow(Flow):
 class InvestmentFlowBlock(SimpleBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
-    See :class:`oemof.solph.options.Investment` for all parameters of the
+    See :class:`.Investment` for all parameters of the
     *Investment* class.
 
-    See :class:`oemof.solph.network.FlowBlock` for all parameters of the *FlowBlock*
+    See :class:`.FlowBlock` for all parameters of the *FlowBlock*
     class.
 
     **Variables**
 
-    All *InvestmentFlowBlock* are indexed by a starting and ending node
+    All *InvestmentFlowBlock*s are indexed by a starting and ending node
     :math:`(i, o)`, which is omitted in the following for the sake
     of convenience. The following variables are created:
 
-    * :math:`P(t)`
+    * :math:`P(p, t)`
 
-        Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
+        Actual flow value (created in :class:`.BaseModel`),
+        indexed by tuple of periods p and timestep t
 
-    * :math:`P_{invest}`
+    * :math:`P_{invest}(p)`
 
-        Value of the investment variable, i.e. equivalent to the nominal
-        value of the flows after optimization.
+        Value of the investment variable in period p,
+        equal to what is being invested and equivalent / similar to
+        the nominal value of the flows after optimization.
 
-    * :math:`b_{invest}`
+    * :math:`P_{total}(p)`
+
+        Total installed capacity / energy in period p,
+        equivalent to the nominal value of the flows after optimization.
+
+    * :math:`P_{old}(p)`
+
+        Old capacity / energy to be decommissioned in period p
+        due to reaching its lifetime; applicable only for multi-period models.
+
+    * :math:`P_{old,exo}(p)`
+
+        Old exogenous capacity / energy to be decommissioned in period p
+        due to reaching its lifetime, i.e. the amount that has been specified
+        by :attr:`existing` when it is decommisioned;
+        applicable only for multi-period models.
+
+    * :math:`P_{old,end}(p)`
+
+        Old endogenous capacity / energy to be decommissioned in period p
+        due to reaching its lifetime, i.e. the amount that has been invested in
+        by the model itself that is decommissioned in a later period because
+        of reaching its lifetime;
+        applicable only for multi-period models.
+
+    * :math:`b_{invest}(p)`
 
         Binary variable for the status of the investment, if
         :attr:`nonconvex` is `True`.
 
     **Constraints**
 
-    Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*, different
-    constraints are created. The following constraint is created for all
-    *InvestmentFlowBlock*:\
+    Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*,
+    different constraints are created. The following constraints are created
+    for all *InvestmentFlowBlock*s:\
 
-            Upper bound for the flow value
+        Total capacity / energy
 
         .. math::
-            P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
+            &
+            if \quad p=0:\\
+            &
+            P_{total}(p) = P_{invest}(p) + P_{exist}(p) \\
+            &
+            else:\\
+            &
+            P_{total}(p) = P_{total}(p-1) + P_{invest}(p) - P_{old}(p) \\
+            &
+            \forall p \in \textrm{PERIODS}
 
-    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
-    of the decision variable :math:`P_{invest}` are different:\
+        Upper bound for the flow value
+
+        .. math::
+            P(p, t) \le ( P_{total}(p) ) \cdot f_{max}(t) \\
+            \forall p, t \in \textrm{TIMEINDEX}
+
+    For a multi-period model, the old capacity is defined as follows:
+
+        .. math::
+            &
+            P_{old}(p) = P_{old,exo}(p) + P_{old,end}(p)\\
+            &\\
+            &
+            if \quad p=0:\\
+            &
+            P_{old,end}(p) = 0\\
+            &
+            else \quad if \quad l \leq year(p):\\
+            &
+            P_{old,end}(p) = P_{invest}(p_{comm})\\
+            &
+            else:\\
+            &
+            P_{old,end}(p)\\
+            &\\
+            &
+            if \quad p=0:\\
+            &
+            P_{old,exo}(p) = 0\\
+            &
+            else \quad if \quad l - a \leq year(p):\\
+            &
+            P_{old,exo}(p) = P_{exist} (*)\\
+            &
+            else:\\
+            &
+            P_{old,exo}(p) = 0\\
+            &
+            \forall p \in \textrm{PERIODS}
+
+        whereby:
+
+        * (*) is only performed for the first period the condition is True.
+          A decommissioning flag is set to True.
+        * :math:`year(p)` is the year corresponding to period p
+        * :math:`p_{comm}` is the commissioning period of the flow
+
+    Depending on the attribute :attr:`nonconvex`, the constraints for the
+    bounds of the decision variable :math:`P_{invest}(p)` are different:\
 
         * :attr:`nonconvex = False`
 
         .. math::
-            P_{invest, min} \le P_{invest} \le P_{invest, max}
+            P_{invest, min}(p) \le P_{invest}(p) \le P_{invest, max}(p) \\
+            \forall p \in \textrm{PERIODS}
 
         * :attr:`nonconvex = True`
 
         .. math::
             &
-            P_{invest, min} \cdot b_{invest} \le P_{invest}\\
+            P_{invest, min}(P) \cdot b_{invest}(P) \le P_{invest}(p)\\
             &
-            P_{invest} \le P_{invest, max} \cdot b_{invest}\\
+            P_{invest}(p) \le P_{invest, max}(p) \cdot b_{invest}(p)\\
+            &
+            \forall p \in \textrm{PERIODS}
 
     For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
     the following additional constraints are created, if the appropriate
@@ -105,51 +191,116 @@ class InvestmentFlowBlock(SimpleBlock):
             Actual value constraint for investments with fixed flow values
 
         .. math::
-            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
+            P(p, t) = P_{total}(p) \cdot f_{fix}(t) \\
+            \forall p, t \in \textrm{TIMEINDEX}
 
         * :attr:`min != 0`
 
             Lower bound for the flow values
 
         .. math::
-            P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
+            P(p, t) \geq P_{total}(p) \cdot f_{min}(t) \\
+            \forall p, t \in \textrm{TIMEINDEX}
 
-        * :attr:`summed_max is not None`
+        * :attr:`summed_max` is not None
 
             Upper bound for the sum of all flow values (e.g. maximum full load
             hours)
 
         .. math::
-            \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
+            \sum_{p, t} P(p, t) \cdot \tau(t) \leq P_{total}(p)
             \cdot f_{sum, min}
 
-        * :attr:`summed_min is not None`
+        * :attr:`summed_min` is not None
 
             Lower bound for the sum of all flow values (e.g. minimum full load
             hours)
 
         .. math::
-            \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
+            \sum_{p, t} P(t) \cdot \tau(t) \geq P_{total}
             \cdot f_{sum, min}
+
+        * :attr:`overall_maximum` is not None (for multi-period model only)
+
+            Overall maximum of total installed capacity / energy for flow
+
+        .. math::
+            P_{total}(p) \leq P_{overall,max} \\
+            \forall p \in \textrm{PERIODS}
+
+        * :attr:`overall_minimum` is not None (for multi-period model only)
+
+            Overall minimum of total installed capacity / energy for flow
+
+        .. math::
+            P_{total}(p_{last}) \geq P_{overall,min}
 
 
     **Objective function**
 
-    The part of the objective function added by the *InvestmentFlowBlock*
-    also depends on whether a convex or nonconvex
-    *InvestmentFlowBlock* is selected. The following parts of the objective function
-    are created:
+    Objective terms for a standard model and a multi-period model differ
+    quite strongly. Besides, the part of the objective function added by the
+    *InvestmentFlowBlock* also depends on whether a convex or nonconvex
+    *InvestmentFlowBlock* is selected. The following parts of the objective
+    function are created:
+
+    *Standard model*
 
         * :attr:`nonconvex = False`
 
             .. math::
-                P_{invest} \cdot c_{invest,var}
+                P_{invest}(0) \cdot c_{invest,var}(0)
 
         * :attr:`nonconvex = True`
 
             .. math::
-                P_{invest} \cdot c_{invest,var}
-                + c_{invest,fix} \cdot b_{invest}\\
+                P_{invest}(0) \cdot c_{invest,var}(0)
+                + c_{invest,fix}(0) \cdot b_{invest}(0) \\
+
+
+    *Multi-period model*
+
+        * :attr:`nonconvex = False`
+
+            .. math::
+                &
+                P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
+                \cdot DF^{-p}\\
+                &
+                \forall p \in \textrm{PERIODS}
+
+        * :attr:`nonconvex = True`
+
+            .. math::
+                &
+                P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
+                \cdot DF^{-p} +  c_{invest,fix}(p) \cdot b_{invest}(p)\\
+                &
+                \forall p \in \textrm{PERIODS}
+
+        * :attr:`fixed_costs` not None for investments
+
+            .. math::
+                &
+                \sum_{pp=year(p)}^{year(p)+l}
+                P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
+                \cdot DF^{-p}\\
+                &
+                \forall p \in \textrm{PERIODS}
+
+        * :attr:`fixed_costs` not None for existing capacity
+
+            .. math::
+                \sum_{pp=0}^{l-a} P_{exist} \cdot c_{fixed}(pp)
+                \cdot DF^{-pp}
+
+
+        whereby:
+
+        * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+          investment expenses :math:`c_{invest,var}(p)` lifetime :math:`l` and
+          interest rate :math:`ir`
+        * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
 
     The total value of all costs of all *InvestmentFlowBlock* can be retrieved
     calling :meth:`om.InvestmentFlowBlock.investment_costs.expr()`.
@@ -158,36 +309,56 @@ class InvestmentFlowBlock(SimpleBlock):
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
 
-        ":math:`P(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
-        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow
+        ":math:`P(p, t)`", ":py:obj:`flow[n, o, p, t]`", "Actual flow value"
+        ":math:`P_{invest}(p)`", ":py:obj:`invest[i, o, p]`", "Invested flow
         capacity"
-        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status
+        ":math:`P_{total}(p, t)`", ":py:obj:`total[n, o, p]`", "Total flow capacity / energy"
+        ":math:`P_{old}(p, t)`", ":py:obj:`old[n, o, p]`", "Old flow capacity / energy"
+        ":math:`P_{old,exo}(p, t)`", ":py:obj:`old_exo[n, o, p]`", "Old exogenous flow capacity / energy"
+        ":math:`P_{old,end}(p, t)`", ":py:obj:`old_end[n, o, p]`", "Old endogenous flow capacity / energy"
+        ":math:`b_{invest}(p)`", ":py:obj:`invest_status[i, o, p]`", "Binary status
         of investment"
 
     List of Variables (in rst table syntax):
 
-    ===================  =============================  =========
-    symbol               attribute                      explanation
-    ===================  =============================  =========
-    :math:`P(t)`         :py:obj:`flow[n, o, t]`         Actual flow value
+    =========================  =================================  =========
+    symbol                     attribute                          explanation
+    =========================  =================================  =========
+    :math:`P(p, t)`            :py:obj:`flow[n, o, p, t]`         Actual flow value
 
-    :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
+    :math:`P_{invest}(p)`      :py:obj:`invest[i, o, p]`          Invested flow capacity
 
-    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
+    :math:`P_{total}(p, t)`    :py:obj:`total[n, o, p]`           Total flow capacity / energy
 
-    ===================  =============================  =========
+    :math:`P_{old}(p, t)`      :py:obj:`old[n, o, p]`             Old flow capacity / energy
+
+    :math:`P_{old,exo}(p, t)`  :py:obj:`old_exo[n, o, p]`         Old exogenous flow capacity / energy
+
+    :math:`P_{old,end}(p, t)`  :py:obj:`old_end[n, o, p]`         Old endogenous flow capacity / energy
+
+    :math:`b_{invest}(p)`      :py:obj:`invest_status[i, o, p]`   Binary status of investment
+
+    =========================  =================================  =========
 
     Grid table style:
 
-    +--------------------+-------------------------------+-----------------------------+
-    | symbol             | attribute                     | explanation                 |
-    +====================+===============================+=============================+
-    | :math:`P(t)`       | :py:obj:`flow[n, o, t]`       | Actual flow value           |
-    +--------------------+-------------------------------+-----------------------------+
-    | :math:`P_{invest}` | :py:obj:`invest[i, o]`        | Invested flow capacity      |
-    +--------------------+-------------------------------+-----------------------------+
-    | :math:`b_{invest}` | :py:obj:`invest_status[i, o]` | Binary status of investment |
-    +--------------------+-------------------------------+-----------------------------+
+    +------------------------+----------------------------------+--------------------------------------------+
+    | symbol                 | attribute                        | explanation                                |
+    +========================+==================================+============================================+
+    | :math:`P(p, t)`        | :py:obj:`flow[n, o, p, t]`       | Actual flow value                          |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`P_{invest}(p)`  | :py:obj:`invest[i, o, p]`        | Invested flow capacity                     |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`P_{total}(p)`  | :py:obj:`total[i, o, p]`          | Total flow capacity / energy               |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`P_{old}(p)`     | :py:obj:`old[n, o, p]`           | Old flow capacity / energy                 |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`P_{old,exo}(p)` | :py:obj:`old_exo[n, o, p]`       | Old exogenous flow capacity / energy       |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`P_{old,end}(p)` | :py:obj:`old_end[n, o, p]`       | Old endogenous flow capacity / energy      |
+    +------------------------+----------------------------------+--------------------------------------------+
+    | :math:`b_{invest}(p)`  | :py:obj:`invest_status[n, o, p]` | Binary status of investment                |
+    +------------------------+----------------------------------+--------------------------------------------+
 
     .. csv-table:: List of Parameters
         :header: "symbol", "attribute", "explanation"
@@ -195,13 +366,13 @@ class InvestmentFlowBlock(SimpleBlock):
 
         ":math:`P_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
         Existing flow capacity"
-        ":math:`P_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        ":math:`P_{invest,min}(p)`", ":py:obj:`flows[i, o].investment.minimum[p]`", "
         Minimum investment capacity"
-        ":math:`P_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        ":math:`P_{invest,max}(p)`", ":py:obj:`flows[i, o].investment.maximum[p]`", "
         Maximum investment capacity"
-        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ":math:`c_{invest,var}(p)`", ":py:obj:`flows[i, o].investment.ep_costs[p]`
         ", "Variable investment costs"
-        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        ":math:`c_{invest,fix}(p)`", ":py:obj:`flows[i, o].investment.offset[p]`", "
         Fix investment costs"
         ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
         fixed value for the flow variable"
@@ -225,9 +396,9 @@ class InvestmentFlowBlock(SimpleBlock):
 
     Note
     ----
-    See also :class:`oemof.solph.network.FlowBlock`,
-    :class:`oemof.solph.blocks.FlowBlock` and
-    :class:`oemof.solph.options.Investment`
+    See also :class:`.FlowBlock`,
+    :class:`.FlowBlock` and
+    :class:`.Investment`
 
     """  # noqa: E501
 
