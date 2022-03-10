@@ -291,7 +291,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         "FR_sink_el": 450,
         "FR_sink_excess": 0,
         "link_DE_FR": 2,
-        "demand_dsm": 180,
+        "demand_dsm": 281,
     }
 
     for key in test_results.keys():
