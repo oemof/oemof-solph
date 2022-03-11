@@ -121,13 +121,14 @@ class Flow(on.Edge):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.flows.flow.FlowBlock`
-     * :py:class:`~oemof.solph.flows.investment_flow.InvestmentFlowBlock`
-        (additionally if Investment object is present)
-     * :py:class:`~oemof.solph.flows.non_convex_flow.NonConvexFlowBlock`
-        (If nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.flows.flow.FlowBlock`
-        class and a MILP will be build)
+
+    * :py:class:`~oemof.solph.flows.flow.FlowBlock`
+    * :py:class:`~oemof.solph.flows.investment_flow.InvestmentFlowBlock`
+      (additionally if Investment object is present)
+    * :py:class:`~oemof.solph.flows.non_convex_flow.NonConvexFlowBlock`
+      (If nonconvex  object is present, CAUTION: replaces
+      :py:class:`~oemof.solph.flows.flow.FlowBlock`
+      class and a MILP will be build)
 
     Examples
     --------
@@ -398,7 +399,8 @@ class FlowBlock(SimpleBlock):
 
     Lifetime age output constraint:
     Force flow to 0 once it exceeds its lifetime, considering its initial age
-      :attr:`om.FlowBlock.lifetime_age_output[i, o]`:
+    :attr:`om.FlowBlock.lifetime_age_output[i, o]`:
+
         .. math::
           &
           if \quad lifetime(i, o) - age(i, o) < year(p):\\
@@ -434,22 +436,23 @@ class FlowBlock(SimpleBlock):
           flow(i, o, p, t) \cdot weight(t) \cdot variable\_costs(i, o, t)
           \cdot DF^{-p}
 
-    If :attr:`fixed_costs` is set by the user
-    and flow has no lifetime limitation:
+    If :attr:`fixed_costs` is set by the user and no lifetime limitation:
       .. math::
           \sum_{(i,o)} \sum_{p \in {PERIODS}}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, p)
           \cdot DF^{-p}
 
-    If :attr:`fixed_costs` is set by the user
-    and flow has a :attr:`lifetime` attribute defined:
+    If :attr:`fixed_costs` is set by the user and flow
+    has a :attr:`lifetime` attribute defined:
+
       .. math::
           \sum_{(i,o)} \sum_{pp=0}^{lifetime(i, o)}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, pp)
           \cdot DF^{-pp}
 
-    If :attr:`fixed_costs` is set by the user
-    and flow has a :attr:`lifetime` and an :attr:`age` attribute defined:
+    If :attr:`fixed_costs` is set by the user and flow has a :attr:`lifetime`
+    and an :attr:`age` attribute defined:
+
       .. math::
           \sum_{(i,o)} \sum_{pp=0}^{lifetime(i, o) - age(i, o)}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, pp)

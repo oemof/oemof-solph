@@ -994,7 +994,7 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ":math:`P_{i,exist}`", "`flows[i[n], n].investment.existing`
         ", "Existing inflow capacity"
         ":math:`P_{o,exist}`", "`flows[n, o[n]].investment.existing`
-        ", "Existing outlfow capacity"
+        ", "Existing outflow capacity"
         ":math:`c_{invest,var}`", "`flows[i, o].investment.ep_costs`
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", "`flows[i, o].investment.offset`", "
@@ -1017,17 +1017,18 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         Conversion factor (i.e. efficiency) when storing energy"
         ":math:`\eta_o(t)`", "`outflow_conversion_factor[t]`", "
         Conversion factor when (i.e. efficiency) taking stored energy"
-        ":math:`c(-1)`", "`initial_storage_level`", "Initial relativ
+        ":math:`c(-1)`", "`initial_storage_level`", "Initial relative
         storage content (before timestep 0)"
         ":math:`c_{max}`", "`flows[i, o].max[t]`", "Normed maximum
         value of storage content"
         ":math:`c_{min}`", "`flows[i, o].min[t]`", "Normed minimum
         value of storage content"
-        ":math:`l`", ":py:obj:`flows[i, o].investment.lifetime`", "
+        ":math:`l`", "`flows[i, o].investment.lifetime`", "
         Lifetime for investments in storage capacity"
-        ":math:`a`", ":py:obj:`flows[i, o].investment.age`", "
+        ":math:`a`", "`flows[i, o].investment.age`", "
         Initial age of existing capacity / energy"
-        ":math:`ir`", ":py:obj:`flows[i, o].investment.interest_rate`", "
+        ":math:`ir`", "`flows[i, o].investment.interest_rate`", "
+        interest rate for investment"
         ":math:`\tau(t)`", "", "Duration of time step"
         ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`,
         :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
