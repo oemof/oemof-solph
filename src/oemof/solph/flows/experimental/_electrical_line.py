@@ -89,10 +89,10 @@ class ElectricalLineBlock(SimpleBlock):
 
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
-            flow(n, o, p, t) =  1 / reactance(n, t) \\cdot ()
-            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
-            \forall p, t \\in \\textrm{TIMEINDEX}, \\
-            \forall n \\in \\textrm{ELECTRICAL\_LINES}.
+            flow(n, o, p, t) =  1 / reactance(n, t) \cdot
+            voltage\_angle(i(n), t) - voltage\_angle(o(n), t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
+            \forall n \in \textrm{ELECTRICAL\_LINES}.
 
     TODO: Add equate constraint of flows
 

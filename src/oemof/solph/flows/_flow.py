@@ -63,7 +63,7 @@ class Flow(on.Edge):
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: REMOVED!
+         * `'costs'`: REMOVED!
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
 
@@ -72,14 +72,14 @@ class Flow(on.Edge):
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: REMOVED!
+          * `'costs'`: REMOVED!
 
     summed_max : numeric, :math:`f_{sum,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
     summed_min : numeric, :math:`f_{sum,min}`
         see above
-    variable_costs : numeric (iterable or scalar)
+    variable_costs : numeric (iterable or scalar), :math:`c_{var}`
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
@@ -104,15 +104,15 @@ class Flow(on.Edge):
         set.
     integer : boolean
         If True, flow is forced to take only integer values
-    fixed_costs : numeric (iterable or scalar)
+    fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
         The fixed costs associated with a flow.
         Note: These are only applicable for a multi-period model.
-    lifetime : int
+    lifetime : int, :math:`l`
         The lifetime of a flow (usually given in years);
         once it reaches its lifetime (considering also
         an initial age), the flow is forced to 0.
         Note: Only applicable for a multi-period model.
-    age : int
+    age : int, :math:`a`
         The initial age of a flow (usually given in years);
         once it reaches its lifetime (considering also
         an initial age), the flow is forced to 0.
@@ -321,13 +321,13 @@ class FlowBlock(SimpleBlock):
 
     FlowBlock max sum :attr:`om.FlowBlock.summed_max[i, o]`
       .. math::
-        \sum_t flow(i, o, p, t) \cdot \tau
+        \sum_{p, t \in \textrm{TIMEINDEX}} flow(i, o, p, t) \cdot \tau
             \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
     FlowBlock min sum :attr:`om.FlowBlock.summed_min[i, o]`
       .. math::
-        \sum_t flow(i, o, p, t) \cdot \tau
+        \sum_{p, t \in \textrm{TIMEINDEX}} flow(i, o, p, t) \cdot \tau
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
 
@@ -337,15 +337,18 @@ class FlowBlock(SimpleBlock):
           &
           if \quad t > 0:\\
           &
-          flow(i, o, p t-1) - flow(i, o, p, t) \geq \
+          flow(i, o, p, t-1) - flow(i, o, p, t) \geq \
           negative\_gradient(i, o, t), \\
+          &\\
           &
           else:\\
           &
           flow(i, o, p, t) = 0\\
+          &\\
           &
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall p, t \in \textrm{TIMEINDEX}\\.
+          &
+          p, t \in \textrm{TIMEINDEX}\\.
 
     Positive gradient constraint
       :attr:`om.FlowBlock.positive_gradient_constr[i, o]`:
@@ -355,19 +358,24 @@ class FlowBlock(SimpleBlock):
           &
           flow(i, o, p t) - flow(i, o, p, t-1) \geq \
           positive\_gradient(i, o, t), \\
+          &\\
           &
           else:\\
           &
           flow(i, o, p, t) = 0\\
+          &\\
           &
           \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall p, t \in \textrm{TIMEINDEX}\\.
+          &
+          p, t \in \textrm{TIMEINDEX}\\.
 
     Note
     ----
     The gradient implementations combine a timestep and its predecessor.
-    This predecessor might also lie in the previous period which is taken
-    care of by checking the previous indices of the TIMEINDEX set.
+    This predecessor might also lie in the previous period. For the sake
+    of readability, this is not represented in the mathematical
+    formulation above, but taken care of by
+    checking the previous index of the TIMEINDEX set.
 
 
     Integer constraint
@@ -384,25 +392,27 @@ class FlowBlock(SimpleBlock):
           if \quad lifetime(i, o) < year(p):\\
           &
           flow(i, o, p, t) = 0 \\
+          &
           \forall p, t \in \textrm{TIMEINDEX},
           (i, o) \in \textrm{LIFETIME\_FLOWS}
 
     Lifetime age output constraint:
     Force flow to 0 once it exceeds its lifetime, considering its initial age
-      :attr:`om.FlowBlock.lifetime_output[i, o]`:
+      :attr:`om.FlowBlock.lifetime_age_output[i, o]`:
         .. math::
           &
           if \quad lifetime(i, o) - age(i, o) < year(p):\\
           &
           flow(i, o, p, t) = 0 \\
+          &
           \forall p, t \in \textrm{TIMEINDEX},
-          (i, o) \in \textrm{LIFETIME\_FLOWS}
+          (i, o) \in \textrm{LIFETIME\_AGE\_FLOWS}
 
     Whereby:
 
-    * year(p) is the year corresponding to period p
-    * lifetime(i, o) is the expected technical lifetime of flow (i, o)
-    * age(i, o) is the initial age of flow (i, o)
+    * :math:`year(p)` is the year corresponding to period p
+    * :math:`lifetime(i, o)` is the expected technical lifetime of flow (i, o)
+    * :math:`age(i, o)` is the initial age of flow (i, o)
 
     **The following parts of the objective function are created:**
 
@@ -410,7 +420,7 @@ class FlowBlock(SimpleBlock):
 
     If :attr:`variable_costs` is set by the user:
       .. math::
-          \sum_{(i,o)} \sum_{p, t}
+          \sum_{(i,o)} \sum_{p, t \in \textrm{TIMEINDEX}}
           flow(i, o, p, t) \cdot weight(t) \cdot variable\_costs(i, o, t)
 
     The expression can be accessed by :attr:`om.FlowBlock.variable_costs` and
@@ -420,26 +430,26 @@ class FlowBlock(SimpleBlock):
 
     If :attr:`variable_costs` is set by the user:
       .. math::
-          \sum_{(i,o)} \sum_{p, t}
+          \sum_{(i,o)} \sum_{p, t \in \textrm{TIMEINDEX}}
           flow(i, o, p, t) \cdot weight(t) \cdot variable\_costs(i, o, t)
-          \cdot DF^{p}
+          \cdot DF^{-p}
 
     If :attr:`fixed_costs` is set by the user
     and flow has no lifetime limitation:
       .. math::
-          \sum_{(i,o)} \sum_p
+          \sum_{(i,o)} \sum_{p \in {PERIODS}}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, p)
-          \cdot DF^{p}
+          \cdot DF^{-p}
 
     If :attr:`fixed_costs` is set by the user
-    and flow has an :attr:`lifetime` attribute defined:
+    and flow has a :attr:`lifetime` attribute defined:
       .. math::
           \sum_{(i,o)} \sum_{pp=0}^{lifetime(i, o)}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, pp)
           \cdot DF^{-pp}
 
     If :attr:`fixed_costs` is set by the user
-    and flow has an :attr:`lifetime` and an :attr:`age` attribute defined:
+    and flow has a :attr:`lifetime` and an :attr:`age` attribute defined:
       .. math::
           \sum_{(i,o)} \sum_{pp=0}^{lifetime(i, o) - age(i, o)}
           nominal\_value(i, o) \cdot fixed\_costs(i, o, pp)
@@ -447,14 +457,20 @@ class FlowBlock(SimpleBlock):
 
     Whereby:
 
-    * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
+    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
     * :math:`weight(t)` is the objective weighting term for timestep t
 
     Cost expressions can be accessed by
-    :attr:`om.FlowBlock.variable_costs`, :attr:`om.FlowBlock.fixed_costs` and
-    :attr:`om.FlowBlock.costs`. Their values  after optimization can be
-    retreived by :meth:`om.FlowBlock.variable_costs()`,
-    :meth:`om.FlowBlock.fixed_costs()` and :meth:`om.FlowBlock.costs()`
+
+    * :attr:`om.FlowBlock.variable_costs`,
+    * :attr:`om.FlowBlock.fixed_costs` and
+    * :attr:`om.FlowBlock.costs`.
+
+    Their values  after optimization can be retrieved by
+
+    * :meth:`om.FlowBlock.variable_costs()`,
+    * :meth:`om.FlowBlock.fixed_costs()` and
+    * :meth:`om.FlowBlock.costs()`
 
     """
 

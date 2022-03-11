@@ -75,6 +75,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     ----
     Flow objects required an attribute named like keyword!
 
+
     **Constraint:**
 
     .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
@@ -166,10 +167,11 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     ----
     Flow objects required an attribute named like keyword!
 
+
     **Constraint:**
 
     .. math:: \sum_{i \in F_I} \sum_{t \in T} P_i(t) \cdot w_i(t)
-               \cdot \tau(t) \leq L(p) \forall p in \textrm{PERIODS}
+               \cdot \tau(t) \leq L(p) \forall p \in \textrm{PERIODS}
 
 
     For the parameter and variable explanation, please refer to the docs

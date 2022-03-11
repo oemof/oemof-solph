@@ -139,9 +139,9 @@ def results(om):
     Examples
     --------
     * *Standard model*: `results[idx]['scalars']`
-    and flows `results[n, n]['sequences']`.
+      and flows `results[n, n]['sequences']`.
     * *Multi-period model*: `results[idx]['period_scalars']`
-    and flows `results[n, n]['sequences']`.
+      and flows `results[n, n]['sequences']`.
     """
     # Extraction steps that are the same for both model types
     df = create_dataframe(om)
@@ -290,7 +290,7 @@ def _extract_multi_period_model_result(
     Parameters
     ----------
     om : oemof.solph.models.Model
-        The ptimization model
+        The optimization model
     df_dict : dict
         dictionary of results DataFrames
     period_indexed : list

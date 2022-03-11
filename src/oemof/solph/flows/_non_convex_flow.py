@@ -70,7 +70,8 @@ class NonConvexFlow(Flow):
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs'`: REMOVED!
+         * `'costs'`: numeric (scalar or None), the gradient cost per
+            unit.
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
@@ -78,7 +79,8 @@ class NonConvexFlow(Flow):
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs'`: REMOVED!
+          * `'costs'`: numeric (scalar or None), the gradient cost per
+            unit.
     """
 
     def __init__(
@@ -191,27 +193,27 @@ class NonConvexFlowBlock(SimpleBlock):
             flow(i, o, p, t) \geq min(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall p, t \in \textrm{TIMEINDEX}, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+            (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Maximum flow constraint `om.NonConvexFlowBlock.max[i,o,t]`
         .. math::
             flow(i, o, p, t) \leq max(i, o, t) \cdot nominal\_value \
                 \cdot status(i, o, t), \\
             \forall p, t \in \textrm{TIMEINDEX}, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+            (i, o) \in \textrm{NONCONVEX\_FLOWS}.
 
     Startup constraint `om.NonConvexFlowBlock.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i,o) \in \textrm{STARTUPFLOWS}.
+            (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
       `om.NonConvexFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
-                N_{start}(i,o)
+                N_{start}(i,o) \\
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
 
     Shutdown constraint `om.NonConvexFlowBlock.shutdown_constr[i,o,t]`
@@ -219,13 +221,13 @@ class NonConvexFlowBlock(SimpleBlock):
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
+            (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
       `om.NonConvexFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
-                N_{shutdown}(i,o)
+                N_{shutdown}(i,o) \\
             \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
     Minimum uptime constraint `om.NonConvexFlowBlock.uptime_constr[i,o,t]`
@@ -263,10 +265,10 @@ class NonConvexFlowBlock(SimpleBlock):
     Positive gradient constraint
       `om.NonConvexFlowBlock.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, p t) \cdot status(i, o, t)
-        - flow(i, o, p, t-1) \cdot status(i, o, t-1)  \geq \
+          - flow(i, o, p, t-1) \cdot status(i, o, t-1)  \geq \
           positive\_gradient(i, o, t), \\
           \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall p, t \in \textrm{TIMEINDEX}.
+           p, t \in \textrm{TIMEINDEX}.
 
     Negative gradient constraint
       `om.NonConvexFlowBlock.negative_gradient_constr[i, o]`:
@@ -275,7 +277,7 @@ class NonConvexFlowBlock(SimpleBlock):
           - flow(i, o, p, t) \cdot status(i, o, t) \geq \
           negative\_gradient(i, o, t), \\
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall p, t \in \textrm{TIMEINDEX}.
+          p, t \in \textrm{TIMEINDEX}.
 
     Note
     ----
@@ -285,6 +287,8 @@ class NonConvexFlowBlock(SimpleBlock):
 
 
     **The following parts of the objective function are created:**
+
+    *Standard model*
 
     If `nonconvex.startup_costs` is set by the user:
         .. math::
@@ -306,15 +310,33 @@ class NonConvexFlowBlock(SimpleBlock):
             \sum_{i, o \in INACTIVITYCOSTFLOWS} \sum_t (1 - status(i, o, t)) \
             \cdot inactivity\_costs(i, o)
 
-    If `nonconvex.positive_gradient["costs"]` is set by the user:
-        .. math::
-            \sum_{i, o \in POSITIVE_GRADIENT_FLOWS} \sum_t
-            positive_gradient(i, o, t) \cdot positive\_gradient\_costs(i, o)
+    *Multi-period model*
 
-    If `nonconvex.negative_gradient["costs"]` is set by the user:
+    If `nonconvex.startup_costs` is set by the user:
         .. math::
-            \sum_{i, o \in NEGATIVE_GRADIENT_FLOWS} \sum_t
-            negative_gradient(i, o, t) \cdot negative\_gradient\_costs(i, o)
+            \sum_{i, o \in STARTUPFLOWS} \sum_{p, t}  startup(i, o, t) \
+            \cdot startup\_costs(i, o) \cdot w(t) \cdot DF^{-p}
+
+    If `nonconvex.shutdown_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
+            \cdot shutdown\_costs(i, o) \cdot w(t) \cdot DF^{-p}
+
+    If `nonconvex.activity_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in ACTIVITYCOSTFLOWS} \sum_t status(i, o, t) \
+            \cdot activity\_costs(i, o) \cdot w(t) \cdot DF^{-p}
+
+    If `nonconvex.inactivity_costs` is set by the user:
+        .. math::
+            \sum_{i, o \in INACTIVITYCOSTFLOWS} \sum_t (1 - status(i, o, t)) \
+            \cdot inactivity\_costs(i, o) \cdot w(t) \cdot DF^{-p}
+
+    Whereby
+
+    * :math:`DF` is the discount factor calculated as :math:`(1+dr)` with
+      discount rate :math:`dr`
+    * :math:`w(t)` is the objective weighting for timestep t
 
     """
 

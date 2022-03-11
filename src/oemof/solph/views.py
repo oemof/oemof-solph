@@ -235,14 +235,16 @@ def node_weight_by_type(results, node_type):
 
     Example
     --------
-    from oemof.outputlib import views
+    ::
 
-    # solve oemof model 'm'
-    # Then collect node weights
-    views.node_weight_by_type(
-        m.results(),
-        node_type=solph.components.GenericStorage
-    )
+        from oemof.solph import views
+
+        # solve oemof model 'm'
+        # Then collect node weights
+        views.node_weight_by_type(
+            m.results(),
+           node_type=solph.components.GenericStorage
+        )
     """
 
     group = {
@@ -274,14 +276,19 @@ def node_input_by_type(results, node_type, droplevel=None):
         Specifies the type of the node for that inputs are selected
     droplevel: list
 
-    Notes
+    Examples
     -----
-    from oemof import solph
-    from oemof.outputlib import views
+    ::
 
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.node_input_by_type(m.results(), node_type=solph.components.Sink)
+        from oemof import solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.node_input_by_type(
+            m.results(),
+            node_type=solph.components.Sink
+        )
     """
     if droplevel is None:
         droplevel = []
@@ -314,15 +321,17 @@ def node_output_by_type(results, node_type, droplevel=None):
 
     Notes
     -----
-    import oemof.solph as solph
-    from oemof.outputlib import views
+    ::
 
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.node_output_by_type(
-        m.results(),
-        node_type=solph.components.Transformer
-    )
+        import oemof.solph as solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.node_output_by_type(
+            m.results(),
+            node_type=solph.components.Transformer
+        )
     """
     if droplevel is None:
         droplevel = []
@@ -355,19 +364,21 @@ def net_storage_flow(results, node_type):
     Returns
     -------
     pandas.DataFrame object with multiindex colums. Names of levels of columns
-    are: from, to, net_flow.
+        are: from, to, net_flow.
 
     Examples
     --------
-    import oemof.solph as solph
-    from oemof.outputlib import views
+    ::
 
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.net_storage_flow(
-        m.results(),
-        node_type=solph.components.GenericStorage
-    )
+        import oemof.solph as solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.net_storage_flow(
+            m.results(),
+            node_type=solph.components.GenericStorage
+        )
     """
 
     group = {

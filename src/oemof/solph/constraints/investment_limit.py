@@ -59,11 +59,12 @@ def investment_limit(model, limit=None):
 
 def investment_limit_per_period(model, limit=None):
     r"""Set an absolute limit for the total investment costs of a
-     investment optimization problem for each period
+    investment optimization problem for each period
     of the multi-period problem.
 
-    .. math:: \sum_{investment\_costs(p)} \leq limit(p)
-    \forall p in \textrm{PERIODS}
+    .. math::
+        \sum_{investment\_costs(p)} \leq limit(p)
+        \forall p \in \textrm{PERIODS}
 
     Parameters
     ----------

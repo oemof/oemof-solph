@@ -51,7 +51,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     **Variables**
 
-    All *InvestmentFlowBlock*s are indexed by a starting and ending node
+    All *InvestmentFlowBlock* objects are indexed by a starting and ending node
     :math:`(i, o)`, which is omitted in the following for the sake
     of convenience. The following variables are created:
 
@@ -63,7 +63,7 @@ class InvestmentFlowBlock(SimpleBlock):
     * :math:`P_{invest}(p)`
 
         Value of the investment variable in period p,
-        equal to what is being invested and equivalent / similar to
+        equal to what is being invested and equivalent resp. similar to
         the nominal value of the flows after optimization.
 
     * :math:`P_{total}(p)`
@@ -100,7 +100,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*,
     different constraints are created. The following constraints are created
-    for all *InvestmentFlowBlock*s:\
+    for all *InvestmentFlowBlock* objects:\
 
         Total capacity / energy
 
@@ -109,17 +109,21 @@ class InvestmentFlowBlock(SimpleBlock):
             if \quad p=0:\\
             &
             P_{total}(p) = P_{invest}(p) + P_{exist}(p) \\
+            &\\
             &
             else:\\
             &
             P_{total}(p) = P_{total}(p-1) + P_{invest}(p) - P_{old}(p) \\
+            &\\
             &
             \forall p \in \textrm{PERIODS}
 
         Upper bound for the flow value
 
         .. math::
+            &
             P(p, t) \le ( P_{total}(p) ) \cdot f_{max}(t) \\
+            &
             \forall p, t \in \textrm{TIMEINDEX}
 
     For a multi-period model, the old capacity is defined as follows:
@@ -132,10 +136,12 @@ class InvestmentFlowBlock(SimpleBlock):
             if \quad p=0:\\
             &
             P_{old,end}(p) = 0\\
+            &\\
             &
             else \quad if \quad l \leq year(p):\\
             &
             P_{old,end}(p) = P_{invest}(p_{comm})\\
+            &\\
             &
             else:\\
             &
@@ -145,23 +151,28 @@ class InvestmentFlowBlock(SimpleBlock):
             if \quad p=0:\\
             &
             P_{old,exo}(p) = 0\\
+            &\\
             &
             else \quad if \quad l - a \leq year(p):\\
             &
             P_{old,exo}(p) = P_{exist} (*)\\
+            &\\
             &
             else:\\
             &
             P_{old,exo}(p) = 0\\
+            &\\
             &
             \forall p \in \textrm{PERIODS}
 
         whereby:
 
         * (*) is only performed for the first period the condition is True.
-          A decommissioning flag is set to True.
+          A decommissioning flag is then set to True to prevent having falsely
+          added old capacity in future periods.
         * :math:`year(p)` is the year corresponding to period p
-        * :math:`p_{comm}` is the commissioning period of the flow
+        * :math:`p_{comm}` is the commissioning period of the flow (which is
+          determined by the model itself)
 
     Depending on the attribute :attr:`nonconvex`, the constraints for the
     bounds of the decision variable :math:`P_{invest}(p)` are different:\
@@ -169,16 +180,19 @@ class InvestmentFlowBlock(SimpleBlock):
         * :attr:`nonconvex = False`
 
         .. math::
+            &
             P_{invest, min}(p) \le P_{invest}(p) \le P_{invest, max}(p) \\
+            &
             \forall p \in \textrm{PERIODS}
 
         * :attr:`nonconvex = True`
 
         .. math::
             &
-            P_{invest, min}(P) \cdot b_{invest}(P) \le P_{invest}(p)\\
+            P_{invest, min}(p) \cdot b_{invest}(p) \le P_{invest}(p)\\
             &
             P_{invest}(p) \le P_{invest, max}(p) \cdot b_{invest}(p)\\
+            &\\
             &
             \forall p \in \textrm{PERIODS}
 
@@ -191,7 +205,10 @@ class InvestmentFlowBlock(SimpleBlock):
             Actual value constraint for investments with fixed flow values
 
         .. math::
+            &
             P(p, t) = P_{total}(p) \cdot f_{fix}(t) \\
+            &\\
+            &
             \forall p, t \in \textrm{TIMEINDEX}
 
         * :attr:`min != 0`
@@ -199,7 +216,10 @@ class InvestmentFlowBlock(SimpleBlock):
             Lower bound for the flow values
 
         .. math::
+            &
             P(p, t) \geq P_{total}(p) \cdot f_{min}(t) \\
+            &\\
+            &
             \forall p, t \in \textrm{TIMEINDEX}
 
         * :attr:`summed_max` is not None
@@ -225,12 +245,16 @@ class InvestmentFlowBlock(SimpleBlock):
             Overall maximum of total installed capacity / energy for flow
 
         .. math::
+            &
             P_{total}(p) \leq P_{overall,max} \\
+            &\\
+            &
             \forall p \in \textrm{PERIODS}
 
         * :attr:`overall_minimum` is not None (for multi-period model only)
 
-            Overall minimum of total installed capacity / energy for flow
+            Overall minimum of total installed capacity / energy for flow;
+            applicable only in last period
 
         .. math::
             P_{total}(p_{last}) \geq P_{overall,min}
@@ -257,6 +281,8 @@ class InvestmentFlowBlock(SimpleBlock):
                 P_{invest}(0) \cdot c_{invest,var}(0)
                 + c_{invest,fix}(0) \cdot b_{invest}(0) \\
 
+    Whereby 0 denotes the 0th (investment) period since in a standard model,
+    there is only this one period.
 
     *Multi-period model*
 
@@ -266,6 +292,7 @@ class InvestmentFlowBlock(SimpleBlock):
                 &
                 P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
                 \cdot DF^{-p}\\
+                &\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -273,8 +300,9 @@ class InvestmentFlowBlock(SimpleBlock):
 
             .. math::
                 &
-                P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
-                \cdot DF^{-p} +  c_{invest,fix}(p) \cdot b_{invest}(p)\\
+                (P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
+                +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p} \\
+                &\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -282,9 +310,10 @@ class InvestmentFlowBlock(SimpleBlock):
 
             .. math::
                 &
-                \sum_{pp=year(p)}^{year(p)+l}
+                (\sum_{pp=year(p)}^{year(p)+l}
                 P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
                 \cdot DF^{-p}\\
+                &\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -302,8 +331,31 @@ class InvestmentFlowBlock(SimpleBlock):
           interest rate :math:`ir`
         * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
 
-    The total value of all costs of all *InvestmentFlowBlock* can be retrieved
-    calling :meth:`om.InvestmentFlowBlock.investment_costs.expr()`.
+    The annuity hereby is:
+
+        .. math::
+
+            A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
+                \frac {(1+i)^l \cdot i} {(1+i)^l - 1} \cdot
+
+    It is retrieved, using oemof.tools.economics annuity function. The
+    interest rate is defined as a weighted average costs of capital (wacc) and
+    assumed constant over time.
+
+    The overall summed cost expressions for all *InvestmentFlowBlock* objects
+    can be accessed by
+
+    * :attr:`om.InvestmentFlowBlock.investment_costs`,
+    * :attr:`om.InvestmentFlowBlock.fixed_costs` and
+    * :attr:`om.InvestmentFlowBlock.costs`.
+
+    Their values  after optimization can be retrieved by
+
+    * :meth:`om.InvestmentFlowBlock.investment_costs`,
+    * :attr:`om.InvestmentFlowBlock.period_investment_costs` (yielding a dict
+      keyed by periods); note: this is not a Pyomo expression, but calculated,
+    * :meth:`om.InvestmentFlowBlock.fixed_costs` and
+    * :meth:`om.InvestmentFlowBlock.costs`.
 
     .. csv-table:: List of Variables (in csv table syntax)
         :header: "symbol", "attribute", "explanation"
@@ -340,7 +392,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     =========================  =================================  =========
 
-    Grid table style:
+    List of Variables (in grid table style):
 
     +------------------------+----------------------------------+--------------------------------------------+
     | symbol                 | attribute                        | explanation                                |
@@ -349,7 +401,7 @@ class InvestmentFlowBlock(SimpleBlock):
     +------------------------+----------------------------------+--------------------------------------------+
     | :math:`P_{invest}(p)`  | :py:obj:`invest[i, o, p]`        | Invested flow capacity                     |
     +------------------------+----------------------------------+--------------------------------------------+
-    | :math:`P_{total}(p)`  | :py:obj:`total[i, o, p]`          | Total flow capacity / energy               |
+    | :math:`P_{total}(p)`   | :py:obj:`total[i, o, p]`         | Total flow capacity / energy               |
     +------------------------+----------------------------------+--------------------------------------------+
     | :math:`P_{old}(p)`     | :py:obj:`old[n, o, p]`           | Old flow capacity / energy                 |
     +------------------------+----------------------------------+--------------------------------------------+
@@ -374,6 +426,14 @@ class InvestmentFlowBlock(SimpleBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}(p)`", ":py:obj:`flows[i, o].investment.offset[p]`", "
         Fix investment costs"
+        ":math:`c_{fixed}`", "`flows[i, o].investment.fixed_costs`", "
+        Fixed costs; only allowed in multi-period model"
+        ":math:`l`", ":py:obj:`flows[i, o].investment.lifetime`", "
+        Lifetime for investments"
+        ":math:`a`", ":py:obj:`flows[i, o].investment.age`", "
+        Initial age of existing capacity / energy"
+        ":math:`ir`", ":py:obj:`flows[i, o].investment.interest_rate`", "
+        Interest rate for investments"
         ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
         fixed value for the flow variable"
         ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
@@ -386,6 +446,10 @@ class InvestmentFlowBlock(SimpleBlock):
         minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"
+        ":math:`year(p)`", ":py:obj:`oemof.solph.energy_system_Energy_System.period_years`","
+        Mapping of periods to years of the energy system (needed for lifetime tracking)"
+        ":math:`dr`", ":py:obj:`oemof.solph.models.Model.discount_rate`", "
+        Discount rate of the model to calculate discount factor :math:`DF`"
 
     Note
     ----
@@ -396,9 +460,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     Note
     ----
-    See also :class:`.FlowBlock`,
-    :class:`.FlowBlock` and
-    :class:`.Investment`
+    See also :class:`.FlowBlock` and :class:`.Investment`
 
     """  # noqa: E501
 

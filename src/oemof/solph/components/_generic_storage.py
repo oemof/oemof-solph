@@ -412,7 +412,7 @@ class GenericStorageBlock(SimpleBlock):
             \cdot c_{fixed}(p) \cdot DF^{-p}
 
     whereby:
-    :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
+    :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
 
 
     """  # noqa: E501
@@ -695,10 +695,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             if \quad p=0:\\
             &
             E_{total}(p) = E_{exist} + E_{invest}(p)\\
+            &\\
             &
             else:\\
             &
             E_{total}(p) = E_{total}(p-1) + E_{invest}(p) - E_{old}(p)\\
+            &\\
             &
             \forall p \in \textrm{PERIODS}
 
@@ -712,10 +714,12 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             if \quad p=0:\\
             &
             E_{old,end}(p) = 0\\
+            &\\
             &
             else \quad if \quad l \leq year(p):\\
             &
             E_{old,end}(p) = E_{invest}(p_{comm})\\
+            &\\
             &
             else:\\
             &
@@ -725,21 +729,25 @@ class GenericInvestmentStorageBlock(SimpleBlock):
             if \quad p=0:\\
             &
             E_{old,exo}(p) = 0\\
+            &\\
             &
             else \quad if \quad l - a \leq year(p):\\
             &
             E_{old,exo}(p) = E_{exist} (*)\\
+            &\\
             &
             else:\\
             &
             E_{old,exo}(p) = 0\\
+            &\\
             &
             \forall p \in \textrm{PERIODS}
 
         whereby:
 
         * (*) is only performed for the first period the condition is True.
-          A decommissioning flag is set to True.
+          A decommissioning flag is then set to True to prevent having falsely
+          added old capacity in future periods.
         * :math:`year(p)` is the year corresponding to period p
         * :math:`p_{comm}` is the commissioning period of the storage
 
@@ -867,10 +875,6 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 E_{invest}(0) \cdot c_{invest,var}(0)
                 + c_{invest,fix}(0) \cdot b_{invest}(0)\\
 
-    The total value of all investment costs of all *InvestmentStorages*
-    can be retrieved calling
-    :math:`om.GenericInvestmentStorageBlock.investment_costs.expr()`.
-
     *Multi-period model*
 
         * :attr:`nonconvex = False`
@@ -915,9 +919,32 @@ class GenericInvestmentStorageBlock(SimpleBlock):
           interest rate :math:`ir`
         * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
 
-    The total value of all investment costs of all *InvestmentStorages*
-    can be retrieved calling
-    `om.GenericInvestmentStorageBlock.investment_costs.expr()`.
+    The annuity hereby is:
+
+        .. math::
+
+            A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
+                \frac {(1+i)^l \cdot i} {(1+i)^l - 1} \cdot
+
+    It is retrieved, using oemof.tools.economics annuity function. The
+    interest rate is defined as a weighted average costs of capital (wacc) and
+    assumed constant over time.
+
+    The overall summed cost expressions for all *InvestmentFlowBlock* objects
+    can be accessed by
+
+    * :attr:`om.GenericInvestmentStorageBlock.investment_costs`,
+    * :attr:`om.GenericInvestmentStorageBlock.fixed_costs` and
+    * :attr:`om.GenericInvestmentStorageBlock.costs`.
+
+    Their values  after optimization can be retrieved by
+
+    * :meth:`om.GenericInvestmentStorageBlock.investment_costs`,
+    * :attr:`om.GenericInvestmentStorageBlock.period_investment_costs`
+      (yielding a dict keyed by periods); note: this is not a Pyomo expression,
+      but calculated,
+    * :meth:`om.GenericInvestmentStorageBlock.fixed_costs` and
+    * :meth:`om.GenericInvestmentStorageBlock.costs`.
 
     .. csv-table:: List of Variables
         :header: "symbol", "attribute", "explanation"
@@ -972,6 +999,8 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", "`flows[i, o].investment.offset`", "
         Fix investment costs"
+        ":math:`c_{fixed}`", "`flows[i, o].investment.fixed_costs`", "
+        Fixed costs; only allowed in multi-period model"
         ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "
         Relation of storage capacity and nominal inflow"
         ":math:`r_{cap,out}`", ":attr:`invest_relation_output_capacity`", "
@@ -994,6 +1023,11 @@ class GenericInvestmentStorageBlock(SimpleBlock):
         value of storage content"
         ":math:`c_{min}`", "`flows[i, o].min[t]`", "Normed minimum
         value of storage content"
+        ":math:`l`", ":py:obj:`flows[i, o].investment.lifetime`", "
+        Lifetime for investments in storage capacity"
+        ":math:`a`", ":py:obj:`flows[i, o].investment.age`", "
+        Initial age of existing capacity / energy"
+        ":math:`ir`", ":py:obj:`flows[i, o].investment.interest_rate`", "
         ":math:`\tau(t)`", "", "Duration of time step"
         ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`,
         :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"

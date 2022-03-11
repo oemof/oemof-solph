@@ -207,7 +207,7 @@ class NonConvex:
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
+         * `'costs'`: numeric (scalar or None), the gradient cost per
            unit.
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
@@ -216,7 +216,7 @@ class NonConvex:
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
+          * `'costs'`: numeric (scalar or None), the gradient cost per
             unit.
     """
 
