@@ -123,11 +123,11 @@ class ExtractionTurbineCHPBlock(SimpleBlock):
     :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
 
     :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
-                                                                                        without heat extraction
+                                                                                without heat extraction
     :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
-                                                                                        with max heat extraction
+                                                                                with max heat extraction
     :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
-                                                                                        maximal heat extraction
+                                                                                maximal heat extraction
     ========================= ============================================ ==== =========
 
     """  # noqa: E501
