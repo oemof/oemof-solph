@@ -70,8 +70,7 @@ class NonConvexFlow(Flow):
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
-           unit.
+         * `'costs'`: REMOVED!
 
     negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
@@ -79,8 +78,7 @@ class NonConvexFlow(Flow):
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
-            unit.
+          * `'costs'`: REMOVED!
     """
 
     def __init__(
@@ -717,7 +715,6 @@ class NonConvexFlowBlock(SimpleBlock):
         shutdown_costs = 0
         activity_costs = 0
         inactivity_costs = 0
-        gradient_costs = 0
 
         if not m.es.multi_period:
             if self.STARTUPFLOWS:
@@ -807,7 +804,6 @@ class NonConvexFlowBlock(SimpleBlock):
 
         self.activity_costs = Expression(expr=activity_costs)
         self.inactivity_costs = Expression(expr=inactivity_costs)
-        self.gradient_costs = Expression(expr=gradient_costs)
         self.startup_costs = Expression(expr=startup_costs)
         self.shutdown_costs = Expression(expr=shutdown_costs)
 
@@ -817,7 +813,6 @@ class NonConvexFlowBlock(SimpleBlock):
                 + shutdown_costs
                 + activity_costs
                 + inactivity_costs
-                + gradient_costs
             )
         )
 
