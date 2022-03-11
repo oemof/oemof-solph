@@ -241,7 +241,7 @@ class GenericCAESBlock(SimpleBlock):
         ":math:`{P}_{cmp\_max}`", "`cmp_p_max[n,t]`", "V", "Max.
         compression power"
         ":math:`\dot{Q}_{cmp}` ", "`cmp_q_out_sum[n,t]`", "V", "Summed
-         heat flow in compression"
+        heat flow in compression"
         ":math:`\dot{Q}_{cmp\_out}` ", "`cmp_q_waste[n,t]`", "V", "
         Waste heat flow from compression"
         ":math:`ST_{exp}(t)`", "`exp_st[n,t]`", "V", "Status of
@@ -256,7 +256,7 @@ class GenericCAESBlock(SimpleBlock):
         ":math:`\dot{Q}_{exp\_add}(t)`", "`exp_q_add_in[n,t]`", "V", "
         Additional heat flow into expansion"
         ":math:`CAV_{fil}(t)`", "`cav_level[n,t]`", "V", "Filling level
-         if CAE"
+        if CAE"
         ":math:`\dot{E}_{cas\_in}(t)`", "`cav_e_in[n,t]`", "V", "
         Exergy flow into CAS"
         ":math:`\dot{E}_{cas\_out}(t)`", "`cav_e_out[n,t]`", "V", "
@@ -264,11 +264,11 @@ class GenericCAESBlock(SimpleBlock):
         ":math:`TES_{fil}(t)`", "`tes_level[n,t]`", "V", "Filling
         level of Thermal Energy Storage (TES)"
         ":math:`\dot{Q}_{tes\_in}(t)`", "`tes_e_in[n,t]`", "V", "Heat
-         flow into TES"
+        flow into TES"
         ":math:`\dot{Q}_{tes\_out}(t)`", "`tes_e_out[n,t]`", "V", "Heat
-         flow from TES"
+        flow from TES"
         ":math:`b_{cmp\_max}`", "`cmp_p_max_b[n,t]`", "P", "Specific
-         y-intersection"
+        y-intersection"
         ":math:`b_{cmp\_q}`", "`cmp_q_out_b[n,t]`", "P", "Specific
         y-intersection"
         ":math:`b_{exp\_max}`", "`exp_p_max_b[n,t]`", "P", "Specific
@@ -280,41 +280,41 @@ class GenericCAESBlock(SimpleBlock):
         ":math:`b_{cas\_out}`", "`cav_e_out_b[n,t]`", "P", "Specific
         y-intersection"
         ":math:`m_{cmp\_max}`", "`cmp_p_max_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cmp\_q}`", "`cmp_q_out_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{exp\_max}`", "`exp_p_max_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{exp\_q}`", "`exp_q_in_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cas\_in}`", "`cav_e_in_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cas\_out}`", "`cav_e_out_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`P_{cmp\_min}`", "`cmp_p_min[n,t]`", "P", "Min.
         compression power"
         ":math:`r_{cmp\_tes}`", "`cmp_q_tes_share[n,t]`", "P", "Ratio
-         between waste heat flow and heat flow into TES"
+        between waste heat flow and heat flow into TES"
         ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "Ratio
-         between external heat flow into expansion and heat flows from TES and
-          additional source"
+        between external heat flow into expansion and heat flows from TES and
+        additional source"
         ":math:`\tau`", "`m.timeincrement[n,t]`", "P", "Time interval
-         length"
+        length"
         ":math:`TES_{fil\_max}`", "`tes_level_max[n,t]`", "P", "Max.
         filling level of TES"
         ":math:`CAS_{fil\_max}`", "`cav_level_max[n,t]`", "P", "Max.
-         filling level of TES"
+        filling level of TES"
         ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
-         (loss factor to take intertemporal losses into account)"
+        (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
-         (external) into Expansion"
+        flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
+        (external) into Expansion"
 
     """
 

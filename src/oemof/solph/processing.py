@@ -27,8 +27,7 @@ from .helpers import flatten
 
 
 def get_tuple(x):
-    """
-    Get oemof tuple within iterable or create it.
+    """Get oemof tuple within iterable or create it
 
     Tuples from Pyomo are of type `(n, n, int)`, `(n, n)` and `(n, int)`.
     For single nodes `n` a tuple with one object `(n,)` is created.
@@ -45,8 +44,7 @@ def get_tuple(x):
 
 
 def get_timestep(x):
-    """
-    Get the timestep from oemof tuples.
+    """Get the timestep from oemof tuples
 
     The timestep from tuples `(n, n, int)`, `(n, n)`, `(n, int)` and (n,)
     is fetched as the last element. For time-independent data (scalars)
@@ -59,8 +57,7 @@ def get_timestep(x):
 
 
 def remove_timestep(x):
-    """
-    Remove the timestep from oemof tuples.
+    """Remove the timestep from oemof tuples
 
     The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
     """
@@ -70,42 +67,12 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def get_timeindex(x):
-    """
-    Get the timeindex from oemof tuples.
-    Slice int values (timeindex, timesteps or periods) dependent on how
-    the variable is indexed.
-
-    The timestep is removed from tuples of type `(n, n, int, int)`,
-    `(n, n, int)` and `(n, int)`.
-    """
-    for i, n in enumerate(x):
-        if isinstance(n, int):
-            return x[i:]
-    return (0,)
-
-
-def remove_timeindex(x):
-    """
-    Remove the timeindex from oemof tuples.
-    Slice up to integer values (node labels)
-
-    The timestep is removed from tuples of type `(n, n, int, int)`,
-    `(n, n, int)` and `(n, int)`.
-    """
-    for i, n in enumerate(x):
-        if isinstance(n, int):
-            return x[:i]
-    return x
-
-
 def create_dataframe(om):
-    """
-    Create a result dataframe with all optimization data.
+    """Create a result DataFrame with all optimization data
 
-    Results from Pyomo are written into pandas DataFrame where separate columns
-    are created for the variable index e.g. for tuples of the flows and
-    components or the timesteps / timeindices.
+    Results from Pyomo are written into one common pandas.DataFrame where
+    separate columns are created for the variable index e.g. for tuples
+    of the flows and components or the timesteps.
     """
     # get all pyomo variables including their block
     block_vars = list(
@@ -130,10 +97,16 @@ def create_dataframe(om):
     # columns for the oemof tuple and timestep are created
     df["oemof_tuple"] = df["pyomo_tuple"].map(get_tuple)
     df = df[df["oemof_tuple"].map(lambda x: x is not None)]
-    df["timeindex"] = df["oemof_tuple"].map(get_timeindex)
-    df["oemof_tuple"] = df["oemof_tuple"].map(remove_timeindex)
+    df["timestep"] = df["oemof_tuple"].map(get_timestep)
+    df["oemof_tuple"] = df["oemof_tuple"].map(remove_timestep)
+
+    # Hack: Use another call of remove timestep to get rid of period not needed
+    df.loc[df["variable_name"] == "flow", "oemof_tuple"] = df.loc[
+        df["variable_name"] == "flow", "oemof_tuple"
+    ].map(remove_timestep)
+
     # order the data by oemof tuple and timestep
-    df = df.sort_values(["oemof_tuple", "timeindex"], ascending=[True, True])
+    df = df.sort_values(["oemof_tuple", "timestep"], ascending=[True, True])
 
     # drop empty decision variables
     df = df.dropna(subset=["value"])
@@ -142,25 +115,42 @@ def create_dataframe(om):
 
 
 def results(om):
-    """
-    Create a result dictionary from the result DataFrame.
+    """Create a nested result dictionary from the result DataFrame
 
-    Results from Pyomo are written into a dictionary of pandas objects where
-    a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows for a standard model. For a multi-period model, the investment
-    values are given in a DataFrame indexed by periods.
-    The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[n, n]['sequences']` for a standard model.
+    The already rearranged results from Pyomo from the result DataFrame are
+    transferred into a nested dictionary of pandas objects.
+    The first level key of that dictionary is a node (denoting the respective
+    flow or component).
+
+    The second level keys are "sequences" and "scalars" for a *standard model*:
+
+    * A pd.DataFrame holds all results that are time-dependent, i.e. given as
+      a sequence and can be indexed with the energy system's timeindex.
+    * A pd.Series holds all scalar values which are applicable for timestep 0
+      (i.e. investments).
+
+    For a *multi-period model*, the second level key for "sequences" remains
+    the same while instead of "scalars", the key "period_scalars" is used:
+
+    * For sequences, see standard model.
+    * Instead of a pd.Series, a pd.DataFrame holds scalar values indexed
+      by periods. These hold investment-related variables.
+
+    Examples
+    --------
+    * *Standard model*: `results[idx]['scalars']`
+      and flows `results[n, n]['sequences']`.
+    * *Multi-period model*: `results[idx]['period_scalars']`
+      and flows `results[n, n]['sequences']`.
     """
     # Extraction steps that are the same for both model types
     df = create_dataframe(om)
-    period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
         k
         if len(k) > 1
-        else (k[0], None): v[["timeindex", "variable_name", "value"]]
+        else (k[0], None): v[["timestep", "variable_name", "value"]]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -168,15 +158,18 @@ def results(om):
 
     # Standard model results extraction
     if not om.es.multi_period:
-        result = _extract_standard_model_result(
-            om, df_dict, period_indexed, result
-        )
+        result = _extract_standard_model_result(om, df_dict, result)
         scalars_col = "scalars"
 
     # Results extraction for a multi-period model
     else:
+        period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
+
         result = _extract_multi_period_model_result(
-            om, df, df_dict, period_indexed, result
+            om,
+            df_dict,
+            period_indexed,
+            result,
         )
         scalars_col = "period_scalars"
 
@@ -202,10 +195,13 @@ def results(om):
     return result
 
 
-def _extract_standard_model_result(
-    om, df_dict, period_indexed=None, result=None
-):
+def _extract_standard_model_result(om, df_dict, result):
     """Extract and return the results of a standard model
+
+    * Set index to timeindex and pivot results such that values are displayed
+      for the respective variables. Reindex with the energy system's timeindex.
+    * Filter for columns with nan values to retrieve scalar variables. Split
+      up the DataFrame into sequences and scalars and return it.
 
     Parameters
     ----------
@@ -213,48 +209,16 @@ def _extract_standard_model_result(
         The optimization model
     df_dict : dict
         dictionary of results DataFrames
-    period_indexed : list
-        list of variables that are indexed by periods
     result : dict
         dictionary to store the results
+
+    Returns
+    -------
+    result : dict
+        dictionary with results stored
     """
     for k in df_dict:
-        df_dict[k].set_index("timeindex", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        try:
-            # Enable reindexing by replacing period by first timeindex
-            try:
-                df_dict[k].loc[
-                    [(0, 0)],
-                    [
-                        col
-                        for col in df_dict[k].columns
-                        if col in period_indexed
-                    ],
-                ] = (
-                    df_dict[k]
-                    .loc[
-                        [(0,)],
-                        [
-                            col
-                            for col in df_dict[k].columns
-                            if col in period_indexed
-                        ],
-                    ]
-                    .values
-                )
-                df_dict[k].drop(index=[(0,)], inplace=True)
-            except KeyError:
-                pass
-            df_dict[k].index = om.es.timeindex
-        except ValueError as e:
-            msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
-                " your input data."
-            )
-            raise type(e)(
-                str(e) + msg.format(k[0].label, k[1].label)
-            ).with_traceback(sys.exc_info()[2])
+        df_dict[k] = _do_basic_results_extraction(om, df_dict, k)
         try:
             condition = df_dict[k].isnull().any()
             scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
@@ -271,59 +235,95 @@ def _extract_standard_model_result(
     return result
 
 
-def _extract_multi_period_model_result(
-    om, df, df_dict, period_indexed=None, result=None
-):
-    """Extract and return the results of a multi-period model
+def _do_basic_results_extraction(om, df_dict, k, reindex=True):
+    """Do a basic iterative results extraction for node k
+
+    Set index to timeindex and pivot results such that values are displayed
+    for the respective variables. Use energy system's timeindex as index
+    if reindex = True (default; used for a standard model).
 
     Parameters
     ----------
     om : oemof.solph.models.Model
-        The ptimization model
-    df : DataFrame
-        DataFrame containing all results
+        The optimization model
+    df_dict : dict
+        dictionary of results DataFrames
+    k :
+        oemof tuple
+    reindex : boolean
+        Reindex using the energy system's timeindex as an index if True
+
+    Returns
+    -------
+    df_dict[k] : pd.DataFrame
+        Manipulated results for node k
+    """
+    df_dict[k].set_index("timestep", inplace=True)
+    df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
+
+    if reindex:
+        try:
+            df_dict[k].index = om.es.timeindex
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
+                " your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
+
+    return df_dict[k]
+
+
+def _extract_multi_period_model_result(
+    om,
+    df_dict,
+    period_indexed=None,
+    result=None,
+):
+    """Extract and return the results of a multi-period model
+
+    Difference to standard model is in the way, scalar values are extracted
+    since they now depend on periods.
+
+    Parameters
+    ----------
+    om : oemof.solph.models.Model
+        The optimization model
     df_dict : dict
         dictionary of results DataFrames
     period_indexed : list
         list of variables that are indexed by periods
     result : dict
         dictionary to store the results
-    """
-    period_timestep_indexed = ["flow"]
-    # TODO: Take care of initial storage content instead of just ignoring
-    to_be_ignored = ["init_content"]
-    timestep_indexed = [
-        el
-        for el in df["variable_name"].unique()
-        if el not in period_indexed
-        and el not in period_timestep_indexed
-        and el not in to_be_ignored
-    ]
 
+    Returns
+    -------
+    result : dict
+        dictionary with results stored
+    """
     for k in df_dict:
-        df_dict[k].set_index("timeindex", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        # TODO: Revise and potentially speed up
+        df_dict[k] = _do_basic_results_extraction(
+            om, df_dict, k, reindex=False
+        )
         # Split data set
-        timeindex_cols = [
-            col
-            for col in df_dict[k].columns
-            if col in timestep_indexed or col == "flow"
-        ]
         period_cols = [
-            col for col in df_dict[k].columns if col not in timeindex_cols
+            col for col in df_dict[k].columns if col in period_indexed
         ]
-        sequences = df_dict[k][timeindex_cols].dropna()
-        if sequences.empty:
-            sequences = pd.DataFrame(index=om.es.timeindex)
-        # periods equal to years (will probably be the standard use case)
-        periods = sorted(list(set(om.es.timeindex.year)))
-        d = dict(zip([(el,) for el in range(len(periods))], periods))
-        period_scalars = df_dict[k][period_cols].dropna()
+        # map periods to their start years for displaying period results
+        d = {
+            key: val + om.es.periods[0].min().year
+            for key, val in om.es.periods_years.items()
+        }
+        period_scalars = df_dict[k].loc[:, period_cols].dropna()
+        sequences = df_dict[k].loc[
+            :, [col for col in df_dict[k].columns if col not in period_cols]
+        ]
+        sequences.index = om.es.timeindex
         if period_scalars.empty:
             period_scalars = pd.DataFrame(index=d.values())
         try:
-            sequences.index = om.es.timeindex
             period_scalars.rename(index=d, inplace=True)
             period_scalars.index.name = "period"
             result[k] = {

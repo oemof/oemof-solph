@@ -36,7 +36,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
-from unittest import skip
 
 import pandas as pd
 from nose.tools import eq_
@@ -135,6 +134,7 @@ def test_optimise_storage_size(
 
 
 def test_results_with_actual_dump():
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -162,68 +162,30 @@ def test_results_with_actual_dump():
     }
 
     for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
 
     # Solver results
-    eq_(str(meta["solver"]["Termination condition"]), "optimal")
-    eq_(meta["solver"]["Error rc"], 0)
-    eq_(str(meta["solver"]["Status"]), "ok")
+    assert str(meta["solver"]["Termination condition"]) == "optimal"
+    assert meta["solver"]["Error rc"] == 0
+    assert str(meta["solver"]["Status"]) == "ok"
 
     # Problem results
-    eq_(meta["problem"]["Lower bound"], 4.231675777e17)
-    eq_(meta["problem"]["Upper bound"], 4.231675777e17)
-    eq_(meta["problem"]["Number of variables"], 2805)
-    eq_(meta["problem"]["Number of constraints"], 2806)
-    eq_(meta["problem"]["Number of nonzeros"], 1197)
-    eq_(meta["problem"]["Number of objectives"], 1)
-    eq_(str(meta["problem"]["Sense"]), "minimize")
+    assert meta["problem"]["Lower bound"] == 4.231675777e17
+    assert meta["problem"]["Upper bound"], 4.231675777e17
+    assert meta["problem"]["Number of variables"] == 2808
+    assert meta["problem"]["Number of constraints"] == 2809
+    assert meta["problem"]["Number of nonzeros"] == 1197
+    assert meta["problem"]["Number of objectives"] == 1
+    assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    eq_(round(meta["objective"]), 423167578261115584)
-
-
-@skip(
-    "Opening an old dump may fail due to different python versions or"
-    " version of other packages. We can try to reactivate the test with"
-    " v0.4.0."
-)
-def test_results_with_old_dump():
-    """
-    Test again with a stored dump created with v0.3.2dev (896a6d50)
-    """
-    energysystem = solph.EnergySystem()
-    energysystem.restore(
-        dpath=os.path.dirname(os.path.realpath(__file__)),
-        filename="es_dump_test_3_2dev.oemof",
-    )
-
-    results = energysystem.results["main"]
-
-    electricity_bus = views.node(results, "electricity")
-    my_results = electricity_bus["sequences"].sum(axis=0).to_dict()
-    storage = energysystem.groups["storage"]
-    my_results["storage_invest"] = results[(storage, None)]["scalars"][
-        "invest"
-    ]
-
-    stor_invest_dict = {
-        "storage_invest": 2040000,
-        (("electricity", "demand"), "flow"): 105867395,
-        (("electricity", "excess_bel"), "flow"): 211771291,
-        (("electricity", "storage"), "flow"): 2350931,
-        (("pp_gas", "electricity"), "flow"): 5148414,
-        (("pv", "electricity"), "flow"): 7488607,
-        (("storage", "electricity"), "flow"): 1880745,
-        (("wind", "electricity"), "flow"): 305471851,
-    }
-
-    for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+    assert round(meta["objective"]) == 423167578261115584
 
 
 def test_solph_transformer_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
     of `solph.components.Transformer`"""
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 

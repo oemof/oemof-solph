@@ -42,12 +42,14 @@ class EnergySystem(es.EnergySystem):
         Parameters
         ----------
         multi_period : boolean
-            If True, a multi period model is used; defaults to False
+            If True, a multi-period model is used; defaults to False
 
         periods : dict
-            The periods of a multi period model
-            Keys are years as integer values,
-            values are the respective number of the period starting with zero
+            The periods of a multi-period model;
+            Keys are the numbers of the respective period, starting with zero,
+            values are pd.date_range objects carrying the timeindex for the
+            respective period;
+            For a standard model, periods only holds one entry, i.e. {0: 0}
         """
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
@@ -71,43 +73,41 @@ class EnergySystem(es.EnergySystem):
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.multi_period = multi_period
         self.periods = self._add_periods(periods)
-        self._extract_periods_lengths_gap_and_years()
+        self._extract_periods_years()
 
     def _add_periods(self, periods):
         """Returns periods to be added to the energy system
 
-        * For a standard model, periods only contain one value.
-        * For a multi-period model, periods are based on the years used in the
-          timeindex. As a default, each year in the timeindex is mapped to
-          its own period.
+        * For a standard model, periods only contain one value {0: 0}
+        * For a multi-period model, periods are indexed with integer values
+          starting from zero. The keys are the time indices for the resective
+          period given by a pd.date_range object. As a default,
+          each year in the timeindex is mapped to its own period.
 
         Parameters
         ----------
         periods : dict
             Periods of a (multi-period) model
-            Keys are years as integer values,
-            values are the periods defined by their first and last timestep.
+            Keys are periods as increasing integer values, starting from 0,
+            values are the periods defined by a pd.date_range object;
             For a standard model, only one period is used.
 
         Returns
         -------
         periods : dict
-            Periods of the energy system
+            Periods of the energy system (to ensure it being set)
         """
         if not self.multi_period:
             periods = {0: 0}
         elif periods is None:
-            years = sorted(
-                        list(
-                            set(getattr(self.timeindex, 'year'))
-                        )
-                    )
+            years = sorted(list(set(getattr(self.timeindex, "year"))))
 
             periods = {}
             filter_series = self.timeindex.to_series()
             for number, year in enumerate(years):
                 start = filter_series.loc[
-                    filter_series.index.year == year].min()
+                    filter_series.index.year == year
+                ].min()
                 end = filter_series.loc[filter_series.index.year == year].max()
                 periods[number] = pd.date_range(start, end, freq="H")
         else:
@@ -117,38 +117,20 @@ class EnergySystem(es.EnergySystem):
 
         return periods
 
-    # TODO: Check if length and gap are needed (no decommissions within period)
-    def _extract_periods_lengths_gap_and_years(self):
-        """Determine length of one and difference between subsequent periods
-        and map periods to simulation years starting with 0
+    def _extract_periods_years(self):
+        """Map simulation years to the respective period based on time indices
 
-        * `periods_length` contains the length of a period in full years
-        * `periods_gap` is the difference in years between subsequent periods,
-          attributed to the prior one
-        * `periods_years` is the simulation year corresponding to the start
-          of a period, starting with 0
+        Returns
+        -------
+        periods_years: dict
+            the simulation year of the start of each a period,
+            relative to the start of the optimization rund and starting with 0
         """
-        periods_gap = {}
-        if not self.multi_period:
-            periods_length = {0: 1}
-            periods_years = {0: 0}
-        else:
-            periods_length = {}
-            periods_years = {0: 0}
-
-            previous_end = None
+        periods_years = {0: 0}
+        if self.multi_period:
+            start_year = self.periods[0].min().year
             for k, v in self.periods.items():
-                periods_length[k] = v.max().year - v.min().year + 1
                 if k >= 1:
-                    periods_gap[k-1] = v.min().year - previous_end.year - 1
-                    periods_years[k] = (
-                        sum(
-                            periods_length[kk] + periods_gap[kk]
-                            for kk in range(k)
-                        )
-                    )
-                previous_end = v.max()
+                    periods_years[k] = v.min().year - start_year
 
-        self.periods_length = periods_length
-        self.periods_gap = periods_gap
         self.periods_years = periods_years

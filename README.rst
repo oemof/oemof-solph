@@ -1,9 +1,14 @@
-|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
+|tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|version| |wheel| |supported-versions| |supported-implementations|
-|commits-since| |zenodo|
+|scrutinizer| |codacy| |codeclimate| |requires|
+
+|wheel| |packaging| |supported-versions|
+
+|docs| |zenodo|
+
+|version| |commits-since| |meeting| |chat|
+
 
 ------------------------------
 
@@ -24,9 +29,9 @@
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
 
-.. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
-    :alt: Requirements Status
-    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+.. |requires| image:: https://img.shields.io/requires/github/oemof/oemof-solph/dev
+     :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
+     :alt: Requirements Status
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
@@ -65,19 +70,32 @@
     :target: https://github.com/oemof/oemof-solph/compare/v0.4.4...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
-    :alt: DOI
+    :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+.. |meeting| image:: https://img.shields.io/date/1652864400?color=%23094714&label=Next%20meeting&logoColor=%230947ff
+     :alt: Relative date
+     :target: https://github.com/oemof/oemof/issues/99
+
+.. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
+     :alt: matrix-chat
+     :target: https://matrix.to/#/#oemof:matrix.org
+
+
+.. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/492e3f5a0dda7065be30d33a37b0625027847518/docs/_logo/logo_oemof_solph_FULL.svg
+    :align: center
+
+------------------------------
+
 ===========
 oemof.solph
 ===========
 
 **A model generator for energy system modelling and optimisation (LP/MILP)**
-
 
 .. contents::
     :depth: 2
@@ -151,7 +169,7 @@ But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
-Check the solver installation by executing the test_installation example below (section `Installation test`).
+Check the solver installation by executing the test_installation example below (see section Installation Test).
 
 **Linux**
 

@@ -21,6 +21,7 @@ from oemof.solph._plumbing import sequence
 def emission_limit(om, flows=None, limit=None):
     r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
+    Can be used to impose an emissions budget limit in a multi-period model.
 
     Note
     ----
@@ -36,6 +37,7 @@ def emission_limit_per_period(om, flows=None, limit=None):
     r"""
     Short handle for generic_periodical_integral_limit()
     with keyword="emission_factor". Only applicable for multi-period models.
+    Puts a limit on each period's emissions.
 
     Note
     ----
@@ -73,9 +75,10 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     ----
     Flow objects required an attribute named like keyword!
 
+
     **Constraint:**
 
-    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(t) \cdot w_i(t)
+    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
                \cdot \tau(t) \leq M
 
 
@@ -85,14 +88,14 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    ================ ==== =====================================================
-    math. symbol     type explanation
-    ================ ==== =====================================================
-    :math:`P_n(t)`   V    power flow :math:`n` at time step :math:`t`
-    :math:`w_N(t)`   P    weight given to Flow named according to `keyword`
-    :math:`\tau(t)`  P    width of time step :math:`t`
-    :math:`L`        P    global limit given by keyword `limit`
-    ================ ==== =====================================================
+    ================= ==== ====================================================
+    math. symbol      type explanation
+    ================= ==== ====================================================
+    :math:`P_n(p, t)` V    power flow :math:`n` at time index :math:`p, t`
+    :math:`w_N(t)`    P    weight given to Flow named according to `keyword`
+    :math:`\tau(t)`   P    width of time step :math:`t`
+    :math:`L`         P    global limit given by keyword `limit`
+    ================= ==== ====================================================
 
     Examples
     --------
@@ -164,10 +167,11 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     ----
     Flow objects required an attribute named like keyword!
 
+
     **Constraint:**
 
     .. math:: \sum_{i \in F_I} \sum_{t \in T} P_i(t) \cdot w_i(t)
-               \cdot \tau(t) \leq L(p) \forall p in \textrm{PERIODS}
+               \cdot \tau(t) \leq L(p) \forall p \in \textrm{PERIODS}
 
 
     For the parameter and variable explanation, please refer to the docs
@@ -178,17 +182,21 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     limit_name = "integral_limit_" + keyword
 
     if not om.es.multi_period:
-        msg = ("generic_periodical_integral_limit is only applicable\n"
-               "for multi-period models.\nFor standard models, use "
-               "generic_integral_limit instead.")
+        msg = (
+            "generic_periodical_integral_limit is only applicable\n"
+            "for multi-period models.\nFor standard models, use "
+            "generic_integral_limit instead."
+        )
         raise ValueError(msg)
 
     if limit is not None:
         limit = sequence(limit)
     else:
-        msg = ("You have to provide a limit for each period!\n"
-               "If you provide a scalar value, this will be applied as a "
-               "limit for each period.")
+        msg = (
+            "You have to provide a limit for each period!\n"
+            "If you provide a scalar value, this will be applied as a "
+            "limit for each period."
+        )
         raise ValueError(msg)
 
     def _periodical_integral_limit_rule(m, p):
@@ -205,7 +213,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     om.periodical_integral_limit = po.Constraint(
         om.PERIODS,
         rule=_periodical_integral_limit_rule,
-        name=limit_name + "_constraint"
+        name=limit_name + "_constraint",
     )
 
     return om
@@ -248,3 +256,5 @@ def _check_and_set_flows(om, flows, keyword):
                         "has no attribute {2}."
                     ).format(i.label, o.label, keyword)
                 )
+
+    return flows

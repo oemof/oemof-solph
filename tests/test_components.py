@@ -147,7 +147,7 @@ def test_generic_storage_with_non_convex_investment():
 def test_generic_storage_with_non_convex_invest_maximum():
     """No investment maximum at nonconvex investment."""
     with pytest.raises(
-        AttributeError, match=r"Please provide an maximum investment value"
+        AttributeError, match=r"Please provide a maximum investment value"
     ):
         bel = Bus()
         components.GenericStorage(
@@ -311,3 +311,9 @@ def test_generic_chp_without_warning():
         back_pressure=False,
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+
+# ********* SinkDSM *********
+
+def test_sink_dsm_attribute_error1():
+    pass

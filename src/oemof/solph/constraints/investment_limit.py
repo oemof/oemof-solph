@@ -20,7 +20,7 @@ from oemof.solph._plumbing import sequence
 
 def investment_limit(model, limit=None):
     r"""Set an absolute limit for the total investment costs of an investment
-    optimization problem:
+    optimization problem (over all periods in case of a multi-period model):
 
     .. math:: \sum_{investment\_costs} \leq limit
 
@@ -59,11 +59,12 @@ def investment_limit(model, limit=None):
 
 def investment_limit_per_period(model, limit=None):
     r"""Set an absolute limit for the total investment costs of a
-     investment optimization problem for each period
-    of the problem.
+    investment optimization problem for each period
+    of the multi-period problem.
 
-    .. math:: \sum_{investment\_costs(p)} \leq limit(p)
-    \forall p in \textrm{PERIODS}
+    .. math::
+        \sum_{investment\_costs(p)} \leq limit(p)
+        \forall p \in \textrm{PERIODS}
 
     Parameters
     ----------
@@ -75,24 +76,28 @@ def investment_limit_per_period(model, limit=None):
     """
 
     if not model.es.multi_period:
-        msg = ("investment_limit_per_period is only applicable "
-               "for multi-period models.\nIn order to create such a model, "
-               "set attribute `multi_period` of your energy system to True.")
+        msg = (
+            "investment_limit_per_period is only applicable "
+            "for multi-period models.\nIn order to create such a model, "
+            "set attribute `multi_period` of your energy system to True."
+        )
         raise ValueError(msg)
 
     if limit is not None:
         limit = sequence(limit)
     else:
-        msg = ("You have to provide an investment limit for each period!\n"
-               "If you provide a scalar value, this will be applied as a "
-               "limit for each period.")
+        msg = (
+            "You have to provide an investment limit for each period!\n"
+            "If you provide a scalar value, this will be applied as a "
+            "limit for each period."
+        )
         raise ValueError(msg)
 
     def investment_period_rule(m, p):
         expr = 0
 
-        if hasattr(m, "InvestmentFlow"):
-            expr += m.InvestmentFlow.period_investment_costs[p]
+        if hasattr(m, "InvestmentFlowBlock"):
+            expr += m.InvestmentFlowBlock.period_investment_costs[p]
 
         if hasattr(m, "GenericInvestmentStorageBlock"):
             expr += m.GenericInvestmentStorageBlock.period_investment_costs[p]
@@ -109,8 +114,7 @@ def investment_limit_per_period(model, limit=None):
         return expr <= limit[p]
 
     model.investment_limit_per_period = po.Constraint(
-        model.PERIODS,
-        rule=investment_period_rule
+        model.PERIODS, rule=investment_period_rule
     )
 
     return model
@@ -128,7 +132,9 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     Total value of keyword attributes after optimization can be retrieved
     calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
 
-    .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
+    .. math::
+        \sum_{p \in \textrm{PERIODS}}
+        \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
     limit.
@@ -136,15 +142,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | symbol        | attribute                     | type | explanation                                                  |
-    +===============+===============================+======+==============================================================+
-    | :math:`P_{i}` | `InvestmentFlow.invest[i, o]` | V    | installed capacity of investment flow                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`   | `keyword`                     | P    | weight given to investment flow named according to `keyword` |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit` | `limit`                       | P    | global limit given by keyword `limit`                        |
-    +---------------+-------------------------------+------+--------------------------------------------------------------+
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol           | attribute                             | type | explanation                                                  |
+    +==================+=======================================+======+==============================================================+
+    | :math:`P_{i}(p)` | `InvestmentFlowBlock.invest[i, o, p]` | V    | invested capacity of investment flow in period p             |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
     ----------
@@ -167,12 +173,12 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> from oemof import solph
     >>> date_time_index = pd.date_range('1/1/2020', periods=5, freq='H')
     >>> es = solph.EnergySystem(timeindex=date_time_index)
-    >>> bus = solph.Bus(label='bus_1')
-    >>> sink = solph.Sink(label="sink", inputs={bus:
-    ...     solph.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
-    >>> src1 = solph.Source(label='source_0', outputs={bus: solph.Flow(
+    >>> bus = solph.buses.Bus(label='bus_1')
+    >>> sink = solph.components.Sink(label="sink", inputs={bus:
+    ...     solph.flows.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.components.Source(label='source_0', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=50, space=4))})
-    >>> src2 = solph.Source(label='source_1', outputs={bus: solph.Flow(
+    >>> src2 = solph.components.Source(label='source_1', outputs={bus: solph.flows.Flow(
     ...     investment=solph.Investment(ep_costs=100, space=1))})
     >>> es.add(bus, sink, src1, src2)
     >>> model = solph.Model(es)
@@ -190,22 +196,23 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
     limit_name = "invest_limit_" + keyword
 
-    def _additional_limit_rule(block):
-        for p in model.PERIODS:
-            lhs = sum(
-                model.InvestmentFlow.invest[inflow, outflow, p]
+    setattr(
+        model,
+        limit_name,
+        po.Expression(
+            expr=sum(
+                model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
+                for p in model.PERIODS
             )
-            rhs = limit
-            model.add_limit.add(p, (lhs <= rhs))
-
-    model.add_limit = po.Constraint(
-        model.PERIODS,
-        noruleinit=True,
-        name=limit_name + "_constraint"
+        ),
     )
-    model.add_limit_build = po.BuildAction(
-        rule=_additional_limit_rule)
+
+    setattr(
+        model,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    )
 
     return model

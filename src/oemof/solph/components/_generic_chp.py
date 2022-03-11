@@ -56,29 +56,31 @@ class GenericCHP(network.Transformer):
 
     Note
     ----
-    An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
-    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
-    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum heat extraction `H_L_FG_min` as share of
-    the fuel flow `H_F` e.g. for motoric CHPs.
-    The boolean component parameter `back_pressure` can be set to model
-    back-pressure characteristics.
+    * An adaption for the flow parameter `H_L_FG_share_max` has been made to
+      set the flue gas losses at maximum heat extraction `H_L_FG_max` as share
+      of the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    * The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+      losses at minimum heat extraction `H_L_FG_min` as share of
+      the fuel flow `H_F` e.g. for motoric CHPs.
+    * The boolean component parameter `back_pressure` can be set to model
+      back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
     Parameters
     ----------
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output. Related parameters like `P_max_woDH` are
-        passed as attributes of the `oemof.Flow` object.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the electrical output.
+        Related parameters like `P_max_woDH` are passed as
+        attributes of the `oemof.Flow` object.
     heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the heat output. Related parameters like `Q_CW_min` are passed as
+        Dictionary with key-value-pair of `oemof.solph.Bus`
+        and `oemof.solph.Flow` objects for the heat output.
+        Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
     Beta : list of numerical values
         Beta values in same dimension as all other parameters (length of
@@ -91,7 +93,7 @@ class GenericCHP(network.Transformer):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._generic_chp.GenericCHPBlock`
+    * :class:`.GenericCHPBlock`
 
     Examples
     --------
@@ -265,39 +267,39 @@ class GenericCHPBlock(SimpleBlock):
     math. symbol                    attribute               type explanation
     =============================== ======================= ==== =======================
     :math:`\dot{H}_{F}`             `H_F[n,t]`              V    input of enthalpy
-                                                                         through fuel input
+                                                                 through fuel input
     :math:`P_{el}`                  `P[n,t]`                V    provided
-                                                                         electric power
+                                                                 electric power
     :math:`P_{el,woDH}`             `P_woDH[n,t]`           V    electric power without
-                                                                         district heating
+                                                                 district heating
     :math:`P_{el,min,woDH}`         `P_min_woDH[n,t]`       P    min. electric power
-                                                                         without district heating
+                                                                 without district heating
     :math:`P_{el,max,woDH}`         `P_max_woDH[n,t]`       P    max. electric power
-                                                                         without district heating
+                                                                 without district heating
     :math:`\dot{Q}`                 `Q[n,t]`                V    provided heat
 
     :math:`\dot{Q}_{CW, min}`       `Q_CW_min[n,t]`         P    minimal therm. condenser
-                                                                         load to cooling water
+                                                                 load to cooling water
     :math:`\dot{H}_{L,FG,min}`      `H_L_FG_min[n,t]`       V    flue gas enthalpy loss
-                                                                         at min heat extraction
+                                                                 at min heat extraction
     :math:`\dot{H}_{L,FG,max}`      `H_L_FG_max[n,t]`       V    flue gas enthalpy loss
-                                                                         at max heat extraction
+                                                                 at max heat extraction
     :math:`\dot{H}_{L,FG,sharemin}` `H_L_FG_share_min[n,t]` P    share of flue gas loss
-                                                                         at min heat extraction
+                                                                 at min heat extraction
     :math:`\dot{H}_{L,FG,sharemax}` `H_L_FG_share_max[n,t]` P    share of flue gas loss
-                                                                         at max heat extraction
+                                                                 at max heat extraction
     :math:`Y`                       `Y[n,t]`                V    status variable
-                                                                         on/off
+                                                                 on/off
     :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient
-                                                                         describing efficiency
+                                                                 describing efficiency
     :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient
-                                                                         describing efficiency
+                                                                 describing efficiency
     :math:`\beta`                   `Beta[n,t]`             P    power loss index
 
     :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel
-                                                                         flow w/o distr. heating
+                                                                 flow w/o distr. heating
     :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
-                                                                         flow w/o distr. heating
+                                                                 flow w/o distr. heating
     =============================== ======================= ==== =======================
 
     """  # noqa: E501
@@ -498,7 +500,7 @@ class GenericCHPBlock(SimpleBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`Flow`.
+        added in the Block :class:`.FlowBlock`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0

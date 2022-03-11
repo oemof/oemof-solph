@@ -115,9 +115,9 @@ class TransformerBlock(SimpleBlock):
 
     Linear relation :attr:`om.TransformerBlock.relation[i,o,t]`
         .. math::
-            \P_{i,n}(t) \times \eta_{n,o}(t) = \
-            \P_{n,o}(t) \times \eta_{n,i}(t), \\
-            \forall t \in \textrm{TIMESTEPS}, \\
+            P_{i,n}(p, t) \times \eta_{n,o}(t) = \
+            P_{n,o}(p, t) \times \eta_{n,i}(t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
             \forall n \in \textrm{TRANSFORMERS}, \\
             \forall i \in \textrm{INPUTS(n)}, \\
             \forall o \in \textrm{OUTPUTS(n)},
@@ -125,14 +125,14 @@ class TransformerBlock(SimpleBlock):
     ======================  ============================  =============
     symbol                  attribute                     explanation
     ======================  ============================  =============
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               TransformerBlock
-                                                                  inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            TransformerBlock
+                                                          inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               TransformerBlock
-                                                                  outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            TransformerBlock
+                                                          outflow
 
     :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
-                                                                  efficiency
+                                                          efficiency
 
     ======================  ============================  =============
     """

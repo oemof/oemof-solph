@@ -45,6 +45,7 @@ def limit_active_flow_count(
     ----
     FlowBlock objects required to be NonConvex
 
+
     **Constraint:**
 
     .. math:: N_{X,min} \le \sum_{n \in F} X_n(t)

@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
-from _ast import Expression
 from warnings import warn
 
 from numpy import mean
@@ -83,9 +82,9 @@ class SinkDSM(Sink):
         demand timeseries and the cumulated (fixed) infeed time series
         for normalization, because the balancing potential may be determined by
         both. Elsewise, underinvestments may occur.
-    capacity_up: int or array
+    capacity_up: int or iterable
         maximum DSM capacity that may be increased (normalized)
-    capacity_down: int or array
+    capacity_down: int or iterable
         maximum DSM capacity that may be reduced (normalized)
     approach: 'oemof', 'DIW', 'DLR'
         Choose one of the DSM modeling approaches. Read notes about which
@@ -149,12 +148,12 @@ class SinkDSM(Sink):
     flex_share_up: float
         Flexible share of installed capacity
         eligible for upshifts (used for invest mode)
-    cost_dsm_up : int
+    cost_dsm_up : float
         Cost per unit of DSM activity that increases the demand
-    cost_dsm_down_shift : int
+    cost_dsm_down_shift : float
         Cost per unit of DSM activity that decreases the demand
         for load shifting
-    cost_dsm_down_shed : int
+    cost_dsm_down_shed : float
         Cost per unit of DSM activity that decreases the demand
         for load shedding
     efficiency : float
@@ -738,8 +737,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -747,8 +745,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -757,8 +754,7 @@ class SinkDSMOemofBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -885,6 +881,10 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -962,6 +962,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
         if m.es.multi_period:
+
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
                 capacity to be decommissioned due to reaching its lifetime
@@ -971,8 +972,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_end[g, p] == 0)
-                            self.old_rule_end.add((g, p), expr)
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
                             comm_p = 0
@@ -981,9 +982,8 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                                     # change of sign is detected
                                     comm_p = k - 1
                                     break
-                            expr = (self.old_end[g, p]
-                                    == self.invest[g, comm_p])
-                            self.old_rule_end.add((g, p), expr)
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
+                            self.old_dsm_rule_end.add((g, p), expr)
                         else:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
@@ -1006,19 +1006,18 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                     for p in m.PERIODS:
                         # No shutdown in first period
                         if p == 0:
-                            expr = (self.old_exo[g, p] == 0)
-                            self.old_rule_exo.add((g, p), expr)
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
                         elif lifetime - age <= m.es.periods_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
-                                    self.old_exo[g, p]
-                                    == m.flows[g].investment.existing
+                                    self.old_exo[g, p] == g.investment.existing
                                 )
                                 is_decommissioned = True
                             else:
-                                expr = (self.old_exo[g, p] == 0)
-                            self.old_rule_exo.add((g, p), expr)
+                                expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
                         else:
                             expr = self.old_exo[g, p] == 0
                             self.old_dsm_rule_exo.add((g, p), expr)
@@ -1180,6 +1179,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -1277,8 +1277,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -1292,8 +1291,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1301,29 +1299,41 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += sum(
-                            self.invest[g, p]
-                            * max(g.demand)
-                            * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(
-                                m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                        fixed_costs += (
+                            sum(
+                                self.invest[g, p]
+                                * max(g.demand)
+                                * g.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime,
+                                )
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )
@@ -1986,8 +1996,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1999,8 +2008,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -2009,8 +2017,7 @@ class SinkDSMDIWBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -2159,10 +2166,14 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
-        def _dsm_investvar_bound_rule(block, g):
+        def _dsm_investvar_bound_rule(block, g, p):
             """Rule definition to bound the
             demand response capacity invested in (`invest`).
             """
@@ -2179,15 +2190,20 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         # Total capacity
         self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        # Old capacity to be decommissioned (due to lifetime)
-        # Old capacity is built out of old exogenous and endogenous capacities
-        self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+        if m.es.multi_period:
+            # Old capacity to be decommissioned (due to lifetime)
+            # Old capacity built out of old exogenous and endogenous capacities
+            self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.investdsm, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.investdsm, m.PERIODS, within=NonNegativeReals
+            )
 
         # Variable load shift down
         self.dsm_do_shift = Var(
@@ -2235,61 +2251,88 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        def _old_dsm_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime <= p:
+        if m.es.multi_period:
+
+            def _old_dsm_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    lifetime = g.investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        else:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+
+            self.old_dsm_rule_end = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_end_build = BuildAction(
+                rule=_old_dsm_capacity_rule_end
+            )
+
+            def _old_dsm_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    age = g.investment.age
+                    lifetime = g.investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[g, p] == g.investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        else:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+
+            self.old_dsm_rule_exo = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_exo_build = BuildAction(
+                rule=_old_dsm_capacity_rule_exo
+            )
+
+            def _old_dsm_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    for p in m.PERIODS:
                         expr = (
-                            self.old_end[g, p] == self.invest[g, p - lifetime]
+                            self.old[g, p]
+                            == self.old_end[g, p] + self.old_exo[g, p]
                         )
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    else:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
+                        self.old_dsm_rule.add((g, p), expr)
 
-        self.old_dsm_rule_end = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_end_build = BuildAction(
-            rule=_old_dsm_capacity_rule_end
-        )
-
-        def _old_dsm_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                age = g.investment.age
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime - age == p:
-                        expr = self.old_exo[g, p] == g.investment.existing
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    else:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-
-        self.old_dsm_rule_exo = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_exo_build = BuildAction(
-            rule=_old_dsm_capacity_rule_exo
-        )
-
-        def _old_dsm_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[g, p]
-                        == self.old_end[g, p] + self.old_exo[g, p]
-                    )
-                    self.old_dsm_rule.add((g, p), expr)
-
-        self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
+            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
             """Force shifting resp. shedding variables to zero dependent
@@ -2782,6 +2825,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -2880,8 +2924,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -2895,8 +2938,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -2908,29 +2950,41 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += sum(
-                            self.invest[g, p]
-                            * max(g.demand)
-                            * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(
-                                m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                        fixed_costs += (
+                            sum(
+                                self.invest[g, p]
+                                * max(g.demand)
+                                * g.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime,
+                                )
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )
@@ -3931,8 +3985,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -3945,8 +3998,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
@@ -3955,8 +4007,7 @@ class SinkDSMDLRBlock(SimpleBlock):
                             g.max_demand
                             * max(g.demand)
                             * g.fixed_costs[p]
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -4194,6 +4245,10 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             ]
         )
 
+        self.EXISTING_INVESTDSM = Set(
+            initialize=[g for g in group if g.investment.existing is not None]
+        )
+
         #  ************* VARIABLES *****************************
 
         # Define bounds for investments in demand response
@@ -4214,14 +4269,19 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         # Total capacity
         self.total = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
-        # Old capacity to be decommissioned (due to lifetime)
-        self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+        if m.es.multi_period:
+            # Old capacity to be decommissioned (due to lifetime)
+            self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
-        # Old endogenous capacity to be decommissioned (due to lifetime)
-        self.old_end = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+            # Old endogenous capacity to be decommissioned (due to lifetime)
+            self.old_end = Var(
+                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+            )
 
-        # Old exogenous capacity to be decommissioned (due to lifetime)
-        self.old_exo = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+            # Old exogenous capacity to be decommissioned (due to lifetime)
+            self.old_exo = Var(
+                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+            )
 
         # Variable load shift down (capacity)
         self.dsm_do_shift = Var(
@@ -4285,61 +4345,88 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        def _old_dsm_capacity_rule_end(block):
-            """Rule definition for determining old endogenously installed
-            capacity to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime <= p:
+        if m.es.multi_period:
+
+            def _old_dsm_capacity_rule_end(block):
+                """Rule definition for determining old endogenously installed
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    lifetime = g.investment.lifetime
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        elif lifetime <= m.es.periods_years[p]:
+                            # Obtain commissioning period
+                            comm_p = 0
+                            for k, v in m.es.periods_years.items():
+                                if m.es.periods_years[p] - lifetime - v < 0:
+                                    # change of sign is detected
+                                    comm_p = k - 1
+                                    break
+                            expr = self.old_end[g, p] == self.invest[g, comm_p]
+                            self.old_dsm_rule_end.add((g, p), expr)
+                        else:
+                            expr = self.old_end[g, p] == 0
+                            self.old_dsm_rule_end.add((g, p), expr)
+
+            self.old_dsm_rule_end = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_end_build = BuildAction(
+                rule=_old_dsm_capacity_rule_end
+            )
+
+            def _old_dsm_capacity_rule_exo(block):
+                """Rule definition for determining old exogenously given
+                capacity to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    age = g.investment.age
+                    lifetime = g.investment.lifetime
+                    is_decommissioned = False
+                    for p in m.PERIODS:
+                        # No shutdown in first period
+                        if p == 0:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        elif lifetime - age <= m.es.periods_years[p]:
+                            # Track decommissioning status
+                            if not is_decommissioned:
+                                expr = (
+                                    self.old_exo[g, p] == g.investment.existing
+                                )
+                                is_decommissioned = True
+                            else:
+                                expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+                        else:
+                            expr = self.old_exo[g, p] == 0
+                            self.old_dsm_rule_exo.add((g, p), expr)
+
+            self.old_dsm_rule_exo = Constraint(
+                group, m.PERIODS, noruleinit=True
+            )
+            self.old_dsm_rule_exo_build = BuildAction(
+                rule=_old_dsm_capacity_rule_exo
+            )
+
+            def _old_dsm_capacity_rule(block):
+                """Rule definition for determining (overall) old capacity
+                to be decommissioned due to reaching its lifetime
+                """
+                for g in group:
+                    for p in m.PERIODS:
                         expr = (
-                            self.old_end[g, p] == self.invest[g, p - lifetime]
+                            self.old[g, p]
+                            == self.old_end[g, p] + self.old_exo[g, p]
                         )
-                        self.old_dsm_rule_end.add((g, p), expr)
-                    else:
-                        expr = self.old_end[g, p] == 0
-                        self.old_dsm_rule_end.add((g, p), expr)
+                        self.old_dsm_rule.add((g, p), expr)
 
-        self.old_dsm_rule_end = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_end_build = BuildAction(
-            rule=_old_dsm_capacity_rule_end
-        )
-
-        def _old_dsm_capacity_rule_exo(block):
-            """Rule definition for determining old exogenously given capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                age = g.investment.age
-                lifetime = g.investment.lifetime
-                for p in m.PERIODS:
-                    if lifetime - age == p:
-                        expr = self.old_exo[g, p] == g.investment.existing
-                        self.old_dsm_rule_exo.add((g, p), expr)
-                    else:
-                        expr = self.old_exo[g, p] == 0
-                        self.old_dsm_rule_exo.add((g, p), expr)
-
-        self.old_dsm_rule_exo = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_exo_build = BuildAction(
-            rule=_old_dsm_capacity_rule_exo
-        )
-
-        def _old_dsm_capacity_rule(block):
-            """Rule definition for determining (overall) old capacity
-            to be decommissioned due to reaching its lifetime
-            """
-            for g in group:
-                for p in m.PERIODS:
-                    expr = (
-                        self.old[g, p]
-                        == self.old_end[g, p] + self.old_exo[g, p]
-                    )
-                    self.old_dsm_rule.add((g, p), expr)
-
-        self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
-        self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
+            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
             """Force shifting resp. shedding variables to zero dependent
@@ -5013,6 +5100,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         )
 
         if m.es.multi_period:
+
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
                 in investment case.
@@ -5119,8 +5207,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             self.invest[g, p]
                             * annuity
                             * lifetime
-                            * ((1 + m.discount_rate)
-                               ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
                         investment_costs += investment_costs_increment
                         period_investment_costs[
@@ -5140,8 +5227,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -5154,29 +5240,41 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate)
-                           ** -m.es.periods_years[p])
+                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += sum(
-                            self.invest[g, p]
-                            * max(g.demand)
-                            * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
-                            for pp in range(
-                                m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime
+                        fixed_costs += (
+                            sum(
+                                self.invest[g, p]
+                                * max(g.demand)
+                                * g.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p] + lifetime,
+                                )
                             )
-                        ) * ((1 + m.discount_rate)
-                             ** -m.es.periods_years[p])
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        )
+
+            for g in self.EXISTING_INVESTDSM:
+                if g.investment.fixed_costs[0] is not None:
+                    lifetime = g.investment.lifetime
+                    age = g.investment.age
+                    fixed_costs += sum(
+                        g.investment.existing
+                        * g.investment.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(0, lifetime - age)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = Expression(expr=period_investment_costs)
+        self.period_investment_costs = period_investment_costs
         self.costs = Expression(
             expr=investment_costs + variable_costs + fixed_costs
         )

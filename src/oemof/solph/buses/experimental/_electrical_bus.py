@@ -21,29 +21,31 @@ from oemof.solph.buses._bus import Bus
 
 
 class ElectricalBus(Bus):
-    r"""An electrical bus object. Every node has to be connected to BusBlock.
+    r"""An electrical bus object used for linear optimal power flow (lopf)
+
+    Every (spatial) node has to be connected to a BusBlock.
     This BusBlock is used in combination with ElectricalLine objects
     for linear optimal power flow (lopf) calculations.
 
     Parameters
     ----------
     slack: boolean
-        If True BusBlock is slack bus for network
+        If True BusBlock is slack bus for electrical network
     v_max: numeric
         Maximum value of voltage angle at electrical bus
     v_min: numeric
-        Mininum value of voltag angle at electrical bus
+        Mininum value of voltage angle at electrical bus
 
     Note: This component is experimental. Use it with care.
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.bus.BusBlock`
+     * :class:`.BusBlock`
     The objects are also used inside:
-     * :py:class:`~oemof.solph.experimental._electrical_line.ElectricalLine`
+     * :class:`.ElectricalLine`
 
-    """
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

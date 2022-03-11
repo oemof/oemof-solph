@@ -30,7 +30,7 @@ from oemof.solph._plumbing import sequence
 
 
 class Link(on.Transformer):
-    """A Link object with 1...2 inputs and 1...2 outputs.
+    """A Link object with 2 inputs and 2 outputs.
 
     Parameters
     ----------
@@ -58,7 +58,8 @@ class Link(on.Transformer):
     ...    label="transshipment_link",
     ...    inputs={bel0: solph.flows.Flow(nominal_value=4),
     ...            bel1: solph.flows.Flow(nominal_value=2)},
-    ...    outputs={bel0: solph.flows.Flow(), bel1: solph.flows.Flow()},
+    ...    outputs={bel0: solph.flows.Flow(),
+    ...             bel1: solph.flows.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
     [0.8, 0.9]
@@ -106,10 +107,11 @@ class LinkBlock(SimpleBlock):
 
     .. math::
         &
-        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+        (1) \qquad P_{\mathrm{in},n}(p, t) = c_n(t)
+        \times P_{\mathrm{out},n}(p, t)
             \quad \forall t \in T, \forall n in {1,2} \\
         &
-        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(t)
+        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(p, t)
                                  / P_{\mathrm{in},1,\mathrm{max}}
             \quad \forall t \in T \\
         &
