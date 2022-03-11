@@ -73,7 +73,7 @@ def node(results, node, multiindex=False, keep_none_type=False):
     }
     if scalars:
         # aggregate data
-        filtered["scalars"] = pd.concat(scalars.values(), axis=0)
+        filtered[scalars_col] = pd.concat(scalars.values(), axis=0)
         # assign index values
         idx = {
             k: [c for c in v[scalars_col].index]
@@ -82,29 +82,29 @@ def node(results, node, multiindex=False, keep_none_type=False):
         }
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
-        filtered["scalars"].index = idx
+        filtered[scalars_col].index = idx
 
         # Sort index
         # (if Nones are present, they have to be replaced while sorting)
         if keep_none_type:
-            filtered["scalars"].index = replace_none(
-                filtered["scalars"].index.tolist()
+            filtered[scalars_col].index = replace_none(
+                filtered[scalars_col].index.tolist()
             )
-        filtered["scalars"].sort_index(axis=0, inplace=True)
+        filtered[scalars_col].sort_index(axis=0, inplace=True)
         if keep_none_type:
-            filtered["scalars"].index = replace_none(
-                filtered["scalars"].index.tolist(), True
+            filtered[scalars_col].index = replace_none(
+                filtered[scalars_col].index.tolist(), True
             )
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
                 [
                     tuple([row[0][0], row[0][1], row[1]])
-                    for row in filtered["scalars"].index
+                    for row in filtered[scalars_col].index
                 ]
             )
             idx.set_names(["from", "to", "type"], inplace=True)
-            filtered["scalars"].index = idx
+            filtered[scalars_col].index = idx
 
     # create a dataframe with tuples as column labels for sequences
     sequences = {

@@ -442,7 +442,7 @@ def test_multi_period_investment_model(solver="cbc"):
         for key in test_results.keys():
             eq_(
                 (
-                    views.node(results, key)["scalars"]
+                    views.node(results, key)["period_scalars"]
                     .sum(axis=0)
                     .round(0)
                     .convert_dtypes("int")
