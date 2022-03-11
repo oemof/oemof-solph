@@ -19,18 +19,19 @@ New features
 * Add option to run multi-period (dynamic) investment models with oemof.solph as an experimental feature:
     * You can change from standard model to multi-period model by defining `multi_period=True`
       as attribute of your energy system. Be aware that it is experimental as of now.
-    * Introduce new Pyomo Sets `PERIODS` and `TIMEINDEX` in ``Model`.
+    * Introduce new Pyomo Sets `PERIODS` and `TIMEINDEX` in :class:`oemof.solph.models.Model`.
     * Index all investment-related variables with `PERIODS` and flow variable with `TIMEINDEX`.
     * Add lifetime tracking for investment options by introducing the attributes `lifetime` and `age`.
     * Add new investment-related variables `total` holding the total capacity, `old` holding capacity
       to be decommissioned, `old_exo` (for exogenous) holding existing capacity to be decommissioned and
       `old_end` holding model-endogenously installed capacity to be decommissioned after its lifetime.
-    * Include discounting and calculating annuities in the objective function terms.
+    * Include discounting and calculating annuities in the objective function terms. Introduce attribute `discount_rate`
+      of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
 
 Documentation
 #############
 
-* See extensive documentation and API reference for the new (experimental) multi-period feature.
+* See extensive documentation in user guide and API reference for the new (experimental) multi-period feature.
 
 Bug fixes
 #########
