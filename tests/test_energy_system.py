@@ -37,11 +37,7 @@ def test_extract_periods_years():
         timeincrement=[1] * len(timeindex),
         multi_period=True,
     )
-    periods_years = {
-        0: 0,
-        1: 21,
-        2: 30
-    }
+    periods_years = {0: 0, 1: 21, 2: 30}
     assert es.periods_years == periods_years
 
 

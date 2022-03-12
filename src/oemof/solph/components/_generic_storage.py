@@ -1680,21 +1680,15 @@ class GenericInvestmentStorageBlock(SimpleBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += (
-                            sum(
-                                self.invest[n, p]
-                                * n.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[p],
-                                    m.es.periods_years[p] + lifetime,
-                                )
+                        fixed_costs += sum(
+                            self.invest[n, p]
+                            * n.investment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime,
                             )
-                            * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[p])
-                            )
-                        )
+                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
