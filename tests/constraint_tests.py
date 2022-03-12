@@ -1175,7 +1175,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="CC",
         )
         self.compare_lp_files("piecewise_linear_transformer_cc.lp")
@@ -1191,7 +1191,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="DCC",
         )
         self.compare_lp_files("piecewise_linear_transformer_dcc.lp")
@@ -1665,7 +1665,7 @@ class TestsConstraint:
                     summed_max=100,
                     variable_costs=25,
                     max=0.8,
-                    nominal_value=10
+                    nominal_value=10,
                 )
             },
         )
@@ -1680,10 +1680,7 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    variable_costs=25,
-                    max=1,
-                    nominal_value=10,
-                    integer=True
+                    variable_costs=25, max=1, nominal_value=10, integer=True
                 )
             },
         )

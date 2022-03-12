@@ -18,9 +18,4 @@ def test_check_age_and_lifetime():
         "expected lifetime."
     )
     with pytest.raises(AttributeError, match=msg):
-        solph.components.Sink(
-            investment=solph.Investment(
-                age=41,
-                lifetime=40
-            )
-        )
+        solph.components.Sink(investment=solph.Investment(age=41, lifetime=40))

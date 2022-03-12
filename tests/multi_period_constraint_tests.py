@@ -1383,7 +1383,7 @@ class TestsMultiPeriodConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="CC",
         )
         self.compare_lp_files(
@@ -1401,7 +1401,7 @@ class TestsMultiPeriodConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="DCC",
         )
         self.compare_lp_files(
@@ -1901,7 +1901,7 @@ class TestsMultiPeriodConstraint:
                     summed_max=100,
                     variable_costs=25,
                     max=0.8,
-                    nominal_value=10
+                    nominal_value=10,
                 )
             },
         )
@@ -1916,10 +1916,7 @@ class TestsMultiPeriodConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    variable_costs=25,
-                    max=0.8,
-                    nominal_value=10,
-                    lifetime=2
+                    variable_costs=25, max=0.8, nominal_value=10, lifetime=2
                 )
             },
         )
@@ -1938,7 +1935,7 @@ class TestsMultiPeriodConstraint:
                     max=0.8,
                     nominal_value=10,
                     lifetime=2,
-                    age=1
+                    age=1,
                 )
             },
         )
@@ -1953,10 +1950,7 @@ class TestsMultiPeriodConstraint:
             label="pv_forever",
             outputs={
                 bel: solph.flows.Flow(
-                    variable_costs=25,
-                    max=0.8,
-                    nominal_value=10,
-                    fixed_costs=3
+                    variable_costs=25, max=0.8, nominal_value=10, fixed_costs=3
                 )
             },
         )
@@ -1969,7 +1963,7 @@ class TestsMultiPeriodConstraint:
                     max=0.8,
                     nominal_value=10,
                     fixed_costs=3,
-                    lifetime=20
+                    lifetime=20,
                 )
             },
         )
@@ -1983,7 +1977,7 @@ class TestsMultiPeriodConstraint:
                     nominal_value=10,
                     fixed_costs=3,
                     lifetime=20,
-                    age=18
+                    age=18,
                 )
             },
         )

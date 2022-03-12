@@ -146,19 +146,16 @@ def test_multi_period_default_discount_rate():
     es.add(bel)
     es.add(
         solph.components.Sink(
-            inputs={bel: solph.flows.Flow(
-                nominal_value=5,
-                fix=[1] * len(timeindex))
+            inputs={
+                bel: solph.flows.Flow(
+                    nominal_value=5, fix=[1] * len(timeindex)
+                )
             }
         )
     )
     es.add(
         solph.components.Source(
-            outputs={
-                bel: solph.flows.Flow(
-                    nominal_value=4, variable_costs=5
-                )
-            }
+            outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)}
         )
     )
     msg = (

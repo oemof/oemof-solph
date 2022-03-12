@@ -962,21 +962,15 @@ class InvestmentFlowBlock(SimpleBlock):
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
-                        fixed_costs += (
-                            sum(
-                                self.invest[i, o, p]
-                                * m.flows[i, o].investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[p],
-                                    m.es.periods_years[p] + lifetime,
-                                )
+                        fixed_costs += sum(
+                            self.invest[i, o, p]
+                            * m.flows[i, o].investment.fixed_costs[pp]
+                            * ((1 + m.discount_rate) ** (-pp))
+                            for pp in range(
+                                m.es.periods_years[p],
+                                m.es.periods_years[p] + lifetime,
                             )
-                            * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[p])
-                            )
-                        )
+                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
 
             for i, o in self.EXISTING_INVESTFLOWS:
                 if m.flows[i, o].investment.fixed_costs[0] is not None:

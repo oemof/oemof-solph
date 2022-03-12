@@ -311,9 +311,3 @@ def test_generic_chp_without_warning():
         back_pressure=False,
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
-
-
-# ********* SinkDSM *********
-
-def test_sink_dsm_attribute_error1():
-    pass
