@@ -69,11 +69,7 @@ def test_multi_period_investment_model(solver="cbc"):
         )
         source_natgas = components.Source(
             label="DE_source_natgas",
-            outputs={
-                bus_natgas: flows.Flow(
-                    variable_costs=20
-                )
-            },
+            outputs={bus_natgas: flows.Flow(variable_costs=20)},
         )
         source_wind = components.Source(
             label="DE_source_wind",
