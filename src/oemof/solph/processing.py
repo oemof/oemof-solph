@@ -242,7 +242,9 @@ def meta_results(om, undefined=False):
     return meta_res
 
 
-def __separate_attrs(system, get_flows=False, exclude_none=True):
+def __separate_attrs(
+    system, exclude_attrs, get_flows=False, exclude_none=True
+):
     """
     Create a dictionary with flow scalars and series.
 
@@ -251,7 +253,15 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
     'sequences': {'attr1': iterable, 'attr2': iterable}}}
 
-    om : A solved oemof.solph.Model.
+    system:
+        A solved oemof.solph.Model or oemof.solph.Energysystem
+    exclude_attrs: List[str]
+        List of additional attributes which shall be excluded from
+        parameter dict
+    get_flows: bool
+        Whether to include flow values or not
+    exclude_none: bool
+        If set, scalars and sequences containing None values are excluded
 
     Returns
     -------
@@ -261,7 +271,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     def detect_scalars_and_sequences(com):
         com_data = {"scalars": {}, "sequences": {}}
 
-        exclusions = (
+        default_exclusions = [
             "__",
             "_",
             "registry",
@@ -271,7 +281,9 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
             "input",
             "output",
             "constraint_group",
-        )
+        ]
+        # Must be tuple in order to work with `str.startswith()`:
+        exclusions = tuple(default_exclusions + exclude_attrs)
         attrs = [
             i
             for i in dir(com)
@@ -370,7 +382,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     return data
 
 
-def parameter_as_dict(system, exclude_none=True):
+def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
     """
     Create a result dictionary containing node parameters.
 
@@ -386,14 +398,24 @@ def parameter_as_dict(system, exclude_none=True):
         A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
+    exclude_attrs: Optional[List[str]]
+        Optional list of additional attributes which shall be excluded from
+        parameter dict
 
     Returns
     -------
     dict: Parameters for all nodes and flows
     """
 
-    flow_data = __separate_attrs(system, True, exclude_none)
-    node_data = __separate_attrs(system, False, exclude_none)
+    if exclude_attrs is None:
+        exclude_attrs = []
+
+    flow_data = __separate_attrs(
+        system, exclude_attrs, get_flows=True, exclude_none=exclude_none
+    )
+    node_data = __separate_attrs(
+        system, exclude_attrs, get_flows=False, exclude_none=exclude_none
+    )
 
     flow_data.update(node_data)
     return flow_data
