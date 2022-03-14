@@ -240,7 +240,9 @@ class TestParameterResult:
 
     def test_nodes_with_excluded_attrs(self):
         diesel = self.es.groups["diesel"]
-        param_results = processing.parameter_as_dict(self.es, exclude_attrs=["conversion_factors"])
+        param_results = processing.parameter_as_dict(
+            self.es, exclude_attrs=["conversion_factors"]
+        )
         assert_series_equal(
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
