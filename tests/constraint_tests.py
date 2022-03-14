@@ -977,7 +977,7 @@ class TestsConstraint:
             inputs={bgas: solph.Flow(nominal_value=100, variable_costs=1)},
             outputs={bel: solph.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="CC",
         )
         self.compare_lp_files("piecewise_linear_transformer_cc.lp")
@@ -991,7 +991,7 @@ class TestsConstraint:
             inputs={bgas: solph.Flow(nominal_value=100, variable_costs=1)},
             outputs={bel: solph.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="DCC",
         )
         self.compare_lp_files("piecewise_linear_transformer_dcc.lp")
