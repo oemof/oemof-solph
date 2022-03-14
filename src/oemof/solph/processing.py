@@ -243,7 +243,7 @@ def meta_results(om, undefined=False):
 
 
 def __separate_attrs(
-    system, exclude_attrs=None, get_flows=False, exclude_none=True
+    system, exclude_attrs, get_flows=False, exclude_none=True
 ):
     """
     Create a dictionary with flow scalars and series.
@@ -256,7 +256,7 @@ def __separate_attrs(
     system:
         A solved oemof.solph.Model or oemof.solph.Energysystem
     exclude_attrs: List[str]
-        Optional list of additional attributes which shall be excluded from
+        List of additional attributes which shall be excluded from
         parameter dict
     get_flows: bool
         Whether to include flow values or not
@@ -368,9 +368,6 @@ def __separate_attrs(
         for ckey, value in list(com["sequences"].items()):
             if len(value) == 0 or value[0] is None:
                 del com["sequences"][ckey]
-
-    if exclude_attrs is None:
-        exclude_attrs = []
 
     # Check if system is es or om:
     if system.__class__.__name__ == "EnergySystem":
