@@ -32,4 +32,3 @@ def test_wrong_logging_level():
     with pytest.raises(LoggingError, match="The root logger level is 'DEBUG'"):
         solph.Model(es)
     my_logger.setLevel("WARNING")
-
