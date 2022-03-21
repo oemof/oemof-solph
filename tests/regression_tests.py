@@ -9,9 +9,11 @@ available from its original location oemof/tests/regression_tests.py
 SPDX-License-Identifier: MIT
 """
 
-import pandas as pd
 import logging
+
+import pandas as pd
 import pytest
+
 from oemof import solph
 from oemof import tools
 from oemof.solph._models import LoggingError
