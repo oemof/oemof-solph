@@ -28,6 +28,8 @@ def test_wrong_logging_level():
     es = solph.EnergySystem(timeindex=datetimeindex)
     tools.logger.define_logging()
     my_logger = logging.getLogger()
+    my_logger.setLevel("DEBUG")
     with pytest.raises(LoggingError, match="The root logger level is 'DEBUG'"):
-        my_logger.setLevel("DEBUG")
         solph.Model(es)
+    my_logger.setLevel("WARNING")
+
