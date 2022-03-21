@@ -13,6 +13,7 @@ SPDX-License-Identifier: MIT
 """
 import logging
 import warnings
+from logging import getLogger
 
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
@@ -80,7 +81,6 @@ class BaseModel(po.ConcreteModel):
         # Check root logger. Due to a problem with pyomo the building of the
         # model will take up to a 100 times longer if the root logger is set
         # to DEBUG
-        from logging import getLogger
 
         if getLogger().level <= 10 and kwargs.get("debug", False) is False:
             msg = (
