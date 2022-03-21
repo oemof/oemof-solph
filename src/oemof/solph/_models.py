@@ -364,7 +364,7 @@ class Model(BaseModel):
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]

@@ -511,7 +511,7 @@ class GenericStorageBlock(ScalarBlock):
             if balanced.
             """
             return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
+                block.storage_content[n, m.TIMESTEPS.at(-1)]
                 == block.init_content[n]
             )
 
