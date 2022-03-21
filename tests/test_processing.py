@@ -235,6 +235,23 @@ class TestParameterResult:
             param_results[(diesel, None)]["sequences"], pandas.DataFrame()
         )
 
+    def test_nodes_with_excluded_attrs(self):
+        diesel = self.es.groups["diesel"]
+        param_results = processing.parameter_as_dict(
+            self.es, exclude_attrs=["conversion_factors"]
+        )
+        assert_series_equal(
+            param_results[(diesel, None)]["scalars"],
+            pandas.Series(
+                {
+                    "label": "diesel",
+                }
+            ),
+        )
+        assert_frame_equal(
+            param_results[(diesel, None)]["sequences"], pandas.DataFrame()
+        )
+
     def test_parameter_with_node_view(self):
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=True
