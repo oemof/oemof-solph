@@ -116,7 +116,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
         .. math::
             \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
-            \cdot f_{capacity, min}
+            \cdot t_{full\_load, min}
 
         * :attr:`full_load_time_min is not None`
 
@@ -125,7 +125,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
         .. math::
             \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
-            \cdot f_{capacity, min}
+            \cdot t_{full\_load, min}
 
 
     **Objective function**
@@ -204,9 +204,9 @@ class InvestmentFlowBlock(SimpleBlock):
         value of the flow"
         ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
         value of the flow"
-        ":math:`f_{capacity,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
+        ":math:`t_{full\_load,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
         maximum of summed flow values (per installed capacity)"
-        ":math:`f_{capacity,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
+        ":math:`t_{full\_load,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
         minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"

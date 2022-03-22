@@ -73,10 +73,10 @@ class Flow(on.Edge):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    full_load_time_max : numeric, :math:`f_{capacity,max}`
+    full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    full_load_time_min : numeric, :math:`f_{capacity,min}`
+    full_load_time_min : numeric, :math:`t_{full\_load,min}`
         see above
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
@@ -305,14 +305,14 @@ class FlowBlock(SimpleBlock):
     FlowBlock max sum :attr:`om.FlowBlock.full_load_time_max[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
-            \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
+            \leq full\_load\_time\_max(i, o) \cdot nominal\_value(i, o), \\
+        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MAX\_FLOWS}.
 
     FlowBlock min sum :attr:`om.FlowBlock.full_load_time_min[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
-            \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
+            \geq full\_load\_time\_min(i, o) \cdot nominal\_value(i, o), \\
+        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MIN\_FLOWS}.
 
     Negative gradient constraint
       :attr:`om.FlowBlock.negative_gradient_constr[i, o]`:
