@@ -1398,8 +1398,3 @@ class TestsConstraint:
             },
         )
         self.compare_lp_files("flow_invest_with_offset_no_minimum.lp")
-
-    # def test_full_load_time_max_no_invest(self):
-    #     bel = solph.buses.Bus(label="electricityBus")
-    #     solph.components.Source(
-    #         inputs={bel: solph.flows.Flow(no)})
