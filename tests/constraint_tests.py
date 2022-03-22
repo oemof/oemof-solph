@@ -232,7 +232,7 @@ class TestsConstraint:
     def test_fixed_source_invest_sink(self):
         """
         Wrong constraints for fixed source + invest sink w.
-        `max_capacity_factor`.
+        `full_load_time_max`.
         """
 
         bel = solph.buses.Bus(label="electricityBus")
@@ -248,7 +248,7 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    max_capacity_factor=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1346,7 +1346,7 @@ class TestsConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    max_capacity_factor=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1365,7 +1365,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    max_capacity_factor=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1388,7 +1388,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    max_capacity_factor=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1398,3 +1398,8 @@ class TestsConstraint:
             },
         )
         self.compare_lp_files("flow_invest_with_offset_no_minimum.lp")
+
+    # def test_full_load_time_max_no_invest(self):
+    #     bel = solph.buses.Bus(label="electricityBus")
+    #     solph.components.Source(
+    #         inputs={bel: solph.flows.Flow(no)})

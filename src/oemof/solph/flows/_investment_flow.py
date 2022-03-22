@@ -109,7 +109,7 @@ class InvestmentFlowBlock(SimpleBlock):
         .. math::
             P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
 
-        * :attr:`max_capacity_factor is not None`
+        * :attr:`full_load_time_max is not None`
 
             Upper bound for the sum of all flow values (e.g. maximum full load
             hours)
@@ -118,7 +118,7 @@ class InvestmentFlowBlock(SimpleBlock):
             \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
             \cdot f_{capacity, min}
 
-        * :attr:`min_capacity_factor is not None`
+        * :attr:`full_load_time_min is not None`
 
             Lower bound for the sum of all flow values (e.g. minimum full load
             hours)
@@ -204,9 +204,9 @@ class InvestmentFlowBlock(SimpleBlock):
         value of the flow"
         ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
         value of the flow"
-        ":math:`f_{capacity,max}`", ":py:obj:`flows[i, o].max_capacity_factor`", "Specific
+        ":math:`f_{capacity,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
         maximum of summed flow values (per installed capacity)"
-        ":math:`f_{capacity,min}`", ":py:obj:`flows[i, o].min_capacity_factor`", "Specific
+        ":math:`f_{capacity,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
         minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"
@@ -272,19 +272,19 @@ class InvestmentFlowBlock(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
         )
 
-        self.MAX_CAPACITY_FACTOR_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MAX_INVESTFLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].max_capacity_factor is not None
+                if g[2].full_load_time_max is not None
             ]
         )
 
-        self.MIN_CAPACITY_FACTOR_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MIN_INVESTFLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].min_capacity_factor is not None
+                if g[2].full_load_time_min is not None
             ]
         )
 
@@ -384,23 +384,23 @@ class InvestmentFlowBlock(SimpleBlock):
             self.MIN_INVESTFLOWS, m.TIMESTEPS, rule=_min_investflow_rule
         )
 
-        def _max_capacity_factor_investflow_rule(block, i, o):
+        def _full_load_time_max_investflow_rule(block, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
             expr = sum(
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
-            ) <= m.flows[i, o].max_capacity_factor * (
+            ) <= m.flows[i, o].full_load_time_max * (
                 self.invest[i, o] + m.flows[i, o].investment.existing
             )
             return expr
 
-        self.max_capacity_factor = Constraint(
-            self.MAX_CAPACITY_FACTOR_INVESTFLOWS,
-            rule=_max_capacity_factor_investflow_rule,
+        self.full_load_time_max = Constraint(
+            self.FULL_LOAD_TIME_MAX_INVESTFLOWS,
+            rule=_full_load_time_max_investflow_rule,
         )
 
-        def _min_capacity_factor_investflow_rule(block, i, o):
+        def _full_load_time_min_investflow_rule(block, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
@@ -408,13 +408,13 @@ class InvestmentFlowBlock(SimpleBlock):
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
                 (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].min_capacity_factor
+                * m.flows[i, o].full_load_time_min
             )
             return expr
 
-        self.min_capacity_factor = Constraint(
-            self.MIN_CAPACITY_FACTOR_INVESTFLOWS,
-            rule=_min_capacity_factor_investflow_rule,
+        self.full_load_time_min = Constraint(
+            self.FULL_LOAD_TIME_MIN_INVESTFLOWS,
+            rule=_full_load_time_min_investflow_rule,
         )
 
     def _objective_expression(self):

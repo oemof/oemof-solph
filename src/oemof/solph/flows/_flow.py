@@ -73,10 +73,10 @@ class Flow(on.Edge):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    max_capacity_factor : numeric, :math:`f_{capacity,max}`
+    full_load_time_max : numeric, :math:`f_{capacity,max}`
         Specific maximum value summed over all timesteps. Will be multiplied
         with the nominal_value to get the absolute limit.
-    min_capacity_factor : numeric, :math:`f_{capacity,min}`
+    full_load_time_min : numeric, :math:`f_{capacity,min}`
         see above
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
@@ -144,18 +144,18 @@ class Flow(on.Edge):
         )
         if "summed_max" in kwargs:
             warn(msg.format("max"), FutureWarning)
-            kwargs["max_capacity_factor"] = kwargs["summed_max"]
+            kwargs["full_load_time_max"] = kwargs["summed_max"]
         if "summed_min" in kwargs:
             warn(msg.format("min"), FutureWarning)
-            kwargs["min_capacity_factor"] = kwargs["summed_min"]
+            kwargs["full_load_time_min"] = kwargs["summed_min"]
         # --- END ---
 
         super().__init__()
 
         scalars = [
             "nominal_value",
-            "max_capacity_factor",
-            "min_capacity_factor",
+            "full_load_time_max",
+            "full_load_time_min",
             "investment",
             "nonconvex",
             "integer",
@@ -284,11 +284,11 @@ class FlowBlock(SimpleBlock):
 
     **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
-    MAX_CAPACITY_FACTOR_FLOWS
-        A set of flows with the attribute :attr:`max_capacity_factor` being not
+    full_load_time_max_FLOWS
+        A set of flows with the attribute :attr:`full_load_time_max` being not
         None.
-    MIN_CAPACITY_FACTOR_FLOWS
-        A set of flows with the attribute :attr:`min_capacity_factor` being not
+    full_load_time_min_FLOWS
+        A set of flows with the attribute :attr:`full_load_time_min` being not
         None.
     NEGATIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`negative_gradient` being not
@@ -302,13 +302,13 @@ class FlowBlock(SimpleBlock):
 
     **The following constraints are build:**
 
-    FlowBlock max sum :attr:`om.FlowBlock.max_capacity_factor[i, o]`
+    FlowBlock max sum :attr:`om.FlowBlock.full_load_time_max[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
             \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
         \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
 
-    FlowBlock min sum :attr:`om.FlowBlock.min_capacity_factor[i, o]`
+    FlowBlock min sum :attr:`om.FlowBlock.full_load_time_min[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
             \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
@@ -360,21 +360,19 @@ class FlowBlock(SimpleBlock):
 
         # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
-        self.MAX_CAPACITY_FACTOR_FLOWS = Set(
+        self.FULL_LOAD_TIME_MAX_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].max_capacity_factor is not None
-                and g[2].nominal_value is not None
+                if g[2].full_load_time_max is not None
             ]
         )
 
-        self.MIN_CAPACITY_FACTOR_FLOWS = Set(
+        self.FULL_LOAD_TIME_MIN_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].min_capacity_factor is not None
-                and g[2].nominal_value is not None
+                if g[2].full_load_time_min is not None
             ]
         )
 
@@ -421,44 +419,44 @@ class FlowBlock(SimpleBlock):
 
         # ######################### CONSTRAINTS ###############################
 
-        def _flow_max_capacity_factor_rule(model):
+        def _flow_full_load_time_max_rule(model):
             """Rule definition for build action of max. sum flow constraint."""
-            for inp, out in self.MAX_CAPACITY_FACTOR_FLOWS:
+            for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].max_capacity_factor
+                    m.flows[inp, out].full_load_time_max
                     * m.flows[inp, out].nominal_value
                 )
-                self.max_capacity_factor.add((inp, out), lhs <= rhs)
+                self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
-        self.max_capacity_factor = Constraint(
-            self.MAX_CAPACITY_FACTOR_FLOWS, noruleinit=True
+        self.full_load_time_max_constr = Constraint(
+            self.FULL_LOAD_TIME_MAX_FLOWS, noruleinit=True
         )
-        self.max_capacity_factor_build = BuildAction(
-            rule=_flow_max_capacity_factor_rule
+        self.full_load_time_max_build = BuildAction(
+            rule=_flow_full_load_time_max_rule
         )
 
-        def _flow_min_capacity_factor_rule(model):
+        def _flow_full_load_time_min_rule(model):
             """Rule definition for build action of min. sum flow constraint."""
-            for inp, out in self.MIN_CAPACITY_FACTOR_FLOWS:
+            for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].min_capacity_factor
+                    m.flows[inp, out].full_load_time_min
                     * m.flows[inp, out].nominal_value
                 )
-                self.min_capacity_factor.add((inp, out), lhs >= rhs)
+                self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
-        self.min_capacity_factor = Constraint(
-            self.MIN_CAPACITY_FACTOR_FLOWS, noruleinit=True
+        self.full_load_time_min_constr = Constraint(
+            self.FULL_LOAD_TIME_MIN_FLOWS, noruleinit=True
         )
-        self.min_capacity_factor_build = BuildAction(
-            rule=_flow_min_capacity_factor_rule
+        self.full_load_time_min_build = BuildAction(
+            rule=_flow_full_load_time_min_rule
         )
 
         def _positive_gradient_flow_rule(model):

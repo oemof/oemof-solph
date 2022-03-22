@@ -40,3 +40,7 @@ def test_summed_min_future_warning():
         Flow(summed_min=2)
         assert len(w) == 1
         assert msg in str(w[-1].message)
+
+
+def test_source_with_full_load_time_max():
+    Flow(full_load_time_max=2)
