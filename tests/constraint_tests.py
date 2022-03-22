@@ -247,7 +247,7 @@ class TestsConstraint:
         solph.components.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.flows.InvestmentFlow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,

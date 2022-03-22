@@ -36,7 +36,7 @@ c_u_InvestmentFlowBlock_max(electricityBus_excess_2)_:
 +1 flow(electricityBus_excess_2)
 <= 40
 
-c_u_InvestmentFlowBlock_max_capacity_factor(electricityBus_excess)_:
+c_u_InvestmentFlowBlock_full_load_time_max(electricityBus_excess)_:
 -2.2999999999999998 InvestmentFlowBlock_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_0)
 +1 flow(electricityBus_excess_1)

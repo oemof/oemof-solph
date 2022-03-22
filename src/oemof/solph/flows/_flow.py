@@ -365,6 +365,7 @@ class FlowBlock(SimpleBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_max is not None
+                and g[2].nominal_value is not None
             ]
         )
 
@@ -373,6 +374,7 @@ class FlowBlock(SimpleBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_min is not None
+                and g[2].nominal_value is not None
             ]
         )
 
