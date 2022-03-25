@@ -16,7 +16,9 @@ SPDX-FileCopyrightText: jnnr
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
+from oemof.tools import debugging
 from oemof.network import network as on
 from pyomo.core import Binary
 from pyomo.core import Set
@@ -80,14 +82,21 @@ class Link(on.Transformer):
             for k, v in kwargs.get("conversion_factors", {}).items()
         }
 
-        wrong_args_message = (
-            "Component `Link` must have exactly"
-            + "2 inputs, 2 outputs, and 2"
-            + "conversion factors connecting these."
+        msg = (
+            "Component `Link` should have exactly "
+            + "2 inputs, 2 outputs, and 2 "
+            + "conversion factors connecting these. You are initializing "
+            + "a `Link`without obeying this specification. "
+            + "If this is intended and you know what you are doing you can "
+            + "disable the SuspiciousUsageWarning globally."
         )
-        assert len(self.inputs) == 2, wrong_args_message
-        assert len(self.outputs) == 2, wrong_args_message
-        assert len(self.conversion_factors) == 2, wrong_args_message
+
+        if (
+            len(self.inputs) != 2
+            or len(self.outputs) != 2
+            or len(self.conversion_factors) != 2
+        ):
+            warn(msg, debugging.SuspiciousUsageWarning)
 
     def constraint_group(self):
         return LinkBlock
