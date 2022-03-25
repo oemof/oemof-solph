@@ -18,8 +18,8 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-from oemof.tools import debugging
 from oemof.network import network as on
+from oemof.tools import debugging
 from pyomo.core import Binary
 from pyomo.core import Set
 from pyomo.core import Var
