@@ -74,10 +74,15 @@ class Flow(on.Edge):
             unit.
 
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
-        Specific maximum value summed over all timesteps. Will be multiplied
-        with the nominal_value to get the absolute limit.
+        Upper bound on the summed flow expressed as the equivalent time that
+        the flow would have to run at full capacity to yield the same sum. The
+        value will be multiplied with the nominal_value to get the absolute
+        limit.
     full_load_time_min : numeric, :math:`t_{full\_load,min}`
-        see above
+        Lower bound on the summed flow expressed as the equivalent time that
+        the flow would have to run at full capacity to yield the same sum. The
+        value will be multiplied with the nominal_value to get the absolute
+        limit.
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
@@ -284,10 +289,10 @@ class FlowBlock(SimpleBlock):
 
     **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
-    full_load_time_max_FLOWS
+    FULL_LOAD_TIME_MAX_FLOWS
         A set of flows with the attribute :attr:`full_load_time_max` being not
         None.
-    full_load_time_min_FLOWS
+    FULL_LOAD_TIME_MIN_FLOWS
         A set of flows with the attribute :attr:`full_load_time_min` being not
         None.
     NEGATIVE_GRADIENT_FLOWS
