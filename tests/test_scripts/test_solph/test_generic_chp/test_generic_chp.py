@@ -16,7 +16,7 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -34,7 +34,7 @@ def test_gen_chp():
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="H")
     es = solph.EnergySystem(timeindex=idx)
-    Node.registry = es
+    Entity.registry = es
 
     # resources
     bgas = solph.buses.Bus(label="bgas")

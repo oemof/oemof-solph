@@ -39,7 +39,7 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 from oemof.tools import economics
 
 from oemof import solph
@@ -58,7 +58,7 @@ def test_optimise_storage_size(
     date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
+    Entity.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")

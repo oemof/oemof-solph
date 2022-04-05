@@ -16,7 +16,7 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -40,7 +40,7 @@ def test_gen_caes():
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="H")
     es = EnergySystem(timeindex=idx)
-    Node.registry = es
+    Entity.registry = es
 
     # resources
     bgas = Bus(label="bgas")

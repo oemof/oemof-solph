@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof import solph
 from oemof.solph import views
@@ -27,7 +27,7 @@ def test_regression_investment_storage(solver="cbc"):
     date_time_index = pd.date_range("1/1/2012", periods=4, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
+    Entity.registry = energysystem
 
     # Buses
     bgas = solph.buses.Bus(label=("natural", "gas"))

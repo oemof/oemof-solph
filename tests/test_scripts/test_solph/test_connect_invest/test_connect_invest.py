@@ -32,7 +32,7 @@ def test_connect_invest():
     date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
 
     energysystem = EnergySystem(timeindex=date_time_index)
-    network.Node.registry = energysystem
+    network.Entity.registry = energysystem
 
     # Read data file
     full_filename = os.path.join(

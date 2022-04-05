@@ -18,7 +18,7 @@ import pandas as pd
 import pytest
 from nose.tools import assert_raises
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof import solph
 
@@ -41,7 +41,7 @@ class TestsConstraint:
         self.energysystem = solph.EnergySystem(
             groupings=solph.GROUPINGS, timeindex=self.date_time_index
         )
-        Node.registry = self.energysystem
+        Entity.registry = self.energysystem
 
     def get_om(self):
         return solph.Model(

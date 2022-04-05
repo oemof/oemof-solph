@@ -17,7 +17,7 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof import solph
 from oemof.solph import views
@@ -29,7 +29,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
+    Entity.registry = energysystem
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)

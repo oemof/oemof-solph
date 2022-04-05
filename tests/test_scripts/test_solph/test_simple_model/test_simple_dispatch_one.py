@@ -12,7 +12,7 @@ SPDX-License-Identifier: MIT
 """
 
 from nose.tools import eq_
-from oemof.network.network import Node
+from oemof.network.network import Entity
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -29,7 +29,7 @@ def test_dispatch_one_time_step(solver="cbc"):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################
-    Node.registry = None
+    Entity.registry = None
 
     # resource buses
     bgas = Bus(label="gas", balanced=False)

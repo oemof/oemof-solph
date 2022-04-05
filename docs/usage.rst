@@ -794,7 +794,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
 
     # Create Energy System
     es = solph.EnergySystem(timeindex=datetimeindex)
-    Node.registry = es
+    Entity.registry = es
 
     # Create bus representing electricity grid
     b_elec = solph.buses.Bus(label='Electricity bus')
