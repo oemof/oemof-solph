@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 import itertools
 
 from numpy import mean
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -434,7 +434,7 @@ class SinkDSM(Sink):
             )
 
 
-class SinkDSMOemofBlock(SimpleBlock):
+class SinkDSMOemofBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach
 
     **The following constraints are created for approach = 'oemof':**
@@ -720,7 +720,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMOemofInvestmentBlock(SimpleBlock):
+class SinkDSMOemofInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'oemof' with an
@@ -1025,7 +1025,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWBlock(SimpleBlock):
+class SinkDSMDIWBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach
 
     **The following constraints are created for approach = 'DIW':**
@@ -1670,7 +1670,7 @@ class SinkDSMDIWBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWInvestmentBlock(SimpleBlock):
+class SinkDSMDIWInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'DIW' with an
@@ -2131,13 +2131,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2156,13 +2153,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2181,13 +2175,10 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # max capacity at tt
-                        rhs = (
-                            max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_up[tt] * g.flex_share_up,
+                            g.capacity_down[tt] * g.flex_share_down,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
@@ -2353,7 +2344,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDLRBlock(SimpleBlock):
+class SinkDSMDLRBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DLR" approach
 
     **The following constraints are created for approach = 'DLR':**
@@ -4222,13 +4213,10 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         )
 
                         # maximum capacity eligibly for load shifting
-                        rhs = (
-                            max(
-                                g.capacity_down[t] * g.flex_share_down,
-                                g.capacity_up[t] * g.flex_share_up,
-                            )
-                            * (self.invest[g] + g.investment.existing)
-                        )
+                        rhs = max(
+                            g.capacity_down[t] * g.flex_share_down,
+                            g.capacity_up[t] * g.flex_share_up,
+                        ) * (self.invest[g] + g.investment.existing)
 
                         # add constraint
                         block.dr_logical_constraint.add((g, t), (lhs <= rhs))

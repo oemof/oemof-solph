@@ -17,7 +17,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network as on
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Piecewise
@@ -89,7 +89,7 @@ PiecewiseLinearTransformer'>
         return PiecewiseLinearTransformerBlock
 
 
-class PiecewiseLinearTransformerBlock(SimpleBlock):
+class PiecewiseLinearTransformerBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components.experimental._piecewise_linear_transformer.PiecewiseLinearTransformer`
 

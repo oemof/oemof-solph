@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -277,7 +277,7 @@ class GenericStorage(network.Node):
             return GenericStorageBlock
 
 
-class GenericStorageBlock(SimpleBlock):
+class GenericStorageBlock(ScalarBlock):
     r"""Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
@@ -511,7 +511,7 @@ class GenericStorageBlock(SimpleBlock):
             if balanced.
             """
             return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
+                block.storage_content[n, m.TIMESTEPS.at(-1)]
                 == block.init_content[n]
             )
 
@@ -549,7 +549,7 @@ class GenericStorageBlock(SimpleBlock):
         return 0
 
 
-class GenericInvestmentStorageBlock(SimpleBlock):
+class GenericInvestmentStorageBlock(ScalarBlock):
     r"""
     Block for all storages with :attr:`Investment` being not None.
     See :class:`oemof.solph.options.Investment` for all parameters of the
