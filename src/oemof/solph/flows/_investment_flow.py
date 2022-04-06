@@ -21,7 +21,7 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from ._flow import Flow
 
@@ -35,7 +35,7 @@ class InvestmentFlow(Flow):
         super().__init__(**kwargs)
 
 
-class InvestmentFlowBlock(SimpleBlock):
+class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
     See :class:`oemof.solph.options.Investment` for all parameters of the

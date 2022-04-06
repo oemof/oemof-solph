@@ -24,7 +24,7 @@ from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._plumbing import sequence
 
@@ -274,7 +274,7 @@ class Flow(on.Edge):
                 )
 
 
-class FlowBlock(SimpleBlock):
+class FlowBlock(ScalarBlock):
     r""" FlowBlock block with definitions for standard flows.
 
     **The following variables are created**:
