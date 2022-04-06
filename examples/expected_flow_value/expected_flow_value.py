@@ -19,7 +19,7 @@ import pandas as pd
 from oemof import solph
 
 solver = "cbc"  # 'glpk', 'gurobi',...
-solver_verbose = False  # show/hide solver output
+solver_verbose = True  # show/hide solver output
 time_steps = 24*31  # 8760
 
 date_time_index = pd.date_range("1/1/2000", periods=time_steps, freq="H")
@@ -72,32 +72,31 @@ def run_energy_system(index, costs, demands, losses, expected=None):
 
     energy_system.add(bus, source, sink, storage)
     model = solph.Model(energy_system)
-    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+    model.solve(solver=solver, solve_kwargs={
+        "tee": solver_verbose,
+    })
 
     _results = solph.processing.results(model)
     _meta_results = solph.processing.meta_results(model)
     return _results, _meta_results
 
 
-results, meta_results = run_energy_system(
+meta_results = {}
+
+results, meta_results["no hints 1"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses)
-print("Time to solve run (no hints): {time:.2f} s".format(
-    time=meta_results['solver']['Wallclock time']))
 bus_data = solph.views.node(results, "bus")["sequences"]
-
-_, meta_results = run_energy_system(
+_, meta_results["no hints 2"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses)
-print("Time to solve run (no hints): {time:.2f} s".format(
-    time=meta_results['solver']['Wallclock time']))
-
-_, meta_results = run_energy_system(
+_, meta_results["with hints"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses,
-    expected=bus_data
+    expected=bus_data,
 )
-print("Time to solve run (with hints): {time:.2f} s".format(
-    time=meta_results['solver']['Wallclock time']))
-
-_, meta_results = run_energy_system(
+_, meta_results["no hints 3"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses)
-print("Time to solve run (no hints): {time:.2f} s".format(
-    time=meta_results['solver']['Wallclock time']))
+
+for meta_result in meta_results:
+    print("Time to solve run {run}: {time:.2f} s".format(
+        run=meta_result,
+        time=meta_results[meta_result]['solver']['Wallclock time'])
+    )
