@@ -74,6 +74,7 @@ def run_energy_system(index, costs, demands, losses, expected=None):
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={
         "tee": solver_verbose,
+        "warmstart": True,
     })
 
     _results = solph.processing.results(model)
