@@ -156,10 +156,14 @@ class LinkBlock(SimpleBlock):
             n: n.conversion_factors for n in group if n.limit_direction
         }
         self.LINK_1ST_INFLOWS = Set(
-            initialize=[(list(c)[0][0], n) for n, c in directed_conversions.items()]
+            initialize=[
+                (list(c)[0][0], n) for n, c in directed_conversions.items()
+            ]
         )
         self.LINK_2ND_INFLOWS = Set(
-            initialize=[(list(c)[1][0], n) for n, c in directed_conversions.items()]
+            initialize=[
+                (list(c)[1][0], n) for n, c in directed_conversions.items()
+            ]
         )
 
         #  0: Flows 1 connected; 1: Flows 2 connected
