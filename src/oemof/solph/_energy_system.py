@@ -13,6 +13,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+import calendar
 import numpy as np
 import pandas as pd
 from oemof.network import energy_system as es
@@ -122,3 +123,14 @@ class EnergySystem(es.EnergySystem):
         super().__init__(
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
+
+
+def create_year_index(year, length=1, number=None):
+    if number is None:
+        if calendar.isleap(year):
+            hoy = 8784
+        else:
+            hoy = 8760
+        number = hoy/length
+    return pd.date_range(f"1/1/{year}", periods=number+1, freq=f"{length}H")
+
