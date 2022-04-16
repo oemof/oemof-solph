@@ -140,6 +140,5 @@ def create_year_index(year, length=1, number=None):
             hoy = 8784
         else:
             hoy = 8760
-        number = hoy/length
-    return pd.date_range(f"1/1/{year}", periods=number+1, freq=f"{length}H")
-
+        number = hoy / length
+    return pd.date_range(f"1/1/{year}", periods=number + 1, freq=f"{length}H")
