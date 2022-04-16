@@ -144,7 +144,7 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
-def results(model, remove_last_time_point=None):
+def results(model, remove_last_time_point=False):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -168,12 +168,6 @@ def results(model, remove_last_time_point=None):
         will get one row with nan-values to have the same index for all
         variables.
     """
-    if remove_last_time_point is None:
-        if model.es.timemode == "implicit":
-            remove_last_time_point = True
-        else:
-            remove_last_time_point = False
-
     df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
@@ -194,8 +188,7 @@ def results(model, remove_last_time_point=None):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
     if remove_last_time_point is True:
-        # In the implicit time mode the first time point is removed.
-        # The values of intervals belong to the time at the end of the
+        # The values of intervals belong to the time at the beginning of the
         # interval.
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)

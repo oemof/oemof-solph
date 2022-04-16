@@ -14,6 +14,8 @@ SPDX-License-Identifier: MIT
 """
 
 import calendar
+import warnings
+
 import numpy as np
 import pandas as pd
 from oemof.network import energy_system as es
@@ -52,7 +54,7 @@ class EnergySystem(es.EnergySystem):
         self,
         timeindex=None,
         timeincrement=None,
-        infer_last_interval=True,
+        infer_last_interval=None,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -72,10 +74,17 @@ class EnergySystem(es.EnergySystem):
             )
             raise TypeError(msg.format(type(timeindex)))
 
-        if infer_last_interval is True:
-            self.timemode = "implicit"
-        else:
-            self.timemode = "explicit"
+        if infer_last_interval is None:
+            msg = (
+                "The default behaviour will change in future versions.\n"
+                "At the moment the last interval of an equidistant time "
+                "index is added implicitly by default. Set "
+                "'infer_last_interval' explicitly 'True' or 'False' to avoid "
+                "this warning. In future versions 'False' will be the default"
+                "behaviour"
+            )
+            warnings.warn(msg, FutureWarning)
+            infer_last_interval = True
 
         if infer_last_interval is True and timeindex is not None:
             # Add one time interval to the timeindex by adding one time point.
