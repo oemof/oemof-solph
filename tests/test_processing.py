@@ -121,8 +121,8 @@ class TestParameterResult:
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
-            "summed_max": None,
-            "summed_min": None,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
             "max": 1,
             "min": 0,
             "negative_gradient_ub": None,
@@ -228,6 +228,23 @@ class TestParameterResult:
                     "label": "diesel",
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
+                }
+            ),
+        )
+        assert_frame_equal(
+            param_results[(diesel, None)]["sequences"], pandas.DataFrame()
+        )
+
+    def test_nodes_with_excluded_attrs(self):
+        diesel = self.es.groups["diesel"]
+        param_results = processing.parameter_as_dict(
+            self.es, exclude_attrs=["conversion_factors"]
+        )
+        assert_series_equal(
+            param_results[(diesel, None)]["scalars"],
+            pandas.Series(
+                {
+                    "label": "diesel",
                 }
             ),
         )

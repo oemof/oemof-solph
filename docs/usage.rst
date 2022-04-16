@@ -269,7 +269,7 @@ Source (basic)
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
+While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
 As we do have to pay for imported gas we should set variable costs.
 Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
 Alternatively, you might use *max* to allow for easy curtailment.
@@ -280,7 +280,7 @@ The *nominal_value* sets the installed capacity.
     solph.components.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
-            nominal_value=1000, summed_max=1000000, variable_costs=50)})
+            nominal_value=1000, full_load_time_max=1000000, variable_costs=50)})
 
     solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
         fix=wind_power_feedin_series, nominal_value=1000000)})

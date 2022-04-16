@@ -230,7 +230,10 @@ class TestsConstraint:
         self.compare_lp_files("nominal_value_to_zero.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Wrong constraints for fixed source + invest sink w. `summed_max`."""
+        """
+        Wrong constraints for fixed source + invest sink w.
+        `full_load_time_max`.
+        """
 
         bel = solph.buses.Bus(label="electricityBus")
 
@@ -244,8 +247,8 @@ class TestsConstraint:
         solph.components.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(
-                    summed_max=2.3,
+                bel: solph.flows.InvestmentFlow(
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1043,7 +1046,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="CC",
         )
         self.compare_lp_files("piecewise_linear_transformer_cc.lp")
@@ -1059,7 +1062,7 @@ class TestsConstraint:
             },
             outputs={bel: solph.flows.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
-            conversion_function=lambda x: x ** 2,
+            conversion_function=lambda x: x**2,
             pw_repn="DCC",
         )
         self.compare_lp_files("piecewise_linear_transformer_dcc.lp")
@@ -1343,7 +1346,7 @@ class TestsConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1362,7 +1365,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1385,7 +1388,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
