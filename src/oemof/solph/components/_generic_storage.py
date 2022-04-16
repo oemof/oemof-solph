@@ -477,7 +477,7 @@ class GenericStorageBlock(ScalarBlock):
             """
             return (
                 block.storage_content[n, m.TIMEPOINTS.at(-1)]
-                == block.storage_content[n, m.TIMEPOINTS.at(-1)]
+                == block.storage_content[n, m.TIMEPOINTS.at(1)]
             )
 
         self.balanced_cstr = Constraint(
