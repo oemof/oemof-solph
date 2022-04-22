@@ -13,12 +13,16 @@ from ._models import Model
 from ._options import Investment
 from ._options import NonConvex
 from ._plumbing import sequence
+from .buses import Bus  # default Bus (for convenience)
+from .flows import Flow  # default Flow (for convenience)
 
 __all__ = [
     "buses",
+    "Bus",
     "components",
     "constraints",
     "flows",
+    "Flow",
     "helpers",
     "processing",
     "views",
