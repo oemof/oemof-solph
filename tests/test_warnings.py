@@ -23,6 +23,9 @@ def warning_fixture():
     """Explicitly activate the warnings."""
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
+    # FutureWarning is i.e. emitted by network Entity registry
+    warnings.simplefilter(action='ignore', category=FutureWarning)
+
 
 def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
