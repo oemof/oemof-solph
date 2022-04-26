@@ -104,7 +104,7 @@ def test_optimal_solution():
 
 def test_infeasible_model():
     # FutureWarning is i.e. emitted by network Entity registry
-    warnings.simplefilter(action='ignore', category=FutureWarning)
+    warnings.simplefilter(action="ignore", category=FutureWarning)
 
     with pytest.raises(ValueError, match=""):
         with warnings.catch_warnings(record=True) as w:
