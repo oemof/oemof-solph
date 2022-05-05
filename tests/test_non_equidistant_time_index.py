@@ -123,14 +123,11 @@ class TestParameterResult:
         # Discharging - timestep (ts) with its timeincrement (ti)
         time = [(7, 1), (40, 0.5)]
         for ts, ti in time:
-            assert (
-                round(
-                    storage_content[ts]
-                    - (discharge[ts] + (discharge[ts] * 1 / 9)) * ti,
-                    5,
-                )
-                == round(storage_content[ts + 1], 5)
-            )
+            assert round(
+                storage_content[ts]
+                - (discharge[ts] + (discharge[ts] * 1 / 9)) * ti,
+                5,
+            ) == round(storage_content[ts + 1], 5)
             assert self.es.timeincrement[ts] == ti
 
     def test_timeincrements(self):

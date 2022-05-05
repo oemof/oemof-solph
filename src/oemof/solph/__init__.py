@@ -29,5 +29,5 @@ __all__ = [
     "Investment",
     "NonConvex",
     "sequence",
-    "create_year_index"
+    "create_year_index",
 ]
