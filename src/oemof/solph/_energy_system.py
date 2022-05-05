@@ -70,7 +70,7 @@ class EnergySystem(es.EnergySystem):
         ):
             msg = (
                 "Parameter 'timeindex' has to be of type "
-                "pandas.datetimeindex or NoneType and not of type {0}"
+                "pandas.DatetimeIndex or NoneType and not of type {0}"
             )
             raise TypeError(msg.format(type(timeindex)))
 
