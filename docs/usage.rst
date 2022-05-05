@@ -51,13 +51,29 @@ Set up an energy system
 
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
-To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The model time is defined by the number of intervals and the length of intervals. The length of each interval does not have to be the same. This can be defined in two ways:
+
+1. Define the length of each interval in an array/Series where the number of the elements is the number of intervals.
+2. Define a `pandas.DatetimeIndex` with all time steps that encloses an interval. Be aware that you have to define 8761 time steps to get 8760 intervals.
+
+The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
+
+One can use the function
+:py:func:`~oemof.solph._energy_system/create_year_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc.. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
+
+It is also possible to define the datetime index using pandas. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+
+Both code blocks will create an hourly datetime index for 2011:
+
+.. code-block:: python
+
+    from oemof.solph import create_year_index
+    my_index = create_year_index(2011)
 
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
 
 This index can be used to define the EnergySystem:
 
