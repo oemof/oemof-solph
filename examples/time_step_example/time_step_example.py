@@ -36,9 +36,11 @@ except ModuleNotFoundError:
 solver = "cbc"  # 'glpk', 'gurobi',...
 solver_verbose = False  # show/hide solver output
 
-date_time_index = pd.date_range("1/1/2000", periods=8, freq="15T")
+date_time_index = pd.date_range("1/1/2000", periods=9, freq="15T")
 
-energy_system = solph.EnergySystem(timeindex=date_time_index)
+energy_system = solph.EnergySystem(
+    timeindex=date_time_index, infer_last_interval=False
+)
 
 bus = solph.buses.Bus(label="bus")
 source = solph.components.Source(
