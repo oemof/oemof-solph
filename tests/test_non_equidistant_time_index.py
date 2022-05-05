@@ -6,7 +6,6 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
-import copy
 import datetime
 import random
 
