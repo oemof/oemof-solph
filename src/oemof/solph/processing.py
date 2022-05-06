@@ -164,7 +164,7 @@ def results(om):
     # add dual variables for bus constraints
     if om.dual is not None:
         grouped = groupby(
-            sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(om.BusBlock.balance.keys()), lambda p: p[0]
         )
         for bus, timesteps in grouped:
             duals = [
