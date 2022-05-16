@@ -178,7 +178,7 @@ def create_time_index(year, interval=1, number=None):
             hoy = 8784
         else:
             hoy = 8760
-        number = hoy / interval
+        number = round(hoy / interval)
     return pd.date_range(
         f"1/1/{year}", periods=number + 1, freq=f"{interval}H"
     )
