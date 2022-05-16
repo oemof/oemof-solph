@@ -123,7 +123,7 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
-github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
 If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
 

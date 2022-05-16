@@ -313,17 +313,18 @@ class TestParameterResult:
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
+
         compare = views.node(results, "storage", multiindex=True)["sequences"]
-        eq_(
+
+        assert (
             (
-                (
-                    compare[("storage", "b_el2", "flow")]
-                    - compare[("b_el1", "storage", "flow")]
-                ).to_frame()
-                == storage_flow.values
-            ).all()[0],
-            True,
-        )
+                compare[("storage", "b_el2", "flow")]
+                - compare[("b_el1", "storage", "flow")]
+            )
+            .to_frame()
+            .fillna(0)
+            == storage_flow.values
+        ).all()[0]
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)
