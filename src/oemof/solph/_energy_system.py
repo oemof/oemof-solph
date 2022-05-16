@@ -158,19 +158,19 @@ def create_time_index(year, interval=1, number=None):
 
     Examples
     --------
-    >>> len(create_year_index(2014))
+    >>> len(create_time_index(2014))
     8761
-    >>> len(create_year_index(2012))  # leap year
+    >>> len(create_time_index(2012))  # leap year
     8785
-    >>> len(create_year_index(2014, interval=0.5))
+    >>> len(create_time_index(2014, interval=0.5))
     17521
-    >>> len(create_year_index(2014, interval=0.5, number=10))
+    >>> len(create_time_index(2014, interval=0.5, number=10))
     11
-    >>> len(create_year_index(2014, number=10))
+    >>> len(create_time_index(2014, number=10))
     11
-    >>> str(create_year_index(2014, interval=0.5, number=10)[-1])
+    >>> str(create_time_index(2014, interval=0.5, number=10)[-1])
     '2014-01-01 05:00:00'
-    >>> str(create_year_index(2014, interval=2, number=10)[-1])
+    >>> str(create_time_index(2014, interval=2, number=10)[-1])
     '2014-01-01 20:00:00'
     """
     if number is None:
