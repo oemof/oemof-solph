@@ -275,9 +275,127 @@ class Flow(on.Edge):
 
 
 class FlowBlock(ScalarBlock):
-    r""" FlowBlock block with definitions for standard flows.
+    r""" Flow block with definitions for standard flows.
 
-    **The following variables are created**:
+    For standard flows the attributes `investment` and `nonconvex` are None.
+
+    See :class:`~oemof.solph.network.Flow` for all parameters of the *Flow*
+    class.
+
+    **Variables**
+
+    All *Flow* objects are indexed by a starting and ending node
+    :math:`(i, o)`, which is omitted in the following for the sake of
+    convenience. The creation of some variables depend on the values of
+    *Flow* attributes. The following variables are created:
+
+    * :math:`P(t)`
+        Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
+        The variable is bound to :math:`f_{min}(t) \ge P(t) \le f_{max}(t)`.
+
+        If `Flow.fix` is not None the variable is bound to
+        :math:`P(t) = f_{fix}`.
+
+    * :math:`ve_n` (`Flow.negative_gradient` is not `None`)
+        Difference of a flow in consecutive timesteps if flow is reduced. The
+        variable is not bound.
+
+    * :math:`ve_p` (`Flow.positive_gradient` is not `None`)
+        Difference of a flow in consecutive timesteps if flow is increased. The
+        variable is not bound.
+
+    The following variable is build for Flows with the attribute
+    `integer_flows` being not None.
+
+    **Constraints**
+
+    The following constraints are created, if the appropriate attribute of the
+    *Flow* (see :class:`oemof.solph.network.Flow`) object is set:
+
+    * `Flow.summed_max` is not `None` (`om.Flow.summed_max[i, o]`):
+        .. math::
+            \sum_t P(t) \cdot \tau \leq F_{max} \cdot P_{nom}
+
+    * `Flow.summed_min` is not `None` (`om.Flow.summed_min[i, o]`):
+        .. math::
+            \sum_t P(t) \cdot \tau \geq F_{min} \cdot P_{nom}
+
+
+    * `Flow.negative_gradient` is not `None` (`om.Flow.negative_gradient_constr[i, o]`):
+        .. math::
+          P(t-1) - P(t) \geq ve_n(t)
+
+    * `Flow.positive_gradient` is not `None` (`om.Flow.positive_gradient_constr[i, o]`):
+        .. math::
+          P(t) - P(t-1) \geq ve_p(t)
+
+    **Objective function**
+
+    Depending on the attributes of the `Flow` object the following parts of
+    the objective function are created:
+
+    * `Flow.variable_costs` is not `None`:
+        .. math::
+          \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+
+    .. csv-table:: List of Variables
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`P(t)`", ":command:`flow[i, o][t]`", "Actual flow value"
+
+        ":math:`ve_n`", ":command:`negative_gradient[n, o, t]`", "Invested flow
+        capacity"
+        ":math:`ve_p`", ":command:`positive_gradient[n, o, t]`", "Binary status
+        of investment"
+
+
+
+    .. csv-table:: List of Parameters
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`F_{max}`",":command:`flow[i, o].summed_max`", "Maximal full
+        load time"
+        ":math:`F_{min}`",":command:`flow[i, o].summed_max`", "Minimal full
+        load time"
+
+        ":math:`P_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
+        Minimum investment capacity"
+        ":math:`P_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
+        Maximum investment capacity"
+        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
+        ", "Variable investment costs"
+        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
+        Fix investment costs"
+        ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
+        fixed value for the flow variable"
+        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
+        value of the flow"
+        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
+        value of the flow"
+        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Specific
+        maximum of summed flow values (per installed capacity)"
+        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Specific
+        minimum of summed flow values (per installed capacity)"
+        ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
+        each time step"
+
+    Note
+    ----
+    In case of a nonconvex investment flow (:attr:`nonconvex=True`),
+    the existing flow capacity :math:`P_{exist}` needs to be zero.
+    At least, it is not tested yet, whether this works out, or makes any sense
+    at all.
+
+    Note
+    ----
+    See also :class:`oemof.solph.network.Flow`,
+    :class:`oemof.solph.blocks.Flow` and
+    :class:`oemof.solph.options.Investment`
+
+    **The following variables are created**: (-> see basic constraints at
+    :class:`.Model` )
 
     negative_gradient :
         Difference of a flow in consecutive timesteps if flow is reduced
@@ -287,52 +405,21 @@ class FlowBlock(ScalarBlock):
         Difference of a flow in consecutive timesteps if flow is increased
         indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
 
-    **The following sets are created:** (-> see basic sets at :class:`.Model` )
+    The following variable is build for Flows with the attribute
+    `integer_flows` being not None.
 
-    FULL_LOAD_TIME_MAX_FLOWS
-        A set of flows with the attribute :attr:`full_load_time_max` being not
-        None.
-    FULL_LOAD_TIME_MIN_FLOWS
-        A set of flows with the attribute :attr:`full_load_time_min` being not
-        None.
-    NEGATIVE_GRADIENT_FLOWS
-        A set of flows with the attribute :attr:`negative_gradient` being not
-        None.
-    POSITIVE_GRADIENT_FLOWS
-        A set of flows with the attribute :attr:`positive_gradient` being not
-        None
+
+
+    **The following sets are created:** (-> see basic sets at
+       :class:`~_models.Model` )
+
     INTEGER_FLOWS
         A set of flows where the attribute :attr:`integer` is True (forces flow
         to only take integer values)
 
     **The following constraints are build:**
 
-    FlowBlock max sum :attr:`om.FlowBlock.full_load_time_max[i, o]`
-      .. math::
-        \sum_t flow(i, o, t) \cdot \tau
-            \leq full\_load\_time\_max(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MAX\_FLOWS}.
 
-    FlowBlock min sum :attr:`om.FlowBlock.full_load_time_min[i, o]`
-      .. math::
-        \sum_t flow(i, o, t) \cdot \tau
-            \geq full\_load\_time\_min(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MIN\_FLOWS}.
-
-    Negative gradient constraint
-      :attr:`om.FlowBlock.negative_gradient_constr[i, o]`:
-        .. math::
-          flow(i, o, t-1) - flow(i, o, t) \geq \
-          negative\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
-
-    Positive gradient constraint
-      :attr:`om.FlowBlock.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
-          positive\__gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
 
     **The following parts of the objective function are created:**
 
@@ -340,10 +427,10 @@ class FlowBlock(ScalarBlock):
       .. math::
           \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
 
-    The expression can be accessed by :attr:`om.FlowBlock.variable_costs` and
-    their value after optimization by :meth:`om.FlowBlock.variable_costs()` .
+    The expression can be accessed by `om.Flow.variable_costs` and
+    their value after optimization by `om.Flow.variable_costs()` .
 
-    """
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
