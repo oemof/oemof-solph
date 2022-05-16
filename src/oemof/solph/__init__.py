@@ -8,7 +8,7 @@ from . import helpers
 from . import processing
 from . import views
 from ._energy_system import EnergySystem
-from ._energy_system import create_year_index
+from ._energy_system import create_time_index
 from ._groupings import GROUPINGS
 from ._models import Model
 from ._options import Investment
