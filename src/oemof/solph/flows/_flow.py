@@ -251,7 +251,7 @@ class Flow(on.Edge):
 
 
 class FlowBlock(ScalarBlock):
-    r""" Flow block with definitions for standard flows.
+    r"""Flow block with definitions for standard flows.
 
     See :class:`~oemof.solph.flows._flow.Flow` class for all parameters of the *Flow*.
 
