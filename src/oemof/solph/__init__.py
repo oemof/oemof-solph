@@ -24,10 +24,10 @@ __all__ = [
     "processing",
     "views",
     "EnergySystem",
+    "create_time_index",
     "GROUPINGS",
     "Model",
     "Investment",
     "NonConvex",
     "sequence",
-    "create_time_index",
 ]
