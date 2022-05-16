@@ -86,7 +86,13 @@ def create_dataframe(om):
         # Drop the auxiliary variables introduced by pyomo's Piecewise
         parent_component = bv.parent_block().parent_component()
         if not isinstance(parent_component, IndexedPiecewise):
-            for i in getattr(bv, "_index"):
+            try:
+                idx_set = getattr(bv, "_index_set")
+            except AttributeError:
+                # To make it compatible with Pyomo < 6.4.1
+                idx_set = getattr(bv, "_index")
+
+            for i in idx_set:
                 key = (str(bv).split(".")[0], str(bv).split(".")[-1], i)
                 value = bv[i].value
                 var_dict[key] = value
