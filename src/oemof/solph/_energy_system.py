@@ -134,7 +134,7 @@ class EnergySystem(es.EnergySystem):
         )
 
 
-def create_year_index(year, interval=1, number=None):
+def create_time_index(year, interval=1, number=None):
     """
     Create a datetime index for one year.
 
