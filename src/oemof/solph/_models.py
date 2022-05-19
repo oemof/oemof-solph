@@ -358,10 +358,10 @@ class Model(BaseModel):
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
+                if self.flows[o, i].fixed is True:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t]
+                            self.flows[o, i].value[t]
                             * self.flows[o, i].nominal_value
                         )
                         self.flow[o, i, t].fix()
@@ -381,6 +381,13 @@ class Model(BaseModel):
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(0)
+
+                    if self.flows[o, i].value[self.TIMESTEPS.at(1)] is not None:
+                        for t in self.TIMESTEPS:
+                            self.flow[o, i, t].value = (
+                                self.flows[o, i].value[t]
+                                * self.flows[o, i].nominal_value
+                            )
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:

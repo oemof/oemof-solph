@@ -49,11 +49,13 @@ class Flow(on.Edge):
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
-    fix : numeric (iterable or scalar), :math:`f_{actual}`
+    fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to `fix
+        set, the flow variable will be fixed to `fix
         * nominal_value`, i.e. this value is set exogenous.
+    expected: numeric (iterable or scalar),
+        Normed expected value for the flow variable (cf. fix).
     positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
         A dictionary containing the following two keys:
 
@@ -87,10 +89,6 @@ class Flow(on.Edge):
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
-    fixed : boolean
-        Boolean value indicating if a flow is fixed during the optimization
-        problem to its ex-ante set value. Used in combination with the
-        :attr:`fix`.
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
@@ -165,14 +163,18 @@ class Flow(on.Edge):
             "nonconvex",
             "integer",
         ]
-        sequences = ["fix", "variable_costs", "min", "max"]
+        batch_sequences = ["variable_costs", "min", "max"]
+        manual_sequences = ["expected", "fix"]
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "variable_costs": 0,
             "positive_gradient": {"ub": None},
             "negative_gradient": {"ub": None},
         }
-        keys = [k for k in kwargs if k != "label"]
+
+        handled_keys = manual_sequences + ["label"]
+
+        keys = [k for k in kwargs if k not in handled_keys]
 
         if "fixed_costs" in keys:
             raise AttributeError(
@@ -211,6 +213,19 @@ class Flow(on.Edge):
         if kwargs.get("max") is None:
             defaults["max"] = 1
 
+        self.fixed = False
+        if kwargs.get("expected") is not None:
+            self.value = sequence(kwargs.pop("expected"))
+            if kwargs.get("fix") is not None:
+                raise ValueError(
+                    "It is not possible to give both, expected and fix values."
+                )
+        elif kwargs.get("fix") is not None:
+            self.value = sequence(kwargs.pop("fix"))
+            self.fixed = True
+        else:
+            self.value = sequence(None)
+
         # Check gradient dictionaries for non-valid keys
         for gradient_dict in ["negative_gradient", "positive_gradient"]:
             if gradient_dict in kwargs:
@@ -222,7 +237,7 @@ class Flow(on.Edge):
                     )
                     raise AttributeError(msg.format(gradient_dict))
 
-        for attribute in set(scalars + sequences + dictionaries + keys):
+        for attribute in set(scalars + batch_sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(
@@ -235,7 +250,7 @@ class Flow(on.Edge):
                 setattr(
                     self,
                     attribute,
-                    sequence(value) if attribute in sequences else value,
+                    sequence(value) if attribute in batch_sequences else value,
                 )
 
         # Checking for impossible attribute combinations
