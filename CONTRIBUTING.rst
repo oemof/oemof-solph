@@ -109,6 +109,20 @@ Note, to combine the coverage data from all the tox environments run:
 Tips
 ----
 
+To run only parts of the testing pipeline (e.g. documentation, stylcheck,
+specific python version)::
+
+    tox -e envname
+
+Available standard environments are::
+
+    clean
+    check
+    docs
+    py37
+    py38
+    py39
+
 To run a subset of tests::
 
     tox -e envname -- pytest -k test_myfeature
