@@ -170,6 +170,8 @@ class Flow(on.Edge):
         }
         need_nominal_value = [
             "fix",
+            "full_load_time_max",
+            "full_load_time_min",
             "max",
             "min",
             "summed_max",
@@ -265,7 +267,7 @@ class Flow(on.Edge):
             )
             if self.nominal_value is None:
                 for attr in need_nominal_value:
-                    if hasattr(self, attr):
+                    if kwargs.get(attr) is not None:
                         warn(
                             warn_msg_no_nominal_value.format(attr),
                             debugging.SuspiciousUsageWarning,

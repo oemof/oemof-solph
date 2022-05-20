@@ -120,12 +120,12 @@ def test_attributes_needing_nominal_value_get_it():
     with pytest.warns(
         SuspiciousUsageWarning, match="If summed_max is set in a flow "
     ):
-        solph.flows.Flow(summed_min=0.3)
+        solph.flows.Flow(summed_max=0.3)
 
     with pytest.warns(
         SuspiciousUsageWarning, match="If summed_min is set in a flow "
     ):
-        solph.flows.Flow(summed_max=0.3)
+        solph.flows.Flow(summed_min=0.3)
 
 
 def test_min_max_values_for_bidirectional_flow():
@@ -143,16 +143,6 @@ def test_min_max_values_for_bidirectional_flow():
     assert b.min[0] == -0.8
 
 
-def test_limit_without_nominal_value():
-    """Deprecated error for actual_warning is not raised correctly."""
-    msg = (
-        "The arguments `min`/`max`/`fix` need either"
-        + "`nominal_value` or `investment` to be defined as well."
-    )
-    with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(max=0.8)
-
-
 def test_deprecated_actual_value():
     """Deprecated error for actual_warning is not raised correctly."""
     msg = "The `actual_value` attribute has been renamed to `fix`"
@@ -168,6 +158,6 @@ def test_warning_fixed_still_used():
         "The `fixed` attribute does not change anything."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.flows.Flow(fixed=True)
+        solph.flows.Flow(nominal_value=1, fixed=True)
         assert len(w) != 0
         assert msg == str(w[-1].message)
