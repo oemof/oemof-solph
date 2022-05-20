@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +145 GenericInvestmentStorageBlock_invest(storage_constraint)
 +500 InvestmentFlowBlock_invest(Bus1_Sink)
@@ -8,12 +8,12 @@ objective:
 
 s.t.
 
-c_e_equate_InvestmentFlowBlock_invest(Source_Bus1)_InvestmentFlowBlock_invest(Bus1_Sink)_:
+c_e__equate_InvestmentFlowBlock_invest(Source_Bus1)_InvestmentFlowBlock_invest(Bus1_Sink)__:
 -1 InvestmentFlowBlock_invest(Bus1_Sink)
 +2 InvestmentFlowBlock_invest(Source_Bus1)
 = 0
 
-c_e_equate_InvestmentFlowBlock_invest(Source_Bus1)_GenericInvestmentStorageBlock_invest(storage_constraint)_:
+c_e__equate_InvestmentFlowBlock_invest(Source_Bus1)_GenericInvestmentStorageBlock_invest(storage_constraint)__:
 -1 GenericInvestmentStorageBlock_invest(storage_constraint)
 +1 InvestmentFlowBlock_invest(Source_Bus1)
 = 0
@@ -155,7 +155,7 @@ c_u_GenericInvestmentStorageBlock_max_storage_content(storage_constraint_2)_:
 +1 GenericInvestmentStorageBlock_storage_content(storage_constraint_2)
 <= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds

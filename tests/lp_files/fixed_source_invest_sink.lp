@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +500 InvestmentFlowBlock_invest(electricityBus_excess)
 +25 flow(electricityBus_excess_0)
@@ -36,14 +36,14 @@ c_u_InvestmentFlowBlock_max(electricityBus_excess_2)_:
 +1 flow(electricityBus_excess_2)
 <= 40
 
-c_u_InvestmentFlowBlock_summed_max(electricityBus_excess)_:
+c_u_InvestmentFlowBlock_full_load_time_max(electricityBus_excess)_:
 -2.2999999999999998 InvestmentFlowBlock_invest(electricityBus_excess)
 +1 flow(electricityBus_excess_0)
 +1 flow(electricityBus_excess_1)
 +1 flow(electricityBus_excess_2)
 <= 114.99999999999999
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds

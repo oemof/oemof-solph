@@ -123,7 +123,7 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
-github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
 If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
 
@@ -197,6 +197,16 @@ GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 If you install the CBC solver via brew (highly recommended), it should work without additional configuration.
 
 
+**conda**
+
+The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+
+.. code:: console
+
+    conda install -c conda-forge coincbc
+    pip install oemof.solph
+
+
 .. _check_installation_label:
 
 Installation test
@@ -263,7 +273,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 License
 =======
 
-Copyright (c) 2019 oemof developer group
+Copyright (c) 2022 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

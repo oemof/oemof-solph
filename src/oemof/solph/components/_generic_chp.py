@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 from oemof.network import network
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
 from pyomo.environ import NonNegativeReals
@@ -194,7 +194,7 @@ class GenericCHP(network.Transformer):
         return GenericCHPBlock
 
 
-class GenericCHPBlock(SimpleBlock):
+class GenericCHPBlock(ScalarBlock):
     r"""
     Block for the relation of the :math:`n` nodes with
     type class:`.GenericCHP`.
