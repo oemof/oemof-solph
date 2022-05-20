@@ -1687,7 +1687,6 @@ class SinkDSMDIWBlock(SimpleBlock):
 
 
 class SinkDSMDIWInvestmentBlock(SimpleBlock):
-    CONSTRAINT_GROUP = True
     r"""Constraints for SinkDSM with "DIW" approach and `investment` defined
 
     **The following constraints are created for approach = "DIW" with an
@@ -1808,6 +1807,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+    CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
