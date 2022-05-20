@@ -86,7 +86,13 @@ def create_dataframe(om):
         # Drop the auxiliary variables introduced by pyomo's Piecewise
         parent_component = bv.parent_block().parent_component()
         if not isinstance(parent_component, IndexedPiecewise):
-            for i in getattr(bv, "_index"):
+            try:
+                idx_set = getattr(bv, "_index_set")
+            except AttributeError:
+                # To make it compatible with Pyomo < 6.4.1
+                idx_set = getattr(bv, "_index")
+
+            for i in idx_set:
                 key = (str(bv).split(".")[0], str(bv).split(".")[-1], i)
                 value = bv[i].value
                 var_dict[key] = value
@@ -144,7 +150,7 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
-def results(model, remove_last_time_point=None):
+def results(model, remove_last_time_point=False):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -168,12 +174,6 @@ def results(model, remove_last_time_point=None):
         will get one row with nan-values to have the same index for all
         variables.
     """
-    if remove_last_time_point is None:
-        if model.es.timemode == "implicit":
-            remove_last_time_point = True
-        else:
-            remove_last_time_point = False
-
     df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
@@ -194,8 +194,7 @@ def results(model, remove_last_time_point=None):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
     if remove_last_time_point is True:
-        # In the implicit time mode the first time point is removed.
-        # The values of intervals belong to the time at the end of the
+        # The values of intervals belong to the time at the beginning of the
         # interval.
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)
@@ -301,7 +300,9 @@ def meta_results(om, undefined=False):
     return meta_res
 
 
-def __separate_attrs(system, get_flows=False, exclude_none=True):
+def __separate_attrs(
+    system, exclude_attrs, get_flows=False, exclude_none=True
+):
     """
     Create a dictionary with flow scalars and series.
 
@@ -310,7 +311,15 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
     'sequences': {'attr1': iterable, 'attr2': iterable}}}
 
-    om : A solved oemof.solph.Model.
+    system:
+        A solved oemof.solph.Model or oemof.solph.Energysystem
+    exclude_attrs: List[str]
+        List of additional attributes which shall be excluded from
+        parameter dict
+    get_flows: bool
+        Whether to include flow values or not
+    exclude_none: bool
+        If set, scalars and sequences containing None values are excluded
 
     Returns
     -------
@@ -320,23 +329,23 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     def detect_scalars_and_sequences(com):
         com_data = {"scalars": {}, "sequences": {}}
 
-        exclusions = (
+        default_exclusions = [
             "__",
             "_",
             "registry",
             "inputs",
             "outputs",
-            "register",
             "Label",
-            "from_object",
             "input",
             "output",
             "constraint_group",
-        )
+        ]
+        # Must be tuple in order to work with `str.startswith()`:
+        exclusions = tuple(default_exclusions + exclude_attrs)
         attrs = [
             i
             for i in dir(com)
-            if not (callable(i) or i.startswith(exclusions))
+            if not (callable(getattr(com, i)) or i.startswith(exclusions))
         ]
 
         for a in attrs:
@@ -431,7 +440,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     return data
 
 
-def parameter_as_dict(system, exclude_none=True):
+def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
     """
     Create a result dictionary containing node parameters.
 
@@ -447,14 +456,24 @@ def parameter_as_dict(system, exclude_none=True):
         A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
+    exclude_attrs: Optional[List[str]]
+        Optional list of additional attributes which shall be excluded from
+        parameter dict
 
     Returns
     -------
     dict: Parameters for all nodes and flows
     """
 
-    flow_data = __separate_attrs(system, True, exclude_none)
-    node_data = __separate_attrs(system, False, exclude_none)
+    if exclude_attrs is None:
+        exclude_attrs = []
+
+    flow_data = __separate_attrs(
+        system, exclude_attrs, get_flows=True, exclude_none=exclude_none
+    )
+    node_data = __separate_attrs(
+        system, exclude_attrs, get_flows=False, exclude_none=exclude_none
+    )
 
     flow_data.update(node_data)
     return flow_data

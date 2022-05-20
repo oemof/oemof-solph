@@ -6,7 +6,6 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
-import copy
 import datetime
 import random
 
@@ -223,34 +222,3 @@ class TestParameterResult:
             )
             assert self.es.timeincrement[ts] == ti
         assert charge.isnull().any()
-
-    def test_default_value_explicit(self):
-        """
-        In the explicit mode the default value for the processing is to not
-        remove the last value and allow nan-values. The explicit mode is
-        triggered by setting `infer_last_interval` to `False`.
-        """
-        assert self.es.timemode == "explicit"
-        model = Model(self.es)
-        model.receive_duals()
-        model.solve()
-        results = processing.results(model)
-        flow = {k: v for k, v in results.items() if k[1] is not None}
-        assert 73 == len([v["sequences"]["flow"] for k, v in flow.items()][0])
-
-    def test_default_value_implicit(self):
-        """
-        In the implicit mode the default value for the processing is to remove
-        the last value and allow nan-values.
-        """
-        assert self.es.timemode == "explicit"
-        test_es = EnergySystem()
-        assert test_es.timemode == "implicit"
-        my_es = copy.copy(self.es)
-        my_es.timemode = test_es.timemode
-        model = Model(my_es)
-        model.receive_duals()
-        model.solve()
-        results = processing.results(model)
-        flow = {k: v for k, v in results.items() if k[1] is not None}
-        assert 72 == len([v["sequences"]["flow"] for k, v in flow.items()][0])

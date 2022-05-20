@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 import itertools
 
 from numpy import mean
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -434,7 +434,7 @@ class SinkDSM(Sink):
             )
 
 
-class SinkDSMOemofBlock(SimpleBlock):
+class SinkDSMOemofBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach
 
     **The following constraints are created for approach = 'oemof':**
@@ -720,7 +720,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMOemofInvestmentBlock(SimpleBlock):
+class SinkDSMOemofInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'oemof' with an
@@ -1025,7 +1025,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWBlock(SimpleBlock):
+class SinkDSMDIWBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach
 
     **The following constraints are created for approach = 'DIW':**
@@ -1670,7 +1670,7 @@ class SinkDSMDIWBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWInvestmentBlock(SimpleBlock):
+class SinkDSMDIWInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'DIW' with an
@@ -2344,7 +2344,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDLRBlock(SimpleBlock):
+class SinkDSMDLRBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DLR" approach
 
     **The following constraints are created for approach = 'DLR':**

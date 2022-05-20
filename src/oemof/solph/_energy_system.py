@@ -13,6 +13,9 @@ SPDX-License-Identifier: MIT
 
 """
 
+import calendar
+import warnings
+
 import numpy as np
 import pandas as pd
 from oemof.network import energy_system as es
@@ -51,7 +54,7 @@ class EnergySystem(es.EnergySystem):
         self,
         timeindex=None,
         timeincrement=None,
-        infer_last_interval=True,
+        infer_last_interval=None,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -67,14 +70,21 @@ class EnergySystem(es.EnergySystem):
         ):
             msg = (
                 "Parameter 'timeindex' has to be of type "
-                "pandas.datetimeindex or NoneType and not of type {0}"
+                "pandas.DatetimeIndex or NoneType and not of type {0}"
             )
             raise TypeError(msg.format(type(timeindex)))
 
-        if infer_last_interval is True:
-            self.timemode = "implicit"
-        else:
-            self.timemode = "explicit"
+        if infer_last_interval is None and timeindex is not None:
+            msg = (
+                "The default behaviour will change in future versions.\n"
+                "At the moment the last interval of an equidistant time "
+                "index is added implicitly by default. Set "
+                "'infer_last_interval' explicitly 'True' or 'False' to avoid "
+                "this warning. In future versions 'False' will be the default"
+                "behaviour"
+            )
+            warnings.warn(msg, FutureWarning)
+            infer_last_interval = True
 
         if infer_last_interval is True and timeindex is not None:
             # Add one time interval to the timeindex by adding one time point.
@@ -122,3 +132,53 @@ class EnergySystem(es.EnergySystem):
         super().__init__(
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
+
+
+def create_time_index(year, interval=1, number=None):
+    """
+    Create a datetime index for one year.
+
+    Notes
+    -----
+    To create 8760 hourly intervals for a non leap year a datetime index with
+    8761 time points need to be created. So the number of time steps is always
+    the number of intervals plus one.
+
+    Parameters
+    ----------
+    year : int
+        The year of the index.
+    interval : float
+        The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
+        interval (default: 1).
+    number : int
+        The number of time intervals. By default number is calculated to create
+        an index of one year. For a shorter or longer period the number of
+        intervals can be set by the user.
+
+    Examples
+    --------
+    >>> len(create_time_index(2014))
+    8761
+    >>> len(create_time_index(2012))  # leap year
+    8785
+    >>> len(create_time_index(2014, interval=0.5))
+    17521
+    >>> len(create_time_index(2014, interval=0.5, number=10))
+    11
+    >>> len(create_time_index(2014, number=10))
+    11
+    >>> str(create_time_index(2014, interval=0.5, number=10)[-1])
+    '2014-01-01 05:00:00'
+    >>> str(create_time_index(2014, interval=2, number=10)[-1])
+    '2014-01-01 20:00:00'
+    """
+    if number is None:
+        if calendar.isleap(year):
+            hoy = 8784
+        else:
+            hoy = 8760
+        number = round(hoy / interval)
+    return pd.date_range(
+        f"1/1/{year}", periods=number + 1, freq=f"{interval}H"
+    )

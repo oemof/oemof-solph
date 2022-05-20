@@ -24,7 +24,7 @@ from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._plumbing import sequence
 
@@ -73,11 +73,16 @@ class Flow(on.Edge):
           * `'costs``: numeric (scalar or None), the gradient cost per
             unit.
 
-    summed_max : numeric, :math:`f_{sum,max}`
-        Specific maximum value summed over all timesteps. Will be multiplied
-        with the nominal_value to get the absolute limit.
-    summed_min : numeric, :math:`f_{sum,min}`
-        see above
+    full_load_time_max : numeric, :math:`t_{full\_load,max}`
+        Upper bound on the summed flow expressed as the equivalent time that
+        the flow would have to run at full capacity to yield the same sum. The
+        value will be multiplied with the nominal_value to get the absolute
+        limit.
+    full_load_time_min : numeric, :math:`t_{full\_load,min}`
+        Lower bound on the summed flow expressed as the equivalent time that
+        the flow would have to run at full capacity to yield the same sum. The
+        value will be multiplied with the nominal_value to get the absolute
+        limit.
     variable_costs : numeric (iterable or scalar)
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
@@ -132,12 +137,26 @@ class Flow(on.Edge):
         # E.g. create the variable in the energy system and populate with
         # information afterwards when creating objects.
 
+        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        msg = (
+            "\nThe parameter 'summed_{0}' ist deprecated and will be removed "
+            "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
+            "to avoid this warning and future problems. "
+        )
+        if "summed_max" in kwargs:
+            warn(msg.format("max"), FutureWarning)
+            kwargs["full_load_time_max"] = kwargs["summed_max"]
+        if "summed_min" in kwargs:
+            warn(msg.format("min"), FutureWarning)
+            kwargs["full_load_time_min"] = kwargs["summed_min"]
+        # --- END ---
+
         super().__init__()
 
         scalars = [
             "nominal_value",
-            "summed_max",
-            "summed_min",
+            "full_load_time_max",
+            "full_load_time_min",
             "investment",
             "nonconvex",
             "integer",
@@ -281,7 +300,7 @@ class Flow(on.Edge):
                 )
 
 
-class FlowBlock(SimpleBlock):
+class FlowBlock(ScalarBlock):
     r""" FlowBlock block with definitions for standard flows.
 
     **The following variables are created**:
@@ -296,10 +315,12 @@ class FlowBlock(SimpleBlock):
 
     **The following sets are created:** (-> see basic sets at :class:`.Model` )
 
-    SUMMED_MAX_FLOWS
-        A set of flows with the attribute :attr:`summed_max` being not None.
-    SUMMED_MIN_FLOWS
-        A set of flows with the attribute :attr:`summed_min` being not None.
+    FULL_LOAD_TIME_MAX_FLOWS
+        A set of flows with the attribute :attr:`full_load_time_max` being not
+        None.
+    FULL_LOAD_TIME_MIN_FLOWS
+        A set of flows with the attribute :attr:`full_load_time_min` being not
+        None.
     NEGATIVE_GRADIENT_FLOWS
         A set of flows with the attribute :attr:`negative_gradient` being not
         None.
@@ -312,17 +333,17 @@ class FlowBlock(SimpleBlock):
 
     **The following constraints are build:**
 
-    FlowBlock max sum :attr:`om.FlowBlock.summed_max[i, o]`
+    FlowBlock max sum :attr:`om.FlowBlock.full_load_time_max[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
-            \leq summed\_max(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{SUMMED\_MAX\_FLOWS}.
+            \leq full\_load\_time\_max(i, o) \cdot nominal\_value(i, o), \\
+        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MAX\_FLOWS}.
 
-    FlowBlock min sum :attr:`om.FlowBlock.summed_min[i, o]`
+    FlowBlock min sum :attr:`om.FlowBlock.full_load_time_min[i, o]`
       .. math::
         \sum_t flow(i, o, t) \cdot \tau
-            \geq summed\_min(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{SUMMED\_MIN\_FLOWS}.
+            \geq full\_load\_time\_min(i, o) \cdot nominal\_value(i, o), \\
+        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MIN\_FLOWS}.
 
     Negative gradient constraint
       :attr:`om.FlowBlock.negative_gradient_constr[i, o]`:
@@ -370,20 +391,20 @@ class FlowBlock(SimpleBlock):
 
         # ########################## SETS #################################
         # set for all flows with an global limit on the flow over time
-        self.SUMMED_MAX_FLOWS = Set(
+        self.FULL_LOAD_TIME_MAX_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].summed_max is not None
+                if g[2].full_load_time_max is not None
                 and g[2].nominal_value is not None
             ]
         )
 
-        self.SUMMED_MIN_FLOWS = Set(
+        self.FULL_LOAD_TIME_MIN_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].summed_min is not None
+                if g[2].full_load_time_min is not None
                 and g[2].nominal_value is not None
             ]
         )
@@ -431,37 +452,45 @@ class FlowBlock(SimpleBlock):
 
         # ######################### CONSTRAINTS ###############################
 
-        def _flow_summed_max_rule(model):
+        def _flow_full_load_time_max_rule(model):
             """Rule definition for build action of max. sum flow constraint."""
-            for inp, out in self.SUMMED_MAX_FLOWS:
+            for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].summed_max
+                    m.flows[inp, out].full_load_time_max
                     * m.flows[inp, out].nominal_value
                 )
-                self.summed_max.add((inp, out), lhs <= rhs)
+                self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
-        self.summed_max = Constraint(self.SUMMED_MAX_FLOWS, noruleinit=True)
-        self.summed_max_build = BuildAction(rule=_flow_summed_max_rule)
+        self.full_load_time_max_constr = Constraint(
+            self.FULL_LOAD_TIME_MAX_FLOWS, noruleinit=True
+        )
+        self.full_load_time_max_build = BuildAction(
+            rule=_flow_full_load_time_max_rule
+        )
 
-        def _flow_summed_min_rule(model):
+        def _flow_full_load_time_min_rule(model):
             """Rule definition for build action of min. sum flow constraint."""
-            for inp, out in self.SUMMED_MIN_FLOWS:
+            for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
-                    m.flows[inp, out].summed_min
+                    m.flows[inp, out].full_load_time_min
                     * m.flows[inp, out].nominal_value
                 )
-                self.summed_min.add((inp, out), lhs >= rhs)
+                self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
-        self.summed_min = Constraint(self.SUMMED_MIN_FLOWS, noruleinit=True)
-        self.summed_min_build = BuildAction(rule=_flow_summed_min_rule)
+        self.full_load_time_min_constr = Constraint(
+            self.FULL_LOAD_TIME_MIN_FLOWS, noruleinit=True
+        )
+        self.full_load_time_min_build = BuildAction(
+            rule=_flow_full_load_time_min_rule
+        )
 
         def _positive_gradient_flow_rule(model):
             """Rule definition for positive gradient constraint."""
