@@ -149,6 +149,13 @@ class Flow(on.Edge):
             "positive_gradient": {"ub": None},
             "negative_gradient": {"ub": None},
         }
+        need_nominal_value = [
+            "fix",
+            "max",
+            "min",
+            "summed_max",
+            "summed_min",
+        ]
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
@@ -177,18 +184,6 @@ class Flow(on.Edge):
         ):
             raise AttributeError(
                 "It is not allowed to define `min`/`max` if `fix` is defined."
-            )
-        if (
-            kwargs.get("nominal_value") is None
-            and kwargs.get("investment") is None
-        ) and (
-            kwargs.get("fix") is not None
-            or kwargs.get("min") is not None
-            or kwargs.get("max") is not None
-        ):
-            raise AttributeError(
-                "The arguments `min`/`max`/`fix` need either"
-                + "`nominal_value` or `investment` to be defined as well."
             )
 
         # Set default value for min and max
@@ -244,22 +239,18 @@ class Flow(on.Edge):
             "value is not allowed."
         )
         if not self.investment:
-            warn_msg = (
+            warn_msg_no_nominal_value = (
                 "If {} is set in a flow (except InvestmentFlow), "
                 "nominal_value must be set as well.\n"
                 "Otherwise, it won't have any effect."
             )
             if self.nominal_value is None:
-                if self.summed_max is not None:
-                    warn(
-                        warn_msg.format("summed_max"),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                if self.summed_min is not None:
-                    warn(
-                        warn_msg.format("summed_min"),
-                        debugging.SuspiciousUsageWarning,
-                    )
+                for attr in need_nominal_value:
+                    if hasattr(self, attr):
+                        warn(
+                            warn_msg_no_nominal_value.format(attr),
+                            debugging.SuspiciousUsageWarning,
+                        )
             else:
                 assert math.isfinite(
                     self.nominal_value

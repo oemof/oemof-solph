@@ -101,13 +101,36 @@ def test_infinite_values():
         solph.flows.Flow(max=float("+inf"))
 
 
-def test_summed_min_and_summed_max():
-    msg1 = "If summed_max is set in a flow "
-    msg2 = "If summed_min is set in a flow "
-    with pytest.warns(SuspiciousUsageWarning, match=msg1):
-        solph.flows.Flow(summed_max=0.3)
-    with pytest.warns(SuspiciousUsageWarning, match=msg2):
+def test_attributes_needing_nominal_value_get_it():
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="If fix is set in a flow "
+    ):
+        solph.flows.Flow(fix=0.3)
+
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="If max is set in a flow "
+    ):
+        solph.flows.Flow(max=0.3)
+
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="If min is set in a flow "
+    ):
+        solph.flows.Flow(min=0.3)
+
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="If summed_max is set in a flow "
+    ):
         solph.flows.Flow(summed_min=0.3)
+
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="If summed_min is set in a flow "
+    ):
+        solph.flows.Flow(summed_max=0.3)
 
 
 def test_min_max_values_for_bidirectional_flow():
