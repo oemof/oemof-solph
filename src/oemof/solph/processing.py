@@ -210,7 +210,14 @@ def results(model, remove_last_time_point=False):
                 columns="variable_name", values="value"
             )
             # Add empty row at the end
-            df_dict[k] = df_dict[k].append(pd.Series(), ignore_index=True)
+            df_dict[k] = pd.concat(
+                [
+                    df_dict[k],
+                    pd.DataFrame(data=["nan"], columns=df_dict[k].columns),
+                ],
+                ignore_index=True,
+                axis=0,
+            )
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
 
