@@ -82,10 +82,6 @@ class Flow(on.Edge):
         The costs associated with one unit of the flow. If this is set the
         costs will be added to the objective expression of the optimization
         problem.
-    fixed : boolean
-        Boolean value indicating if a flow is fixed during the optimization
-        problem to its ex-ante set value. Used in combination with the
-        :attr:`fix`.
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
