@@ -103,32 +103,27 @@ def test_infinite_values():
 
 def test_attributes_needing_nominal_value_get_it():
     with pytest.warns(
-        SuspiciousUsageWarning,
-        match="If fix is set in a flow "
+        SuspiciousUsageWarning, match="If fix is set in a flow "
     ):
         solph.flows.Flow(fix=0.3)
 
     with pytest.warns(
-        SuspiciousUsageWarning,
-        match="If max is set in a flow "
+        SuspiciousUsageWarning, match="If max is set in a flow "
     ):
         solph.flows.Flow(max=0.3)
 
     with pytest.warns(
-        SuspiciousUsageWarning,
-        match="If min is set in a flow "
+        SuspiciousUsageWarning, match="If min is set in a flow "
     ):
         solph.flows.Flow(min=0.3)
 
     with pytest.warns(
-        SuspiciousUsageWarning,
-        match="If summed_max is set in a flow "
+        SuspiciousUsageWarning, match="If summed_max is set in a flow "
     ):
         solph.flows.Flow(summed_min=0.3)
 
     with pytest.warns(
-        SuspiciousUsageWarning,
-        match="If summed_min is set in a flow "
+        SuspiciousUsageWarning, match="If summed_min is set in a flow "
     ):
         solph.flows.Flow(summed_max=0.3)
 
