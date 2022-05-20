@@ -23,20 +23,15 @@ Installation requirements
 
 This example requires oemof.solph, install by:
 
-    pip install oemof.solph
+    pip install oemof.solph[examples]
 """
-import pandas as pd
 from oemof import solph
-
-try:
-    import matplotlib.pyplot as plt
-except ModuleNotFoundError:
-    plt = None
+import matplotlib.pyplot as plt
 
 solver = "cbc"  # 'glpk', 'gurobi',...
 solver_verbose = False  # show/hide solver output
 
-date_time_index = pd.date_range("1/1/2000", periods=9, freq="15T")
+date_time_index = solph.create_time_index(2000, interval=0.25, number=8)
 
 energy_system = solph.EnergySystem(
     timeindex=date_time_index, infer_last_interval=False
