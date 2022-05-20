@@ -14,7 +14,7 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
-
+import math
 from warnings import warn
 
 from oemof.network import network as on
@@ -238,6 +238,33 @@ class Flow(on.Edge):
                 "Investment flows cannot be combined with "
                 + "nonconvex flows!"
             )
+
+        infinite_error_msg = (
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
+        )
+        if not self.investment:
+            warn_msg = (
+                "If {} is set in a flow (except InvestmentFlow), "
+                "nominal_value must be set as well.\n"
+                "Otherwise, it won't have any effect."
+            )
+            if self.nominal_value is None:
+                if self.summed_max is not None:
+                    warn(
+                        warn_msg.format("summed_max"),
+                        debugging.SuspiciousUsageWarning,
+                    )
+                if self.summed_min is not None:
+                    warn(
+                        warn_msg.format("summed_min"),
+                        debugging.SuspiciousUsageWarning,
+                    )
+            else:
+                assert math.isfinite(
+                    self.nominal_value
+                ), infinite_error_msg.format("nominal_value")
+        assert math.isfinite(self.max[0]), infinite_error_msg.format("max")
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
