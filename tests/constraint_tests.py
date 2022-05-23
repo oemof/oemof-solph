@@ -1401,9 +1401,9 @@ class TestsConstraint:
 
     def test_nonequidistant_storage(self):
         """Constraint test of an energysystem with nonequidistant timeindex"""
-        idxh = pd.date_range('1/1/2017', periods=3, freq="H")
-        idx2h = pd.date_range('1/1/2017 03:00:00', periods=2, freq="2H")
-        idx30m = pd.date_range('1/1/2017 07:00:00', periods=4, freq="30min")
+        idxh = pd.date_range("1/1/2017", periods=3, freq="H")
+        idx2h = pd.date_range("1/1/2017 03:00:00", periods=2, freq="2H")
+        idx30m = pd.date_range("1/1/2017 07:00:00", periods=4, freq="30min")
         timeindex = idxh.append([idx2h, idx30m])
         es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=False)
         b_gas = solph.Bus(label="gas")
