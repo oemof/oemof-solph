@@ -272,11 +272,10 @@ class Flow(on.Edge):
                             warn_msg_no_nominal_value.format(attr),
                             debugging.SuspiciousUsageWarning,
                         )
-            else:
-                assert math.isfinite(
-                    self.nominal_value
-                ), infinite_error_msg.format("nominal_value")
-        assert math.isfinite(self.max[0]), infinite_error_msg.format("max")
+            elif not math.isfinite(self.nominal_value):
+                raise ValueError(infinite_error_msg.format("nominal_value"))
+        if not math.isfinite(self.max[0]):
+            raise ValueError(infinite_error_msg.format("max"))
 
         # Checking for impossible gradient combinations
         if self.nonconvex:

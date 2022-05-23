@@ -95,9 +95,9 @@ def test_flow_with_fix_and_min_max():
 def test_infinite_values():
     msg1 = "nominal_value must be a finite value"
     msg2 = "max must be a finite value"
-    with pytest.raises(AssertionError, match=msg1):
+    with pytest.raises(ValueError, match=msg1):
         solph.flows.Flow(nominal_value=float("+inf"))
-    with pytest.raises(AssertionError, match=msg2):
+    with pytest.raises(ValueError, match=msg2):
         solph.flows.Flow(max=float("+inf"))
 
 
@@ -131,7 +131,6 @@ def test_attributes_needing_nominal_value_get_it():
 def test_min_max_values_for_bidirectional_flow():
     a = solph.flows.Flow(
         bidirectional=True,
-        nominal_value=1,
     )  # use default values
     b = solph.flows.Flow(
         bidirectional=True, nominal_value=1, min=-0.8, max=0.9
@@ -139,6 +138,7 @@ def test_min_max_values_for_bidirectional_flow():
     assert a.bidirectional
     assert a.max[0] == 1
     assert a.min[0] == -1
+    assert b.bidirectional
     assert b.max[0] == 0.9
     assert b.min[0] == -0.8
 
