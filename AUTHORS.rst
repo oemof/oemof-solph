@@ -7,7 +7,6 @@ Authors
 
 * Birgit Schachler
 * Brian Michael Lancien
-* c-koehl
 * Caroline Möller
 * Caterina Köhl
 * Clemens Wingenbach
