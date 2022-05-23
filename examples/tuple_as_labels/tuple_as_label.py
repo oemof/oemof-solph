@@ -127,7 +127,7 @@ try:
     data = pd.read_csv(filename)
 except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
-    warnings.warn(msg.format(filename), ResourceWarning)
+    warnings.warn(msg.format(filename), UserWarning)
     data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
 solver = "cbc"  # 'glpk', 'gurobi',....

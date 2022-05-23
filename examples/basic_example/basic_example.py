@@ -66,7 +66,9 @@ from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
+from oemof.solph import create_time_index
 from oemof.solph import flows
+from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
@@ -76,7 +78,7 @@ try:
     data = pd.read_csv(filename)
 except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
-    warnings.warn(msg.format(filename), ResourceWarning)
+    warnings.warn(msg.format(filename), UserWarning)
     data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
 solver = "cbc"  # 'glpk', 'gurobi',....
@@ -92,11 +94,11 @@ logger.define_logging(
 )
 
 logging.info("Initialize the energy system")
-date_time_index = pd.date_range(
-    "1/1/2012", periods=number_of_time_steps, freq="H"
-)
+date_time_index = create_time_index(2012, number=number_of_time_steps)
 
-energysystem = EnergySystem(timeindex=date_time_index)
+energysystem = EnergySystem(
+    timeindex=date_time_index, infer_last_interval=False
+)
 
 ##########################################################################
 # Create oemof object
@@ -123,7 +125,7 @@ energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
 energysystem.add(
     cmp.Source(
         label="rgas",
-        outputs={bgas: flows.Flow(summed_max=1)},
+        outputs={bgas: flows.Flow()},
     )
 )
 
@@ -192,7 +194,7 @@ model = Model(energysystem)
 # the lp-file.
 if debug:
     filename = os.path.join(
-        solph.helpers.extend_basic_path("lp_files"), "basic_example.lp"
+        helpers.extend_basic_path("lp_files"), "basic_example.lp"
     )
     logging.info("Store lp-file in {0}.".format(filename))
     model.write(filename, io_options={"symbolic_solver_labels": True})
@@ -248,29 +250,25 @@ custom_storage = views.node(results, "storage")
 electricity_bus = views.node(results, "electricity")
 
 # plot the time series (sequences) of a specific component/bus
-if plt is not None:
-    fig, ax = plt.subplots(figsize=(10, 5))
-    custom_storage["sequences"].plot(
-        ax=ax, kind="line", drawstyle="steps-post"
-    )
-    plt.legend(
-        loc="upper center",
-        prop={"size": 8},
-        bbox_to_anchor=(0.5, 1.25),
-        ncol=2,
-    )
-    fig.subplots_adjust(top=0.8)
-    plt.show()
 
-    fig, ax = plt.subplots(figsize=(10, 5))
-    electricity_bus["sequences"].plot(
-        ax=ax, kind="line", drawstyle="steps-post"
-    )
-    plt.legend(
-        loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
-    )
-    fig.subplots_adjust(top=0.8)
-    plt.show()
+fig, ax = plt.subplots(figsize=(10, 5))
+custom_storage["sequences"].plot(ax=ax, kind="line", drawstyle="steps-post")
+plt.legend(
+    loc="upper center",
+    prop={"size": 8},
+    bbox_to_anchor=(0.5, 1.25),
+    ncol=2,
+)
+fig.subplots_adjust(top=0.8)
+plt.show()
+
+fig, ax = plt.subplots(figsize=(10, 5))
+electricity_bus["sequences"].plot(ax=ax, kind="line", drawstyle="steps-post")
+plt.legend(
+    loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
+)
+fig.subplots_adjust(top=0.8)
+plt.show()
 
 # print the solver results
 print("********* Meta results *********")

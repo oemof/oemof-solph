@@ -34,7 +34,7 @@ from oemof.solph import processing
 # The gradient for the output of the natural gas power plant.
 # Change the gradient between 0.1 and 0.0001 and check the results. The
 # more flexible the power plant can be run the less the storage will be used.
-GRADIENT = 0.001
+GRADIENT = 0.01
 
 date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
 print(date_time_index)
@@ -116,34 +116,36 @@ model.solve(solver="cbc")
 # processing the results
 results = processing.results(model)
 
-print("C", results[(storage, None)]["sequences"])
-print("f", results[(storage, bel)]["sequences"])
-ax = results[(storage, None)]["sequences"].diff().plot()
-ax = results[(storage, bel)]["sequences"].mul(-1).plot(ax=ax)
-ax = results[(storage, None)]["sequences"].plot(ax=ax)
-results[(bel, storage)]["sequences"].plot(ax=ax)
-plt.show()
-exit(0)
-# get all variables of a specific component/bus
-custom_storage = solph.views.node(results, "storage")
-electricity_bus = solph.views.node(results, "electricity")
-
-# plotting
-fig, ax = plt.subplots(figsize=(10, 5))
-custom_storage["sequences"].plot(ax=ax, kind="line", drawstyle="steps-post")
-plt.legend(
-    loc="upper center",
-    prop={"size": 8},
-    bbox_to_anchor=(0.5, 1.25),
-    ncol=2,
+# ****** Create a table with all sequences and store it into a file (csv/xlsx)
+flows_to_bus = pd.DataFrame(
+    {
+        str(k[0].label): v["sequences"]["flow"]
+        for k, v in results.items()
+        if k[1] is not None and k[1] == bel
+    }
 )
-fig.subplots_adjust(top=0.8)
-plt.show()
-
-fig, ax = plt.subplots(figsize=(10, 5))
-electricity_bus["sequences"].plot(ax=ax, kind="line", drawstyle="steps-post")
-plt.legend(
-    loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
+flows_from_bus = pd.DataFrame(
+    {
+        str(k[1].label): v["sequences"]["flow"]
+        for k, v in results.items()
+        if k[1] is not None and k[0] == bel
+    }
 )
-fig.subplots_adjust(top=0.8)
+
+storage = pd.DataFrame(
+    {
+        str(k[0].label): v["sequences"]["storage_content"]
+        for k, v in results.items()
+        if k[1] is None and k[0] == storage
+    }
+)
+
+my_flows = pd.concat(
+    [flows_to_bus, flows_from_bus, storage],
+    keys=["to_bus", "from_bus", "content", "duals"],
+    axis=1,
+)
+
+print(my_flows)
+my_flows.plot()
 plt.show()
