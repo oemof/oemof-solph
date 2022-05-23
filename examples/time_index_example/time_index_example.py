@@ -21,7 +21,7 @@ A minimal example to show how time steps work.
 Installation requirements
 -------------------------
 
-This example requires oemof.solph, install by:
+This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
 """
