@@ -37,3 +37,30 @@ Gradient example
     :members:
     :undoc-members:
     :show-inheritance:
+
+Emission constraint
+-------------------
+
+.. automodule:: emission_constraint.emission_constraint
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Storage investment
+------------------
+
+Optimize all technologies
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: storage_investment.v1_invest_optimize_all_technologies
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Optimize only gas and storage
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. automodule:: storage_investment.v2_invest_optimize_only_gas_and_storage
+    :members:
+    :undoc-members:
+    :show-inheritance:
