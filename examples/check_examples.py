@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import tempfile
@@ -77,7 +78,8 @@ for root, dirs, files in sorted(os.walk(fullpath)):
                 try:
                     exec(open(fn).read())
                     checker[name] = "okay"
-                except:
+                except Exception as e:
+                    print(e)
                     checker[name] = "failed"
         elif name[-6:] == ".ipynb" and not exclude_notebooks:
             fn = os.path.join(root, name)
@@ -91,7 +93,8 @@ for root, dirs, files in sorted(os.walk(fullpath)):
                 try:
                     notebook_run(fn)
                     checker[name] = "okay"
-                except:
+                except Exception as e:
+                    print(e)
                     checker[name] = "failed"
         plt.close()
 

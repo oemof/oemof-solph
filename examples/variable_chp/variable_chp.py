@@ -84,11 +84,11 @@ def shape_legend(node, reverse=True, **kwargs):
 
 
 def write_lp_file():
-    filename = os.path.join(
+    lp_filename = os.path.join(
         solph.helpers.extend_basic_path("lp_files"), "variable_chp.lp"
     )
-    logging.info("Store lp-file in {0}.".format(filename))
-    om.write(filename, io_options={"symbolic_solver_labels": True})
+    logging.info("Store lp-file in {0}.".format(lp_filename))
+    om.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
 # Read data file
@@ -98,7 +98,9 @@ try:
 except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
     warnings.warn(msg.format(filename), UserWarning)
-    data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500], "demand_th": [344]})
+    data = pd.DataFrame(
+        {"pv": [0.3], "wind": [0.6], "demand_el": [500], "demand_th": [344]}
+    )
 
 logger.define_logging()
 logging.info("Initialize the energy system")
