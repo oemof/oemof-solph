@@ -10,6 +10,7 @@ include .editorconfig
 
 include AUTHORS.rst
 include CHANGELOG.rst
+include CITATION.cff
 include CONTRIBUTING.rst
 include LICENSE
 include README.rst
@@ -20,4 +21,5 @@ include pytest.ini
 include tox.ini
 include *.yml
 
+recursive-exclude examples *.py
 global-exclude *.py[cod] __pycache__/* *.so *.dylib

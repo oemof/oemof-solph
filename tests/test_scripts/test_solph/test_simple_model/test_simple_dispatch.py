@@ -18,105 +18,136 @@ import os
 import pandas as pd
 from nose.tools import eq_
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.components import Transformer
+from oemof.solph.flows import Flow
 
 
-def test_dispatch_example(solver='cbc', periods=24*5):
+def test_dispatch_example(solver="cbc", periods=24 * 5):
     """Create an energy system and optimize the dispatch at least costs."""
 
-    filename = os.path.join(os.path.dirname(__file__), 'input_data.csv')
+    filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
     data = pd.read_csv(filename, sep=",")
 
     # ######################### create energysystem components ################
 
     # resource buses
-    bcoal = Bus(label='coal', balanced=False)
-    bgas = Bus(label='gas', balanced=False)
-    boil = Bus(label='oil', balanced=False)
-    blig = Bus(label='lignite', balanced=False)
+    bcoal = Bus(label="coal", balanced=False)
+    bgas = Bus(label="gas", balanced=False)
+    boil = Bus(label="oil", balanced=False)
+    blig = Bus(label="lignite", balanced=False)
 
     # electricity and heat
-    bel = Bus(label='b_el')
-    bth = Bus(label='b_th')
+    bel = Bus(label="b_el")
+    bth = Bus(label="b_th")
 
     # an excess and a shortage variable can help to avoid infeasible problems
-    excess_el = Sink(label='excess_el', inputs={bel: Flow()})
+    excess_el = Sink(label="excess_el", inputs={bel: Flow()})
     # shortage_el = Source(label='shortage_el',
     #                      outputs={bel: Flow(variable_costs=200)})
 
     # sources
-    wind = Source(label='wind', outputs={bel: Flow(fix=data['wind'],
-                  nominal_value=66.3)})
+    wind = Source(
+        label="wind", outputs={bel: Flow(fix=data["wind"], nominal_value=66.3)}
+    )
 
-    pv = Source(label='pv', outputs={bel: Flow(fix=data['pv'],
-                nominal_value=65.3)})
+    pv = Source(
+        label="pv", outputs={bel: Flow(fix=data["pv"], nominal_value=65.3)}
+    )
 
     # demands (electricity/heat)
-    demand_el = Sink(label='demand_elec', inputs={bel: Flow(nominal_value=85,
-                     fix=data['demand_el'])})
+    demand_el = Sink(
+        label="demand_elec",
+        inputs={bel: Flow(nominal_value=85, fix=data["demand_el"])},
+    )
 
-    demand_th = Sink(label='demand_therm',
-                     inputs={bth: Flow(nominal_value=40,
-                                       fix=data['demand_th'])})
+    demand_th = Sink(
+        label="demand_therm",
+        inputs={bth: Flow(nominal_value=40, fix=data["demand_th"])},
+    )
 
     # power plants
-    pp_coal = Transformer(label='pp_coal',
-                          inputs={bcoal: Flow()},
-                          outputs={bel: Flow(nominal_value=20.2,
-                                             variable_costs=25)},
-                          conversion_factors={bel: 0.39})
+    pp_coal = Transformer(
+        label="pp_coal",
+        inputs={bcoal: Flow()},
+        outputs={bel: Flow(nominal_value=20.2, variable_costs=25)},
+        conversion_factors={bel: 0.39},
+    )
 
-    pp_lig = Transformer(label='pp_lig',
-                         inputs={blig: Flow()},
-                         outputs={bel: Flow(nominal_value=11.8,
-                                            variable_costs=19)},
-                         conversion_factors={bel: 0.41})
+    pp_lig = Transformer(
+        label="pp_lig",
+        inputs={blig: Flow()},
+        outputs={bel: Flow(nominal_value=11.8, variable_costs=19)},
+        conversion_factors={bel: 0.41},
+    )
 
-    pp_gas = Transformer(label='pp_gas',
-                         inputs={bgas: Flow()},
-                         outputs={bel: Flow(nominal_value=41,
-                                            variable_costs=40)},
-                         conversion_factors={bel: 0.50})
+    pp_gas = Transformer(
+        label="pp_gas",
+        inputs={bgas: Flow()},
+        outputs={bel: Flow(nominal_value=41, variable_costs=40)},
+        conversion_factors={bel: 0.50},
+    )
 
-    pp_oil = Transformer(label='pp_oil',
-                         inputs={boil: Flow()},
-                         outputs={bel: Flow(nominal_value=5,
-                                            variable_costs=50)},
-                         conversion_factors={bel: 0.28})
+    pp_oil = Transformer(
+        label="pp_oil",
+        inputs={boil: Flow()},
+        outputs={bel: Flow(nominal_value=5, variable_costs=50)},
+        conversion_factors={bel: 0.28},
+    )
 
     # combined heat and power plant (chp)
-    pp_chp = Transformer(label='pp_chp',
-                         inputs={bgas: Flow()},
-                         outputs={bel: Flow(nominal_value=30,
-                                            variable_costs=42),
-                                  bth: Flow(nominal_value=40)},
-                         conversion_factors={bel: 0.3, bth: 0.4})
+    pp_chp = Transformer(
+        label="pp_chp",
+        inputs={bgas: Flow()},
+        outputs={
+            bel: Flow(nominal_value=30, variable_costs=42),
+            bth: Flow(nominal_value=40),
+        },
+        conversion_factors={bel: 0.3, bth: 0.4},
+    )
 
     # heatpump with a coefficient of performance (COP) of 3
-    b_heat_source = Bus(label='b_heat_source')
+    b_heat_source = Bus(label="b_heat_source")
 
-    heat_source = Source(label='heat_source', outputs={b_heat_source: Flow()})
+    heat_source = Source(label="heat_source", outputs={b_heat_source: Flow()})
 
     cop = 3
-    heat_pump = Transformer(label='heat_pump',
-                            inputs={bel: Flow(), b_heat_source: Flow()},
-                            outputs={bth: Flow(nominal_value=10)},
-                            conversion_factors={
-                                        bel: 1/3, b_heat_source: (cop-1)/cop})
+    heat_pump = Transformer(
+        label="heat_pump",
+        inputs={bel: Flow(), b_heat_source: Flow()},
+        outputs={bth: Flow(nominal_value=10)},
+        conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
+    )
 
-    datetimeindex = pd.date_range('1/1/2012', periods=periods, freq='H')
+    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
     energysystem = EnergySystem(timeindex=datetimeindex)
-    energysystem.add(bcoal, bgas, boil, bel, bth, blig, excess_el, wind, pv,
-                     demand_el, demand_th, pp_coal, pp_lig, pp_oil, pp_gas,
-                     pp_chp, b_heat_source, heat_source, heat_pump)
+    energysystem.add(
+        bcoal,
+        bgas,
+        boil,
+        bel,
+        bth,
+        blig,
+        excess_el,
+        wind,
+        pv,
+        demand_el,
+        demand_th,
+        pp_coal,
+        pp_lig,
+        pp_oil,
+        pp_gas,
+        pp_chp,
+        b_heat_source,
+        heat_source,
+        heat_pump,
+    )
 
     # ################################ optimization ###########################
 
@@ -134,29 +165,29 @@ def test_dispatch_example(solver='cbc', periods=24*5):
     # ################################ results ################################
 
     # generic result object
-    results = processing.results(om=optimization_model)
+    results = processing.results(model=optimization_model)
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.
     # investment values within a pandas.Series object.
     # in this case the entry data['scalars'] does not exist since no investment
     # variables are used
-    data = views.node(results, 'b_el')
+    data = views.node(results, "b_el")
 
     # generate results to be evaluated in tests
-    results = data['sequences'].sum(axis=0).to_dict()
+    results = data["sequences"].sum(axis=0).to_dict()
 
     test_results = {
-        (('wind', 'b_el'), 'flow'): 1773,
-        (('pv', 'b_el'), 'flow'): 605,
-        (('b_el', 'demand_elec'), 'flow'): 7440,
-        (('b_el', 'excess_el'), 'flow'): 139,
-        (('pp_chp', 'b_el'), 'flow'): 666,
-        (('pp_lig', 'b_el'), 'flow'): 1210,
-        (('pp_gas', 'b_el'), 'flow'): 1519,
-        (('pp_coal', 'b_el'), 'flow'): 1925,
-        (('pp_oil', 'b_el'), 'flow'): 0,
-        (('b_el', 'heat_pump'), 'flow'): 118,
+        (("wind", "b_el"), "flow"): 1773,
+        (("pv", "b_el"), "flow"): 605,
+        (("b_el", "demand_elec"), "flow"): 7440,
+        (("b_el", "excess_el"), "flow"): 139,
+        (("pp_chp", "b_el"), "flow"): 666,
+        (("pp_lig", "b_el"), "flow"): 1210,
+        (("pp_gas", "b_el"), "flow"): 1519,
+        (("pp_coal", "b_el"), "flow"): 1925,
+        (("pp_oil", "b_el"), "flow"): 0,
+        (("b_el", "heat_pump"), "flow"): 118,
     }
 
     for key in test_results.keys():
