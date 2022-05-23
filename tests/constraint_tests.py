@@ -1401,21 +1401,20 @@ class TestsConstraint:
 
     def test_nonequidistant_storage(self):
         """Constraint test of an energysystem with nonequidistant timeindex"""
-        idx2h = pd.date_range('1/1/2017', periods=3, freq='H')
-        idxh = pd.date_range('1/1/2017 04:00:00', periods=2, freq='2H')
-        idx30m = pd.date_range('1/1/2017 06:30:00', periods=3, freq='30min')
+        idxh = pd.date_range('1/1/2017', periods=3, freq='H')
+        idx2h = pd.date_range('1/1/2017 03:00:00', periods=2, freq='2H')
+        idx30m = pd.date_range('1/1/2017 07:00:00', periods=4, freq='30min')
         timeindex = idxh.append([idx2h, idx30m])
-        timeincrement = solph.helpers.calculate_timeincrement(timeindex)
         es = solph.EnergySystem(timeindex=timeindex,
-                                timeincrement=timeincrement)
+                                infer_last_interval=False)
         b_gas = solph.Bus(label="gas")
         b_th = solph.Bus(label='heat')
-        boiler = solph.Transformer(
+        boiler = solph.components.Transformer(
             label="boiler",
             inputs={b_gas: solph.Flow(variable_costs=100)},
             outputs={b_th: solph.Flow(nominal_value=200)}
         )
-        storage = solph.GenericStorage(
+        storage = solph.components.GenericStorage(
             label='storage',
             inputs={b_th: solph.Flow(nominal_value=100, variable_costs=56)},
             outputs={b_th: solph.Flow(nominal_value=100, variable_costs=24)},

@@ -29,183 +29,183 @@ objective:
 
 s.t.
 
-c_e_Bus_balance(gas_0)_:
+c_e_BusBlock_balance(gas_0)_:
 +1 flow(gas_boiler_0)
 = 0
 
-c_e_Bus_balance(gas_1)_:
+c_e_BusBlock_balance(gas_1)_:
 +1 flow(gas_boiler_1)
 = 0
 
-c_e_Bus_balance(gas_2)_:
+c_e_BusBlock_balance(gas_2)_:
 +1 flow(gas_boiler_2)
 = 0
 
-c_e_Bus_balance(gas_3)_:
+c_e_BusBlock_balance(gas_3)_:
 +1 flow(gas_boiler_3)
 = 0
 
-c_e_Bus_balance(gas_4)_:
+c_e_BusBlock_balance(gas_4)_:
 +1 flow(gas_boiler_4)
 = 0
 
-c_e_Bus_balance(gas_5)_:
+c_e_BusBlock_balance(gas_5)_:
 +1 flow(gas_boiler_5)
 = 0
 
-c_e_Bus_balance(gas_6)_:
+c_e_BusBlock_balance(gas_6)_:
 +1 flow(gas_boiler_6)
 = 0
 
-c_e_Bus_balance(gas_7)_:
+c_e_BusBlock_balance(gas_7)_:
 +1 flow(gas_boiler_7)
 = 0
 
-c_e_Bus_balance(heat_0)_:
+c_e_BusBlock_balance(heat_0)_:
 +1 flow(boiler_heat_0)
 -1 flow(heat_storage_0)
 +1 flow(storage_heat_0)
 = 0
 
-c_e_Bus_balance(heat_1)_:
+c_e_BusBlock_balance(heat_1)_:
 +1 flow(boiler_heat_1)
 -1 flow(heat_storage_1)
 +1 flow(storage_heat_1)
 = 0
 
-c_e_Bus_balance(heat_2)_:
+c_e_BusBlock_balance(heat_2)_:
 +1 flow(boiler_heat_2)
 -1 flow(heat_storage_2)
 +1 flow(storage_heat_2)
 = 0
 
-c_e_Bus_balance(heat_3)_:
+c_e_BusBlock_balance(heat_3)_:
 +1 flow(boiler_heat_3)
 -1 flow(heat_storage_3)
 +1 flow(storage_heat_3)
 = 0
 
-c_e_Bus_balance(heat_4)_:
+c_e_BusBlock_balance(heat_4)_:
 +1 flow(boiler_heat_4)
 -1 flow(heat_storage_4)
 +1 flow(storage_heat_4)
 = 0
 
-c_e_Bus_balance(heat_5)_:
+c_e_BusBlock_balance(heat_5)_:
 +1 flow(boiler_heat_5)
 -1 flow(heat_storage_5)
 +1 flow(storage_heat_5)
 = 0
 
-c_e_Bus_balance(heat_6)_:
+c_e_BusBlock_balance(heat_6)_:
 +1 flow(boiler_heat_6)
 -1 flow(heat_storage_6)
 +1 flow(storage_heat_6)
 = 0
 
-c_e_Bus_balance(heat_7)_:
+c_e_BusBlock_balance(heat_7)_:
 +1 flow(boiler_heat_7)
 -1 flow(heat_storage_7)
 +1 flow(storage_heat_7)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_0)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_0)_:
 -1 flow(boiler_heat_0)
 +1 flow(gas_boiler_0)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_1)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_1)_:
 -1 flow(boiler_heat_1)
 +1 flow(gas_boiler_1)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_2)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_2)_:
 -1 flow(boiler_heat_2)
 +1 flow(gas_boiler_2)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_3)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_3)_:
 -1 flow(boiler_heat_3)
 +1 flow(gas_boiler_3)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_4)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_4)_:
 -1 flow(boiler_heat_4)
 +1 flow(gas_boiler_4)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_5)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_5)_:
 -1 flow(boiler_heat_5)
 +1 flow(gas_boiler_5)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_6)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_6)_:
 -1 flow(boiler_heat_6)
 +1 flow(gas_boiler_6)
 = 0
 
-c_e_Transformer_relation(boiler_gas_heat_7)_:
+c_e_TransformerBlock_relation(boiler_gas_heat_7)_:
 -1 flow(boiler_heat_7)
 +1 flow(gas_boiler_7)
 = 0
 
-c_e_GenericStorageBlock_balance_first(storage)_:
-+1 GenericStorageBlock_storage_content(storage_0)
+c_e_GenericStorageBlock_balance(storage_0)_:
++1 GenericStorageBlock_storage_content(storage_1)
 -1 flow(heat_storage_0)
 +1 flow(storage_heat_0)
 = 270
 
 c_e_GenericStorageBlock_balance(storage_1)_:
--0.90000000000000002 GenericStorageBlock_storage_content(storage_0)
-+1 GenericStorageBlock_storage_content(storage_1)
+-0.90000000000000002 GenericStorageBlock_storage_content(storage_1)
++1 GenericStorageBlock_storage_content(storage_2)
 -1 flow(heat_storage_1)
 +1 flow(storage_heat_1)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_2)_:
--0.90000000000000002 GenericStorageBlock_storage_content(storage_1)
-+1 GenericStorageBlock_storage_content(storage_2)
+-0.90000000000000002 GenericStorageBlock_storage_content(storage_2)
++1 GenericStorageBlock_storage_content(storage_3)
 -1 flow(heat_storage_2)
 +1 flow(storage_heat_2)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_3)_:
--0.81000000000000005 GenericStorageBlock_storage_content(storage_2)
-+1 GenericStorageBlock_storage_content(storage_3)
+-0.81000000000000005 GenericStorageBlock_storage_content(storage_3)
++1 GenericStorageBlock_storage_content(storage_4)
 -2 flow(heat_storage_3)
 +2 flow(storage_heat_3)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_4)_:
--0.81000000000000005 GenericStorageBlock_storage_content(storage_3)
-+1 GenericStorageBlock_storage_content(storage_4)
+-0.81000000000000005 GenericStorageBlock_storage_content(storage_4)
++1 GenericStorageBlock_storage_content(storage_5)
 -2 flow(heat_storage_4)
 +2 flow(storage_heat_4)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_5)_:
--0.94868329805051377 GenericStorageBlock_storage_content(storage_4)
-+1 GenericStorageBlock_storage_content(storage_5)
+-0.94868329805051377 GenericStorageBlock_storage_content(storage_5)
++1 GenericStorageBlock_storage_content(storage_6)
 -0.5 flow(heat_storage_5)
 +0.5 flow(storage_heat_5)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_6)_:
--0.94868329805051377 GenericStorageBlock_storage_content(storage_5)
-+1 GenericStorageBlock_storage_content(storage_6)
+-0.94868329805051377 GenericStorageBlock_storage_content(storage_6)
++1 GenericStorageBlock_storage_content(storage_7)
 -0.5 flow(heat_storage_6)
 +0.5 flow(storage_heat_6)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_7)_:
--0.94868329805051377 GenericStorageBlock_storage_content(storage_6)
-+1 GenericStorageBlock_storage_content(storage_7)
+-0.94868329805051377 GenericStorageBlock_storage_content(storage_7)
++1 GenericStorageBlock_storage_content(storage_8)
 -0.5 flow(heat_storage_7)
 +0.5 flow(storage_heat_7)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage)_:
-+1 GenericStorageBlock_storage_content(storage_7)
++1 GenericStorageBlock_storage_content(storage_8)
 = 300
 
 c_e_ONE_VAR_CONSTANT:
@@ -244,7 +244,6 @@ bounds
    0 <= flow(storage_heat_5) <= 100
    0 <= flow(storage_heat_6) <= 100
    0 <= flow(storage_heat_7) <= 100
-   0 <= GenericStorageBlock_storage_content(storage_0) <= 300
    0 <= GenericStorageBlock_storage_content(storage_1) <= 300
    0 <= GenericStorageBlock_storage_content(storage_2) <= 300
    0 <= GenericStorageBlock_storage_content(storage_3) <= 300
@@ -252,4 +251,5 @@ bounds
    0 <= GenericStorageBlock_storage_content(storage_5) <= 300
    0 <= GenericStorageBlock_storage_content(storage_6) <= 300
    0 <= GenericStorageBlock_storage_content(storage_7) <= 300
+   0 <= GenericStorageBlock_storage_content(storage_8) <= 300
 end
