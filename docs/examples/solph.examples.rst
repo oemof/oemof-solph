@@ -1,5 +1,5 @@
 Basic example
-+++++++++++++
+-------------
 
 .. automodule:: basic_example.basic_example
     :members:
@@ -7,7 +7,7 @@ Basic example
     :show-inheritance:
 
 Tuple as label example
-++++++++++++++++++++++
+----------------------
 
 .. automodule:: tuple_as_labels.tuple_as_label
     :members:
@@ -15,7 +15,7 @@ Tuple as label example
     :show-inheritance:
 
 Activity costs
-==============
+--------------
 
 .. automodule:: activity_costs.activity_costs
     :members:
@@ -23,7 +23,7 @@ Activity costs
     :show-inheritance:
 
 Time Index Example
-++++++++++++++++++
+------------------
 
 .. automodule:: time_index_example.time_index_example
     :members:
@@ -31,7 +31,7 @@ Time Index Example
     :show-inheritance:
 
 Gradient example
-++++++++++++++++
+----------------
 
 .. automodule:: gradient_example.gradient_example
     :members:

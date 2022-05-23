@@ -3,6 +3,7 @@
 """
 General description
 -------------------
+
 This example illustrates the effect of activity_costs.
 
 There are the following components:
