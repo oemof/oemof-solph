@@ -6,24 +6,27 @@ General description
 This example shows how to perform a capacity optimization for
 an energy system with storage. The following energy system is modeled:
 
-                input/output  bgas     bel
-                     |          |        |       |
-                     |          |        |       |
- wind(FixedSource)   |------------------>|       |
-                     |          |        |       |
- pv(FixedSource)     |------------------>|       |
-                     |          |        |       |
- gas_resource        |--------->|        |       |
- (Commodity)         |          |        |       |
-                     |          |        |       |
- demand(Sink)        |<------------------|       |
-                     |          |        |       |
-                     |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
-                     |------------------>|       |
-                     |          |        |       |
- storage(Storage)    |<------------------|       |
-                     |------------------>|       |
+.. code-block:: text
+
+                    input/output  bgas     bel
+                         |          |        |
+                         |          |        |
+     wind(FixedSource)   |------------------>|
+                         |          |        |
+     pv(FixedSource)     |------------------>|
+                         |          |        |
+     gas_resource        |--------->|        |
+     (Commodity)         |          |        |
+                         |          |        |
+     demand(Sink)        |<------------------|
+                         |          |        |
+                         |          |        |
+     pp_gas(Transformer) |<---------|        |
+                         |------------------>|
+                         |          |        |
+     storage(Storage)    |<------------------|
+                         |------------------>|
+
 
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 2:
@@ -79,7 +82,9 @@ try:
 except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
     warnings.warn(msg.format(filename), UserWarning)
-    data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    data = pd.DataFrame(
+        {"pv": [0.3, 0.5], "wind": [0.6, 0.8], "demand_el": [500, 600]}
+    )
 
 number_timesteps = len(data)
 

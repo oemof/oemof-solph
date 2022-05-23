@@ -6,24 +6,26 @@ General description
 This example shows how to perform a capacity optimization for
 an energy system with storage. The following energy system is modeled:
 
-                input/output  bgas     bel
-                     |          |        |       |
-                     |          |        |       |
- wind(FixedSource)   |------------------>|       |
-                     |          |        |       |
- pv(FixedSource)     |------------------>|       |
-                     |          |        |       |
- gas_resource        |--------->|        |       |
- (Commodity)         |          |        |       |
-                     |          |        |       |
- demand(Sink)        |<------------------|       |
-                     |          |        |       |
-                     |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
-                     |------------------>|       |
-                     |          |        |       |
- storage(Storage)    |<------------------|       |
-                     |------------------>|       |
+.. code-block:: text
+
+                    input/output  bgas     bel
+                         |          |        |
+                         |          |        |
+     wind(FixedSource)   |------------------>|
+                         |          |        |
+     pv(FixedSource)     |------------------>|
+                         |          |        |
+     gas_resource        |--------->|        |
+     (Commodity)         |          |        |
+                         |          |        |
+     demand(Sink)        |<------------------|
+                         |          |        |
+                         |          |        |
+     pp_gas(Transformer) |<---------|        |
+                         |------------------>|
+                         |          |        |
+     storage(Storage)    |<------------------|
+                         |------------------>|
 
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 3:
