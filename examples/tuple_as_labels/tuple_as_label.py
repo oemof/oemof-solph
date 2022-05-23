@@ -264,32 +264,7 @@ logging.info("Store the energy system with the results.")
 # The processing module of the outputlib can be used to extract the results
 # from the model transfer them into a homogeneous structured dictionary.
 
-# add results to the energy system to make it possible to store them.
-energysystem.results["main"] = processing.results(model)
-energysystem.results["meta"] = processing.meta_results(model)
-graph.create_nx_graph(energysystem, filename="/home/uwe/tuple_example.graphml")
-# The default path is the '.oemof' folder in your $HOME directory.
-# The default filename is 'es_dump.oemof'.
-# You can omit the attributes (as None is the default value) for testing cases.
-# You should use unique names/folders for valuable results to avoid
-# overwriting.
-
-# store energy system with results
-energysystem.dump(dpath=None, filename=None)
-
-# ****************************************************************************
-# ********** PART 2 - Processing the results *********************************
-# ****************************************************************************
-
-logging.info("**** The script can be divided into two parts here.")
-logging.info("Restore the energy system and the results.")
-energysystem = EnergySystem()
-energysystem.restore(dpath=None, filename=None)
-
-# define an alias for shorter calls below (optional)
-results = energysystem.results["main"]
-ebus = energysystem.groups["bus_electricity_None"]
-battery = energysystem.groups["storage_electricity_battery"]
+results = processing.results(model)
 
 
 # ****** Create a table with all sequences and store it into a file (csv/xlsx)
@@ -297,14 +272,14 @@ flows_to_bus = pd.DataFrame(
     {
         str(k[0].label): v["sequences"]["flow"]
         for k, v in results.items()
-        if k[1] is not None and k[1] == ebus
+        if k[1] is not None and k[1] == bel
     }
 )
 flows_from_bus = pd.DataFrame(
     {
         str(k[1].label): v["sequences"]["flow"]
         for k, v in results.items()
-        if k[1] is not None and k[0] == ebus
+        if k[1] is not None and k[0] == bel
     }
 )
 
@@ -312,7 +287,7 @@ storage = pd.DataFrame(
     {
         str(k[0].label): v["sequences"]["storage_content"]
         for k, v in results.items()
-        if k[1] is None and k[0] == battery
+        if k[1] is None and k[0] == storage
     }
 )
 
