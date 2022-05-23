@@ -13,7 +13,7 @@ oemof.solph.EnergySystem
     :show-inheritance:
 
 oemof.solph.buses.Bus
----------------
+---------------------
 
 .. automodule:: oemof.solph.network.bus
     :members:
