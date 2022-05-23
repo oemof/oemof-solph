@@ -2,16 +2,12 @@
 
 import os
 import sys
-from subprocess import Popen, PIPE
 
 import matplotlib
 from sphinx.ext.autodoc import between
 
 matplotlib.use("agg")
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
-
-
-proc = Popen(['apt', 'install', '-y', 'coinor-cbc'], stdout=PIPE)
 
 
 def setup(app):
