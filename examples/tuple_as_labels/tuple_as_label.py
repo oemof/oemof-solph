@@ -76,10 +76,14 @@ basic_example.csv
 
 Installation requirements
 -------------------------
-
 This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
+
+
+License
+-------
+SPDX-License-Identifier: MIT
 
 """
 
@@ -145,7 +149,6 @@ energysystem = EnergySystem(
 )
 
 
-
 ##########################################################################
 # Create oemof object
 ##########################################################################
@@ -176,9 +179,7 @@ energysystem.add(
 energysystem.add(
     comp.Source(
         label=Label("commodity_source", "gas", "commodity"),
-        outputs={
-            bgas: flows.Flow()
-        },
+        outputs={bgas: flows.Flow()},
     )
 )
 
@@ -202,7 +203,9 @@ energysystem.add(
 energysystem.add(
     comp.Sink(
         label=Label("sink", "electricity", "demand"),
-        inputs={bel: flows.Flow(fix=data["demand_el"]/1000, nominal_value=1)},
+        inputs={
+            bel: flows.Flow(fix=data["demand_el"] / 1000, nominal_value=1)
+        },
     )
 )
 
@@ -221,10 +224,8 @@ nominal_storage_capacity = 5000
 storage = comp.GenericStorage(
     nominal_storage_capacity=nominal_storage_capacity,
     label=Label("storage", "electricity", "battery"),
-    inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity/6)},
-    outputs={
-        bel: flows.Flow(nominal_value=nominal_storage_capacity/6)
-    },
+    inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
+    outputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
     loss_rate=0.00,
     initial_storage_level=None,
     inflow_conversion_factor=1,

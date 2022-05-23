@@ -36,15 +36,14 @@ basic_example.csv
 
 Installation requirements
 -------------------------
-
 This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
 
+License
+-------
+SPDX-License-Identifier: MIT
 """
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
 
 # ****************************************************************************
 # ********** PART 1 - Define and optimise the energy system ******************
@@ -70,7 +69,6 @@ from oemof.solph import components as cmp
 from oemof.solph import flows
 from oemof.solph import processing
 from oemof.solph import views
-
 
 # Read data file
 filename = os.path.join(os.getcwd(), "basic_example.csv")
@@ -243,7 +241,6 @@ print(
     ]
 )
 print("")
-
 
 
 # get all variables of a specific component/bus

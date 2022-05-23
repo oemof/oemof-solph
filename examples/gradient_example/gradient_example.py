@@ -11,18 +11,25 @@ the storage.
 
 Installation requirements
 -------------------------
-
 This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
+
+
+License
+-------
+SPDX-License-Identifier: MIT
 """
 
 import matplotlib.pyplot as plt
 import pandas as pd
-from oemof.solph import EnergySystem, Model, buses
-from oemof.solph import components as cmp
-from oemof.solph import flows, processing
 
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import flows
+from oemof.solph import processing
 
 # The gradient for the output of the natural gas power plant.
 # Change the gradient between 0.1 and 0.0001 and check the results. The
