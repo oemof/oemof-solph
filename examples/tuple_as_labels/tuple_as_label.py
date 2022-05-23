@@ -83,7 +83,7 @@ This example requires oemof.solph (v0.5.x), install by:
 
 License
 -------
-SPDX-License-Identifier: MIT
+`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
 
