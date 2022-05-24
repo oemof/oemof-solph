@@ -123,8 +123,8 @@ class TestParameterResult:
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
-            "summed_max": None,
-            "summed_min": None,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
             "max": 1,
             "min": 0,
             "negative_gradient_ub": None,
@@ -244,6 +244,23 @@ class TestParameterResult:
             param_results[(diesel, None)]["sequences"], pandas.DataFrame()
         )
 
+    def test_nodes_with_excluded_attrs(self):
+        diesel = self.es.groups["diesel"]
+        param_results = processing.parameter_as_dict(
+            self.es, exclude_attrs=["conversion_factors"]
+        )
+        assert_series_equal(
+            param_results[(diesel, None)]["scalars"],
+            pandas.Series(
+                {
+                    "label": "diesel",
+                }
+            ),
+        )
+        assert_frame_equal(
+            param_results[(diesel, None)]["sequences"], pandas.DataFrame()
+        )
+
     def test_parameter_with_node_view(self):
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=True
@@ -305,17 +322,18 @@ class TestParameterResult:
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
+
         compare = views.node(results, "storage", multiindex=True)["sequences"]
-        eq_(
+
+        assert (
             (
-                (
-                    compare[("storage", "b_el2", "flow")]
-                    - compare[("b_el1", "storage", "flow")]
-                ).to_frame()
-                == storage_flow.values
-            ).all()[0],
-            True,
-        )
+                compare[("storage", "b_el2", "flow")]
+                - compare[("b_el1", "storage", "flow")]
+            )
+            .to_frame()
+            .fillna(0)
+            == storage_flow.values
+        ).all()[0]
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)

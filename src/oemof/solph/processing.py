@@ -83,7 +83,13 @@ def create_dataframe(om):
         # Drop the auxiliary variables introduced by pyomo's Piecewise
         parent_component = bv.parent_block().parent_component()
         if not isinstance(parent_component, IndexedPiecewise):
-            for i in getattr(bv, "_index"):
+            try:
+                idx_set = getattr(bv, "_index_set")
+            except AttributeError:
+                # To make it compatible with Pyomo < 6.4.1
+                idx_set = getattr(bv, "_index")
+
+            for i in idx_set:
                 key = (str(bv).split(".")[0], str(bv).split(".")[-1], i)
                 value = bv[i].value
                 var_dict[key] = value
@@ -114,7 +120,39 @@ def create_dataframe(om):
     return df
 
 
-def results(om):
+def divide_scalars_sequences(df_dict, k):
+    try:
+        condition = df_dict[k][:-1].isnull().any()
+        scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+        sequences = df_dict[k].loc[:, ~condition]
+        return {"scalars": scalars, "sequences": sequences}
+    except IndexError:
+        error_message = (
+            "Cannot access index on result data. "
+            + "Did the optimization terminate"
+            + " without errors?"
+        )
+        raise IndexError(error_message)
+
+
+def set_result_index(df_dict, k, result_index):
+    try:
+        df_dict[k].index = result_index
+    except ValueError:
+        try:
+            df_dict[k] = df_dict[k][:-1]
+            df_dict[k].index = result_index
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values "
+                "in your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
+
+
+def results(model, remove_last_time_point=False):
     """Create a nested result dictionary from the result DataFrame
 
     The already rearranged results from Pyomo from the result DataFrame are
@@ -142,9 +180,23 @@ def results(om):
       and flows `results[n, n]['sequences']`.
     * *Multi-period model*: `results[idx]['period_scalars']`
       and flows `results[n, n]['sequences']`.
+
+    Parameters
+    ----------
+    model : oemof.solph.BaseModel
+        A solved oemof.solph model.
+    remove_last_time_point : bool
+        The last time point of all TIMEPOINT variables is removed to get the
+        same length as the TIMESTEP (interval) variables without getting
+        nan-values. By default the last time point is removed if it has not
+        been defined by the user in the EnergySystem but inferred. If all
+        time points has been defined explicitly by the user the last time point
+        will not be removed by default. In that case all interval variables
+        will get one row with nan-values to have the same index for all
+        variables.
     """
     # Extraction steps that are the same for both model types
-    df = create_dataframe(om)
+    df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
@@ -154,11 +206,19 @@ def results(om):
         for k, v in df.groupby("oemof_tuple")
     }
 
+    # Define index
+    if model.es.timeindex is None:
+        result_index = list(range(len(model.es.timeincrement) + 1))
+    else:
+        result_index = model.es.timeindex
+
+    # create final result dictionary by splitting up the dataframes in the
+    # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
 
     # Standard model results extraction
-    if not om.es.multi_period:
-        result = _extract_standard_model_result(om, df_dict, result)
+    if not model.es.multi_period:
+        result = _extract_standard_model_result(model, df_dict, result)
         scalars_col = "scalars"
 
     # Results extraction for a multi-period model
@@ -166,7 +226,7 @@ def results(om):
         period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
 
         result = _extract_multi_period_model_result(
-            om,
+            model,
             df_dict,
             period_indexed,
             result,
@@ -174,16 +234,16 @@ def results(om):
         scalars_col = "period_scalars"
 
     # add dual variables for bus constraints
-    if om.dual is not None:
+    if model.dual is not None:
         grouped = groupby(
-            sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
         )
         for bus, timeindex in grouped:
             duals = [
-                om.dual[om.BusBlock.balance[bus, p, t]]
+                model.dual[model.BusBlock.balance[bus, p, t]]
                 for _, p, t in timeindex
             ]
-            df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=model.es.timeindex)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
@@ -195,7 +255,7 @@ def results(om):
     return result
 
 
-def _extract_standard_model_result(om, df_dict, result):
+def _extract_standard_model_result(model, df_dict, result, remove_last_time_point):
     """Extract and return the results of a standard model
 
     * Set index to timeindex and pivot results such that values are displayed
@@ -205,7 +265,7 @@ def _extract_standard_model_result(om, df_dict, result):
 
     Parameters
     ----------
-    om : oemof.solph.models.Model
+    model : oemof.solph.models.Model
         The optimization model
     df_dict : dict
         dictionary of results DataFrames
@@ -217,20 +277,26 @@ def _extract_standard_model_result(om, df_dict, result):
     result : dict
         dictionary with results stored
     """
-    for k in df_dict:
-        df_dict[k] = _do_basic_results_extraction(om, df_dict, k)
-        try:
-            condition = df_dict[k].isnull().any()
-            scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~condition]
-            result[k] = {"scalars": scalars, "sequences": sequences}
-        except IndexError:
-            error_message = (
-                "Cannot access index on result data. "
-                + "Did the optimization terminate"
-                + " without errors?"
+    if remove_last_time_point is True:
+        # The values of intervals belong to the time at the beginning of the
+        # interval.
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
             )
-            raise IndexError(error_message)
+            set_result_index(df_dict, k, result_index[:-1])
+            result[k] = divide_scalars_sequences(df_dict, k)
+    else:
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
+            )
+            # Add empty row at the end
+            df_dict[k] = df_dict[k].append(pd.Series(), ignore_index=True)
+            set_result_index(df_dict, k, result_index)
+            result[k] = divide_scalars_sequences(df_dict, k)
 
     return result
 
@@ -404,7 +470,9 @@ def meta_results(om, undefined=False):
     return meta_res
 
 
-def __separate_attrs(system, get_flows=False, exclude_none=True):
+def __separate_attrs(
+    system, exclude_attrs, get_flows=False, exclude_none=True
+):
     """
     Create a dictionary with flow scalars and series.
 
@@ -413,7 +481,15 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     {(node1, node2): {'scalars': {'attr1': scalar, 'attr2': 'text'},
     'sequences': {'attr1': iterable, 'attr2': iterable}}}
 
-    om : A solved oemof.solph.Model.
+    system:
+        A solved oemof.solph.Model or oemof.solph.Energysystem
+    exclude_attrs: List[str]
+        List of additional attributes which shall be excluded from
+        parameter dict
+    get_flows: bool
+        Whether to include flow values or not
+    exclude_none: bool
+        If set, scalars and sequences containing None values are excluded
 
     Returns
     -------
@@ -423,23 +499,23 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     def detect_scalars_and_sequences(com):
         com_data = {"scalars": {}, "sequences": {}}
 
-        exclusions = (
+        default_exclusions = [
             "__",
             "_",
             "registry",
             "inputs",
             "outputs",
-            "register",
             "Label",
-            "from_object",
             "input",
             "output",
             "constraint_group",
-        )
+        ]
+        # Must be tuple in order to work with `str.startswith()`:
+        exclusions = tuple(default_exclusions + exclude_attrs)
         attrs = [
             i
             for i in dir(com)
-            if not (callable(i) or i.startswith(exclusions))
+            if not (callable(getattr(com, i)) or i.startswith(exclusions))
         ]
 
         for a in attrs:
@@ -534,7 +610,7 @@ def __separate_attrs(system, get_flows=False, exclude_none=True):
     return data
 
 
-def parameter_as_dict(system, exclude_none=True):
+def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
     """
     Create a result dictionary containing node parameters.
 
@@ -550,14 +626,24 @@ def parameter_as_dict(system, exclude_none=True):
         A populated energy system.
     exclude_none: bool
         If True, all scalars and sequences containing None values are excluded
+    exclude_attrs: Optional[List[str]]
+        Optional list of additional attributes which shall be excluded from
+        parameter dict
 
     Returns
     -------
     dict: Parameters for all nodes and flows
     """
 
-    flow_data = __separate_attrs(system, True, exclude_none)
-    node_data = __separate_attrs(system, False, exclude_none)
+    if exclude_attrs is None:
+        exclude_attrs = []
+
+    flow_data = __separate_attrs(
+        system, exclude_attrs, get_flows=True, exclude_none=exclude_none
+    )
+    node_data = __separate_attrs(
+        system, exclude_attrs, get_flows=False, exclude_none=exclude_none
+    )
 
     flow_data.update(node_data)
     return flow_data

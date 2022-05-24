@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network as on
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
 from pyomo.environ import NonNegativeReals
@@ -117,7 +117,7 @@ class GenericCAES(on.Transformer):
         return GenericCAESBlock
 
 
-class GenericCAESBlock(SimpleBlock):
+class GenericCAESBlock(ScalarBlock):
     r"""Block for nodes of class:`.GenericCAES`.
 
     Note: This component is experimental. Use it with care.

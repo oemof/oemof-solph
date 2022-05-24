@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
@@ -81,7 +81,7 @@ class ExtractionTurbineCHP(Transformer):
         return ExtractionTurbineCHPBlock
 
 
-class ExtractionTurbineCHPBlock(SimpleBlock):
+class ExtractionTurbineCHPBlock(ScalarBlock):
     r"""Block for the linear relation of nodes with type
     :class:`oemof.solph.components.experimental._ExtractionTurbineCHP`
 

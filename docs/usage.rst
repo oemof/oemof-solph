@@ -51,13 +51,29 @@ Set up an energy system
 
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model's elements.
 
-To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas date_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The model time is defined by the number of intervals and the length of intervals. The length of each interval does not have to be the same. This can be defined in two ways:
+
+1. Define the length of each interval in an array/Series where the number of the elements is the number of intervals.
+2. Define a `pandas.DatetimeIndex` with all time steps that encloses an interval. Be aware that you have to define n+1 time points to get n intervals. For non-leap year with hourly values that means 8761 time points to get 8760 interval e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
+
+The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
+
+One can use the function
+:py:func:`~oemof.solph._energy_system/create_year_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc.. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
+
+It is also possible to define the datetime index using pandas. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+
+Both code blocks will create an hourly datetime index for 2011:
+
+.. code-block:: python
+
+    from oemof.solph import create_year_index
+    my_index = create_year_index(2011)
 
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
 
 This index can be used to define the EnergySystem:
 
@@ -272,7 +288,7 @@ Source (basic)
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*summed_max*).
+While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
 As we do have to pay for imported gas we should set variable costs.
 Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
 Alternatively, you might use *max* to allow for easy curtailment.
@@ -283,7 +299,7 @@ The *nominal_value* sets the installed capacity.
     solph.components.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
-            nominal_value=1000, summed_max=1000000, variable_costs=50)})
+            nominal_value=1000, full_load_time_max=1000000, variable_costs=50)})
 
     solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
         fix=wind_power_feedin_series, nominal_value=1000000)})

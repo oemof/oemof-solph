@@ -22,7 +22,7 @@ from warnings import warn
 from numpy import mean
 from oemof.tools import debugging
 from oemof.tools import economics
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -393,7 +393,7 @@ class SinkDSM(Sink):
             raise AttributeError(e6)
 
     def constraint_group(self):
-        possible_approaches = ["DIW", "DLR", "oemof"]  #
+        possible_approaches = ["DIW", "DLR", "oemof"]
 
         if not self.shed_eligibility and not self.shift_eligibility:
             raise ValueError(
@@ -445,7 +445,7 @@ class SinkDSM(Sink):
             )
 
 
-class SinkDSMOemofBlock(SimpleBlock):
+class SinkDSMOemofBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach
 
     **The following constraints are created for approach = 'oemof':**
@@ -764,7 +764,7 @@ class SinkDSMOemofBlock(SimpleBlock):
         return self.costs
 
 
-class SinkDSMOemofInvestmentBlock(SimpleBlock):
+class SinkDSMOemofInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'oemof' with an
@@ -1338,7 +1338,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         return self.costs
 
 
-class SinkDSMDIWBlock(SimpleBlock):
+class SinkDSMDIWBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach
 
     **The following constraints are created for approach = 'DIW':**
@@ -2024,7 +2024,7 @@ class SinkDSMDIWBlock(SimpleBlock):
         return self.costs
 
 
-class SinkDSMDIWInvestmentBlock(SimpleBlock):
+class SinkDSMDIWInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'DIW' with an
@@ -2767,6 +2767,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
 
+                    # Only applicable for load shedding
                     if g.shed_eligibility:
 
                         # main use case
@@ -2986,7 +2987,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         return self.costs
 
 
-class SinkDSMDLRBlock(SimpleBlock):
+class SinkDSMDLRBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DLR" approach
 
     **The following constraints are created for approach = 'DLR':**

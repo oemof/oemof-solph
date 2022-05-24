@@ -230,7 +230,10 @@ class TestsConstraint:
         self.compare_lp_files("nominal_value_to_zero.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Constraints test for fixed source + invest sink w. `summed_max`"""
+        """
+        Wrong constraints for fixed source + invest sink w.
+        `full_load_time_max`.
+        """
 
         bel = solph.buses.Bus(label="electricityBus")
 
@@ -244,8 +247,8 @@ class TestsConstraint:
         solph.components.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(
-                    summed_max=2.3,
+                bel: solph.flows.InvestmentFlow(
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1573,7 +1576,7 @@ class TestsConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1592,7 +1595,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1615,7 +1618,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1686,3 +1689,29 @@ class TestsConstraint:
         )
 
         self.compare_lp_files("integer_source.lp")
+
+    def test_nonequidistant_storage(self):
+        """Constraint test of an energysystem with nonequidistant timeindex"""
+        idxh = pd.date_range("1/1/2017", periods=3, freq="H")
+        idx2h = pd.date_range("1/1/2017 03:00:00", periods=2, freq="2H")
+        idx30m = pd.date_range("1/1/2017 07:00:00", periods=4, freq="30min")
+        timeindex = idxh.append([idx2h, idx30m])
+        es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=False)
+        b_gas = solph.Bus(label="gas")
+        b_th = solph.Bus(label="heat")
+        boiler = solph.components.Transformer(
+            label="boiler",
+            inputs={b_gas: solph.Flow(variable_costs=100)},
+            outputs={b_th: solph.Flow(nominal_value=200)},
+        )
+        storage = solph.components.GenericStorage(
+            label="storage",
+            inputs={b_th: solph.Flow(nominal_value=100, variable_costs=56)},
+            outputs={b_th: solph.Flow(nominal_value=100, variable_costs=24)},
+            nominal_storage_capacity=300,
+            loss_rate=0.1,
+            initial_storage_level=1,
+        )
+        es.add(b_gas, b_th, boiler, storage)
+        om = solph.Model(es)
+        self.compare_lp_files("nonequidistant_timeindex.lp", my_om=om)

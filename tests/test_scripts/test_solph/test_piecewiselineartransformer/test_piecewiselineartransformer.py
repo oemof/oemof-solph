@@ -66,7 +66,9 @@ def test_pwltf():
     optimization_model.solve(solver="cbc")
 
     # Get results
-    results = processing.results(optimization_model)
+    results = processing.results(
+        optimization_model, remove_last_time_point=True
+    )
     string_results = processing.convert_keys_to_strings(results)
     sequences = {k: v["sequences"] for k, v in string_results.items()}
     df = pd.concat(sequences, axis=1)

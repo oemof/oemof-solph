@@ -23,7 +23,7 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._options import NonConvex
 
@@ -119,7 +119,7 @@ class NonConvexFlow(Flow):
         super().__init__(nonconvex=nonconvex, **kwargs)
 
 
-class NonConvexFlowBlock(SimpleBlock):
+class NonConvexFlowBlock(ScalarBlock):
     r"""
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )

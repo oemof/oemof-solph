@@ -20,7 +20,7 @@ SPDX-License-Identifier: MIT
 from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 
 class Bus(on.Bus):
@@ -50,7 +50,7 @@ class Bus(on.Bus):
             return None
 
 
-class BusBlock(SimpleBlock):
+class BusBlock(ScalarBlock):
     r"""Block for all balanced buses.
 
     **The following constraints are build:**

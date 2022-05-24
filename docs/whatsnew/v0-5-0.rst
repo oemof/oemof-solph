@@ -9,7 +9,7 @@ API changes
 * Public and private API are be more distinguished now. ('_' signifies private, public API is defined in init files.)
 * Started API for distinct `Flow`, `InvestmentFlow`, and `NonConvexFlow`.
 * Experimental code is now sitting in submodules called `experimental` (replaces "custom").
-
+* The flow arguments `summed_min`and `summed_max` now have the more descriptive names `full_load_time_min` and `full_load_time_max`.
 
 
 New features
@@ -50,5 +50,6 @@ Contributors
 ^^^^^^^^^^^^
 
 * Patrik Schönfeldt
+* Uwe Krien
 * Johannes Kochems
 

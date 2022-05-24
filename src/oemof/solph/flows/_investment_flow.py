@@ -26,7 +26,7 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from ._flow import Flow
 
@@ -40,7 +40,7 @@ class InvestmentFlow(Flow):
         super().__init__(**kwargs)
 
 
-class InvestmentFlowBlock(SimpleBlock):
+class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
     See :class:`.Investment` for all parameters of the
@@ -222,23 +222,23 @@ class InvestmentFlowBlock(SimpleBlock):
             &
             \forall p, t \in \textrm{TIMEINDEX}
 
-        * :attr:`summed_max` is not None
+        * :attr:`full_load_time_max is not None`
 
             Upper bound for the sum of all flow values (e.g. maximum full load
             hours)
 
         .. math::
             \sum_{p, t} P(p, t) \cdot \tau(t) \leq P_{total}(p)
-            \cdot f_{sum, min}
+            \cdot t_{full\_load, min}
 
-        * :attr:`summed_min` is not None
+        * :attr:`full_load_time_min is not None`
 
             Lower bound for the sum of all flow values (e.g. minimum full load
             hours)
 
         .. math::
             \sum_{p, t} P(t) \cdot \tau(t) \geq P_{total}
-            \cdot f_{sum, min}
+            \cdot t_{full\_load, min}
 
         * :attr:`overall_maximum` is not None (for multi-period model only)
 
@@ -440,9 +440,9 @@ class InvestmentFlowBlock(SimpleBlock):
         value of the flow"
         ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
         value of the flow"
-        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Specific
+        ":math:`t_{full\_load,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
         maximum of summed flow values (per installed capacity)"
-        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Specific
+        ":math:`t_{full\_load,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
         minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"
@@ -510,15 +510,19 @@ class InvestmentFlowBlock(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
         )
 
-        self.SUMMED_MAX_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MAX_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group if g[2].summed_max is not None
+                (g[0], g[1])
+                for g in group
+                if g[2].full_load_time_max is not None
             ]
         )
 
-        self.SUMMED_MIN_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MIN_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group if g[2].summed_min is not None
+                (g[0], g[1])
+                for g in group
+                if g[2].full_load_time_min is not None
             ]
         )
 
@@ -801,23 +805,24 @@ class InvestmentFlowBlock(SimpleBlock):
         )
         self.min_build = BuildAction(rule=_min_investflow_rule)
 
-        def _summed_max_investflow_rule(block, i, o):
+        def _full_load_time_max_investflow_rule(block, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
             expr = sum(
                 m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
             ) <= (
-                m.flows[i, o].summed_max
+                m.flows[i, o].full_load_time_max
                 * sum(self.total[i, o, p] for p in m.PERIODS)
             )
             return expr
 
-        self.summed_max = Constraint(
-            self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule
+        self.full_load_time_max = Constraint(
+            self.FULL_LOAD_TIME_MAX_INVESTFLOWS,
+            rule=_full_load_time_max_investflow_rule,
         )
 
-        def _summed_min_investflow_rule(block, i, o):
+        def _full_load_time_min_investflow_rule(block, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
@@ -825,12 +830,13 @@ class InvestmentFlowBlock(SimpleBlock):
                 m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
             ) >= (
                 sum(self.total[i, o, p] for p in m.PERIODS)
-                * m.flows[i, o].summed_min
+                * m.flows[i, o].full_load_time_min
             )
             return expr
 
-        self.summed_min = Constraint(
-            self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule
+        self.full_load_time_min = Constraint(
+            self.FULL_LOAD_TIME_MIN_INVESTFLOWS,
+            rule=_full_load_time_min_investflow_rule,
         )
 
         if m.es.multi_period:
