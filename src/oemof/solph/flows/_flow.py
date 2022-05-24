@@ -260,17 +260,13 @@ class Flow(on.Edge):
             "value is not allowed."
         )
         if not self.investment:
-            warn_msg_no_nominal_value = (
-                "If {} is set in a flow (except InvestmentFlow), "
-                "nominal_value must be set as well.\n"
-                "Otherwise, it won't have any effect."
-            )
             if self.nominal_value is None:
                 for attr in need_nominal_value:
                     if kwargs.get(attr) is not None:
-                        warn(
-                            warn_msg_no_nominal_value.format(attr),
-                            debugging.SuspiciousUsageWarning,
+                        raise AttributeError(
+                            "If {} is set in a flow (except InvestmentFlow), "
+                            "nominal_value must be set as well.\n"
+                            "Otherwise, it won't have any effect.".format(attr)
                         )
             elif not math.isfinite(self.nominal_value):
                 raise ValueError(infinite_error_msg.format("nominal_value"))

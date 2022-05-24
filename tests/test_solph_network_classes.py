@@ -98,34 +98,34 @@ def test_infinite_values():
     with pytest.raises(ValueError, match=msg1):
         solph.flows.Flow(nominal_value=float("+inf"))
     with pytest.raises(ValueError, match=msg2):
-        solph.flows.Flow(max=float("+inf"))
+        solph.flows.Flow(nominal_value=1, max=float("+inf"))
 
 
 def test_attributes_needing_nominal_value_get_it():
-    with pytest.warns(
-        SuspiciousUsageWarning, match="If fix is set in a flow "
+    with pytest.raises(
+        AttributeError, match="If fix is set in a flow "
     ):
         solph.flows.Flow(fix=0.3)
 
-    with pytest.warns(
-        SuspiciousUsageWarning, match="If max is set in a flow "
+    with pytest.raises(
+        AttributeError, match="If max is set in a flow "
     ):
         solph.flows.Flow(max=0.3)
 
-    with pytest.warns(
-        SuspiciousUsageWarning, match="If min is set in a flow "
+    with pytest.raises(
+        AttributeError, match="If min is set in a flow "
     ):
         solph.flows.Flow(min=0.3)
 
-    with pytest.warns(
-        SuspiciousUsageWarning, match="If summed_max is set in a flow "
+    with pytest.raises(
+        AttributeError, match="If full_load_time_max is set in a flow "
     ):
-        solph.flows.Flow(summed_max=0.3)
+        solph.flows.Flow(full_load_time_max=0.3)
 
-    with pytest.warns(
-        SuspiciousUsageWarning, match="If summed_min is set in a flow "
+    with pytest.raises(
+        AttributeError, match="If full_load_time_min is set in a flow "
     ):
-        solph.flows.Flow(summed_min=0.3)
+        solph.flows.Flow(full_load_time_min=0.3)
 
 
 def test_min_max_values_for_bidirectional_flow():
