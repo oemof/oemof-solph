@@ -102,19 +102,13 @@ def test_infinite_values():
 
 
 def test_attributes_needing_nominal_value_get_it():
-    with pytest.raises(
-        AttributeError, match="If fix is set in a flow "
-    ):
+    with pytest.raises(AttributeError, match="If fix is set in a flow "):
         solph.flows.Flow(fix=0.3)
 
-    with pytest.raises(
-        AttributeError, match="If max is set in a flow "
-    ):
+    with pytest.raises(AttributeError, match="If max is set in a flow "):
         solph.flows.Flow(max=0.3)
 
-    with pytest.raises(
-        AttributeError, match="If min is set in a flow "
-    ):
+    with pytest.raises(AttributeError, match="If min is set in a flow "):
         solph.flows.Flow(min=0.3)
 
     with pytest.raises(
