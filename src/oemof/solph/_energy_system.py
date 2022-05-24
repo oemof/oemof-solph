@@ -163,56 +163,6 @@ class EnergySystem(es.EnergySystem):
         self.periods = self._add_periods(periods)
         self._extract_periods_years()
 
-
-def create_time_index(year, interval=1, number=None):
-    """
-    Create a datetime index for one year.
-
-    Notes
-    -----
-    To create 8760 hourly intervals for a non leap year a datetime index with
-    8761 time points need to be created. So the number of time steps is always
-    the number of intervals plus one.
-
-    Parameters
-    ----------
-    year : int
-        The year of the index.
-    interval : float
-        The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
-        interval (default: 1).
-    number : int
-        The number of time intervals. By default number is calculated to create
-        an index of one year. For a shorter or longer period the number of
-        intervals can be set by the user.
-
-    Examples
-    --------
-    >>> len(create_time_index(2014))
-    8761
-    >>> len(create_time_index(2012))  # leap year
-    8785
-    >>> len(create_time_index(2014, interval=0.5))
-    17521
-    >>> len(create_time_index(2014, interval=0.5, number=10))
-    11
-    >>> len(create_time_index(2014, number=10))
-    11
-    >>> str(create_time_index(2014, interval=0.5, number=10)[-1])
-    '2014-01-01 05:00:00'
-    >>> str(create_time_index(2014, interval=2, number=10)[-1])
-    '2014-01-01 20:00:00'
-    """
-    if number is None:
-        if calendar.isleap(year):
-            hoy = 8784
-        else:
-            hoy = 8760
-        number = round(hoy / interval)
-    return pd.date_range(
-        f"1/1/{year}", periods=number + 1, freq=f"{interval}H"
-    )
-
     def _add_periods(self, periods):
         """Returns periods to be added to the energy system
 
@@ -272,3 +222,53 @@ def create_time_index(year, interval=1, number=None):
                     periods_years[k] = v.min().year - start_year
 
         self.periods_years = periods_years
+
+
+def create_time_index(year, interval=1, number=None):
+    """
+    Create a datetime index for one year.
+
+    Notes
+    -----
+    To create 8760 hourly intervals for a non leap year a datetime index with
+    8761 time points need to be created. So the number of time steps is always
+    the number of intervals plus one.
+
+    Parameters
+    ----------
+    year : int
+        The year of the index.
+    interval : float
+        The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
+        interval (default: 1).
+    number : int
+        The number of time intervals. By default number is calculated to create
+        an index of one year. For a shorter or longer period the number of
+        intervals can be set by the user.
+
+    Examples
+    --------
+    >>> len(create_time_index(2014))
+    8761
+    >>> len(create_time_index(2012))  # leap year
+    8785
+    >>> len(create_time_index(2014, interval=0.5))
+    17521
+    >>> len(create_time_index(2014, interval=0.5, number=10))
+    11
+    >>> len(create_time_index(2014, number=10))
+    11
+    >>> str(create_time_index(2014, interval=0.5, number=10)[-1])
+    '2014-01-01 05:00:00'
+    >>> str(create_time_index(2014, interval=2, number=10)[-1])
+    '2014-01-01 20:00:00'
+    """
+    if number is None:
+        if calendar.isleap(year):
+            hoy = 8784
+        else:
+            hoy = 8760
+        number = round(hoy / interval)
+    return pd.date_range(
+        f"1/1/{year}", periods=number + 1, freq=f"{interval}H"
+    )

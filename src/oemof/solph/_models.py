@@ -32,6 +32,7 @@ from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 
 class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
+
     pass
 
 

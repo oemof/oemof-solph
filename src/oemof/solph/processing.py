@@ -255,7 +255,9 @@ def results(model, remove_last_time_point=False):
     return result
 
 
-def _extract_standard_model_result(model, df_dict, result, remove_last_time_point):
+def _extract_standard_model_result(
+    model, df_dict, result, remove_last_time_point
+):
     """Extract and return the results of a standard model
 
     * Set index to timeindex and pivot results such that values are displayed
