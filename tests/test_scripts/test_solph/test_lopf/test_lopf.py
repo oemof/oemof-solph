@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -114,7 +113,7 @@ def test_lopf(solver="cbc"):
     logging.info("Running lopf on 3-Node exmaple system")
     om.solve(solver=solver)
 
-    results = processing.results(om)
+    results = processing.results(om, remove_last_time_point=True)
 
     generators = views.node_output_by_type(results, Source)
 
@@ -125,24 +124,24 @@ def test_lopf(solver="cbc"):
 
     for key in generators_test_results.keys():
         logging.debug("Test genertor production of {0}".format(key))
-        eq_(
-            int(round(generators[key])),
-            int(round(generators_test_results[key])),
+        assert int(round(generators[key])) == int(
+            round(generators_test_results[key])
         )
 
-    eq_(
-        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"][0],
-        -40,
+    assert (
+        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"][0]
+        == -40
     )
 
-    eq_(
-        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"][0], 60
+    assert (
+        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"][0]
+        == 60
     )
 
-    eq_(
-        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"][0],
-        -20,
+    assert (
+        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"][0]
+        == -20
     )
 
     # objective function
-    eq_(round(processing.meta_results(om)["objective"]), 3200)
+    assert round(processing.meta_results(om)["objective"]) == 3200
