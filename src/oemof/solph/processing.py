@@ -209,15 +209,8 @@ def results(model, remove_last_time_point=False):
             df_dict[k] = df_dict[k].pivot(
                 columns="variable_name", values="value"
             )
-            # Add empty row at the end
-            df_dict[k] = pd.concat(
-                [
-                    df_dict[k],
-                    pd.DataFrame(data=["nan"], columns=df_dict[k].columns),
-                ],
-                ignore_index=True,
-                axis=0,
-            )
+            # Add empty row at the end df.loc[df.iloc[-1].name + 1,:] = np.nan
+            df_dict[k].loc[df_dict[k].iloc[-1].name + 1, :] = float("nan")
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
 
