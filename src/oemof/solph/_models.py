@@ -364,8 +364,8 @@ class Model(BaseModel):
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
-                        [0] * len(self.es.timeindex),
-                        range(len(self.es.timeindex)),
+                        [0] * len(self.es.timeincrement),
+                        range(len(self.es.timeincrement)),
                     )
                 ),
                 ordered=True,
@@ -379,7 +379,7 @@ class Model(BaseModel):
             ]
             self.TIMEINDEX = po.Set(
                 initialize=list(
-                    zip(flattened_list, range(len(self.es.timeindex)))
+                    zip(flattened_list, range(len(self.es.timeincrement)))
                 ),
                 ordered=True,
             )

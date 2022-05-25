@@ -643,30 +643,30 @@ class FlowBlock(ScalarBlock):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMEINDEX) + 1):
-                    if m.TIMEINDEX[index][1] > 0:
+                    if m.TIMEINDEX.at(index)[1] > 0:
                         lhs = (
                             m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ]
                             - m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX[index - 1][0],
-                                m.TIMEINDEX[index - 1][1],
+                                m.TIMEINDEX.at(index - 1)[0],
+                                m.TIMEINDEX.at(index - 1)[1],
                             ]
                         )
                         rhs = self.positive_gradient[
-                            inp, out, m.TIMEINDEX[index][1]
+                            inp, out, m.TIMEINDEX.at(index)[1]
                         ]
                         self.positive_gradient_constr.add(
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ),
                             lhs <= rhs,
                         )
@@ -677,8 +677,8 @@ class FlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ),
                             lhs == rhs,
                         )
@@ -694,30 +694,30 @@ class FlowBlock(ScalarBlock):
             """Rule definition for negative gradient constraint."""
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMEINDEX) + 1):
-                    if m.TIMEINDEX[index][1] > 0:
+                    if m.TIMEINDEX.at(index)[1] > 0:
                         lhs = (
                             m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX[index - 1][0],
-                                m.TIMEINDEX[index - 1][1],
+                                m.TIMEINDEX.at(index - 1)[0],
+                                m.TIMEINDEX.at(index - 1)[1],
                             ]
                             - m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ]
                         )
                         rhs = self.negative_gradient[
-                            inp, out, m.TIMEINDEX[index][1]
+                            inp, out, m.TIMEINDEX.at(index)[1]
                         ]
                         self.negative_gradient_constr.add(
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ),
                             lhs <= rhs,
                         )
@@ -728,8 +728,8 @@ class FlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX[index][0],
-                                m.TIMEINDEX[index][1],
+                                m.TIMEINDEX.at(index)[0],
+                                m.TIMEINDEX.at(index)[1],
                             ),
                             lhs == rhs,
                         )

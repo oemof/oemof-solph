@@ -122,12 +122,20 @@ class EnergySystem(es.EnergySystem):
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            msg = (
-                "Specifying the timeincrement and the timeindex parameter at "
-                "the same time is not allowed since these might be "
-                "conflicting to each other."
-            )
-            raise AttributeError(msg)
+            if not multi_period:
+                msg = (
+                    "Specifying the timeincrement and the timeindex parameter "
+                    "at the same time is not allowed since these might be "
+                    "conflicting to each other."
+                )
+                raise AttributeError(msg)
+            else:
+                msg = (
+                    "Ensure that your timeindex and timeincrement are "
+                    "consistent.\nIf you are not considering non-equidistant "
+                    "timeindices, consider only specifying a timeindex."
+                )
+                warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)

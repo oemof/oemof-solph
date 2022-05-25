@@ -45,6 +45,7 @@ class TestsMultiPeriodConstraint:
             groupings=solph.GROUPINGS,
             timeindex=self.date_time_index,
             timeincrement=[1] * len(self.date_time_index),
+            infer_last_interval=False,
             multi_period=True,
         )
         Node.registry = self.energysystem

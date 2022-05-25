@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
+import pandas as pd
 import pytest
 
 from oemof import solph

@@ -22,7 +22,7 @@ def test_add_periods():
         pd.date_range(start="2012-01-01", periods=8784, freq="H")
     )
     assert es.periods[1].equals(
-        pd.date_range(start="2013-01-01", periods=1216, freq="H")
+        pd.date_range(start="2013-01-01", periods=1217, freq="H")
     )
 
 
@@ -35,6 +35,7 @@ def test_extract_periods_years():
     es = EnergySystem(
         timeindex=timeindex,
         timeincrement=[1] * len(timeindex),
+        infer_last_interval=False,
         multi_period=True,
     )
     periods_years = {0: 0, 1: 21, 2: 30}
