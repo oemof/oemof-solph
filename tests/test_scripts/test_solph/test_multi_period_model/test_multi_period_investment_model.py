@@ -49,6 +49,7 @@ def test_multi_period_investment_model(solver="cbc"):
             timeindex=timeindex,
             timeincrement=[1] * len(timeindex),
             multi_period=True,
+            infer_last_interval=False,
         )
 
         # Create buses

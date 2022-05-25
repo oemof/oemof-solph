@@ -220,51 +220,51 @@ c_u_InvestmentFlowBlock_max(storage5_electricityBus_2_5)_:
 +1 flow(storage5_electricityBus_2_5)
 <= 0
 
-c_e_GenericStorageBlock_balance_first(storage5)_:
--1 GenericStorageBlock_init_content(storage5)
-+1 GenericStorageBlock_storage_content(storage5_0)
+c_e_GenericStorageBlock_balance(storage5_0_0)_:
+-1 GenericStorageBlock_storage_content(storage5_0)
++1 GenericStorageBlock_storage_content(storage5_1)
 -1 flow(electricityBus_storage5_0_0)
 +1 flow(storage5_electricityBus_0_0)
 = 0
 
 c_e_GenericStorageBlock_balance(storage5_0_1)_:
--1 GenericStorageBlock_storage_content(storage5_0)
-+1 GenericStorageBlock_storage_content(storage5_1)
+-1 GenericStorageBlock_storage_content(storage5_1)
++1 GenericStorageBlock_storage_content(storage5_2)
 -1 flow(electricityBus_storage5_0_1)
 +1 flow(storage5_electricityBus_0_1)
 = 0
 
 c_e_GenericStorageBlock_balance(storage5_1_2)_:
--1 GenericStorageBlock_storage_content(storage5_1)
-+1 GenericStorageBlock_storage_content(storage5_2)
+-1 GenericStorageBlock_storage_content(storage5_2)
++1 GenericStorageBlock_storage_content(storage5_3)
 -1 flow(electricityBus_storage5_1_2)
 +1 flow(storage5_electricityBus_1_2)
 = 0
 
 c_e_GenericStorageBlock_balance(storage5_1_3)_:
--1 GenericStorageBlock_storage_content(storage5_2)
-+1 GenericStorageBlock_storage_content(storage5_3)
+-1 GenericStorageBlock_storage_content(storage5_3)
++1 GenericStorageBlock_storage_content(storage5_4)
 -1 flow(electricityBus_storage5_1_3)
 +1 flow(storage5_electricityBus_1_3)
 = 0
 
 c_e_GenericStorageBlock_balance(storage5_2_4)_:
--1 GenericStorageBlock_storage_content(storage5_3)
-+1 GenericStorageBlock_storage_content(storage5_4)
+-1 GenericStorageBlock_storage_content(storage5_4)
++1 GenericStorageBlock_storage_content(storage5_5)
 -1 flow(electricityBus_storage5_2_4)
 +1 flow(storage5_electricityBus_2_4)
 = 0
 
 c_e_GenericStorageBlock_balance(storage5_2_5)_:
--1 GenericStorageBlock_storage_content(storage5_4)
-+1 GenericStorageBlock_storage_content(storage5_5)
+-1 GenericStorageBlock_storage_content(storage5_5)
++1 GenericStorageBlock_storage_content(storage5_6)
 -1 flow(electricityBus_storage5_2_5)
 +1 flow(storage5_electricityBus_2_5)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage5)_:
--1 GenericStorageBlock_init_content(storage5)
-+1 GenericStorageBlock_storage_content(storage5_5)
+-1 GenericStorageBlock_storage_content(storage5_0)
++1 GenericStorageBlock_storage_content(storage5_6)
 = 0
 
 c_e_GenericStorageBlock_power_coupled(storage5_0)_:
@@ -334,5 +334,5 @@ bounds
    0 <= GenericStorageBlock_storage_content(storage5_3) <= 10000
    0 <= GenericStorageBlock_storage_content(storage5_4) <= 10000
    0 <= GenericStorageBlock_storage_content(storage5_5) <= 10000
-   0 <= GenericStorageBlock_init_content(storage5) <= 10000
+   0 <= GenericStorageBlock_storage_content(storage5_6) <= 10000
 end

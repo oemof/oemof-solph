@@ -680,12 +680,12 @@ class SinkDSMOemofBlock(ScalarBlock):
             """
             for g in group:
                 intervals = range(
-                    m.TIMESTEPS[1], m.TIMESTEPS[-1], g.shift_interval
+                    m.TIMESTEPS.at(1), m.TIMESTEPS.at(-1), g.shift_interval
                 )
 
                 for interval in intervals:
-                    if (interval + g.shift_interval - 1) > m.TIMESTEPS[-1]:
-                        timesteps = range(interval, m.TIMESTEPS[-1] + 1)
+                    if (interval + g.shift_interval - 1) > m.TIMESTEPS.at(-1):
+                        timesteps = range(interval, m.TIMESTEPS.at(-1) + 1)
                     else:
                         timesteps = range(
                             interval, interval + g.shift_interval
@@ -1149,12 +1149,12 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             """
             for g in group:
                 intervals = range(
-                    m.TIMESTEPS[1], m.TIMESTEPS[-1], g.shift_interval
+                    m.TIMESTEPS.at(1), m.TIMESTEPS.at(-1), g.shift_interval
                 )
 
                 for interval in intervals:
-                    if (interval + g.shift_interval - 1) > m.TIMESTEPS[-1]:
-                        timesteps = range(interval, m.TIMESTEPS[-1] + 1)
+                    if (interval + g.shift_interval - 1) > m.TIMESTEPS.at(-1):
+                        timesteps = range(interval, m.TIMESTEPS.at(-1) + 1)
                     else:
                         timesteps = range(
                             interval, interval + g.shift_interval
@@ -1206,7 +1206,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS[-1]]
+                        <= self.total[g, m.PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 
@@ -1555,7 +1555,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         )
 
                     # main use case
-                    elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
 
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, p, t]
@@ -1589,7 +1589,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(
-                                    t - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    t - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             - self.dsm_do_shed[g, t]
@@ -1634,7 +1634,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -1658,7 +1658,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         rhs = sum(
                             self.dsm_do_shift[g, t, tt]
                             for tt in range(
-                                t - g.delay_time, m.TIMESTEPS[-1] + 1
+                                t - g.delay_time, m.TIMESTEPS.at(-1) + 1
                             )
                         )
 
@@ -1720,7 +1720,9 @@ class SinkDSMDIWBlock(ScalarBlock):
                         block.dsm_do_constraint.add((g, tt), (lhs <= rhs))
 
                     # main use case
-                    elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif (
+                        g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
+                    ):
 
                         # DSM down
                         lhs = (
@@ -1746,7 +1748,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                             sum(
                                 self.dsm_do_shift[g, t, tt]
                                 for t in range(
-                                    tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    tt - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             + self.dsm_do_shed[g, tt]
@@ -1794,7 +1796,9 @@ class SinkDSMDIWBlock(ScalarBlock):
                         # add constraint
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
-                    elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif (
+                        g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
+                    ):
 
                         # DSM up/down
                         lhs = (
@@ -1824,7 +1828,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                             + sum(
                                 self.dsm_do_shift[g, t, tt]
                                 for t in range(
-                                    tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    tt - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             + self.dsm_do_shed[g, tt]
@@ -1856,7 +1860,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     if g.recovery_time_shift not in [None, 0]:
 
                         # main use case
-                        if t <= m.TIMESTEPS[-1] - g.recovery_time_shift:
+                        if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shift:
 
                             # DSM up
                             lhs = sum(
@@ -1879,7 +1883,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
-                                for tt in range(t, m.TIMESTEPS[-1] + 1)
+                                for tt in range(t, m.TIMESTEPS.at(-1) + 1)
                             )
                             # max energy shift for shifting process
                             rhs = (
@@ -1915,7 +1919,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     if g.shed_eligibility:
 
                         # main use case
-                        if t <= m.TIMESTEPS[-1] - g.recovery_time_shed:
+                        if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shed:
 
                             # DSM up
                             lhs = sum(
@@ -1940,7 +1944,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
-                                for tt in range(t, m.TIMESTEPS[-1] + 1)
+                                for tt in range(t, m.TIMESTEPS.at(-1) + 1)
                             )
                             # max energy shift for shifting process
                             rhs = (
@@ -2385,7 +2389,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
 
                     # main use case
-                    elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
 
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, p, t]
@@ -2418,7 +2422,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
                                 for tt in range(
-                                    t - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    t - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             - self.dsm_do_shed[g, t]
@@ -2463,7 +2467,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         block.dsm_updo_constraint.add((g, t), (lhs == rhs))
 
                     # main use case
-                    elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
 
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
@@ -2487,7 +2491,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         rhs = sum(
                             self.dsm_do_shift[g, t, tt]
                             for tt in range(
-                                t - g.delay_time, m.TIMESTEPS[-1] + 1
+                                t - g.delay_time, m.TIMESTEPS.at(-1) + 1
                             )
                         )
 
@@ -2553,7 +2557,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         block.dsm_do_constraint.add((g, p, tt), (lhs <= rhs))
 
                     # main use case
-                    elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif (
+                        g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
+                    ):
 
                         # DSM down
                         lhs = (
@@ -2583,7 +2589,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             sum(
                                 self.dsm_do_shift[g, t, tt]
                                 for t in range(
-                                    tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    tt - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             + self.dsm_do_shed[g, tt]
@@ -2638,7 +2644,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         # add constraint
                         block.C2_constraint.add((g, p, tt), (lhs <= rhs))
 
-                    elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
+                    elif (
+                        g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
+                    ):
 
                         # DSM up/down
                         lhs = (
@@ -2671,7 +2679,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             + sum(
                                 self.dsm_do_shift[g, t, tt]
                                 for t in range(
-                                    tt - g.delay_time, m.TIMESTEPS[-1] + 1
+                                    tt - g.delay_time, m.TIMESTEPS.at(-1) + 1
                                 )
                             )
                             + self.dsm_do_shed[g, tt]
@@ -2706,7 +2714,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     if g.recovery_time_shift not in [None, 0]:
 
                         # main use case
-                        if t <= m.TIMESTEPS[-1] - g.recovery_time_shift:
+                        if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shift:
 
                             # DSM up
                             lhs = sum(
@@ -2732,7 +2740,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
-                                for tt in range(t, m.TIMESTEPS[-1] + 1)
+                                for tt in range(t, m.TIMESTEPS.at(-1) + 1)
                             )
                             # max energy shift for shifting process
                             rhs = (
@@ -2771,7 +2779,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     if g.shed_eligibility:
 
                         # main use case
-                        if t <= m.TIMESTEPS[-1] - g.recovery_time_shed:
+                        if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shed:
 
                             # DSM up
                             lhs = sum(
@@ -2797,7 +2805,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
-                                for tt in range(t, m.TIMESTEPS[-1] + 1)
+                                for tt in range(t, m.TIMESTEPS.at(-1) + 1)
                             )
                             # max energy shift for shifting process
                             rhs = (
@@ -2850,7 +2858,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS[-1]]
+                        <= self.total[g, m.PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 
@@ -3361,7 +3369,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                                 )
 
                             # no balancing for the first timestep
-                            elif t == m.TIMESTEPS[1]:
+                            elif t == m.TIMESTEPS.at(1):
                                 lhs = self.balance_dsm_do[g, h, t]
                                 rhs = 0
 
@@ -3413,7 +3421,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                                 )
 
                             # no balancing for the first timestep
-                            elif t == m.TIMESTEPS[1]:
+                            elif t == m.TIMESTEPS.at(1):
                                 lhs = self.balance_dsm_up[g, h, t]
                                 rhs = 0
 
@@ -3451,7 +3459,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     if g.fixes:
                         for h in g.delay_time:
 
-                            if t > m.TIMESTEPS[-1] - h:
+                            if t > m.TIMESTEPS.at(-1) - h:
                                 # no load reduction anymore (dsm_do_shift = 0)
                                 lhs = self.dsm_do_shift[g, h, t]
                                 rhs = 0
@@ -3476,7 +3484,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     if g.fixes:
                         for h in g.delay_time:
 
-                            if t > m.TIMESTEPS[-1] - h:
+                            if t > m.TIMESTEPS.at(-1) - h:
                                 # no load increase anymore (dsm_up = 0)
                                 lhs = self.dsm_up[g, h, t]
                                 rhs = 0
@@ -4512,7 +4520,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                                 )
 
                             # no balancing for the first timestep
-                            elif t == m.TIMESTEPS[1]:
+                            elif t == m.TIMESTEPS.at(1):
                                 lhs = self.balance_dsm_do[g, h, t]
                                 rhs = 0
 
@@ -4564,7 +4572,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                                 )
 
                             # no balancing for the first timestep
-                            elif t == m.TIMESTEPS[1]:
+                            elif t == m.TIMESTEPS.at(1):
                                 lhs = self.balance_dsm_up[g, h, t]
                                 rhs = 0
 
@@ -4602,7 +4610,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     if g.fixes:
                         for h in g.delay_time:
 
-                            if t > m.TIMESTEPS[-1] - h:
+                            if t > m.TIMESTEPS.at(-1) - h:
                                 # no load reduction anymore (dsm_do_shift = 0)
                                 lhs = self.dsm_do_shift[g, h, t]
                                 rhs = 0
@@ -4627,7 +4635,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     if g.fixes:
                         for h in g.delay_time:
 
-                            if t > m.TIMESTEPS[-1] - h:
+                            if t > m.TIMESTEPS.at(-1) - h:
                                 # no load increase anymore (dsm_up = 0)
                                 lhs = self.dsm_up[g, h, t]
                                 rhs = 0
@@ -5122,7 +5130,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS[-1]]
+                        <= self.total[g, m.PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 

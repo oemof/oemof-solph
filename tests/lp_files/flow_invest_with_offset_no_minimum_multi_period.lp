@@ -159,7 +159,7 @@ c_u_InvestmentFlowBlock_max(electricityBus_source_nonconvex_invest_2_5)_:
 +1 flow(electricityBus_source_nonconvex_invest_2_5)
 <= 0
 
-c_u_InvestmentFlowBlock_summed_max(electricityBus_source_nonconvex_invest)_:
+c_u_InvestmentFlowBlock_full_load_time_max(electricityBus_source_nonconvex_invest)_:
 -2.2999999999999998 InvestmentFlowBlock_total(electricityBus_source_nonconvex_invest_0)
 -2.2999999999999998 InvestmentFlowBlock_total(electricityBus_source_nonconvex_invest_1)
 -2.2999999999999998 InvestmentFlowBlock_total(electricityBus_source_nonconvex_invest_2)

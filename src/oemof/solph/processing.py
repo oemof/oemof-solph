@@ -106,7 +106,7 @@ def create_dataframe(om):
     df["timestep"] = df["oemof_tuple"].map(get_timestep)
     df["oemof_tuple"] = df["oemof_tuple"].map(remove_timestep)
 
-    # Hack: Use another call of remove timestep to get rid of period not needed
+    # Use another call of remove timestep to get rid of period not needed
     df.loc[df["variable_name"] == "flow", "oemof_tuple"] = df.loc[
         df["variable_name"] == "flow", "oemof_tuple"
     ].map(remove_timestep)
@@ -152,6 +152,17 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
+def set_sequences_index(df, result_index):
+    try:
+        df.index = result_index
+    except ValueError:
+        try:
+            df = df[:-1]
+            df.index = result_index
+        except:
+            raise ValueError("Results extraction failed!")
+
+
 def results(model, remove_last_time_point=False):
     """Create a nested result dictionary from the result DataFrame
 
@@ -190,10 +201,10 @@ def results(model, remove_last_time_point=False):
         same length as the TIMESTEP (interval) variables without getting
         nan-values. By default the last time point is removed if it has not
         been defined by the user in the EnergySystem but inferred. If all
-        time points has been defined explicitly by the user the last time point
-        will not be removed by default. In that case all interval variables
-        will get one row with nan-values to have the same index for all
-        variables.
+        time points have been defined explicitly by the user the last time
+        point will not be removed by default. In that case all interval
+        variables will get one row with nan-values to have the same index
+        for all variables.
     """
     # Extraction steps that are the same for both model types
     df = create_dataframe(model)
@@ -218,7 +229,9 @@ def results(model, remove_last_time_point=False):
 
     # Standard model results extraction
     if not model.es.multi_period:
-        result = _extract_standard_model_result(model, df_dict, result)
+        result = _extract_standard_model_result(
+            df_dict, result, result_index, remove_last_time_point
+        )
         scalars_col = "scalars"
 
     # Results extraction for a multi-period model
@@ -230,6 +243,8 @@ def results(model, remove_last_time_point=False):
             df_dict,
             period_indexed,
             result,
+            result_index,
+            remove_last_time_point,
         )
         scalars_col = "period_scalars"
 
@@ -243,7 +258,7 @@ def results(model, remove_last_time_point=False):
                 model.dual[model.BusBlock.balance[bus, p, t]]
                 for _, p, t in timeindex
             ]
-            df = pd.DataFrame({"duals": duals}, index=model.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
@@ -256,10 +271,11 @@ def results(model, remove_last_time_point=False):
 
 
 def _extract_standard_model_result(
-    model, df_dict, result, remove_last_time_point
+    df_dict, result, result_index, remove_last_time_point
 ):
     """Extract and return the results of a standard model
 
+    * Optionally remove last time point or include it elsewise.
     * Set index to timeindex and pivot results such that values are displayed
       for the respective variables. Reindex with the energy system's timeindex.
     * Filter for columns with nan values to retrieve scalar variables. Split
@@ -267,19 +283,21 @@ def _extract_standard_model_result(
 
     Parameters
     ----------
-    model : oemof.solph.models.Model
-        The optimization model
     df_dict : dict
         dictionary of results DataFrames
     result : dict
         dictionary to store the results
+    result_index : pd.DatetimeIndex
+        timeindex to use for the results (derived from EnergySystem)
+    remove_last_time_point : bool
+        if True, remove the last time point
 
     Returns
     -------
     result : dict
         dictionary with results stored
     """
-    if remove_last_time_point is True:
+    if remove_last_time_point:
         # The values of intervals belong to the time at the beginning of the
         # interval.
         for k in df_dict:
@@ -303,52 +321,13 @@ def _extract_standard_model_result(
     return result
 
 
-def _do_basic_results_extraction(om, df_dict, k, reindex=True):
-    """Do a basic iterative results extraction for node k
-
-    Set index to timeindex and pivot results such that values are displayed
-    for the respective variables. Use energy system's timeindex as index
-    if reindex = True (default; used for a standard model).
-
-    Parameters
-    ----------
-    om : oemof.solph.models.Model
-        The optimization model
-    df_dict : dict
-        dictionary of results DataFrames
-    k :
-        oemof tuple
-    reindex : boolean
-        Reindex using the energy system's timeindex as an index if True
-
-    Returns
-    -------
-    df_dict[k] : pd.DataFrame
-        Manipulated results for node k
-    """
-    df_dict[k].set_index("timestep", inplace=True)
-    df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-
-    if reindex:
-        try:
-            df_dict[k].index = om.es.timeindex
-        except ValueError as e:
-            msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
-                " your input data."
-            )
-            raise type(e)(
-                str(e) + msg.format(k[0].label, k[1].label)
-            ).with_traceback(sys.exc_info()[2])
-
-    return df_dict[k]
-
-
 def _extract_multi_period_model_result(
-    om,
+    model,
     df_dict,
     period_indexed=None,
     result=None,
+    result_index=None,
+    remove_last_time_point=False,
 ):
     """Extract and return the results of a multi-period model
 
@@ -357,7 +336,7 @@ def _extract_multi_period_model_result(
 
     Parameters
     ----------
-    om : oemof.solph.models.Model
+    model : oemof.solph.models.Model
         The optimization model
     df_dict : dict
         dictionary of results DataFrames
@@ -365,6 +344,10 @@ def _extract_multi_period_model_result(
         list of variables that are indexed by periods
     result : dict
         dictionary to store the results
+    result_index : pd.DatetimeIndex
+        timeindex to use for the results (derived from EnergySystem)
+    remove_last_time_point : bool
+        if True, remove the last time point
 
     Returns
     -------
@@ -372,23 +355,25 @@ def _extract_multi_period_model_result(
         dictionary with results stored
     """
     for k in df_dict:
-        df_dict[k] = _do_basic_results_extraction(
-            om, df_dict, k, reindex=False
-        )
+        df_dict[k].set_index("timestep", inplace=True)
+        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         # Split data set
         period_cols = [
             col for col in df_dict[k].columns if col in period_indexed
         ]
         # map periods to their start years for displaying period results
         d = {
-            key: val + om.es.periods[0].min().year
-            for key, val in om.es.periods_years.items()
+            key: val + model.es.periods[0].min().year
+            for key, val in model.es.periods_years.items()
         }
         period_scalars = df_dict[k].loc[:, period_cols].dropna()
         sequences = df_dict[k].loc[
             :, [col for col in df_dict[k].columns if col not in period_cols]
         ]
-        sequences.index = om.es.timeindex
+        if remove_last_time_point:
+            sequences.index = set_sequences_index(sequences, result_index[:-1])
+        else:
+            sequences.index = set_sequences_index(sequences, result_index)
         if period_scalars.empty:
             period_scalars = pd.DataFrame(index=d.values())
         try:

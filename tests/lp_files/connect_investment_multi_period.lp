@@ -14,12 +14,12 @@ objective:
 
 s.t.
 
-c_e_equate_InvestmentFlowBlock_invest(Source_Bus1_0)_InvestmentFlowBlock_invest(Bus1_Sink_0)_:
+c_e__equate_InvestmentFlowBlock_invest(Source_Bus1_0)_InvestmentFlowBlock_invest(Bus1_Sink_0)__:
 -1 InvestmentFlowBlock_invest(Bus1_Sink_0)
 +2 InvestmentFlowBlock_invest(Source_Bus1_0)
 = 0
 
-c_e_equate_InvestmentFlowBlock_invest(Source_Bus1_0)_GenericInvestmentStorageBlock_invest(storage_0)_:
+c_e__equate_InvestmentFlowBlock_invest(Source_Bus1_0)_GenericInvestmentStorageBlock_invest(storage_0)__:
 -1 GenericInvestmentStorageBlock_invest(storage_0)
 +1 InvestmentFlowBlock_invest(Source_Bus1_0)
 = 0
