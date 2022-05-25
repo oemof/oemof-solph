@@ -174,8 +174,10 @@ class Flow(on.Edge):
             "full_load_time_min",
             "max",
             "min",
+            # --- BEGIN: To be removed for versions >= v0.6 ---
             "summed_max",
             "summed_min",
+            # --- END ---
         ]
         keys = [k for k in kwargs if k != "label"]
 
