@@ -258,7 +258,11 @@ def results(model, remove_last_time_point=False):
                 model.dual[model.BusBlock.balance[bus, p, t]]
                 for _, p, t in timeindex
             ]
-            df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
+            if not model.es.multi_period:
+                df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
+            # TODO: Align with standard model
+            else:
+                df = pd.DataFrame({"duals": duals}, index=result_index)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
@@ -371,9 +375,9 @@ def _extract_multi_period_model_result(
             :, [col for col in df_dict[k].columns if col not in period_cols]
         ]
         if remove_last_time_point:
-            sequences.index = set_sequences_index(sequences, result_index[:-1])
+            set_sequences_index(sequences, result_index[:-1])
         else:
-            sequences.index = set_sequences_index(sequences, result_index)
+            set_sequences_index(sequences, result_index)
         if period_scalars.empty:
             period_scalars = pd.DataFrame(index=d.values())
         try:
