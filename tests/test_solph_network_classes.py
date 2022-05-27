@@ -94,7 +94,7 @@ def test_fixed_costs_warning():
 
 
 def test_flow_with_fix_and_min_max():
-    msg = "It is not allowed to define min/max if fix is defined."
+    msg = "It is not allowed to define `min`/`max` if `fix` is defined."
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(fix=[1, 3], min=[0, 5])
     with pytest.raises(AttributeError, match=msg):
@@ -103,14 +103,49 @@ def test_flow_with_fix_and_min_max():
         solph.flows.Flow(fix=[1, 3], max=[0, 5], min=[4, 9])
 
 
+def test_infinite_values():
+    msg1 = "nominal_value must be a finite value"
+    msg2 = "max must be a finite value"
+    with pytest.raises(ValueError, match=msg1):
+        solph.flows.Flow(nominal_value=float("+inf"))
+    with pytest.raises(ValueError, match=msg2):
+        solph.flows.Flow(nominal_value=1, max=float("+inf"))
+
+
+def test_attributes_needing_nominal_value_get_it():
+    with pytest.raises(AttributeError, match="If fix is set in a flow "):
+        solph.flows.Flow(fix=0.3)
+
+    with pytest.raises(AttributeError, match="If max is set in a flow "):
+        solph.flows.Flow(max=0.3)
+
+    with pytest.raises(AttributeError, match="If min is set in a flow "):
+        solph.flows.Flow(min=0.3)
+
+    with pytest.raises(
+        AttributeError, match="If full_load_time_max is set in a flow "
+    ):
+        solph.flows.Flow(full_load_time_max=0.3)
+
+    with pytest.raises(
+        AttributeError, match="If full_load_time_min is set in a flow "
+    ):
+        solph.flows.Flow(full_load_time_min=0.3)
+
+
 def test_min_max_values_for_bidirectional_flow():
-    a = solph.flows.Flow(bidirectional=True)  # use default values
-    b = solph.flows.Flow(bidirectional=True, min=-0.9, max=0.9)
+    a = solph.flows.Flow(
+        bidirectional=True,
+    )  # use default values
+    b = solph.flows.Flow(
+        bidirectional=True, nominal_value=1, min=-0.8, max=0.9
+    )
     assert a.bidirectional
     assert a.max[0] == 1
     assert a.min[0] == -1
+    assert b.bidirectional
     assert b.max[0] == 0.9
-    assert b.min[0] == -0.9
+    assert b.min[0] == -0.8
 
 
 def test_deprecated_actual_value():
@@ -128,6 +163,6 @@ def test_warning_fixed_still_used():
         "The `fixed` attribute does not change anything."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.flows.Flow(fixed=True)
+        solph.flows.Flow(nominal_value=1, fixed=True)
         assert len(w) != 0
         assert msg == str(w[-1].message)
