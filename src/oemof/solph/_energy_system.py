@@ -19,8 +19,8 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from oemof.tools import debugging
 from oemof.network import energy_system as es
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):
