@@ -159,7 +159,7 @@ def set_sequences_index(df, result_index):
         try:
             df = df[:-1]
             df.index = result_index
-        except:
+        except ValueError:
             raise ValueError("Results extraction failed!")
 
 

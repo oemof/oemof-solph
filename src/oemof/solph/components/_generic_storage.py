@@ -22,10 +22,9 @@ SPDX-License-Identifier: MIT
 from warnings import warn
 
 from oemof.network import network
-from pyomo.core.base.block import ScalarBlock
 from oemof.tools import debugging
 from oemof.tools import economics
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint

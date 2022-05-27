@@ -22,7 +22,6 @@ from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
-from oemof.solph._plumbing import sequence
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
 from oemof.solph.flows._flow import FlowBlock
