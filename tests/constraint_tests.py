@@ -908,10 +908,11 @@ class TestsConstraint:
                 )
             },
         )
-        om = self.get_om()
-        solph.constraints.set_idle_time(om, (source, bus1), (bus1, sink), 1)
 
-        self.compare_lp_files("set_flow_idle.lp", my_om=om)
+        om = self.get_om()
+        solph.constraints.set_idle_time(om, (source, bus1), (bus1, sink), n=1)
+
+        self.compare_lp_files("set_idle_time.lp", my_om=om)
 
 
     def test_gradient(self):
