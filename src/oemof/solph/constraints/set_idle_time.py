@@ -15,6 +15,12 @@ def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
     Enforces f1 to be inactive for n timesteps before f2 can be active.
 
     For each timestep status of f2 can only be "on" if f1 has been off the previous n timesteps.
+
+    **Constraint:**
+
+    .. math:: X_2(t) \cdot \sum_{s=0}^t X_1(s) = 0 \forall t < n
+    .. math:: X_2(t) \cdot \sum_{s=t-n}^t X_1(s) = 0 \forall t \le n
+
     """
     # make sure that idle time is not longer than number of timesteps
     n_timesteps = len(model.TIMESTEPS)
