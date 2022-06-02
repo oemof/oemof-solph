@@ -7,7 +7,6 @@ SPDX-FileCopyrightText: Jann Launer
 SPDX-License-Identifier: MIT
 """
 from pyomo import environ as po
-from pyomo.core.util import prod
 
 
 def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
