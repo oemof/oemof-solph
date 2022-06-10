@@ -11,13 +11,9 @@ to understand the plot.
 Installation requirements
 -------------------------
 
-This example requires the version v0.5.x of oemof. Install by:
+This example requires the version v0.5.x of oemof.solph:
 
-    pip install 'oemof.solph>=0.5,<0.6'
-
-Optional:
-
-    pip install matplotlib
+    pip install 'oemof.solph[examples]>=0.5,<0.6'
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
