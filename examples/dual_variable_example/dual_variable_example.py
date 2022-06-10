@@ -29,21 +29,16 @@ SPDX-License-Identifier: MIT
 # imports
 ###############################################################################
 
-import logging
-import os
-import pprint as pp
-
 import pandas as pd
-from oemof.solph import EnergySystem, Model, buses
-from oemof.solph import components as cmp
-from oemof.solph import flows, processing, views
+from matplotlib import pyplot as plt
 from oemof.tools import logger
 
-try:
-    import matplotlib.pyplot as plt
-except ImportError:
-    plt = None
-
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import flows
+from oemof.solph import processing
 
 solver = "cbc"  # 'glpk', 'gurobi',....
 debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
