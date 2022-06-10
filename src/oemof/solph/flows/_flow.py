@@ -14,7 +14,7 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
-
+import math
 from warnings import warn
 
 from oemof.network import network as on
@@ -97,7 +97,7 @@ class Flow(on.Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_value=2, fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
@@ -148,6 +148,17 @@ class Flow(on.Edge):
             "positive_gradient": {"ub": None},
             "negative_gradient": {"ub": None},
         }
+        need_nominal_value = [
+            "fix",
+            "full_load_time_max",
+            "full_load_time_min",
+            "max",
+            "min",
+            # --- BEGIN: To be removed for versions >= v0.6 ---
+            "summed_max",
+            "summed_min",
+            # --- END ---
+        ]
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
@@ -175,7 +186,7 @@ class Flow(on.Edge):
             kwargs.get("min") is not None or kwargs.get("max") is not None
         ):
             raise AttributeError(
-                "It is not allowed to define min/max if fix is defined."
+                "It is not allowed to define `min`/`max` if `fix` is defined."
             )
 
         # Set default value for min and max
@@ -225,6 +236,24 @@ class Flow(on.Edge):
                 "Investment flows cannot be combined with "
                 + "nonconvex flows!"
             )
+
+        infinite_error_msg = (
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
+        )
+        if not self.investment:
+            if self.nominal_value is None:
+                for attr in need_nominal_value:
+                    if kwargs.get(attr) is not None:
+                        raise AttributeError(
+                            "If {} is set in a flow (except InvestmentFlow), "
+                            "nominal_value must be set as well.\n"
+                            "Otherwise, it won't have any effect.".format(attr)
+                        )
+            elif not math.isfinite(self.nominal_value):
+                raise ValueError(infinite_error_msg.format("nominal_value"))
+        if not math.isfinite(self.max[0]):
+            raise ValueError(infinite_error_msg.format("max"))
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
