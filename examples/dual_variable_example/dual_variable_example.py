@@ -41,7 +41,6 @@ from oemof.solph import flows
 from oemof.solph import processing
 
 solver = "cbc"  # 'glpk', 'gurobi',....
-debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
 number_of_time_steps = 48
 solver_verbose = False  # show/hide solver output
 
