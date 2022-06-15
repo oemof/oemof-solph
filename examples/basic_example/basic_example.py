@@ -57,6 +57,7 @@ import logging
 import os
 import pprint as pp
 import warnings
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -239,7 +240,7 @@ print("")
 print("********* State of Charge (slice) *********")
 print(
     results[(storage, None)]["sequences"][
-        "2012-02-25 08:00:00":"2012-02-26 15:00:00"
+        datetime(2012, 2, 25, 8, 0, 0) : datetime(2012, 2, 26, 3, 0, 0)
     ]
 )
 print("")

@@ -97,7 +97,6 @@ import warnings
 from collections import namedtuple
 
 import pandas as pd
-from oemof.network import graph
 from oemof.tools import logger
 
 from oemof.solph import EnergySystem
