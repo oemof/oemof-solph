@@ -1,0 +1,23 @@
+[tool.black]
+line-length = 79
+target-version = ['py37', 'py38']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | ci
+)/
+'''
+
+[build-system]
+requires = ["setuptools<60.0", "wheel"]
+build-backend = "setuptools.build_meta"

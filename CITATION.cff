@@ -1,0 +1,96 @@
+# YAML 1.2
+---
+cff-version: "1.1.0"
+doi: "10.5281/zenodo.596235"
+license: MIT
+message: "If you use this software, please cite it using these metadata."
+title: "oemof.solph"
+abstract: "The oemof.solph package is part of the Open energy modelling framework (oemof). This an organisational framework to bundle tools for energy (system) modelling. oemof-solph is a model generator for energy system modelling and optimisation."
+authors:
+  -
+    family-names: Krien
+    given-names: Uwe
+  -
+    family-names: Kaldemeyer
+    given-names: Cord
+  -
+    family-names: "Günther"
+    given-names: Stephan
+  -
+    family-names: Simon
+    given-names: Hilpert
+  -
+    given-names: jnnr
+  -
+    family-names: "Möller"
+    given-names: Caroline
+  -
+    family-names: "Schönfeldt"
+    given-names: Patrik
+  -
+    family-names: "Röder"
+    given-names: Johannes
+  -
+    given-names: gplssm
+  -
+    given-names: steffenGit
+  -
+    family-names: Schachler
+    given-names: Birgit
+  -
+    given-names: cswh
+  -
+    given-names: henhuy
+  -
+    family-names: Pl
+    given-names: Franzi
+  -
+    family-names: Endres
+    given-names: Julian
+  -
+    family-names: TU
+    given-names: Fabian
+  -
+    given-names: pkassing
+  -
+    family-names: Lancien
+    given-names: Bryan
+  -
+    family-names: Kochems
+    given-names: Johannes
+  -
+    familiy-names: Koehl
+    given-names: Caterina
+  -
+    given-names: nesnoj
+  -
+    given-names: lmilletb
+  -
+    given-names: mloenneberga
+  -
+    family-names: Delfs
+    given-names: Jens-Olaf
+  -
+    given-names: RD-OTH
+  -
+    family-names: Francesco
+    given-names: Witte
+  -
+    given-names: elisapap
+  -
+    family-names: Gaudchau
+    given-names: Elisa
+  -
+    family-names: Smalla
+    given-names: Tjark
+  -
+    given-names: escalacjo
+  -
+    given-names: ajimenezUCLA
+  -
+    given-names: chrisflei
+  -
+    given-names: stefansc1
+  -
+    given-names: jakob-wo
+...

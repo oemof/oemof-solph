@@ -1,0 +1,38 @@
+name: Black
+
+on:
+  push:
+    branches:
+      - master
+      - dev
+      - v0.5
+  pull_request:
+
+jobs:
+  run-linters:
+    name: Run linters
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.9
+
+      - name: Install Python dependencies
+        run: pip install black flake8
+
+      - name: Run linters
+        uses: samuelmeuli/lint-action@v1
+        with:
+          github_token: ${{ secrets.github_token }}
+          # Enable linters
+          black: true
+          flake8: false
+          # Mark the following line true if you want linters to attempt to autocorrect your code
+          auto_fix: false
+          git_name: "Greene Lab Linter"
+          git_email: "csgreene@upenn.edu"

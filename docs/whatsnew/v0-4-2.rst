@@ -1,0 +1,4 @@
+v0.4.2 (May, 11, 2021)
+----------------------
+
+* Exclude Pyomo version 5.7.3, because this version causes an unusual high computing time to create a model.

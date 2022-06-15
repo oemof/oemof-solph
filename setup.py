@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
-
 import io
 import re
 from glob import glob
@@ -23,20 +20,21 @@ def read(*names, **kwargs):
         return fh.read()
 
 
+long_description = "%s" % (
+    re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
+        "", read("README.rst")
+    )
+)
+
+
 setup(
-    name="oemof-solph",
-    version="0.4.0.dev0",
+    name="oemof.solph",
+    version="0.4.5.dev0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
     ),
-    long_description="%s\n%s"
-    % (
-        re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
-            "", read("README.rst")
-        ),
-        re.sub(":[a-z]+:`~?(.*?)`", r"``\1``", read("CHANGELOG.rst")),
-    ),
+    long_description=long_description,
     long_description_content_type="text/x-rst",
     author="oemof developer group",
     author_email="contact@oemof.org",
@@ -49,49 +47,55 @@ setup(
     classifiers=[
         # complete classifier list:
         # http://pypi.python.org/pypi?%3Aaction=list_classifiers
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
         "License :: OSI Approved :: MIT License",
         "Operating System :: Unix",
         "Operating System :: POSIX",
         "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Utilities",
     ],
     project_urls={
-        "Documentation": "https://oemofsolph.readthedocs.io/",
+        "Documentation": "https://oemof-solph.readthedocs.io/",
         "Changelog": (
-            "https://oemofsolph.readthedocs.io/en/latest/changelog.html"
+            "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
         ),
-        "Issue Tracker": "https://github.com/uvchik/oemof.solph/issues",
+        "Issue Tracker": "https://github.com/oemof/oemof-solph/issues",
     },
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    python_requires=">=3.6",
+    python_requires=">=3.7",
     install_requires=[
         "blinker",
         "dill",
         "numpy",
         "pandas",
-        "pyomo >= 4.4.0, < 6.0",
+        "pyomo >= 6.0.0, < 7.0",
         "networkx",
-        ("oemof.tools@https://github.com/oemof/oemof.tools/archive/master.zip"
-         ),
-        ("oemof.network@https://github.com/oemof/oemof.network/archive/"
-         "uvchik-test-branch.zip"),
+        (
+            "oemof.tools@https://github.com/oemof/oemof.tools/archive/feature/"
+            "set-minimal-lggin-level.zip"
+        ),
+        "oemof.network",
     ],
-    extras_require={"dev": ["pytest", "sphinx", "sphinx_rtd_theme", ],
-                    "dummy": ["oemof"]},
+    extras_require={
+        "dev": ["pytest", "sphinx", "sphinx_rtd_theme"],
+        "dummy": ["oemof"],
+    },
     entry_points={
         "console_scripts": [
             "oemof_installation_test = "
-            + "oemof.tools.console_scripts:check_oemof_installation"
+            + "oemof.solph.console_scripts:check_oemof_installation"
         ]
     },
 )

@@ -21,6 +21,8 @@ oemof-solph could always use more documentation, whether as part of the
 official oemof-solph docs, in docstrings, or even on the web in blog posts,
 articles, and such.
 
+.. _feature_requests_and_feedback:
+
 Feature requests and feedback
 =============================
 
@@ -77,6 +79,32 @@ For merging, you should:
        `run the tests <https://travis-ci.org/oemof/oemof-solph/pull_requests>`_ for each change you add in the pull request.
 
        It will be slower though ...
+
+
+Tests
+-----
+
+To run the all tests run::
+
+    tox
+
+Note, to combine the coverage data from all the tox environments run:
+
+.. list-table::
+    :widths: 10 90
+    :stub-columns: 1
+
+    - - Windows
+      - ::
+
+            set PYTEST_ADDOPTS=--cov-append
+            tox
+
+    - - Other
+      - ::
+
+            PYTEST_ADDOPTS=--cov-append tox
+
 
 Tips
 ----

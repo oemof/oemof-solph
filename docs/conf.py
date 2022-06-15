@@ -1,7 +1,16 @@
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
 
 import os
+
+from sphinx.ext.autodoc import between
+
+
+def setup(app):
+    # Register a sphinx.ext.autodoc.between listener to ignore everything
+    # between lines that contain the word IGNORE
+    app.connect("autodoc-process-docstring", between("^SPDX.*$", exclude=True))
+    return app
+
 
 extensions = [
     "sphinx.ext.autodoc",
@@ -12,21 +21,22 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
+    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
 ]
-source_suffix = '.rst'
-master_doc = 'index'
-project = 'oemof-solph'
-year = '2014-2020'
-author = 'oemof developer group'
-copyright = '{0}, {1}'.format(year, author)
-version = release = '0.4.0.dev0'
+source_suffix = ".rst"
+master_doc = "index"
+project = "oemof.solph"
+year = "2014-2021"
+author = "oemof-developer-group"
+copyright = "{0}, {1}".format(year, author)
+version = release = "0.4.5.dev0"
 
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    'issue': ('https://github.com/oemof/oemof-solph/issues/%s', '#'),
-    'pr': ('https://github.com/oemof/oemof-solph/pull/%s', 'PR #'),
+    "issue": ("https://github.com/oemof/oemof-solph/issues/%s", "#"),
+    "pr": ("https://github.com/oemof/oemof-solph/pull/%s", "PR #"),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
@@ -41,7 +51,20 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
+html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
+nitpicky = False
+
+exclude_patterns = ["_build", "whatsnew/*"]
+
+linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
+    [
+        r"https://github.com/oemof/oemof-solph/issues/*",
+        r"https://github.com/oemof/oemof-solph/pull/*",
+    ]
+    if "TRAVIS" not in os.environ
+    else []
+)

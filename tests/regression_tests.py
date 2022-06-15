@@ -9,9 +9,26 @@ available from its original location oemof/tests/regression_tests.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import ok_
+import logging
+
+import pandas as pd
+import pytest
+
 from oemof import solph
+from oemof import tools
+from oemof.solph._models import LoggingError
 
 
 def test_version_metadata():
-    ok_(solph.__version__)
+    assert solph.__version__
+
+
+def test_wrong_logging_level():
+    datetimeindex = pd.date_range("1/1/2012", periods=12, freq="H")
+    es = solph.EnergySystem(timeindex=datetimeindex)
+    tools.logger.define_logging()
+    my_logger = logging.getLogger()
+    my_logger.setLevel("DEBUG")
+    with pytest.raises(LoggingError, match="The root logger level is 'DEBUG'"):
+        solph.Model(es)
+    my_logger.setLevel("WARNING")
