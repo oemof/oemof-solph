@@ -255,7 +255,8 @@ def create_nodes(nd=None):
                     inputs={bus1: solph.Flow()},
                     outputs={bus2: solph.Flow()},
                     conversion_factors={bus2: p["efficiency"]},
-                ))
+                )
+            )
             nodes.append(
                 solph.components.Transformer(
                     label="powerline" + "_" + p["bus_2"] + "_" + p["bus_1"],
