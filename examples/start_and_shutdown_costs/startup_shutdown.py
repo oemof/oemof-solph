@@ -17,7 +17,6 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
-import os
 import pandas as pd
 from oemof import solph
 import matplotlib.pyplot as plt
