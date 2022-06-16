@@ -23,10 +23,6 @@ Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
-
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -42,6 +38,11 @@ from oemof.solph import components as cmp
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.components.experimental import Link
+
+try:
+    import pygraphviz as pygz
+except ModuleNotFoundError:
+    pygz = None
 
 
 def draw_graph(
@@ -169,13 +170,14 @@ m.results()
 
 graph = create_nx_graph(es, m)
 
-draw_graph(
-    graph,
-    plot=True,
-    layout="neato",
-    node_size=3000,
-    node_color={"b_0": "#cd3333", "b_1": "#7EC0EE", "b_2": "#eeac7e"},
-)
+if pygz is not None:
+    draw_graph(
+        graph,
+        plot=True,
+        layout="neato",
+        node_size=3000,
+        node_color={"b_0": "#cd3333", "b_1": "#7EC0EE", "b_2": "#eeac7e"},
+    )
 
 results = processing.results(m)
 

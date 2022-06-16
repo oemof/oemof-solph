@@ -4,19 +4,21 @@ Example that shows how to use "Generic Investment Limit".
 
 There are two supply chains. The energy systems looks like that:
 
-              bus_a_0          bus_a_1
-               |                 |
-source_a_0 --->|---> trafo_a --->|--->demand_a
-                                 |
-                   source_a_1--->|
-                                 |
+.. code-block:: text
 
-              bus_b_0          bus_b_1
-               |                 |
-source_b_0 --->|---> trafo_b --->|--->demand_b
-                                 |
-                   source_b_1--->|
-                                 |
+                  bus_a_0          bus_a_1
+                   |                 |
+    source_a_0 --->|---> trafo_a --->|--->demand_a
+                                     |
+                       source_a_1--->|
+                                     |
+
+                  bus_b_0          bus_b_1
+                   |                 |
+    source_b_0 --->|---> trafo_b --->|--->demand_b
+                                     |
+                       source_b_1--->|
+                                     |
 
 Everything is identical: the costs for the sources, the demand, the efficiency
 of the Transformer. And both Transformer have an investment at the output.

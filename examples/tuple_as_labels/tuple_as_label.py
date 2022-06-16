@@ -4,7 +4,7 @@
 General description
 -------------------
 
-You should have understood the basic_example to understand this one.
+You should have grasped the basic_example to understand this one.
 
 This is an example to show how the label attribute can be used with tuples to
 manage the results of large energy system. Even though, the feature is

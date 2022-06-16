@@ -20,8 +20,9 @@ Installation requirements
 This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
+
     pip3 install openpyxl
-    pip3 install networkx
+
 
 If you want to plot the energy system's graph, you have to install pygraphviz
 using:
@@ -342,74 +343,82 @@ def draw_graph(
         plt.show()
 
 
-logger.define_logging()
-datetime_index = pd.date_range(
-    "2016-01-01 00:00:00", "2016-01-01 23:00:00", freq="60min"
-)
-
-# model creation and solving
-logging.info("Starting optimization")
-
-# initialisation of the energy system
-esys = solph.EnergySystem(timeindex=datetime_index, infer_last_interval=False)
-
-# read node data from Excel sheet
-excel_nodes = nodes_from_excel(
-    os.path.join(
-        os.getcwd(),
-        "scenario.xlsx",
+def optimise_scenario():
+    logger.define_logging()
+    datetime_index = pd.date_range(
+        "2016-01-01 00:00:00", "2016-01-01 23:00:00", freq="60min"
     )
-)
 
-# create nodes from Excel sheet data
-my_nodes = create_nodes(nd=excel_nodes)
+    # model creation and solving
+    logging.info("Starting optimization")
 
-# add nodes and flows to energy system
-esys.add(*my_nodes)
+    # initialisation of the energy system
+    esys = solph.EnergySystem(
+        timeindex=datetime_index, infer_last_interval=False
+    )
 
-print("*********************************************************")
-print("The following objects have been created from excel sheet:")
-for n in esys.nodes:
-    oobj = str(type(n)).replace("<class 'oemof.solph.", "").replace("'>", "")
-    print(oobj + ":", n.label)
-print("*********************************************************")
+    # read node data from Excel sheet
+    excel_nodes = nodes_from_excel(
+        os.path.join(
+            os.getcwd(),
+            "scenario.xlsx",
+        )
+    )
 
-# creation of a least cost model from the energy system
-om = solph.Model(esys)
-om.receive_duals()
+    # create nodes from Excel sheet data
+    my_nodes = create_nodes(nd=excel_nodes)
 
-# solving the linear problem using the given solver
-om.solve(solver="cbc")
+    # add nodes and flows to energy system
+    esys.add(*my_nodes)
 
-# create graph of esys
-# You can use argument filename='/home/somebody/my_graph.graphml'
-# to dump your graph to disc. You can open it using e.g. yEd or gephi
-graph = create_nx_graph(esys)
+    print("*********************************************************")
+    print("The following objects have been created from excel sheet:")
+    for n in esys.nodes:
+        oobj = (
+            str(type(n)).replace("<class 'oemof.solph.", "").replace("'>", "")
+        )
+        print(oobj + ":", n.label)
+    print("*********************************************************")
 
-# plot esys graph
-draw_graph(
-    grph=graph,
-    plot=True,
-    layout="neato",
-    node_size=1000,
-    node_color={"R1_bus_el": "#cd3333", "R2_bus_el": "#cd3333"},
-)
+    # creation of a least cost model from the energy system
+    om = solph.Model(esys)
+    om.receive_duals()
 
-# print and plot some results
-results = solph.processing.results(om)
+    # solving the linear problem using the given solver
+    om.solve(solver="cbc")
 
-region2 = solph.views.node(results, "R2_bus_el")
-region1 = solph.views.node(results, "R1_bus_el")
+    # create graph of esys
+    # You can use argument filename='/home/somebody/my_graph.graphml'
+    # to dump your graph to disc. You can open it using e.g. yEd or gephi
+    graph = create_nx_graph(esys)
 
-print(region2["sequences"].sum())
-print(region1["sequences"].sum())
+    # plot esys graph
+    draw_graph(
+        grph=graph,
+        plot=True,
+        layout="neato",
+        node_size=1000,
+        node_color={"R1_bus_el": "#cd3333", "R2_bus_el": "#cd3333"},
+    )
+
+    # print and plot some results
+    results = solph.processing.results(om)
+
+    region2 = solph.views.node(results, "R2_bus_el")
+    region1 = solph.views.node(results, "R1_bus_el")
+
+    print(region2["sequences"].sum())
+    print(region1["sequences"].sum())
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    region1["sequences"].plot(ax=ax)
+    ax.legend(
+        loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.4), ncol=3
+    )
+    fig.subplots_adjust(top=0.7)
+    plt.show()
+    logging.info("Done!")
 
 
-fig, ax = plt.subplots(figsize=(10, 5))
-region1["sequences"].plot(ax=ax)
-ax.legend(
-    loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.4), ncol=3
-)
-fig.subplots_adjust(top=0.7)
-plt.show()
-logging.info("Done!")
+if __name__ == "__main__":
+    optimise_scenario()

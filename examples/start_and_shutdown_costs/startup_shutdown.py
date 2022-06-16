@@ -23,12 +23,34 @@ from oemof import solph
 import matplotlib.pyplot as plt
 
 
-# read sequence data
-full_filename = os.path.join(os.getcwd(), "data.csv")
-data = pd.read_csv(full_filename, sep=",")
-
+demand_el = [
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    0,
+    0,
+]
 # create an energy system
-idx = solph.create_time_index(2017, number=len(data))
+idx = solph.create_time_index(2017, number=len(demand_el))
 es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
 # power bus and components
@@ -36,7 +58,7 @@ bel = solph.Bus(label="bel")
 
 demand_el = solph.components.Sink(
     label="demand_el",
-    inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=10)},
+    inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
 )
 
 # pp1 and pp2 are competing to serve overall 12 units load at lowest cost

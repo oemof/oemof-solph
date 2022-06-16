@@ -54,14 +54,19 @@ except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
     warnings.warn(msg.format(filename), UserWarning)
     data = pd.DataFrame(
-        {"pv": [0.3], "wind": [0.6], "demand_el": [500], "demand_th": [400]}
+        {
+            "pv": [0.3, 0.7],
+            "wind": [0.6, 0.5],
+            "demand_el": [500, 400],
+            "demand_th": [400, 300],
+        }
     )
 
 solver = "cbc"
 
 # Create an energy system and optimize the dispatch at least costs.
 # ####################### initialize and provide data #####################
-datetimeindex = create_time_index(2016, number=24 * 10)
+datetimeindex = create_time_index(2016, number=len(data))
 energysystem = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
 
 # ######################### create energysystem components ################
@@ -215,11 +220,15 @@ fig.subplots_adjust(right=0.8)
 dates = node_results_flows.index
 tick_distance = int(len(dates) / 7) - 1
 ax.set_xticks(range(0, len(dates), tick_distance), minor=False)
-ax.set_xticklabels(
-    [item.strftime("%d-%m-%Y") for item in dates.tolist()[0::tick_distance]],
-    rotation=90,
-    minor=False,
-)
+if tick_distance > 0:
+    ax.set_xticklabels(
+        [
+            item.strftime("%d-%m-%Y")
+            for item in dates.tolist()[0::tick_distance]
+        ],
+        rotation=90,
+        minor=False,
+    )
 
 plt.show()
 
@@ -238,10 +247,11 @@ fig.subplots_adjust(right=0.8)
 dates = node_results_flows.index
 tick_distance = int(len(dates) / 7) - 1
 ax.set_xticks(range(0, len(dates), tick_distance), minor=False)
-ax.set_xticklabels(
-    [item.strftime("%d-%m-%Y") for item in dates.tolist()[0::tick_distance]],
-    rotation=90,
-    minor=False,
-)
+if tick_distance > 0:
+    ax.set_xticklabels(
+        [item.strftime("%d-%m-%Y") for item in dates.tolist()[0::tick_distance]],
+        rotation=90,
+        minor=False,
+    )
 
 plt.show()

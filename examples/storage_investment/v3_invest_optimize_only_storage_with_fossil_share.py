@@ -82,7 +82,9 @@ try:
 except FileNotFoundError:
     msg = "Data file not found: {0}. Only one value used!"
     warnings.warn(msg.format(filename), UserWarning)
-    data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    data = pd.DataFrame(
+        {"pv": [0.3, 0.4], "wind": [0.6, 0.5], "demand_el": [500, 400]}
+    )
 
 number_timesteps = len(data)
 
