@@ -240,7 +240,7 @@ print("")
 print("********* State of Charge (slice) *********")
 print(
     results[(storage, None)]["sequences"][
-        datetime(2012, 2, 25, 8, 0, 0) : datetime(2012, 2, 26, 3, 0, 0)
+        datetime(2012, 2, 25, 8, 0, 0) : datetime(2012, 2, 25, 17, 0, 0)
     ]
 )
 print("")
