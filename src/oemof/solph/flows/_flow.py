@@ -138,7 +138,7 @@ class Flow(on.Edge):
 
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
         msg = (
-            "\nThe parameter 'summed_{0}' ist deprecated and will be removed "
+            "\nThe parameter 'summed_{0}' is deprecated and will be removed "
             "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
             "to avoid this warning and future problems. "
         )
