@@ -33,12 +33,11 @@ https://github.com/oemof/oemof/wiki/Windows---general
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
-
-Copyright (c)
-
 Uwe Krien <uvchik.git@posteo.eu>
 Jonathan Amme <jonathan.amme@rl-institut.de>
+
+`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+
 """
 
 import os
@@ -314,7 +313,6 @@ def draw_graph(
 
     # set drawing options
     options = {
-        "prog": "dot",
         "with_labels": with_labels,
         "node_color": node_color,
         "edge_color": edge_color,

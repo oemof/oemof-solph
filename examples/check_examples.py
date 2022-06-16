@@ -12,7 +12,7 @@ from termcolor import colored
 warnings.filterwarnings("ignore", "", UserWarning)
 matplotlib.use("Agg")
 
-stop_at_error = True  # If True script will stop if error is raised
+stop_at_error = False  # If True script will stop if error is raised
 exclude_notebooks = False
 exclude_python_scripts = False
 

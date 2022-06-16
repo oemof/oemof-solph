@@ -12,7 +12,6 @@ This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
 
-
 License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_

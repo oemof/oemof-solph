@@ -74,6 +74,7 @@ from oemof.solph import processing
 from oemof.solph import views
 
 # Read data file
+
 filename = os.path.join(os.getcwd(), "basic_example.csv")
 try:
     data = pd.read_csv(filename)
