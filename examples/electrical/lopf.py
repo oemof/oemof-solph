@@ -84,7 +84,7 @@ def draw_graph(
     layout : string
         networkx graph layout, one of: neato, dot, twopi, circo, fdp, sfdp.
     """
-    if type(node_color) is dict:
+    if isinstance(node_color, dict):
         node_color = [node_color.get(g, "#AFAFAF") for g in grph.nodes()]
 
     # set drawing options
