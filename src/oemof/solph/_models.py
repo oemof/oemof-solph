@@ -25,6 +25,7 @@ from oemof.solph.components._transformer import TransformerBlock
 from oemof.solph.flows._flow import FlowBlock
 from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
+from oemof.solph.flows._non_convex_invest_flow import NonConvexInvestFlowBlock
 
 
 class LoggingError(BaseException):
@@ -296,6 +297,7 @@ class Model(BaseModel):
         InvestmentFlowBlock,
         FlowBlock,
         NonConvexFlowBlock,
+        NonConvexInvestFlowBlock,
     ]
 
     def __init__(self, energysystem, **kwargs):
