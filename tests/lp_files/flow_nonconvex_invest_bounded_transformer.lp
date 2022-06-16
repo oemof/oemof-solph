@@ -1,0 +1,161 @@
+\* Source Pyomo model name=Model *\
+
+min 
+objective:
++500 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
++25 flow(transformer_nonconvex_invest_electricityBus_0)
++25 flow(transformer_nonconvex_invest_electricityBus_1)
++25 flow(transformer_nonconvex_invest_electricityBus_2)
+
+s.t.
+
+c_e_BusBlock_balance(electricityBus_0)_:
++1 flow(transformer_nonconvex_invest_electricityBus_0)
+= 0
+
+c_e_BusBlock_balance(electricityBus_1)_:
++1 flow(transformer_nonconvex_invest_electricityBus_1)
+= 0
+
+c_e_BusBlock_balance(electricityBus_2)_:
++1 flow(transformer_nonconvex_invest_electricityBus_2)
+= 0
+
+c_e_BusBlock_balance(fuelBus_0)_:
++1 flow(fuelBus_transformer_nonconvex_invest_0)
+= 0
+
+c_e_BusBlock_balance(fuelBus_1)_:
++1 flow(fuelBus_transformer_nonconvex_invest_1)
+= 0
+
+c_e_BusBlock_balance(fuelBus_2)_:
++1 flow(fuelBus_transformer_nonconvex_invest_2)
+= 0
+
+c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_0)_:
++0.33000000000000002 flow(fuelBus_transformer_nonconvex_invest_0)
+-1 flow(transformer_nonconvex_invest_electricityBus_0)
+= 0
+
+c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_1)_:
++0.33000000000000002 flow(fuelBus_transformer_nonconvex_invest_1)
+-1 flow(transformer_nonconvex_invest_electricityBus_1)
+= 0
+
+c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_2)_:
++0.33000000000000002 flow(fuelBus_transformer_nonconvex_invest_2)
+-1 flow(transformer_nonconvex_invest_electricityBus_2)
+= 0
+
+c_l_NonConvexInvestFlowBlock_minimum_rule(transformer_nonconvex_invest_electricityBus)_:
++1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
+>= 0
+
+c_u_NonConvexInvestFlowBlock_maximum_rule(transformer_nonconvex_invest_electricityBus)_:
++1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
+-1234 NonConvexInvestFlowBlock_invest_status(transformer_nonconvex_invest_electricityBus)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_min(transformer_nonconvex_invest_electricityBus_0)_:
++0.20000000000000001 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0)
+-1 flow(transformer_nonconvex_invest_electricityBus_0)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_min(transformer_nonconvex_invest_electricityBus_1)_:
++0.20000000000000001 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1)
+-1 flow(transformer_nonconvex_invest_electricityBus_1)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_min(transformer_nonconvex_invest_electricityBus_2)_:
++0.20000000000000001 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2)
+-1 flow(transformer_nonconvex_invest_electricityBus_2)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_max(transformer_nonconvex_invest_electricityBus_0)_:
+-0.80000000000000004 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0)
++1 flow(transformer_nonconvex_invest_electricityBus_0)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_max(transformer_nonconvex_invest_electricityBus_1)_:
+-0.80000000000000004 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1)
++1 flow(transformer_nonconvex_invest_electricityBus_1)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_max(transformer_nonconvex_invest_electricityBus_2)_:
+-0.80000000000000004 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2)
++1 flow(transformer_nonconvex_invest_electricityBus_2)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_one(transformer_nonconvex_invest_electricityBus_0)_:
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0)
+-1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_0)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_one(transformer_nonconvex_invest_electricityBus_1)_:
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1)
+-1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_1)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_one(transformer_nonconvex_invest_electricityBus_2)_:
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2)
+-1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_2)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_two(transformer_nonconvex_invest_electricityBus_0)_:
+-1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_two(transformer_nonconvex_invest_electricityBus_1)_:
+-1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_two(transformer_nonconvex_invest_electricityBus_2)_:
+-1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
++1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2)
+<= 0
+
+c_u_NonConvexInvestFlowBlock_linearization_three(transformer_nonconvex_invest_electricityBus_0)_:
++1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
+-1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0)
++1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_0)
+<= 1234
+
+c_u_NonConvexInvestFlowBlock_linearization_three(transformer_nonconvex_invest_electricityBus_1)_:
++1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
+-1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1)
++1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_1)
+<= 1234
+
+c_u_NonConvexInvestFlowBlock_linearization_three(transformer_nonconvex_invest_electricityBus_2)_:
++1 NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus)
+-1 NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2)
++1234 NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_2)
+<= 1234
+
+c_e_ONE_VAR_CONSTANT: 
+ONE_VAR_CONSTANT = 1.0
+
+bounds
+   0 <= flow(fuelBus_transformer_nonconvex_invest_0) <= +inf
+   0 <= flow(fuelBus_transformer_nonconvex_invest_1) <= +inf
+   0 <= flow(fuelBus_transformer_nonconvex_invest_2) <= +inf
+   0 <= flow(transformer_nonconvex_invest_electricityBus_0) <= +inf
+   0 <= flow(transformer_nonconvex_invest_electricityBus_1) <= +inf
+   0 <= flow(transformer_nonconvex_invest_electricityBus_2) <= +inf
+   0 <= NonConvexInvestFlowBlock_invest(transformer_nonconvex_invest_electricityBus) <= 1234
+   0 <= NonConvexInvestFlowBlock_invest_status(transformer_nonconvex_invest_electricityBus) <= 1
+   0 <= NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_0) <= 1
+   0 <= NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_1) <= 1
+   0 <= NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_2) <= 1
+   0 <= NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_0) <= +inf
+   0 <= NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_1) <= +inf
+   0 <= NonConvexInvestFlowBlock_invest_non_convex(transformer_nonconvex_invest_electricityBus_2) <= +inf
+binary
+  NonConvexInvestFlowBlock_invest_status(transformer_nonconvex_invest_electricityBus)
+  NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_0)
+  NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_1)
+  NonConvexInvestFlowBlock_status(transformer_nonconvex_invest_electricityBus_2)
+end
