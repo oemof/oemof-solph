@@ -26,7 +26,7 @@ def test_error_in_gradient_attribute():
 
 def test_summed_max_future_warning():
     """Can be removed with v0.6."""
-    msg = "The parameter 'summed_max' ist deprecated and will be removed"
+    msg = "The parameter 'summed_max' is deprecated and will be removed"
     with warnings.catch_warnings(record=True) as w:
         Flow(nominal_value=1, summed_max=2)
         assert len(w) == 1
@@ -35,7 +35,7 @@ def test_summed_max_future_warning():
 
 def test_summed_min_future_warning():
     """Can be removed with v0.6."""
-    msg = "The parameter 'summed_min' ist deprecated and will be removed"
+    msg = "The parameter 'summed_min' is deprecated and will be removed"
     with warnings.catch_warnings(record=True) as w:
         Flow(nominal_value=1, summed_min=2)
         assert len(w) == 1

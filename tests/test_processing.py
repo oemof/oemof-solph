@@ -96,6 +96,7 @@ class TestParameterResult:
             param_results[(b_el2, demand)]["scalars"].sort_index(),
             pandas.Series(
                 {
+                    "allow_nonconvex_investment": False,
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
@@ -117,6 +118,7 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
+            "allow_nonconvex_investment": False,
             "integer": None,
             "investment": None,
             "nominal_value": 1,
