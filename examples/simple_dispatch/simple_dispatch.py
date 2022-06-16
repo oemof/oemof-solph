@@ -249,7 +249,10 @@ tick_distance = int(len(dates) / 7) - 1
 ax.set_xticks(range(0, len(dates), tick_distance), minor=False)
 if tick_distance > 0:
     ax.set_xticklabels(
-        [item.strftime("%d-%m-%Y") for item in dates.tolist()[0::tick_distance]],
+        [
+            item.strftime("%d-%m-%Y")
+            for item in dates.tolist()[0::tick_distance]
+        ],
         rotation=90,
         minor=False,
     )
