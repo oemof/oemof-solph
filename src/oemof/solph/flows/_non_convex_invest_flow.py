@@ -114,9 +114,11 @@ class NonConvexInvestFlow(Flow):
             positive_gradient=positive_gradient,
             negative_gradient=negative_gradient,
         )
-        # inside kwargs there is "investment", so flow
+
         other_warning_messages = []
         with warnings.catch_warnings(record=True) as w:
+            # Only in the NonConvexInvestClass, the attribute
+            # `allow_nonconvex_investment` can be set to True.
             super().__init__(
                 nonconvex=nonconvex, allow_nonconvex_investment=True, **kwargs
             )
@@ -141,8 +143,10 @@ class NonConvexInvestFlow(Flow):
 
 class NonConvexInvestFlowBlock(SimpleBlock):
     r"""
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
+    ################ SETS ################
+    **The following sets are created similar to the
+    <class 'oemof.solph.flows.NonConvexFlow'> class:**
+    (-> see basic sets at :class:`.Model` )
 
     A set of flows with the attribute `nonconvex` of type
         :class:`.options.NonConvex`.
@@ -177,78 +181,57 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         `negative_gradient` being not None.
 
 
-    **Variables**
+    ################ VARIABLES ################
+    **The following variables are created similar to the
+    <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
-    * :math:`P(t)`
-        Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
-
-    * :math:`P_{invest}`
-        Value of the investment variable, i.e. equivalent to the nominal
-        value of the flows after optimization.
-
-    Status variable (binary) `om.NonConvexInvestmentFlowBlock.status`:
+    Status variable (binary) `om.NonConvexInvestFlowBlock.status`:
         Variable indicating if flow is >= 0 indexed by FLOWS
 
-    * :math: `invest_non_convex(i,o,t)` (non-negative real number)
-        new paramater representing the multiplication of
-        `P_{invest}` and status(i,o,t)`used for the constraints
-        on the minimum and maximum flow constraints.
-
-    Startup variable (binary) `om.NonConvexInvestmentFlowBlock.startup`:
+    Startup variable (binary) `om.NonConvexInvestFlowBlock.startup`:
         Variable indicating startup of flow (component) indexed by
         STARTUPFLOWS
 
-    Shutdown variable (binary) `om.NonConvexInvestmentFlowBlock.shutdown`:
+    Shutdown variable (binary) `om.NonConvexInvestFlowBlock.shutdown`:
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWNFLOWS
 
     Positive gradient (continuous)
-    `om.NonConvexInvestmentFlowBlock.positive_gradient`:
+    `om.NonConvexInvestFlowBlock.positive_gradient`:
         Variable indicating the positive gradient, i.e. the load increase
         between two consecutive timesteps, indexed by
         POSITIVE_GRADIENT_FLOWS
 
     Negative gradient (continuous)
-    `om.NonConvexInvestmentFlowBlock.negative_gradient`:
+    `om.NonConvexInvestFlowBlock.negative_gradient`:
         Variable indicating the negative gradient, i.e. the load decrease
         between two consecutive timesteps, indexed by
         NEGATIVE_GRADIENT_FLOWS
 
 
-    **Constraints**
+    **The following variables are created similar to the
+    <class 'oemof.solph.flows.InvestmentFlow'> class:**
 
-    Upper bound for the flow value
-        .. math::
-            P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
+    * :math:`P_{invest}`
+        Value of the investment variable, i.e. equivalent to the nominal
+        value of the flows after optimization.
 
-        .. math:: (:attr:`nonconvex = False`)
-            P_{invest, min} \le P_{invest} \le P_{invest, max}
 
-        * :attr:`fix` is not None
-            Actual value constraint for investments with fixed flow values
-        .. math::
-            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
+    **The following variable is a new variable created in the
+    <class 'oemof.solph.flows.NonConvexInvestFlow'> class:**
 
-        * :attr:`min != 0`
-            Lower bound for the flow values
-        .. math::
-            P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
+    * :math: `invest_non_convex(i,o,t)` (non-negative real number)
+        New paramater representing the multiplication of `P_{invest}`
+        (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
+        `status(i,o,t)` (from the <class 'oemof.solph.flows.NonConvexFlow'>)
+        used for the constraints on the minimum and maximum flow constraints.
 
-        * :attr:`summed_max is not None`
-            Upper bound for the sum of all flow values (e.g. maximum full load
-            hours)
-        .. math::
-            \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
-            \cdot f_{sum, min}
 
-        * :attr:`summed_min is not None`
-            Lower bound for the sum of all flow values (e.g. minimum full load
-            hours)
-        .. math::
-            \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
-            \cdot f_{sum, min}
+    ################ CONSTRAINTS ################
+    **The following constraints are created similar to the
+    <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
-    Startup constraint `om.NonConvexInvestmentFlowBlock.startup_constr[i,o,t]`
+    Startup constraint `om.NonConvexInvestFlowBlock.startup_constr[i,o,t]`
         .. math::
             startup(i, o, t) \geq \
                 status(i,o,t) - status(i, o, t-1) \\
@@ -256,14 +239,14 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i,o) \in \textrm{STARTUPFLOWS}.
 
     Maximum startups constraint
-      `om.NonConvexInvestmentFlowBlock.max_startup_constr[i,o,t]`
+      `om.NonConvexInvestFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{start}(i,o)
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
 
     Shutdown constraint
-    `om.NonConvexInvestmentFlowBlock.shutdown_constr[i,o,t]`
+    `om.NonConvexInvestFlowBlock.shutdown_constr[i,o,t]`
         .. math::
             shutdown(i, o, t) \geq \
                 status(i, o, t-1) - status(i, o, t) \\
@@ -271,14 +254,14 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-      `om.NonConvexInvestmentFlowBlock.max_startup_constr[i,o,t]`
+      `om.NonConvexInvestFlowBlock.max_startup_constr[i,o,t]`
         .. math::
             \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
                 N_{shutdown}(i,o)
             \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
     Minimum uptime constraint
-    `om.NonConvexInvestmentFlowBlock.uptime_constr[i,o,t]`
+    `om.NonConvexInvestFlowBlock.uptime_constr[i,o,t]`
         .. math::
             (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
             \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
@@ -294,7 +277,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
 
     Minimum downtime constraint
-    `om.NonConvexInvestmentFlowBlock.downtime_constr[i,o,t]`
+    `om.NonConvexInvestFlowBlock.downtime_constr[i,o,t]`
         .. math::
             (status(i, o, t-1)-status(i, o, t)) \
             \cdot minimum\_downtime(i, o) \\
@@ -312,7 +295,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
 
     Positive gradient constraint
-      `om.NonConvexInvestmentFlowBlock.positive_gradient_constr[i, o]`:
+      `om.NonConvexInvestFlowBlock.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) \cdot status(i, o, t)
         - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
           positive\_gradient(i, o, t), \\
@@ -320,7 +303,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
           \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
-      `om.NonConvexInvestmentFlowBlock.negative_gradient_constr[i, o]`:
+      `om.NonConvexInvestFlowBlock.negative_gradient_constr[i, o]`:
         .. math::
           flow(i, o, t-1) \cdot status(i, o, t-1)
           - flow(i, o, t) \cdot status(i, o, t) \geq \
@@ -328,13 +311,25 @@ class NonConvexInvestFlowBlock(SimpleBlock):
           \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
           \forall t \in \textrm{TIMESTEPS}.
 
-    Minimum flow constraint `om.NonConvexInvestmentFlowBlock.min[i,o,t]`
+
+    **The following constraints are created similar to the
+    <class 'oemof.solph.flows.InvestmentFlow'> class:**
+
+    Upper and lower bounds for the investment
+        .. math::
+            P_{invest, min} \le P_{invest} \le P_{invest, max}
+
+
+    **The following constraints are new and created in the
+    <class 'oemof.solph.flows.NonConvexInvestFlow'> class:**
+
+    Minimum flow constraint `om.NonConvexInvestFlowBlock.min[i,o,t]`
         .. math::
             flow(i, o, t) \geq min(i, o, t) \cdot invest_non_convex(i, o, t),\\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_INVESTMENT\_FLOWS}.
 
-    Maximum flow constraint `om.NonConvexInvestmentFlowBlock.max[i,o,t]`
+    Maximum flow constraint `om.NonConvexInvestFlowBlock.max[i,o,t]`
         .. math::
             flow(i, o, t) \leq max(i, o, t) invest_non_convex(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
@@ -342,7 +337,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
     Additional constraints that must be used because the new
     parameter `invest_non_convex(i,o,t)` was introduced to deal with
-    non-linearity of the minimum and maximum flow constraints.
+    nonlinearity of the minimum and maximum flow constraints.
         .. math::
         invest_non_convex(i,o,t) \leq status(i,o,t) \cdot P_{invest, max}
 
@@ -354,7 +349,9 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             P_{invest} - (1 - status(i,o,t)) \cdot P_{invest, max}
 
 
-    **The following parts of the objective function are created:**
+    ################ OBJECTIVE FUNCTION ################
+    **The following parts of the objective function are created similar
+    to the <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
     If `nonconvex.startup_costs` is set by the user:
         .. math::
@@ -376,6 +373,12 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \sum_{i, o \in NEGATIVE_GRADIENT_FLOWS} \sum_t
             negative_gradient(i, o, t) \cdot negative\_gradient\_costs(i, o)
 
+
+    **The following parts of the objective function are created similar
+    to the <class 'oemof.solph.flows.InvestmentFlow'> class:**
+
+    .. math::
+            P_{invest} \cdot c_{invest,var}
     """
 
     def __init__(self, *args, **kwargs):
@@ -383,12 +386,12 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
     def _create(self, group=None):
         """Creates set, variables, constraints for all flow object with
-        an attribute flow of type class:`.NonConvexFlowBlock`.
+        an attribute flow of type class:`.NonConvexInvestFlowBlock`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.NonConvexFlowBlock objects for which
+            List of oemof.solph.NonConvexInvestFlowBlock objects for which
             the constraints are build.
         """
         if group is None:
@@ -396,20 +399,8 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
         m = self.parent_block()
         # ########################## SETS #####################################
-        # investment-related sets
-        self.FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not None]
-        )
-
-        self.NON_FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
-        )
-
-        # nonconvex-related sets
-        self.NON_CONVEX_INVEST_FLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group]
-        )
-
+        # Nonconvex-related sets similar to the
+        # <class 'oemof.solph.flows.NonconvexFlow'> class.
         self.MIN_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].min[0] is not None]
         )
@@ -475,26 +466,28 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             ]
         )
 
-        # ################### VARIABLES #######################
-        def _investvar_bound_rule(block, i, o):
-            """Rule definition for bounds of the invest variable."""
-            if (i, o) in self.NON_CONVEX_INVEST_FLOWS:
-                return 0, m.flows[i, o].investment.maximum
-
-        # create the 'invest' variable for the nonconvex investment flow
-        self.invest = Var(
-            self.NON_CONVEX_INVEST_FLOWS,
-            within=NonNegativeReals,
-            bounds=_investvar_bound_rule,
+        # Investment-related sets similar to the
+        # <class 'oemof.solph.flows.InvestmentFlow'> class.
+        self.FIXED_INVESTFLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not None]
         )
 
-        # invest_status can be deleted (assumed to be always true)
-        # to increase the optimization speed
+        self.NON_FIXED_INVESTFLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
+        )
 
-        self.invest_status = Var(self.NON_CONVEX_INVEST_FLOWS, within=Binary)
+        # New nonconvex-investment-related set defines in the
+        # <class 'oemof.solph.flows.NonconvexInvestFlow'> class.
+        self.NON_CONVEX_INVEST_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group]
+        )
 
-        # create status variable for a nonconvex investment flow
-        # representing the status of the  flow at each time step
+        # ################### VARIABLES #######################
+        # Nonconvex-related variables similar to the
+        # <class 'oemof.solph.flows.NonConvexFlow'> class.
+
+        # Create `status` variable representing the status of the flow
+        # at each time step
         self.status = Var(
             self.NON_CONVEX_INVEST_FLOWS, m.TIMESTEPS, within=Binary
         )
@@ -515,58 +508,39 @@ class NonConvexInvestFlowBlock(SimpleBlock):
                 self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS
             )
 
-        # invest_non_convex represents the multiplication of a binary (status)
-        # and a continuous (invest) variable
+        # Investment-related variable similar to the
+        # <class 'oemof.solph.flows.InvestmentFlow'> class.
+
+        def _investvar_bound_rule(block, i, o):
+            """Rule definition for bounds of the invest variable."""
+            if (i, o) in self.NON_CONVEX_INVEST_FLOWS:
+                return 0, m.flows[i, o].investment.maximum
+
+        # Create the `invest` variable for the nonconvex investment flow.
+        self.invest = Var(
+            self.NON_CONVEX_INVEST_FLOWS,
+            within=NonNegativeReals,
+            bounds=_investvar_bound_rule,
+        )
+
+        # create status variable for the nonconvex investment flow
+        self.invest_status = Var(self.NON_CONVEX_INVEST_FLOWS, within=Binary)
+
+        # New nonconvex-investment-related variable defined in the
+        # <class 'oemof.solph.flows.NonConvexInvestFlow'> class.
+
+        # `invest_non_convex` is a new parameter which represents the
+        # multiplication of a binary variable (`status`) and a continuous
+        # variable (`invest`):
         # self.invest_non_convex[i, o, t] = self.status[i, o, t]
         # * self.invest[i, o]
-        # z = x * y, where x is a binary variable (in our case status)
-        # and y is a continuous variable (in our case invest)
         self.invest_non_convex = Var(
             self.MIN_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
 
-        # ################### CONSTRAINTS #######################
-        def _min_invest_rule(block, i, o):
-            """Rule definition for applying a minimum investment"""
-            expr = (
-                m.flows[i, o].investment.minimum * self.invest_status[i, o]
-                # m.flows[i, o].investment.minimum
-                <= self.invest[i, o]
-            )
-            return expr
-
-        self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVEST_FLOWS, rule=_min_invest_rule
-        )
-
-        def _max_invest_rule(block, i, o):
-            """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= (
-                m.flows[i, o].investment.maximum
-                * self.invest_status[i, o]
-                # m.flows[i, o].investment.maximum
-            )
-            return expr
-
-        self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVEST_FLOWS, rule=_max_invest_rule
-        )
-
-        def _investflow_fixed_rule(block, i, o, t):
-            """Rule definition of constraint to fix flow variable
-            of investment flow to (normed) actual value
-            """
-            expr = m.flow[i, o, t] == (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].fix[t]
-            )
-
-            return expr
-
-        self.fixed = Constraint(
-            self.FIXED_INVESTFLOWS, m.TIMESTEPS, rule=_investflow_fixed_rule
-        )
-
+        # ################### CONSTRAINTS ########################
+        # Nonconvex-related constraints similar to the
+        # <class 'oemof.solph.flows.NonConvexFlow'> class.
         def _startup_rule(block, i, o, t):
             """Rule definition for startup constraint of nonconvex flows."""
             if t > m.TIMESTEPS[1]:
@@ -726,6 +700,50 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             rule=_negative_gradient_flow_rule
         )
 
+        # Investment-related constraints similar to the
+        # <class 'oemof.solph.flows.InvestmentFlow'> class.
+
+        def _min_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = (
+                m.flows[i, o].investment.minimum * self.invest_status[i, o]
+                <= self.invest[i, o]
+            )
+            return expr
+
+        self.minimum_rule = Constraint(
+            self.NON_CONVEX_INVEST_FLOWS, rule=_min_invest_rule
+        )
+
+        def _max_invest_rule(block, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o]
+            )
+            return expr
+
+        self.maximum_rule = Constraint(
+            self.NON_CONVEX_INVEST_FLOWS, rule=_max_invest_rule
+        )
+
+        def _investflow_fixed_rule(block, i, o, t):
+            """Rule definition of constraint to fix flow variable
+            of investment flow to (normed) actual value
+            """
+            expr = m.flow[i, o, t] == (
+                (m.flows[i, o].investment.existing + self.invest[i, o])
+                * m.flows[i, o].fix[t]
+            )
+
+            return expr
+
+        self.fixed = Constraint(
+            self.FIXED_INVESTFLOWS, m.TIMESTEPS, rule=_investflow_fixed_rule
+        )
+
+        # New nonconvex-investment-related constraints defined in the
+        # <class 'oemof.solph.flows.NonConvexInvestFlow'> class.
+
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints."""
             expr = (
@@ -750,14 +768,15 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             self.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule
         )
 
-        # z = x * y, where x is a binary variable (in our case status)
-        # and y is a continuous variable (in our case invest).
-        # We define M as the upper bound of y (in our case investment.maximum)
-        # In order to linearize x*y which is non linear, the following three
-        # constraints are needed
-        # These constraints are only needed for cbc solver as Gurobi handles
-        # multiplication of binary and continuous variables automatically
-
+        # z = x * y, where x is a binary variable (in our case `status`),
+        # y is a continuous variable (in our case `invest`), and z denotes
+        # the new parameter `invest_non_convex`.
+        # We define M as the upper bound of y (i.e., `investment.maximum`).
+        # In order to linearize x * y, which is nonlinear, the following three
+        # constraints are built.
+        # These constraints are only needed for the CBC solver (and probably
+        # other free open-source solvers) as Gurobi handles multiplication of
+        # binary and continuous variables automatically.
         def _linearization_rule_invest_non_convex_one(block, i, o, t):
             """Rule definition for the linearization of the new parameter.
             :math:`xM \\ge z`
