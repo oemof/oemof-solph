@@ -523,9 +523,6 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             bounds=_investvar_bound_rule,
         )
 
-        # create status variable for the nonconvex investment flow
-        self.invest_status = Var(self.NON_CONVEX_INVEST_FLOWS, within=Binary)
-
         # New nonconvex-investment-related variable defined in the
         # <class 'oemof.solph.flows.NonConvexInvestFlow'> class.
 
@@ -706,8 +703,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""
             expr = (
-                m.flows[i, o].investment.minimum * self.invest_status[i, o]
-                <= self.invest[i, o]
+                m.flows[i, o].investment.minimum <= self.invest[i, o]
             )
             return expr
 
@@ -718,7 +714,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""
             expr = self.invest[i, o] <= (
-                m.flows[i, o].investment.maximum * self.invest_status[i, o]
+                m.flows[i, o].investment.maximum
             )
             return expr
 
@@ -869,7 +865,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         for i, o in self.NON_CONVEX_INVEST_FLOWS:
             investment_costs += (
                 self.invest[i, o] * m.flows[i, o].investment.ep_costs
-                + self.invest_status[i, o] * m.flows[i, o].investment.offset
+                + m.flows[i, o].investment.offset
             )
 
         self.investment_costs = Expression(expr=investment_costs)
