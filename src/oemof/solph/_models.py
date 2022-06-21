@@ -183,8 +183,10 @@ class BaseModel(po.ConcreteModel):
 
         """
         # shadow prices
+        del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
+        del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
