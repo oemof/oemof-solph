@@ -466,16 +466,6 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             ]
         )
 
-        # Investment-related sets similar to the
-        # <class 'oemof.solph.flows.InvestmentFlow'> class.
-        self.FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is not None]
-        )
-
-        self.NON_FIXED_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
-        )
-
         # New nonconvex-investment-related set defines in the
         # <class 'oemof.solph.flows.NonconvexInvestFlow'> class.
         self.NON_CONVEX_INVEST_FLOWS = Set(
@@ -720,21 +710,6 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
         self.maximum_rule = Constraint(
             self.NON_CONVEX_INVEST_FLOWS, rule=_max_invest_rule
-        )
-
-        def _investflow_fixed_rule(block, i, o, t):
-            """Rule definition of constraint to fix flow variable
-            of investment flow to (normed) actual value
-            """
-            expr = m.flow[i, o, t] == (
-                (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].fix[t]
-            )
-
-            return expr
-
-        self.fixed = Constraint(
-            self.FIXED_INVESTFLOWS, m.TIMESTEPS, rule=_investflow_fixed_rule
         )
 
         # New nonconvex-investment-related constraints defined in the
