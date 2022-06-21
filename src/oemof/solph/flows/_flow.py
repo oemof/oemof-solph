@@ -262,15 +262,14 @@ class Flow(on.Edge):
             if self.investment and self.nonconvex:
                 raise WrongOptionCombinationError(
                     "Investment flows cannot be combined with "
-                    + "nonconvex flows using the class "
-                    + "<class 'solph.flows.Flow'>! Please consider using"
-                    + " <class 'solph.flows.NonConvexInvestFlow'>"
+                    + "nonconvex flows using the general Flow class! "
+                    + "Please consider using the NonConvexInvestFlow class."
                 )
         else:
             warn(
-                "You are using the class <class 'solph.flows.Flow'> "
-                "with option `allow_nonconvex_investment`, please consider "
-                "using <class 'solph.flows.NonConvexInvestFlow'> instead.",
+                "You are using the general Flow class with the option "
+                "`allow_nonconvex_investment`, please consider using"
+                "NonConvexInvestFlow class instead.",
                 FlowOptionWarning,
             )
 
