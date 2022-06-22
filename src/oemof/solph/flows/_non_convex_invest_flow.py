@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for FlowBlock objects with both Nonconvex and Investment options.
+for NonConvexInvestFlowBlock objects with both Nonconvex and Investment
+options.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -12,6 +13,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Pierre-François Duc
 
 SPDX-License-Identifier: MIT
 
