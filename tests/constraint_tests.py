@@ -190,15 +190,15 @@ class TestsConstraint:
                 bel: solph.flows.NonConvexInvestFlow(
                     nominal_value=None,
                     variable_costs=25,
-                    min=0.2,
-                    max=0.8,
+                    min=0.25,
+                    max=0.5,
                     investment=solph.Investment(
                         ep_costs=500,
                         maximum=1234,
                     ),
                 )
             },
-            conversion_factors={bel: 0.33},
+            conversion_factors={bel: 0.5},
         )
         self.compare_lp_files("flow_nonconvex_invest_bounded_transformer.lp")
 
