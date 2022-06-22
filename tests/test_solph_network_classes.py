@@ -13,9 +13,9 @@ import warnings
 
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
-from oemof.solph._exceptions import WrongOptionCombinationError
 
 from oemof import solph
+from oemof.solph._exceptions import WrongOptionCombinationError
 
 
 class TestTransformerClass:

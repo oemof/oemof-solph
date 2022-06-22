@@ -39,11 +39,14 @@ This example requires the version v0.5.x of oemof.solph. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import numpy as np
 import os
-import pandas as pd
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+
 from oemof import solph
 
 try:

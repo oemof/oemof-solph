@@ -397,9 +397,7 @@ excess_rate = (
 ##########################################################################
 
 print("\n" + 50 * "*")
-print(
-    f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s"
-)
+print(f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s")
 print(50 * "*")
 print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")
 print(f"LCOE:\t\t {lcoe:.2f} cent/kWh")

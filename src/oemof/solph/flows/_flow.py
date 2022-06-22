@@ -28,11 +28,9 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._exceptions import FlowOptionWarning
+from oemof.solph._exceptions import WrongOptionCombinationError
 from oemof.solph._plumbing import sequence
-from oemof.solph._exceptions import (
-    FlowOptionWarning,
-    WrongOptionCombinationError,
-)
 
 
 class Flow(on.Edge):

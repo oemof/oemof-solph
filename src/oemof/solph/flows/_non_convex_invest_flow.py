@@ -19,6 +19,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+import warnings
+
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -27,10 +29,9 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import SimpleBlock
-import warnings
 
-from oemof.solph._options import NonConvex
 from oemof.solph._exceptions import FlowOptionWarning
+from oemof.solph._options import NonConvex
 
 from ._flow import Flow
 
@@ -694,9 +695,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""
-            expr = (
-                m.flows[i, o].investment.minimum <= self.invest[i, o]
-            )
+            expr = m.flows[i, o].investment.minimum <= self.invest[i, o]
             return expr
 
         self.minimum_rule = Constraint(
@@ -705,9 +704,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
 
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= (
-                m.flows[i, o].investment.maximum
-            )
+            expr = self.invest[i, o] <= (m.flows[i, o].investment.maximum)
             return expr
 
         self.maximum_rule = Constraint(
