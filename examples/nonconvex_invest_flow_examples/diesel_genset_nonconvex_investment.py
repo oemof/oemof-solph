@@ -22,7 +22,7 @@ There are the following components:
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof. Install by:
+This example requires the version v0.5.x of oemof.solph. Install by:
 
     pip install 'oemof.solph>=0.5,<0.6'
 
