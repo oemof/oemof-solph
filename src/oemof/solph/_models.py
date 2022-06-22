@@ -7,6 +7,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Saeed Sayadi
 
 SPDX-License-Identifier: MIT
 

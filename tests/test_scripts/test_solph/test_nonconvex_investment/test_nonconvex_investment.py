@@ -4,10 +4,8 @@
 This test contains a NonConvexInvestFlow class.
 
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location
-oemof/tests/test_scripts/test_solph/test_nonconvex_investment/test_nonconvex_investment.py
+SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Pierre-François Duc
 
 SPDX-License-Identifier: MIT
 

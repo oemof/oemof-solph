@@ -10,6 +10,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: Pierre-François Duc
+SPDX-FileCopyrightText: Saeed Sayadi
 
 SPDX-License-Identifier: MIT
 
