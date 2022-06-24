@@ -12,7 +12,7 @@ oemof.solph.EnergySystem
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Bus
+oemof.solph.buses.Bus
 ---------------
 
 .. automodule:: oemof.solph.network.bus
@@ -25,30 +25,25 @@ oemof.solph.Bus
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Flow
-----------------
+oemof.solph.flows
+-----------------
 
-.. automodule:: oemof.solph.network.flow
+.. automodule:: oemof.solph.flows._flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.flow
+.. automodule:: oemof.solph.flows._investment_flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.investment_flow
+.. automodule:: oemof.solph.blocks._non_convex_flow
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.blocks.non_convex_flow
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-oemof.solph.Sink
+oemof.solph.components.Sink
 ----------------
 
 .. automodule:: oemof.solph.network.sink
@@ -56,7 +51,7 @@ oemof.solph.Sink
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Source
+oemof.solph.components.Source
 ------------------
 
 .. automodule:: oemof.solph.network.source
@@ -64,7 +59,7 @@ oemof.solph.Source
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.Transformer
+oemof.solph.components.Transformer
 -----------------------
 
 .. automodule:: oemof.solph.network.transformer
@@ -77,10 +72,10 @@ oemof.solph.Transformer
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.components.ExtractionTurbineCHP
+oemof.solph.components._extractionTurbineCHP
 -------------------------------------------
 
-.. automodule:: oemof.solph.components.extraction_turbine_chp
+.. automodule:: oemof.solph.components._extraction_turbine_chp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -88,7 +83,7 @@ oemof.solph.components.ExtractionTurbineCHP
 oemof.solph.components.GenericCHP
 ---------------------------------
 
-.. automodule:: oemof.solph.components.generic_chp
+.. automodule:: oemof.solph.components._generic_chp
     :members:
     :undoc-members:
     :show-inheritance:
@@ -96,7 +91,7 @@ oemof.solph.components.GenericCHP
 oemof.solph.components.GenericStorage
 -------------------------------------
 
-.. automodule:: oemof.solph.components.generic_storage
+.. automodule:: oemof.solph.components._generic_storage
     :members:
     :undoc-members:
     :show-inheritance:
@@ -104,7 +99,7 @@ oemof.solph.components.GenericStorage
 oemof.solph.components.OffsetTransformer
 ----------------------------------------
 
-.. automodule:: oemof.solph.components.offset_transformer
+.. automodule:: oemof.solph.components._offset_transformer
     :members:
     :undoc-members:
     :show-inheritance:
@@ -184,7 +179,7 @@ oemof.solph.helpers module
 oemof.solph.models module
 -------------------------
 
-.. automodule:: oemof.solph.models
+.. automodule:: oemof.solph._models
     :members:
     :undoc-members:
     :show-inheritance:
@@ -205,7 +200,7 @@ oemof.solph.options module
     :undoc-members:
     :show-inheritance:
 
-oemof.solph.plumbing module
+oemof.solph._plumbing module
 ---------------------------
 
 .. automodule:: oemof.solph.plumbing

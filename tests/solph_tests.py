@@ -17,7 +17,7 @@ from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment
-from oemof.solph.blocks import InvestmentFlow as InvFlow
+from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.helpers import extend_basic_path
 
 
@@ -39,18 +39,20 @@ class TestsGrouping:
         `InvestmentFlow` group is not empty.
         """
 
-        b = solph.Bus(label="Bus")
+        b = solph.buses.Bus(label="Bus")
 
-        solph.Source(
+        solph.components.Source(
             label="Source",
-            outputs={b: solph.Flow(fix=[12, 16, 14], nominal_value=1000000)},
+            outputs={
+                b: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)
+            },
         )
 
-        solph.Sink(
+        solph.components.Sink(
             label="Sink",
             inputs={
-                b: solph.Flow(
-                    summed_max=2.3,
+                b: solph.flows.InvestmentFlow(
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=Investment(ep_costs=500, maximum=10e5),
@@ -59,10 +61,10 @@ class TestsGrouping:
         )
 
         ok_(
-            self.es.groups.get(InvFlow),
+            self.es.groups.get(InvestmentFlowBlock),
             (
                 "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
-            ).format(self.es.groups.get(InvFlow)),
+            ).format(self.es.groups.get(InvestmentFlowBlock)),
         )
 
 

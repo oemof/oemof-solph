@@ -14,11 +14,11 @@ import warnings
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
-from oemof.solph import Bus
-from oemof.solph import Flow
 from oemof.solph import Investment
-from oemof.solph import NonConvex
 from oemof.solph import components
+from oemof.solph.buses import Bus
+from oemof.solph.flows import Flow
+from oemof.solph.flows import NonConvexFlow
 
 # ********* GenericStorage *********
 
@@ -74,6 +74,27 @@ def test_generic_storage_3():
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
     )
+
+
+def test_generic_storage_4():
+    """Infeasible parameter combination for initial_storage_level"""
+    bel = Bus()
+    with pytest.raises(
+        ValueError, match="initial_storage_level must be greater"
+    ):
+        components.GenericStorage(
+            label="storage4",
+            nominal_storage_capacity=10,
+            inputs={bel: Flow(variable_costs=10e10)},
+            outputs={bel: Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+        )
 
 
 def test_generic_storage_with_old_parameters():
@@ -245,12 +266,8 @@ def test_offsettransformer__too_many_input_flows():
         components.OffsetTransformer(
             label="ostf_2_in",
             inputs={
-                bgas: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                ),
-                bcoal: Flow(
-                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
-                ),
+                bgas: NonConvexFlow(nominal_value=60, min=0.5, max=1.0),
+                bcoal: NonConvexFlow(nominal_value=30, min=0.3, max=1.0),
             },
             coefficients=(20, 0.5),
         )
@@ -266,11 +283,7 @@ def test_offsettransformer_too_many_output_flows():
 
         components.OffsetTransformer(
             label="ostf_2_out",
-            inputs={
-                bm1: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                )
-            },
+            inputs={bm1: NonConvexFlow(nominal_value=60, min=0.5, max=1.0)},
             outputs={bm1: Flow(), bm2: Flow()},
             coefficients=(20, 0.5),
         )

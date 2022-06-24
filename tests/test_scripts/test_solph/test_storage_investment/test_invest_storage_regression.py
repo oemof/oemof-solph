@@ -30,26 +30,26 @@ def test_regression_investment_storage(solver="cbc"):
     Node.registry = energysystem
 
     # Buses
-    bgas = solph.Bus(label=("natural", "gas"))
-    bel = solph.Bus(label="electricity")
+    bgas = solph.buses.Bus(label=("natural", "gas"))
+    bel = solph.buses.Bus(label="electricity")
 
-    solph.Sink(
+    solph.components.Sink(
         label="demand",
         inputs={
-            bel: solph.Flow(
+            bel: solph.flows.Flow(
                 fix=[209643, 207497, 200108, 191892], nominal_value=1
             )
         },
     )
 
     # Sources
-    solph.Source(label="rgas", outputs={bgas: solph.Flow()})
+    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
 
     # Transformer
-    solph.Transformer(
+    solph.components.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=300000)},
+        inputs={bgas: solph.flows.Flow()},
+        outputs={bel: solph.flows.Flow(nominal_value=300000)},
         conversion_factors={bel: 0.58},
     )
 
@@ -57,12 +57,12 @@ def test_regression_investment_storage(solver="cbc"):
     solph.components.GenericStorage(
         label="storage",
         inputs={
-            bel: solph.Flow(
+            bel: solph.flows.Flow(
                 investment=solph.Investment(existing=625046 / 6, maximum=0)
             )
         },
         outputs={
-            bel: solph.Flow(
+            bel: solph.flows.Flow(
                 investment=solph.Investment(existing=104174.33, maximum=1)
             )
         },

@@ -51,6 +51,7 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
+html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
@@ -59,7 +60,7 @@ nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
-linkcheck_ignore = [r"https://requires.io/.*"] + (
+linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
     [
         r"https://github.com/oemof/oemof-solph/issues/*",
         r"https://github.com/oemof/oemof-solph/pull/*",

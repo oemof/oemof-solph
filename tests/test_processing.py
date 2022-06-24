@@ -16,16 +16,16 @@ from nose.tools import ok_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
 from oemof.solph.components import GenericStorage
+from oemof.solph.components import Sink
+from oemof.solph.components import Transformer
+from oemof.solph.flows import Flow
 
 
 class TestParameterResult:
@@ -121,8 +121,8 @@ class TestParameterResult:
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
-            "summed_max": None,
-            "summed_min": None,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
             "max": 1,
             "min": 0,
             "negative_gradient_ub": None,
@@ -139,10 +139,7 @@ class TestParameterResult:
         sequences_attributes = {
             "fix": self.demand_values,
         }
-        default_sequences = ["fix"]
-        for attr in default_sequences:
-            if attr not in sequences_attributes:
-                sequences_attributes[attr] = [None]
+
         assert_frame_equal(
             param_results[(b_el2, demand)]["sequences"],
             pandas.DataFrame(sequences_attributes),
@@ -316,17 +313,18 @@ class TestParameterResult:
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
+
         compare = views.node(results, "storage", multiindex=True)["sequences"]
-        eq_(
+
+        assert (
             (
-                (
-                    compare[("storage", "b_el2", "flow")]
-                    - compare[("b_el1", "storage", "flow")]
-                ).to_frame()
-                == storage_flow.values
-            ).all()[0],
-            True,
-        )
+                compare[("storage", "b_el2", "flow")]
+                - compare[("b_el1", "storage", "flow")]
+            )
+            .to_frame()
+            .fillna(0)
+            == storage_flow.values
+        ).all()[0]
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)

@@ -42,9 +42,9 @@ authors:
     family-names: Schachler
     given-names: Birgit
   -
-    given-names: "@cswh"
+    alias: "@cswh"
   -
-    given-names: "@henhuy"
+    alias: "@henhuy"
   -
     family-names: Pl
     given-names: Franzi
@@ -62,6 +62,8 @@ authors:
     family-names: Kochems
     given-names: Johannes
   -
+    familiy-names: Koehl
+    given-names: Caterina
     alias: "@c-koehl"
   -
     alias: "@nesnoj"
