@@ -16,6 +16,7 @@ from oemof.network import network
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
+from oemof.solph._exceptions import FlowOptionWarning
 
 
 @pytest.fixture()
@@ -133,3 +134,63 @@ def test_storage_without_inputs(warning_fixture):
         )
         assert len(w) == 1
         assert msg in str(w[-1].message)
+
+
+def test_flow_allow_nonconvex_investment(warning_fixture):
+    """
+    <class 'solph.flows.Flow'> should raise UserWarning if the user set the
+    allow_nonconvex_investment option of <class 'solph.flows.Flow'> to True
+    """
+
+    with pytest.warns(FlowOptionWarning):
+        solph.flows.Flow(allow_nonconvex_investment=True)
+
+    with warnings.catch_warnings(record=True) as w:
+        solph.flows.Flow(allow_nonconvex_investment=True)
+        correct_warning_is_raised = False
+        for wm in w:
+            if isinstance(wm.message, FlowOptionWarning):
+                correct_warning_is_raised = True
+        assert correct_warning_is_raised is True
+
+
+def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
+    """
+    <class 'solph.flows.NonConvexInvestFlow'> without specifying
+    the maximum attribute of the <class 'solph.Investment'>
+    """
+
+    with pytest.raises(AttributeError):
+        solph.flows.NonConvexInvestFlow(
+            nominal_value=None,
+            variable_costs=25,
+            min=0.2,
+            max=0.8,
+            investment=solph.Investment(
+                ep_costs=500,  # no maximum is provided here
+            ),
+        )
+
+
+def test_non_convex_invest_flow_allow_nonconvex_investment(warning_fixture):
+    """
+    <class 'solph.flows.NonConvexInvestFlow'> should not raise the UserWarning
+    raised if the user set the allow_nonconvex_investment option of
+    <class 'solph.flows.Flow'> to True
+    """
+
+    with warnings.catch_warnings(record=True) as w:
+        solph.flows.NonConvexInvestFlow(
+            nominal_value=None,
+            variable_costs=25,
+            min=0.2,
+            max=0.8,
+            investment=solph.Investment(
+                ep_costs=500,
+                maximum=1234,
+            ),
+        )
+
+        for wm in w:
+            if isinstance(wm.message, FlowOptionWarning):
+                pytest.fail("A FlowOptionWarning should not have been raised")

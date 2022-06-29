@@ -16,6 +16,7 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: Saeed Sayadi
 
 SPDX-License-Identifier: MIT
 
@@ -26,6 +27,7 @@ from oemof.network import groupings as groupings
 from oemof.solph.flows._flow import FlowBlock
 from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
+from oemof.solph.flows._non_convex_invest_flow import NonConvexInvestFlowBlock
 
 
 def constraint_grouping(node, fallback=lambda *xs, **ks: None):
@@ -63,7 +65,7 @@ standard_flow_grouping = groupings.FlowsWithNodes(constant_key=FlowBlock)
 
 def _investment_grouping(stf):
     if hasattr(stf[2], "investment"):
-        if stf[2].investment is not None:
+        if stf[2].investment is not None and stf[2].nonconvex is None:
             return True
     else:
         return False
@@ -78,7 +80,7 @@ investment_flow_grouping = groupings.FlowsWithNodes(
 
 def _nonconvex_grouping(stf):
     if hasattr(stf[2], "nonconvex"):
-        if stf[2].nonconvex is not None:
+        if stf[2].nonconvex is not None and stf[2].investment is None:
             return True
     else:
         return False
@@ -89,9 +91,22 @@ nonconvex_flow_grouping = groupings.FlowsWithNodes(
 )
 
 
+def _nonconvex_invest_grouping(stf):
+    if hasattr(stf[2], "nonconvex"):
+        if stf[2].investment is not None and stf[2].nonconvex is not None:
+            return True
+    else:
+        return False
+
+
+nonconvex_invest_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=NonConvexInvestFlowBlock, filter=_nonconvex_invest_grouping
+)
+
 GROUPINGS = [
     constraint_grouping,
     investment_flow_grouping,
     standard_flow_grouping,
     nonconvex_flow_grouping,
+    nonconvex_invest_flow_grouping,
 ]

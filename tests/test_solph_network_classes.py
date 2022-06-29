@@ -15,6 +15,7 @@ import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
+from oemof.solph._exceptions import WrongOptionCombinationError
 
 
 class TestTransformerClass:
@@ -69,11 +70,38 @@ def test_wrong_combination_invest_and_nominal_value():
 
 
 def test_wrong_combination_of_options():
-    msg = "Investment flows cannot be combined with nonconvex flows!"
-    with pytest.raises(ValueError, match=msg):
+    with pytest.raises(WrongOptionCombinationError):
         solph.flows.Flow(
             investment=solph.Investment(), nonconvex=solph.NonConvex()
         )
+
+
+def test_allowed_combination_of_options_for_flow():
+    try:
+        solph.flows.Flow(
+            investment=solph.Investment(),
+            nonconvex=solph.NonConvex(),
+            allow_nonconvex_investment=True,
+        )
+    except ValueError:
+        pytest.fail()
+
+
+def test_allowed_combination_of_options_for_non_convex_invest_flow():
+    try:
+        solph.flows.NonConvexInvestFlow(
+            investment=solph.Investment(maximum=1234)
+        )
+    except WrongOptionCombinationError:
+        pytest.fail(
+            "The NonConvexInvestFlow should not raise a "
+            "WrongOptionCombinationError if using investment mode"
+        )
+
+
+def test_allowed_raw_use_for_non_convex_invest_flow2():
+
+    solph.flows.NonConvexInvestFlow()
 
 
 def test_error_of_deprecated_fixed_costs():

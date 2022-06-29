@@ -7,7 +7,7 @@ API changes
 
 * Parts of the energy system graph are now clearly structured into `buses`, `components`, and `flows`.
 * Public and private API are be more distinguished now. ('_' signifies private, public API is defined in init files.)
-* Started API for distinct `Flow`, `InvestmentFlow`, and `NonConvexFlow`.
+* Started API for distinct `Flow`, `InvestmentFlow`, `NonConvexFlow`, and `NonConvexInvestFlow`.
 * Experimental code is now sitting in submodules called `experimental` (replaces "custom").
 * The flow arguments `summed_min`and `summed_max` now have the more descriptive names `full_load_time_min` and `full_load_time_max`.
 
@@ -16,6 +16,7 @@ New features
 ############
 
 * Add `inactivity_costs` as an option for `NonConvexFlow`.
+* Add `NonConvexInvestFlow` which provides the possibility to perform capacity optimization of assets considering their min/max loads, as well as their operation status.
 
 Documentation
 #############
@@ -39,4 +40,6 @@ Contributors
 
 * Patrik Schönfeldt
 * Uwe Krien
+* Saeed Sayadi
+* Pierre-François Duc
 

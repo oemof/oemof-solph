@@ -10,6 +10,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: Pierre-François Duc
+SPDX-FileCopyrightText: Saeed Sayadi
 
 SPDX-License-Identifier: MIT
 
@@ -26,6 +28,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._exceptions import FlowOptionWarning
+from oemof.solph._exceptions import WrongOptionCombinationError
 from oemof.solph._plumbing import sequence
 
 
@@ -87,6 +91,21 @@ class Flow(on.Edge):
         :attr:`fix`.
     integer : boolean
         Set True to bound the flow values to integers.
+    investment : :class:`Investment <oemof.solph.options.Investment>`
+        Object indicating if a nominal_value of the flow is determined by
+        the optimization problem. Note: This will refer all attributes to an
+        investment variable instead of to the nominal_value. The nominal_value
+        should not be set (or set to None) if an investment object is used.
+    nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
+        If a nonconvex flow object is added here, the flow constraints will
+        be altered significantly as the mathematical model for the flow
+        will be different, i.e. constraint etc. from
+        :class:`NonConvexFlowBlock <oemof.solph.blocks.NonConvexFlowBlock>`
+        will be used instead of
+        :class:`FlowBlock <oemof.solph.blocks.FlowBlock>`.
+    allow_nonconvex_investment: :bool:
+        If set to True, then the combinaison of nonconvex and investment flows
+        is possible
 
     Notes
     -----
@@ -119,7 +138,7 @@ class Flow(on.Edge):
 
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
         msg = (
-            "\nThe parameter 'summed_{0}' ist deprecated and will be removed "
+            "\nThe parameter 'summed_{0}' is deprecated and will be removed "
             "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
             "to avoid this warning and future problems. "
         )
@@ -143,10 +162,12 @@ class Flow(on.Edge):
         ]
         sequences = ["fix", "variable_costs", "min", "max"]
         dictionaries = ["positive_gradient", "negative_gradient"]
+        booleans = ["allow_nonconvex_investment"]
         defaults = {
             "variable_costs": 0,
             "positive_gradient": {"ub": None},
             "negative_gradient": {"ub": None},
+            "allow_nonconvex_investment": False,
         }
         need_nominal_value = [
             "fix",
@@ -209,7 +230,9 @@ class Flow(on.Edge):
                     )
                     raise AttributeError(msg.format(gradient_dict))
 
-        for attribute in set(scalars + sequences + dictionaries + keys):
+        for attribute in set(
+            scalars + sequences + dictionaries + booleans + keys
+        ):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(
@@ -231,10 +254,23 @@ class Flow(on.Edge):
                 "Using the investment object the nominal_value"
                 " has to be set to None."
             )
-        if self.investment and self.nonconvex:
-            raise ValueError(
-                "Investment flows cannot be combined with "
-                + "nonconvex flows!"
+
+        # Checking for misuse of nonconvex and investment options of
+        # <class 'solph.flows.Flow'> instead of using
+        # <class 'solph.flows.NonConvexInvestFlow'>
+        if self.allow_nonconvex_investment is False:
+            if self.investment and self.nonconvex:
+                raise WrongOptionCombinationError(
+                    "Investment flows cannot be combined with "
+                    + "nonconvex flows using the general Flow class! "
+                    + "Please consider using the NonConvexInvestFlow class."
+                )
+        else:
+            warn(
+                "You are using the general Flow class with the option "
+                "`allow_nonconvex_investment`, please consider using"
+                "NonConvexInvestFlow class instead.",
+                FlowOptionWarning,
             )
 
         infinite_error_msg = (

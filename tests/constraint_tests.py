@@ -178,6 +178,30 @@ class TestsConstraint:
 
         self.compare_lp_files("linear_transformer_invest.lp")
 
+    def test_nonconvex_invest_transformer(self):
+        """Non convex invest flow with offset, without minimum."""
+        bfuel = solph.buses.Bus(label="fuelBus")
+        bel = solph.buses.Bus(label="electricityBus")
+
+        solph.components.Transformer(
+            label="transformer_nonconvex_invest",
+            inputs={bfuel: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.NonConvexInvestFlow(
+                    nominal_value=None,
+                    variable_costs=25,
+                    min=0.25,
+                    max=0.5,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        maximum=1234,
+                    ),
+                )
+            },
+            conversion_factors={bel: 0.5},
+        )
+        self.compare_lp_files("flow_nonconvex_invest_bounded_transformer.lp")
+
     def test_max_source_min_sink(self):
         """ """
         bel = solph.buses.Bus(label="electricityBus")

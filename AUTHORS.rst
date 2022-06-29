@@ -28,6 +28,8 @@ Authors
 * Lluis Millet
 * Martin Soethe
 * Patrik Schönfeldt
+* Saeed Sayadi
+* Pierre-François Duc
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien
