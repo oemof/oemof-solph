@@ -40,6 +40,7 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
     -------
     the updated model.
     """
+
     def _equate_flow_groups_rule(m):
         for ts in m.TIMESTEPS:
             sum1_t = sum(m.flow[fi, fo, ts] for fi, fo in flows1)
