@@ -29,40 +29,33 @@ def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
         f"is longer than total number of timesteps {n_timesteps}"
     )
 
+    # Create an index for the idle time
+    model.idle_time = po.RangeSet(0, n)
+
     def _idle_rule(m):
         # In the first n steps, the status of f1 has to be inactive
-        # for f2 to be active
-        for ts in list(m.TIMESTEPS)[:n]:
-            expr = (
-                m.NonConvexFlowBlock.status[f2[0], f2[1], ts]
-                * sum(
-                    m.NonConvexFlowBlock.status[f1[0], f1[1], t]
-                    for t in range(ts + 1)
-                )
-                == 0
-            )
-            if expr is not True:
-                getattr(m, name_constraint).add(ts, expr)
+        # for f2 to be active. For all following timesteps, f1 has to be
+        # inactive in the preceding window of n timesteps for f2 to be active.
+        for ts in list(m.TIMESTEPS):
+            for delay in model.idle_time:
 
-        # for all following timesteps, f1 has to be inactive in the preceding
-        # window of n timesteps for f2 to be active
-        for ts in list(m.TIMESTEPS)[n:]:
-            expr = (
-                m.NonConvexFlowBlock.status[f2[0], f2[1], ts]
-                * sum(
-                    m.NonConvexFlowBlock.status[f1[0], f1[1], t]
-                    for t in range(ts - n, ts + 1)
+                if ts - delay < 0:
+                    continue
+
+                expr = (
+                    m.NonConvexFlowBlock.status[f2[0], f2[1], ts]
+                    + m.NonConvexFlowBlock.status[f1[0], f1[1], ts-delay]
+                    <= 1
                 )
-                == 0
-            )
-            if expr is not True:
-                getattr(m, name_constraint).add(ts, expr)
+                if expr is not True:
+                    getattr(m, name_constraint).add((ts, ts - delay), expr)
 
     setattr(
         model,
         name_constraint,
-        po.Constraint(model.TIMESTEPS, noruleinit=True),
+        po.Constraint([(t, t-delay) for t in model.TIMESTEPS for delay in model.idle_time], noruleinit=True),
     )
+
     setattr(
         model,
         name_constraint + "_build",
