@@ -44,7 +44,7 @@ def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
 
                 expr = (
                     m.NonConvexFlowBlock.status[f2[0], f2[1], ts]
-                    + m.NonConvexFlowBlock.status[f1[0], f1[1], ts-delay]
+                    + m.NonConvexFlowBlock.status[f1[0], f1[1], ts - delay]
                     <= 1
                 )
                 if expr is not True:
@@ -53,7 +53,14 @@ def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
     setattr(
         model,
         name_constraint,
-        po.Constraint([(t, t-delay) for t in model.TIMESTEPS for delay in model.idle_time], noruleinit=True),
+        po.Constraint(
+            [
+                (t, t - delay)
+                for t in model.TIMESTEPS
+                for delay in model.idle_time
+            ],
+            noruleinit=True,
+        ),
     )
 
     setattr(
