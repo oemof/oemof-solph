@@ -11,16 +11,34 @@ from pyomo import environ as po
 
 def set_idle_time(model, f1, f2, n, name_constraint="constraint_idle_time"):
     r"""
-    Enforces f1 to be inactive for n timesteps before f2 can be active.
+    Adds a constraint to the given model that enforces f1 to be inactive
+    for n timesteps before f2 can be active.
 
-    For each timestep status of f2 can only be "on" if f1 has been off
+    For each timestep status of f2 can only be active if f1 has been inactive
     the previous n timesteps.
 
-    **Constraint:**
+    **Constraints:**
 
-    .. math:: X_2(t) \cdot \sum_{s=0}^t X_1(s) = 0 \forall t < n
-    .. math:: X_2(t) \cdot \sum_{s=t-n}^t X_1(s) = 0 \forall t \le n
+    .. math:: X_1(s) + X_2(t) <= 1 \forall 0 < t < n, 0 \le s \le t
+    .. math:: X_1(s) + X_2(t) <= 1 \forall t \ge n, t-n \le s \le t
 
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which the constraint is added.
+    f1 : tuple
+        First flow tuple.
+    f2 : tuple
+        Second flow tuple. Has to be inactive for a defined number of
+        timesteps after first flow was active.
+    n : int
+        Number of timesteps f2 has to be inactive after f1 has been active.
+    name_constraint : str, default='constraint_idle_time'
+        Name for the equation e.g. in the LP file.
+
+    Returns
+    -------
+    the updated model.
     """
     # make sure that idle time is not longer than number of timesteps
     n_timesteps = len(model.TIMESTEPS)
