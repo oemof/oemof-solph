@@ -266,8 +266,12 @@ def test_offsettransformer__too_many_input_flows():
         components.OffsetTransformer(
             label="ostf_2_in",
             inputs={
-                bgas: Flow(nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()),
-                bcoal: Flow(nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()),
+                bgas: Flow(
+                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
+                ),
+                bcoal: Flow(
+                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
+                ),
             },
             coefficients=(20, 0.5),
         )
@@ -283,7 +287,11 @@ def test_offsettransformer_too_many_output_flows():
 
         components.OffsetTransformer(
             label="ostf_2_out",
-            inputs={bm1: Flow(nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex())},
+            inputs={
+                bm1: Flow(
+                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
+                )
+            },
             outputs={bm1: Flow(), bm2: Flow()},
             coefficients=(20, 0.5),
         )

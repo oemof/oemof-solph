@@ -217,9 +217,7 @@ class Flow(on.Edge):
                     )
                     raise AttributeError(msg.format(gradient_dict))
 
-        for attribute in set(
-            scalars + sequences + dictionaries + keys
-        ):
+        for attribute in set(scalars + sequences + dictionaries + keys):
             value = kwargs.get(attribute, defaults.get(attribute))
             if attribute in dictionaries:
                 setattr(

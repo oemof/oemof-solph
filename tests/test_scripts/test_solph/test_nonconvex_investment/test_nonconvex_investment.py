@@ -56,15 +56,9 @@ except ImportError:
 
 
 def test_nonconvex_investment(solver="cbc"):
-
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
-
-
-    # Start time for calculating the total elapsed time.
-    start_simulation_time = time.time()
-
     start = "2022-01-01"
 
     # The maximum number of days depends on the given *.csv file.
@@ -74,8 +68,9 @@ def test_nonconvex_investment(solver="cbc"):
     # Create date and time objects.
     start_date_obj = datetime.strptime(start, "%Y-%m-%d")
     start_date = start_date_obj.date()
-    start_time = start_date_obj.time()
-    start_datetime = datetime.combine(start_date_obj.date(), start_date_obj.time())
+    start_datetime = datetime.combine(
+        start_date_obj.date(), start_date_obj.time()
+    )
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
@@ -83,7 +78,7 @@ def test_nonconvex_investment(solver="cbc"):
     filename = os.path.join(current_directory, "diesel_genset_data.csv")
     data = pd.read_csv(filepath_or_buffer=filename)
 
-    # Change the index of data to be able to select data based on the time range.
+    # Change index of data to be able to select data based on the time range.
     data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
 
     # Choose the range of the solar potential and demand
@@ -216,9 +211,7 @@ def test_nonconvex_investment(solver="cbc"):
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
         outputs={
-            b_el_dc: solph.flows.Flow(
-                investment=solph.Investment(ep_costs=0)
-            )
+            b_el_dc: solph.flows.Flow(investment=solph.Investment(ep_costs=0))
         },
         initial_storage_level=0.0,
         min_storage_level=0.0,
@@ -261,7 +254,6 @@ def test_nonconvex_investment(solver="cbc"):
         excess_el,
     )
 
-
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
@@ -277,19 +269,13 @@ def test_nonconvex_investment(solver="cbc"):
         cmdline_options=solver_option[solver],
     )
 
-    # End of the calculation time.
-    end_simulation_time = time.time()
-
-
     ##########################################################################
     # Process the results
     ##########################################################################
-
     results = solph.processing.results(model)
 
     results_diesel_genset = solph.views.node(
-        results=results,
-        node="diesel_genset"
+        results=results, node="diesel_genset"
     )
 
     # -------------------- SEQUENCES (DYNAMIC) --------------------

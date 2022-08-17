@@ -1022,7 +1022,7 @@ class TestsConstraint:
                         initial_status=2,
                         startup_costs=5,
                         shutdown_costs=7,
-                    )
+                    ),
                 )
             },
         )
