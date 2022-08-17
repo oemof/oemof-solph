@@ -98,8 +98,9 @@ class Flow(on.Edge):
 
     Notes
     -----
-    See :py:class:`~oemof.solph.flows._simple_flow.SimpleFlowBlock` for the variables,
-    constraints and objective parts, that are created for a FLow object.
+    See :py:class:`~oemof.solph.flows._simple_flow.SimpleFlowBlock`
+    for the variables, constraints and objective parts, that are created for
+    a FLow object.
 
     Examples
     --------
@@ -121,9 +122,9 @@ class Flow(on.Edge):
     def __init__(self, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
-        # pyomo.core.base.IndexedVarWithDomain before any SimpleFlowBlock is created.
-        # E.g. create the variable in the energy system and populate with
-        # information afterwards when creating objects.
+        # pyomo.core.base.IndexedVarWithDomain before any SimpleFlowBlock
+        # is created. E.g. create the variable in the energy system and
+        # populate with information afterwards when creating objects.
 
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
         msg = (

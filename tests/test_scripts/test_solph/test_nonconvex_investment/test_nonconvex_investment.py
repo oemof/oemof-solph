@@ -136,9 +136,9 @@ def test_nonconvex_investment(solver="cbc"):
     # the given minimum and maximum loads, which represent the fraction
     # of the optimal capacity obtained from the optimization.
 
-    # If the `min` attribute is set to 0, the NonConvex attribute has no effect,
-    # so the flow will be similar to the `InvestmentFlow` and it is better to avoid
-    # using the `NonConvexInvestFlow` for such cases.
+    # If the `min` attribute is set to 0, the NonConvex attribute
+    # has no effect, so the flow will be similar to the `InvestmentFlow`
+    # and it is better to avoid using the `NonConvexInvestFlow` for such cases.
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh
