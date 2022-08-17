@@ -40,7 +40,6 @@ __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
 import os
-import time
 from datetime import datetime
 from datetime import timedelta
 
