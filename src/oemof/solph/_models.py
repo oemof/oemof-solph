@@ -23,7 +23,7 @@ from pyomo.opt import SolverFactory
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
-from oemof.solph.flows._flow import FlowBlock
+from oemof.solph.flows._simple_flow import SimpleFlowBlock
 from oemof.solph.flows._investment_flow import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
 from oemof.solph.flows._non_convex_invest_flow import NonConvexInvestFlowBlock
@@ -286,7 +286,7 @@ class Model(BaseModel):
     **The following basic variables are created**:
 
     flow
-        FlowBlock from source to target indexed by FLOWS, TIMESTEPS.
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
@@ -296,7 +296,7 @@ class Model(BaseModel):
         BusBlock,
         TransformerBlock,
         InvestmentFlowBlock,
-        FlowBlock,
+        SimpleFlowBlock,
         NonConvexFlowBlock,
         NonConvexInvestFlowBlock,
     ]

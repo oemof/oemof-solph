@@ -506,7 +506,7 @@ class GenericStorageBlock(ScalarBlock):
         r"""
         Objective expression for storages with no investment.
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`FlowBlock`.
+        added in the Block :class:`SimpleFlowBlock`.
         """
         if not hasattr(self, "STORAGES"):
             return 0

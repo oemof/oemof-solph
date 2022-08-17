@@ -51,7 +51,7 @@ class TestsGrouping:
         solph.components.Sink(
             label="Sink",
             inputs={
-                b: solph.flows.InvestmentFlow(
+                b: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,

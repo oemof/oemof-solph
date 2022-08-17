@@ -143,7 +143,7 @@ def set_result_index(df_dict, k, result_index):
             df_dict[k].index = result_index
         except ValueError as e:
             msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values "
+                "\nFlow: {0}-{1}. This could be caused by NaN-values "
                 "in your input data."
             )
             raise type(e)(

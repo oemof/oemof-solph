@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for FlowBlock objects with investment option.
+for SimpleFlowBlock objects with investment option.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -23,17 +23,6 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from ._flow import Flow
-
-
-class InvestmentFlow(Flow):
-    r"""
-    Wrapper class to prepare separation of flow classes.
-    """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
 
 class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
@@ -41,7 +30,7 @@ class InvestmentFlowBlock(ScalarBlock):
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
 
-    See :class:`oemof.solph.network.FlowBlock` for all parameters of the *FlowBlock*
+    See :class:`oemof.solph.network.SimpleFlowBlock` for all parameters of the *SimpleFlowBlock*
     class.
 
     **Variables**
@@ -66,7 +55,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
     **Constraints**
 
-    Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*, different
+    Depending on the attributes of the *InvestmentFlowBlock* and *SimpleFlowBlock*, different
     constraints are created. The following constraint is created for all
     *InvestmentFlowBlock*:\
 
@@ -93,7 +82,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
     For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
     the following additional constraints are created, if the appropriate
-    attribute of the *FlowBlock* (see :class:`oemof.solph.network.FlowBlock`) is set:
+    attribute of the *SimpleFlowBlock* (see :class:`oemof.solph.network.SimpleFlowBlock`) is set:
 
         * :attr:`fix` is not None
 
@@ -220,8 +209,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
     Note
     ----
-    See also :class:`oemof.solph.network.FlowBlock`,
-    :class:`oemof.solph.blocks.FlowBlock` and
+    See also :class:`oemof.solph.network.SimpleFlowBlock`,
+    :class:`oemof.solph.blocks.SimpleFlowBlock` and
     :class:`oemof.solph.options.Investment`
 
     """  # noqa: E501
@@ -230,7 +219,7 @@ class InvestmentFlowBlock(ScalarBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        r"""Creates sets, variables and constraints for FlowBlock
+        r"""Creates sets, variables and constraints for SimpleFlowBlock
         with investment attribute of type class:`.Investment`.
 
         Parameters

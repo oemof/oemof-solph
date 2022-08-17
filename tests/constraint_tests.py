@@ -187,7 +187,7 @@ class TestsConstraint:
             label="transformer_nonconvex_invest",
             inputs={bfuel: solph.flows.Flow()},
             outputs={
-                bel: solph.flows.NonConvexInvestFlow(
+                bel: solph.flows.Flow(
                     nominal_value=None,
                     variable_costs=25,
                     min=0.25,
@@ -196,6 +196,7 @@ class TestsConstraint:
                         ep_costs=500,
                         maximum=1234,
                     ),
+                    nonconvex=solph.NonConvex(),
                 )
             },
             conversion_factors={bel: 0.5},
@@ -271,7 +272,7 @@ class TestsConstraint:
         solph.components.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.InvestmentFlow(
+                bel: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
@@ -435,12 +436,12 @@ class TestsConstraint:
         solph.components.GenericStorage(
             label="storage6",
             inputs={
-                bel: solph.flows.InvestmentFlow(
+                bel: solph.flows.Flow(
                     investment=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
-                bel: solph.flows.InvestmentFlow(
+                bel: solph.flows.Flow(
                     investment=solph.Investment(existing=100)
                 )
             },
@@ -1010,16 +1011,18 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_min_down_constraints",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    minimum_downtime=4,
-                    minimum_uptime=2,
-                    initial_status=2,
-                    startup_costs=5,
-                    shutdown_costs=7,
+                    nonconvex=solph.NonConvex(
+                        minimum_downtime=4,
+                        minimum_uptime=2,
+                        initial_status=2,
+                        startup_costs=5,
+                        shutdown_costs=7,
+                    )
                 )
             },
         )
@@ -1031,12 +1034,12 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_activity_costs",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    activity_costs=2,
+                    nonconvex=solph.NonConvex(activity_costs=2),
                 )
             },
         )
@@ -1048,12 +1051,12 @@ class TestsConstraint:
         solph.components.Source(
             label="cheap_plant_inactivity_costs",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    inactivity_costs=2,
+                    nonconvex=solph.NonConvex(inactivity_costs=2),
                 )
             },
         )

@@ -69,13 +69,6 @@ def test_wrong_combination_invest_and_nominal_value():
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
 
 
-def test_wrong_combination_of_options():
-    with pytest.raises(WrongOptionCombinationError):
-        solph.flows.Flow(
-            investment=solph.Investment(), nonconvex=solph.NonConvex()
-        )
-
-
 def test_allowed_combination_of_options_for_flow():
     try:
         solph.flows.Flow(
@@ -85,23 +78,6 @@ def test_allowed_combination_of_options_for_flow():
         )
     except ValueError:
         pytest.fail()
-
-
-def test_allowed_combination_of_options_for_non_convex_invest_flow():
-    try:
-        solph.flows.NonConvexInvestFlow(
-            investment=solph.Investment(maximum=1234)
-        )
-    except WrongOptionCombinationError:
-        pytest.fail(
-            "The NonConvexInvestFlow should not raise a "
-            "WrongOptionCombinationError if using investment mode"
-        )
-
-
-def test_allowed_raw_use_for_non_convex_invest_flow2():
-
-    solph.flows.NonConvexInvestFlow()
 
 
 def test_error_of_deprecated_fixed_costs():
