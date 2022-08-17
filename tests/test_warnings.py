@@ -16,7 +16,6 @@ from oemof.network import network
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
-from oemof.solph._exceptions import FlowOptionWarning
 
 
 @pytest.fixture()
