@@ -22,8 +22,6 @@ from warnings import warn
 from oemof.network import network as on
 from oemof.tools import debugging
 
-from oemof.solph._exceptions import FlowOptionWarning
-from oemof.solph._exceptions import WrongOptionCombinationError
 from oemof.solph._plumbing import sequence
 
 

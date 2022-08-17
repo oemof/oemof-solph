@@ -18,9 +18,6 @@ SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-License-Identifier: MIT
 
 """
-
-import warnings
-
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
