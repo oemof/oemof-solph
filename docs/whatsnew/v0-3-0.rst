@@ -56,7 +56,7 @@ New features
   signals. The first supported signal gets emitted, whenever a `node
   <oemof.network.node>` is `added <oemof.energy_system.EnergySystem.add>` to an
   `energy system <oemof.energy_system.EnergySystem>`.
-  (`blinker <https://pythonhosted.org/blinker/>`_)
+  (`blinker <https://blinker.readthedocs.io/>`_)
 
 
 Documentation
