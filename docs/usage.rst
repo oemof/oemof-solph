@@ -1042,7 +1042,7 @@ Some predefined additional constraints can be found in the
 
 
 The Grouping module (Sets)
------------------------------------------------------
+--------------------------
 To construct constraints,
 variables and objective expressions inside all Block classes
 and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,
