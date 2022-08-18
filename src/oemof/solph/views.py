@@ -227,7 +227,7 @@ def node_weight_by_type(results, node_type):
 
     Example
     --------
-    >>> from oemof.outputlib import views
+    >>> from oemof.solph import views
     >>>
     >>> # solve oemof model 'm'
     >>> # Then collect node weights
@@ -269,7 +269,7 @@ def node_input_by_type(results, node_type, droplevel=None):
     Notes
     -----
     >>> from oemof import solph
-    >>> from oemof.outputlib import views
+    >>> from oemof.solph import views
     >>>
     >>> # solve oemof solph model 'm'
     >>> # Then collect node weights
@@ -307,7 +307,7 @@ def node_output_by_type(results, node_type, droplevel=None):
     Notes
     -----
     >>> import oemof.solph as solph
-    >>> from oemof.outputlib import views
+    >>> from oemof.solph import views
     >>>
     >>> # solve oemof solph model 'm'
     >>> # Then collect node weights
@@ -352,7 +352,7 @@ def net_storage_flow(results, node_type):
     Examples
     --------
     >>> import oemof.solph as solph
-    >>> from oemof.outputlib import views
+    >>> from oemof.solph import views
     >>>
     >>> # solve oemof solph model 'm'
     >>> # Then collect node weights
