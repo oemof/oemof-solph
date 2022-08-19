@@ -26,7 +26,7 @@ jobs:
 
     steps:
       - name: Install LaTeX
-        run: sudo apt install rubber texlive-latex-extra
+        run: sudo apt install dvipng rubber texlive-latex-extra
       - name: Git clone
         uses: actions/checkout@v2
 
