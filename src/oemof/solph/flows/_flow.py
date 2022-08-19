@@ -117,7 +117,7 @@ class Flow(on.Edge):
     >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
     >>> f1.max[1]
     0.99
-    """
+    """  # noqa: E501
 
     def __init__(self, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData

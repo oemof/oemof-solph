@@ -15,10 +15,10 @@ import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof.solph import Investment
+from oemof.solph import NonConvex
 from oemof.solph import components
 from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
-from oemof.solph import NonConvex
 
 # ********* GenericStorage *********
 
