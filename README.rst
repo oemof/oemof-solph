@@ -77,9 +77,9 @@
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
-.. |meeting| image:: https://img.shields.io/date/1652864400?color=%23094714&label=Next%20meeting&logoColor=%230947ff
+.. |meeting| image:: https://img.shields.io/date/1667998800?color=%23094714&label=Next%20meeting&logoColor=%230947ff
      :alt: Relative date
-     :target: https://github.com/oemof/oemof/issues/99
+     :target: https://github.com/oemof/oemof/issues/100
 
 .. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat
