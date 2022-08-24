@@ -284,10 +284,15 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         if group is None:
             return None
 
-        m = self.parent_block()
-        # ########################## SETS #####################################
-        # Nonconvex-related sets similar to the
-        # <class 'oemof.solph.flows.NonconvexFlow'> class.
+        self._create_sets(group)
+        self._create_variables(group)
+        self._create_constraints()
+
+    def _create_sets(self, group):
+        """
+        Nonconvex-related sets similar to the
+        <class 'oemof.solph.flows.NonconvexFlow'> class.
+        """
         self.MIN_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].min[0] is not None]
         )
@@ -359,10 +364,13 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
-        # ################### VARIABLES #######################
-        # Nonconvex-related variables similar to the
-        # <class 'oemof.solph.flows.NonConvexFlow'> class.
+    def _create_variables(self, groups):
+        """
+        Nonconvex-related variables similar to the
+        <class 'oemof.solph.flows.NonConvexFlow'> class.
+        """
 
+        m = self.parent_block()
         # Create `status` variable representing the status of the flow
         # at each time step
         self.status = Var(
@@ -412,9 +420,13 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             self.MIN_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
 
-        # ################### CONSTRAINTS ########################
-        # Nonconvex-related constraints similar to the
+    def _create_constraints(self):
+        """
+        Nonconvex-related constraints similar to the
         # <class 'oemof.solph.flows.NonConvexFlow'> class.
+        """
+        m = self.parent_block()
+
         def _startup_rule(block, i, o, t):
             """Rule definition for startup constraint of nonconvex flows."""
             if t > m.TIMESTEPS[1]:

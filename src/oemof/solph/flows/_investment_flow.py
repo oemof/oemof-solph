@@ -232,9 +232,14 @@ class InvestmentFlowBlock(ScalarBlock):
         if group is None:
             return None
 
-        m = self.parent_block()
+        self._create_sets(group)
+        self._create_variables(group)
+        self._create_constraints()
 
-        # ######################### SETS #####################################
+    def _create_sets(self, group):
+        """
+        Creates all sets for investment flows.
+        """
         self.INVESTFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.CONVEX_INVESTFLOWS = Set(
@@ -285,7 +290,12 @@ class InvestmentFlowBlock(ScalarBlock):
             ]
         )
 
-        # ######################### VARIABLES #################################
+    def _create_variables(self, group):
+        """
+        Creates all variables for investment flows.
+        """
+        m = self.parent_block()
+
         def _investvar_bound_rule(block, i, o):
             """Rule definition for bounds of invest variable."""
             if (i, o) in self.CONVEX_INVESTFLOWS:
@@ -305,7 +315,12 @@ class InvestmentFlowBlock(ScalarBlock):
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
-        # ######################### CONSTRAINTS ###############################
+
+    def _create_constraints(self):
+        """
+        Creates all constraints for standard flows.
+        """
+        m = self.parent_block()
 
         def _min_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""

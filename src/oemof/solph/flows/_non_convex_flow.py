@@ -236,8 +236,14 @@ class NonConvexFlowBlock(ScalarBlock):
         if group is None:
             return None
 
-        m = self.parent_block()
-        # ########################## SETS #####################################
+        self._create_sets(group)
+        self._create_variables(group)
+        self._create_constraints()
+
+    def _create_sets(self, group):
+        """
+        Creates all sets for non-convex flows.
+        """
         self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.MIN_FLOWS = Set(
@@ -321,7 +327,11 @@ class NonConvexFlowBlock(ScalarBlock):
             ]
         )
 
-        # ################### VARIABLES AND CONSTRAINTS #######################
+    def _create_variables(self, group):
+        """
+        Creates all variables for non-convex flows.
+        """
+        m = self.parent_block()
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
         if self.STARTUPFLOWS:
@@ -339,6 +349,12 @@ class NonConvexFlowBlock(ScalarBlock):
             self.negative_gradient = Var(
                 self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS
             )
+
+    def _create_constraints(self):
+        """
+        Creates all constraints for non-convex flows.
+        """
+        m = self.parent_block()
 
         def _minimum_flow_rule(block, i, o, t):
             """Rule definition for MILP minimum flow constraints."""

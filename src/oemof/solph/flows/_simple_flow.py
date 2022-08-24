@@ -142,10 +142,14 @@ class SimpleFlowBlock(ScalarBlock):
         if group is None:
             return None
 
-        m = self.parent_block()
+        self._create_sets(group)
+        self._create_variables(group)
+        self._create_constraints()
 
-        # ########################## SETS #################################
-        # set for all flows with an global limit on the flow over time
+    def _create_sets(self, group):
+        """
+        Creates all sets for standard flows.
+        """
         self.FULL_LOAD_TIME_MAX_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
@@ -183,7 +187,12 @@ class SimpleFlowBlock(ScalarBlock):
         self.INTEGER_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group if g[2].integer]
         )
-        # ######################### Variables  ################################
+
+    def _create_variables(self, group):
+        """
+        Creates all variables for standard flows.
+        """
+        m = self.parent_block()
 
         self.positive_gradient = Var(self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS)
 
@@ -205,7 +214,11 @@ class SimpleFlowBlock(ScalarBlock):
                         f.negative_gradient["ub"][t] * f.nominal_value
                     )
 
-        # ######################### CONSTRAINTS ###############################
+    def _create_constraints(self):
+        """
+        Creates all constraints for standard flows.
+        """
+        m = self.parent_block()
 
         def _flow_full_load_time_max_rule(model):
             """Rule definition for build action of max. sum flow constraint."""
