@@ -24,6 +24,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from . import _non_convex_constraint_factories as nccf
+
 
 class NonConvexFlowBlock(ScalarBlock):
     r"""
@@ -384,118 +386,12 @@ class NonConvexFlowBlock(ScalarBlock):
             self.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule
         )
 
-        def _startup_rule(block, i, o, t):
-            """Rule definition for startup constraint of nonconvex flows."""
-            if t > m.TIMESTEPS[1]:
-                expr = (
-                    self.startup[i, o, t]
-                    >= self.status[i, o, t] - self.status[i, o, t - 1]
-                )
-            else:
-                expr = (
-                    self.startup[i, o, t]
-                    >= self.status[i, o, t]
-                    - m.flows[i, o].nonconvex.initial_status
-                )
-            return expr
-
-        self.startup_constr = Constraint(
-            self.STARTUPFLOWS, m.TIMESTEPS, rule=_startup_rule
-        )
-
-        def _max_startup_rule(block, i, o):
-            """Rule definition for maximum number of start-ups."""
-            lhs = sum(self.startup[i, o, t] for t in m.TIMESTEPS)
-            return lhs <= m.flows[i, o].nonconvex.maximum_startups
-
-        self.max_startup_constr = Constraint(
-            self.MAXSTARTUPFLOWS, rule=_max_startup_rule
-        )
-
-        def _shutdown_rule(block, i, o, t):
-            """Rule definition for shutdown constraints of nonconvex flows."""
-            if t > m.TIMESTEPS[1]:
-                expr = (
-                    self.shutdown[i, o, t]
-                    >= self.status[i, o, t - 1] - self.status[i, o, t]
-                )
-            else:
-                expr = (
-                    self.shutdown[i, o, t]
-                    >= m.flows[i, o].nonconvex.initial_status
-                    - self.status[i, o, t]
-                )
-            return expr
-
-        self.shutdown_constr = Constraint(
-            self.SHUTDOWNFLOWS, m.TIMESTEPS, rule=_shutdown_rule
-        )
-
-        def _max_shutdown_rule(block, i, o):
-            """Rule definition for maximum number of start-ups."""
-            lhs = sum(self.shutdown[i, o, t] for t in m.TIMESTEPS)
-            return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
-
-        self.max_shutdown_constr = Constraint(
-            self.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule
-        )
-
-        def _min_uptime_rule(block, i, o, t):
-            """
-            Rule definition for min-uptime constraints of nonconvex flows.
-            """
-            if (
-                m.flows[i, o].nonconvex.max_up_down
-                <= t
-                <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down
-            ):
-                expr = 0
-                expr += (
-                    self.status[i, o, t] - self.status[i, o, t - 1]
-                ) * m.flows[i, o].nonconvex.minimum_uptime
-                expr += -sum(
-                    self.status[i, o, t + u]
-                    for u in range(0, m.flows[i, o].nonconvex.minimum_uptime)
-                )
-                return expr <= 0
-            else:
-                expr = 0
-                expr += self.status[i, o, t]
-                expr += -m.flows[i, o].nonconvex.initial_status
-                return expr == 0
-
-        self.min_uptime_constr = Constraint(
-            self.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule
-        )
-
-        def _min_downtime_rule(block, i, o, t):
-            """
-            Rule definition for min-downtime constraints of nonconvex flows.
-            """
-            if (
-                m.flows[i, o].nonconvex.max_up_down
-                <= t
-                <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down
-            ):
-                expr = 0
-                expr += (
-                    self.status[i, o, t - 1] - self.status[i, o, t]
-                ) * m.flows[i, o].nonconvex.minimum_downtime
-                expr += -m.flows[i, o].nonconvex.minimum_downtime
-                expr += sum(
-                    self.status[i, o, t + d]
-                    for d in range(0, m.flows[i, o].nonconvex.minimum_downtime)
-                )
-                return expr <= 0
-            else:
-                expr = 0
-                expr += self.status[i, o, t]
-                expr += -m.flows[i, o].nonconvex.initial_status
-                return expr == 0
-
-        self.min_downtime_constr = Constraint(
-            self.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=_min_downtime_rule
-        )
+        self.startup_constr = nccf.startup_constraint(self)
+        self.max_startup_constr = nccf.max_startup_constraint(self)
+        self.shutdown_constr = nccf.shutdown_constraint(self)
+        self.max_shutdown_constr = nccf.max_shutdown_constraint(self)
+        self.min_uptime_constr = nccf.min_uptime_constraint(self)
+        self.min_downtime_constr = nccf.min_downtime_constraint(self)
 
         def _positive_gradient_flow_rule(block):
             """Rule definition for positive gradient constraint."""
