@@ -149,7 +149,8 @@ class NonConvexInvestFlowBlock(ScalarBlock):
     Minimum uptime constraint
         `om.NonConvexInvestFlowBlock.uptime_constr[i,o,t]`
             .. math::
-                (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
+                (status(i, o, t)-status(i, o, t-1))
+                \cdot minimum\_uptime(i, o) \\
                 \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
                 \forall t \in \textrm{TIMESTEPS} | \\
                 t \neq \{0..minimum\_uptime\} \cup \
