@@ -81,9 +81,7 @@ def min_uptime_constraint(block):
             expr += -m.flows[i, o].nonconvex.initial_status
             return expr == 0
 
-    return Constraint(
-        block.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule
-    )
+    return Constraint(block.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule)
 
 
 def shutdown_constraint(block):
@@ -105,13 +103,11 @@ def shutdown_constraint(block):
             )
         return expr
 
-    return Constraint(
-        block.SHUTDOWNFLOWS, m.TIMESTEPS, rule=_shutdown_rule
-    )
+    return Constraint(block.SHUTDOWNFLOWS, m.TIMESTEPS, rule=_shutdown_rule)
 
 
 def startup_constraint(block):
-    """ Factory function for startups (of non-convex flows)"""
+    """Factory function for startups (of non-convex flows)"""
     m = block.parent_block()
 
     def _startup_rule(_, i, o, t):
@@ -129,13 +125,11 @@ def startup_constraint(block):
             )
         return expr
 
-    return Constraint(
-        block.STARTUPFLOWS, m.TIMESTEPS, rule=_startup_rule
-    )
+    return Constraint(block.STARTUPFLOWS, m.TIMESTEPS, rule=_startup_rule)
 
 
 def max_startup_constraint(block):
-    """ Factory function for maximum number of startups
+    """Factory function for maximum number of startups
 
     Will only run if startup_constraint is also defined.
     """
@@ -146,13 +140,11 @@ def max_startup_constraint(block):
         lhs = sum(block.startup[i, o, t] for t in m.TIMESTEPS)
         return lhs <= m.flows[i, o].nonconvex.maximum_startups
 
-    return Constraint(
-        block.MAXSTARTUPFLOWS, rule=_max_startup_rule
-    )
+    return Constraint(block.MAXSTARTUPFLOWS, rule=_max_startup_rule)
 
 
 def max_shutdown_constraint(block):
-    """ Factory function for maximum number of startups
+    """Factory function for maximum number of startups
 
     Will only run if shutdown_constraint is also defined.
     """
@@ -163,6 +155,4 @@ def max_shutdown_constraint(block):
         lhs = sum(block.shutdown[i, o, t] for t in m.TIMESTEPS)
         return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
 
-    return Constraint(
-        block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule
-    )
+    return Constraint(block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule)
