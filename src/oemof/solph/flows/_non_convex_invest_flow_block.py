@@ -25,14 +25,13 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from . import _non_convex_constraint_factories as nccf
 
 
-class NonConvexInvestFlowBlock(SimpleBlock):
+class NonConvexInvestFlowBlock(ScalarBlock):
     r"""
-    ################ SETS ################
     **The following sets are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
     (-> see basic sets at :class:`.Model` )
@@ -70,7 +69,6 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         `negative_gradient` being not None.
 
 
-    ################ VARIABLES ################
     **The following variables are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
@@ -86,13 +84,13 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         SHUTDOWNFLOWS
 
     Positive gradient (continuous)
-    `om.NonConvexInvestFlowBlock.positive_gradient`:
+        `om.NonConvexInvestFlowBlock.positive_gradient`:
         Variable indicating the positive gradient, i.e. the load increase
         between two consecutive timesteps, indexed by
         POSITIVE_GRADIENT_FLOWS
 
     Negative gradient (continuous)
-    `om.NonConvexInvestFlowBlock.negative_gradient`:
+        `om.NonConvexInvestFlowBlock.negative_gradient`:
         Variable indicating the negative gradient, i.e. the load decrease
         between two consecutive timesteps, indexed by
         NEGATIVE_GRADIENT_FLOWS
@@ -116,7 +114,6 @@ class NonConvexInvestFlowBlock(SimpleBlock):
         used for the constraints on the minimum and maximum flow constraints.
 
 
-    ################ CONSTRAINTS ################
     **The following constraints are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
@@ -135,70 +132,70 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
 
     Shutdown constraint
-    `om.NonConvexInvestFlowBlock.shutdown_constr[i,o,t]`
-        .. math::
-            shutdown(i, o, t) \geq \
-                status(i, o, t-1) - status(i, o, t) \\
-            \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
+        `om.NonConvexInvestFlowBlock.shutdown_constr[i,o,t]`
+            .. math::
+                shutdown(i, o, t) \geq \
+                    status(i, o, t-1) - status(i, o, t) \\
+                \forall t \in \textrm{TIMESTEPS}, \\
+                \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
 
     Maximum shutdowns constraint
-      `om.NonConvexInvestFlowBlock.max_startup_constr[i,o,t]`
-        .. math::
-            \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
-                N_{shutdown}(i,o)
-            \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
+        `om.NonConvexInvestFlowBlock.max_startup_constr[i,o,t]`
+            .. math::
+                \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
+                    N_{shutdown}(i,o)
+                \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
 
     Minimum uptime constraint
-    `om.NonConvexInvestFlowBlock.uptime_constr[i,o,t]`
-        .. math::
-            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
-            \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
-            \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
-            \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
-            \\ \\
-            status(i, o, t) = initial\_status(i, o) \\
-            \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
-            \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
+        `om.NonConvexInvestFlowBlock.uptime_constr[i,o,t]`
+            .. math::
+                (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
+                \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
+                \forall t \in \textrm{TIMESTEPS} | \\
+                t \neq \{0..minimum\_uptime\} \cup \
+                \{t\_max-minimum\_uptime..t\_max\} , \\
+                \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
+                \\ \\
+                status(i, o, t) = initial\_status(i, o) \\
+                \forall t \in \textrm{TIMESTEPS} | \\
+                t = \{0..minimum\_uptime\} \cup \
+                \{t\_max-minimum\_uptime..t\_max\} , \\
+                \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
 
     Minimum downtime constraint
-    `om.NonConvexInvestFlowBlock.downtime_constr[i,o,t]`
-        .. math::
-            (status(i, o, t-1)-status(i, o, t)) \
-            \cdot minimum\_downtime(i, o) \\
-            \leq minimum\_downtime(i, o) \
-            - \sum_{n=0}^{minimum\_downtime-1} status(i,o,t+n) \\
-            \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
-            \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
-            \\ \\
-            status(i, o, t) = initial\_status(i, o) \\
-            \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
-            \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
+        `om.NonConvexInvestFlowBlock.downtime_constr[i,o,t]`
+            .. math::
+                (status(i, o, t-1)-status(i, o, t)) \
+                \cdot minimum\_downtime(i, o) \\
+                \leq minimum\_downtime(i, o) \
+                - \sum_{n=0}^{minimum\_downtime-1} status(i,o,t+n) \\
+                \forall t \in \textrm{TIMESTEPS} | \\
+                t \neq \{0..minimum\_downtime\} \cup \
+                \{t\_max-minimum\_downtime..t\_max\} , \\
+                \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
+                \\ \\
+                status(i, o, t) = initial\_status(i, o) \\
+                \forall t \in \textrm{TIMESTEPS} | \\
+                t = \{0..minimum\_downtime\} \cup \
+                \{t\_max-minimum\_downtime..t\_max\} , \\
+                \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
 
     Positive gradient constraint
-      `om.NonConvexInvestFlowBlock.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) \cdot status(i, o, t)
-        - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
-          positive\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+        `om.NonConvexInvestFlowBlock.positive_gradient_constr[i, o]`:
+            .. math:: flow(i, o, t) \cdot status(i, o, t)
+                - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
+                positive\_gradient(i, o, t), \\
+                \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+                \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
-      `om.NonConvexInvestFlowBlock.negative_gradient_constr[i, o]`:
-        .. math::
-          flow(i, o, t-1) \cdot status(i, o, t-1)
-          - flow(i, o, t) \cdot status(i, o, t) \geq \
-          negative\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+        `om.NonConvexInvestFlowBlock.negative_gradient_constr[i, o]`:
+            .. math::
+                flow(i, o, t-1) \cdot status(i, o, t-1)
+                - flow(i, o, t) \cdot status(i, o, t) \geq \
+                negative\_gradient(i, o, t), \\
+                \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+                \forall t \in \textrm{TIMESTEPS}.
 
 
     **The following constraints are created similar to the
@@ -225,20 +222,19 @@ class NonConvexInvestFlowBlock(SimpleBlock):
             \forall (i, o) \in \textrm{NONCONVEX\_INVESTMENT\_FLOWS}.
 
     Additional constraints that must be used because the new
-    parameter `invest_non_convex(i,o,t)` was introduced to deal with
-    nonlinearity of the minimum and maximum flow constraints.
-        .. math::
-        invest_non_convex(i,o,t) \leq status(i,o,t) \cdot P_{invest, max}
+        parameter `invest_non_convex(i,o,t)` was introduced to deal with
+        nonlinearity of the minimum and maximum flow constraints.
 
         .. math::
+            invest_non_convex(i,o,t)
+            \leq status(i,o,t) \cdot P_{invest, max}
+            \\ \\
             invest_non_convex(i,o,t) \leq P_{invest}
-
-        .. math::
+            \\ \\
             invest_non_convex(i,o,t) \geq
             P_{invest} - (1 - status(i,o,t)) \cdot P_{invest, max}
 
 
-    ################ OBJECTIVE FUNCTION ################
     **The following parts of the objective function are created similar
     to the <class 'oemof.solph.flows.NonConvexFlow'> class:**
 
@@ -267,7 +263,7 @@ class NonConvexInvestFlowBlock(SimpleBlock):
     to the <class 'oemof.solph.flows.InvestmentFlow'> class:**
 
     .. math::
-            P_{invest} \cdot c_{invest,var}
+        P_{invest} \cdot c_{invest,var}
     """
 
     def __init__(self, *args, **kwargs):

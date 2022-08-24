@@ -28,12 +28,27 @@ oemof.solph.Flow
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.flows._investment_flow
+.. automodule:: oemof.solph.flows._simple_flow_block
     :members:
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.flows._non_convex_flow
+.. automodule:: oemof.solph.flows._investment_flow_block
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: oemof.solph.flows._non_convex_flow_block
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: oemof.solph.flows._non_convex_invest_flow_block
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. automodule:: oemof.solph.flows._non_convex_constraint_factories
     :members:
     :undoc-members:
     :show-inheritance:
