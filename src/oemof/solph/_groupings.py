@@ -26,7 +26,9 @@ from oemof.network import groupings as groupings
 
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
-from oemof.solph.flows._non_convex_invest_flow_block import NonConvexInvestFlowBlock
+from oemof.solph.flows._non_convex_invest_flow_block import (
+    NonConvexInvestFlowBlock,
+)
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 
