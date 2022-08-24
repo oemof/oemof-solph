@@ -391,7 +391,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../src/oemof/solph/components/extraction_turbine_chp.py
+.. include:: ../src/oemof/solph/components/_extraction_turbine_chp.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -530,13 +530,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -710,7 +710,7 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/offset_transformer.py
+.. include:: ../src/oemof/solph/components/_offset_transformer.py
   :start-after: _OffsetTransformer-equations:
   :end-before: """
 
@@ -733,43 +733,43 @@ The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by ser
 
 .. _oemof_solph_custom_electrical_line_label:
 
-ElectricalLine (custom)
-^^^^^^^^^^^^^^^^^^^^^^^
+ElectricalLine (experimental)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Electrical line.
 
-.. note:: See the :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.flows.experimental._electrical_line.ElectricalLine` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_link_label:
 
-GenericCAES (custom)
+GenericCAES (experimental)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../src/oemof/solph/custom/generic_caes.py
+.. include:: ../src/oemof/solph/components/experimental/_generic_caes.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.custom.generic_caes.GenericCAES` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.experimental._generic_caes.GenericCAES` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_generic_chp_label:
 
-Link (custom)
-^^^^^^^^^^^^^
+Link (experimental)
+^^^^^^^^^^^^^^^^^^^
 
 Link.
 
-.. note:: See the :py:class:`~oemof.solph.custom.link.Link` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.experimental._link.Link` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_sinkdsm_label:
 
 
-SinkDSM (custom)
-^^^^^^^^^^^^^^^^
+SinkDSM (experimental)
+^^^^^^^^^^^^^^^^^^^^^^
 
 :class:`~oemof.solph.custom.sink_dsm.SinkDSM` can used to represent flexibility in a demand time series.
 It can represent both, load shifting or load shedding.
@@ -1148,7 +1148,7 @@ Some predefined additional constraints can be found in the
 
 
 The Grouping module (Sets)
------------------------------------------------------
+--------------------------
 To construct constraints,
 variables and objective expressions inside all Block classes
 and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,

@@ -171,19 +171,19 @@ class NonConvexFlowBlock(ScalarBlock):
     Positive gradient constraint
       `om.NonConvexFlowBlock.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) \cdot status(i, o, t)
-        - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
-          positive\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
+            positive\_gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
       `om.NonConvexFlowBlock.negative_gradient_constr[i, o]`:
         .. math::
-          flow(i, o, t-1) \cdot status(i, o, t-1)
-          - flow(i, o, t) \cdot status(i, o, t) \geq \
-          negative\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            flow(i, o, t-1) \cdot status(i, o, t-1)
+            - flow(i, o, t) \cdot status(i, o, t) \geq \
+            negative\_gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
 
     **The following parts of the objective function are created:**
