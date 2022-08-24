@@ -17,7 +17,7 @@ from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
+from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.helpers import extend_basic_path
 
 
