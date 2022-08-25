@@ -31,9 +31,7 @@ def minimum_investment_constraint(block):
         )
         return expr
 
-    return Constraint(
-        block.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule
-    )
+    return Constraint(block.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
 
 
 def maximum_investment_constraint(block):
@@ -47,6 +45,4 @@ def maximum_investment_constraint(block):
         )
         return expr
 
-    return Constraint(
-        block.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule
-    )
+    return Constraint(block.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)

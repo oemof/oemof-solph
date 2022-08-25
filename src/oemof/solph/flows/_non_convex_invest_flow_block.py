@@ -494,7 +494,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
 
         def _max_invest_rule(block, i, o):
             """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= (m.flows[i, o].investment.maximum)
+            expr = self.invest[i, o] <= m.flows[i, o].investment.maximum
             return expr
 
         self.maximum_rule = Constraint(
