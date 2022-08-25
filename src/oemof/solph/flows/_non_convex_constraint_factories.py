@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Constraints that are shared between several types of flows.
+"""Constraints that are shared between non-convex flows.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
