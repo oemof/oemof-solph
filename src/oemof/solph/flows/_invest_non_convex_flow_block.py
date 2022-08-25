@@ -30,7 +30,7 @@ from pyomo.core.base.block import ScalarBlock
 from . import _non_convex_constraint_factories as nccf
 
 
-class NonConvexInvestFlowBlock(ScalarBlock):
+class InvestNonConvexFlowBlock(ScalarBlock):
     r"""
     **The following sets are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
@@ -359,7 +359,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
 
         # New nonconvex-investment-related set defines in the
         # <class 'oemof.solph.flows.NonconvexInvestFlow'> class.
-        self.NON_CONVEX_INVEST_FLOWS = Set(
+        self.INVEST_NON_CONVEX_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group]
         )
 
@@ -373,7 +373,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
         # Create `status` variable representing the status of the flow
         # at each time step
         self.status = Var(
-            self.NON_CONVEX_INVEST_FLOWS, m.TIMESTEPS, within=Binary
+            self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
         if self.STARTUPFLOWS:
@@ -397,12 +397,12 @@ class NonConvexInvestFlowBlock(ScalarBlock):
 
         def _investvar_bound_rule(block, i, o):
             """Rule definition for bounds of the invest variable."""
-            if (i, o) in self.NON_CONVEX_INVEST_FLOWS:
+            if (i, o) in self.INVEST_NON_CONVEX_FLOWS:
                 return 0, m.flows[i, o].investment.maximum
 
         # Create the `invest` variable for the nonconvex investment flow.
         self.invest = Var(
-            self.NON_CONVEX_INVEST_FLOWS,
+            self.INVEST_NON_CONVEX_FLOWS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )
@@ -489,7 +489,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
             return expr
 
         self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVEST_FLOWS, rule=_min_invest_rule
+            self.INVEST_NON_CONVEX_FLOWS, rule=_min_invest_rule
         )
 
         def _max_invest_rule(block, i, o):
@@ -498,7 +498,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
             return expr
 
         self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVEST_FLOWS, rule=_max_invest_rule
+            self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule
         )
 
         # New nonconvex-investment-related constraints defined in the
@@ -596,7 +596,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
     # ################### OBJECTIVE FUNCTION #######################
     def _objective_expression(self):
         r"""Objective expression for nonconvex investment flows."""
-        if not hasattr(self, "NON_CONVEX_INVEST_FLOWS"):
+        if not hasattr(self, "INVEST_NON_CONVEX_FLOWS"):
             return 0
 
         m = self.parent_block()
@@ -626,7 +626,7 @@ class NonConvexInvestFlowBlock(ScalarBlock):
                     )
             self.shutdown_costs = Expression(expr=shutdown_costs)
 
-        for i, o in self.NON_CONVEX_INVEST_FLOWS:
+        for i, o in self.INVEST_NON_CONVEX_FLOWS:
             investment_costs += (
                 self.invest[i, o] * m.flows[i, o].investment.ep_costs
                 + m.flows[i, o].investment.offset

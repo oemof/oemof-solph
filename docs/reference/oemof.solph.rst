@@ -43,7 +43,7 @@ oemof.solph.Flow
     :undoc-members:
     :show-inheritance:
 
-.. automodule:: oemof.solph.flows._non_convex_invest_flow_block
+.. automodule:: oemof.solph.flows._invest_non_convex_flow_block
     :members:
     :undoc-members:
     :show-inheritance:

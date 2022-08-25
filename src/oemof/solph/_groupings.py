@@ -24,11 +24,11 @@ SPDX-License-Identifier: MIT
 
 from oemof.network import groupings as groupings
 
+from oemof.solph.flows._invest_non_convex_flow_block import (
+    InvestNonConvexFlowBlock,
+)
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
-from oemof.solph.flows._non_convex_invest_flow_block import (
-    NonConvexInvestFlowBlock,
-)
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 
@@ -93,7 +93,7 @@ nonconvex_flow_grouping = groupings.FlowsWithNodes(
 )
 
 
-def _nonconvex_invest_grouping(stf):
+def _invest_non_convex_grouping(stf):
     if hasattr(stf[2], "nonconvex"):
         if stf[2].investment is not None and stf[2].nonconvex is not None:
             return True
@@ -101,8 +101,8 @@ def _nonconvex_invest_grouping(stf):
         return False
 
 
-nonconvex_invest_flow_grouping = groupings.FlowsWithNodes(
-    constant_key=NonConvexInvestFlowBlock, filter=_nonconvex_invest_grouping
+invest_non_convex_flow_grouping = groupings.FlowsWithNodes(
+    constant_key=InvestNonConvexFlowBlock, filter=_invest_non_convex_grouping
 )
 
 GROUPINGS = [
@@ -110,5 +110,5 @@ GROUPINGS = [
     investment_flow_grouping,
     standard_flow_grouping,
     nonconvex_flow_grouping,
-    nonconvex_invest_flow_grouping,
+    invest_non_convex_flow_grouping,
 ]
