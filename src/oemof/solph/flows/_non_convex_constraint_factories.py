@@ -156,3 +156,35 @@ def max_shutdown_constraint(block):
         return lhs <= m.flows[i, o].nonconvex.maximum_shutdowns
 
     return Constraint(block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule)
+
+
+def maximum_flow_constraint(block):
+    """Factory function for maximum of flows"""
+    m = block.parent_block()
+
+    def _maximum_flow_rule(_, i, o, t):
+        """Rule definition for MILP maximum flow constraints."""
+        expr = (
+            block.status_nominal[i, o, t]
+            * m.flows[i, o].max[t]
+            >= m.flow[i, o, t]
+        )
+        return expr
+
+    return Constraint(block.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule)
+
+
+def minimum_flow_constraint(block):
+    """Factory function for minimum of flows"""
+    m = block.parent_block()
+
+    def _minimum_flow_rule(_, i, o, t):
+        """Rule definition for MILP minimum flow constraints."""
+        expr = (
+            block.status_nominal[i, o, t]
+            * m.flows[i, o].min[t]
+            <= m.flow[i, o, t]
+        )
+        return expr
+
+    return Constraint(block.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule)

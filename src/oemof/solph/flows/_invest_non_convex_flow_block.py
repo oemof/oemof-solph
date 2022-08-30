@@ -407,16 +407,11 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             bounds=_investvar_bound_rule,
         )
 
-        # New nonconvex-investment-related variable defined in the
-        # <class 'oemof.solph.flows.NonConvexInvestFlow'> class.
-
-        # `invest_non_convex` is a new parameter which represents the
-        # multiplication of a binary variable (`status`) and a continuous
-        # variable (`invest`):
-        # self.invest_non_convex[i, o, t] = self.status[i, o, t]
-        # * self.invest[i, o]
-        self.invest_non_convex = Var(
-            self.MIN_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+        # `status_nominal` is a parameter which represents the
+        # multiplication of a binary variable (`status`)
+        # and a continuous variable (`invest` or `nominal_value`)
+        self.status_nominal = Var(
+            self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
 
     def _create_constraints(self):
@@ -501,32 +496,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule
         )
 
-        # New nonconvex-investment-related constraints defined in the
-        # <class 'oemof.solph.flows.NonConvexInvestFlow'> class.
-
-        def _minimum_flow_rule(block, i, o, t):
-            """Rule definition for MILP minimum flow constraints."""
-            expr = (
-                self.invest_non_convex[i, o, t] * m.flows[i, o].min[t]
-                <= m.flow[i, o, t]
-            )
-            return expr
-
-        self.min = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule
-        )
-
-        def _maximum_flow_rule(block, i, o, t):
-            """Rule definition for MILP maximum flow constraints."""
-            expr = (
-                self.invest_non_convex[i, o, t] * m.flows[i, o].max[t]
-                >= m.flow[i, o, t]
-            )
-            return expr
-
-        self.max = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule
-        )
+        self.min = nccf.minimum_flow_constraint(self)
+        self.max = nccf.maximum_flow_constraint(self)
 
         # z = x * y, where x is a binary variable (in our case `status`),
         # y is a continuous variable (in our case `invest`), and z denotes
@@ -544,7 +515,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             """
             expr = (
                 self.status[i, o, t] * m.flows[i, o].investment.maximum
-                >= self.invest_non_convex[i, o, t]
+                >= self.status_nominal[i, o, t]
             )
             return expr
 
@@ -559,7 +530,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
             :math:`y \\ge z`
             """
-            expr = self.invest[i, o] >= self.invest_non_convex[i, o, t]
+            expr = self.invest[i, o] >= self.status_nominal[i, o, t]
             return expr
 
         self.linearization_two = Constraint(
@@ -583,7 +554,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             expr = (
                 self.invest[i, o]
                 - (1 - self.status[i, o, t]) * m.flows[i, o].investment.maximum
-                <= self.invest_non_convex[i, o, t]
+                <= self.status_nominal[i, o, t]
             )
             return expr
 

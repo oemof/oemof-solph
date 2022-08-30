@@ -179,7 +179,7 @@ class TestsConstraint:
         self.compare_lp_files("linear_transformer_invest.lp")
 
     def test_nonconvex_invest_transformer(self):
-        """Non convex invest flow with offset, without minimum."""
+        """Non-convex invest flow with offset, without minimum."""
         bfuel = solph.buses.Bus(label="fuelBus")
         bel = solph.buses.Bus(label="electricityBus")
 

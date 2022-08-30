@@ -20,6 +20,7 @@ from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
+from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
@@ -336,6 +337,13 @@ class NonConvexFlowBlock(ScalarBlock):
         m = self.parent_block()
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
 
+        # `status_nominal` is a parameter which represents the
+        # multiplication of a binary variable (`status`)
+        # and a continuous variable (`invest` or `nominal_value`)
+        self.status_nominal = Var(
+            self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+        )
+
         if self.STARTUPFLOWS:
             self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
 
@@ -358,33 +366,21 @@ class NonConvexFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        def _minimum_flow_rule(block, i, o, t):
-            """Rule definition for MILP minimum flow constraints."""
+        def _status_nominal_rule(_, i, o, t):
+            """Rule definition for status_nominal"""
             expr = (
-                self.status[i, o, t]
-                * m.flows[i, o].min[t]
+                self.status_nominal[i, o, t]
+                == self.status[i, o, t]
                 * m.flows[i, o].nominal_value
-                <= m.flow[i, o, t]
             )
             return expr
 
-        self.min = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule
+        self.status_nominal_constraint = Constraint(
+            self.NONCONVEX_FLOWS, m.TIMESTEPS, rule=_status_nominal_rule
         )
 
-        def _maximum_flow_rule(block, i, o, t):
-            """Rule definition for MILP maximum flow constraints."""
-            expr = (
-                self.status[i, o, t]
-                * m.flows[i, o].max[t]
-                * m.flows[i, o].nominal_value
-                >= m.flow[i, o, t]
-            )
-            return expr
-
-        self.max = Constraint(
-            self.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule
-        )
+        self.min = nccf.minimum_flow_constraint(self)
+        self.max = nccf.maximum_flow_constraint(self)
 
         self.startup_constr = nccf.startup_constraint(self)
         self.max_startup_constr = nccf.max_startup_constraint(self)
