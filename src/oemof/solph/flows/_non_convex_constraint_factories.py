@@ -165,8 +165,7 @@ def maximum_flow_constraint(block):
     def _maximum_flow_rule(_, i, o, t):
         """Rule definition for MILP maximum flow constraints."""
         expr = (
-            block.status_nominal[i, o, t]
-            * m.flows[i, o].max[t]
+            block.status_nominal[i, o, t] * m.flows[i, o].max[t]
             >= m.flow[i, o, t]
         )
         return expr
@@ -181,8 +180,7 @@ def minimum_flow_constraint(block):
     def _minimum_flow_rule(_, i, o, t):
         """Rule definition for MILP minimum flow constraints."""
         expr = (
-            block.status_nominal[i, o, t]
-            * m.flows[i, o].min[t]
+            block.status_nominal[i, o, t] * m.flows[i, o].min[t]
             <= m.flow[i, o, t]
         )
         return expr
