@@ -38,10 +38,13 @@ class SimpleFlowBlock(ScalarBlock):
 
     * :math:`P(t)`
         Actual flow value (created in :class:`~oemof.solph._models.Model`).
-        The variable is bound to: :math:`f_{min}(t) \cdot P_{nom} \ge P(t) \le f_{max}(t) \cdot P_{nom}`.
+        The variable is bound to:
+        :math:`f_\mathrm{min}(t) \cdot P_\mathrm{nom}
+        \le P(t)
+        \le f_\mathrm{max}(t) \cdot P_\mathrm{nom}`.
 
         If `Flow.fix` is not None the variable is bound to
-        :math:`P(t) = f_{fix} \cdot P_{nom}`.
+        :math:`P(t) = f_\mathrm{fix}(t) \cdot P_\mathrm{nom}`.
 
     * :math:`ve_n` (`Flow.negative_gradient` is not `None`)
         Difference of a flow in consecutive timesteps if flow is reduced. The
@@ -54,14 +57,14 @@ class SimpleFlowBlock(ScalarBlock):
     The following variable is build for Flows with the attribute
     `integer_flows` being not None.
 
-    * :math:`i`(`Flow.integer` is `True`)
+    * :math:`i` (`Flow.integer` is `True`)
         All flow values are integers. Variable is bound to non-negative
         integers.
 
     **Constraints**
 
     The following constraints are created, if the appropriate attribute of the
-    *Flow* (see :class:`oemof.solph.network.Flow`) object is set:
+    *Flow* (see :class:`~oemof.solph.flows._flow.Flow`) object is set:
 
     * `Flow.full_load_time_max` is not `None` (full_load_time_max_constr):
         .. math::

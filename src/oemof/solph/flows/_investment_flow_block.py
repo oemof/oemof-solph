@@ -211,9 +211,9 @@ class InvestmentFlowBlock(ScalarBlock):
 
     Note
     ----
-    See also :class:`oemof.solph.network.SimpleFlowBlock`,
-    :class:`oemof.solph.blocks.SimpleFlowBlock` and
-    :class:`oemof.solph.options.Investment`
+    See also :class:`~oemof.solph.flows._flow.Flow`,
+    :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock` and
+    :class:`~oemof.solph._options.Investment`
 
     """  # noqa: E501
 

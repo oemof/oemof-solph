@@ -92,9 +92,9 @@ class Flow(on.Edge):
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
         will be different, i.e. constraint etc. from
-        :class:`NonConvexFlowBlock <oemof.solph.flows._non_convex_flow.NonConvexFlowBlock>`
+        :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
-        :class:`SimpleFlowBlock <oemof.solph.flows._simple_flow.SimpleFlowBlock>`.
+        :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
 
     Notes
     -----
