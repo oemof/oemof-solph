@@ -41,7 +41,7 @@ class SimpleFlowBlock(ScalarBlock):
         The variable is bound to: :math:`f_{min}(t) \cdot P_{nom} \ge P(t) \le f_{max}(t) \cdot P_{nom}`.
 
         If `Flow.fix` is not None the variable is bound to
-        :math:`P(t) = f_{fix}`.
+        :math:`P(t) = f_{fix} \cdot P_{nom}`.
 
     * :math:`ve_n` (`Flow.negative_gradient` is not `None`)
         Difference of a flow in consecutive timesteps if flow is reduced. The
