@@ -26,6 +26,7 @@ from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
 from . import _non_convex_constraint_factories as nccf
+from . import _non_convex_objective_factories as ncof
 
 
 class NonConvexFlowBlock(ScalarBlock):
@@ -441,31 +442,11 @@ class NonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        startup_costs = 0
-        shutdown_costs = 0
+        startup_costs = ncof.startup_costs(self)
+        shutdown_costs = ncof.shutdown_costs(self)
         activity_costs = 0
         inactivity_costs = 0
         gradient_costs = 0
-
-        if self.STARTUPFLOWS:
-            for i, o in self.STARTUPFLOWS:
-                if m.flows[i, o].nonconvex.startup_costs[0] is not None:
-                    startup_costs += sum(
-                        self.startup[i, o, t]
-                        * m.flows[i, o].nonconvex.startup_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-            self.startup_costs = Expression(expr=startup_costs)
-
-        if self.SHUTDOWNFLOWS:
-            for i, o in self.SHUTDOWNFLOWS:
-                if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
-                    shutdown_costs += sum(
-                        self.shutdown[i, o, t]
-                        * m.flows[i, o].nonconvex.shutdown_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-            self.shutdown_costs = Expression(expr=shutdown_costs)
 
         if self.ACTIVITYCOSTFLOWS:
             for i, o in self.ACTIVITYCOSTFLOWS:
