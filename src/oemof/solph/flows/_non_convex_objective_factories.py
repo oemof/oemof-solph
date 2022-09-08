@@ -20,7 +20,7 @@ from pyomo.core import Expression
 
 
 def startup_costs(block):
-    """
+    r"""
     :param block:
     :return:
 
@@ -47,7 +47,7 @@ def startup_costs(block):
 
 
 def shutdown_costs(block):
-    """
+    r"""
     :param block:
     :return:
 
