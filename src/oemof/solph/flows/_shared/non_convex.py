@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 
 """
 from pyomo.core import Binary
+from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
 from pyomo.core import Set
@@ -328,3 +329,56 @@ def minimum_flow_constraint(block):
         return expr
 
     return Constraint(block.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule)
+
+
+def add_constraints_to_non_convex_block(block):
+    m = block.parent_block()
+
+    block.startup_constr = startup_constraint(block)
+    block.max_startup_constr = max_startup_constraint(block)
+    block.shutdown_constr = shutdown_constraint(block)
+    block.max_shutdown_constr = max_shutdown_constraint(block)
+    block.min_uptime_constr = min_uptime_constraint(block)
+    block.min_downtime_constr = min_downtime_constraint(block)
+
+    def _positive_gradient_flow_rule(_):
+        """Rule definition for positive gradient constraint."""
+        for i, o in block.POSITIVE_GRADIENT_FLOWS:
+            for t in m.TIMESTEPS:
+                if t > 0:
+                    lhs = (
+                        m.flow[i, o, t] * block.status[i, o, t]
+                        - m.flow[i, o, t - 1] * block.status[i, o, t - 1]
+                    )
+                    rhs = block.positive_gradient[i, o, t]
+                    block.positive_gradient_constr.add((i, o, t), lhs <= rhs)
+                else:
+                    pass  # return(Constraint.Skip)
+
+    block.positive_gradient_constr = Constraint(
+        block.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+    )
+    block.positive_gradient_build = BuildAction(
+        rule=_positive_gradient_flow_rule
+    )
+
+    def _negative_gradient_flow_rule(_):
+        """Rule definition for negative gradient constraint."""
+        for i, o in block.NEGATIVE_GRADIENT_FLOWS:
+            for t in m.TIMESTEPS:
+                if t > 0:
+                    lhs = (
+                        m.flow[i, o, t - 1] * block.status[i, o, t - 1]
+                        - m.flow[i, o, t] * block.status[i, o, t]
+                    )
+                    rhs = block.negative_gradient[i, o, t]
+                    block.negative_gradient_constr.add((i, o, t), lhs <= rhs)
+                else:
+                    pass  # return(Constraint.Skip)
+
+    block.negative_gradient_constr = Constraint(
+        block.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
+    )
+    block.negative_gradient_build = BuildAction(
+        rule=_negative_gradient_flow_rule
+    )

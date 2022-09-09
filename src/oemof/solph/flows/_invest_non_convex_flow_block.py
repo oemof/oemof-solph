@@ -19,7 +19,6 @@ SPDX-License-Identifier: MIT
 
 """
 from pyomo.core import Binary
-from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
@@ -341,59 +340,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        self.startup_constr = nc.startup_constraint(self)
-        self.max_startup_constr = nc.max_startup_constraint(self)
-        self.shutdown_constr = nc.shutdown_constraint(self)
-        self.max_shutdown_constr = nc.max_shutdown_constraint(self)
-
-        self.min_uptime_constr = nc.min_uptime_constraint(self)
-        self.min_downtime_constr = nc.min_downtime_constraint(self)
-
-        def _positive_gradient_flow_rule(block):
-            """Rule definition for positive gradient constraint."""
-            for i, o in self.POSITIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
-                        lhs = (
-                            m.flow[i, o, t] * self.status[i, o, t]
-                            - m.flow[i, o, t - 1] * self.status[i, o, t - 1]
-                        )
-                        rhs = self.positive_gradient[i, o, t]
-                        self.positive_gradient_constr.add(
-                            (i, o, t), lhs <= rhs
-                        )
-                    else:
-                        pass  # return(Constraint.Skip)
-
-        self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
-        )
-        self.positive_gradient_build = BuildAction(
-            rule=_positive_gradient_flow_rule
-        )
-
-        def _negative_gradient_flow_rule(block):
-            """Rule definition for negative gradient constraint."""
-            for i, o in self.NEGATIVE_GRADIENT_FLOWS:
-                for t in m.TIMESTEPS:
-                    if t > 0:
-                        lhs = (
-                            m.flow[i, o, t - 1] * self.status[i, o, t - 1]
-                            - m.flow[i, o, t] * self.status[i, o, t]
-                        )
-                        rhs = self.negative_gradient[i, o, t]
-                        self.negative_gradient_constr.add(
-                            (i, o, t), lhs <= rhs
-                        )
-                    else:
-                        pass  # return(Constraint.Skip)
-
-        self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
-        )
-        self.negative_gradient_build = BuildAction(
-            rule=_negative_gradient_flow_rule
-        )
+        nc.add_constraints_to_non_convex_block(self)
 
         # Investment-related constraints similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
