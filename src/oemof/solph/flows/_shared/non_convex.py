@@ -162,6 +162,10 @@ def shutdown_costs(block):
     return _shutdown_costs
 
 
+def _time_step_allows_flexibility(t, max_up_down, last_step):
+    return max_up_down <= t <= last_step - max_up_down
+
+
 def min_downtime_constraint(block):
     """Factory function for minimum downtime (on non-convex flows)"""
     m = block.parent_block()
@@ -170,10 +174,8 @@ def min_downtime_constraint(block):
         """
         Rule definition for min-downtime constraints of non-convex flows.
         """
-        if (
-            m.flows[i, o].nonconvex.max_up_down
-            <= t
-            <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down
+        if _time_step_allows_flexibility(
+            t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS[-1]
         ):
             expr = 0
             expr += (
@@ -204,10 +206,8 @@ def min_uptime_constraint(block):
         """
         Rule definition for min-uptime constraints of non-convex flows.
         """
-        if (
-            m.flows[i, o].nonconvex.max_up_down
-            <= t
-            <= m.TIMESTEPS[-1] - m.flows[i, o].nonconvex.max_up_down
+        if _time_step_allows_flexibility(
+            t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS[-1]
         ):
             expr = 0
             expr += (
