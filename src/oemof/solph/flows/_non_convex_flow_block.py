@@ -32,7 +32,8 @@ class NonConvexFlowBlock(ScalarBlock):
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
-    A set of flows with the attribute `nonconvex` of type
+    NONCONVEX_FLOWS
+        A set of flows with the attribute `nonconvex` of type
         :class:`.options.NonConvex`.
     MIN_FLOWS
         A subset of set NONCONVEX_FLOWS with the attribute `min`
