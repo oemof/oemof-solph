@@ -86,6 +86,21 @@ def add_sets_for_non_convex_flows_to_block(block, group):
             if g[2].nonconvex.positive_gradient["ub"][0] is not None
         ]
     )
+    block.ACTIVITYCOSTFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.activity_costs[0] is not None
+        ]
+    )
+
+    block.INACTIVITYCOSTFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.inactivity_costs[0] is not None
+        ]
+    )
 
 
 def add_variables_for_non_convex_flows_to_block(block):
@@ -160,6 +175,43 @@ def shutdown_costs(block):
         block.shutdown_costs = Expression(expr=_shutdown_costs)
 
     return _shutdown_costs
+
+
+def activity_costs(block):
+    _activity_costs = 0
+
+    if block.ACTIVITYCOSTFLOWS:
+        m = block.parent_block()
+
+        for i, o in block.ACTIVITYCOSTFLOWS:
+            if m.flows[i, o].nonconvex.activity_costs[0] is not None:
+                _activity_costs += sum(
+                    block.status[i, o, t]
+                    * m.flows[i, o].nonconvex.activity_costs[t]
+                    for t in m.TIMESTEPS
+                )
+
+        block.activity_costs = Expression(expr=_activity_costs)
+
+    return _activity_costs
+
+
+def inactivity_costs(block):
+    _inactivity_costs = 0
+
+    if block.INACTIVITYCOSTFLOWS:
+        m = block.parent_block()
+        for i, o in block.INACTIVITYCOSTFLOWS:
+            if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
+                _inactivity_costs += sum(
+                    (1 - block.status[i, o, t])
+                    * m.flows[i, o].nonconvex.inactivity_costs[t]
+                    for t in m.TIMESTEPS
+                )
+
+        block.inactivity_costs = Expression(expr=_inactivity_costs)
+
+    return _inactivity_costs
 
 
 def _time_step_allows_flexibility(t, max_up_down, last_step):

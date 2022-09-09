@@ -18,7 +18,6 @@ SPDX-License-Identifier: MIT
 
 from pyomo.core import Binary
 from pyomo.core import Constraint
-from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
@@ -251,22 +250,6 @@ class NonConvexFlowBlock(ScalarBlock):
 
         nc.add_sets_for_non_convex_flows_to_block(self, group)
 
-        self.ACTIVITYCOSTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.activity_costs[0] is not None
-            ]
-        )
-
-        self.INACTIVITYCOSTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.inactivity_costs[0] is not None
-            ]
-        )
-
     def _create_variables(self, group):
         """
         Creates all variables for non-convex flows.
@@ -311,35 +294,11 @@ class NonConvexFlowBlock(ScalarBlock):
         if not hasattr(self, "NONCONVEX_FLOWS"):
             return 0
 
-        m = self.parent_block()
-
         startup_costs = nc.startup_costs(self)
         shutdown_costs = nc.shutdown_costs(self)
-        activity_costs = 0
-        inactivity_costs = 0
+        activity_costs = nc.activity_costs(self)
+        inactivity_costs = nc.inactivity_costs(self)
         gradient_costs = 0
-
-        if self.ACTIVITYCOSTFLOWS:
-            for i, o in self.ACTIVITYCOSTFLOWS:
-                if m.flows[i, o].nonconvex.activity_costs[0] is not None:
-                    activity_costs += sum(
-                        self.status[i, o, t]
-                        * m.flows[i, o].nonconvex.activity_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-
-            self.activity_costs = Expression(expr=activity_costs)
-
-        if self.INACTIVITYCOSTFLOWS:
-            for i, o in self.INACTIVITYCOSTFLOWS:
-                if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
-                    inactivity_costs += sum(
-                        (1 - self.status[i, o, t])
-                        * m.flows[i, o].nonconvex.inactivity_costs[t]
-                        for t in m.TIMESTEPS
-                    )
-
-            self.inactivity_costs = Expression(expr=inactivity_costs)
 
         return (
             startup_costs

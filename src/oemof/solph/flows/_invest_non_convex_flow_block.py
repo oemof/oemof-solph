@@ -441,6 +441,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         startup_costs = nc.startup_costs(self)
         shutdown_costs = nc.shutdown_costs(self)
+        activity_costs = nc.activity_costs(self)
+        inactivity_costs = nc.inactivity_costs(self)
         gradient_costs = 0
         investment_costs = 0
 
@@ -453,5 +455,10 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         self.investment_costs = Expression(expr=investment_costs)
 
         return (
-            startup_costs + shutdown_costs + gradient_costs + investment_costs
+            startup_costs
+            + shutdown_costs
+            + activity_costs
+            + inactivity_costs
+            + gradient_costs
+            + investment_costs
         )
