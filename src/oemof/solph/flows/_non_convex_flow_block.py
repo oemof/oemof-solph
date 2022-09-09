@@ -25,8 +25,7 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from . import _non_convex_constraint_factories as nccf
-from . import _non_convex_objective_factories as ncof
+from ._shared import non_convex as nc
 
 
 class NonConvexFlowBlock(ScalarBlock):
@@ -250,54 +249,7 @@ class NonConvexFlowBlock(ScalarBlock):
         """
         self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
-        self.MIN_FLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].min[0] is not None]
-        )
-        self.STARTUPFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.startup_costs[0] is not None
-                or g[2].nonconvex.maximum_startups is not None
-            ]
-        )
-        self.MAXSTARTUPFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.maximum_startups is not None
-            ]
-        )
-        self.SHUTDOWNFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.shutdown_costs[0] is not None
-                or g[2].nonconvex.maximum_shutdowns is not None
-            ]
-        )
-        self.MAXSHUTDOWNFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.maximum_shutdowns is not None
-            ]
-        )
-        self.MINUPTIMEFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.minimum_uptime is not None
-            ]
-        )
-
-        self.MINDOWNTIMEFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.minimum_downtime is not None
-            ]
-        )
+        nc.add_sets_for_non_convex_flows_to_block(self, group)
 
         self.ACTIVITYCOSTFLOWS = Set(
             initialize=[
@@ -315,22 +267,6 @@ class NonConvexFlowBlock(ScalarBlock):
             ]
         )
 
-        self.NEGATIVE_GRADIENT_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.negative_gradient["ub"][0] is not None
-            ]
-        )
-
-        self.POSITIVE_GRADIENT_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].nonconvex.positive_gradient["ub"][0] is not None
-            ]
-        )
-
     def _create_variables(self, group):
         """
         Creates all variables for non-convex flows.
@@ -345,21 +281,7 @@ class NonConvexFlowBlock(ScalarBlock):
             self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
 
-        if self.STARTUPFLOWS:
-            self.startup = Var(self.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
-
-        if self.SHUTDOWNFLOWS:
-            self.shutdown = Var(self.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
-
-        if self.POSITIVE_GRADIENT_FLOWS:
-            self.positive_gradient = Var(
-                self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS
-            )
-
-        if self.NEGATIVE_GRADIENT_FLOWS:
-            self.negative_gradient = Var(
-                self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS
-            )
+        nc.add_variables_for_non_convex_flows_to_block(self)
 
     def _create_constraints(self):
         """
@@ -379,15 +301,15 @@ class NonConvexFlowBlock(ScalarBlock):
             self.NONCONVEX_FLOWS, m.TIMESTEPS, rule=_status_nominal_rule
         )
 
-        self.min = nccf.minimum_flow_constraint(self)
-        self.max = nccf.maximum_flow_constraint(self)
+        self.min = nc.minimum_flow_constraint(self)
+        self.max = nc.maximum_flow_constraint(self)
 
-        self.startup_constr = nccf.startup_constraint(self)
-        self.max_startup_constr = nccf.max_startup_constraint(self)
-        self.shutdown_constr = nccf.shutdown_constraint(self)
-        self.max_shutdown_constr = nccf.max_shutdown_constraint(self)
-        self.min_uptime_constr = nccf.min_uptime_constraint(self)
-        self.min_downtime_constr = nccf.min_downtime_constraint(self)
+        self.startup_constr = nc.startup_constraint(self)
+        self.max_startup_constr = nc.max_startup_constraint(self)
+        self.shutdown_constr = nc.shutdown_constraint(self)
+        self.max_shutdown_constr = nc.max_shutdown_constraint(self)
+        self.min_uptime_constr = nc.min_uptime_constraint(self)
+        self.min_downtime_constr = nc.min_downtime_constraint(self)
 
         def _positive_gradient_flow_rule(block):
             """Rule definition for positive gradient constraint."""
@@ -442,8 +364,8 @@ class NonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        startup_costs = ncof.startup_costs(self)
-        shutdown_costs = ncof.shutdown_costs(self)
+        startup_costs = nc.startup_costs(self)
+        shutdown_costs = nc.shutdown_costs(self)
         activity_costs = 0
         inactivity_costs = 0
         gradient_costs = 0

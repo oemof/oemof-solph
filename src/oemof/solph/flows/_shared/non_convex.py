@@ -16,7 +16,149 @@ SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-License-Identifier: MIT
 
 """
+from pyomo.core import Binary
 from pyomo.core import Constraint
+from pyomo.core import Expression
+from pyomo.core import Set
+from pyomo.core import Var
+
+
+def add_sets_for_non_convex_flows_to_block(block, group):
+    block.MIN_FLOWS = Set(
+        initialize=[(g[0], g[1]) for g in group if g[2].min[0] is not None]
+    )
+    block.STARTUPFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.startup_costs[0] is not None
+            or g[2].nonconvex.maximum_startups is not None
+        ]
+    )
+    block.MAXSTARTUPFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.maximum_startups is not None
+        ]
+    )
+    block.SHUTDOWNFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.shutdown_costs[0] is not None
+            or g[2].nonconvex.maximum_shutdowns is not None
+        ]
+    )
+    block.MAXSHUTDOWNFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.maximum_shutdowns is not None
+        ]
+    )
+    block.MINUPTIMEFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.minimum_uptime is not None
+        ]
+    )
+    block.MINDOWNTIMEFLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.minimum_downtime is not None
+        ]
+    )
+    block.NEGATIVE_GRADIENT_FLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.negative_gradient["ub"][0] is not None
+        ]
+    )
+    block.POSITIVE_GRADIENT_FLOWS = Set(
+        initialize=[
+            (g[0], g[1])
+            for g in group
+            if g[2].nonconvex.positive_gradient["ub"][0] is not None
+        ]
+    )
+
+
+def add_variables_for_non_convex_flows_to_block(block):
+    m = block.parent_block()
+
+    if block.STARTUPFLOWS:
+        block.startup = Var(block.STARTUPFLOWS, m.TIMESTEPS, within=Binary)
+
+    if block.SHUTDOWNFLOWS:
+        block.shutdown = Var(block.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
+
+    if block.POSITIVE_GRADIENT_FLOWS:
+        block.positive_gradient = Var(
+            block.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS
+        )
+
+    if block.NEGATIVE_GRADIENT_FLOWS:
+        block.negative_gradient = Var(
+            block.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS
+        )
+
+
+def startup_costs(block):
+    r"""
+    :param block:
+    :return:
+
+    If `nonconvex.startup_costs` is set by the user:
+    .. math::
+        \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
+        \cdot startup\_costs(i, o)
+    """
+    _startup_costs = 0
+
+    if block.STARTUPFLOWS:
+        m = block.parent_block()
+
+        for i, o in block.STARTUPFLOWS:
+            if m.flows[i, o].nonconvex.startup_costs[0] is not None:
+                _startup_costs += sum(
+                    block.startup[i, o, t]
+                    * m.flows[i, o].nonconvex.startup_costs[t]
+                    for t in m.TIMESTEPS
+                )
+        block.startup_costs = Expression(expr=_startup_costs)
+
+    return _startup_costs
+
+
+def shutdown_costs(block):
+    r"""
+    :param block:
+    :return:
+
+    If `nonconvex.shutdown_costs` is set by the user:
+    .. math::
+        \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
+        \cdot shutdown\_costs(i, o)
+    """
+    _shutdown_costs = 0
+
+    if block.SHUTDOWNFLOWS:
+        m = block.parent_block()
+
+        for i, o in block.SHUTDOWNFLOWS:
+            if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
+                _shutdown_costs += sum(
+                    block.shutdown[i, o, t]
+                    * m.flows[i, o].nonconvex.shutdown_costs[t]
+                    for t in m.TIMESTEPS
+                )
+        block.shutdown_costs = Expression(expr=_shutdown_costs)
+
+    return _shutdown_costs
 
 
 def min_downtime_constraint(block):
