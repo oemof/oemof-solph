@@ -1276,6 +1276,29 @@ class TestsConstraint:
         )
         self.compare_lp_files("dsm_module_oemof_invest.lp")
 
+    def test_invest_non_convex_flow(self):
+        """Invest into a non-convex Flow
+        """
+        b1 = solph.buses.Bus(label="b1")
+        b2 = solph.buses.Bus(
+            label="b2",
+            inputs={
+                b1: solph.Flow(
+                    nominal_value=None,
+                    variable_costs=8,
+                    min=0.25,
+                    max=0.5,
+                    investment=solph.Investment(
+                        ep_costs=0.75,
+                        maximum=10,
+                    ),
+                    nonconvex=solph.NonConvex(),
+                )
+            },
+            outputs={b1: solph.Flow()},
+        )
+        self.compare_lp_files("invest_non_convex_flow.lp")
+
     def test_nonconvex_investment_storage_without_offset(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
