@@ -1277,10 +1277,9 @@ class TestsConstraint:
         self.compare_lp_files("dsm_module_oemof_invest.lp")
 
     def test_invest_non_convex_flow(self):
-        """Invest into a non-convex Flow
-        """
+        """Invest into a non-convex Flow"""
         b1 = solph.buses.Bus(label="b1")
-        b2 = solph.buses.Bus(
+        solph.buses.Bus(
             label="b2",
             inputs={
                 b1: solph.Flow(
