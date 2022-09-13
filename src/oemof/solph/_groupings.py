@@ -69,8 +69,7 @@ def _investment_grouping(stf):
     if hasattr(stf[2], "investment"):
         if stf[2].investment is not None and stf[2].nonconvex is None:
             return True
-    else:
-        return False
+    return False
 
 
 investment_flow_grouping = groupings.FlowsWithNodes(
@@ -84,8 +83,7 @@ def _nonconvex_grouping(stf):
     if hasattr(stf[2], "nonconvex"):
         if stf[2].nonconvex is not None and stf[2].investment is None:
             return True
-    else:
-        return False
+    return False
 
 
 nonconvex_flow_grouping = groupings.FlowsWithNodes(
@@ -97,8 +95,7 @@ def _invest_non_convex_grouping(stf):
     if hasattr(stf[2], "nonconvex"):
         if stf[2].investment is not None and stf[2].nonconvex is not None:
             return True
-    else:
-        return False
+    return False
 
 
 invest_non_convex_flow_grouping = groupings.FlowsWithNodes(
