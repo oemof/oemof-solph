@@ -29,7 +29,7 @@ from oemof.solph._options import NonConvex
 from oemof.solph import processing, views
 from oemof.solph import helpers
 
-data_demand = [
+renewable_timeseries = [
     1, 1, 2, 4, 5, 6, 4, 6, 2, 6, 7, 6,
     7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7,
     8, 8, 2, 1, 0, 5, 6, 7, 6, 7, 3,
@@ -37,10 +37,10 @@ data_demand = [
 ]
 
 # select periods
-periods = len(data_demand)
+periods = len(renewable_timeseries)
 
 # create an energy system
-idx = pd.date_range('1/1/2017', periods=periods, freq='H')
+idx = pd.date_range('1/1/2022', periods=periods, freq='H')
 es = EnergySystem(timeindex=idx)
 
 bus_1 = Bus(label='bus')
@@ -50,7 +50,7 @@ es.add(bus_1)
 es.add(components.Source(
     label='renewable_energy',
     inputs={bus_1: Flow(
-        fix=data_demand,
+        fix=renewable_timeseries,
         nominal_value=1,
     )}
 ))
