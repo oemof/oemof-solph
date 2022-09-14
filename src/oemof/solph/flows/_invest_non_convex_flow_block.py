@@ -35,38 +35,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
     (-> see basic sets at :class:`.Model` )
 
-    A set of flows with the attribute `nonconvex` of type
-        :class:`.options.NonConvex`.
-    MIN_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute `min`
-        being not None in the first timestep.
-    STARTUPFLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `maximum_startups` or `startup_costs`
-        being not None.
-    MAXSTARTUPFLOWS
-        A subset of set STARTUPFLOWS with the attribute
-        `maximum_startups` being not None.
-    SHUTDOWNFLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `maximum_shutdowns` or `shutdown_costs`
-        being not None.
-    MAXSHUTDOWNFLOWS
-        A subset of set SHUTDOWNFLOWS with the attribute
-        `maximum_shutdowns` being not None.
-    MINUPTIMEFLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `minimum_uptime` being not None.
-    MINDOWNTIMEFLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `minimum_downtime` being not None.
-    POSITIVE_GRADIENT_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `positive_gradient` being not None.
-    NEGATIVE_GRADIENT_FLOWS
-        A subset of set NONCONVEX_FLOWS with the attribute
-        `negative_gradient` being not None.
-
+    .. document private functions
+    .. automethod:: _create_sets
 
     **The following variables are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
@@ -106,7 +76,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
     **The following variable is a new variable created in the
     <class 'oemof.solph.flows.NonConvexInvestFlow'> class:**
 
-    * :math: `invest_non_convex(i,o,t)` (non-negative real number)
+    * :math:`invest\_non\_convex(i,o,t)` (non-negative real number)
         New paramater representing the multiplication of `P_{invest}`
         (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
         `status(i,o,t)` (from the <class 'oemof.solph.flows.NonConvexFlow'>)
@@ -211,27 +181,28 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
     Minimum flow constraint `om.NonConvexInvestFlowBlock.min[i,o,t]`
         .. math::
-            flow(i, o, t) \geq min(i, o, t) \cdot invest_non_convex(i, o, t),\\
+            flow(i, o, t) \geq min(i, o, t)
+            \cdot invest\_non\_convex(i, o, t),\\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_INVESTMENT\_FLOWS}.
 
     Maximum flow constraint `om.NonConvexInvestFlowBlock.max[i,o,t]`
         .. math::
-            flow(i, o, t) \leq max(i, o, t) invest_non_convex(i, o, t), \\
+            flow(i, o, t) \leq max(i, o, t) invest\_non\_convex(i, o, t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall (i, o) \in \textrm{NONCONVEX\_INVESTMENT\_FLOWS}.
 
     Additional constraints that must be used because the new
-        parameter `invest_non_convex(i,o,t)` was introduced to deal with
+        parameter `invest\_non\_convex(i,o,t)` was introduced to deal with
         nonlinearity of the minimum and maximum flow constraints.
 
         .. math::
-            invest_non_convex(i,o,t)
+            invest\_non\_convex(i,o,t)
             \leq status(i,o,t) \cdot P_{invest, max}
             \\ \\
-            invest_non_convex(i,o,t) \leq P_{invest}
+            invest\_non\_convex(i,o,t) \leq P_{invest}
             \\ \\
-            invest_non_convex(i,o,t) \geq
+            invest\_non\_convex(i,o,t) \geq
             P_{invest} - (1 - status(i,o,t)) \cdot P_{invest, max}
 
 
@@ -250,13 +221,13 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
     If `nonconvex.positive_gradient["costs"]` is set by the user:
         .. math::
-            \sum_{i, o \in POSITIVE_GRADIENT_FLOWS} \sum_t
-            positive_gradient(i, o, t) \cdot positive\_gradient\_costs(i, o)
+            \sum_{i, o \in POSITIVE\_GRADIENT\_FLOWS} \sum_t
+            positive\_gradient(i, o, t) \cdot positive\_gradient\_costs(i, o)
 
     If `nonconvex.negative_gradient["costs"]` is set by the user:
         .. math::
-            \sum_{i, o \in NEGATIVE_GRADIENT_FLOWS} \sum_t
-            negative_gradient(i, o, t) \cdot negative\_gradient\_costs(i, o)
+            \sum_{i, o \in NEGATIVE\_GRADIENT\_FLOWS} \sum_t
+            negative\_gradient(i, o, t) \cdot negative\_gradient\_costs(i, o)
 
 
     **The following parts of the objective function are created similar
@@ -289,6 +260,51 @@ class InvestNonConvexFlowBlock(ScalarBlock):
     def _create_sets(self, group):
         """
         Creates all sets for investment non-convex flows.
+
+        .. glossary::
+
+            INVEST_NON_CONVEX_FLOWS
+                A set of flows with the attribute `nonconvex` of type
+                :class:`.options.NonConvex` and the attribute `invest`
+                of type :class:`.options.Invest`.
+
+            MIN_FLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute `min`
+                being not None in the first timestep.
+
+            STARTUPFLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `maximum_startups` or `startup_costs`
+                being not None.
+
+            MAXSTARTUPFLOWS
+                A subset of set STARTUPFLOWS with the attribute
+                `maximum_startups` being not None.
+
+            SHUTDOWNFLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `maximum_shutdowns` or `shutdown_costs`
+                being not None.
+
+            MAXSHUTDOWNFLOWS
+                A subset of set SHUTDOWNFLOWS with the attribute
+                `maximum_shutdowns` being not None.
+
+            MINUPTIMEFLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `minimum_uptime` being not None.
+
+            MINDOWNTIMEFLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `minimum_downtime` being not None.
+
+            POSITIVE_GRADIENT_FLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `positive_gradient` being not None.
+
+            NEGATIVE_GRADIENT_FLOWS
+                A subset of set NONCONVEX_FLOWS with the attribute
+                `negative_gradient` being not None.
         """
         self.INVEST_NON_CONVEX_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group]
