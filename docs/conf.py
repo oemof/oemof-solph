@@ -52,11 +52,6 @@ html_sidebars = {
 }
 html_short_title = "%s-%s" % (project, version)
 html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
-autodoc_default_options = {
-    "members": True,
-    "undoc-members": True,
-    "private-members": False,
-}
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
