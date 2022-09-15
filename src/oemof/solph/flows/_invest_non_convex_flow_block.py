@@ -36,6 +36,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
     (-> see basic sets at :class:`.Model` )
 
     .. document private functions
+    .. automethod:: _create_variables
     .. automethod:: _create_sets
 
     **The following variables are created similar to the
@@ -63,24 +64,6 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         Variable indicating the negative gradient, i.e. the load decrease
         between two consecutive timesteps, indexed by
         NEGATIVE_GRADIENT_FLOWS
-
-
-    **The following variables are created similar to the
-    <class 'oemof.solph.flows.InvestmentFlow'> class:**
-
-    * :math:`P_{invest}`
-        Value of the investment variable, i.e. equivalent to the nominal
-        value of the flows after optimization.
-
-
-    **The following variable is a new variable created in the
-    <class 'oemof.solph.flows.NonConvexInvestFlow'> class:**
-
-    * :math:`invest\_non\_convex(i,o,t)` (non-negative real number)
-        New paramater representing the multiplication of `P_{invest}`
-        (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
-        `status(i,o,t)` (from the <class 'oemof.solph.flows.NonConvexFlow'>)
-        used for the constraints on the minimum and maximum flow constraints.
 
 
     **The following constraints are created similar to the
@@ -313,9 +296,20 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         nc.add_sets_for_non_convex_flows_to_block(self, group)
 
     def _create_variables(self, groups):
-        """
-        Nonconvex-related variables similar to the
-        <class 'oemof.solph.flows.NonConvexFlow'> class.
+        r"""
+        **The following variables are created:**
+
+        * :math:`P_{invest}`
+            Value of the investment variable, i.e. equivalent to the nominal
+            value of the flows after optimization.
+
+        * :math:`invest\_non\_convex(i,o,t)` (non-negative real number)
+            New paramater representing the multiplication of `P_{invest}`
+            (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
+            `status(i,o,t)` (from the
+            <class 'oemof.solph.flows.NonConvexFlow'>)
+            used for the constraints on the minimum and maximum
+            flow constraints.
         """
 
         m = self.parent_block()
