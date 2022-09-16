@@ -239,7 +239,7 @@ class NonConvexFlowBlock(ScalarBlock):
             return None
 
         self._create_sets(group)
-        self._create_variables(group)
+        self._create_variables()
         self._create_constraints()
 
     def _create_sets(self, group):
@@ -250,7 +250,7 @@ class NonConvexFlowBlock(ScalarBlock):
 
         self._add_sets_for_non_convex_flows(group)
 
-    def _create_variables(self, group):
+    def _create_variables(self):
         """
         Creates all variables for non-convex flows.
         """

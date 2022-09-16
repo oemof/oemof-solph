@@ -236,7 +236,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             return None
 
         self._create_sets(group)
-        self._create_variables(group)
+        self._create_variables()
         self._create_constraints()
 
     def _create_sets(self, group):
@@ -294,7 +294,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         self._add_sets_for_non_convex_flows(group)
 
-    def _create_variables(self, groups):
+    def _create_variables(self):
         r"""
         **The following variables are created:**
 
