@@ -145,6 +145,7 @@ diesel_genset = solph.components.Transformer(
                 ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                 maximum=2 * peak_demand,
             ),
+            nonconvex=solph.NonConvex(),
         )
     },
     conversion_factors={b_el_ac: 0.33},
