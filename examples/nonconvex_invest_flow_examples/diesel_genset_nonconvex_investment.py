@@ -3,8 +3,8 @@
 """
 General description
 -------------------
-This example illustrates the application of the NonConvexInvestFlow to
-a diesel generator in a hybrid mini-grid system.
+This example illustrates the combination of Investment and NonConvex options
+applied to a diesel generator in a hybrid mini-grid system.
 
 There are the following components:
 
@@ -127,10 +127,6 @@ pv = solph.components.Source(
 # The output power of the diesel genset can only vary between
 # the given minimum and maximum loads, which represent the fraction
 # of the optimal capacity obtained from the optimization.
-
-# If the `min` attribute is set to 0, the flow class will be
-# similar to the existing `InvestmentFlow` and it is better to avoid
-# using the `NonConvexInvestFlow` for such cases.
 
 epc_diesel_genset = 84.80  # currency/kW/year
 variable_cost_diesel_genset = 0.045  # currency/kWh
