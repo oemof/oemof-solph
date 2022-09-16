@@ -24,12 +24,11 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import ScalarBlock
 
-from ._shared import non_convex as nc
+from ._non_convex_flow_block import NonConvexFlowBlock
 
 
-class InvestNonConvexFlowBlock(ScalarBlock):
+class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     r"""
     **The following sets are created similar to the
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
@@ -293,7 +292,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
-        nc.add_sets_for_non_convex_flows_to_block(self, group)
+        self._add_sets_for_non_convex_flows(group)
 
     def _create_variables(self, groups):
         r"""
@@ -319,7 +318,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        nc.add_variables_for_non_convex_flows_to_block(self)
+        self._add_variables_for_non_convex_flows()
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -350,7 +349,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        nc.add_constraints_to_non_convex_block(self)
+        self.add_constraints()
 
         # Investment-related constraints similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -373,8 +372,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule
         )
 
-        self.min = nc.minimum_flow_constraint(self)
-        self.max = nc.maximum_flow_constraint(self)
+        self.min = self._minimum_flow_constraint()
+        self.max = self._maximum_flow_constraint()
 
         # z = x * y, where x is a binary variable (in our case `status`),
         # y is a continuous variable (in our case `invest`), and z denotes
@@ -449,10 +448,10 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        startup_costs = nc.startup_costs(self)
-        shutdown_costs = nc.shutdown_costs(self)
-        activity_costs = nc.activity_costs(self)
-        inactivity_costs = nc.inactivity_costs(self)
+        startup_costs = self._startup_costs()
+        shutdown_costs = self._shutdown_costs()
+        activity_costs = self._activity_costs()
+        inactivity_costs = self._inactivity_costs()
         gradient_costs = 0
         investment_costs = 0
 

@@ -23,8 +23,6 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from ._shared import investment as cf_i
-
 
 class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
@@ -324,8 +322,8 @@ class InvestmentFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        self.minimum_rule = cf_i.minimum_investment_constraint(self)
-        self.maximum_rule = cf_i.maximum_investment_constraint(self)
+        self.minimum_rule = self._minimum_investment_constraint()
+        self.maximum_rule = self._maximum_investment_constraint()
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
@@ -426,3 +424,30 @@ class InvestmentFlowBlock(ScalarBlock):
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
+
+    def _minimum_investment_constraint(self):
+        """Constraint factory for a minimum investment"""
+        m = self.parent_block()
+
+        def _min_invest_rule(_, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = (
+                m.flows[i, o].investment.minimum * self.invest_status[i, o]
+                <= self.invest[i, o]
+            )
+            return expr
+
+        return Constraint(self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
+
+    def _maximum_investment_constraint(self):
+        """Constraint factory for a maximum investment"""
+        m = self.parent_block()
+
+        def _max_invest_rule(_, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o]
+            )
+            return expr
+
+        return Constraint(self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)
