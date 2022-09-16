@@ -110,7 +110,7 @@ epc_pv = 152.62  # currency/kW/year
 pv = solph.components.Source(
     label="pv",
     outputs={
-        b_el_dc: solph.flows.InvestmentFlow(
+        b_el_dc: solph.flows.Flow(
             fix=solar_potential / peak_solar_potential,
             nominal_value=None,
             investment=solph.Investment(
@@ -140,7 +140,7 @@ diesel_genset = solph.components.Transformer(
     label="diesel_genset",
     inputs={b_diesel: solph.flows.Flow()},
     outputs={
-        b_el_ac: solph.flows.NonConvexInvestFlow(
+        b_el_ac: solph.flows.Flow(
             nominal_value=None,
             variable_costs=variable_cost_diesel_genset,
             min=min_load,
@@ -159,7 +159,7 @@ epc_rectifier = 62.35  # currency/kW/year
 rectifier = solph.components.Transformer(
     label="rectifier",
     inputs={
-        b_el_ac: solph.flows.InvestmentFlow(
+        b_el_ac: solph.flows.Flow(
             nominal_value=None,
             investment=solph.Investment(
                 ep_costs=epc_rectifier * n_days / n_days_in_year
@@ -178,7 +178,7 @@ epc_inverter = 62.35  # currency/kW/year
 inverter = solph.components.Transformer(
     label="inverter",
     inputs={
-        b_el_dc: solph.flows.InvestmentFlow(
+        b_el_dc: solph.flows.Flow(
             nominal_value=None,
             investment=solph.Investment(
                 ep_costs=epc_inverter * n_days / n_days_in_year
@@ -202,9 +202,7 @@ battery = solph.components.GenericStorage(
     ),
     inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
     outputs={
-        b_el_dc: solph.flows.InvestmentFlow(
-            investment=solph.Investment(ep_costs=0)
-        )
+        b_el_dc: solph.flows.Flow(investment=solph.Investment(ep_costs=0))
     },
     initial_storage_level=0.0,
     min_storage_level=0.0,
