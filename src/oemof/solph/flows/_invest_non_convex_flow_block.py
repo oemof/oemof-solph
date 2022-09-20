@@ -34,7 +34,6 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     <class 'oemof.solph.flows.NonConvexFlow'> class:**
     (-> see basic sets at :class:`.Model` )
 
-    .. document private functions
     .. automethod:: _create_variables
     .. automethod:: _create_sets
 
@@ -292,7 +291,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
-        self._add_sets_for_non_convex_flows(group)
+        self._sets_for_non_convex_flows(group)
 
     def _create_variables(self):
         r"""
@@ -318,7 +317,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        self._add_variables_for_non_convex_flows()
+        self._variables_for_non_convex_flows()
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -349,12 +348,12 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         """
         m = self.parent_block()
 
-        self.add_constraints()
+        self._shared_constraints_for_non_convex_flows()
 
         # Investment-related constraints similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
 
-        def _min_invest_rule(block, i, o):
+        def _min_invest_rule(_, i, o):
             """Rule definition for applying a minimum investment"""
             expr = m.flows[i, o].investment.minimum <= self.invest[i, o]
             return expr
@@ -363,7 +362,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             self.INVEST_NON_CONVEX_FLOWS, rule=_min_invest_rule
         )
 
-        def _max_invest_rule(block, i, o):
+        def _max_invest_rule(_, i, o):
             """Rule definition for applying a minimum investment"""
             expr = self.invest[i, o] <= m.flows[i, o].investment.maximum
             return expr
@@ -376,15 +375,15 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         self.max = self._maximum_flow_constraint()
 
         # z = x * y, where x is a binary variable (in our case `status`),
-        # y is a continuous variable (in our case `invest`), and z denotes
-        # the new parameter `invest_non_convex`.
+        # y is a continuous variable (in our case `status_nominal`),
+        # and z denotes the new parameter `invest_non_convex`.
         # We define M as the upper bound of y (i.e., `investment.maximum`).
         # In order to linearize x * y, which is nonlinear, the following three
         # constraints are built.
         # These constraints are only needed for the CBC solver (and probably
         # other free open-source solvers) as Gurobi handles multiplication of
         # binary and continuous variables automatically.
-        def _linearization_rule_invest_non_convex_one(block, i, o, t):
+        def _linearization_rule_invest_non_convex_one(_, i, o, t):
             """Rule definition for the linearization of the new parameter.
             :math:`xM \\ge z`
 
@@ -401,7 +400,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             rule=_linearization_rule_invest_non_convex_one,
         )
 
-        def _linearization_rule_invest_non_convex_two(block, i, o, t):
+        def _linearization_rule_invest_non_convex_two(_, i, o, t):
             """Rule definition for the linearization of the new parameter.
 
             :math:`y \\ge z`
@@ -415,7 +414,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             rule=_linearization_rule_invest_non_convex_two,
         )
 
-        def _linearization_rule_invest_non_convex_three(block, i, o, t):
+        def _linearization_rule_invest_non_convex_three(_, i, o, t):
             """Rule definition for the linearization of the new parameter.
 
             :math:`z \\ge y - (1-x) M`
