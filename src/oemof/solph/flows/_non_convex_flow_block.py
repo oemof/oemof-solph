@@ -128,10 +128,7 @@ class NonConvexFlowBlock(ScalarBlock):
         inactivity_costs = self._inactivity_costs()
 
         return (
-            startup_costs
-            + shutdown_costs
-            + activity_costs
-            + inactivity_costs
+            startup_costs + shutdown_costs + activity_costs + inactivity_costs
         )
 
     def _sets_for_non_convex_flows(self, group):

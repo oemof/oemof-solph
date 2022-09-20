@@ -356,6 +356,4 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             expr = self.invest[i, o] <= m.flows[i, o].investment.maximum
             return expr
 
-        return Constraint(
-            self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule
-        )
+        return Constraint(self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule)
