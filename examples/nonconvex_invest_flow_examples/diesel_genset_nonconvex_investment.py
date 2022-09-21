@@ -3,8 +3,8 @@
 """
 General description
 -------------------
-This example illustrates the application of the NonConvexInvestFlow to
-a diesel generator in a hybrid mini-grid system.
+This example illustrates the combination of Investment and NonConvex options
+applied to a diesel generator in a hybrid mini-grid system.
 
 There are the following components:
 
@@ -110,7 +110,7 @@ epc_pv = 152.62  # currency/kW/year
 pv = solph.components.Source(
     label="pv",
     outputs={
-        b_el_dc: solph.flows.InvestmentFlow(
+        b_el_dc: solph.flows.Flow(
             fix=solar_potential / peak_solar_potential,
             nominal_value=None,
             investment=solph.Investment(
@@ -128,10 +128,6 @@ pv = solph.components.Source(
 # the given minimum and maximum loads, which represent the fraction
 # of the optimal capacity obtained from the optimization.
 
-# If the `min` attribute is set to 0, the flow class will be
-# similar to the existing `InvestmentFlow` and it is better to avoid
-# using the `NonConvexInvestFlow` for such cases.
-
 epc_diesel_genset = 84.80  # currency/kW/year
 variable_cost_diesel_genset = 0.045  # currency/kWh
 min_load = 0.2
@@ -140,7 +136,7 @@ diesel_genset = solph.components.Transformer(
     label="diesel_genset",
     inputs={b_diesel: solph.flows.Flow()},
     outputs={
-        b_el_ac: solph.flows.NonConvexInvestFlow(
+        b_el_ac: solph.flows.Flow(
             nominal_value=None,
             variable_costs=variable_cost_diesel_genset,
             min=min_load,
@@ -149,6 +145,7 @@ diesel_genset = solph.components.Transformer(
                 ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                 maximum=2 * peak_demand,
             ),
+            nonconvex=solph.NonConvex(),
         )
     },
     conversion_factors={b_el_ac: 0.33},
@@ -159,7 +156,7 @@ epc_rectifier = 62.35  # currency/kW/year
 rectifier = solph.components.Transformer(
     label="rectifier",
     inputs={
-        b_el_ac: solph.flows.InvestmentFlow(
+        b_el_ac: solph.flows.Flow(
             nominal_value=None,
             investment=solph.Investment(
                 ep_costs=epc_rectifier * n_days / n_days_in_year
@@ -178,7 +175,7 @@ epc_inverter = 62.35  # currency/kW/year
 inverter = solph.components.Transformer(
     label="inverter",
     inputs={
-        b_el_dc: solph.flows.InvestmentFlow(
+        b_el_dc: solph.flows.Flow(
             nominal_value=None,
             investment=solph.Investment(
                 ep_costs=epc_inverter * n_days / n_days_in_year
@@ -202,9 +199,7 @@ battery = solph.components.GenericStorage(
     ),
     inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
     outputs={
-        b_el_dc: solph.flows.InvestmentFlow(
-            investment=solph.Investment(ep_costs=0)
-        )
+        b_el_dc: solph.flows.Flow(investment=solph.Investment(ep_costs=0))
     },
     initial_storage_level=0.0,
     min_storage_level=0.0,
