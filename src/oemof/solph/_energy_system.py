@@ -60,6 +60,10 @@ class EnergySystem(es.EnergySystem):
         respective period;
         For a standard model, periods only holds one entry, i.e. {0: 0}
 
+    freq : str
+        The frequency of a multi-period model;
+        Defaults to "H"
+
     kwargs
     """
 
@@ -70,6 +74,7 @@ class EnergySystem(es.EnergySystem):
         infer_last_interval=None,
         multi_period=False,
         periods=None,
+        freq="H",
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -168,10 +173,10 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.multi_period = multi_period
-        self.periods = self._add_periods(periods)
+        self.periods = self._add_periods(periods, freq)
         self._extract_periods_years()
 
-    def _add_periods(self, periods):
+    def _add_periods(self, periods, freq="H"):
         """Returns periods to be added to the energy system
 
         * For a standard model, periods only contain one value {0: 0}
@@ -187,6 +192,10 @@ class EnergySystem(es.EnergySystem):
             Keys are periods as increasing integer values, starting from 0,
             values are the periods defined by a pd.date_range object;
             For a standard model, only one period is used.
+
+        freq : str
+            The frequency of a multi-period model;
+            Defaults to "H"
 
         Returns
         -------
@@ -205,7 +214,7 @@ class EnergySystem(es.EnergySystem):
                     filter_series.index.year == year
                 ].min()
                 end = filter_series.loc[filter_series.index.year == year].max()
-                periods[number] = pd.date_range(start, end, freq="H")
+                periods[number] = pd.date_range(start, end, freq=freq)
         else:
             for k in periods.keys():
                 if not isinstance(k, int):
