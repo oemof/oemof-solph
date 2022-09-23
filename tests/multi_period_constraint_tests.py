@@ -1158,7 +1158,7 @@ class TestsMultiPeriodConstraint:
 
         self.compare_lp_files("periodical_investment_limit.lp", my_om=om)
 
-    def test_perioical_investment_limit_with_dsm1(self):
+    def test_periodical_investment_limit_with_dsm1(self):
         """Testing the investment_limit function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
         solph.components.Source(
@@ -1176,8 +1176,7 @@ class TestsMultiPeriodConstraint:
             demand=[1] * 6,
             capacity_up=[0.5] * 6,
             capacity_down=[0.5] * 6,
-            flex_share_up=1,
-            flex_share_down=1,
+            max_demand=1,
             delay_time=1,
             cost_dsm_down_shift=0.5,
             cost_dsm_up=0.5,
@@ -1220,8 +1219,7 @@ class TestsMultiPeriodConstraint:
             demand=[1] * 6,
             capacity_up=[0.5] * 6,
             capacity_down=[0.5] * 6,
-            flex_share_up=1,
-            flex_share_down=1,
+            max_demand=1,
             delay_time=1,
             shift_time=1,
             cost_dsm_down_shift=0.5,
@@ -1265,8 +1263,7 @@ class TestsMultiPeriodConstraint:
             demand=[1] * 6,
             capacity_up=[0.5] * 6,
             capacity_down=[0.5] * 6,
-            flex_share_up=1,
-            flex_share_down=1,
+            max_demand=1,
             delay_time=1,
             shift_interval=2,
             cost_dsm_down_shift=0.5,
@@ -1620,8 +1617,7 @@ class TestsMultiPeriodConstraint:
             capacity_up=[0.5] * 6,
             capacity_down=[0.5] * 6,
             approach="DIW",
-            flex_share_up=1,
-            flex_share_down=1,
+            max_demand=[1, 2, 3],
             delay_time=1,
             cost_dsm_down_shift=1,
             cost_dsm_up=1,
@@ -1654,8 +1650,7 @@ class TestsMultiPeriodConstraint:
             capacity_up=[0.5] * 6,
             capacity_down=[0.5] * 6,
             approach="DLR",
-            flex_share_up=1,
-            flex_share_down=1,
+            max_demand=[1, 2, 3],
             delay_time=2,
             shift_time=1,
             cost_dsm_down_shift=1,
@@ -1690,8 +1685,7 @@ class TestsMultiPeriodConstraint:
             capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
             capacity_down=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
             approach="oemof",
-            flex_share_up=0.9,
-            flex_share_down=0.9,
+            max_demand=[1, 2, 3],
             shift_interval=2,
             cost_dsm_down_shift=1,
             cost_dsm_up=1,

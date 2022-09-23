@@ -147,9 +147,8 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_0_0)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_0_0)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_1_0)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_0)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_0)
-= 0
+= 1
 
 c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_0_1)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_1)
@@ -157,9 +156,8 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_0_1)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_1_1)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_2_1)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_1)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_1)
-= 0
+= 1
 
 c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_1_2)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_2)
@@ -167,9 +165,8 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_1_2)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_2_2)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_3_2)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_2)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_1)
 +1 flow(bus_elec_demand_dsm_1_2)
-= 0
+= 2
 
 c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_1_3)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_3)
@@ -177,9 +174,8 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_1_3)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_3_3)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_4_3)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_3)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_1)
 +1 flow(bus_elec_demand_dsm_1_3)
-= 0
+= 2
 
 c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_2_4)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_4)
@@ -187,18 +183,16 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_2_4)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_4_4)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_5_4)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_4)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_2)
 +1 flow(bus_elec_demand_dsm_2_4)
-= 0
+= 3
 
 c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_2_5)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_5)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_4_5)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_5_5)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_5)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_2)
 +1 flow(bus_elec_demand_dsm_2_5)
-= 0
+= 3
 
 c_e_SinkDSMDIWInvestmentBlock_dsm_updo_constraint(demand_dsm_0)_:
 -1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_0_0)

@@ -134,20 +134,14 @@ class SinkDSM(Sink):
         Only used when :attr:`~shed_eligibility` is set to True.
         Maximum length of a load shedding process at full capacity
         (used within energy limit constraint)
-    max_demand: numeric
-        Maximum demand prior to demand response
+    max_demand: numeric or iterable
+        Maximum demand prior to demand response (per period)
     max_capacity_down: numeric
         Maximum capacity eligible for downshifts
-        prior to demand response (used for dispatch mode)
+        prior to demand response (used only for dispatch mode)
     max_capacity_up: numeric
         Maximum capacity eligible for upshifts
-        prior to demand response (used for dispatch mode)
-    flex_share_down: float
-        Flexible share of installed capacity
-        eligible for downshifts (used for invest mode)
-    flex_share_up: float
-        Flexible share of installed capacity
-        eligible for upshifts (used for invest mode)
+        prior to demand response (used only for dispatch mode)
     cost_dsm_up : float
         Cost per unit of DSM activity that increases the demand
     cost_dsm_down_shift : float
@@ -242,8 +236,6 @@ class SinkDSM(Sink):
         max_demand=None,
         max_capacity_down=None,
         max_capacity_up=None,
-        flex_share_down=None,
-        flex_share_up=None,
         cost_dsm_up=0,
         cost_dsm_down_shift=0,
         cost_dsm_down_shed=0,
@@ -275,62 +267,9 @@ class SinkDSM(Sink):
             self.delay_time = [el for el in range(1, delay_time + 1)]
         self.shift_time = shift_time
         self.shed_time = shed_time
-
-        # Attributes are only needed if no investments occur
         self.max_capacity_down = max_capacity_down
         self.max_capacity_up = max_capacity_up
-        self.max_demand = max_demand
-
-        # Attributes for investment modeling
-        if flex_share_down is not None:
-            if max_capacity_down is None and max_demand is None:
-                self.flex_share_down = flex_share_down
-            else:
-                e1 = (
-                    "Please determine either flex_share_down "
-                    "(investment modeling)\n or set "
-                    "max_demand and max_capacity_down "
-                    "(dispatch modeling).\n"
-                    "Otherwise, overdetermination occurs."
-                )
-                raise AttributeError(e1)
-        else:
-            if max_capacity_down is None or max_demand is None:
-                e2 = (
-                    "If you do not specify flex_share_down\n"
-                    "which should be used for investment modeling,\n"
-                    "you have to specify max_capacity_down "
-                    "and max_demand\n"
-                    "instead which should be used for dispatch modeling."
-                )
-                raise AttributeError(e2)
-            else:
-                self.flex_share_down = self.max_capacity_down / self.max_demand
-
-        if flex_share_up is not None:
-            if max_capacity_up is None and max_demand is None:
-                self.flex_share_up = flex_share_up
-            else:
-                e3 = (
-                    "Please determine either flex_share_up "
-                    "(investment modeling)\n or set "
-                    "max_demand and max_capacity_up (dispatch modeling).\n"
-                    "Otherwise, overdetermination occurs."
-                )
-                raise AttributeError(e3)
-        else:
-            if max_capacity_up is None or max_demand is None:
-                e4 = (
-                    "If you do not specify flex_share_up\n"
-                    "which should be used for investment modeling,\n"
-                    "you have to specify max_capacity_up "
-                    "and max_demand\n"
-                    "instead which should be used for dispatch modeling."
-                )
-                raise AttributeError(e4)
-            else:
-                self.flex_share_up = self.max_capacity_up / self.max_demand
-
+        self.max_demand = sequence(max_demand)
         self.cost_dsm_up = sequence(cost_dsm_up)
         self.cost_dsm_down_shift = sequence(cost_dsm_down_shift)
         self.cost_dsm_down_shed = sequence(cost_dsm_down_shed)
@@ -355,42 +294,30 @@ class SinkDSM(Sink):
         self._invest_group = isinstance(self.investment, Investment)
 
         if (
-            self.max_demand is None
-            or self.max_capacity_up is None
-            or self.max_capacity_down is None
+            self.max_capacity_up is None or self.max_capacity_down is None
         ) and not self._invest_group:
-            e5 = (
-                "If you are setting up a dispatch model, "
-                "you have to specify max_demand, max_capacity_up "
-                "and max_capacity_down.\n"
-                "The values you might have passed for flex_share_up "
-                "and flex_share_down will be ignored and only used in "
-                "an investment model."
+            e1 = (
+                "If you are using the dispatch mode, "
+                "you have to specify `max_capacity_up` "
+                "and `max_capacity_down`."
             )
-            raise AttributeError(e5)
+            raise AttributeError(e1)
 
         if self._invest_group:
             self._check_invest_attributes()
 
     def _check_invest_attributes(self):
         if (
-            self.investment is not None
-            and (
-                self.max_demand
-                or self.max_capacity_down
-                or self.max_capacity_up
+            self.max_capacity_down or self.max_capacity_up
+        ) and self.investment is not None:
+            e2 = (
+                "If you are using the investment mode, the invest variable "
+                "replaces the `max_capacity_down` "
+                "as well as the `max_capacity_up` values.\n"
+                "Therefore, `max_capacity_up` and `max_capacity_down` "
+                "values should be None (which is their default value)."
             )
-            is not None
-        ):
-            e6 = (
-                "If an investment object is defined, the invest variable "
-                "replaces the max_demand, the max_capacity_down "
-                "as well as\n"
-                "the max_capacity_up values. Therefore, max_demand,\n"
-                "max_capacity_up and max_capacity_down values should be "
-                "'None'.\n"
-            )
-            raise AttributeError(e6)
+            raise AttributeError(e2)
 
     def constraint_group(self):
         possible_approaches = ["DIW", "DLR", "oemof"]
@@ -614,7 +541,7 @@ class SinkDSMOemofBlock(ScalarBlock):
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
-                        g.demand[t] * g.max_demand
+                        g.demand[t] * g.max_demand[p]
                         + self.dsm_up[g, t]
                         - self.dsm_do_shift[g, t]
                         - self.dsm_do_shed[g, t]
@@ -751,8 +678,7 @@ class SinkDSMOemofBlock(ScalarBlock):
                 if g.fixed_costs[0] is not None:
                     for p in m.PERIODS:
                         fixed_costs += (
-                            g.max_demand
-                            * max(g.demand)
+                            max(g.max_capacity_up, g.max_capacity_down)
                             * g.fixed_costs[p]
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
@@ -831,21 +757,14 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to the additionally installed capacity.
-            The capacity share eligible for a shift is determined
-            by flex share(s)."
+            invested in. Equals to the additionally shiftable resp.
+            sheddable capacity."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
             ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
             "P", "existing DSM capacity"
-            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
-            "P","Share of invested capacity that may be shift upwards
-            at maximum"
-            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
-            "P", "Share of invested capacity that may be shift downwards
-            at maximum"
             ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.epcosts` ",
             "P", "specific investment annuity"
     """
@@ -1079,7 +998,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
-                        g.demand[t] * self.total[g, p]
+                        g.demand[t] * g.max_demand[p]
                         + self.dsm_up[g, t]
                         - self.dsm_do_shift[g, t]
                         - self.dsm_do_shed[g, t]
@@ -1105,7 +1024,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
-                    rhs = g.capacity_up[t] * self.total[g, p] * g.flex_share_up
+                    rhs = g.capacity_up[t] * self.total[g, p]
 
                     # add constraint
                     block.dsm_up_constraint.add((g, p, t), (lhs <= rhs))
@@ -1125,11 +1044,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     # DSM down
                     lhs = self.dsm_do_shift[g, t] + self.dsm_do_shed[g, t]
                     # Capacity dsm_down
-                    rhs = (
-                        g.capacity_down[t]
-                        * self.total[g, p]
-                        * g.flex_share_down
-                    )
+                    rhs = g.capacity_down[t] * self.total[g, p]
 
                     # add constraint
                     block.dsm_down_constraint.add((g, p, t), (lhs <= rhs))
@@ -1307,7 +1222,6 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     for p in m.PERIODS:
                         fixed_costs += sum(
                             self.invest[g, p]
-                            * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
@@ -1540,7 +1454,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * g.max_demand
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -1561,7 +1475,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * g.max_demand
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -1584,7 +1498,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * g.max_demand
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -2015,8 +1929,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                 if g.fixed_costs[0] is not None:
                     for p in m.PERIODS:
                         fixed_costs += (
-                            g.max_demand
-                            * max(g.demand)
+                            max(g.max_capacity_up, g.max_capacity_down)
                             * g.fixed_costs[p]
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
@@ -2116,21 +2029,14 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to the additionally installed capacity.
-            The capacity share eligible for a shift is determined
-            by flex share(s)."
+            invested in. Equals to the additionally shiftable resp.
+            sheddable capacity."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
             ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
             "P", "existing DSM capacity"
-            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
-            "P","Share of invested capacity that may be shift upwards
-            at maximum"
-            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
-            "P", "Share of invested capacity that may be shift downwards
-            at maximum"
             ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.ep_costs` ",
             "P", "specific investment annuity"
             ":math:`T` "," ","P", "Overall amount of time steps (cardinality)"
@@ -2374,7 +2280,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * self.total[g, p]
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -2395,7 +2301,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * self.total[g, p]
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -2417,7 +2323,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
                         rhs = (
-                            g.demand[t] * self.total[g, p]
+                            g.demand[t] * g.max_demand[p]
                             + self.dsm_up[g, t]
                             - sum(
                                 self.dsm_do_shift[g, tt, t]
@@ -2516,7 +2422,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # DSM up
                     lhs = self.dsm_up[g, t]
                     # Capacity dsm_up
-                    rhs = g.capacity_up[t] * self.total[g, p] * g.flex_share_up
+                    rhs = g.capacity_up[t] * self.total[g, p]
 
                     # add constraint
                     block.dsm_up_constraint.add((g, p, t), (lhs <= rhs))
@@ -2547,11 +2453,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # Capacity DSM down
-                        rhs = (
-                            g.capacity_down[tt]
-                            * self.total[g, p]
-                            * g.flex_share_down
-                        )
+                        rhs = g.capacity_down[tt] * self.total[g, p]
 
                         # add constraint
                         block.dsm_do_constraint.add((g, p, tt), (lhs <= rhs))
@@ -2572,11 +2474,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # Capacity DSM down
-                        rhs = (
-                            g.capacity_down[tt]
-                            * self.total[g, p]
-                            * g.flex_share_down
-                        )
+                        rhs = g.capacity_down[tt] * self.total[g, p]
 
                         # add constraint
                         block.dsm_do_constraint.add((g, p, tt), (lhs <= rhs))
@@ -2595,11 +2493,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, tt]
                         )
                         # Capacity DSM down
-                        rhs = (
-                            g.capacity_down[tt]
-                            * self.total[g, p]
-                            * g.flex_share_down
-                        )
+                        rhs = g.capacity_down[tt] * self.total[g, p]
 
                         # add constraint
                         block.dsm_do_constraint.add((g, p, tt), (lhs <= rhs))
@@ -2635,8 +2529,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         # max capacity at tt
                         rhs = (
                             max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
+                                g.capacity_up[tt],
+                                g.capacity_down[tt],
                             )
                             * self.total[g, p]
                         )
@@ -2662,8 +2556,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         # max capacity at tt
                         rhs = (
                             max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
+                                g.capacity_up[tt],
+                                g.capacity_down[tt],
                             )
                             * self.total[g, p]
                         )
@@ -2687,8 +2581,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         # max capacity at tt
                         rhs = (
                             max(
-                                g.capacity_up[tt] * g.flex_share_up,
-                                g.capacity_down[tt] * g.flex_share_down,
+                                g.capacity_up[tt],
+                                g.capacity_down[tt],
                             )
                             * self.total[g, p]
                         )
@@ -2725,7 +2619,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             rhs = (
                                 g.capacity_up[t]
                                 * self.total[g, p]
-                                * g.flex_share_up
                                 * g.delay_time
                                 * m.timeincrement[t]
                             )
@@ -2746,7 +2639,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             rhs = (
                                 g.capacity_up[t]
                                 * self.total[g, p]
-                                * g.flex_share_up
                                 * g.delay_time
                                 * m.timeincrement[t]
                             )
@@ -2790,7 +2682,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             rhs = (
                                 g.capacity_down[t]
                                 * self.total[g, p]
-                                * g.flex_share_down
                                 * g.shed_time
                                 * m.timeincrement[t]
                             )
@@ -2811,7 +2702,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             rhs = (
                                 g.capacity_down[t]
                                 * self.total[g, p]
-                                * g.flex_share_down
                                 * g.shed_time
                                 * m.timeincrement[t]
                             )
@@ -2964,7 +2854,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     for p in m.PERIODS:
                         fixed_costs += sum(
                             self.invest[g, p]
-                            * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
@@ -3320,7 +3209,7 @@ class SinkDSMDLRBlock(ScalarBlock):
 
                     # Demand +- DR
                     rhs = (
-                        g.demand[t] * g.max_demand
+                        g.demand[t] * g.max_demand[p]
                         + sum(
                             self.dsm_up[g, h, t]
                             + self.balance_dsm_do[g, h, t]
@@ -4007,8 +3896,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                 if g.fixed_costs[0] is not None:
                     for p in m.PERIODS:
                         fixed_costs += (
-                            g.max_demand
-                            * max(g.demand)
+                            max(g.max_capacity_up, g.max_capacity_down)
                             * g.fixed_costs[p]
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
@@ -4180,21 +4068,14 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
             :widths: 1, 1, 1, 1
 
             ":math:`invest` ",":attr:`~SinkDSM.invest` ","V", "DSM capacity
-            invested in. Equals to the additionally installed capacity.
-            The capacity share eligible for a shift is determined
-            by flex share(s)."
+            invested in. Equals to the additionally shiftable resp.
+            sheddable capacity."
             ":math:`invest_{min}` ", ":attr:`~SinkDSM.investment.minimum` ",
             "P", "minimum investment"
             ":math:`invest_{max}` ", ":attr:`~SinkDSM.investment.maximum` ",
             "P", "maximum investment"
             ":math:`E_{exist}` ",":attr:`~SinkDSM.investment.existing` ",
             "P", "existing DSM capacity"
-            ":math:`s_{flex, up}` ",":attr:`~SinkDSM.flex_share_up` ",
-            "P","Share of invested capacity that may be shift upwards
-            at maximum"
-            ":math:`s_{flex, do}` ",":attr:`~SinkDSM.flex_share_do` ",
-            "P", "Share of invested capacity that may be shift downwards
-            at maximum"
             ":math:`costs_{invest}` ",":attr:`~SinkDSM.investment.ep_costs` ",
             "P", "specific investment annuity"
     """
@@ -4471,7 +4352,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
 
                     # Demand +- DR
                     rhs = (
-                        g.demand[t] * self.total[g, p]
+                        # g.demand[t] * self.total[g, p]
+                        g.demand[t] * g.max_demand[p]
                         + sum(
                             self.dsm_up[g, h, t]
                             + self.balance_dsm_do[g, h, t]
@@ -4667,11 +4549,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     )
 
                     # upper bound
-                    rhs = (
-                        g.capacity_down[t]
-                        * self.total[g, p]
-                        * g.flex_share_down
-                    )
+                    rhs = g.capacity_down[t] * self.total[g, p]
 
                     # add constraint
                     block.availability_red.add((g, p, t), (lhs <= rhs))
@@ -4693,7 +4571,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     )
 
                     # upper bound
-                    rhs = g.capacity_up[t] * self.total[g, p] * g.flex_share_up
+                    rhs = g.capacity_up[t] * self.total[g, p]
 
                     # add constraint
                     block.availability_inc.add((g, p, t), (lhs <= rhs))
@@ -4795,7 +4673,6 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         rhs = (
                             g.capacity_down_mean
                             * self.total[g, p]
-                            * g.flex_share_down
                             * g.shift_time
                         )
 
@@ -4827,12 +4704,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     lhs = self.dsm_up_level[g, t]
 
                     # maximum (time-dependent) available shifting capacity
-                    rhs = (
-                        g.capacity_up_mean
-                        * self.total[g, p]
-                        * g.flex_share_up
-                        * g.shift_time
-                    )
+                    rhs = g.capacity_up_mean * self.total[g, p] * g.shift_time
 
                     # add constraint
                     block.dr_storage_limit_inc.add((g, p, t), (lhs <= rhs))
@@ -4862,7 +4734,6 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         rhs = (
                             g.capacity_down_mean
                             * self.total[g, p]
-                            * g.flex_share_down
                             * g.shed_time
                             * g.n_yearLimit_shed
                         )
@@ -4902,7 +4773,6 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         rhs = (
                             g.capacity_down_mean
                             * self.total[g, p]
-                            * g.flex_share_down
                             * g.shift_time
                             * g.n_yearLimit_shift
                         )
@@ -4940,7 +4810,6 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         rhs = (
                             g.capacity_up_mean
                             * self.total[g, p]
-                            * g.flex_share_up
                             * g.shift_time
                             * g.n_yearLimit_shift
                         )
@@ -4981,7 +4850,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             # daily limit
                             rhs = g.capacity_down_mean * self.total[
                                 g, p
-                            ] * g.flex_share_down * g.shift_time - sum(
+                            ] * g.shift_time - sum(
                                 sum(
                                     self.dsm_do_shift[g, h, t - t_dash]
                                     for h in g.delay_time
@@ -5029,7 +4898,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                             # daily limit
                             rhs = g.capacity_up_mean * self.total[
                                 g, p
-                            ] * g.flex_share_up * g.shift_time - sum(
+                            ] * g.shift_time - sum(
                                 sum(
                                     self.dsm_up[g, h, t - t_dash]
                                     for h in g.delay_time
@@ -5081,8 +4950,8 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                         # maximum capacity eligibly for load shifting
                         rhs = (
                             max(
-                                g.capacity_down[t] * g.flex_share_down,
-                                g.capacity_up[t] * g.flex_share_up,
+                                g.capacity_down[t],
+                                g.capacity_up[t],
                             )
                             * self.total[g, p]
                         )
@@ -5251,7 +5120,6 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
                     for p in m.PERIODS:
                         fixed_costs += sum(
                             self.invest[g, p]
-                            * max(g.demand)
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(

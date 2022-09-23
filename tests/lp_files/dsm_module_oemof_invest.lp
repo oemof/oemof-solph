@@ -36,25 +36,22 @@ c_e_SinkDSMOemofInvestmentBlock_input_output_relation(demand_dsm_0_0)_:
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_0)
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_0)
 -1 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_0)
--1 SinkDSMOemofInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_0)
-= 0
+= 1
 
 c_e_SinkDSMOemofInvestmentBlock_input_output_relation(demand_dsm_0_1)_:
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_1)
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_1)
 -1 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_1)
--1 SinkDSMOemofInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_1)
-= 0
+= 1
 
 c_e_SinkDSMOemofInvestmentBlock_input_output_relation(demand_dsm_0_2)_:
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_2)
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_2)
 -1 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_2)
--1 SinkDSMOemofInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_2)
-= 0
+= 1
 
 c_u_SinkDSMOemofInvestmentBlock_dsm_up_constraint(demand_dsm_0_0)_:
 +1 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_0)

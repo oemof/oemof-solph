@@ -82,9 +82,8 @@ c_e_SinkDSMDLRInvestmentBlock_input_output_relation(sink_dsm_DLR_0_0)_:
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(sink_dsm_DLR_0)
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shift(sink_dsm_DLR_1_0)
 -1 SinkDSMDLRInvestmentBlock_dsm_up(sink_dsm_DLR_1_0)
--1 SinkDSMDLRInvestmentBlock_total(sink_dsm_DLR_0)
 +1 flow(Bus1_sink_dsm_DLR_0_0)
-= 0
+= 1
 
 c_e_SinkDSMDLRInvestmentBlock_input_output_relation(sink_dsm_DLR_0_1)_:
 -1 SinkDSMDLRInvestmentBlock_balance_dsm_do(sink_dsm_DLR_1_1)
@@ -92,9 +91,8 @@ c_e_SinkDSMDLRInvestmentBlock_input_output_relation(sink_dsm_DLR_0_1)_:
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(sink_dsm_DLR_1)
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shift(sink_dsm_DLR_1_1)
 -1 SinkDSMDLRInvestmentBlock_dsm_up(sink_dsm_DLR_1_1)
--1 SinkDSMDLRInvestmentBlock_total(sink_dsm_DLR_0)
 +1 flow(Bus1_sink_dsm_DLR_0_1)
-= 0
+= 1
 
 c_e_SinkDSMDLRInvestmentBlock_input_output_relation(sink_dsm_DLR_0_2)_:
 -1 SinkDSMDLRInvestmentBlock_balance_dsm_do(sink_dsm_DLR_1_2)
@@ -102,9 +100,8 @@ c_e_SinkDSMDLRInvestmentBlock_input_output_relation(sink_dsm_DLR_0_2)_:
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(sink_dsm_DLR_2)
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shift(sink_dsm_DLR_1_2)
 -1 SinkDSMDLRInvestmentBlock_dsm_up(sink_dsm_DLR_1_2)
--1 SinkDSMDLRInvestmentBlock_total(sink_dsm_DLR_0)
 +1 flow(Bus1_sink_dsm_DLR_0_2)
-= 0
+= 1
 
 c_e_SinkDSMDLRInvestmentBlock_capacity_balance_red(sink_dsm_DLR_1_0)_:
 +1 SinkDSMDLRInvestmentBlock_balance_dsm_do(sink_dsm_DLR_1_0)
