@@ -86,7 +86,7 @@ class Flow(on.Edge):
     investment : :class:`Investment <oemof.solph.options.Investment>`
         Object indicating if a nominal_value of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_value. The nominal_value
+        investment variable rather than to the nominal_value. The nominal_value
         should not be set (or set to None) if an investment object is used.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
@@ -100,7 +100,7 @@ class Flow(on.Edge):
     -----
     See :py:class:`~oemof.solph.flows._simple_flow.SimpleFlowBlock`
     for the variables, constraints and objective parts, that are created for
-    a FLow object.
+    a Flow object.
 
     Examples
     --------

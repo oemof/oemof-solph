@@ -227,7 +227,7 @@ def test_generic_storage_too_many_outputs():
 def test_offsettransformer_wrong_flow_type():
     """No NonConvexFlow for Inflow defined."""
     with pytest.raises(
-        TypeError, match=r"Input flows must be have NonConvex attribute!"
+        TypeError, match=r"Input flows must have NonConvex attribute!"
     ):
         bgas = Bus(label="gasBus")
         components.OffsetTransformer(

@@ -1072,7 +1072,7 @@ equal to :math:`invest`.
         label='diesel_genset',
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
-            b_el: solph.flows.NonConvexInvestFlow(
+            b_el: solph.flows.Flow(
                 nominal_value=None,
                 variable_costs=0.04,
                 min=0.2,

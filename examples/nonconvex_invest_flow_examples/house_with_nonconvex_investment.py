@@ -80,7 +80,7 @@ epc = economics.annuity(5000, 20, 0.05)
 fireplace = solph.components.Source(
     label="fireplace",
     outputs={
-        b_heat: solph.flows.NonConvexInvestFlow(
+        b_heat: solph.flows.Flow(
             max=1.0,
             min=0.9,
             variable_costs=0.1,

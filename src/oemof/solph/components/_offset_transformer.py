@@ -78,7 +78,7 @@ class OffsetTransformer(network.Transformer):
             for k, v in self.inputs.items():
                 if not v.nonconvex:
                     raise TypeError(
-                        "Input flows must be have NonConvex attribute!"
+                        "Input flows must have NonConvex attribute!"
                     )
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
