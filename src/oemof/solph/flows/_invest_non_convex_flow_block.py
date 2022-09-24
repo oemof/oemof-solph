@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for NonConvexInvestFlowBlock objects with both Nonconvex and Investment
+for InvestNonConvexFlowBlock objects with both Nonconvex and Investment
 options.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
@@ -62,12 +62,12 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
     def _create(self, group=None):
         """Creates set, variables, constraints for all flow object with
-        an attribute flow of type class:`.NonConvexInvestFlowBlock`.
+        an attribute flow of type class:`.InvestNonConvexFlowBlock`.
 
         Parameters
         ----------
         group : list
-            List of oemof.solph.NonConvexInvestFlowBlock objects for which
+            List of oemof.solph.InvestNonConvexFlowBlock objects for which
             the constraints are build.
         """
         if group is None:
@@ -134,10 +134,10 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
     def _create_variables(self):
         r"""
-        Status variable (binary) `om.NonConvexInvestFlowBlock.status`:
+        Status variable (binary) `om.InvestNonConvexFlowBlock.status`:
             Variable indicating if flow is >= 0 indexed by FLOWS
 
-        :math:`P_{invest}` `NonConvexInvestFlowBlock.invest`
+        :math:`P_{invest}` `InvestNonConvexFlowBlock.invest`
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
 
