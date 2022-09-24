@@ -3,7 +3,9 @@
 """
 General description
 -------------------
-This example illustrates the NonConvexInvestFlow.
+This example illustrates a possible combination of solph.Investment and
+solph.NonConvex. Note that both options are added to the same
+component of the energy system.
 
 There are the following components:
 

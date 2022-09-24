@@ -85,13 +85,14 @@ demand_heat = solph.components.Sink(
 fireplace = solph.components.Source(
     label="fireplace",
     outputs={
-        b_heat: solph.flows.NonConvexFlow(
+        b_heat: solph.flows.Flow(
             nominal_value=10,
             min=0.4,
             max=1.0,
             variable_costs=0.1,
             minimum_uptime=2,
             initial_status=1,
+            nonconvex=solph.NonConvex(),
         )
     },
 )
@@ -108,7 +109,7 @@ epc = economics.annuity(5000, 20, 0.05)
 thermal_collector = solph.components.Source(
     label="thermal_collector",
     outputs={
-        b_heat: solph.flows.InvestmentFlow(
+        b_heat: solph.flows.Flow(
             fix=[solar_thermal(day) for day in range(0, periods)],
             investment=solph.Investment(
                 ep_costs=epc, minimum=1.0, maximum=5.0
