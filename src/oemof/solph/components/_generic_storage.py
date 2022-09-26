@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -277,7 +277,7 @@ class GenericStorage(network.Node):
             return GenericStorageBlock
 
 
-class GenericStorageBlock(SimpleBlock):
+class GenericStorageBlock(ScalarBlock):
     r"""Storage without an :class:`.Investment` object.
 
     **The following sets are created:** (-> see basic sets at
@@ -401,6 +401,12 @@ class GenericStorageBlock(SimpleBlock):
             initialize=[n for n in group if n.balanced is True]
         )
 
+        self.STORAGES_INITITAL_LEVEL = Set(
+            initialize=[
+                n for n in group if n.initial_storage_level is not None
+            ]
+        )
+
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
                 n for n in group if n.invest_relation_input_output is not None
@@ -421,70 +427,29 @@ class GenericStorageBlock(SimpleBlock):
             return bounds
 
         self.storage_content = Var(
-            self.STORAGES, m.TIMESTEPS, bounds=_storage_content_bound_rule
-        )
-
-        def _storage_init_content_bound_rule(block, n):
-            return 0, n.nominal_storage_capacity
-
-        self.init_content = Var(
-            self.STORAGES,
-            within=NonNegativeReals,
-            bounds=_storage_init_content_bound_rule,
+            self.STORAGES, m.TIMEPOINTS, bounds=_storage_content_bound_rule
         )
 
         # set the initial storage content
+        # ToDo: More elegant code possible?
         for n in group:
             if n.initial_storage_level is not None:
-                self.init_content[n] = (
+                self.storage_content[n, 0] = (
                     n.initial_storage_level * n.nominal_storage_capacity
                 )
-                self.init_content[n].fix()
+                self.storage_content[n, 0].fix()
 
         #  ************* Constraints ***************************
 
-        reduced_timesteps = [x for x in m.TIMESTEPS if x > 0]
-
-        # storage balance constraint (first time step)
-        def _storage_balance_first_rule(block, n):
-            """
-            Rule definition for the storage balance of every storage n for
-            the first timestep.
-            """
-            expr = 0
-            expr += block.storage_content[n, 0]
-            expr += (
-                -block.init_content[n]
-                * (1 - n.loss_rate[0]) ** m.timeincrement[0]
-            )
-            expr += (
-                n.fixed_losses_relative[0]
-                * n.nominal_storage_capacity
-                * m.timeincrement[0]
-            )
-            expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
-            expr += (
-                -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-            ) * m.timeincrement[0]
-            expr += (
-                m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-            ) * m.timeincrement[0]
-            return expr == 0
-
-        self.balance_first = Constraint(
-            self.STORAGES, rule=_storage_balance_first_rule
-        )
-
-        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, t):
             """
             Rule definition for the storage balance of every storage n and
-            every timestep but the first (t > 0).
+            every timestep.
             """
             expr = 0
-            expr += block.storage_content[n, t]
+            expr += block.storage_content[n, t + 1]
             expr += (
-                -block.storage_content[n, t - 1]
+                -block.storage_content[n, t]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -502,7 +467,7 @@ class GenericStorageBlock(SimpleBlock):
             return expr == 0
 
         self.balance = Constraint(
-            self.STORAGES, reduced_timesteps, rule=_storage_balance_rule
+            self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
         )
 
         def _balanced_storage_rule(block, n):
@@ -511,8 +476,8 @@ class GenericStorageBlock(SimpleBlock):
             if balanced.
             """
             return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
-                == block.init_content[n]
+                block.storage_content[n, m.TIMEPOINTS.at(-1)]
+                == block.storage_content[n, m.TIMEPOINTS.at(1)]
             )
 
         self.balanced_cstr = Constraint(
@@ -549,7 +514,7 @@ class GenericStorageBlock(SimpleBlock):
         return 0
 
 
-class GenericInvestmentStorageBlock(SimpleBlock):
+class GenericInvestmentStorageBlock(ScalarBlock):
     r"""
     Block for all storages with :attr:`Investment` being not None.
     See :class:`oemof.solph.options.Investment` for all parameters of the

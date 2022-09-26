@@ -22,7 +22,7 @@ from pyomo.core import Constraint
 from pyomo.core import Expression
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._options import NonConvex
 
@@ -118,7 +118,7 @@ class NonConvexFlow(Flow):
         super().__init__(nonconvex=nonconvex, **kwargs)
 
 
-class NonConvexFlowBlock(SimpleBlock):
+class NonConvexFlowBlock(ScalarBlock):
     r"""
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
@@ -264,19 +264,19 @@ class NonConvexFlowBlock(SimpleBlock):
     Positive gradient constraint
       `om.NonConvexFlowBlock.positive_gradient_constr[i, o]`:
         .. math:: flow(i, o, t) \cdot status(i, o, t)
-        - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
-          positive\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
+            positive\_gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
     Negative gradient constraint
       `om.NonConvexFlowBlock.negative_gradient_constr[i, o]`:
         .. math::
-          flow(i, o, t-1) \cdot status(i, o, t-1)
-          - flow(i, o, t) \cdot status(i, o, t) \geq \
-          negative\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            flow(i, o, t-1) \cdot status(i, o, t-1)
+            - flow(i, o, t) \cdot status(i, o, t) \geq \
+            negative\_gradient(i, o, t), \\
+            \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+            \forall t \in \textrm{TIMESTEPS}.
 
 
     **The following parts of the objective function are created:**

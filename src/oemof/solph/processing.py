@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 import sys
 from itertools import groupby
 
+import numpy as np
 import pandas as pd
 from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
@@ -86,7 +87,13 @@ def create_dataframe(om):
         # Drop the auxiliary variables introduced by pyomo's Piecewise
         parent_component = bv.parent_block().parent_component()
         if not isinstance(parent_component, IndexedPiecewise):
-            for i in getattr(bv, "_index"):
+            try:
+                idx_set = getattr(bv, "_index_set")
+            except AttributeError:
+                # To make it compatible with Pyomo < 6.4.1
+                idx_set = getattr(bv, "_index")
+
+            for i in idx_set:
                 key = (str(bv).split(".")[0], str(bv).split(".")[-1], i)
                 value = bv[i].value
                 var_dict[key] = value
@@ -112,7 +119,39 @@ def create_dataframe(om):
     return df
 
 
-def results(om):
+def divide_scalars_sequences(df_dict, k):
+    try:
+        condition = df_dict[k][:-1].isnull().any()
+        scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
+        sequences = df_dict[k].loc[:, ~condition]
+        return {"scalars": scalars, "sequences": sequences}
+    except IndexError:
+        error_message = (
+            "Cannot access index on result data. "
+            + "Did the optimization terminate"
+            + " without errors?"
+        )
+        raise IndexError(error_message)
+
+
+def set_result_index(df_dict, k, result_index):
+    try:
+        df_dict[k].index = result_index
+    except ValueError:
+        try:
+            df_dict[k] = df_dict[k][:-1]
+            df_dict[k].index = result_index
+        except ValueError as e:
+            msg = (
+                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values "
+                "in your input data."
+            )
+            raise type(e)(
+                str(e) + msg.format(k[0].label, k[1].label)
+            ).with_traceback(sys.exc_info()[2])
+
+
+def results(model, remove_last_time_point=False):
     """
     Create a result dictionary from the result DataFrame.
 
@@ -121,8 +160,22 @@ def results(om):
     and flows.
     The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
     and flows e.g. `results[n, n]['sequences']`.
+
+    Parameters
+    ----------
+    model : oemof.solph.BaseModel
+        A solved oemof.solph model.
+    remove_last_time_point : bool
+        The last time point of all TIMEPOINT variables is removed to get the
+        same length as the TIMESTEP (interval) variables without getting
+        nan-values. By default the last time point is removed if it has not
+        been defined by the user in the EnergySystem but inferred. If all
+        time points has been defined explicitly by the user the last time point
+        will not be removed by default. In that case all interval variables
+        will get one row with nan-values to have the same index for all
+        variables.
     """
-    df = create_dataframe(om)
+    df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
@@ -132,45 +185,48 @@ def results(om):
         for k, v in df.groupby("oemof_tuple")
     }
 
+    # Define index
+    if model.es.timeindex is None:
+        result_index = list(range(len(model.es.timeincrement) + 1))
+    else:
+        result_index = model.es.timeindex
+
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
-    for k in df_dict:
-        df_dict[k].set_index("timestep", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        try:
-            df_dict[k].index = om.es.timeindex
-        except ValueError as e:
-            msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values in"
-                " your input data."
+    if remove_last_time_point is True:
+        # The values of intervals belong to the time at the beginning of the
+        # interval.
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
             )
-            raise type(e)(
-                str(e) + msg.format(k[0].label, k[1].label)
-            ).with_traceback(sys.exc_info()[2])
-        try:
-            condition = df_dict[k].isnull().any()
-            scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-            sequences = df_dict[k].loc[:, ~condition]
-            result[k] = {"scalars": scalars, "sequences": sequences}
-        except IndexError:
-            error_message = (
-                "Cannot access index on result data. "
-                + "Did the optimization terminate"
-                + " without errors?"
+            set_result_index(df_dict, k, result_index[:-1])
+            result[k] = divide_scalars_sequences(df_dict, k)
+    else:
+        for k in df_dict:
+            df_dict[k].set_index("timestep", inplace=True)
+            df_dict[k] = df_dict[k].pivot(
+                columns="variable_name", values="value"
             )
-            raise IndexError(error_message)
+            # Add empty row with nan at the end of the table by adding 1 to the
+            # last value of the numeric index.
+            df_dict[k].loc[df_dict[k].index[-1] + 1, :] = np.nan
+            set_result_index(df_dict, k, result_index)
+            result[k] = divide_scalars_sequences(df_dict, k)
 
     # add dual variables for bus constraints
-    if om.dual is not None:
+    if model.dual is not None:
         grouped = groupby(
-            sorted(om.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
         )
         for bus, timesteps in grouped:
             duals = [
-                om.dual[om.BusBlock.balance[bus, t]] for _, t in timesteps
+                model.dual[model.BusBlock.balance[bus, t]]
+                for _, t in timesteps
             ]
-            df = pd.DataFrame({"duals": duals}, index=om.es.timeindex)
+            df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,

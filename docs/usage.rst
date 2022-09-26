@@ -51,13 +51,29 @@ Set up an energy system
 
 In most cases an EnergySystem object is defined when we start to build up an energy system model. The EnergySystem object will be the main container for the model.
 
-To define an EnergySystem we need a Datetime index to define the time range and increment of our model. An easy way to this is to use the pandas time_range function.
-The following code example defines the year 2011 in hourly steps. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+The model time is defined by the number of intervals and the length of intervals. The length of each interval does not have to be the same. This can be defined in two ways:
+
+1. Define the length of each interval in an array/Series where the number of the elements is the number of intervals.
+2. Define a `pandas.DatetimeIndex` with all time steps that encloses an interval. Be aware that you have to define n+1 time points to get n intervals. For non-leap year with hourly values that means 8761 time points to get 8760 interval e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
+
+The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
+
+One can use the function
+:py:func:`~oemof.solph._energy_system/create_year_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc.. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
+
+It is also possible to define the datetime index using pandas. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
+
+Both code blocks will create an hourly datetime index for 2011:
+
+.. code-block:: python
+
+    from oemof.solph import create_year_index
+    my_index = create_year_index(2011)
 
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8760, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
 
 This index can be used to define the EnergySystem:
 
@@ -375,7 +391,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../src/oemof/solph/components/extraction_turbine_chp.py
+.. include:: ../src/oemof/solph/components/_extraction_turbine_chp.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -514,13 +530,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../src/oemof/solph/components/generic_chp.py
+.. include:: ../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -694,7 +710,7 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/offset_transformer.py
+.. include:: ../src/oemof/solph/components/_offset_transformer.py
   :start-after: _OffsetTransformer-equations:
   :end-before: """
 
@@ -717,43 +733,43 @@ The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by ser
 
 .. _oemof_solph_custom_electrical_line_label:
 
-ElectricalLine (custom)
-^^^^^^^^^^^^^^^^^^^^^^^
+ElectricalLine (experimental)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Electrical line.
 
-.. note:: See the :py:class:`~oemof.solph.custom.electrical_line.ElectricalLine` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.flows.experimental._electrical_line.ElectricalLine` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_link_label:
 
-GenericCAES (custom)
+GenericCAES (experimental)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../src/oemof/solph/custom/generic_caes.py
+.. include:: ../src/oemof/solph/components/experimental/_generic_caes.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
-.. note:: See the :py:class:`~oemof.solph.custom.generic_caes.GenericCAES` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.experimental._generic_caes.GenericCAES` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_generic_chp_label:
 
-Link (custom)
-^^^^^^^^^^^^^
+Link (experimental)
+^^^^^^^^^^^^^^^^^^^
 
 Link.
 
-.. note:: See the :py:class:`~oemof.solph.custom.link.Link` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.experimental._link.Link` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_sinkdsm_label:
 
 
-SinkDSM (custom)
-^^^^^^^^^^^^^^^^
+SinkDSM (experimental)
+^^^^^^^^^^^^^^^^^^^^^^
 
 :class:`~oemof.solph.custom.sink_dsm.SinkDSM` can used to represent flexibility in a demand time series.
 It can represent both, load shifting or load shedding.
@@ -1026,7 +1042,7 @@ Some predefined additional constraints can be found in the
 
 
 The Grouping module (Sets)
------------------------------------------------------
+--------------------------
 To construct constraints,
 variables and objective expressions inside all Block classes
 and the :py:mod:`~oemof.solph.models` modules, so called groups are used. Consequently,

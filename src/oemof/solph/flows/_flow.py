@@ -14,7 +14,7 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-License-Identifier: MIT
 
 """
-
+import math
 from warnings import warn
 
 from oemof.network import network as on
@@ -24,7 +24,7 @@ from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._plumbing import sequence
 
@@ -49,29 +49,23 @@ class Flow(on.Edge):
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
-    fix : numeric (iterable or scalar), :math:`f_{actual}`
+    fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
-        :attr:`nominal_value` to get the absolute value. If :attr:`fixed` is
-        set to :obj:`True` the flow variable will be fixed to `fix
-        * nominal_value`, i.e. this value is set exogenous.
-    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
-        A dictionary containing the following two keys:
+        :attr:`nominal_value` to get the absolute value.
+    positive_gradient : :obj:`dict`, default: `{'ub': None}`
+        A dictionary containing the following key:
 
          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
            bound* on the positive difference (`flow[t-1] < flow[t]`) of
            two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
-           unit.
 
-    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
+    negative_gradient : :obj:`dict`, default: `{'ub': None}`
 
-        A dictionary containing the following two keys:
+        A dictionary containing the following key:
 
           * `'ub'`: numeric (iterable, scalar or None), the normed *upper
             bound* on the negative difference (`flow[t-1] > flow[t]`) of
             two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
-            unit.
 
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Upper bound on the summed flow expressed as the equivalent time that
@@ -91,37 +85,19 @@ class Flow(on.Edge):
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
         :attr:`fix`.
-    investment : :class:`Investment <oemof.solph.options.Investment>`
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_value. The nominal_value
-        should not be set (or set to None) if an investment object is used.
-    nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
-        If a nonconvex flow object is added here, the flow constraints will
-        be altered significantly as the mathematical model for the flow
-        will be different, i.e. constraint etc. from
-        :class:`NonConvexFlowBlock <oemof.solph.blocks.NonConvexFlowBlock>`
-        will be used instead of
-        :class:`FlowBlock <oemof.solph.blocks.FlowBlock>`.
-        Note: at the moment this does not work if the investment attribute is
-        set .
+    integer : boolean
+        Set True to bound the flow values to integers.
 
     Notes
     -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph..flows.flow.FlowBlock`
-     * :py:class:`~oemof.solph..flows.investment_flow.InvestmentFlowBlock`
-        (additionally if Investment object is present)
-     * :py:class:`~oemof.solph..flows.non_convex_flow.NonConvexFlowBlock`
-        (If nonconvex  object is present, CAUTION: replaces
-        :py:class:`~oemof.solph.flows.flow.FlowBlock`
-        class and a MILP will be build)
+    See :py:class:`~oemof.solph.flows._flow.FlowBlock` for the variables,
+    constraints and objective parts, that are created for a FLow object.
 
     Examples
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_value=2, fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
@@ -172,6 +148,17 @@ class Flow(on.Edge):
             "positive_gradient": {"ub": None},
             "negative_gradient": {"ub": None},
         }
+        need_nominal_value = [
+            "fix",
+            "full_load_time_max",
+            "full_load_time_min",
+            "max",
+            "min",
+            # --- BEGIN: To be removed for versions >= v0.6 ---
+            "summed_max",
+            "summed_min",
+            # --- END ---
+        ]
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
@@ -199,7 +186,7 @@ class Flow(on.Edge):
             kwargs.get("min") is not None or kwargs.get("max") is not None
         ):
             raise AttributeError(
-                "It is not allowed to define min/max if fix is defined."
+                "It is not allowed to define `min`/`max` if `fix` is defined."
             )
 
         # Set default value for min and max
@@ -250,6 +237,24 @@ class Flow(on.Edge):
                 + "nonconvex flows!"
             )
 
+        infinite_error_msg = (
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
+        )
+        if not self.investment:
+            if self.nominal_value is None:
+                for attr in need_nominal_value:
+                    if kwargs.get(attr) is not None:
+                        raise AttributeError(
+                            "If {} is set in a flow (except InvestmentFlow), "
+                            "nominal_value must be set as well.\n"
+                            "Otherwise, it won't have any effect.".format(attr)
+                        )
+            elif not math.isfinite(self.nominal_value):
+                raise ValueError(infinite_error_msg.format("nominal_value"))
+        if not math.isfinite(self.max[0]):
+            raise ValueError(infinite_error_msg.format("max"))
+
         # Checking for impossible gradient combinations
         if self.nonconvex:
             if self.nonconvex.positive_gradient["ub"][0] is not None and (
@@ -274,76 +279,107 @@ class Flow(on.Edge):
                 )
 
 
-class FlowBlock(SimpleBlock):
-    r""" FlowBlock block with definitions for standard flows.
+class FlowBlock(ScalarBlock):
+    r"""Flow block with definitions for standard flows.
 
-    **The following variables are created**:
+    See :class:`~oemof.solph.flows._flow.Flow` class for all parameters of the *Flow*.
 
-    negative_gradient :
-        Difference of a flow in consecutive timesteps if flow is reduced
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+    **Variables**
 
-    positive_gradient :
-        Difference of a flow in consecutive timesteps if flow is increased
-        indexed by NEGATIVE_GRADIENT_FLOWS, TIMESTEPS.
+    All *Flow* objects are indexed by a starting and ending node
+    :math:`(i, o)`, which is omitted in the following for the sake of
+    convenience. The creation of some variables depend on the values of
+    *Flow* attributes. The following variables are created:
 
-    **The following sets are created:** (-> see basic sets at :class:`.Model` )
+    * :math:`P(t)`
+        Actual flow value (created in :class:`~oemof.solph._models.Model`).
+        The variable is bound to: :math:`f_{min}(t) \cdot P_{nom} \ge P(t) \le f_{max}(t) \cdot P_{nom}`.
 
-    FULL_LOAD_TIME_MAX_FLOWS
-        A set of flows with the attribute :attr:`full_load_time_max` being not
-        None.
-    FULL_LOAD_TIME_MIN_FLOWS
-        A set of flows with the attribute :attr:`full_load_time_min` being not
-        None.
-    NEGATIVE_GRADIENT_FLOWS
-        A set of flows with the attribute :attr:`negative_gradient` being not
-        None.
-    POSITIVE_GRADIENT_FLOWS
-        A set of flows with the attribute :attr:`positive_gradient` being not
-        None
-    INTEGER_FLOWS
-        A set of flows where the attribute :attr:`integer` is True (forces flow
-        to only take integer values)
+        If `Flow.fix` is not None the variable is bound to
+        :math:`P(t) = f_{fix}`.
 
-    **The following constraints are build:**
+    * :math:`ve_n` (`Flow.negative_gradient` is not `None`)
+        Difference of a flow in consecutive timesteps if flow is reduced. The
+        variable is bound to: :math:`0 \ge ve_n \ge ve_n^{max}`.
 
-    FlowBlock max sum :attr:`om.FlowBlock.full_load_time_max[i, o]`
-      .. math::
-        \sum_t flow(i, o, t) \cdot \tau
-            \leq full\_load\_time\_max(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MAX\_FLOWS}.
+    * :math:`ve_p` (`Flow.positive_gradient` is not `None`)
+        Difference of a flow in consecutive timesteps if flow is increased. The
+        variable is bound to: :math:`0 \ge ve_p \ge ve_p^{max}`.
 
-    FlowBlock min sum :attr:`om.FlowBlock.full_load_time_min[i, o]`
-      .. math::
-        \sum_t flow(i, o, t) \cdot \tau
-            \geq full\_load\_time\_min(i, o) \cdot nominal\_value(i, o), \\
-        \forall (i, o) \in \textrm{FULL\_LOAD\_TIME\_MIN\_FLOWS}.
+    The following variable is build for Flows with the attribute
+    `integer_flows` being not None.
 
-    Negative gradient constraint
-      :attr:`om.FlowBlock.negative_gradient_constr[i, o]`:
+    * :math:`i`(`Flow.integer` is `True`)
+        All flow values are integers. Variable is bound to non-negative
+        integers.
+
+    **Constraints**
+
+    The following constraints are created, if the appropriate attribute of the
+    *Flow* (see :class:`oemof.solph.network.Flow`) object is set:
+
+    * `Flow.full_load_time_max` is not `None` (full_load_time_max_constr):
         .. math::
-          flow(i, o, t-1) - flow(i, o, t) \geq \
-          negative\_gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+            \sum_t P(t) \cdot \tau \leq F_{max} \cdot P_{nom}
 
-    Positive gradient constraint
-      :attr:`om.FlowBlock.positive_gradient_constr[i, o]`:
-        .. math:: flow(i, o, t) - flow(i, o, t-1) \geq \
-          positive\__gradient(i, o, t), \\
-          \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
-          \forall t \in \textrm{TIMESTEPS}.
+    * `Flow.full_load_time_min` is not `None` (full_load_time_min_constr):
+        .. math::
+            \sum_t P(t) \cdot \tau \geq F_{min} \cdot P_{nom}
 
-    **The following parts of the objective function are created:**
 
-    If :attr:`variable_costs` are set by the user:
-      .. math::
-          \sum_{(i,o)} \sum_t flow(i, o, t) \cdot variable\_costs(i, o, t)
+    * `Flow.negative_gradient` is not `None` (negative_gradient_constr):
+        .. math::
+          P(t-1) - P(t) \geq ve_n(t)
 
-    The expression can be accessed by :attr:`om.FlowBlock.variable_costs` and
-    their value after optimization by :meth:`om.FlowBlock.variable_costs()` .
+    * `Flow.positive_gradient` is not `None` (positive_gradient_constr):
+        .. math::
+          P(t) - P(t-1) \geq ve_p(t)
 
-    """
+    * `Flow.integer` is `True`
+        .. math::
+          P(t) = i(t)
+
+    **Objective function**
+
+    Depending on the attributes of the `Flow` object the following parts of
+    the objective function are created:
+
+    * `Flow.variable_costs` is not `None`:
+        .. math::
+          \sum_{(i,o)} \sum_t P(t) \cdot c_{var}(i, o, t)
+
+    .. csv-table:: List of Variables
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`P(t)`", ":command:`flow[i, o][t]`", "Actual flow value"
+        ":math:`ve_n`", ":command:`negative_gradient[n, o, t]`", "Negative gradient of the flow"
+        ":math:`ve_p`", ":command:`positive_gradient[n, o, t]`", "Positive gradient of the flow"
+        ":math:`i`", ":command:`integer_flow[i, o, t]`","Integer flow"
+
+
+    .. csv-table:: List of Parameters
+        :header: "symbol", "attribute", "explanation"
+        :widths: 1, 1, 1
+
+        ":math:`P_{nom}`", ":command:`flows[i, o].nominal_value`","Nominal value of the flow"
+        ":math:`F_{max}`",":command:`flow[i, o].full_load_time_max`", "Maximal full
+        load time"
+        ":math:`F_{min}`",":command:`flow[i, o].full_load_time_min`", "Minimal full
+        load time"
+        ":math:`c_{var}`", ":command:`variable\_costs[t]`", "Variable cost of the flow"
+        ":math:`f_{max}`", ":command:`flows[i, o].max[t]`", "Normed maximum value of the flow, the absolute maximum is :math:`f_{max} \cdot P_{nom}`"
+        ":math:`f_{min}`", ":command:`flows[i, o].min[t]`", "Normed minimum value of the flow, the absolute minimum is :math:`f_{min} \cdot P_{nom}`"
+        ":math:`f_{fix}`", ":command:`flows[i, o].min[t]`", "Normed fixed value of the flow, the absolute fixed value is :math:`f_{fix} \cdot P_{nom}`"
+        ":math:`ve_n^{max}`",":command:`flows[i, o].negative_gradient`","Normed maximal negative gradient of the flow, the absolute maximum gradient is :math:`ve_n^{max} \cdot P_{nom}`"
+        ":math:`ve_p^{max}`",":command:`flows[i, o].positive_gradient`","Normed maximal positive gradient of the flow, the absolute maximum gradient is :math:`ve_n^{max} \cdot P_{nom}`"
+
+    Note
+    ----
+    See the :class:`~oemof.solph.flows._flow.Flow` class for the definition of
+    all parameters from the "List of Parameters above.
+
+    """  # noqa: E501
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
