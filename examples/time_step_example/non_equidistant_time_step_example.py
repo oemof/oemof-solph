@@ -9,7 +9,7 @@ In addition to the comments in the simple example, note that:
 
 *   Time steps in the beginning are 15 minutes.
 *   Time steps in the end are hourly.
-*   n the middle, there is a very short demand peak of one minute.
+*   In the middle, there is a very short demand peak of one minute.
     This, however, does barely influence he storage contents.
 *   Storage losses are defined per hour.
     *   storage_fixed looses 1 energy unit per hour
