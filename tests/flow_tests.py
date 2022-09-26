@@ -14,6 +14,7 @@ import warnings
 import pytest
 
 from oemof.solph.flows import Flow
+from oemof.solph import NonConvex
 
 
 def test_error_in_gradient_attribute():
@@ -44,3 +45,37 @@ def test_summed_min_future_warning():
 
 def test_source_with_full_load_time_max():
     Flow(nominal_value=1, full_load_time_max=2)
+
+
+def test_nonconvex_positive_gradient_error():
+    """Testing nonconvex positive gradient error."""
+    msg = (
+        "You specified a positive gradient in your nonconvex "
+        "option. This cannot be combined with a positive or a "
+        "negative gradient for a standard flow!"
+    )
+
+    with pytest.raises(ValueError, match=msg):
+        Flow(
+            nonconvex=NonConvex(
+                positive_gradient={"ub": 0.03},
+            ),
+            positive_gradient={"ub": 0.03},
+        )
+
+
+def test_non_convex_negative_gradient_error():
+    """Testing non-convex positive gradient error."""
+    msg = (
+        "You specified a negative gradient in your nonconvex "
+        "option. This cannot be combined with a positive or a "
+        "negative gradient for a standard flow!"
+    )
+
+    with pytest.raises(ValueError, match=msg):
+        Flow(
+            nonconvex=NonConvex(
+                negative_gradient={"ub": 0.03, "costs": 7},
+            ),
+            negative_gradient={"ub": 0.03},
+        )
