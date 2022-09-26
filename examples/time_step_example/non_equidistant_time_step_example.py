@@ -10,7 +10,7 @@ In addition to the comments in the simple example, note that:
 *   Time steps in the beginning are 15 minutes.
 *   Time steps in the end are hourly.
 *   In the middle, there is a very short demand peak of one minute.
-    This, however, does barely influence he storage contents.
+    This, however, does barely influence the storage contents.
 *   Storage losses are defined per hour.
     *   storage_fixed looses 1 energy unit per hour
     *   storage_relative looses 50 % of its contents per hour
