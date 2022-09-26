@@ -82,10 +82,7 @@ setup(
         "pandas",
         "pyomo >= 6.0.0, < 7.0",
         "networkx",
-        (
-            "oemof.tools@https://github.com/oemof/oemof.tools/archive/feature/"
-            "set-minimal-lggin-level.zip"
-        ),
+        "oemof.tools >= 0.4.2",
         "oemof.network",
     ],
     extras_require={
