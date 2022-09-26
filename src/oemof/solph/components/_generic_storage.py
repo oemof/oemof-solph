@@ -64,13 +64,13 @@ class GenericStorage(network.Node):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per time unit.
+        The relative loss of the storage content per hour.
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
-        Losses independent of state of charge between two consecutive
-        timesteps relative to nominal storage capacity.
+        Losses per hour that are independent of the storage content but
+        proportional to nominal storage capacity.
     fixed_losses_absolute : numeric (iterable or scalar), :math:`\delta(t)`
-        Losses independent of state of charge and independent of
-        nominal storage capacity between two consecutive timesteps.
+        Losses per hour that are independent of storage content and independent
+        of nominal storage capacity.
     inflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_i(t)`
         The relative conversion factor, i.e. efficiency associated with the
         inflow of the storage.
@@ -339,15 +339,13 @@ class GenericStorageBlock(ScalarBlock):
     :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
     :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
                                 as share of
-                                :math:`E(t)`
-                                per time unit
+                                :math:`E(t)` per hour
     :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
                                 relative to
                                 :math:`E_{nom}` per
-                                time unit
+                                hour
     :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
-                                of energy per
-                                time unit
+                                of energy per hour
     :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
     :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
