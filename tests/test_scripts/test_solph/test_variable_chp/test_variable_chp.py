@@ -17,7 +17,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Entity
 
 from oemof import solph
 from oemof.solph import views
@@ -29,7 +28,6 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Entity.registry = energysystem
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -43,11 +41,14 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     # create natural gas bus
     bgas = solph.buses.Bus(label=("natural", "gas"))
+    energysystem.add(bgas)
 
     # create commodity object for gas resource
-    solph.components.Source(
-        label=("commodity", "gas"),
-        outputs={bgas: solph.flows.Flow(variable_costs=50)},
+    energysystem.add(
+        solph.components.Source(
+            label=("commodity", "gas"),
+            outputs={bgas: solph.flows.Flow(variable_costs=50)},
+        )
     )
 
     # create two electricity buses and two heat buses
@@ -55,62 +56,89 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     bel2 = solph.buses.Bus(label=("electricity", 2))
     bth = solph.buses.Bus(label=("heat", 1))
     bth2 = solph.buses.Bus(label=("heat", 2))
+    energysystem.add(bel, bel2, bth, bth2)
 
     # create excess components for the elec/heat bus to allow overproduction
-    solph.components.Sink(
-        label=("excess", "bth_2"), inputs={bth2: solph.flows.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label=("excess", "bth_2"), inputs={bth2: solph.flows.Flow()}
+        )
     )
-    solph.components.Sink(
-        label=("excess", "bth_1"), inputs={bth: solph.flows.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label=("excess", "bth_1"), inputs={bth: solph.flows.Flow()}
+        )
     )
-    solph.components.Sink(
-        label=("excess", "bel_2"), inputs={bel2: solph.flows.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label=("excess", "bel_2"), inputs={bel2: solph.flows.Flow()}
+        )
     )
-    solph.components.Sink(
-        label=("excess", "bel_1"), inputs={bel: solph.flows.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label=("excess", "bel_1"), inputs={bel: solph.flows.Flow()}
+        )
     )
 
     # create simple sink object for electrical demand for each electrical bus
-    solph.components.Sink(
-        label=("demand", "elec1"),
-        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+    energysystem.add(
+        solph.components.Sink(
+            label=("demand", "elec1"),
+            inputs={
+                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
-    solph.components.Sink(
-        label=("demand", "elec2"),
-        inputs={
-            bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label=("demand", "elec2"),
+            inputs={
+                bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
 
     # create simple sink object for heat demand for each thermal bus
-    solph.components.Sink(
-        label=("demand", "therm1"),
-        inputs={
-            bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label=("demand", "therm1"),
+            inputs={
+                bth: solph.flows.Flow(
+                    fix=data["demand_th"], nominal_value=741000
+                )
+            },
+        )
     )
-    solph.components.Sink(
-        label=("demand", "therm2"),
-        inputs={
-            bth2: solph.flows.Flow(fix=data["demand_th"], nominal_value=741000)
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label=("demand", "therm2"),
+            inputs={
+                bth2: solph.flows.Flow(
+                    fix=data["demand_th"], nominal_value=741000
+                )
+            },
+        )
     )
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    solph.components.Transformer(
-        label=("fixed_chp", "gas"),
-        inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
-        outputs={bel2: solph.flows.Flow(), bth2: solph.flows.Flow()},
-        conversion_factors={bel2: 0.3, bth2: 0.5},
+    energysystem.add(
+        solph.components.Transformer(
+            label=("fixed_chp", "gas"),
+            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            outputs={bel2: solph.flows.Flow(), bth2: solph.flows.Flow()},
+            conversion_factors={bel2: 0.3, bth2: 0.5},
+        )
     )
 
     # create a fixed transformer to distribute to the heat and elec buses
-    solph.components.ExtractionTurbineCHP(
-        label=("variable_chp", "gas"),
-        inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
-        outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
-        conversion_factors={bel: 0.3, bth: 0.5},
-        conversion_factor_full_condensation={bel: 0.5},
+    energysystem.add(
+        solph.components.ExtractionTurbineCHP(
+            label=("variable_chp", "gas"),
+            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
+            conversion_factors={bel: 0.3, bth: 0.5},
+            conversion_factor_full_condensation={bel: 0.5},
+        )
     )
 
     ##########################################################################

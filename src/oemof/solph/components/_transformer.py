@@ -146,8 +146,10 @@ class TransformerBlock(ScalarBlock):
     def _create(self, group=None):
         """Creates the linear constraint for the class:`TransformerBlock`
         block.
+
         Parameters
         ----------
+
         group : list
             List of oemof.solph.components.Transformers objects for which
             the linear relation of inputs and outputs is created
