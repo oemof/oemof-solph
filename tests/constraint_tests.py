@@ -15,10 +15,8 @@ from difflib import unified_diff
 from os import path as ospath
 
 import pandas as pd
-import pytest
 from nose.tools import assert_raises
 from nose.tools import eq_
-from oemof.network.network import Node
 
 from oemof import solph
 
@@ -1484,7 +1482,9 @@ class TestsConstraint:
         self.compare_lp_files("flow_invest_with_offset_no_minimum.lp")
 
     def test_nonequidistant_storage(self):
-        """Constraint test of an energy system with non-equidistant time index"""
+        """Constraint test of an energy system
+        with non-equidistant time index
+        """
         idxh = pd.date_range("1/1/2017", periods=3, freq="H")
         idx2h = pd.date_range("1/1/2017 03:00:00", periods=2, freq="2H")
         idx30m = pd.date_range("1/1/2017 07:00:00", periods=4, freq="30min")

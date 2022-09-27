@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
-from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment

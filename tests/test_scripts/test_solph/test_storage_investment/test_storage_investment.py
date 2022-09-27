@@ -39,7 +39,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof import solph

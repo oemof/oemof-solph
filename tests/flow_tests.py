@@ -13,8 +13,8 @@ import warnings
 
 import pytest
 
-from oemof.solph.flows import Flow
 from oemof.solph import NonConvex
+from oemof.solph.flows import Flow
 
 
 def test_error_in_gradient_attribute():

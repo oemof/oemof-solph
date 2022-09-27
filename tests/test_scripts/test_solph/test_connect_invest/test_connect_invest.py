@@ -15,7 +15,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network import network
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment

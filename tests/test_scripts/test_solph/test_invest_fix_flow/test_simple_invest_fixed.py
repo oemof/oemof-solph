@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof.solph import EnergySystem
