@@ -21,7 +21,6 @@ from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 class TestsGrouping:
     def setup(self):
         self.es = EnSys(groupings=solph.GROUPINGS)
-        Node.registry = self.es
 
     def test_investment_flow_grouping(self):
         """Flows of investment sink should be grouped.
@@ -37,24 +36,31 @@ class TestsGrouping:
         """
 
         b = solph.buses.Bus(label="Bus")
+        self.es.add(b)
 
-        solph.components.Source(
-            label="Source",
-            outputs={
-                b: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)
-            },
+        self.es.add(
+            solph.components.Source(
+                label="Source",
+                outputs={
+                    b: solph.flows.Flow(
+                        fix=[12, 16, 14], nominal_value=1000000
+                    )
+                },
+            )
         )
 
-        solph.components.Sink(
-            label="Sink",
-            inputs={
-                b: solph.flows.Flow(
-                    full_load_time_max=2.3,
-                    variable_costs=25,
-                    max=0.8,
-                    investment=Investment(ep_costs=500, maximum=10e5),
-                )
-            },
+        self.es.add(
+            solph.components.Sink(
+                label="Sink",
+                inputs={
+                    b: solph.flows.Flow(
+                        full_load_time_max=2.3,
+                        variable_costs=25,
+                        max=0.8,
+                        investment=Investment(ep_costs=500, maximum=10e5),
+                    )
+                },
+            )
         )
 
         ok_(

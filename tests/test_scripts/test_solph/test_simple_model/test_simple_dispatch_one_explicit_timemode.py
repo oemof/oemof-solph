@@ -29,8 +29,6 @@ def test_dispatch_one_time_step(solver="cbc"):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################
-    Node.registry = None
-
     # resource buses
     bgas = Bus(label="gas", balanced=False)
 
