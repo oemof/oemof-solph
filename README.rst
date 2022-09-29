@@ -112,10 +112,11 @@ This an organisational framework to bundle tools for energy (system) modelling.
 oemof-solph is a model generator for energy system modelling and optimisation.
 
 The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
-oemof meta package. Now you need to install ``oemof.solph`` separately, but
+oemof meta package. Now you need to install ``oemof.solph`` instead of ``oemof``, but
 everything else is still the same.
-Since v0.4.0. it is not possible to install just oemof, use
-``pip install oemof.solph`` instead.
+(Note: Since the oemof package refers to legacy versions before v0.4,
+it is not possible to install both, oemof and oemof.solph, at the same time.
+Just use ``pip install oemof.solph``.)
 
 Everybody is welcome to use and/or develop oemof.solph.
 Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
