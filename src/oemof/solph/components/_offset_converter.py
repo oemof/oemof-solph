@@ -166,8 +166,7 @@ class OffsetConverterBlock(ScalarBlock):
             expr = 0
             expr += -m.flow[list(n.inputs.keys())[0], n, t]
             expr += (
-                m.flow[n, list(n.outputs.keys())[0], t]
-                * n.coefficients[1][t]
+                m.flow[n, list(n.outputs.keys())[0], t] * n.coefficients[1][t]
             )
             # `Y(t)` in the last term of the constraint
             # (":math:`C_0(t) \cdot Y(t)`") is different for different cases.
@@ -194,8 +193,9 @@ class OffsetConverterBlock(ScalarBlock):
             # block) does not exist.
             except (KeyError, AttributeError):
                 expr += (
-                    m.NonConvexFlowBlock.status_nominal[n, list(
-                        n.outputs.keys())[0], t]
+                    m.NonConvexFlowBlock.status_nominal[
+                        n, list(n.outputs.keys())[0], t
+                    ]
                     * n.coefficients[0][t]
                 )
             return expr == 0
