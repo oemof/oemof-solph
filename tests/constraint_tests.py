@@ -1128,25 +1128,26 @@ class TestsConstraint:
         )
         self.compare_lp_files("maximum_shutdowns.lp")
 
-    def test_offsettransformer(self):
-        """Constraint test of a OffsetTransformer."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bth = solph.buses.Bus(label="thermalBus")
+    def test_offsettransformer_nonconvex(self):
+        """Constraint test of an OffsetTransformer only with NonConvex
+        attribute."""
+        b_diesel = solph.buses.Bus(label="bus_diesel")
+        b_el = solph.buses.Bus(label="bus_electricity")
 
         solph.components.OffsetTransformer(
-            label="gasboiler",
-            inputs={
-                bgas: solph.flows.Flow(
-                    nonconvex=solph.NonConvex(),
+            label="diesel_genset",
+            inputs={b_diesel: solph.flows.Flow()},
+            outputs={
+                b_el: solph.flows.Flow(
                     nominal_value=100,
-                    min=0.32,
+                    min=0.2,
+                    nonconvex=solph.NonConvex(),
                 )
             },
-            outputs={bth: solph.flows.Flow()},
-            coefficients=[-17, 0.9],
+            coefficients=[2.5, 0.5],
         )
 
-        self.compare_lp_files("offsettransformer.lp")
+        self.compare_lp_files("offsettransformer_nonconvex.lp")
 
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""
