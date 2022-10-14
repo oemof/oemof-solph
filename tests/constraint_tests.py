@@ -1149,6 +1149,31 @@ class TestsConstraint:
 
         self.compare_lp_files("offsetconverter_nonconvex.lp")
 
+    def test_offsetconverter_nonconvex_investment(self):
+        """Constraint test of an OffsetConverter with both NonConvex and
+        Investment attributes."""
+        b_diesel = solph.buses.Bus(label="bus_diesel")
+        b_el = solph.buses.Bus(label="bus_electricity")
+
+        solph.components.OffsetConverter(
+            label="diesel_genset",
+            inputs={b_diesel: solph.flows.Flow()},
+            outputs={
+                b_el: solph.flows.Flow(
+                    nominal_value=None,
+                    min=0.2,
+                    nonconvex=solph.NonConvex(),
+                    investment=solph.Investment(
+                        ep_costs=100,
+                        maximum=1234,
+                    ),
+                )
+            },
+            coefficients=[2.5, 0.5],
+        )
+
+        self.compare_lp_files("offsetconverter_nonconvex_investment.lp")
+
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""
 
