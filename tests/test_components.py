@@ -221,78 +221,99 @@ def test_generic_storage_too_many_outputs():
         )
 
 
-# ********* OffsetTransformer *********
+# ********* OffsetConverter *********
 
 
-def test_offsettransformer_wrong_flow_type():
-    """No NonConvexFlow for Inflow defined."""
+def test_offsetconverter_without_nonconvex():
+    """No NonConvex attribute is defined for the output flow."""
     with pytest.raises(
-        TypeError, match=r"Input flows must have NonConvex attribute!"
+        TypeError, match="Output flow must have the `NonConvex` attribute!"
     ):
-        bgas = Bus(label="gasBus")
+        b_el = Bus(label="bus_electricity")
         components.OffsetConverter(
-            label="gasboiler", inputs={bgas: Flow()}, coefficients=(-17, 0.9)
+            label="diesel_genset",
+            outputs={b_el: Flow()},
+            coefficients=(2.5, 0.5),
         )
 
 
-def test_offsettransformer_not_enough_coefficients():
+def test_offsetconverter_nonconvex_on_inputs():
+    """NonConvex attribute is defined for the input flow."""
+    with pytest.raises(
+        TypeError,
+        match="`NonConvex` attribute must be defined only for the output "
+        + "flow!",
+    ):
+        b_diesel = Bus(label="bus_diesel")
+        components.OffsetConverter(
+            inputs={b_diesel: Flow(nonconvex=NonConvex())},
+            coefficients=(2.5, 0.5),
+        )
+
+
+def test_offsetconverter_investment_on_inputs():
+    """Investment attribute is defined for the input flow."""
+    with pytest.raises(
+        TypeError,
+        match="`Investment` attribute must be defined only for the output "
+        + "flow!",
+    ):
+        b_diesel = Bus(label="bus_diesel")
+        components.OffsetConverter(
+            inputs={b_diesel: Flow(investment=Investment())},
+            coefficients=(2.5, 0.5),
+        )
+
+
+def test_offsetconverter_not_enough_coefficients():
     with pytest.raises(
         ValueError,
-        match=r"Two coefficients or coefficient series have to be given.",
+        match="Two coefficients or coefficient series have to be given.",
     ):
         components.OffsetConverter(label="of1", coefficients=([1, 4, 7]))
 
 
-def test_offsettransformer_too_many_coefficients():
+def test_offsetconverter_too_many_coefficients():
     with pytest.raises(
         ValueError,
-        match=r"Two coefficients or coefficient series have to be given.",
+        match="Two coefficients or coefficient series have to be given.",
     ):
         components.OffsetConverter(label="of2", coefficients=(1, 4, 7))
 
 
-def test_offsettransformer_empty():
-    """No NonConvexFlow for Inflow defined."""
-    components.OffsetConverter()
-
-
-def test_offsettransformer__too_many_input_flows():
+def test_offsetconverter_too_many_input_flows():
     """Too many Input Flows defined."""
     with pytest.raises(
-        ValueError, match=r"OffsetConverter` must not have more than 1"
+        ValueError,
+        match="Component `OffsetConverter` must not have more than 1 input "
+        + "and 1 output!",
     ):
-        bgas = Bus(label="GasBus")
-        bcoal = Bus(label="CoalBus")
+        b_gas = Bus(label="bus_gas")
+        b_coal = Bus(label="bus_coal")
         components.OffsetConverter(
-            label="ostf_2_in",
             inputs={
-                bgas: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                ),
-                bcoal: Flow(
-                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
-                ),
+                b_gas: Flow(),
+                b_coal: Flow(),
             },
             coefficients=(20, 0.5),
         )
 
 
-def test_offsettransformer_too_many_output_flows():
+def test_offsetconverter_too_many_output_flows():
     """Too many Output Flows defined."""
     with pytest.raises(
-        ValueError, match="OffsetConverter` must not have more than 1"
+        ValueError,
+        match="Component `OffsetConverter` must not have more than 1 input "
+        + "and 1 output!",
     ):
-        bm1 = Bus(label="my_offset_Bus1")
-        bm2 = Bus(label="my_offset_Bus2")
+        b_el = Bus(label="bus_electricity")
+        b_th = Bus(label="bus_thermal")
 
         components.OffsetConverter(
-            label="ostf_2_out",
-            inputs={
-                bm1: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                )
+            outputs={
+                b_el: Flow(nonconvex=NonConvex()),
+                b_th: Flow(nonconvex=NonConvex()),
             },
-            outputs={bm1: Flow(), bm2: Flow()},
             coefficients=(20, 0.5),
         )
 
