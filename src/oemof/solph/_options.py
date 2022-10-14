@@ -169,6 +169,7 @@ class NonConvex:
             "shutdown_costs",
             "activity_costs",
             "inactivity_costs",
+            "profile",
         ]
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {

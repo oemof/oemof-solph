@@ -344,6 +344,13 @@ class NonConvexFlowBlock(ScalarBlock):
                 or g[2].nonconvex.maximum_startups is not None
             ]
         )
+        self.PROFILEFLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].nonconvex.profile is not None
+            ]
+        )
         self.MAXSTARTUPFLOWS = Set(
             initialize=[
                 (g[0], g[1])
@@ -653,6 +660,49 @@ class NonConvexFlowBlock(ScalarBlock):
         )
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule
+        )
+
+        def _schedule_profile_rule(block, i, o, t):
+            """Rule definition for startup constraint of nonconvex flows."""
+
+            # for i, o in self.PROFILEFLOWS:
+                # for t in m.TIMESTEPS:
+
+            profile_reversed = m.flows[i, o].nonconvex.profile[::-1]
+            len_profile = len(m.flows[i, o].nonconvex.profile)
+
+            if (
+                len(m.flows[i, o].nonconvex.profile) - 1
+                <= t
+                < len(m.TIMESTEPS) - len(m.flows[i, o].nonconvex.profile)
+            ):
+                expr = 0
+                expr += - m.flow[i, o, t]
+                print("f_(", t, ") =\n")
+                for d in range(len_profile):
+                    print(profile_reversed[d], " * binary(", t + d - len_profile + 1, ") + ")
+                    expr += self.startup[i, o, t + d - len_profile + 1] *\
+                            profile_reversed[d]
+
+                return expr == 0
+
+            else:
+                expr = 0
+                expr += - m.flow[i, o, t]
+                return expr == 0
+
+            # ####
+            # for t in m.TIMESTEPS:
+            #     if t < len(m.TIMESTEPS) - len(m.flows[i, o].nonconvex.profile):
+            #         for i in range(len(m.flows[i, o].nonconvex.profile)):
+            #
+            #             expr = (
+            #                 m.flow[i, o, t] = self.startup[i, o, t]
+            #             )
+            # return expr
+
+        self.schedule_profile_constr = Constraint(
+            self.PROFILEFLOWS, m.TIMESTEPS, rule=_schedule_profile_rule
         )
 
     def _objective_expression(self):
