@@ -68,14 +68,6 @@ def test_wrong_combination_invest_and_nominal_value():
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
 
 
-def test_wrong_combination_of_options():
-    msg = "Investment flows cannot be combined with nonconvex flows!"
-    with pytest.raises(ValueError, match=msg):
-        solph.flows.Flow(
-            investment=solph.Investment(), nonconvex=solph.NonConvex()
-        )
-
-
 def test_error_of_deprecated_fixed_costs():
     msg = "The `fixed_costs` attribute has been removed with v0.2!"
     with pytest.raises(AttributeError, match=msg):

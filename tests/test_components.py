@@ -15,10 +15,10 @@ import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof.solph import Investment
+from oemof.solph import NonConvex
 from oemof.solph import components
 from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
-from oemof.solph.flows import NonConvexFlow
 
 # ********* GenericStorage *********
 
@@ -227,7 +227,7 @@ def test_generic_storage_too_many_outputs():
 def test_offsettransformer_wrong_flow_type():
     """No NonConvexFlow for Inflow defined."""
     with pytest.raises(
-        TypeError, match=r"Input flows must be of type NonConvexFlow!"
+        TypeError, match=r"Input flows must have NonConvex attribute!"
     ):
         bgas = Bus(label="gasBus")
         components.OffsetTransformer(
@@ -266,8 +266,12 @@ def test_offsettransformer__too_many_input_flows():
         components.OffsetTransformer(
             label="ostf_2_in",
             inputs={
-                bgas: NonConvexFlow(nominal_value=60, min=0.5, max=1.0),
-                bcoal: NonConvexFlow(nominal_value=30, min=0.3, max=1.0),
+                bgas: Flow(
+                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
+                ),
+                bcoal: Flow(
+                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
+                ),
             },
             coefficients=(20, 0.5),
         )
@@ -283,7 +287,11 @@ def test_offsettransformer_too_many_output_flows():
 
         components.OffsetTransformer(
             label="ostf_2_out",
-            inputs={bm1: NonConvexFlow(nominal_value=60, min=0.5, max=1.0)},
+            inputs={
+                bm1: Flow(
+                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
+                )
+            },
             outputs={bm1: Flow(), bm2: Flow()},
             coefficients=(20, 0.5),
         )
