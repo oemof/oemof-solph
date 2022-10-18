@@ -24,7 +24,7 @@ API changes
   most recently created `energy system
   <oemof.energy_system.EnergySystem>`. You can still restore the old automatic
   registration by manually assigning an `energy system
-  <oemof.energy_system.EnergySystem>` to `Entity.registry
+  <oemof.energy_system.EnergySystem>` to `Node.registry
   <oemof.network.Node.registry>`. On the other hand you can still explicitly
   `add <oemof.energy_system.EnergySystem.add>` `nodes
   <oemof.network.Node>` to an `energy system
