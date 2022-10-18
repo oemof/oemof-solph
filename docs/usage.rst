@@ -993,7 +993,7 @@ Dispatch Optimization
 ^^^^^^^^^^^^^^^^^^^^^
 In the dispatch optimization mode, it is assumed that the capacities of the assets are already known,
 but the optimal dispatch strategy must be obtained.
-For this purpose, the class :py:class:`~oemof.solph.flows.NonConvexFlow` should be used, as seen in the following example.
+For this purpose, the class :py:class:`~oemof.solph._options.NonConvex` should be used, as seen in the following example.
 
 Note that this flow class's usage is incompatible with the :py:mod:`~oemof.solph.options.Investment` option. This means that,
 as stated before, the optimal capacity of the transformer cannot be obtained using the :py:class:`~oemof.solph.flows.NonConvexFlow`
@@ -1008,13 +1008,14 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
     solph.components.Transformer(
         label='pp_chp',
         inputs={b_gas: solph.flows.Flow()},
-        outputs={b_el: solph.flows.NonConvexFlow(
+        outputs={b_el: solph.flows.Flow(
+            nonconvex=solph.NonConvex(),
             nominal_value=30,
             min=0.5),
         b_th: solph.flows.Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The :py:class:`~oemof.solph.flows.NonConvexFlow` class for the electrical output of the created LinearTransformer (i.e., CHP)
+The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created LinearTransformer (i.e., CHP)
 will create a 'status' variable for the flow.
 This will be used to model, for example, minimal/maximal power production constraints if the
 attributes `min`/`max` of the flow are set. It will also be used to include start-up constraints and costs
@@ -1025,21 +1026,21 @@ if corresponding attributes of the class are provided. For more information, see
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
 
-Combination of Dispatch and Investment Optimization
+Combination of Dispatch and Investment Optimisation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-The second optimization mode is a new feature in oempf-solph, which is  not useable before version 'v0.5'.
-A new class called :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` has been developed, representing a new type of the Flow(),
-which combines both :py:class:`~oemof.solph.flows.InvestmentFlow` and :py:class:`~oemof.solph.flows.NonConvexFlow` classes.
+It is also possilbe to combine the investment and nonconvex option (not useable before version 'v0.5').
+Therefore, a new constraint block for flows, called :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` has been developed,
+which combines both :py:class:`~oemof.solph._options.Investment` and :py:class:`~oemof.solph._options.NonConvex` classes.
 The new class offers the possibility to perform the investment optimization of an asset considering `min`/`max` values of the flow
 as fractions of the optimal capacity. Moreover, it obtains the optimal 'status' of the flow during the simulation period.
 
-It must be noted since in the :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class, a binary variable
+It must be noted since in the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, a binary variable
 representing the 'status' of the flow at each time is multiplied by the 'invest' parameter,
 which is a continuous variable representing the capacity of the asset being optimized (i.e., :math:`status \times invest`),
 the problem becomes nonlinear. For some solvers such as the 'Gurobi', this kind of nonlinearity is automatically linearized internally.
 Nevertheless, in other free solvers such as the 'CBC', this would cause an error in the optimization.
-For this reason, this nonlinearity is addressed by introducing a new attribute in the
-:py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class called 'invest_non_convex', which represents the multiplication of the
+For this reason, this nonlinearity is addressed by introducing a new variable in the
+:py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class called 'invest_non_convex', which represents the multiplication of the
 'status' attribute by the 'invest' attribute, and the following constraints have been added to linearize this multiplication.
 
 .. math::
@@ -1053,9 +1054,9 @@ For this reason, this nonlinearity is addressed by introducing a new attribute i
 
 In the above equations, :math:`status` is the binary variable denoting the operation status of the flow at each time,
 :math:`invest_{max}` is the maximum capacity of the component being optimized, which is a required fixed input parameter
-that must be given by providing the `maximum` parameter in the :py:mod:`~oemof.solph.options` of the
-:py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class (see example below), and :math:`invest\_non\_convex` is an attribute
-of the :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class representing :math:`status \times invest`.
+that must be given by providing the `maximum` parameter in the :py:mod:`~oemof.solph._options.Investment` of the
+flow (see example below), and :math:`invest\_non\_convex` is a variable
+of the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class representing :math:`status \times invest`.
 
 When :math:`status = 0`, according to equations (1) and (3), :math:`invest\_non\_convex` should be smaller or equal to 0, but since
 :math:`invest\_non\_convex` is defined as a 'non-negative' value, it is forced to be equal to 0.
@@ -1077,6 +1078,7 @@ equal to :math:`invest`.
                 variable_costs=0.04,
                 min=0.2,
                 max=1,
+                nonconvex=solph.NonConvex(),
                 investment=solph.Investment(
                     ep_costs=90,
                     maximum=150, # required for the linearization
@@ -1086,7 +1088,7 @@ equal to :math:`invest`.
         conversion_factors={b_el: 0.3})
 
 The following diagram shows the duration curve of a typical diesel genset in a hybrid mini-grid system consisting of a diesel genset,
-PV cells, battery, inverter, and rectifier. Thanks to the new :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class,
+PV cells, battery, inverter, and rectifier. By using the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class,
 it is possible to obtain the optimal capacity of this component and simultaneously limit its operation between `min` and `max` loads.
 
 .. 	image:: _files/diesel_genset_nonconvex_invest_flow.svg
@@ -1094,25 +1096,24 @@ it is possible to obtain the optimal capacity of this component and simultaneous
    :alt: diesel_genset_nonconvex_invest_flow.svg
    :align: center
 
-Without using the new :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class, if the same system is optimized again, but this
-time using the :py:class:`~oemof.solph.flows.InvestmentFlow` class, the corresponding duration curve would be similar to the following
+Without using the new :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, if the same system is optimized again, but this
+time using the :py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock`, the corresponding duration curve would be similar to the following
 figure. However, assuming that the diesel genset has a minimum operation load of 20% (as seen in the figure), the
-:py:class:`~oemof.solph.flows.InvestmentFlow` fails to prevent the operations at lower loads than 20%, and it would result in
+:py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock` cannot prevent operations at lower loads than 20%, and it would result in
 an infeasible operation of this device for around 50% of its annual operation.
 
-Moreover, using the :py:class:`~oemof.solph.flows.InvestmentFlow` class in the given case study would result in a significantly
+Moreover, using the :py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock` class in the given case study would result in a significantly
 oversized diesel genset, which has a 30% larger capacity compared with the optimal capacity obtained from the
-:py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class.
+:py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class.
 
 .. 	image:: _files/diesel_genset_investment_flow.svg
    :width: 100 %
    :alt: diesel_genset_investment_flow.svg
    :align: center
 
-Before developing the new :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class, to optimized the capacity of a
-transformer and consider its `min`/`max` loads, the only possibility was first to obtain the optimal capacity using the
-:py:class:`~oemof.solph.flows.InvestmentFlow` and then implement the `min`/`max` loads using the
-:py:class:`~oemof.solph.flows.NonConvexFlow` class. The following duration curve would be obtained by applying
+Solving such an optimisation problem considering `min`/`max` loads without the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, the only possibility is first to obtain the optimal capacity using the
+:py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock` and then implement the `min`/`max` loads using the
+:py:class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock` class. The following duration curve would be obtained by applying
 this method to the same diesel genset.
 
 .. 	image:: _files/diesel_genset_nonconvex_flow.svg
@@ -1123,8 +1124,8 @@ this method to the same diesel genset.
 Because of the oversized diesel genset obtained from this approach, the capacity of the PV and battery in the given case study
 would be 13% and 43% smaller than the capacities obtained using the :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class.
 This results in a 15% reduction in the share of renewable energy sources to cover the given demand and a higher levelized
-cost of electricity. Last but not least, apart from the nonreliable results, using :py:class:`~oemof.solph.flows.InvestmentFlow`
-and :py:class:`~oemof.solph.flows.NonConvexFlow` classes for the dispatch and investment optimization of the given case study
+cost of electricity. Last but not least, apart from the nonreliable results, using :py:class:`~oemof.solph._options.Investment`
+and :py:class:`~oemof.solph._options.NonConvex` classes for the dispatch and investment optimization of the given case study
 increases the computation time by more than 9 times compared to the
 :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class.
 
