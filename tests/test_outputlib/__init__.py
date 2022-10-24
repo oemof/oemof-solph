@@ -5,9 +5,9 @@ import pandas as pd
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph.buses import Bus
+from oemof.solph.components import Converter
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Converter
 from oemof.solph.flows import Flow
 
 filename = os.path.join(os.path.dirname(__file__), "input_data.csv")

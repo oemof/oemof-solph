@@ -396,7 +396,7 @@ these flows, with the following constraints:
   :end-before: """
 
 These constraints are applied in addition to those of a standard
-:class:`~oemof.solph.network.transformer.Transformer`. The constraints limit the range of
+:class:`~oemof.solph.components.Converter`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
 the power loss factor :math:`\beta` (in some contexts also referred to as
@@ -710,8 +710,8 @@ linear equation of in- and outflow does not hit the origin, but is offset. By mu
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/_offset_transformer.py
-  :start-after: _OffsetTransformer-equations:
+.. include:: ../src/oemof/solph/components/_offset_converter.py
+  :start-after: _OffsetConverter-equations:
   :end-before: """
 
 The following figures shows the efficiency dependent on the output power,
@@ -1300,7 +1300,7 @@ The following will give you all flows which are outputs of transformer:
 .. code-block:: python
 
     flows_from_transformer = [x for x in flows if isinstance(
-        x[0], solph.components.Transformer)]
+        x[0], solph.components.Converter)]
 
 You can filter your flows, if the label of in- or output contains a given
 string, e.g.:

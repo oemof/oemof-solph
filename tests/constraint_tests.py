@@ -183,7 +183,7 @@ class TestsConstraint:
         bfuel = solph.buses.Bus(label="fuelBus")
         bel = solph.buses.Bus(label="electricityBus")
 
-        solph.components.Transformer(
+        solph.components.Converter(
             label="transformer_nonconvex_invest",
             inputs={bfuel: solph.flows.Flow()},
             outputs={
@@ -1457,7 +1457,7 @@ class TestsConstraint:
         es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=False)
         b_gas = solph.Bus(label="gas")
         b_th = solph.Bus(label="heat")
-        boiler = solph.components.Transformer(
+        boiler = solph.components.Converter(
             label="boiler",
             inputs={b_gas: solph.Flow(variable_costs=100)},
             outputs={b_th: solph.Flow(nominal_value=200)},

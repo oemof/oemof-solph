@@ -109,42 +109,42 @@ c_e_BusBlock_balance(heat_7)_:
 +1 flow(storage_heat_7)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_0)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_0)_:
 -1 flow(boiler_heat_0)
 +1 flow(gas_boiler_0)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_1)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_1)_:
 -1 flow(boiler_heat_1)
 +1 flow(gas_boiler_1)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_2)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_2)_:
 -1 flow(boiler_heat_2)
 +1 flow(gas_boiler_2)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_3)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_3)_:
 -1 flow(boiler_heat_3)
 +1 flow(gas_boiler_3)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_4)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_4)_:
 -1 flow(boiler_heat_4)
 +1 flow(gas_boiler_4)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_5)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_5)_:
 -1 flow(boiler_heat_5)
 +1 flow(gas_boiler_5)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_6)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_6)_:
 -1 flow(boiler_heat_6)
 +1 flow(gas_boiler_6)
 = 0
 
-c_e_TransformerBlock_relation(boiler_gas_heat_7)_:
+c_e_ConverterBlock_relation(boiler_gas_heat_7)_:
 -1 flow(boiler_heat_7)
 +1 flow(gas_boiler_7)
 = 0

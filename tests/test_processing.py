@@ -22,9 +22,9 @@ from oemof.solph import Model
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.buses import Bus
+from oemof.solph.components import Converter
 from oemof.solph.components import GenericStorage
 from oemof.solph.components import Sink
-from oemof.solph.components import Converter
 from oemof.solph.flows import Flow
 
 

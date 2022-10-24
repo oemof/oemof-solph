@@ -134,7 +134,7 @@ class ConverterBlock(ScalarBlock):
 
     ======================  ============================  ====================
     symbol                  attribute                     explanation
-    ======================  ============================  =============
+    ======================  ============================  ====================
     :math:`P_{i,n}(t)`      `flow[i, n, t]`               Converter inflow
 
     :math:`P_{n,o}(t)`      `flow[n, o, t]`               Converter outflow

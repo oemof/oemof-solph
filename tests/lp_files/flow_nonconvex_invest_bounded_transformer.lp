@@ -33,17 +33,17 @@ c_e_BusBlock_balance(fuelBus_2)_:
 +1 flow(fuelBus_transformer_nonconvex_invest_2)
 = 0
 
-c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_0)_:
+c_e_ConverterBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_0)_:
 +0.5 flow(fuelBus_transformer_nonconvex_invest_0)
 -1 flow(transformer_nonconvex_invest_electricityBus_0)
 = 0
 
-c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_1)_:
+c_e_ConverterBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_1)_:
 +0.5 flow(fuelBus_transformer_nonconvex_invest_1)
 -1 flow(transformer_nonconvex_invest_electricityBus_1)
 = 0
 
-c_e_TransformerBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_2)_:
+c_e_ConverterBlock_relation(transformer_nonconvex_invest_fuelBus_electricityBus_2)_:
 +0.5 flow(fuelBus_transformer_nonconvex_invest_2)
 -1 flow(transformer_nonconvex_invest_electricityBus_2)
 = 0
