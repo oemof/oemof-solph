@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._plumbing import sequence
@@ -99,7 +99,7 @@ class Converter(on.Transformer):
         return ConverterBlock
 
 
-class ConverterBlock(SimpleBlock):
+class ConverterBlock(ScalarBlock):
     r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.components._converter.ConverterBlock`
 
@@ -114,26 +114,37 @@ class ConverterBlock(SimpleBlock):
 
     Linear relation :attr:`om.ConverterBlock.relation[i,o,t]`
         .. math::
-            \P_{i,n}(t) \times \eta_{n,o}(t) = \
-            \P_{n,o}(t) \times \eta_{n,i}(t), \\
+            P_{i}(t) \cdot \eta_{o}(t) =
+            P_{o}(t) \cdot \eta_{i}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{CONVERTERS}, \\
             \forall i \in \textrm{INPUTS(n)}, \\
             \forall o \in \textrm{OUTPUTS(n)},
 
-    ======================  ============================  =============
+    While INPUTS is the set of Bus objects connected with the input of the
+    Transformer and OUPUTS the set of Bus objects connected with the output of
+    the Transformer. The constraint above will be created for all combinations
+    of INPUTS and OUTPUTS for all TIMESTEPS. A Transformer with two inflows and
+    two outflows for one day with an hourly resolution will lead to 96
+    constraints.
+
+    The index :math: n is the index for the Transformer node itself. Therefore,
+    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
+    time step t.
+
+    ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  =============
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               ConverterBlock
-                                                                  inflow
+    :math:`P_{i,n}(t)`      `flow[i, n, t]`               Converter inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               ConverterBlock
-                                                                  outflow
+    :math:`P_{n,o}(t)`      `flow[n, o, t]`               Converter outflow
 
-    :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
-                                                                  efficiency
+    :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
-    ======================  ============================  =============
+    :math:`\eta_{o}(t)`     `conversion_factor[n, o, t]`  Outflow, efficiency
+
+    ======================  ============================  ====================
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -142,8 +153,10 @@ class ConverterBlock(SimpleBlock):
     def _create(self, group=None):
         """Creates the linear constraint for the class:`ConverterBlock`
         block.
+
         Parameters
         ----------
+
         group : list
             List of oemof.solph.components.Converters objects for which
             the linear relation of inputs and outputs is created

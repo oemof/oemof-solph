@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 
 from oemof.network import network
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
@@ -78,7 +78,7 @@ class OffsetConverter(network.Transformer):
             for k, v in self.inputs.items():
                 if not v.nonconvex:
                     raise TypeError(
-                        "Input flows must be of type NonConvexFlow!"
+                        "Input flows must have NonConvex attribute!"
                     )
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
@@ -91,7 +91,7 @@ class OffsetConverter(network.Transformer):
         return OffsetConverterBlock
 
 
-class OffsetConverterBlock(SimpleBlock):
+class OffsetConverterBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components._offset_converter.OffsetConverter`
 

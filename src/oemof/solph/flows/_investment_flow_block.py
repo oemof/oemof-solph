@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for FlowBlock objects with investment option.
+for SimpleFlowBlock objects with investment option.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -21,27 +21,16 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
-
-from ._flow import Flow
+from pyomo.core.base.block import ScalarBlock
 
 
-class InvestmentFlow(Flow):
-    r"""
-    Wrapper class to prepare separation of flow classes.
-    """
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-class InvestmentFlowBlock(SimpleBlock):
+class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
 
-    See :class:`oemof.solph.network.FlowBlock` for all parameters of the *FlowBlock*
+    See :class:`oemof.solph.network.SimpleFlowBlock` for all parameters of the *SimpleFlowBlock*
     class.
 
     **Variables**
@@ -66,7 +55,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     **Constraints**
 
-    Depending on the attributes of the *InvestmentFlowBlock* and *FlowBlock*, different
+    Depending on the attributes of the *InvestmentFlowBlock* and *SimpleFlowBlock*, different
     constraints are created. The following constraint is created for all
     *InvestmentFlowBlock*:\
 
@@ -93,7 +82,7 @@ class InvestmentFlowBlock(SimpleBlock):
 
     For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
     the following additional constraints are created, if the appropriate
-    attribute of the *FlowBlock* (see :class:`oemof.solph.network.FlowBlock`) is set:
+    attribute of the *SimpleFlowBlock* (see :class:`oemof.solph.network.SimpleFlowBlock`) is set:
 
         * :attr:`fix` is not None
 
@@ -109,23 +98,23 @@ class InvestmentFlowBlock(SimpleBlock):
         .. math::
             P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
 
-        * :attr:`summed_max is not None`
+        * :attr:`full_load_time_max is not None`
 
             Upper bound for the sum of all flow values (e.g. maximum full load
             hours)
 
         .. math::
             \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
-            \cdot f_{sum, min}
+            \cdot t_{full\_load, min}
 
-        * :attr:`summed_min is not None`
+        * :attr:`full_load_time_min is not None`
 
             Lower bound for the sum of all flow values (e.g. minimum full load
             hours)
 
         .. math::
             \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
-            \cdot f_{sum, min}
+            \cdot t_{full\_load, min}
 
 
     **Objective function**
@@ -204,9 +193,9 @@ class InvestmentFlowBlock(SimpleBlock):
         value of the flow"
         ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
         value of the flow"
-        ":math:`f_{sum,max}`", ":py:obj:`flows[i, o].summed_max`", "Specific
+        ":math:`t_{full\_load,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
         maximum of summed flow values (per installed capacity)"
-        ":math:`f_{sum,min}`", ":py:obj:`flows[i, o].summed_min`", "Specific
+        ":math:`t_{full\_load,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
         minimum of summed flow values (per installed capacity)"
         ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
         each time step"
@@ -220,9 +209,9 @@ class InvestmentFlowBlock(SimpleBlock):
 
     Note
     ----
-    See also :class:`oemof.solph.network.FlowBlock`,
-    :class:`oemof.solph.blocks.FlowBlock` and
-    :class:`oemof.solph.options.Investment`
+    See also :class:`~oemof.solph.flows._flow.Flow`,
+    :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock` and
+    :class:`~oemof.solph._options.Investment`
 
     """  # noqa: E501
 
@@ -230,7 +219,7 @@ class InvestmentFlowBlock(SimpleBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        r"""Creates sets, variables and constraints for FlowBlock
+        r"""Creates sets, variables and constraints for SimpleFlowBlock
         with investment attribute of type class:`.Investment`.
 
         Parameters
@@ -243,9 +232,14 @@ class InvestmentFlowBlock(SimpleBlock):
         if group is None:
             return None
 
-        m = self.parent_block()
+        self._create_sets(group)
+        self._create_variables(group)
+        self._create_constraints()
 
-        # ######################### SETS #####################################
+    def _create_sets(self, group):
+        """
+        Creates all sets for investment flows.
+        """
         self.INVESTFLOWS = Set(initialize=[(g[0], g[1]) for g in group])
 
         self.CONVEX_INVESTFLOWS = Set(
@@ -272,15 +266,19 @@ class InvestmentFlowBlock(SimpleBlock):
             initialize=[(g[0], g[1]) for g in group if g[2].fix[0] is None]
         )
 
-        self.SUMMED_MAX_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MAX_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group if g[2].summed_max is not None
+                (g[0], g[1])
+                for g in group
+                if g[2].full_load_time_max is not None
             ]
         )
 
-        self.SUMMED_MIN_INVESTFLOWS = Set(
+        self.FULL_LOAD_TIME_MIN_INVESTFLOWS = Set(
             initialize=[
-                (g[0], g[1]) for g in group if g[2].summed_min is not None
+                (g[0], g[1])
+                for g in group
+                if g[2].full_load_time_min is not None
             ]
         )
 
@@ -292,7 +290,12 @@ class InvestmentFlowBlock(SimpleBlock):
             ]
         )
 
-        # ######################### VARIABLES #################################
+    def _create_variables(self, group):
+        """
+        Creates all variables for investment flows.
+        """
+        m = self.parent_block()
+
         def _investvar_bound_rule(block, i, o):
             """Rule definition for bounds of invest variable."""
             if (i, o) in self.CONVEX_INVESTFLOWS:
@@ -312,30 +315,15 @@ class InvestmentFlowBlock(SimpleBlock):
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
-        # ######################### CONSTRAINTS ###############################
 
-        def _min_invest_rule(block, i, o):
-            """Rule definition for applying a minimum investment"""
-            expr = (
-                m.flows[i, o].investment.minimum * self.invest_status[i, o]
-                <= self.invest[i, o]
-            )
-            return expr
+    def _create_constraints(self):
+        """
+        Creates all constraints for standard flows.
+        """
+        m = self.parent_block()
 
-        self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule
-        )
-
-        def _max_invest_rule(block, i, o):
-            """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= (
-                m.flows[i, o].investment.maximum * self.invest_status[i, o]
-            )
-            return expr
-
-        self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule
-        )
+        self.minimum_rule = self._minimum_investment_constraint()
+        self.maximum_rule = self._maximum_investment_constraint()
 
         def _investflow_fixed_rule(block, i, o, t):
             """Rule definition of constraint to fix flow variable
@@ -380,22 +368,23 @@ class InvestmentFlowBlock(SimpleBlock):
             self.MIN_INVESTFLOWS, m.TIMESTEPS, rule=_min_investflow_rule
         )
 
-        def _summed_max_investflow_rule(block, i, o):
+        def _full_load_time_max_investflow_rule(block, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
             expr = sum(
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
-            ) <= m.flows[i, o].summed_max * (
+            ) <= m.flows[i, o].full_load_time_max * (
                 self.invest[i, o] + m.flows[i, o].investment.existing
             )
             return expr
 
-        self.summed_max = Constraint(
-            self.SUMMED_MAX_INVESTFLOWS, rule=_summed_max_investflow_rule
+        self.full_load_time_max = Constraint(
+            self.FULL_LOAD_TIME_MAX_INVESTFLOWS,
+            rule=_full_load_time_max_investflow_rule,
         )
 
-        def _summed_min_investflow_rule(block, i, o):
+        def _full_load_time_min_investflow_rule(block, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
@@ -403,12 +392,13 @@ class InvestmentFlowBlock(SimpleBlock):
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
                 (m.flows[i, o].investment.existing + self.invest[i, o])
-                * m.flows[i, o].summed_min
+                * m.flows[i, o].full_load_time_min
             )
             return expr
 
-        self.summed_min = Constraint(
-            self.SUMMED_MIN_INVESTFLOWS, rule=_summed_min_investflow_rule
+        self.full_load_time_min = Constraint(
+            self.FULL_LOAD_TIME_MIN_INVESTFLOWS,
+            rule=_full_load_time_min_investflow_rule,
         )
 
     def _objective_expression(self):
@@ -434,3 +424,30 @@ class InvestmentFlowBlock(SimpleBlock):
 
         self.investment_costs = Expression(expr=investment_costs)
         return investment_costs
+
+    def _minimum_investment_constraint(self):
+        """Constraint factory for a minimum investment"""
+        m = self.parent_block()
+
+        def _min_invest_rule(_, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = (
+                m.flows[i, o].investment.minimum * self.invest_status[i, o]
+                <= self.invest[i, o]
+            )
+            return expr
+
+        return Constraint(self.NON_CONVEX_INVESTFLOWS, rule=_min_invest_rule)
+
+    def _maximum_investment_constraint(self):
+        """Constraint factory for a maximum investment"""
+        m = self.parent_block()
+
+        def _max_invest_rule(_, i, o):
+            """Rule definition for applying a minimum investment"""
+            expr = self.invest[i, o] <= (
+                m.flows[i, o].investment.maximum * self.invest_status[i, o]
+            )
+            return expr
+
+        return Constraint(self.NON_CONVEX_INVESTFLOWS, rule=_max_invest_rule)

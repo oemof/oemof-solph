@@ -5,7 +5,6 @@ on:
     branches:
       - master
       - dev
-      - v0.5
   pull_request:
 
   workflow_dispatch:
@@ -17,11 +16,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8, 3.9]
+        python-version: [3.8, 3.9, "3.10"]
 
     steps:
     - uses: actions/checkout@v1
-    - name: Install xmllint
+    - name: Install cbc
       run: sudo apt install coinor-cbc
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v2

@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 import itertools
 
 from numpy import mean
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Expression
@@ -434,7 +434,7 @@ class SinkDSM(Sink):
             )
 
 
-class SinkDSMOemofBlock(SimpleBlock):
+class SinkDSMOemofBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach
 
     **The following constraints are created for approach = 'oemof':**
@@ -720,13 +720,13 @@ class SinkDSMOemofBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMOemofInvestmentBlock(SimpleBlock):
+class SinkDSMOemofInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "oemof" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'oemof' with an
     investment object defined:**
 
-    .. _SinkDSMOemof equations:
+    .. _SinkDSMOemofInvestment equations:
 
     .. math::
         &
@@ -1025,7 +1025,7 @@ class SinkDSMOemofInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWBlock(SimpleBlock):
+class SinkDSMDIWBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach
 
     **The following constraints are created for approach = 'DIW':**
@@ -1141,7 +1141,7 @@ class SinkDSMDIWBlock(SimpleBlock):
             ":math:`cost_{t}^{dsm, do, shed}` ",
             ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
             "Variable costs for shedding load"
-            ":math:`\R`",":attr:`~SinkDSM.recovery_time_shift`","P",
+            ":math:`\mathbb{R}`",":attr:`~SinkDSM.recovery_time_shift`","P",
             "Minimum time between the end of one load shifting process
             and the start of another"
             ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
@@ -1670,13 +1670,13 @@ class SinkDSMDIWBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDIWInvestmentBlock(SimpleBlock):
+class SinkDSMDIWInvestmentBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach and :attr:`investment`
 
     **The following constraints are created for approach = 'DIW' with an
     investment object defined:**
 
-    .. _SinkDSMDIW equations:
+    .. _SinkDSMDIWInvestment equations:
 
     .. math::
         &
@@ -2344,7 +2344,7 @@ class SinkDSMDIWInvestmentBlock(SimpleBlock):
         return self.cost
 
 
-class SinkDSMDLRBlock(SimpleBlock):
+class SinkDSMDLRBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DLR" approach
 
     **The following constraints are created for approach = 'DLR':**
@@ -3315,7 +3315,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
     **The following constraints are created for approach = 'DLR' with an
     investment object defined:**
 
-    .. _SinkDSMDLR equations:
+    .. _SinkDSMDLRInvestment equations:
 
     .. math::
         &

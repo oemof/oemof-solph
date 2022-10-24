@@ -30,33 +30,48 @@ c_e_BusBlock_balance(thermalBus_2)_:
 +1 flow(gasboiler_thermalBus_2)
 = 0
 
+c_e_NonConvexFlowBlock_status_nominal_constraint(gasBus_gasboiler_0)_:
+-100 NonConvexFlowBlock_status(gasBus_gasboiler_0)
++1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(gasBus_gasboiler_1)_:
+-100 NonConvexFlowBlock_status(gasBus_gasboiler_1)
++1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(gasBus_gasboiler_2)_:
+-100 NonConvexFlowBlock_status(gasBus_gasboiler_2)
++1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
+= 0
+
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_0)_:
-+32 NonConvexFlowBlock_status(gasBus_gasboiler_0)
++0.32000000000000001 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0)
 -1 flow(gasBus_gasboiler_0)
 <= 0
 
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_1)_:
-+32 NonConvexFlowBlock_status(gasBus_gasboiler_1)
++0.32000000000000001 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1)
 -1 flow(gasBus_gasboiler_1)
 <= 0
 
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_2)_:
-+32 NonConvexFlowBlock_status(gasBus_gasboiler_2)
++0.32000000000000001 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
 -1 flow(gasBus_gasboiler_2)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_0)_:
--100 NonConvexFlowBlock_status(gasBus_gasboiler_0)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0)
 +1 flow(gasBus_gasboiler_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_1)_:
--100 NonConvexFlowBlock_status(gasBus_gasboiler_1)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1)
 +1 flow(gasBus_gasboiler_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_2)_:
--100 NonConvexFlowBlock_status(gasBus_gasboiler_2)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
 +1 flow(gasBus_gasboiler_2)
 <= 0
 
@@ -91,6 +106,9 @@ bounds
    0 <= NonConvexFlowBlock_status(gasBus_gasboiler_0) <= 1
    0 <= NonConvexFlowBlock_status(gasBus_gasboiler_1) <= 1
    0 <= NonConvexFlowBlock_status(gasBus_gasboiler_2) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2) <= +inf
 binary
   NonConvexFlowBlock_status(gasBus_gasboiler_0)
   NonConvexFlowBlock_status(gasBus_gasboiler_1)

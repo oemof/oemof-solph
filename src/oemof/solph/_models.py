@@ -7,24 +7,34 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Saeed Sayadi
 
 SPDX-License-Identifier: MIT
 
 """
 import logging
 import warnings
+from logging import getLogger
 
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
-from oemof.solph._plumbing import sequence
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
-from oemof.solph.flows._flow import FlowBlock
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
-from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
+from oemof.solph.flows._invest_non_convex_flow_block import (
+    InvestNonConvexFlowBlock,
+)
+from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
+from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
+from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
+
+
+class LoggingError(BaseException):
+    """Raised when the wrong logging level is used."""
+
+    pass
 
 
 class BaseModel(po.ConcreteModel):
@@ -71,26 +81,29 @@ class BaseModel(po.ConcreteModel):
     def __init__(self, energysystem, **kwargs):
         super().__init__()
 
+        # Check root logger. Due to a problem with pyomo the building of the
+        # model will take up to a 100 times longer if the root logger is set
+        # to DEBUG
+
+        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+            msg = (
+                "The root logger level is 'DEBUG'.\nDue to a communication "
+                "problem between solph and the pyomo package,\nusing the "
+                "DEBUG level will slow down the modelling process by the "
+                "factor ~100.\nIf you need the debug-logging you can "
+                "initialise the Model with 'debug=True`\nYou should only do "
+                "this for small models. To avoid the slow-down use the "
+                "logger\nfunction of oemof.tools (read docstring) or "
+                "change the level of the root logger:\n\nimport logging\n"
+                "logging.getLogger().setLevel(logging.INFO)"
+            )
+            raise LoggingError(msg)
+
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(
-            kwargs.get("timeincrement", self.es.timeincrement)
-        )
-        if self.timeincrement[0] is None:
-            try:
-                self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12
-                )
-            except AttributeError:
-                msg = (
-                    "No valid time increment found. Please pass a valid "
-                    "timeincremet parameter or pass an EnergySystem with "
-                    "a valid time index. Please note that a valid time"
-                    "index need to have a 'freq' attribute."
-                )
-                raise AttributeError(msg)
+        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
@@ -174,8 +187,10 @@ class BaseModel(po.ConcreteModel):
 
         """
         # shadow prices
+        del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
+        del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
@@ -273,7 +288,7 @@ class Model(BaseModel):
     **The following basic variables are created**:
 
     flow
-        FlowBlock from source to target indexed by FLOWS, TIMESTEPS.
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
@@ -283,8 +298,9 @@ class Model(BaseModel):
         BusBlock,
         ConverterBlock,
         InvestmentFlowBlock,
-        FlowBlock,
+        SimpleFlowBlock,
         NonConvexFlowBlock,
+        InvestNonConvexFlowBlock,
     ]
 
     def __init__(self, energysystem, **kwargs):
@@ -295,9 +311,19 @@ class Model(BaseModel):
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
+        if self.es.timeincrement is None:
+            msg = (
+                "The EnergySystem needs to have a valid 'timeincrement' "
+                "attribute to build a model."
+            )
+            raise AttributeError(msg)
+
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+            initialize=range(len(self.es.timeincrement)), ordered=True
+        )
+        self.TIMEPOINTS = po.Set(
+            initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
         # previous timesteps
@@ -339,7 +365,7 @@ class Model(BaseModel):
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]

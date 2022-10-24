@@ -16,6 +16,7 @@ Welcome to oemof's documentation!
    contributing
    authors
    changelog
+   _logo/README.rst
 
 Indices and tables
 ==================
