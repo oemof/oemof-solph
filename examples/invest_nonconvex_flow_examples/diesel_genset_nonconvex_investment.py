@@ -66,7 +66,7 @@ end_datetime = start_datetime + timedelta(days=n_days)
 
 # Import data.
 current_directory = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(current_directory, "diesel_genset_data.csv")
+filename = os.path.join(current_directory, "solar_generation.csv")
 data = pd.read_csv(filepath_or_buffer=filename)
 
 # Change the index of data to be able to select data based on the time range.

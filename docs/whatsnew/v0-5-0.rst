@@ -41,4 +41,5 @@ Contributors
 * Uwe Krien
 * Saeed Sayadi
 * Pierre-François Duc
+* Johannes Röder
 
