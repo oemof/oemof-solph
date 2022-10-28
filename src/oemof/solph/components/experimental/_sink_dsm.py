@@ -708,17 +708,16 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
         + DSM_{t}^{up}
         - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
         \quad \forall t \in \mathbb{T} \\
         &
         (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
-        \cdot s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
-        E_{t}^{do} \cdot (invest + E_{exist}) \cdot s_{flex, do}
+        E_{t}^{do} \cdot (invest + E_{exist})
         \quad \forall t \in \mathbb{T} \\
         &
         (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
@@ -1959,7 +1958,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
         + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \quad
         \forall t \in \mathbb{T} \\
@@ -1969,28 +1968,26 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         \quad \forall t \in \mathbb{T} \\
         &
         (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
-        \ s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (7) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot (invest + E_{exist})
-        \cdot s_{flex, do}
         \quad \forall tt \in \mathbb{T} \\
         &
         (8) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \leq
-        max \{ E_{tt}^{up} \cdot s_{flex, up},
-        E_{tt}^{do} \cdot s_{flex, do} \} \cdot (invest + E_{exist})
+        max \{ E_{tt}^{up}, E_{tt}^{do} \}
+        \cdot (invest + E_{exist})
         \quad \forall tt \in \mathbb{T} \\
         &
         (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
         \leq E_{t}^{up} \cdot (invest + E_{exist})
-        \cdot s_{flex, up} \cdot L \cdot \Delta t
+        \cdot L \cdot \Delta t
         \quad \forall t \in \mathbb{T} \\
         &
         (10) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
         \leq E_{t}^{do} \cdot (invest + E_{exist})
-        \cdot s_{flex, do} \cdot t_{shed}
+        \cdot t_{shed}
         \cdot \Delta t \quad \forall t \in \mathbb{T} \\
 
     *Note*: For the sake of readability, the handling of indices is not
@@ -3927,7 +3924,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (3) \quad DSM_{t}^{do, shed} = 0 \quad \forall t \in \mathbb{T}
         \quad if \space eligibility_{shed} = False \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot (invest + E_{exist})
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
         + \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
         - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed}
@@ -3952,13 +3949,11 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (9) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
         + DSM_{h, t}^{balanceUp}) + DSM_{t}^{do, shed}
         \leq E_{t}^{do} \cdot (invest + E_{exist})
-        \cdot s_{flex, do}
         \quad \forall t \in \mathbb{T} \\
         &
         (10) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo})
         \leq E_{t}^{up} \cdot (invest + E_{exist})
-        \cdot s_{flex, up}
         \quad \forall t \in \mathbb{T} \\
         &
         (11) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
@@ -3972,13 +3967,11 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         \quad \forall t \in [1..T] \\
         &
         (13) \quad W_{t}^{levelDo} \leq \overline{E}_{t}^{do}
-        \cdot (invest + E_{exist})
-        \cdot s_{flex, do} \cdot t_{shift}
+        \cdot (invest + E_{exist}) \cdot t_{shift}
         \quad \forall t \in \mathbb{T} \\
         &
         (14) \quad W_{t}^{levelUp} \leq \overline{E}_{t}^{up}
-        \cdot (invest + E_{exist})
-        \cdot s_{flex, up} \cdot t_{shift}
+        \cdot (invest + E_{exist}) \cdot t_{shift}
         \quad \forall t \in \mathbb{T} \\
         &
         (15) \quad \displaystyle\sum_{t=0}^{T} DSM_{t}^{do, shed}
@@ -3990,7 +3983,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (16) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{do, shift}
         \leq (invest + E_{exist})
-        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \cdot \overline{E}_{t}^{do}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
         (optional \space constraint) \\
@@ -3998,14 +3991,14 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         (17) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{up}
         \leq (invest + E_{exist})
-        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \cdot \overline{E}_{t}^{up}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
         (optional \space constraint) \\
         &
         (18) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{do, shift}
         \leq (invest + E_{exist})
-        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \cdot \overline{E}_{t}^{do}
         \cdot t_{shift} -
         \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
         DSM_{h, t - t'}^{do, shift}
@@ -4014,7 +4007,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         &
         (19) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{up}
         \leq (invest + E_{exist})
-        \cdot s_{flex, up} \cdot \overline{E}_{t}^{up}
+        \cdot \overline{E}_{t}^{up}
         \cdot t_{shift} -
         \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
         DSM_{h, t - t'}^{up}
@@ -4025,8 +4018,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
         + DSM_{h, t}^{balanceDo}
         + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
         + DSM_{t}^{shed}
-        \leq \max \{E_{t}^{up} \cdot s_{flex, up},
-        E_{t}^{do} \cdot s_{flex, do} \} \cdot (invest + E_{exist})
+        \leq \max \{E_{t}^{up}, E_{t}^{do} \} \cdot (invest + E_{exist})
         \quad \forall t \in \mathbb{T} \\
         (optional \space constraint) \\
         &
