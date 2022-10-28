@@ -560,7 +560,7 @@ class InvestmentFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        def _investvar_bound_rule(block, i, o):
+        def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of invest variable."""
             if (i, o) in self.CONVEX_INVESTFLOWS:
                 return (
@@ -598,7 +598,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
-            self.NON_CONVEX_INVESTFLOWS, ,m.PERIODS, within=Binary
+            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, within=Binary
         )
 
     def _create_constraints(self):
