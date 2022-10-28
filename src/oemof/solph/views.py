@@ -231,7 +231,8 @@ def node_weight_by_type(results, node_type):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type for which node weights should be collected
+        Specifies the type for which node weights should be collected,
+        e.g. solph.components.GenericStorage
 
     Example
     --------
@@ -273,7 +274,8 @@ def node_input_by_type(results, node_type, droplevel=None):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type of the node for that inputs are selected
+        Specifies the type of the node for that inputs are selected,
+        e.g. solph.components.Sink
     droplevel: list
 
     Examples
@@ -316,11 +318,12 @@ def node_output_by_type(results, node_type, droplevel=None):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type of the node for that outputs are selected
+        Specifies the type of the node for that outputs are selected,
+        e.g. solph.components.Transformer
     droplevel: list
 
-    Notes
-    -----
+    Examples
+    --------
     ::
 
         import oemof.solph as solph
@@ -359,7 +362,8 @@ def net_storage_flow(results, node_type):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type for which (storage) type net flows are calculated
+        Specifies the type for which (storage) type net flows are calculated,
+        e.g. solph.components.GenericStorage
 
     Returns
     -------

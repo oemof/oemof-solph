@@ -75,15 +75,15 @@ class GenericStorage(network.Node):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per time unit.
+        The relative loss of the storage content per time unit (e.g. hour).
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
-        Losses independent of state of charge between two consecutive
-        timesteps relative to nominal storage capacity.
+        Losses per hour that are independent of the storage content but
+        proportional to nominal storage capacity.
 
         Note: Fixed losses are not supported in investment mode.
     fixed_losses_absolute : numeric (iterable or scalar), :math:`\delta(t)`
-        Losses independent of state of charge and independent of
-        nominal storage capacity between two consecutive timesteps.
+        Losses per hour that are independent of storage content and independent
+        of nominal storage capacity.
 
         Note: Fixed losses are not supported in investment mode.
     inflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_i(t)`
@@ -93,7 +93,8 @@ class GenericStorage(network.Node):
         see: inflow_conversion_factor
     min_storage_level : numeric (iterable or scalar), :math:`c_{min}(t)`
         The normed minimum storage content as fraction of the
-        nominal storage capacity or the invested capacity (between 0 and 1).
+        nominal storage capacity or the capacity that has been invested into
+        (between 0 and 1).
         To set different values in every time step use a sequence.
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
@@ -115,9 +116,9 @@ class GenericStorage(network.Node):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :class:`.GenericStorageBlock`
+     * :py:class:`~oemof.solph.components._generic_storage.GenericStorageBlock`
        (if no Investment object present)
-     * :class:`.GenericInvestmentStorageBlock`
+     * :py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock`
        (if Investment object present)
 
     Examples
@@ -315,15 +316,15 @@ class GenericStorageBlock(ScalarBlock):
     :class:`.Model` )
 
     STORAGES
-        A set with all :class:`.GenericStorage` objects, which do not have an
+        A set with all :py:class:`~.GenericStorage` objects, which do not have an
         :attr:`investment` of type :class:`.Investment`.
 
     STORAGES_BALANCED
-        A set of  all :class:`.GenericStorage` objects, with 'balanced'
-        attribute set to True.
+        A set of  all :py:class:`~.GenericStorage` objects, with 'balanced' attribute set
+        to True.
 
     STORAGES_WITH_INVEST_FLOW_REL
-        A set with all :class:`.GenericStorage` objects with two investment
+        A set with all :py:class:`~.GenericStorage` objects with two investment
         flows coupled with the 'invest_relation_input_output' attribute.
 
     **The following variables are created:**
@@ -373,13 +374,14 @@ class GenericStorageBlock(ScalarBlock):
                                 as share of
                                 :math:`E(t)`
                                 per time unit
+                                (e.g. hour)
     :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
                                 relative to
                                 :math:`E_{nom}` per
-                                time unit
+                                time unit (e.g. hour)
     :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
                                 of energy per
-                                time unit
+                                time unit (e.g. hour)
     :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
     :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
@@ -486,7 +488,6 @@ class GenericStorageBlock(ScalarBlock):
 
         #  ************* Constraints ***************************
 
-        # storage balance constraint (every time step but the first)
         def _storage_balance_rule(block, n, p, t):
             """
             Rule definition for the storage balance of every storage n and
@@ -557,8 +558,8 @@ class GenericStorageBlock(ScalarBlock):
         Note
         ----
         * For standard models, this adds nothing as variable costs are
-          already added in the Block :class:`.FlowBlock`.
-        * For multi-period models, fixed costs may be introduced and added here
+          already added in the Block :py:class:`~.SimpleFlowBlock`.
+        * For multi-period models, fixed costs may be introduced and added here.
         """
         m = self.parent_block()
 
@@ -753,7 +754,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             An initial value for the storage content is given:
 
         .. math::
-               E(-1) = (E_{invest} + E_{exist}(0)) \cdot c(-1)
+               E(-1) = (E_{invest}(0) + E_{exist}) \cdot c(-1)
 
         * :attr:`balanced=True`;
           not applicable for multi-period model

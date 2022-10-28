@@ -93,7 +93,7 @@ class GenericCHP(network.Transformer):
     Note
     ----
     The following sets, variables, constraints and objective parts are created
-    * :class:`.GenericCHPBlock`
+     * :py:class:`~oemof.solph.components._generic_chp.GenericCHPBlock`
 
     Examples
     --------
@@ -500,7 +500,7 @@ class GenericCHPBlock(ScalarBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`.FlowBlock`.
+        added in the Block :class:`SimpleFlowBlock`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0

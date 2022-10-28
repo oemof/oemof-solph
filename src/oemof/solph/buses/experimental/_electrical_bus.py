@@ -21,7 +21,7 @@ from oemof.solph.buses._bus import Bus
 
 
 class ElectricalBus(Bus):
-    r"""An electrical bus object used for linear optimal power flow (lopf)
+    r"""An electrical bus object used for linear optimal power flow (LOPF)
 
     Every (spatial) node has to be connected to a BusBlock.
     This BusBlock is used in combination with ElectricalLine objects
@@ -41,11 +41,11 @@ class ElectricalBus(Bus):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :class:`.BusBlock`
+     * :py:class:`~oemof.solph._bus.BusBlock`
     The objects are also used inside:
-     * :class:`.ElectricalLine`
+     * :py:class:`~oemof.solph.experimental._electrical_line.ElectricalLine`
 
-    """  # noqa: E501
+    """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -9,16 +9,13 @@ available from its original location oemof/tests/solph_tests.py
 SPDX-License-Identifier: MIT
 """
 
-import os
-
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
 from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
-from oemof.solph.helpers import extend_basic_path
+from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 
 
 class TestsGrouping:
@@ -51,7 +48,7 @@ class TestsGrouping:
         solph.components.Sink(
             label="Sink",
             inputs={
-                b: solph.flows.InvestmentFlow(
+                b: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
@@ -66,11 +63,3 @@ class TestsGrouping:
                 "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
             ).format(self.es.groups.get(InvestmentFlowBlock)),
         )
-
-
-def test_helpers():
-    ok_(os.path.isdir(os.path.join(os.path.expanduser("~"), ".oemof")))
-    new_dir = extend_basic_path("test_xf67456_dir")
-    ok_(os.path.isdir(new_dir))
-    os.rmdir(new_dir)
-    ok_(not os.path.isdir(new_dir))

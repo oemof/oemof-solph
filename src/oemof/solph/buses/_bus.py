@@ -26,6 +26,9 @@ from pyomo.core.base.block import ScalarBlock
 class Bus(on.Bus):
     """A balance object. Every node has to be connected to BusBlock.
 
+    The sum of all inputs of a Bus object must equal the sum of all outputs
+    within one time step.
+
     Attributes
     ----------
     balanced: boolean
@@ -53,18 +56,36 @@ class Bus(on.Bus):
 class BusBlock(ScalarBlock):
     r"""Block for all balanced buses.
 
-    **The following constraints are build:**
+     The sum of all inputs of a Bus object must equal the sum of all outputs
+     within one time step.
 
-    BusBlock balance  :attr:`om.BusBlock.balance[i, o, p, t]`
+     **The following constraints are build:**
 
-        .. math::
-            &
-            \sum_{i \in INPUTS(n)} flow(i, n, p, t) =
-            \sum_{o \in OUTPUTS(n)} flow(n, o, p, t), \\
-            &
-            \forall n \in \textrm{BUSES},
-            \forall p, t \in \textrm{TIMEINDEX}.
-    """
+     Bus balance: `om.Bus.balance[i, o, t]`
+       .. math::
+         \sum_{i \in INPUTS(n)} P_{i}(p, t) =
+         \sum_{o \in OUTPUTS(n)} P_{o}(p, t), \\
+         \forall p, t \in \textrm{TIMEINDEX}, \\
+         \forall i \in \textrm{INPUTS}, \\
+         \forall o \in \textrm{OUTPUTS}
+
+     While INPUTS is the set of Component objects connected with the input of
+     the Bus object and OUPUTS the set of Component objects connected with the
+     output of the Bus object.
+
+     The index :math:`n` is the index for the Bus node itself. Therefore,
+     a :math:`flow[i, n, p, t]` is a flow from the Component i to the Bus n at
+     time index p, t.
+
+     ======================  ============================  ====================
+     symbol                  attribute                     explanation
+     ======================  ============================  ====================
+     :math:`P_{i}(p, t)`     `flow[i, n, p, t]`            Bus, inflow
+
+     :math:`P_{o}(p, t)`     `flow[n, o, p, t]`            Bus, outflow
+
+     ======================  ============================  ====================
+     """
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
