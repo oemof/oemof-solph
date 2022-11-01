@@ -559,7 +559,8 @@ class GenericStorageBlock(ScalarBlock):
         ----
         * For standard models, this adds nothing as variable costs are
           already added in the Block :py:class:`~.SimpleFlowBlock`.
-        * For multi-period models, fixed costs may be introduced and added here.
+        * For multi-period models, fixed costs may be introduced
+          and added here.
         """
         m = self.parent_block()
 
