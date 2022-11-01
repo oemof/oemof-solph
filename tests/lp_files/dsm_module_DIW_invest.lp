@@ -60,9 +60,8 @@ c_e_SinkDSMDIWInvestmentBlock_input_output_relation(demand_dsm_0_2)_:
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_1_2)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_2_2)
 -1 SinkDSMDIWInvestmentBlock_dsm_up(demand_dsm_2)
--1 SinkDSMDIWInvestmentBlock_total(demand_dsm_0)
 +1 flow(bus_elec_demand_dsm_0_2)
-= 0
+= 1
 
 c_e_SinkDSMDIWInvestmentBlock_dsm_updo_constraint(demand_dsm_0)_:
 -1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_0_0)

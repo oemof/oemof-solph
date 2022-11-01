@@ -19,6 +19,7 @@ SPDX-License-Identifier: MIT
 from pyomo.core import BuildAction, Expression
 from pyomo.core import Constraint
 from pyomo.core import NonNegativeIntegers
+from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock

@@ -978,7 +978,7 @@ class InvestmentFlowBlock(ScalarBlock):
         """Constraint factory for a minimum investment"""
         m = self.parent_block()
 
-        def _min_invest_rule(block):
+        def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 for p in m.PERIODS:
@@ -1000,7 +1000,7 @@ class InvestmentFlowBlock(ScalarBlock):
         """Constraint factory for a maximum investment"""
         m = self.parent_block()
 
-        def _max_invest_rule(_, i, o):
+        def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 for p in m.PERIODS:
