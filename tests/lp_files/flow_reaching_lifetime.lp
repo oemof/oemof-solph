@@ -35,11 +35,11 @@ c_e_BusBlock_balance(electricityBus_2_5)_:
 +1 flow(electricityBus_excess_2_5)
 = 0
 
-c_e_FlowBlock_lifetime_output(electricityBus_excess_2_4)_:
+c_e_SimpleFlowBlock_lifetime_output(electricityBus_excess_2_4)_:
 +1 flow(electricityBus_excess_2_4)
 = 0
 
-c_e_FlowBlock_lifetime_output(electricityBus_excess_2_5)_:
+c_e_SimpleFlowBlock_lifetime_output(electricityBus_excess_2_5)_:
 +1 flow(electricityBus_excess_2_5)
 = 0
 

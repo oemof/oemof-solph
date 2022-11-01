@@ -324,7 +324,8 @@ class TestsMultiPeriodConstraint:
 
         msg = (
             "You have to specify a lifetime "
-            "for an InvestmentFlow in a multi-period model!"
+            "for a Flow with an associated investment "
+            "object in a multi-period model!"
         )
         with pytest.raises(ValueError, match=msg):
             self.get_om()
@@ -510,14 +511,14 @@ class TestsMultiPeriodConstraint:
         solph.components.GenericStorage(
             label="storage6",
             inputs={
-                bel: solph.flows.InvestmentFlow(
+                bel: solph.flows.Flow(
                     investment=solph.Investment(
                         ep_costs=99, existing=110, lifetime=20
                     )
                 )
             },
             outputs={
-                bel: solph.flows.InvestmentFlow(
+                bel: solph.flows.Flow(
                     investment=solph.Investment(existing=100, lifetime=20)
                 )
             },
@@ -717,7 +718,8 @@ class TestsMultiPeriodConstraint:
 
         msg = (
             "You have to specify a lifetime "
-            "for an InvestmentFlow in a multi-period model!"
+            "for a Flow going into or out of a GenericStorage "
+            "unit in a multi-period model!"
         )
         with pytest.raises(ValueError, match=msg):
             self.get_om()
@@ -1321,16 +1323,18 @@ class TestsMultiPeriodConstraint:
         solph.components.Source(
             label="cheap_plant_min_down_constraints",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    minimum_downtime=4,
-                    minimum_uptime=2,
-                    initial_status=1,
-                    startup_costs=5,
-                    shutdown_costs=7,
+                    nonconvex=solph.NonConvex(
+                        minimum_downtime=4,
+                        minimum_uptime=2,
+                        initial_status=1,
+                        startup_costs=5,
+                        shutdown_costs=7,
+                    ),
                 )
             },
         )
@@ -1342,12 +1346,14 @@ class TestsMultiPeriodConstraint:
         solph.components.Source(
             label="cheap_plant_activity_costs",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    activity_costs=2,
+                    nonconvex=solph.NonConvex(
+                        activity_costs=2,
+                    ),
                 )
             },
         )
@@ -1359,12 +1365,14 @@ class TestsMultiPeriodConstraint:
         solph.components.Source(
             label="cheap_plant_inactivity_costs",
             outputs={
-                bus_t: solph.flows.NonConvexFlow(
+                bus_t: solph.flows.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
                     variable_costs=10,
-                    inactivity_costs=2,
+                    nonconvex=solph.NonConvex(
+                        inactivity_costs=2,
+                    ),
                 )
             },
         )

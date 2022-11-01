@@ -1208,9 +1208,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     if lifetime is None:
                         msg = (
                             "You have to specify a lifetime "
-                            "for an InvestmentFlow in "
-                            "a multi-period model! Value for {} "
-                            "is missing.".format(n)
+                            "for a Flow going into or out of "
+                            "a GenericStorage unit "
+                            "in a multi-period model!"
+                            " Value for {} is missing.".format(n)
                         )
                         raise ValueError(msg)
                     for p in m.PERIODS:

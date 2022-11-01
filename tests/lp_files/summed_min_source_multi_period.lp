@@ -35,7 +35,7 @@ c_e_BusBlock_balance(electricityBus_2_5)_:
 +1 flow(electricityBus_excess_2_5)
 = 0
 
-c_u_FlowBlock_full_load_time_max_constr(electricityBus_excess)_:
+c_u_SimpleFlowBlock_full_load_time_max_constr(electricityBus_excess)_:
 +1 flow(electricityBus_excess_0_0)
 +1 flow(electricityBus_excess_0_1)
 +1 flow(electricityBus_excess_1_2)
@@ -44,7 +44,7 @@ c_u_FlowBlock_full_load_time_max_constr(electricityBus_excess)_:
 +1 flow(electricityBus_excess_2_5)
 <= 1000
 
-c_l_FlowBlock_full_load_time_min_constr(electricityBus_excess)_:
+c_l_SimpleFlowBlock_full_load_time_min_constr(electricityBus_excess)_:
 +1 flow(electricityBus_excess_0_0)
 +1 flow(electricityBus_excess_0_1)
 +1 flow(electricityBus_excess_1_2)

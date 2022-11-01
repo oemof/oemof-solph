@@ -650,7 +650,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     if lifetime is None:
                         msg = (
                             "You have to specify a lifetime "
-                            "for an InvestmentFlow in "
+                            "for a Flow with an associated "
+                            "investment object in "
                             "a multi-period model! Value for {} "
                             "is missing.".format((i, o))
                         )
