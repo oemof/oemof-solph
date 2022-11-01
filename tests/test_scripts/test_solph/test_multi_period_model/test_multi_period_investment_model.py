@@ -292,6 +292,7 @@ def test_multi_period_investment_model(solver="cbc"):
             "capacity_down": [1] * len(timeindex),
             "delay_time": 4,
             "shed_time": 2,
+            "max_demand": [1] * len(es.periods),
             "recovery_time_shift": 0,
             "recovery_time_shed": 24,
             "cost_dsm_up": 0.01,
@@ -300,8 +301,6 @@ def test_multi_period_investment_model(solver="cbc"):
             "efficiency": 1.0,
             "shed_eligibility": False,
             "shift_eligibility": True,
-            "flex_share_up": 1,
-            "flex_share_down": 1,
             "shift_time": 2,
         }
 
