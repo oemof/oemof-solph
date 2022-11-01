@@ -3,7 +3,7 @@ v0.2.2 (July 1, 2018)
 
 
 API changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The storage API has been revised, even though it is still possible to use the
   old API. In that case a warning is raised
@@ -14,7 +14,7 @@ API changes
 
 
 New features
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * We added a new attribute `existing` to the `solph.options.Investement` class.
   It will now be possible to run investment optimization based on already
@@ -43,12 +43,12 @@ New features
 
 
 New components
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 
 
 Documentation
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The documentation of the storage
   `storage component <https://oemof-solph.readthedocs.io/en/latest/usage.html#genericstorage-component>`_ has been improved.
@@ -56,13 +56,13 @@ Documentation
   `Extraction Turbine <https://oemof-solph.readthedocs.io/en/latest/usage.html#extractionturbinechp-component>`_ has been improved.
 
 Known issues
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * It is not possible to model one time step with oemof.solph. You have to
   model at least two timesteps (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a comment if this bug affects you.
 
 Bug fixes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Fix file extension check to dump a graph correctly as .graphml-file
 * The full constraint set of the ExtractionTurbineCHP class was only build for
@@ -74,7 +74,7 @@ Bug fixes
   functions now (`Issue #494 <https://github.com/oemof/oemof-solph/pull/494>`_).
 
 Testing
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The test coverage has been increased (>80%). oemof has experimental areas to
   test new functions. These functions are marked as experimental and will not
@@ -82,7 +82,7 @@ Testing
 
 
 Other changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Subclasses of `Node <oemof.network.Node>` are no longer optimized
   using `__slots__
@@ -92,7 +92,7 @@ Other changes
   option of using it.
 
 Contributors
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Fabian Büllesbach
 * Guido Plessmann
