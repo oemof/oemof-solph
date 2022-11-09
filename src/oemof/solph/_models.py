@@ -80,8 +80,8 @@ class BaseModel(po.ConcreteModel):
 
     """
 
+    # The default list of constraint groups to be used for a model
     CONSTRAINT_GROUPS = []
-    """The default list of constraint groups to be used for a model"""
 
     def __init__(self, energysystem, **kwargs):
         """Initialize a BaseModel, using its energysystem as well as
