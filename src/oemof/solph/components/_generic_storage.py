@@ -132,6 +132,9 @@ class GenericStorage(network.Node):
 
     def __init__(
         self,
+        label,
+        inputs,
+        outputs,
         nominal_storage_capacity,
         initial_storage_level,
         investment,
