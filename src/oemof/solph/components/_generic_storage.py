@@ -131,37 +131,39 @@ class GenericStorage(network.Node):
     """  # noqa: E501
 
     def __init__(
-        self, *args, max_storage_level=1, min_storage_level=0, **kwargs
+        self,
+        nominal_storage_capacity,
+        initial_storage_level,
+        investment,
+        invest_relation_input_output,
+        invest_relation_input_capacity,
+        invest_relation_output_capacity,
+        *args,
+        max_storage_level=1,
+        balanced=True,
+        loss_rate=0,
+        fixed_losses_relative=0,
+        min_storage_level=0,
+        fixed_losses_absolute=0,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=1,
+        **kwargs
     ):
         super().__init__(*args, **kwargs)
-        self.nominal_storage_capacity = kwargs.get("nominal_storage_capacity")
-        self.initial_storage_level = kwargs.get("initial_storage_level")
-        self.balanced = kwargs.get("balanced", True)
-        self.loss_rate = solph_sequence(kwargs.get("loss_rate", 0))
-        self.fixed_losses_relative = solph_sequence(
-            kwargs.get("fixed_losses_relative", 0)
-        )
-        self.fixed_losses_absolute = solph_sequence(
-            kwargs.get("fixed_losses_absolute", 0)
-        )
-        self.inflow_conversion_factor = solph_sequence(
-            kwargs.get("inflow_conversion_factor", 1)
-        )
-        self.outflow_conversion_factor = solph_sequence(
-            kwargs.get("outflow_conversion_factor", 1)
-        )
+        self.nominal_storage_capacity = nominal_storage_capacity
+        self.initial_storage_level = initial_storage_level
+        self.balanced = balanced
+        self.loss_rate = solph_sequence(loss_rate)
+        self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
+        self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
+        self.inflow_conversion_factor = solph_sequence(inflow_conversion_factor)
+        self.outflow_conversion_factor = solph_sequence(outflow_conversion_factor)
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
-        self.investment = kwargs.get("investment")
-        self.invest_relation_input_output = kwargs.get(
-            "invest_relation_input_output"
-        )
-        self.invest_relation_input_capacity = kwargs.get(
-            "invest_relation_input_capacity"
-        )
-        self.invest_relation_output_capacity = kwargs.get(
-            "invest_relation_output_capacity"
-        )
+        self.investment = investment
+        self.invest_relation_input_output = invest_relation_input_output
+        self.invest_relation_input_capacity = invest_relation_input_capacity
+        self.invest_relation_output_capacity = invest_relation_output_capacity
         self._invest_group = isinstance(self.investment, Investment)
 
         # Check number of flows.
