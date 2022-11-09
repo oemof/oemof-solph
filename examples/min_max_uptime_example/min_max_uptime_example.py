@@ -49,7 +49,7 @@ es.add(bus_1)
 
 es.add(components.Source(
     label='renewable_energy',
-    inputs={bus_1: Flow(
+    outputs={bus_1: Flow(
         fix=renewable_timeseries,
         nominal_value=1,
     )}
@@ -57,7 +57,7 @@ es.add(components.Source(
 
 es.add(components.Sink(
     label='cyclic_process',
-    outputs={bus_1: Flow(
+    inputs={bus_1: Flow(
         variable_costs=-10,
         nominal_value=4,
         min=1,
@@ -71,7 +71,7 @@ es.add(components.Sink(
 
 es.add(components.Sink(
     label='excess',
-    outputs={bus_1: Flow(
+    inputs={bus_1: Flow(
         variable_costs=0,
     )},
 ))
