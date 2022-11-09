@@ -120,7 +120,11 @@ class Flow(on.Edge):
     0.99
     """  # noqa: E501
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        max=1,
+        **kwargs
+    ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any SimpleFlowBlock
@@ -205,8 +209,8 @@ class Flow(on.Edge):
                 defaults["min"] = -1
             else:
                 defaults["min"] = 0
-        if kwargs.get("max") is None:
-            defaults["max"] = 1
+
+        defaults["max"] = max
 
         # Check gradient dictionaries for non-valid keys
         for gradient_dict in ["negative_gradient", "positive_gradient"]:
