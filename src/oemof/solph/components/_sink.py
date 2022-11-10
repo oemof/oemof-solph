@@ -21,8 +21,11 @@ from oemof.solph._helpers import check_node_object_for_missing_attribute
 class Sink(on.Sink):
     """An object with one input flow."""
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, label=None, inputs=None, **kwargs):
+        if inputs is None:
+            inputs = {}
+
+        super().__init__(label=label, inputs=inputs, **kwargs)
         check_node_object_for_missing_attribute(self, "inputs")
 
     def constraint_group(self):
