@@ -29,10 +29,14 @@ from oemof.solph._plumbing import sequence
 
 class Transformer(on.Transformer):
     """A linear converter object with n inputs and n outputs.
+<<<<<<< HEAD
 
     Expects specified inputs and outputs as dicts with respective flows.
     If no inputs or outputs are specified,  
 
+=======
+    
+>>>>>>> 1c27995cbbced2b825a4c7702326067b7e60f06b
     Parameters
     ----------
     conversion_factors : dict
