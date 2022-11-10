@@ -68,12 +68,14 @@ def shared_limit(
     ...     label="Party1Storage",
     ...     nominal_storage_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
-    ...     outputs={b1: solph.flows.Flow()})
+    ...     outputs={b1: solph.flows.Flow()}
+    ... )
     >>> storage2 = solph.components.GenericStorage(
     ...     label="Party2Storage",
     ...     nominal_storage_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
-    ...     outputs={b1: solph.flows.Flow()})
+    ...     outputs={b1: solph.flows.Flow()}
+    ... )
     >>> energysystem.add(b1, b2, storage1, storage2)
     >>> components = [storage1, storage2]
     >>> model = solph.Model(energysystem)
@@ -81,7 +83,8 @@ def shared_limit(
     ...    model,
     ...    model.GenericStorageBlock.storage_content,
     ...    "limit_storage", components,
-    ...    [1, 1], upper_limit=5)
+    ...    [1, 1], upper_limit=5
+    ... )
     """
 
     setattr(model, limit_name, po.Var(model.TIMESTEPS))
