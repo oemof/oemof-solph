@@ -109,24 +109,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
     output flows relate to each other, and the symbols used are defined as
     follows (with Variables (V) and Parameters (P)):
 
-    ========================= ============================================ ==== =========
+    ========================= ============================================ ==== ================================================
     symbol                    attribute                                    type explanation
-    ========================= ============================================ ==== =========
+    ========================= ============================================ ==== ================================================
     :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
-
     :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
-
     :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
-
     :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
-
-    :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
-                                                                                        without heat extraction
-    :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
-                                                                                        with max heat extraction
-    :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
-                                                                                        maximal heat extraction
-    ========================= ============================================ ==== =========
+    :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency without heat extraction
+    :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency with max heat extraction
+    :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with  maximal heat extraction
+    ========================= ============================================ ==== ================================================
 
     """  # noqa: E501
 

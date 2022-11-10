@@ -98,7 +98,7 @@ An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
 .. 	image:: _files/oemof_solph_example.svg
-   :scale: 10 %
+   :scale: 70 %
    :alt: alternate text
    :align: center
 
@@ -450,7 +450,7 @@ With the GenericCHP class it is possible to model different types of CHP plants 
 back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
 
 .. 	image:: _files/GenericCHP.svg
-   :scale: 10 %
+   :scale: 70 %
    :alt: scheme of GenericCHP operation range
    :align: center
 
@@ -623,9 +623,9 @@ As an addition to other flow-investments, the storage class implements the possi
 with the capacity of the storage.
 Three parameters are responsible for connecting the flows and the capacity of the storage:
 
-    *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be filled within one time-period.
-    *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
-    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger.
+    *	``invest_relation_input_capacity`` fixes the input flow investment to the capacity investment. A ratio of 1 means that the storage can be filled within one time-period.
+    *	``invest_relation_output_capacity`` fixes the output flow investment to the capacity investment. A ratio of 1 means that the storage can be emptied within one period.
+    *	``invest_relation_input_output`` fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger.
 
 You should not set all 3 parameters at the same time, since it will lead to overdetermination.
 
