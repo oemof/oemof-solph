@@ -1412,7 +1412,7 @@ class TestsConstraint:
 
         solph.components.Source(
             label="source_nonconvex_invest",
-            inputs={
+            outputs={
                 bel: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
@@ -1430,12 +1430,12 @@ class TestsConstraint:
         self.compare_lp_files("flow_invest_with_offset.lp")
 
     def test_nonconvex_invest_source_with_offset_no_minimum(self):
-        """Non convex invest flow with offset, without minimum."""
+        """Non-convex invest flow with offset, without minimum."""
         bel = solph.buses.Bus(label="electricityBus")
 
         solph.components.Source(
             label="source_nonconvex_invest",
-            inputs={
+            outputs={
                 bel: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,

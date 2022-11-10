@@ -53,31 +53,10 @@ def test_filtered_warning(warning_fixture):
 def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     """Source doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
-    msg = (
-        "Attribute <outputs> is missing in Node <test_source> of <class"
-        " 'oemof.solph.components._source.Source'>."
-    )
-    with warnings.catch_warnings(record=True) as w:
+    with pytest.raises(TypeError, match="got an unexpected keyword argument 'inputs'"):
         solph.components.Source(
             label="test_source", inputs={look_out: "A typo!"}
         )
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
-
-
-def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
-    """Source doesn't warn about potentially erroneous usage."""
-    look_out = network.Bus()
-    msg = (
-        "Attribute <outputs> is missing in Node <solph_sink> of <class"
-        " 'oemof.solph.components._source.Source'>."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.components.Source(
-            label="solph_sink", inputs={look_out: "A typo!"}
-        )
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
 
 
 def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
