@@ -83,13 +83,13 @@ class Transformer(on.Transformer):
      * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
-    def __init__(self, label=None,inputs=None, outputs=None, conversion_factors=None):
-                 #*args):#, **kwargs):
+    def __init__(self, label=None, inputs=None, outputs=None, conversion_factors=None):
+
         if inputs is None:
             inputs={}
         if outputs is None:
             outputs={}
-        super().__init__(label=label, inputs=inputs, outputs=outputs)#, *args, **kwargs)
+        super().__init__(label=label, inputs=inputs, outputs=outputs)
 
 
         check_node_object_for_missing_attribute(self, "inputs")
