@@ -136,20 +136,20 @@ class GenericStorage(network.Node):
         inputs,
         outputs,
         *,
-        nominal_storage_capacity,
-        initial_storage_level,
-        investment,
-        invest_relation_input_output,
-        invest_relation_input_capacity,
-        invest_relation_output_capacity,
+        nominal_storage_capacity=None,
+        initial_storage_level=None,
+        investment=None,
+        invest_relation_input_output=None,
+        invest_relation_input_capacity=None,
+        invest_relation_output_capacity=None,
+        min_storage_level=0,
         max_storage_level=1,
         balanced=True,
         loss_rate=0,
         fixed_losses_relative=0,
-        min_storage_level=0,
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
-        outflow_conversion_factor=1,
+        outflow_conversion_factor=1
     ):
         super().__init__(label, inputs, outputs)
         self.nominal_storage_capacity = nominal_storage_capacity
