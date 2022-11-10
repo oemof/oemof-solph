@@ -28,27 +28,29 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     name : str
         Optional name for the equation e.g. in the LP file. By default the
         name is: equate + string representation of var1 and var2.
-    model : oemof.solph.Model
+    model : oemof.solph._models.Model
         Model to which the constraint is added.
 
-     **The following constraints are build:**
 
-     .. math:: var_1 \cdot factor_1 = var_1
+    **The following constraints are build:**
 
-     The symbols used are defined as follows (with Variables (V) and Parameters
-      (P)):
+    .. math:: var_1 \cdot factor_1 = var_1
+
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
+
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | symbol           | attribute           | type | explanation                                                                                                                                    |
     +==================+=====================+======+================================================================================================================================================+
-    | :math:`var_1`    | pyomo.environ.Var`  | V    | First variable, to be set to equal with :math:`var_2` and multiplied with :math:`factor_1`var_1                                             |
+    | :math:`var_1`    | pyomo.environ.Var`  | V    | First variable, to be set to equal with :math:`var_2` and :math:`var_1` multiplied with :math:`factor_1`                                       |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | :math:`var_2`    | pyomo.environ.Var`  | V    | Second variable, to be set equal to :math:`var_1 \cdot factor_1`                                                                               |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | :math:`factor_1` | `float`             | P    | Factor to define the proportion between the variables. The default value is 1.                                                                 |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
-    | name             | `str`               | P    | Optional name for the equation e.g. in the LP file. By default the name is: equate + string representation of :math:`var_1` and :math:`var_2`. |
+    | name             | `str`               | P    | | Optional name for the equation e.g. in the LP file.                                                                                          |
+    |                  |                     |      | | By default the name is: equate + string representation of :math:`var_1` and :math:`var_2`.                                                   |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
-    | model            | `oemof.solph.Model` | P    | Model to which the constraint is added                                                                                                        |
+    | model            | `oemof.solph.Model` | P    | Model to which the constraint is added                                                                                                         |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
 
     Examples
@@ -73,8 +75,8 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     >>> energysystem.add(solph.components.Transformer(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.flows.Flow()},
-    ...   outputs={bel1: solph.flows.Flow(
-    ...       investment=solph.Investment(ep_costs=20))}))
+    ...    outputs={bel1: solph.flows.Flow(
+    ...        investment=solph.Investment(ep_costs=20))}))
     >>> om = solph.Model(energysystem)
     >>> line12 = energysystem.groups['powerline_1_2']
     >>> line21 = energysystem.groups['powerline_2_1']
