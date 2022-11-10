@@ -146,7 +146,7 @@ class InvestmentFlowBlock(ScalarBlock):
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
 
-        * :math:`b_{invest}`
+        * :math:`Y_{invest}`
 
         Binary variable for the status of the investment, if
         :attr:`nonconvex` is `True`.
@@ -197,9 +197,9 @@ class InvestmentFlowBlock(ScalarBlock):
 
             .. math::
                 &
-                P_{invest, min} \cdot b_{invest} \le P_{invest}\\
+                P_{invest, min} \cdot Y_{invest} \le P_{invest}\\
                 &
-                P_{invest} \le P_{invest, max} \cdot b_{invest}\\
+                P_{invest} \le P_{invest, max} \cdot Y_{invest}\\
 
         For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
         the following additional constraints are created, if the appropriate
@@ -337,7 +337,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
         .. math::
             P_{invest} \cdot c_{invest,var}
-            + c_{invest,fix} \cdot b_{invest}\\
+            + c_{invest,fix} \cdot Y_{invest}\\
         """
         if not hasattr(self, "INVESTFLOWS"):
             return 0

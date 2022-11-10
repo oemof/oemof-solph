@@ -335,7 +335,7 @@ class NonConvexFlowBlock(ScalarBlock):
         r"""
         .. math::
             \sum_{ACTIVITYCOSTFLOWS} \sum_t Y_{status}(t) \
-            \cdot activity\_costs(i, o)
+            \cdot c_{activity}
         """
         activity_costs = 0
 
@@ -384,18 +384,18 @@ class NonConvexFlowBlock(ScalarBlock):
         r"""
         .. math::
             (Y_{status}(t-1) - Y_{status}(t)) \
-            \cdot minimum\_downtime \\
-            \leq minimum\_downtime \
-            - \sum_{n=0}^{minimum\_downtime-1} Y_{status}(t+n) \\
+            \cdot t_{down,minimum} \\
+            \leq t_{down,minimum} \
+            - \sum_{n=0}^{t_{down,minimum}-1} Y_{status}(t+n) \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
+            t \neq \{0..t_{down,minimum}\} \cup \
+            \{t\_max-t_{down,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
             \\ \\
             Y_{status}(t) = Y_{status,0} \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
+            t = \{0..t_{down,minimum}\} \cup \
+            \{t\_max-t_{down,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
         """
         m = self.parent_block()
@@ -430,17 +430,17 @@ class NonConvexFlowBlock(ScalarBlock):
     def _min_uptime_constraint(self):
         r"""
         .. math::
-            (Y_{status}(t)-Y_{status}(t-1)) \cdot minimum\_uptime(i, o) \\
-            \leq \sum_{n=0}^{minimum\_uptime-1} Y_{status}(t+n) \\
+            (Y_{status}(t)-Y_{status}(t-1)) \cdot t_{up,minimum} \\
+            \leq \sum_{n=0}^{t_{up,minimum}-1} Y_{status}(t+n) \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
+            t \neq \{0..t_{up,minimum}\} \cup \
+            \{t\_max-t_{up,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
             \\ \\
             Y_{status}(t) = Y_{status,0} \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
+            t = \{0..t_{up,minimum}\} \cup \
+            \{t\_max-t_{up,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
         """
         m = self.parent_block()
@@ -561,7 +561,7 @@ class NonConvexFlowBlock(ScalarBlock):
             P(t) \leq max(i, o, t) \cdot P_{nom} \
                 \cdot status(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}.
         """
         m = self.parent_block()
 
@@ -580,7 +580,7 @@ class NonConvexFlowBlock(ScalarBlock):
         .. math::
             P(t) \geq min(i, o, t) \cdot P_{nom} \
                 \cdot Y_{status}(t), \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}, \\
+            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}, \\
             \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()

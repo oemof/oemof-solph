@@ -35,26 +35,6 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     .. automethod:: _create_sets
 
     .. automethod:: _objective_expression
-
-
-    **The following parts of the objective function are created similar
-    to the <class 'oemof.solph.flows.NonConvexFlow'> class:**
-
-    If `nonconvex.startup_costs` is set by the user:
-        .. math::
-            \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
-            \cdot startup\_costs(i, o)
-
-    If `nonconvex.shutdown_costs` is set by the user:
-        .. math::
-            \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
-            \cdot shutdown\_costs(i, o)
-
-    **The following parts of the objective function are created similar
-    to the <class 'oemof.solph.flows.InvestmentFlow'> class:**
-
-    .. math::
-        P_{invest} \cdot c_{invest,var}
     """
 
     def __init__(self, *args, **kwargs):
@@ -264,7 +244,21 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         )
 
     def _objective_expression(self):
-        r"""Objective expression for nonconvex investment flows."""
+        r"""Objective expression for nonconvex investment flows.
+
+            If `nonconvex.startup_costs` is set by the user:
+            .. math::
+                \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
+                \cdot c_{startup}
+
+            If `nonconvex.shutdown_costs` is set by the user:
+                .. math::
+                    \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
+                    \cdot c_{shutdown}
+
+            .. math::
+                P_{invest} \cdot c_{invest,var}
+        """
         if not hasattr(self, "INVEST_NON_CONVEX_FLOWS"):
             return 0
 
