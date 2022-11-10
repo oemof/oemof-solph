@@ -75,150 +75,160 @@ from oemof.tools import logger
 
 from oemof import solph
 
-# Read data file
-filename = os.path.join(os.getcwd(), "storage_investmentd.csv")
-try:
-    data = pd.read_csv(filename)
-except FileNotFoundError:
-    msg = "Data file not found: {0}. Only one value used!"
-    warnings.warn(msg.format(filename), UserWarning)
-    data = pd.DataFrame(
-        {"pv": [0.3, 0.5], "wind": [0.6, 0.8], "demand_el": [500, 600]}
+
+def main():
+    # Read data file
+    filename = os.path.join(os.getcwd(), "storage_investmentd.csv")
+    try:
+        data = pd.read_csv(filename)
+    except FileNotFoundError:
+        msg = "Data file not found: {0}. Only one value used!"
+        warnings.warn(msg.format(filename), UserWarning)
+        data = pd.DataFrame(
+            {"pv": [0.3, 0.5], "wind": [0.6, 0.8], "demand_el": [500, 600]}
+        )
+
+    number_timesteps = len(data)
+
+    ##########################################################################
+    # Initialize the energy system and read/calculate necessary parameters
+    ##########################################################################
+
+    logger.define_logging()
+    logging.info("Initialize the energy system")
+    date_time_index = solph.create_time_index(2012, number=number_timesteps)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=False
     )
 
-number_timesteps = len(data)
+    price_gas = 0.04
 
-##########################################################################
-# Initialize the energy system and read/calculate necessary parameters
-##########################################################################
+    # If the period is one year the equivalent periodical costs (epc) of an
+    # investment are equal to the annuity. Use oemof's economic tools.
+    epc_wind = economics.annuity(capex=1000, n=20, wacc=0.05)
+    epc_pv = economics.annuity(capex=1000, n=20, wacc=0.05)
+    epc_storage = economics.annuity(capex=1000, n=20, wacc=0.05)
 
-logger.define_logging()
-logging.info("Initialize the energy system")
-date_time_index = solph.create_time_index(2012, number=number_timesteps)
-energysystem = solph.EnergySystem(
-    timeindex=date_time_index, infer_last_interval=False
-)
+    ##########################################################################
+    # Create oemof objects
+    ##########################################################################
 
-price_gas = 0.04
+    logging.info("Create oemof objects")
+    # create natural gas bus
+    bgas = solph.Bus(label="natural_gas")
 
-# If the period is one year the equivalent periodical costs (epc) of an
-# investment are equal to the annuity. Use oemof's economic tools.
-epc_wind = economics.annuity(capex=1000, n=20, wacc=0.05)
-epc_pv = economics.annuity(capex=1000, n=20, wacc=0.05)
-epc_storage = economics.annuity(capex=1000, n=20, wacc=0.05)
+    # create electricity bus
+    bel = solph.Bus(label="electricity")
 
-##########################################################################
-# Create oemof objects
-##########################################################################
+    energysystem.add(bgas, bel)
 
-logging.info("Create oemof objects")
-# create natural gas bus
-bgas = solph.Bus(label="natural_gas")
+    # create excess component for the electricity bus to allow overproduction
+    excess = solph.components.Sink(
+        label="excess_bel", inputs={bel: solph.Flow()}
+    )
 
-# create electricity bus
-bel = solph.Bus(label="electricity")
+    # create source object representing the gas commodity (annual limit)
+    gas_resource = solph.components.Source(
+        label="rgas", outputs={bgas: solph.Flow(variable_costs=price_gas)}
+    )
 
-energysystem.add(bgas, bel)
+    # create fixed source object representing wind power plants
+    wind = solph.components.Source(
+        label="wind",
+        outputs={
+            bel: solph.Flow(
+                fix=data["wind"],
+                investment=solph.Investment(ep_costs=epc_wind),
+            )
+        },
+    )
 
-# create excess component for the electricity bus to allow overproduction
-excess = solph.components.Sink(label="excess_bel", inputs={bel: solph.Flow()})
+    # create fixed source object representing pv power plants
+    pv = solph.components.Source(
+        label="pv",
+        outputs={
+            bel: solph.Flow(
+                fix=data["pv"], investment=solph.Investment(ep_costs=epc_pv)
+            )
+        },
+    )
 
-# create source object representing the natural gas commodity (annual limit)
-gas_resource = solph.components.Source(
-    label="rgas", outputs={bgas: solph.Flow(variable_costs=price_gas)}
-)
+    # create simple sink object representing the electrical demand
+    demand = solph.components.Sink(
+        label="demand",
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+    )
 
-# create fixed source object representing wind power plants
-wind = solph.components.Source(
-    label="wind",
-    outputs={
-        bel: solph.Flow(
-            fix=data["wind"], investment=solph.Investment(ep_costs=epc_wind)
-        )
-    },
-)
+    # create simple transformer object representing a gas power plant
+    pp_gas = solph.components.Transformer(
+        label="pp_gas",
+        inputs={bgas: solph.Flow()},
+        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        conversion_factors={bel: 0.58},
+    )
 
-# create fixed source object representing pv power plants
-pv = solph.components.Source(
-    label="pv",
-    outputs={
-        bel: solph.Flow(
-            fix=data["pv"], investment=solph.Investment(ep_costs=epc_pv)
-        )
-    },
-)
+    # create storage object representing a battery
+    storage = solph.components.GenericStorage(
+        label="storage",
+        inputs={bel: solph.Flow(variable_costs=0.0001)},
+        outputs={bel: solph.Flow()},
+        loss_rate=0.00,
+        initial_storage_level=0,
+        invest_relation_input_capacity=1 / 6,
+        invest_relation_output_capacity=1 / 6,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=0.8,
+        investment=solph.Investment(ep_costs=epc_storage),
+    )
 
-# create simple sink object representing the electrical demand
-demand = solph.components.Sink(
-    label="demand",
-    inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
-)
+    energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)
 
-# create simple transformer object representing a gas power plant
-pp_gas = solph.components.Transformer(
-    label="pp_gas",
-    inputs={bgas: solph.Flow()},
-    outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
-    conversion_factors={bel: 0.58},
-)
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
 
-# create storage object representing a battery
-storage = solph.components.GenericStorage(
-    label="storage",
-    inputs={bel: solph.Flow(variable_costs=0.0001)},
-    outputs={bel: solph.Flow()},
-    loss_rate=0.00,
-    initial_storage_level=0,
-    invest_relation_input_capacity=1 / 6,
-    invest_relation_output_capacity=1 / 6,
-    inflow_conversion_factor=1,
-    outflow_conversion_factor=0.8,
-    investment=solph.Investment(ep_costs=epc_storage),
-)
+    logging.info("Optimise the energy system")
 
-energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)
+    # initialise the operational model
+    om = solph.Model(energysystem)
 
-##########################################################################
-# Optimise the energy system
-##########################################################################
+    # if tee_switch is true solver messages will be displayed
+    logging.info("Solve the optimization problem")
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-logging.info("Optimise the energy system")
+    ##########################################################################
+    # Check and plot the results
+    ##########################################################################
 
-# initialise the operational model
-om = solph.Model(energysystem)
+    # check if the new result object is working for custom components
+    results = solph.processing.results(om)
 
-# if tee_switch is true solver messages will be displayed
-logging.info("Solve the optimization problem")
-om.solve(solver="cbc", solve_kwargs={"tee": True})
+    electricity_bus = solph.views.node(results, "electricity")
 
-##########################################################################
-# Check and plot the results
-##########################################################################
+    meta_results = solph.processing.meta_results(om)
+    pp.pprint(meta_results)
 
-# check if the new result object is working for custom components
-results = solph.processing.results(om)
+    my_results = electricity_bus["scalars"]
 
-custom_storage = solph.views.node(results, "storage")
-electricity_bus = solph.views.node(results, "electricity")
+    # installed capacity of storage in GWh
+    my_results["storage_invest_GWh"] = (
+        results[(storage, None)]["scalars"]["invest"] / 1e6
+    )
 
-meta_results = solph.processing.meta_results(om)
-pp.pprint(meta_results)
+    # installed capacity of wind power plant in MW
+    my_results["wind_invest_MW"] = (
+        results[(wind, bel)]["scalars"]["invest"] / 1e3
+    )
 
-my_results = electricity_bus["scalars"]
+    # resulting renewable energy share
+    my_results["res_share"] = (
+        1
+        - results[(pp_gas, bel)]["sequences"].sum()
+        / results[(bel, demand)]["sequences"].sum()
+    )
 
-# installed capacity of storage in GWh
-my_results["storage_invest_GWh"] = (
-    results[(storage, None)]["scalars"]["invest"] / 1e6
-)
+    pp.pprint(my_results)
 
-# installed capacity of wind power plant in MW
-my_results["wind_invest_MW"] = results[(wind, bel)]["scalars"]["invest"] / 1e3
 
-# resulting renewable energy share
-my_results["res_share"] = (
-    1
-    - results[(pp_gas, bel)]["sequences"].sum()
-    / results[(bel, demand)]["sequences"].sum()
-)
-
-pp.pprint(my_results)
+if __name__ == "__main__":
+    main()

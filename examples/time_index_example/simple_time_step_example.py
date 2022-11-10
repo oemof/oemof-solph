@@ -33,68 +33,78 @@ import matplotlib.pyplot as plt
 
 from oemof import solph
 
-solver = "cbc"  # 'glpk', 'gurobi',...
-solver_verbose = False  # show/hide solver output
 
-date_time_index = solph.create_time_index(2000, interval=0.25, number=8)
+def main():
+    solver = "cbc"  # 'glpk', 'gurobi',...
+    solver_verbose = False  # show/hide solver output
 
-energy_system = solph.EnergySystem(
-    timeindex=date_time_index, infer_last_interval=False
-)
+    date_time_index = solph.create_time_index(2000, interval=0.25, number=8)
 
-bus = solph.buses.Bus(label="bus")
-source = solph.components.Source(
-    label="source",
-    outputs={
-        bus: solph.flows.Flow(
-            nominal_value=2,
-            variable_costs=0.2,
-            max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
-        )
-    },
-)
-storage = solph.components.GenericStorage(
-    label="storage",
-    inputs={bus: solph.flows.Flow()},
-    outputs={bus: solph.flows.Flow()},
-    nominal_storage_capacity=4,
-    initial_storage_level=0.5,
-)
-sink = solph.components.Sink(
-    label="sink",
-    inputs={
-        bus: solph.flows.Flow(
-            nominal_value=2,
-            variable_costs=0.1,
-            fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0],
-        )
-    },
-)
-
-energy_system.add(bus, source, sink, storage)
-model = solph.Model(energy_system)
-model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
-
-results = solph.processing.results(model)
-
-results_df = results[(storage, None)]["sequences"].copy()
-results_df["storage_inflow"] = results[(bus, storage)]["sequences"]["flow"]
-results_df["storage_outflow"] = results[(storage, bus)]["sequences"]["flow"]
-
-print(results_df)
-
-if plt is not None:
-    plt.plot(
-        results[(bus, storage)]["sequences"],
-        drawstyle="steps-post",
-        label="Storage inflow",
-    )
-    plt.plot(results[(storage, None)]["sequences"], label="Storage content")
-    plt.plot(
-        results[(storage, bus)]["sequences"],
-        drawstyle="steps-post",
-        label="Storage outflow",
+    energy_system = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=False
     )
 
-    plt.legend(loc="lower left")
-    plt.show()
+    bus = solph.buses.Bus(label="bus")
+    source = solph.components.Source(
+        label="source",
+        outputs={
+            bus: solph.flows.Flow(
+                nominal_value=2,
+                variable_costs=0.2,
+                max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
+            )
+        },
+    )
+    storage = solph.components.GenericStorage(
+        label="storage",
+        inputs={bus: solph.flows.Flow()},
+        outputs={bus: solph.flows.Flow()},
+        nominal_storage_capacity=4,
+        initial_storage_level=0.5,
+    )
+    sink = solph.components.Sink(
+        label="sink",
+        inputs={
+            bus: solph.flows.Flow(
+                nominal_value=2,
+                variable_costs=0.1,
+                fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0],
+            )
+        },
+    )
+
+    energy_system.add(bus, source, sink, storage)
+    model = solph.Model(energy_system)
+    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+
+    results = solph.processing.results(model)
+
+    results_df = results[(storage, None)]["sequences"].copy()
+    results_df["storage_inflow"] = results[(bus, storage)]["sequences"]["flow"]
+    results_df["storage_outflow"] = results[(storage, bus)]["sequences"][
+        "flow"
+    ]
+
+    print(results_df)
+
+    if plt is not None:
+        plt.plot(
+            results[(bus, storage)]["sequences"],
+            drawstyle="steps-post",
+            label="Storage inflow",
+        )
+        plt.plot(
+            results[(storage, None)]["sequences"], label="Storage content"
+        )
+        plt.plot(
+            results[(storage, bus)]["sequences"],
+            drawstyle="steps-post",
+            label="Storage outflow",
+        )
+
+        plt.legend(loc="lower left")
+        plt.show()
+
+
+if __name__ == "__main__":
+    main()

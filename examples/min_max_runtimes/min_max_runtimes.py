@@ -19,82 +19,92 @@ License
 
 """
 from matplotlib import pyplot as plt
-from oemof.network.network import Node
 
 from oemof import solph
 
-# Create demand data
-demand_el = [0] * 24
-for n in [10, 15, 19]:
-    demand_el[n] = 1
 
-# create an energy system
-idx = solph.create_time_index(2017, number=24)
-es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
-Node.registry = es
+def main():
+    # Create demand data
+    demand_el = [0] * 24
+    for n in [10, 15, 19]:
+        demand_el[n] = 1
 
-# power bus and components
-bel = solph.Bus(label="bel")
+    # create an energy system
+    idx = solph.create_time_index(2017, number=24)
+    es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
-demand_el = solph.components.Sink(
-    label="demand_el",
-    inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
-)
+    # power bus and components
+    bel = solph.Bus(label="bel")
 
-dummy_el = solph.components.Sink(
-    label="dummy_el", inputs={bel: solph.Flow(variable_costs=10)}
-)
+    demand_el = solph.components.Sink(
+        label="demand_el",
+        inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
+    )
 
-pp1 = solph.components.Source(
-    label="plant_min_down_constraints",
-    outputs={
-        bel: solph.Flow(
-            nominal_value=10,
-            min=0.5,
-            max=1.0,
-            variable_costs=10,
-            nonconvex=solph.NonConvex(minimum_downtime=4, initial_status=0),
-        )
-    },
-)
+    dummy_el = solph.components.Sink(
+        label="dummy_el", inputs={bel: solph.Flow(variable_costs=10)}
+    )
 
-pp2 = solph.components.Source(
-    label="plant_min_up_constraints",
-    outputs={
-        bel: solph.Flow(
-            nominal_value=10,
-            min=0.5,
-            max=1.0,
-            variable_costs=10,
-            nonconvex=solph.NonConvex(minimum_uptime=2, initial_status=1),
-        )
-    },
-)
+    pp1 = solph.components.Source(
+        label="plant_min_down_constraints",
+        outputs={
+            bel: solph.Flow(
+                nominal_value=10,
+                min=0.5,
+                max=1.0,
+                variable_costs=10,
+                nonconvex=solph.NonConvex(
+                    minimum_downtime=4, initial_status=0
+                ),
+            )
+        },
+    )
 
-# create an optimization problem and solve it
-om = solph.Model(es)
+    pp2 = solph.components.Source(
+        label="plant_min_up_constraints",
+        outputs={
+            bel: solph.Flow(
+                nominal_value=10,
+                min=0.5,
+                max=1.0,
+                variable_costs=10,
+                nonconvex=solph.NonConvex(minimum_uptime=2, initial_status=1),
+            )
+        },
+    )
 
-# debugging
-# om.write('problem.lp', io_options={'symbolic_solver_labels': True})
+    es.add(bel, dummy_el, demand_el, pp1, pp2)
 
-# solve model
-om.solve(solver="cbc", solve_kwargs={"tee": True})
+    # create an optimization problem and solve it
+    om = solph.Model(es)
 
-# create result object
-results = solph.processing.results(om)
+    # debugging
+    # om.write('problem.lp', io_options={'symbolic_solver_labels': True})
 
-# plot data
-data = solph.views.node(results, "bel")["sequences"]
-data[[(("bel", "demand_el"), "flow"), (("bel", "dummy_el"), "flow")]] *= -1
-exclude = ["dummy_el", "status"]
-columns = [
-    c for c in data.columns if not any(s in c[0] or s in c[1] for s in exclude)
-]
-data = data[columns]
-fig, ax = plt.subplots(figsize=(10, 5))
-data.plot(ax=ax, kind="line", drawstyle="steps-post", grid=True, rot=0)
-ax.set_xlabel("Hour")
-ax.set_ylabel("P [MW]")
-plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.3), ncol=1)
-fig.subplots_adjust(top=0.8)
-plt.show()
+    # solve model
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
+
+    # create result object
+    results = solph.processing.results(om)
+
+    # plot data
+    data = solph.views.node(results, "bel")["sequences"]
+    data[[(("bel", "demand_el"), "flow"), (("bel", "dummy_el"), "flow")]] *= -1
+    exclude = ["dummy_el", "status"]
+    columns = [
+        c
+        for c in data.columns
+        if not any(s in c[0] or s in c[1] for s in exclude)
+    ]
+    data = data[columns]
+    fig, ax = plt.subplots(figsize=(10, 5))
+    data.plot(ax=ax, kind="line", drawstyle="steps-post", grid=True, rot=0)
+    ax.set_xlabel("Hour")
+    ax.set_ylabel("P [MW]")
+    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.3), ncol=1)
+    fig.subplots_adjust(top=0.8)
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -31,163 +31,170 @@ from oemof.solph import components as cmp
 from oemof.solph import flows
 from oemof.solph import processing
 
-# The gradient for the output of the natural gas power plant.
-# Change the gradient between 0.1 and 0.0001 and check the results. The
-# more flexible the power plant can be run the less the storage will be used.
-GRADIENT = 0.01
 
-date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
-print(date_time_index)
-energysystem = EnergySystem(timeindex=date_time_index, timemode="explicit")
+def main():
+    # The gradient for the output of the natural gas power plant.
+    # Change the gradient between 0.1 and 0.0001 and check the results. The
+    # more flexible the power plant can be run the less the storage will be
+    # used.
+    gradient = 0.01
 
-demand = [
-    209643,
-    207497,
-    200108,
-    191892,
-    185717,
-    180672,
-    172683,
-    170048,
-    171132,
-    179532,
-    189155,
-    201026,
-    208466,
-    207718,
-    205443,
-    206255,
-    217240,
-    232798,
-    237321,
-    232387,
-    224306,
-    219280,
-    223701,
-    213926,
-    201834,
-    192215,
-    187152,
-    184355,
-    184438,
-    182786,
-    180105,
-    191509,
-    207104,
-    222501,
-    231127,
-    238410,
-    241184,
-    237413,
-    234469,
-    235193,
-    242730,
-    264196,
-    265950,
-    260283,
-    245578,
-    238849,
-    241553,
-    231372,
-]
+    date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
+    print(date_time_index)
+    energysystem = EnergySystem(timeindex=date_time_index, timemode="explicit")
 
-# create natural gas bus
-bgas = buses.Bus(label="natural_gas")
+    demand = [
+        209643,
+        207497,
+        200108,
+        191892,
+        185717,
+        180672,
+        172683,
+        170048,
+        171132,
+        179532,
+        189155,
+        201026,
+        208466,
+        207718,
+        205443,
+        206255,
+        217240,
+        232798,
+        237321,
+        232387,
+        224306,
+        219280,
+        223701,
+        213926,
+        201834,
+        192215,
+        187152,
+        184355,
+        184438,
+        182786,
+        180105,
+        191509,
+        207104,
+        222501,
+        231127,
+        238410,
+        241184,
+        237413,
+        234469,
+        235193,
+        242730,
+        264196,
+        265950,
+        260283,
+        245578,
+        238849,
+        241553,
+        231372,
+    ]
 
-# create electricity bus
-bel = buses.Bus(label="electricity")
+    # create natural gas bus
+    bgas = buses.Bus(label="natural_gas")
 
-# adding the buses to the energy system
-energysystem.add(bgas, bel)
+    # create electricity bus
+    bel = buses.Bus(label="electricity")
 
-# create excess component for the electricity bus to allow overproduction
-energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
+    # adding the buses to the energy system
+    energysystem.add(bgas, bel)
 
-# create source object representing the natural gas commodity (annual limit)
-energysystem.add(
-    cmp.Source(
-        label="rgas",
-        outputs={bgas: flows.Flow(variable_costs=5)},
+    # create excess component for the electricity bus to allow overproduction
+    energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
+
+    # create source object representing the gas commodity (annual limit)
+    energysystem.add(
+        cmp.Source(
+            label="rgas",
+            outputs={bgas: flows.Flow(variable_costs=5)},
+        )
     )
-)
 
-# create simple sink object representing the electrical demand
-energysystem.add(
-    cmp.Sink(
-        label="demand",
-        inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
+    # create simple sink object representing the electrical demand
+    energysystem.add(
+        cmp.Sink(
+            label="demand",
+            inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
+        )
     )
-)
 
-# create simple transformer object representing a gas power plant
-energysystem.add(
-    cmp.Transformer(
-        label="pp_gas",
-        inputs={bgas: flows.Flow()},
-        outputs={
-            bel: flows.Flow(
-                nominal_value=10e5,
-                negative_gradient={"ub": GRADIENT},
-                positive_gradient={"ub": GRADIENT},
-            )
-        },
-        conversion_factors={bel: 0.58},
+    # create simple transformer object representing a gas power plant
+    energysystem.add(
+        cmp.Transformer(
+            label="pp_gas",
+            inputs={bgas: flows.Flow()},
+            outputs={
+                bel: flows.Flow(
+                    nominal_value=10e5,
+                    negative_gradient={"ub": gradient},
+                    positive_gradient={"ub": gradient},
+                )
+            },
+            conversion_factors={bel: 0.58},
+        )
     )
-)
 
-# create storage object representing a battery
-storage = cmp.GenericStorage(
-    nominal_storage_capacity=999999999,
-    label="storage",
-    inputs={bel: flows.Flow()},
-    outputs={bel: flows.Flow()},
-    loss_rate=0.0,
-    initial_storage_level=None,
-    inflow_conversion_factor=1,
-    outflow_conversion_factor=0.8,
-)
+    # create storage object representing a battery
+    storage = cmp.GenericStorage(
+        nominal_storage_capacity=999999999,
+        label="storage",
+        inputs={bel: flows.Flow()},
+        outputs={bel: flows.Flow()},
+        loss_rate=0.0,
+        initial_storage_level=None,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=0.8,
+    )
 
-energysystem.add(storage)
+    energysystem.add(storage)
 
-# initialise the operational model
-model = Model(energysystem)
+    # initialise the operational model
+    model = Model(energysystem)
 
-# solve
-model.solve(solver="cbc")
+    # solve
+    model.solve(solver="cbc")
 
-# processing the results
-results = processing.results(model)
+    # processing the results
+    results = processing.results(model)
 
-# ****** Create a table with all sequences and store it into a file (csv/xlsx)
-flows_to_bus = pd.DataFrame(
-    {
-        str(k[0].label): v["sequences"]["flow"]
-        for k, v in results.items()
-        if k[1] is not None and k[1] == bel
-    }
-)
-flows_from_bus = pd.DataFrame(
-    {
-        str(k[1].label): v["sequences"]["flow"]
-        for k, v in results.items()
-        if k[1] is not None and k[0] == bel
-    }
-)
+    # *** Create a table with all sequences and store it into a file (csv/xlsx)
+    flows_to_bus = pd.DataFrame(
+        {
+            str(k[0].label): v["sequences"]["flow"]
+            for k, v in results.items()
+            if k[1] is not None and k[1] == bel
+        }
+    )
+    flows_from_bus = pd.DataFrame(
+        {
+            str(k[1].label): v["sequences"]["flow"]
+            for k, v in results.items()
+            if k[1] is not None and k[0] == bel
+        }
+    )
 
-storage = pd.DataFrame(
-    {
-        str(k[0].label): v["sequences"]["storage_content"]
-        for k, v in results.items()
-        if k[1] is None and k[0] == storage
-    }
-)
+    storage = pd.DataFrame(
+        {
+            str(k[0].label): v["sequences"]["storage_content"]
+            for k, v in results.items()
+            if k[1] is None and k[0] == storage
+        }
+    )
 
-my_flows = pd.concat(
-    [flows_to_bus, flows_from_bus, storage],
-    keys=["to_bus", "from_bus", "content", "duals"],
-    axis=1,
-)
+    my_flows = pd.concat(
+        [flows_to_bus, flows_from_bus, storage],
+        keys=["to_bus", "from_bus", "content", "duals"],
+        axis=1,
+    )
 
-print(my_flows)
-my_flows.plot()
-plt.show()
+    print(my_flows)
+    my_flows.plot()
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -120,214 +120,220 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
         return "_".join(map(str, self._asdict().values()))
 
 
-# Read data file
-filename = os.path.join(os.getcwd(), "tuple_as_label.csv")
-try:
-    data = pd.read_csv(filename)
-except FileNotFoundError:
-    msg = "Data file not found: {0}. Only one value used!"
-    warnings.warn(msg.format(filename), UserWarning)
-    data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+def main():
+    # Read data file
+    filename = os.path.join(os.getcwd(), "tuple_as_label.csv")
+    try:
+        data = pd.read_csv(filename)
+    except FileNotFoundError:
+        msg = "Data file not found: {0}. Only one value used!"
+        warnings.warn(msg.format(filename), UserWarning)
+        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
-solver = "cbc"  # 'glpk', 'gurobi',....
-debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
-number_of_time_steps = len(data)
-solver_verbose = False  # show/hide solver output
+    solver = "cbc"  # 'glpk', 'gurobi',....
+    debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
+    number_of_time_steps = len(data)
+    solver_verbose = False  # show/hide solver output
 
-# initiate the logger (see the API docs for more information)
-logger.define_logging(
-    logfile="oemof_example.log",
-    screen_level=logging.INFO,
-    file_level=logging.WARNING,
-)
-
-logging.info("Initialize the energy system")
-energysystem = EnergySystem(
-    timeindex=create_time_index(2012, number=number_of_time_steps),
-    infer_last_interval=False,
-)
-
-
-##########################################################################
-# Create oemof object
-##########################################################################
-
-logging.info("Create oemof objects")
-
-# The bus objects were assigned to variables which makes it easier to connect
-# components to these buses (see below).
-
-# create natural gas bus
-bgas = buses.Bus(label=Label("bus", "gas", None))
-
-# create electricity bus
-bel = buses.Bus(label=Label("bus", "electricity", None))
-
-# adding the buses to the energy system
-energysystem.add(bgas, bel)
-
-# create excess component for the electricity bus to allow overproduction
-energysystem.add(
-    comp.Sink(
-        label=Label("sink", "electricity", "excess"),
-        inputs={bel: flows.Flow()},
+    # initiate the logger (see the API docs for more information)
+    logger.define_logging(
+        logfile="oemof_example.log",
+        screen_level=logging.INFO,
+        file_level=logging.WARNING,
     )
-)
 
-# create source object representing the natural gas commodity (annual limit)
-energysystem.add(
-    comp.Source(
-        label=Label("commodity_source", "gas", "commodity"),
-        outputs={bgas: flows.Flow()},
+    logging.info("Initialize the energy system")
+    energysystem = EnergySystem(
+        timeindex=create_time_index(2012, number=number_of_time_steps),
+        infer_last_interval=False,
     )
-)
 
-# create fixed source object representing wind pow er plants
-energysystem.add(
-    comp.Source(
-        label=Label("ee_source", "electricity", "wind"),
-        outputs={bel: flows.Flow(fix=data["wind"], nominal_value=2000)},
+    ##########################################################################
+    # Create oemof object
+    ##########################################################################
+
+    logging.info("Create oemof objects")
+
+    # The bus objects were assigned to variables which makes it easier to
+    # connect components to these buses (see below).
+
+    # create natural gas bus
+    bgas = buses.Bus(label=Label("bus", "gas", None))
+
+    # create electricity bus
+    bel = buses.Bus(label=Label("bus", "electricity", None))
+
+    # adding the buses to the energy system
+    energysystem.add(bgas, bel)
+
+    # create excess component for the electricity bus to allow overproduction
+    energysystem.add(
+        comp.Sink(
+            label=Label("sink", "electricity", "excess"),
+            inputs={bel: flows.Flow()},
+        )
     )
-)
 
-# create fixed source object representing pv power plants
-energysystem.add(
-    comp.Source(
-        label=Label("ee_source", "electricity", "pv"),
-        outputs={bel: flows.Flow(fix=data["pv"], nominal_value=3000)},
+    # create source object representing the gas commodity (annual limit)
+    energysystem.add(
+        comp.Source(
+            label=Label("commodity_source", "gas", "commodity"),
+            outputs={bgas: flows.Flow()},
+        )
     )
-)
 
-# create simple sink object representing the electrical demand
-energysystem.add(
-    comp.Sink(
-        label=Label("sink", "electricity", "demand"),
-        inputs={
-            bel: flows.Flow(fix=data["demand_el"] / 1000, nominal_value=1)
-        },
+    # create fixed source object representing wind pow er plants
+    energysystem.add(
+        comp.Source(
+            label=Label("ee_source", "electricity", "wind"),
+            outputs={bel: flows.Flow(fix=data["wind"], nominal_value=2000)},
+        )
     )
-)
 
-# create simple transformer object representing a gas power plant
-energysystem.add(
-    comp.Transformer(
-        label=Label("power plant", "electricity", "gas"),
-        inputs={bgas: flows.Flow()},
-        outputs={bel: flows.Flow(nominal_value=10000, variable_costs=50)},
-        conversion_factors={bel: 0.58},
+    # create fixed source object representing pv power plants
+    energysystem.add(
+        comp.Source(
+            label=Label("ee_source", "electricity", "pv"),
+            outputs={bel: flows.Flow(fix=data["pv"], nominal_value=3000)},
+        )
     )
-)
 
-# create storage object representing a battery
-nominal_storage_capacity = 5000
-storage = comp.GenericStorage(
-    nominal_storage_capacity=nominal_storage_capacity,
-    label=Label("storage", "electricity", "battery"),
-    inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
-    outputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
-    loss_rate=0.00,
-    initial_storage_level=None,
-    inflow_conversion_factor=1,
-    outflow_conversion_factor=0.8,
-)
-
-energysystem.add(storage)
-
-##########################################################################
-# Optimise the energy system and plot the results
-##########################################################################
-
-logging.info("Optimise the energy system")
-
-# initialise the operational model
-model = Model(energysystem)
-
-# This is for debugging only. It is not(!) necessary to solve the problem and
-# should be set to False to save time and disc space in normal use. For
-# debugging the timesteps should be set to 3, to increase the readability of
-# the lp-file.
-if debug:
-    filename = os.path.join(
-        helpers.extend_basic_path("lp_files"), "basic_example.lp"
+    # create simple sink object representing the electrical demand
+    energysystem.add(
+        comp.Sink(
+            label=Label("sink", "electricity", "demand"),
+            inputs={
+                bel: flows.Flow(fix=data["demand_el"] / 1000, nominal_value=1)
+            },
+        )
     )
-    logging.info("Store lp-file in {0}.".format(filename))
-    model.write(filename, io_options={"symbolic_solver_labels": True})
 
-# if tee_switch is true solver messages will be displayed
-logging.info("Solve the optimization problem")
-model.receive_duals()
-model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
-
-logging.info("Store the energy system with the results.")
-
-# The processing module of the outputlib can be used to extract the results
-# from the model transfer them into a homogeneous structured dictionary.
-
-results = processing.results(model)
-
-
-# ****** Create a table with all sequences and store it into a file (csv/xlsx)
-flows_to_bus = pd.DataFrame(
-    {
-        str(k[0].label): v["sequences"]["flow"]
-        for k, v in results.items()
-        if k[1] is not None and k[1] == bel
-    }
-)
-flows_from_bus = pd.DataFrame(
-    {
-        str(k[1].label): v["sequences"]["flow"]
-        for k, v in results.items()
-        if k[1] is not None and k[0] == bel
-    }
-)
-
-storage = pd.DataFrame(
-    {
-        str(k[0].label): v["sequences"]["storage_content"]
-        for k, v in results.items()
-        if k[1] is None and k[0] == storage
-    }
-)
-
-duals = pd.DataFrame(
-    {
-        str(k[0].label): v["sequences"]["duals"]
-        for k, v in results.items()
-        if k[1] is None and isinstance(k[0], buses.Bus)
-    }
-)
-
-my_flows = pd.concat(
-    [flows_to_bus, flows_from_bus, storage],
-    keys=["to_bus", "from_bus", "content", "duals"],
-    axis=1,
-)
-
-# Store the table to csv or excel file:
-home_path = os.path.expanduser("~")
-my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
-# my_flows.to_excel(os.path.join(home_path, "my_flows.xlsx"))
-print(my_flows.sum())
-
-# ********* Use your tuple labels to filter the components
-ee_sources = [
-    str(f[0].label) for f in results.keys() if f[0].label.tag1 == "ee_source"
-]
-print(ee_sources)
-
-# It is possible to filter components by the label tags and the class, so the
-# label concepts is a result of the postprocessing. If it is necessary to get
-# all components of a region, "region" should be a field of the label.
-# To filter only by tags you can add a tag named "class" with the name of the
-# class as value.
-electricity_buses = list(
-    set(
-        [
-            str(f[0].label)
-            for f in results.keys()
-            if f[0].label.tag2 == "electricity" and isinstance(f[0], buses.Bus)
-        ]
+    # create simple transformer object representing a gas power plant
+    energysystem.add(
+        comp.Transformer(
+            label=Label("power plant", "electricity", "gas"),
+            inputs={bgas: flows.Flow()},
+            outputs={bel: flows.Flow(nominal_value=10000, variable_costs=50)},
+            conversion_factors={bel: 0.58},
+        )
     )
-)
-print(electricity_buses)
+
+    # create storage object representing a battery
+    nominal_storage_capacity = 5000
+    storage = comp.GenericStorage(
+        nominal_storage_capacity=nominal_storage_capacity,
+        label=Label("storage", "electricity", "battery"),
+        inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
+        outputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
+        loss_rate=0.00,
+        initial_storage_level=None,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=0.8,
+    )
+
+    energysystem.add(storage)
+
+    ##########################################################################
+    # Optimise the energy system and plot the results
+    ##########################################################################
+
+    logging.info("Optimise the energy system")
+
+    # initialise the operational model
+    model = Model(energysystem)
+
+    # This is for debugging only. It is not(!) necessary to solve the problem
+    # and should be set to False to save time and disc space in normal use. For
+    # debugging the timesteps should be set to 3, to increase the readability
+    # of the lp-file.
+    if debug:
+        filename = os.path.join(
+            helpers.extend_basic_path("lp_files"), "basic_example.lp"
+        )
+        logging.info("Store lp-file in {0}.".format(filename))
+        model.write(filename, io_options={"symbolic_solver_labels": True})
+
+    # if tee_switch is true solver messages will be displayed
+    logging.info("Solve the optimization problem")
+    model.receive_duals()
+    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+
+    logging.info("Store the energy system with the results.")
+
+    # The processing module of the outputlib can be used to extract the results
+    # from the model transfer them into a homogeneous structured dictionary.
+
+    results = processing.results(model)
+
+    # ** Create a table with all sequences and store it into a file (csv/xlsx)
+    flows_to_bus = pd.DataFrame(
+        {
+            str(k[0].label): v["sequences"]["flow"]
+            for k, v in results.items()
+            if k[1] is not None and k[1] == bel
+        }
+    )
+    flows_from_bus = pd.DataFrame(
+        {
+            str(k[1].label): v["sequences"]["flow"]
+            for k, v in results.items()
+            if k[1] is not None and k[0] == bel
+        }
+    )
+
+    storage = pd.DataFrame(
+        {
+            str(k[0].label): v["sequences"]["storage_content"]
+            for k, v in results.items()
+            if k[1] is None and k[0] == storage
+        }
+    )
+
+    duals = pd.DataFrame(
+        {
+            str(k[0].label): v["sequences"]["duals"]
+            for k, v in results.items()
+            if k[1] is None and isinstance(k[0], buses.Bus)
+        }
+    )
+
+    my_flows = pd.concat(
+        [flows_to_bus, flows_from_bus, storage, duals],
+        keys=["to_bus", "from_bus", "content", "duals"],
+        axis=1,
+    )
+
+    # Store the table to csv or excel file:
+    home_path = os.path.expanduser("~")
+    my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
+    # my_flows.to_excel(os.path.join(home_path, "my_flows.xlsx"))
+    print(my_flows.sum())
+
+    # ********* Use your tuple labels to filter the components
+    ee_sources = [
+        str(f[0].label)
+        for f in results.keys()
+        if f[0].label.tag1 == "ee_source"
+    ]
+    print(ee_sources)
+
+    # It is possible to filter components by the label tags and the class, so
+    # the label concepts is a result of the postprocessing. If it is necessary
+    # to get all components of a region, "region" should be a field of the
+    # label. To filter only by tags you can add a tag named "class" with the
+    # name of the class as value.
+    electricity_buses = list(
+        set(
+            [
+                str(f[0].label)
+                for f in results.keys()
+                if f[0].label.tag2 == "electricity"
+                and isinstance(f[0], buses.Bus)
+            ]
+        )
+    )
+    print(electricity_buses)
+
+
+if __name__ == "__main__":
+    main()

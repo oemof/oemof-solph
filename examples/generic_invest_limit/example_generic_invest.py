@@ -54,138 +54,151 @@ import matplotlib.pyplot as plt
 
 from oemof import solph
 
-data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
-# create an energy system
-idx = solph.create_time_index(2020, number=len(data))
-es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
+def main():
+    data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
-# Parameter: costs for the sources
-c_0 = 10
-c_1 = 100
+    # create an energy system
+    idx = solph.create_time_index(2020, number=len(data))
+    es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
-epc_invest = 500
+    # Parameter: costs for the sources
+    c_0 = 10
+    c_1 = 100
 
-# commodity a
-bus_a_0 = solph.Bus(label="bus_a_0")
-bus_a_1 = solph.Bus(label="bus_a_1")
-es.add(bus_a_0, bus_a_1)
+    epc_invest = 500
 
-es.add(
-    solph.components.Source(
-        label="source_a_0", outputs={bus_a_0: solph.Flow(variable_costs=c_0)}
+    # commodity a
+    bus_a_0 = solph.Bus(label="bus_a_0")
+    bus_a_1 = solph.Bus(label="bus_a_1")
+    es.add(bus_a_0, bus_a_1)
+
+    es.add(
+        solph.components.Source(
+            label="source_a_0",
+            outputs={bus_a_0: solph.Flow(variable_costs=c_0)},
+        )
     )
-)
 
-es.add(
-    solph.components.Source(
-        label="source_a_1", outputs={bus_a_1: solph.Flow(variable_costs=c_1)}
+    es.add(
+        solph.components.Source(
+            label="source_a_1",
+            outputs={bus_a_1: solph.Flow(variable_costs=c_1)},
+        )
     )
-)
 
-es.add(
-    solph.components.Sink(
-        label="demand_a",
-        inputs={bus_a_1: solph.Flow(fix=data, nominal_value=1)},
+    es.add(
+        solph.components.Sink(
+            label="demand_a",
+            inputs={bus_a_1: solph.Flow(fix=data, nominal_value=1)},
+        )
     )
-)
 
-# commodity b
-bus_b_0 = solph.Bus(label="bus_b_0")
-bus_b_1 = solph.Bus(label="bus_b_1")
-es.add(bus_b_0, bus_b_1)
-es.add(
-    solph.components.Source(
-        label="source_b_0", outputs={bus_b_0: solph.Flow(variable_costs=c_0)}
+    # commodity b
+    bus_b_0 = solph.Bus(label="bus_b_0")
+    bus_b_1 = solph.Bus(label="bus_b_1")
+    es.add(bus_b_0, bus_b_1)
+    es.add(
+        solph.components.Source(
+            label="source_b_0",
+            outputs={bus_b_0: solph.Flow(variable_costs=c_0)},
+        )
     )
-)
 
-es.add(
-    solph.components.Source(
-        label="source_b_1", outputs={bus_b_1: solph.Flow(variable_costs=c_1)}
+    es.add(
+        solph.components.Source(
+            label="source_b_1",
+            outputs={bus_b_1: solph.Flow(variable_costs=c_1)},
+        )
     )
-)
 
-es.add(
-    solph.components.Sink(
-        label="demand_b",
-        inputs={bus_b_1: solph.Flow(fix=data, nominal_value=1)},
+    es.add(
+        solph.components.Sink(
+            label="demand_b",
+            inputs={bus_b_1: solph.Flow(fix=data, nominal_value=1)},
+        )
     )
-)
 
-# transformer a
-es.add(
-    solph.components.Transformer(
-        label="trafo_a",
-        inputs={bus_a_0: solph.Flow()},
-        outputs={
-            bus_a_1: solph.Flow(
-                nominal_value=None,
-                investment=solph.Investment(
-                    ep_costs=epc_invest,
-                    space=2,
-                ),
-            )
-        },
-        conversion_factors={bus_a_1: 0.8},
+    # transformer a
+    es.add(
+        solph.components.Transformer(
+            label="trafo_a",
+            inputs={bus_a_0: solph.Flow()},
+            outputs={
+                bus_a_1: solph.Flow(
+                    nominal_value=None,
+                    investment=solph.Investment(
+                        ep_costs=epc_invest,
+                        space=2,
+                    ),
+                )
+            },
+            conversion_factors={bus_a_1: 0.8},
+        )
     )
-)
 
-# transformer b
-es.add(
-    solph.components.Transformer(
-        label="trafo_b",
-        inputs={bus_b_0: solph.Flow()},
-        outputs={
-            bus_b_1: solph.Flow(
-                nominal_value=None,
-                investment=solph.Investment(
-                    ep_costs=epc_invest,
-                    space=1,
-                ),
-            )
-        },
-        conversion_factors={bus_a_1: 0.8},
+    # transformer b
+    es.add(
+        solph.components.Transformer(
+            label="trafo_b",
+            inputs={bus_b_0: solph.Flow()},
+            outputs={
+                bus_b_1: solph.Flow(
+                    nominal_value=None,
+                    investment=solph.Investment(
+                        ep_costs=epc_invest,
+                        space=1,
+                    ),
+                )
+            },
+            conversion_factors={bus_a_1: 0.8},
+        )
     )
-)
+
+    # create an optimization problem and solve it
+    om = solph.Model(es)
+
+    # add constraint for generic investment limit
+    om = solph.constraints.additional_investment_flow_limit(
+        om, "space", limit=24
+    )
+
+    # export lp file
+    filename = os.path.join(
+        solph.helpers.extend_basic_path("lp_files"), "GenericInvest.lp"
+    )
+    logging.info("Store lp-file in {0}.".format(filename))
+    om.write(filename, io_options={"symbolic_solver_labels": True})
+
+    # solve model
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
+
+    # create result object
+    results = solph.processing.results(om)
+
+    bus1 = solph.views.node(results, "bus_a_1")["sequences"]
+    bus2 = solph.views.node(results, "bus_b_1")["sequences"]
+
+    # plot the time series (sequences) of a specific component/bus
+    if plt is not None:
+        bus1.plot(kind="line", drawstyle="steps-mid")
+        plt.legend()
+        plt.show()
+        bus2.plot(kind="line", drawstyle="steps-mid")
+        plt.legend()
+        plt.show()
+
+    space_used = om.invest_limit_space()
+    print("Space value: ", space_used)
+    print(
+        "Investment trafo_a: ",
+        solph.views.node(results, "trafo_a")["scalars"][0],
+    )
+    print(
+        "Investment trafo_b: ",
+        solph.views.node(results, "trafo_b")["scalars"][0],
+    )
 
 
-# create an optimization problem and solve it
-om = solph.Model(es)
-
-# add constraint for generic investment limit
-om = solph.constraints.additional_investment_flow_limit(om, "space", limit=24)
-
-# export lp file
-filename = os.path.join(
-    solph.helpers.extend_basic_path("lp_files"), "GenericInvest.lp"
-)
-logging.info("Store lp-file in {0}.".format(filename))
-om.write(filename, io_options={"symbolic_solver_labels": True})
-
-# solve model
-om.solve(solver="cbc", solve_kwargs={"tee": True})
-
-# create result object
-results = solph.processing.results(om)
-
-bus1 = solph.views.node(results, "bus_a_1")["sequences"]
-bus2 = solph.views.node(results, "bus_b_1")["sequences"]
-
-# plot the time series (sequences) of a specific component/bus
-if plt is not None:
-    bus1.plot(kind="line", drawstyle="steps-mid")
-    plt.legend()
-    plt.show()
-    bus2.plot(kind="line", drawstyle="steps-mid")
-    plt.legend()
-    plt.show()
-
-space_used = om.invest_limit_space()
-print("Space value: ", space_used)
-print(
-    "Investment trafo_a: ", solph.views.node(results, "trafo_a")["scalars"][0]
-)
-print(
-    "Investment trafo_b: ", solph.views.node(results, "trafo_b")["scalars"][0]
-)
+if __name__ == "__main__":
+    main()

@@ -139,7 +139,7 @@ def create_time_index(
     year: int = None,
     interval: float = 1,
     number: int = None,
-    start: datetime.datetime = None,
+    start: datetime.datetime or datetime.date = None,
 ):
     """
     Create a datetime index for one year.
@@ -162,7 +162,7 @@ def create_time_index(
         The number of time intervals. By default number is calculated to create
         an index of one year. For a shorter or longer period the number of
         intervals can be set by the user.
-    start : datetime.datetime
+    start : datetime.datetime or datetime.date
         Optional start time. If start is not set, 00:00 of the first day of
         the given year is the start time.
 

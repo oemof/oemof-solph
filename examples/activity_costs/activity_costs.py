@@ -35,68 +35,73 @@ import pandas as pd
 
 from oemof import solph
 
-##########################################################################
-# Calculate parameters and initialize the energy system and
-##########################################################################
 
-periods = 24
-time = pd.date_range("1/1/2018", periods=periods, freq="H")
+def main():
+    ##########################################################################
+    # Calculate parameters and initialize the energy system and
+    ##########################################################################
+    periods = 24
+    time = pd.date_range("1/1/2018", periods=periods, freq="H")
 
-demand_heat = np.full(periods, 5)
-demand_heat[:4] = 0
-demand_heat[4:18] = 4
+    demand_heat = np.full(periods, 5)
+    demand_heat[:4] = 0
+    demand_heat[4:18] = 4
 
-activity_costs = np.full(periods, 5)
-activity_costs[18:] = 0
+    activity_costs = np.full(periods, 5)
+    activity_costs[18:] = 0
 
-es = solph.EnergySystem(timeindex=time)
+    es = solph.EnergySystem(timeindex=time)
 
-b_heat = solph.Bus(label="b_heat")
+    b_heat = solph.Bus(label="b_heat")
 
-es.add(b_heat)
+    es.add(b_heat)
 
-sink_heat = solph.components.Sink(
-    label="demand",
-    inputs={b_heat: solph.Flow(fix=demand_heat, nominal_value=1)},
-)
+    sink_heat = solph.components.Sink(
+        label="demand",
+        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_value=1)},
+    )
 
-fireplace = solph.components.Source(
-    label="fireplace",
-    outputs={
-        b_heat: solph.Flow(
-            nominal_value=3,
-            variable_costs=0,
-            nonconvex=solph.NonConvex(activity_costs=activity_costs),
-        )
-    },
-)
+    fireplace = solph.components.Source(
+        label="fireplace",
+        outputs={
+            b_heat: solph.Flow(
+                nominal_value=3,
+                variable_costs=0,
+                nonconvex=solph.NonConvex(activity_costs=activity_costs),
+            )
+        },
+    )
 
-boiler = solph.components.Source(
-    label="boiler",
-    outputs={b_heat: solph.Flow(nominal_value=10, variable_costs=1)},
-)
+    boiler = solph.components.Source(
+        label="boiler",
+        outputs={b_heat: solph.Flow(nominal_value=10, variable_costs=1)},
+    )
 
-es.add(sink_heat, fireplace, boiler)
+    es.add(sink_heat, fireplace, boiler)
 
-##########################################################################
-# Optimise the energy system
-##########################################################################
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
 
-# create an optimization problem and solve it
-om = solph.Model(es)
+    # create an optimization problem and solve it
+    om = solph.Model(es)
 
-# solve model
-om.solve(solver="cbc", solve_kwargs={"tee": True})
+    # solve model
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-##########################################################################
-# Check and plot the results
-##########################################################################
+    ##########################################################################
+    # Check and plot the results
+    ##########################################################################
 
-results = solph.processing.results(om)
+    results = solph.processing.results(om)
 
-# plot data
-data = solph.views.node(results, "b_heat")["sequences"]
-ax = data.plot(kind="line", drawstyle="steps-post", grid=True, rot=0)
-ax.set_xlabel("Time")
-ax.set_ylabel("Heat (arb. units)")
-plt.show()
+    # plot data
+    data = solph.views.node(results, "b_heat")["sequences"]
+    ax = data.plot(kind="line", drawstyle="steps-post", grid=True, rot=0)
+    ax.set_xlabel("Time")
+    ax.set_ylabel("Heat (arb. units)")
+    plt.show()
+
+
+if __name__ == "__main__":
+    main()

@@ -115,77 +115,85 @@ def draw_graph(
         plt.show()
 
 
-datetimeindex = pd.date_range("1/1/2017", periods=3, freq="H")
+def main():
+    datetimeindex = pd.date_range("1/1/2017", periods=3, freq="H")
 
-es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
+    es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
 
-b_0 = Bus(label="b_0")
+    b_0 = Bus(label="b_0")
 
-b_1 = Bus(label="b_1")
+    b_1 = Bus(label="b_1")
 
-es.add(b_0, b_1)
+    es.add(b_0, b_1)
 
-es.add(
-    Link(
-        label="line_0",
-        inputs={b_0: Flow(), b_1: Flow()},
-        outputs={
-            b_1: Flow(investment=Investment()),
-            b_0: Flow(investment=Investment()),
-        },
-        conversion_factors={(b_0, b_1): 0.95, (b_1, b_0): 0.9},
-        limit_direction=False,
-    )
-)
-
-
-es.add(
-    cmp.Source(
-        label="gen_0",
-        outputs={b_0: Flow(nominal_value=100, variable_costs=50)},
-    )
-)
-
-es.add(
-    cmp.Source(
-        label="gen_1",
-        outputs={b_1: Flow(nominal_value=100, variable_costs=50)},
-    )
-)
-
-es.add(
-    cmp.Sink(label="load_0", inputs={b_0: Flow(nominal_value=150, fix=[0, 1])})
-)
-
-es.add(
-    cmp.Sink(label="load_1", inputs={b_1: Flow(nominal_value=150, fix=[1, 0])})
-)
-
-m = Model(energysystem=es)
-
-# m.write('transshipment.lp', io_options={'symbolic_solver_labels': True})
-
-m.solve(solver="cbc", solve_kwargs={"tee": True, "keepfiles": False})
-
-m.results()
-
-graph = create_nx_graph(es, m)
-
-if pygz is not None:
-    draw_graph(
-        graph,
-        plot=True,
-        layout="neato",
-        node_size=3000,
-        node_color={"b_0": "#cd3333", "b_1": "#7EC0EE", "b_2": "#eeac7e"},
+    es.add(
+        Link(
+            label="line_0",
+            inputs={b_0: Flow(), b_1: Flow()},
+            outputs={
+                b_1: Flow(investment=Investment()),
+                b_0: Flow(investment=Investment()),
+            },
+            conversion_factors={(b_0, b_1): 0.95, (b_1, b_0): 0.9},
+            limit_direction=False,
+        )
     )
 
-results = processing.results(m)
+    es.add(
+        cmp.Source(
+            label="gen_0",
+            outputs={b_0: Flow(nominal_value=100, variable_costs=50)},
+        )
+    )
 
-print(views.node(results, "gen_0"))
-print(views.node(results, "gen_1"))
+    es.add(
+        cmp.Source(
+            label="gen_1",
+            outputs={b_1: Flow(nominal_value=100, variable_costs=50)},
+        )
+    )
 
-views.node(results, "line_0")["sequences"].plot(kind="bar")
+    es.add(
+        cmp.Sink(
+            label="load_0", inputs={b_0: Flow(nominal_value=150, fix=[0, 1])}
+        )
+    )
 
-# look at constraints of Links in the pyomo model LinkBlock
-m.LinkBlock.pprint()
+    es.add(
+        cmp.Sink(
+            label="load_1", inputs={b_1: Flow(nominal_value=150, fix=[1, 0])}
+        )
+    )
+
+    m = Model(energysystem=es)
+
+    # m.write('transshipment.lp', io_options={'symbolic_solver_labels': True})
+
+    m.solve(solver="cbc", solve_kwargs={"tee": True, "keepfiles": False})
+
+    m.results()
+
+    graph = create_nx_graph(es, m)
+
+    if pygz is not None:
+        draw_graph(
+            graph,
+            plot=True,
+            layout="neato",
+            node_size=3000,
+            node_color={"b_0": "#cd3333", "b_1": "#7EC0EE", "b_2": "#eeac7e"},
+        )
+
+    results = processing.results(m)
+
+    print(views.node(results, "gen_0"))
+    print(views.node(results, "gen_1"))
+
+    views.node(results, "line_0")["sequences"].plot(kind="bar")
+
+    # look at constraints of Links in the pyomo model LinkBlock
+    m.LinkBlock.pprint()
+
+
+if __name__ == "__main__":
+    main()

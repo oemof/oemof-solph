@@ -97,7 +97,6 @@ for root, dirs, files in sorted(os.walk(fullpath)):
                     checker[name] = "failed"
         plt.close()
 
-
 print("******* TEST RESULTS ***********************************")
 
 print(
@@ -106,8 +105,16 @@ print(
     )
 )
 
+f = 0
 for k, v in checker.items():
     if v == "failed":
         print(k, colored(v, "red"))
+        f += 1
     else:
         print(k, colored(v, "green"))
+
+print()
+if f > 0:
+    print("{0} of {1} examples failed!".format(f, number))
+else:
+    print("Congratulations! All examples are fine.")
