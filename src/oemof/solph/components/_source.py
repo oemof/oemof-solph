@@ -19,7 +19,7 @@ from oemof.solph._helpers import check_node_object_for_missing_attribute
 
 
 class Source(on.Source):
-    """A node object which is designed for one output flow.
+    """A component which is designed for one output flow.
 
     Parameters
     ----------
@@ -41,7 +41,7 @@ class Source(on.Source):
     >>> type(pv_plant)
     <class 'oemof.solph.components._source.Source'>
 
-    >>> str(pv_plant.outputs()])
+    >>> str(pv_plant.outputs())
     ['electricity']
 
     Notes
