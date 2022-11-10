@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -63,7 +64,7 @@ def limit_active_flow_count(
     +-------------------+------+--------------------------------------------------------------+
     | :math:`N_{X,min}` | P    | lower_limit                                                  |
     +-------------------+------+--------------------------------------------------------------+
-    | :math:`N_{X,max}  | P    | upper_limit                                                  |
+    | :math:`N_{X,max}` | P    | upper_limit                                                  |
     +-------------------+------+--------------------------------------------------------------+
     """  # noqa: E501
 
