@@ -131,7 +131,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
     def _create_variables(self, group):
-        r""" Creates all variables for investment flows.
+        r"""Creates all variables for investment flows.
 
         All *InvestmentFlowBlock* are indexed by a starting and ending node
         :math:`(i, o)`, which is omitted in the following for the sake
