@@ -726,7 +726,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
     **The following constraints are created for approach = 'oemof' with an
     investment object defined:**
 
-    .. _SinkDSMOemof equations:
+    .. _SinkDSMOemofInvestment equations:
 
     .. math::
         &
@@ -1141,7 +1141,7 @@ class SinkDSMDIWBlock(ScalarBlock):
             ":math:`cost_{t}^{dsm, do, shed}` ",
             ":attr:`~SinkDSM.cost_dsm_down_shed[t]`","P",
             "Variable costs for shedding load"
-            ":math:`\R`",":attr:`~SinkDSM.recovery_time_shift`","P",
+            ":math:`\mathbb{R}`",":attr:`~SinkDSM.recovery_time_shift`","P",
             "Minimum time between the end of one load shifting process
             and the start of another"
             ":math:`\Delta t`",":attr:`~models.Model.timeincrement`","P",
@@ -1676,7 +1676,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
     **The following constraints are created for approach = 'DIW' with an
     investment object defined:**
 
-    .. _SinkDSMDIW equations:
+    .. _SinkDSMDIWInvestment equations:
 
     .. math::
         &
@@ -3315,7 +3315,7 @@ class SinkDSMDLRInvestmentBlock(SinkDSMDLRBlock):
     **The following constraints are created for approach = 'DLR' with an
     investment object defined:**
 
-    .. _SinkDSMDLR equations:
+    .. _SinkDSMDLRInvestment equations:
 
     .. math::
         &

@@ -45,6 +45,51 @@ c_e_BusBlock_balance(electricityBus_2)_:
 +1 flow(source4_electricityBus_2)
 = 0
 
+c_e_NonConvexFlowBlock_status_nominal_constraint(source1_electricityBus_0)_:
+-100 NonConvexFlowBlock_status(source1_electricityBus_0)
++1 NonConvexFlowBlock_status_nominal(source1_electricityBus_0)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source1_electricityBus_1)_:
+-100 NonConvexFlowBlock_status(source1_electricityBus_1)
++1 NonConvexFlowBlock_status_nominal(source1_electricityBus_1)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source1_electricityBus_2)_:
+-100 NonConvexFlowBlock_status(source1_electricityBus_2)
++1 NonConvexFlowBlock_status_nominal(source1_electricityBus_2)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source2_electricityBus_0)_:
+-100 NonConvexFlowBlock_status(source2_electricityBus_0)
++1 NonConvexFlowBlock_status_nominal(source2_electricityBus_0)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source2_electricityBus_1)_:
+-100 NonConvexFlowBlock_status(source2_electricityBus_1)
++1 NonConvexFlowBlock_status_nominal(source2_electricityBus_1)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source2_electricityBus_2)_:
+-100 NonConvexFlowBlock_status(source2_electricityBus_2)
++1 NonConvexFlowBlock_status_nominal(source2_electricityBus_2)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source3_electricityBus_0)_:
+-100 NonConvexFlowBlock_status(source3_electricityBus_0)
++1 NonConvexFlowBlock_status_nominal(source3_electricityBus_0)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source3_electricityBus_1)_:
+-100 NonConvexFlowBlock_status(source3_electricityBus_1)
++1 NonConvexFlowBlock_status_nominal(source3_electricityBus_1)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(source3_electricityBus_2)_:
+-100 NonConvexFlowBlock_status(source3_electricityBus_2)
++1 NonConvexFlowBlock_status_nominal(source3_electricityBus_2)
+= 0
+
 c_l_NonConvexFlowBlock_min(source1_electricityBus_0)_:
 +1 flow(source1_electricityBus_0)
 >= 0
@@ -82,47 +127,47 @@ c_l_NonConvexFlowBlock_min(source3_electricityBus_2)_:
 >= 0
 
 c_u_NonConvexFlowBlock_max(source1_electricityBus_0)_:
--100 NonConvexFlowBlock_status(source1_electricityBus_0)
+-1 NonConvexFlowBlock_status_nominal(source1_electricityBus_0)
 +1 flow(source1_electricityBus_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source1_electricityBus_1)_:
--100 NonConvexFlowBlock_status(source1_electricityBus_1)
+-1 NonConvexFlowBlock_status_nominal(source1_electricityBus_1)
 +1 flow(source1_electricityBus_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source1_electricityBus_2)_:
--100 NonConvexFlowBlock_status(source1_electricityBus_2)
+-1 NonConvexFlowBlock_status_nominal(source1_electricityBus_2)
 +1 flow(source1_electricityBus_2)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source2_electricityBus_0)_:
--100 NonConvexFlowBlock_status(source2_electricityBus_0)
+-1 NonConvexFlowBlock_status_nominal(source2_electricityBus_0)
 +1 flow(source2_electricityBus_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source2_electricityBus_1)_:
--100 NonConvexFlowBlock_status(source2_electricityBus_1)
+-1 NonConvexFlowBlock_status_nominal(source2_electricityBus_1)
 +1 flow(source2_electricityBus_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source2_electricityBus_2)_:
--100 NonConvexFlowBlock_status(source2_electricityBus_2)
+-1 NonConvexFlowBlock_status_nominal(source2_electricityBus_2)
 +1 flow(source2_electricityBus_2)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source3_electricityBus_0)_:
--100 NonConvexFlowBlock_status(source3_electricityBus_0)
+-1 NonConvexFlowBlock_status_nominal(source3_electricityBus_0)
 +1 flow(source3_electricityBus_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source3_electricityBus_1)_:
--100 NonConvexFlowBlock_status(source3_electricityBus_1)
+-1 NonConvexFlowBlock_status_nominal(source3_electricityBus_1)
 +1 flow(source3_electricityBus_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(source3_electricityBus_2)_:
--100 NonConvexFlowBlock_status(source3_electricityBus_2)
+-1 NonConvexFlowBlock_status_nominal(source3_electricityBus_2)
 +1 flow(source3_electricityBus_2)
 <= 0
 
@@ -154,6 +199,15 @@ bounds
    0 <= NonConvexFlowBlock_status(source3_electricityBus_0) <= 1
    0 <= NonConvexFlowBlock_status(source3_electricityBus_1) <= 1
    0 <= NonConvexFlowBlock_status(source3_electricityBus_2) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(source1_electricityBus_0) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source1_electricityBus_1) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source1_electricityBus_2) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source2_electricityBus_0) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source2_electricityBus_1) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source2_electricityBus_2) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source3_electricityBus_0) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source3_electricityBus_1) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(source3_electricityBus_2) <= +inf
 binary
   NonConvexFlowBlock_status(source1_electricityBus_0)
   NonConvexFlowBlock_status(source1_electricityBus_1)
