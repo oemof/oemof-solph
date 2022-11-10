@@ -23,7 +23,7 @@ def limit_active_flow_count(
     active NonConvex flows. The flows are given as a list.
 
     Total actual counts after optimization can be retrieved
-    calling the :attr:`om.oemof.solph.Model.$(constraint_name)_count()`.
+    calling the `om.oemof.solph.Model.$(constraint_name)_count()`.
 
     Parameters
     ----------

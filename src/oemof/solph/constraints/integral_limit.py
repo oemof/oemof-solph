@@ -37,7 +37,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     Total value of keyword attributes after optimization can be retrieved
     calling the
-    :attr:`om.oemof.solph._models.Model.integral_limit_${keyword}()`.
+    `om.oemof.solph._models.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------

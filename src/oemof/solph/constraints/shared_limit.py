@@ -33,19 +33,21 @@ def shared_limit(
     Parameters
     ----------
     model : oemof.solph.Model
-        Model to which the constraint is added.
+        Model to which the constraint is added
     limit_name : string
         Name of the constraint to create
     quantity : pyomo.core.base.var.IndexedVar
         Shared Pyomo variable for all components of a type.
+        (:math:`v_i(t)`)
     components : list of components
         list of components of the same type
     weights : list of numeric values
         has to have the same length as the list of components
+        (:math:`w_i(t)`)
     lower_limit : numeric
-        the lower limit
+        the lower limit (:math:`l_\mathrm{low}`)
     upper_limit : numeric
-        the lower limit
+        the lower limit (:math:`l_\mathrm{up}`)
 
     Examples
     --------

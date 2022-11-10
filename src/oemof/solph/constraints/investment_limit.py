@@ -53,7 +53,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
-    calling the :attr:`oemof.solph._modelsModel.invest_limit_${keyword}()`.
+    calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
 
     .. math:: \sum_{i \in IF}  P_i \cdot w_i \leq limit
 
