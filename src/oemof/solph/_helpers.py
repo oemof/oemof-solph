@@ -30,6 +30,7 @@ def check_node_object_for_missing_attribute(obj, attribute):
             debugging.SuspiciousUsageWarning,
         )
 
+
 def warn_if_missing_attribute(obj, attribute):
     msg = (
         "Attribute <{0}> is missing in Node <{1}> of {2}.\n"
