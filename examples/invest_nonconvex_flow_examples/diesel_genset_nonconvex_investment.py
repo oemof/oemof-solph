@@ -37,6 +37,7 @@ import pandas as pd
 import time
 from datetime import datetime, timedelta
 from oemof import solph
+import warnings
 
 try:
     import matplotlib.pyplot as plt
@@ -65,9 +66,13 @@ start_datetime = datetime.combine(start_date_obj.date(), start_date_obj.time())
 end_datetime = start_datetime + timedelta(days=n_days)
 
 # Import data.
-current_directory = os.path.dirname(os.path.abspath(__file__))
-filename = os.path.join(current_directory, "solar_generation.csv")
-data = pd.read_csv(filepath_or_buffer=filename)
+filename = os.path.join(os.getcwd(), "solar_generation.csv")
+try:
+    data = pd.read_csv(filename)
+except FileNotFoundError:
+    msg = "Data file not found: {0}. Only one value used!"
+    warnings.warn(msg.format(filename), UserWarning)
+    data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
 # Change the index of data to be able to select data based on the time range.
 data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
@@ -80,11 +85,10 @@ peak_solar_potential = solar_potential.max()
 peak_demand = hourly_demand.max()
 
 # Create the energy system.
-date_time_index = pd.date_range(
-    start=start_date, periods=n_days * 24, freq="H"
+date_time_index = solph.create_time_index(number=n_days * 24, start=start_date)
+energysystem = solph.EnergySystem(
+    timeindex=date_time_index, infer_last_interval=False
 )
-energy_system = solph.EnergySystem(timeindex=date_time_index)
-
 
 # -------------------- BUSES --------------------
 # Create electricity and diesel buses.
@@ -228,7 +232,7 @@ excess_el = solph.components.Sink(
 )
 
 # Add all objects to the energy system.
-energy_system.add(
+energysystem.add(
     pv,
     diesel_source,
     b_el_dc,
@@ -252,7 +256,7 @@ energy_system.add(
 solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
 solver = "cbc"
 
-model = solph.Model(energy_system)
+model = solph.Model(energysystem)
 model.solve(
     solver=solver,
     solve_kwargs={"tee": True},
