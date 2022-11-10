@@ -55,7 +55,7 @@ html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
 napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
-nitpicky = True
+nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
