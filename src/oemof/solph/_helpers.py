@@ -29,3 +29,14 @@ def check_node_object_for_missing_attribute(obj, attribute):
             msg.format(attribute, obj.label, type(obj)),
             debugging.SuspiciousUsageWarning,
         )
+
+def warn_if_missing_attribute(obj, attribute):
+    msg = (
+        "Attribute <{0}> is missing in Node <{1}> of {2}.\n"
+        "If this is intended and you know what you are doing you can"
+        "disable the SuspiciousUsageWarning globally."
+    )
+    warn(
+        msg.format(attribute, obj.label, type(obj)),
+        debugging.SuspiciousUsageWarning,
+    )
