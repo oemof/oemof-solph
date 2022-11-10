@@ -29,16 +29,15 @@ from oemof.solph._plumbing import sequence
 
 class Transformer(on.Transformer):
     """A linear converter object with n inputs and n outputs.
-<<<<<<< HEAD
 
-    Expects specified inputs and outputs as dicts with respective flows.
-    If no inputs or outputs are specified,  
+    Expects inputs and outputs as dicts with respective flows.
 
-=======
-    
->>>>>>> 1c27995cbbced2b825a4c7702326067b7e60f06b
     Parameters
     ----------
+    inputs : dict
+        Dictionary with inflows. Keys must be starting node(s) of inflow(s).
+    outputs : dict
+        Dictionary with outflows. Keys must be ending node(s) of outflow(s).
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected bus objects.
