@@ -135,7 +135,7 @@ class Flow(on.Edge):
         bidirectional=False,
         investment=None,
         nonconvex=None,
-        **kwargs
+        **kwargs,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
