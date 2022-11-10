@@ -179,7 +179,6 @@ class GenericStorage(network.Node):
         if self._invest_group is True:
             self._check_invest_attributes()
 
-
     def _set_flows(self):
         for flow in self.inputs.values():
             if (
