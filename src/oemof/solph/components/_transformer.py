@@ -83,20 +83,20 @@ class Transformer(on.Transformer):
      * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
-    def __init__(self, label=None, inputs=None, outputs=None, conversion_factors=None):
+    def __init__(self, label=None, inputs=None, outputs=None,
+                 conversion_factors=None):
 
         if inputs is None:
-            inputs={}
+            inputs = {}
         if outputs is None:
-            outputs={}
+            outputs = {}
         super().__init__(label=label, inputs=inputs, outputs=outputs)
-
 
         check_node_object_for_missing_attribute(self, "inputs")
         check_node_object_for_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
-            conversion_factors={}
+            conversion_factors = {}
 
         self.conversion_factors = {
             k: sequence(v)
