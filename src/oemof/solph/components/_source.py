@@ -19,7 +19,36 @@ from oemof.solph._helpers import check_node_object_for_missing_attribute
 
 
 class Source(on.Source):
-    """An object with one output flow."""
+    """A node object which is designed for one output flow.
+
+    Parameters
+    ----------
+    label : str
+        String holding the label of the Source object.
+        The label of each object must be unique.
+
+    Examples
+    --------
+    Defining a Source:
+
+    >>> from oemof import solph
+    >>> bel = solph.buses.Bus(label='electricity')
+
+    >>> pv_plant = solph.components.Source(
+    ...    label='pp_pv',
+    ...    outputs={bel: solph.flows.Flow()})
+
+    >>> type(pv_plant)
+    <class 'oemof.solph.components._source.Source'>
+
+    >>> str(pv_plant.outputs()])
+    ['electricity']
+
+    Notes
+    -----
+    It is theoretically possible to use the Source object with multiple outputs.
+    However, we strongly recommend using the Bus object instead.
+    """
 
     def __init__(self, label=None, outputs=None, **kwargs):
         if outputs is None:
