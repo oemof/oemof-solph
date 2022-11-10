@@ -57,7 +57,7 @@ fullpath = os.path.join(os.getcwd())
 checker = {}
 number = 0
 
-start = datetime.now()
+start_check = datetime.now()
 
 for root, dirs, files in sorted(os.walk(fullpath)):
     for name in sorted(files):
@@ -100,7 +100,11 @@ for root, dirs, files in sorted(os.walk(fullpath)):
 
 print("******* TEST RESULTS ***********************************")
 
-print("\n{0} examples tested in {1}.\n".format(number, datetime.now() - start))
+print(
+    "\n{0} examples tested in {1}.\n".format(
+        number, datetime.now() - start_check
+    )
+)
 
 for k, v in checker.items():
     if v == "failed":
