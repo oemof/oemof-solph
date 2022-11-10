@@ -23,7 +23,10 @@ from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._helpers import (
+    check_node_object_for_missing_attribute,
+    warn_if_missing_attribute,
+)
 from oemof.solph._plumbing import sequence
 
 
@@ -94,22 +97,26 @@ class Transformer(on.Transformer):
         conversion_factors=None,
         options=None,
     ):
+        self.label = label
         if inputs is None:
+            warn_if_missing_attribute(self, "inputs")  # label ???
             inputs = {}
         if outputs is None:
+            warn_if_missing_attribute(self, "outputs")  # label ???
             outputs = {}
-        super().__init__(label=label, inputs=inputs, outputs=outputs,
-                         options=options)
 
-        check_node_object_for_missing_attribute(self, "inputs")
-        check_node_object_for_missing_attribute(self, "outputs")
+        super().__init__(
+            label=label, inputs=inputs, outputs=outputs, options=options
+        )
+
+        # check_node_object_for_missing_attribute(self, "inputs")
+        # check_node_object_for_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
             conversion_factors = {}
 
         self.conversion_factors = {
-            k: sequence(v)
-            for k, v in conversion_factors.items()
+            k: sequence(v) for k, v in conversion_factors.items()
         }
 
         missing_conversion_factor_keys = (
