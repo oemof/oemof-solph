@@ -135,13 +135,13 @@ class GenericStorage(network.Node):
         label,
         inputs,
         outputs,
+        *,
         nominal_storage_capacity,
         initial_storage_level,
         investment,
         invest_relation_input_output,
         invest_relation_input_capacity,
         invest_relation_output_capacity,
-        *args,
         max_storage_level=1,
         balanced=True,
         loss_rate=0,
@@ -150,9 +150,8 @@ class GenericStorage(network.Node):
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
-        **kwargs
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(label, inputs, outputs)
         self.nominal_storage_capacity = nominal_storage_capacity
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
@@ -180,33 +179,6 @@ class GenericStorage(network.Node):
         if self._invest_group is True:
             self._check_invest_attributes()
 
-        # Check for old parameter names. This is a temporary fix and should
-        # be removed once a general solution is found.
-        # TODO: https://github.com/oemof/oemof-solph/issues/560
-        renamed_parameters = [
-            ("nominal_capacity", "nominal_storage_capacity"),
-            ("initial_capacity", "initial_storage_level"),
-            ("capacity_loss", "loss_rate"),
-            ("capacity_min", "min_storage_level"),
-            ("capacity_max", "max_storage_level"),
-        ]
-        messages = [
-            "`{0}` to `{1}`".format(old_name, new_name)
-            for old_name, new_name in renamed_parameters
-            if old_name in kwargs
-        ]
-        if messages:
-            message = (
-                "The following attributes have been renamed from v0.2 to v0.3:"
-                "\n\n  {}\n\n"
-                "You are using the old names as parameters, thus setting "
-                "deprecated\n"
-                "attributes, which is not what you might have intended.\n"
-                "Use the new names, or, if you know what you're doing, set "
-                "these\n"
-                "attributes explicitly after construction instead."
-            )
-            raise AttributeError(message.format("\n  ".join(messages)))
 
     def _set_flows(self):
         for flow in self.inputs.values():
