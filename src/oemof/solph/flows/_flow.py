@@ -185,22 +185,7 @@ class Flow(on.Edge):
         self.investment = investment
         self.nonconvex = nonconvex
         self.bidirectional = bidirectional
-
-        # scalars = [
-        #     "nominal_value",
-        #     "full_load_time_max",
-        #     "full_load_time_min",
-        #     "investment",
-        #     "nonconvex",
-        #     "integer",
-        # ]
-        # sequences = ["fix", "variable_costs", "min", "max"]
-        # dictionaries = ["positive_gradient", "negative_gradient"]
-        # # defaults = {
-        # #     "variable_costs": 0,
-        # #     "positive_gradient": {"ub": None},
-        # #     "negative_gradient": {"ub": None},
-        # # }
+        
         need_nominal_value = [
             "fix",
             "full_load_time_max",
@@ -212,8 +197,6 @@ class Flow(on.Edge):
             "summed_min",
             # --- END ---
         ]
-
-        # keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in kwargs:
             raise AttributeError(
@@ -247,31 +230,10 @@ class Flow(on.Edge):
         for gradient_dict in ["negative_gradient", "positive_gradient"]:
             # if gradient_dict in kwargs:
             if list(getattr(self, gradient_dict).keys()) != list(["ub"]):
-            # if list(self.gradient_dict.keys()) != list(
-            #     defaults[gradient_dict].keys()
-            # ):
                 msg = (
                     "Only the key 'ub' is allowed for the '{0}' attribute"
                 )
                 raise AttributeError(msg.format(gradient_dict))
-
-        # for attribute in set(scalars + sequences + dictionaries + keys):
-        #     # value = flow_attr[attribute]
-        #     value = getattr(self, attribute)
-        #     if value is not None:
-        #         if attribute in dictionaries:
-        #             setattr(
-        #                 self,
-        #                 attribute,
-        #                 {"ub": sequence(value["ub"])},
-        #             )
-        #
-        #         else:
-        #             setattr(
-        #                 self,
-        #                 attribute,
-        #                 sequence(value) if attribute in sequences else value,
-        #             )
 
         # Checking for impossible attribute combinations
         if self.investment and self.nominal_value is not None:
