@@ -192,10 +192,6 @@ class Flow(on.Edge):
             "full_load_time_min",
             "min",
             "max",
-            # --- BEGIN: To be removed for versions >= v0.6 ---
-            "summed_max",
-            "summed_min",
-            # --- END ---
         ]
 
         # It is not allowed to define min or max if fix is defined.
