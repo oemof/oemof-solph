@@ -26,12 +26,12 @@ from oemof.solph._plumbing import sequence as solph_sequence
 
 
 class OffsetTransformer(network.Transformer):
-    """An object with one input and one output.
+    """An object with one input and one output and two coefficients to model
+    part load behaviour.
 
     Parameters
     ----------
-
-    coefficients : tuple
+    coefficients : tuple, (:math:`C_0(t)`, :math:`C_1(t)`)
         Tuple containing the first two polynomial coefficients
         i.e. the y-intersection and slope of a linear equation.
         The tuple values can either be a scalar or a sequence with length
@@ -104,22 +104,22 @@ class OffsetTransformerBlock(ScalarBlock):
         P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
 
 
-    .. csv-table:: Variables (V) and Parameters (P)
-        :header: "symbol", "attribute", "type", "explanation"
-        :widths: 1, 1, 1, 1
+    The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-        ":math:`P_{out}(t)`", "`flow[n, o, t]`", "V", "Power of output"
-        ":math:`P_{in}(t)`", "`flow[i, n, t]`", "V","Power of input"
-        ":math:`Y(t)`", "`status[i, n, t]`", "V","binary
-        status variable of nonconvex input flow "
-        ":math:`C_1(t)`", "`coefficients[1][n, t]`", "P", "linear
-        coefficient 1 (slope)"
-        ":math:`C_0(t)`", "`coefficients[0][n, t]`", "P", "linear
-        coefficient 0 (y-intersection)"
-
-
-    """
-
+    +--------------------+------------------------+------+--------------------------------------------+
+    | symbol             | attribute              | type | explanation                                |
+    +====================+========================+======+============================================+
+    | :math:`P_{out}(t)` | `flow[n,o,t]`          | V    | Outflow of transformer                     |
+    +--------------------+------------------------+------+--------------------------------------------+
+    | :math:`P_{in}(t)`  | `flow[i,n,t]`          | V    | Inflow of transformer                      |
+    +--------------------+------------------------+------+--------------------------------------------+
+    | :math:`Y(t)`       | `status[i,n,t]`        | V    | Binary status variable of nonconvex inflow |
+    +--------------------+------------------------+------+--------------------------------------------+
+    | :math:`C_1(t)`     | `coefficients[1][n,t]` | P    | Linear coefficient 1 (slope)               |
+    +--------------------+------------------------+------+--------------------------------------------+
+    | :math:`C_0(t)`     | `coefficients[0][n,t]` | P    | Linear coefficient 0 (y-intersection)      |
+    +--------------------+------------------------+------+--------------------------------------------+
+    """  # noqa: E501
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
