@@ -121,7 +121,9 @@ def main():
     energysystem.add(bgas, bel)
 
     # create excess component for the electricity bus to allow overproduction
-    excess = solph.components.Sink(label="excess_bel", inputs={bel: solph.Flow()})
+    excess = solph.components.Sink(
+        label="excess_bel", inputs={bel: solph.Flow()}
+    )
 
     # create source object representing the natural gas commodity (annual limit)
     gas_resource = solph.components.Source(
@@ -143,7 +145,8 @@ def main():
         label="wind",
         outputs={
             bel: solph.Flow(
-                fix=data["wind"], investment=solph.Investment(ep_costs=epc_wind)
+                fix=data["wind"],
+                investment=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
@@ -222,7 +225,9 @@ def main():
     )
 
     # installed capacity of wind power plant in MW
-    my_results["wind_invest_MW"] = results[(wind, bel)]["scalars"]["invest"] / 1e3
+    my_results["wind_invest_MW"] = (
+        results[(wind, bel)]["scalars"]["invest"] / 1e3
+    )
 
     # installed capacity of pv power plant in MW
     my_results["pv_invest_MW"] = results[(pv, bel)]["scalars"]["invest"] / 1e3

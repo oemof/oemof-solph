@@ -82,7 +82,9 @@ def main():
 
     results_df = results[(storage, None)]["sequences"].copy()
     results_df["storage_inflow"] = results[(bus, storage)]["sequences"]["flow"]
-    results_df["storage_outflow"] = results[(storage, bus)]["sequences"]["flow"]
+    results_df["storage_outflow"] = results[(storage, bus)]["sequences"][
+        "flow"
+    ]
 
     print(results_df)
 
@@ -92,7 +94,9 @@ def main():
             drawstyle="steps-post",
             label="Storage inflow",
         )
-        plt.plot(results[(storage, None)]["sequences"], label="Storage content")
+        plt.plot(
+            results[(storage, None)]["sequences"], label="Storage content"
+        )
         plt.plot(
             results[(storage, bus)]["sequences"],
             drawstyle="steps-post",
