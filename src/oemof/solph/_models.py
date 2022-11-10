@@ -154,7 +154,8 @@ class BaseModel(po.ConcreteModel):
     def _add_parent_block_variables(self):
         """Method to create all variables located at the parent block,
         i.e. the model itself as these variables  are to be shared across
-        all model components. See the class :py:class:~oemof.solph._models.Model
+        all model components.
+        See the class :py:class:~oemof.solph._models.Model
         for the `flow` variable created.
         """
         pass
