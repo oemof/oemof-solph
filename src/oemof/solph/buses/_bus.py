@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.bus
-
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer

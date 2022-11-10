@@ -35,26 +35,6 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     .. automethod:: _create_sets
 
     .. automethod:: _objective_expression
-
-
-    **The following parts of the objective function are created similar
-    to the <class 'oemof.solph.flows.NonConvexFlow'> class:**
-
-    If `nonconvex.startup_costs` is set by the user:
-        .. math::
-            \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
-            \cdot startup\_costs(i, o)
-
-    If `nonconvex.shutdown_costs` is set by the user:
-        .. math::
-            \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
-            \cdot shutdown\_costs(i, o)
-
-    **The following parts of the objective function are created similar
-    to the <class 'oemof.solph.flows.InvestmentFlow'> class:**
-
-    .. math::
-        P_{invest} \cdot c_{invest,var}
     """
 
     def __init__(self, *args, **kwargs):
@@ -81,50 +61,12 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         """
         Creates all sets for investment non-convex flows.
 
-        .. glossary::
+        INVEST_NON_CONVEX_FLOWS
+            A set of flows with the attribute `nonconvex` of type
+            :class:`.options.NonConvex` and the attribute `invest`
+            of type :class:`.options.Invest`.
 
-            INVEST_NON_CONVEX_FLOWS
-                A set of flows with the attribute `nonconvex` of type
-                :class:`.options.NonConvex` and the attribute `invest`
-                of type :class:`.options.Invest`.
-
-            MIN_FLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute `min`
-                being not None in the first timestep.
-
-            STARTUPFLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `maximum_startups` or `startup_costs`
-                being not None.
-
-            MAXSTARTUPFLOWS
-                A subset of set STARTUPFLOWS with the attribute
-                `maximum_startups` being not None.
-
-            SHUTDOWNFLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `maximum_shutdowns` or `shutdown_costs`
-                being not None.
-
-            MAXSHUTDOWNFLOWS
-                A subset of set SHUTDOWNFLOWS with the attribute
-                `maximum_shutdowns` being not None.
-
-            MINUPTIMEFLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `minimum_uptime` being not None.
-
-            MINDOWNTIMEFLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `minimum_downtime` being not None.
-
-            POSITIVE_GRADIENT_FLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `positive_gradient` being not None.
-
-            NEGATIVE_GRADIENT_FLOWS
-                A subset of set NONCONVEX_FLOWS with the attribute
-                `negative_gradient` being not None.
+        .. automethod:: _sets_for_non_convex_flows
         """
         self.INVEST_NON_CONVEX_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group]
@@ -137,11 +79,11 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         Status variable (binary) `om.InvestNonConvexFlowBlock.status`:
             Variable indicating if flow is >= 0 indexed by FLOWS
 
-        :math:`P_{invest}` `InvestNonConvexFlowBlock.invest`
+        :math::`P_{invest}` `InvestNonConvexFlowBlock.invest`
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
 
-        :math:`status\_nominal(i,o,t)` (non-negative real number)
+        :math::`status\_nominal(i,o,t)` (non-negative real number)
             New paramater representing the multiplication of `P_{invest}`
             (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
             `status(i,o,t)` (from the
@@ -207,7 +149,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         The resulting constraint is equivalent to
 
         .. math::
-            status\_nominal(i,o,t) = status(i,o,t) \cdot P_{invest}.
+            status\_nominal(i,o,t) = Y_{status}(t) \cdot P_{invest}.
 
         However, :math:`status` and :math:`invest` are variables
         (binary and continuous, respectively).
@@ -243,7 +185,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         r"""
         .. math::
             status\_nominal(i,o,t)
-            \leq status(i,o,t) \cdot P_{invest, max}\quad (1)
+            \leq Y_{status}(t) \cdot P_{invest, max}\quad (1)
         """
         m = self.parent_block()
 
@@ -282,7 +224,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         r"""
         .. math::
             status\_nominal(i,o,t) \geq
-            P_{invest} - (1 - status(i,o,t)) \cdot P_{invest, max}\quad (3)
+            P_{invest} - (1 - Y_{status}(t)) \cdot P_{invest, max}\quad (3)
         """
 
         m = self.parent_block()
@@ -302,7 +244,21 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         )
 
     def _objective_expression(self):
-        r"""Objective expression for nonconvex investment flows."""
+        r"""Objective expression for nonconvex investment flows.
+
+            If `nonconvex.startup_costs` is set by the user:
+                .. math::
+                    \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
+                    \cdot c_{startup}
+
+            If `nonconvex.shutdown_costs` is set by the user:
+                .. math::
+                    \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
+                    \cdot c_{shutdown}
+
+            .. math::
+                P_{invest} \cdot c_{invest,var}
+        """
         if not hasattr(self, "INVEST_NON_CONVEX_FLOWS"):
             return 0
 
