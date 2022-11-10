@@ -7,7 +7,8 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
-SPDX-FileCopyrightText: Johannes Kochems (jokochems)
+SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -23,9 +24,12 @@ from pyomo.opt import SolverFactory
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
-from oemof.solph.flows._flow import FlowBlock
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
-from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
+from oemof.solph.flows._invest_non_convex_flow_block import (
+    InvestNonConvexFlowBlock,
+)
+from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
+from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
+from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 
 class LoggingError(BaseException):
@@ -75,8 +79,8 @@ class BaseModel(po.ConcreteModel):
         Store the reduced costs of the model if pyomo suffix is set to IMPORT
     """
 
+    # The default list of constraint groups to be used for a model.
     CONSTRAINT_GROUPS = []
-    """The default list of constraint groups to be used for a model."""
 
     def __init__(self, energysystem, **kwargs):
         """Initialize a BaseModel, using its energysystem as well as
@@ -150,7 +154,7 @@ class BaseModel(po.ConcreteModel):
     def _add_parent_block_variables(self):
         """Method to create all variables located at the parent block,
         i.e. the model itself as these variables  are to be shared across
-        all model components. See the class :py:class:~oemof.solph.models.Model
+        all model components. See the class :py:class:~oemof.solph._models.Model
         for the `flow` variable created.
         """
         pass
@@ -293,7 +297,7 @@ class Model(BaseModel):
     **The following basic variables are created**:
 
     flow
-        FlowBlock from source to target indexed by FLOWS, TIMESTEPS.
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
@@ -303,8 +307,9 @@ class Model(BaseModel):
         BusBlock,
         TransformerBlock,
         InvestmentFlowBlock,
-        FlowBlock,
+        SimpleFlowBlock,
         NonConvexFlowBlock,
+        InvestNonConvexFlowBlock,
     ]
 
     def __init__(self, energysystem, **kwargs):

@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 import sys
 from itertools import groupby
 
+import numpy as np
 import pandas as pd
 from oemof.network.network import Node
 from pyomo.core.base.piecewise import IndexedPiecewise
@@ -142,7 +143,7 @@ def set_result_index(df_dict, k, result_index):
             df_dict[k].index = result_index
         except ValueError as e:
             msg = (
-                "\nFlowBlock: {0}-{1}. This could be caused by NaN-values "
+                "\nFlow: {0}-{1}. This could be caused by NaN-values "
                 "in your input data."
             )
             raise type(e)(
@@ -209,8 +210,9 @@ def results(model, remove_last_time_point=False):
             df_dict[k] = df_dict[k].pivot(
                 columns="variable_name", values="value"
             )
-            # Add empty row at the end
-            df_dict[k] = df_dict[k].append(pd.Series(), ignore_index=True)
+            # Add empty row with nan at the end of the table by adding 1 to the
+            # last value of the numeric index.
+            df_dict[k].loc[df_dict[k].index[-1] + 1, :] = np.nan
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
 

@@ -21,7 +21,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
 ]
 source_suffix = ".rst"
@@ -35,8 +34,8 @@ version = release = "0.4.5.dev0"
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/oemof/oemof-solph/issues/%s", "#"),
-    "pr": ("https://github.com/oemof/oemof-solph/pull/%s", "PR #"),
+    "issue": ("https://github.com/oemof/oemof-solph/issues/%s", "#%s"),
+    "pr": ("https://github.com/oemof/oemof-solph/pull/%s", "PR #%s"),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"

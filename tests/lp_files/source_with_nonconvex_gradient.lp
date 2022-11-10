@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min 
+min
 objective:
 +23 flow(powerplant_electricityBus_0)
 +23 flow(powerplant_electricityBus_1)
@@ -20,6 +20,21 @@ c_e_BusBlock_balance(electricityBus_2)_:
 +1 flow(powerplant_electricityBus_2)
 = 0
 
+c_e_NonConvexFlowBlock_status_nominal_constraint(powerplant_electricityBus_0)_:
+-999 NonConvexFlowBlock_status(powerplant_electricityBus_0)
++1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_0)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(powerplant_electricityBus_1)_:
+-999 NonConvexFlowBlock_status(powerplant_electricityBus_1)
++1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_1)
+= 0
+
+c_e_NonConvexFlowBlock_status_nominal_constraint(powerplant_electricityBus_2)_:
+-999 NonConvexFlowBlock_status(powerplant_electricityBus_2)
++1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_2)
+= 0
+
 c_l_NonConvexFlowBlock_min(powerplant_electricityBus_0)_:
 +1 flow(powerplant_electricityBus_0)
 >= 0
@@ -33,17 +48,17 @@ c_l_NonConvexFlowBlock_min(powerplant_electricityBus_2)_:
 >= 0
 
 c_u_NonConvexFlowBlock_max(powerplant_electricityBus_0)_:
--999 NonConvexFlowBlock_status(powerplant_electricityBus_0)
+-1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_0)
 +1 flow(powerplant_electricityBus_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(powerplant_electricityBus_1)_:
--999 NonConvexFlowBlock_status(powerplant_electricityBus_1)
+-1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_1)
 +1 flow(powerplant_electricityBus_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(powerplant_electricityBus_2)_:
--999 NonConvexFlowBlock_status(powerplant_electricityBus_2)
+-1 NonConvexFlowBlock_status_nominal(powerplant_electricityBus_2)
 +1 flow(powerplant_electricityBus_2)
 <= 0
 
@@ -79,7 +94,7 @@ c_u_NonConvexFlowBlock_negative_gradient_constr(powerplant_electricityBus_2)_:
 ]
 <= 0
 
-c_e_ONE_VAR_CONSTANT: 
+c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds
@@ -89,6 +104,9 @@ bounds
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_0) <= 1
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_1) <= 1
    0 <= NonConvexFlowBlock_status(powerplant_electricityBus_2) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(powerplant_electricityBus_0) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(powerplant_electricityBus_1) <= +inf
+   0 <= NonConvexFlowBlock_status_nominal(powerplant_electricityBus_2) <= +inf
     -inf <= NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_1) <= +inf
     -inf <= NonConvexFlowBlock_positive_gradient(powerplant_electricityBus_2) <= +inf
     -inf <= NonConvexFlowBlock_negative_gradient(powerplant_electricityBus_1) <= +inf

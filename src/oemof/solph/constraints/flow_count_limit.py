@@ -43,7 +43,7 @@ def limit_active_flow_count(
 
     Note
     ----
-    FlowBlock objects required to be NonConvex
+    SimpleFlowBlock objects required to be NonConvex
 
     **Constraint:**
 
