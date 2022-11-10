@@ -120,11 +120,7 @@ class Flow(on.Edge):
     0.99
     """  # noqa: E501
 
-    def __init__(
-        self,
-        max=None,
-        **kwargs
-    ):
+    def __init__(self, max=None, **kwargs):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any SimpleFlowBlock
