@@ -120,11 +120,23 @@ class Flow(on.Edge):
     0.99
     """  # noqa: E501
 
-    def __init__(self, nominal_value=None, min=None, max=None, fix=None,
-                 positive_gradient=None, negative_gradient=None,
-                 full_load_time_max=None, full_load_time_min=None,
-                 variable_costs=0, integer=None, bidirectional=False,
-                 investment=None, nonconvex=None, **kwargs):
+    def __init__(
+        self,
+        nominal_value=None,
+        min=None,
+        max=None,
+        fix=None,
+        positive_gradient=None,
+        negative_gradient=None,
+        full_load_time_max=None,
+        full_load_time_min=None,
+        variable_costs=0,
+        integer=None,
+        bidirectional=False,
+        investment=None,
+        nonconvex=None,
+        **kwargs
+    ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
         # pyomo.core.base.IndexedVarWithDomain before any SimpleFlowBlock
