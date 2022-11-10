@@ -50,11 +50,11 @@ class Source(on.Source):
     However, we strongly recommend using the Bus object instead.
     """
 
-    def __init__(self, label=None, outputs=None, **kwargs):
+    def __init__(self, label=None, outputs=None):
         if outputs is None:
             outputs = {}
 
-        super().__init__(label=label, outputs=outputs, **kwargs)
+        super().__init__(label=label, outputs=outputs)
         check_node_object_for_missing_attribute(self, "outputs")
 
     def constraint_group(self):
