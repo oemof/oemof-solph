@@ -198,26 +198,6 @@ class Flow(on.Edge):
             # --- END ---
         ]
 
-        if "fixed_costs" in kwargs:
-            raise AttributeError(
-                "The `fixed_costs` attribute has been removed" " with v0.2!"
-            )
-
-        if "actual_value" in kwargs:
-            raise AttributeError(
-                "The `actual_value` attribute has been renamed"
-                " to `fix` with v0.4. The attribute `fixed` is"
-                " set to True automatically when passing `fix`."
-            )
-
-        if "fixed" in kwargs:
-            msg = (
-                "The `fixed` attribute is deprecated.\nIf you have defined "
-                "the `fix` attribute the flow variable will be fixed.\n"
-                "The `fixed` attribute does not change anything."
-            )
-            warn(msg, debugging.SuspiciousUsageWarning)
-
         # It is not allowed to define min or max if fix is defined.
         if fix is not None and (
             min is not None or max is not None
