@@ -84,13 +84,14 @@ class Transformer(on.Transformer):
     """
 
     def __init__(self, label=None, inputs=None, outputs=None,
-                 conversion_factors=None):
+                 conversion_factors=None, options=None):
 
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-        super().__init__(label=label, inputs=inputs, outputs=outputs)
+        super().__init__(label=label, inputs=inputs, outputs=outputs,
+                         options=options)
 
         check_node_object_for_missing_attribute(self, "inputs")
         check_node_object_for_missing_attribute(self, "outputs")
