@@ -86,7 +86,13 @@ setup(
         "oemof.network",
     ],
     extras_require={
-        "dev": ["pytest", "sphinx", "sphinx_rtd_theme"],
+        "dev": [
+            "pytest",
+            "sphinx",
+            "sphinx_rtd_theme",
+            "nbformat",
+            "termcolor",
+        ],
         "examples": ["matplotlib"],
         "dummy": ["oemof"],
     },
