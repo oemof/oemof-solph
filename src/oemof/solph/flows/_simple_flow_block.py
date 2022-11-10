@@ -27,7 +27,8 @@ from pyomo.core.base.block import ScalarBlock
 class SimpleFlowBlock(ScalarBlock):
     r"""Flow block with definitions for standard flows.
 
-    See :class:`~oemof.solph.flows._flow.Flow` class for all parameters of the *Flow*.
+    See :class:`~oemof.solph.flows._flow.Flow` class for all parameters of the
+    *Flow*.
 
     .. automethod:: _create_constraints
     .. automethod:: _create_variables
@@ -123,12 +124,12 @@ class SimpleFlowBlock(ScalarBlock):
             :math:`P(t) = f_\mathrm{fix}(t) \cdot P_\mathrm{nom}`.
 
         * :math:`\dot{P}_{down}` (`Flow.negative_gradient` is not `None`)
-            Difference of a flow in consecutive timesteps if flow is reduced. The
-            variable is bound to: :math:`0 \ge ve_n \ge ve_n^{max}`.
+            Difference of a flow in consecutive timesteps if flow is reduced.
+            The variable is bound to: :math:`0 \ge ve_n \ge ve_n^{max}`.
 
         * :math:`\dot{P}_{up}` (`Flow.positive_gradient` is not `None`)
-            Difference of a flow in consecutive timesteps if flow is increased. The
-            variable is bound to: :math:`0 \ge ve_p \ge ve_p^{max}`.
+            Difference of a flow in consecutive timesteps if flow is increased.
+            The variable is bound to: :math:`0 \ge ve_p \ge ve_p^{max}`.
         """
         m = self.parent_block()
 
@@ -155,8 +156,8 @@ class SimpleFlowBlock(ScalarBlock):
     def _create_constraints(self):
         r"""Creates all constraints for standard flows.
 
-        The following constraints are created, if the appropriate attribute of the
-        *Flow* (see :class:`~oemof.solph.flows._flow.Flow`) object is set:
+        The following constraints are created, if the appropriate attribute of
+        the *Flow* (see :class:`~oemof.solph.flows._flow.Flow`) object is set:
 
         * `Flow.full_load_time_max` is not `None` (full_load_time_max_constr):
             .. math::

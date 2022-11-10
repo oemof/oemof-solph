@@ -130,7 +130,7 @@ class InvestmentFlowBlock(ScalarBlock):
             ]
         )
 
-    def _create_variables(self, group):
+    def _create_variables(self, _):
         r"""Creates all variables for investment flows.
 
         All *InvestmentFlowBlock* are indexed by a starting and ending node
@@ -139,7 +139,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
         * :math:`P(t)`
 
-            Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
+            Actual flow value
+            (created in :class:`oemof.solph.models.BaseModel`).
 
         * :math:`P_{invest}`
 
@@ -176,17 +177,18 @@ class InvestmentFlowBlock(ScalarBlock):
     def _create_constraints(self):
         r"""Creates all constraints for standard flows.
 
-        Depending on the attributes of the *InvestmentFlowBlock* and *SimpleFlowBlock*, different
-        constraints are created. The following constraint is created for all
-        *InvestmentFlowBlock*:\
+        Depending on the attributes of the *InvestmentFlowBlock*
+        and *SimpleFlowBlock*, different constraints are created.
+        The following constraint is created for all
+        *InvestmentFlowBlock*:
 
                 Upper bound for the flow value
 
             .. math::
                 P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
 
-        Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
-        of the decision variable :math:`P_{invest}` are different:\
+        Depeding on the attribute :attr:`nonconvex`, the constraints for
+        the bounds of the decision variable :math:`P_{invest}` are different:
 
             * :attr:`nonconvex = False`
 
@@ -201,9 +203,10 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 P_{invest} \le P_{invest, max} \cdot Y_{invest}\\
 
-        For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
-        the following additional constraints are created, if the appropriate
-        attribute of the *SimpleFlowBlock* (see :class:`oemof.solph.network.SimpleFlowBlock`) is set:
+        For all *InvestmentFlowBlock* (independent of the attribute
+        :attr:`nonconvex`), the following additional constraints are created,
+        if the appropriate attribute of the *SimpleFlowBlock* (see
+        :class:`oemof.solph.network.SimpleFlowBlock`) is set:
 
             * :attr:`fix` is not None
 
@@ -221,8 +224,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
             * :attr:`full_load_time_max is not None`
 
-                Upper bound for the sum of all flow values (e.g. maximum full load
-                hours)
+                Upper bound for the sum of all flow values
+                (e.g. maximum full load hours)
 
             .. math::
                 \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
@@ -230,8 +233,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
             * :attr:`full_load_time_min is not None`
 
-                Lower bound for the sum of all flow values (e.g. minimum full load
-                hours)
+                Lower bound for the sum of all flow values
+                (e.g. minimum full load hours)
 
             .. math::
                 \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
@@ -325,8 +328,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
         The part of the objective function added by the *InvestmentFlowBlock*
         also depends on whether a convex or nonconvex
-        *InvestmentFlowBlock* is selected. The following parts of the objective function
-        are created:
+        *InvestmentFlowBlock* is selected. The following parts of the
+        objective function are created:
 
         * :attr:`nonconvex = False`
 

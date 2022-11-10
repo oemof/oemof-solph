@@ -259,12 +259,14 @@ class NonConvexFlowBlock(ScalarBlock):
             Variable indicating shutdown of flow (component) indexed by
             SHUTDOWNFLOWS
 
-        :math:`\dot{P}_{up}` (continuous) `NonConvexFlowBlock.positive_gradient`:
+        :math:`\dot{P}_{up}` (continuous)
+            `NonConvexFlowBlock.positive_gradient`:
             Variable indicating the positive gradient, i.e. the load increase
             between two consecutive timesteps, indexed by
             POSITIVE_GRADIENT_FLOWS
 
-        :math:`\dot{P}_{down}` (continuous) `NonConvexFlowBlock.negative_gradient`:
+        :math:`\dot{P}_{down}` (continuous)
+            `NonConvexFlowBlock.negative_gradient`:
             Variable indicating the negative gradient, i.e. the load decrease
             between two consecutive timesteps, indexed by
             NEGATIVE_GRADIENT_FLOWS
