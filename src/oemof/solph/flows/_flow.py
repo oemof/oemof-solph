@@ -123,6 +123,7 @@ class Flow(on.Edge):
     def __init__(
         self,
         nominal_value=None,
+        variable_costs=0,
         min=None,
         max=None,
         fix=None,
@@ -130,11 +131,14 @@ class Flow(on.Edge):
         negative_gradient=None,
         full_load_time_max=None,
         full_load_time_min=None,
-        variable_costs=0,
         integer=None,
         bidirectional=False,
         investment=None,
         nonconvex=None,
+        # --- BEGIN: To be removed for versions >= v0.6 ---
+        summed_max=None,
+        summed_min=None,
+        # --- END ---
         **kwargs,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
@@ -149,16 +153,12 @@ class Flow(on.Edge):
             "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
             "to avoid this warning and future problems. "
         )
-        if "summed_max" in kwargs:
+        if summed_max is not None:
             warn(msg.format("max"), FutureWarning)
-            self.summed_max = kwargs["summed_max"]
-        else:
-            self.summed_max = None
-        if "summed_min" in kwargs:
+            full_load_time_max = summed_max
+        if summed_min is not None:
             warn(msg.format("min"), FutureWarning)
-            self.summed_min = kwargs["summed_min"]
-        else:
-            self.summed_min = None
+            full_load_time_min = summed_min
         # --- END ---
 
         super().__init__()
@@ -185,7 +185,7 @@ class Flow(on.Edge):
         self.investment = investment
         self.nonconvex = nonconvex
         self.bidirectional = bidirectional
-        
+
         need_nominal_value = [
             "fix",
             "full_load_time_max",
