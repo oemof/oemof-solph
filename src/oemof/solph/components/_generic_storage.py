@@ -132,10 +132,9 @@ class GenericStorage(network.Node):
 
     def __init__(
         self,
-        label,
-        inputs,
-        outputs,
-        *,
+        label=None,
+        inputs=None,
+        outputs=None,
         nominal_storage_capacity=None,
         initial_storage_level=None,
         investment=None,
@@ -151,7 +150,11 @@ class GenericStorage(network.Node):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1
     ):
-        super().__init__(label, inputs, outputs)
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        super().__init__(label=label, inputs=inputs, outputs=outputs)
         self.nominal_storage_capacity = nominal_storage_capacity
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
