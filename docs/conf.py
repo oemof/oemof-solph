@@ -21,7 +21,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
 ]
 source_suffix = ".rst"
