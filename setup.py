@@ -92,6 +92,7 @@ setup(
             "sphinx_rtd_theme",
             "nbformat",
             "termcolor",
+            "matplotlib"
         ],
         "examples": ["matplotlib"],
         "dummy": ["oemof"],

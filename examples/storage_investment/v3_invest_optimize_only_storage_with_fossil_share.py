@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 General description
 -------------------
 This example shows how to perform a capacity optimization for
@@ -34,15 +34,14 @@ the main setting for the optimization variation 3:
     - set installed capacities for wind and pv
     - set investment cost for storage
     - remove the gas price and set a fossil share
-      --> now it becomes a calculation of storage capacity
-          (no cost optimization)
+    - now it becomes a calculation of storage capacity (no cost optimization)
 
-    Results show now the installation of storage because a higher
-    renewable share than achieved in variation 2 is now required
-    (80% compared to 78%).
+Results show now the installation of storage because a higher
+renewable share than achieved in variation 2 is now required
+(80% compared to 78%).
 
-    Have a look at different parameter settings. There are four variations
-    of this example in the same folder.
+Have a look at different parameter settings. There are four variations
+of this example in the same folder.
 
 Installation requirements
 -------------------------

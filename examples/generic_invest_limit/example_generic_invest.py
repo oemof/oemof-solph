@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 Example that shows how to use "Generic Investment Limit".
 
 There are two supply chains. The energy systems looks like that:
@@ -20,9 +20,9 @@ There are two supply chains. The energy systems looks like that:
                        source_b_1--->|
                                      |
 
-Everything is identical: the costs for the sources, the demand, the efficiency
+Everything is identical - the costs for the sources, the demand, the efficiency
 of the Transformer. And both Transformer have an investment at the output.
-The source '*_1' is in both cases very expensive, so that
+The source '\*_1' is in both cases very expensive, so that
 a investment is probably done in the transformer.
 Now, both investments share a third resource, which is called "space" in this
 example. (This could be anything, and you could use as many additional
@@ -30,7 +30,7 @@ resources as you want.) And this resource is limited. In this case, every
 Transformer capacity unit, which might be installed, needs 2 space for
 'trafo a', and 1 space per installed capacity for 'trafo b'.
 And the total space is limited to 24.
-See what happens, have fun ... ;)
+See what happens, have fun ;)
 
 Installation requirements
 -------------------------
