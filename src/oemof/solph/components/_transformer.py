@@ -80,6 +80,7 @@ class Transformer(on.Transformer):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+
         check_node_object_for_missing_attribute(self, "inputs")
         check_node_object_for_missing_attribute(self, "outputs")
 
