@@ -23,7 +23,7 @@ def limit_active_flow_count(
     active NonConvex flows. The flows are given as a list.
 
     Total actual counts after optimization can be retrieved
-    calling the `om.oemof.solph.Model.$(constraint_name)_count()`.
+    calling the `oemof.solph.Model.$(constraint_name)_count()`.
 
     Parameters
     ----------
@@ -126,8 +126,7 @@ def limit_active_flow_count_by_keyword(
 
     See Also
     --------
-    limit_active_flow_count(model, constraint_name, flows,
-                            lower_limit=0, upper_limit=None)
+    limit_active_flow_count
     """
     flows = []
     for (i, o) in model.NonConvexFlowBlock.NONCONVEX_FLOWS:
