@@ -43,6 +43,9 @@ class Transformer(on.Transformer):
         Keys are the connected bus objects.
         The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
+    options : dict
+        Dictionary with additional parameters for usage in additional
+        constraints.
 
     Examples
     --------
@@ -83,9 +86,14 @@ class Transformer(on.Transformer):
      * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
-    def __init__(self, label=None, inputs=None, outputs=None,
-                 conversion_factors=None, options=None):
-
+    def __init__(
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        options=None,
+    ):
         if inputs is None:
             inputs = {}
         if outputs is None:
