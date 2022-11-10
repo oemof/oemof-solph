@@ -122,7 +122,7 @@ class Flow(on.Edge):
 
     def __init__(
         self,
-        max=1,
+        max=None,
         **kwargs
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
@@ -155,7 +155,7 @@ class Flow(on.Edge):
             "nonconvex",
             "integer",
         ]
-        sequences = ["fix", "variable_costs", "min", "max"]
+        sequences = ["fix", "variable_costs", "min"]
         dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "variable_costs": 0,
@@ -166,13 +166,17 @@ class Flow(on.Edge):
             "fix",
             "full_load_time_max",
             "full_load_time_min",
-            "max",
             "min",
             # --- BEGIN: To be removed for versions >= v0.6 ---
             "summed_max",
             "summed_min",
             # --- END ---
         ]
+
+        need_nominal_value_dict = {
+            "max": max,
+        }
+
         keys = [k for k in kwargs if k != "label"]
 
         if "fixed_costs" in keys:
@@ -197,7 +201,7 @@ class Flow(on.Edge):
 
         # It is not allowed to define min or max if fix is defined.
         if kwargs.get("fix") is not None and (
-            kwargs.get("min") is not None or kwargs.get("max") is not None
+            kwargs.get("min") is not None or max is not None
         ):
             raise AttributeError(
                 "It is not allowed to define `min`/`max` if `fix` is defined."
@@ -210,7 +214,7 @@ class Flow(on.Edge):
             else:
                 defaults["min"] = 0
 
-        defaults["max"] = max
+        setattr(self, "max", sequence(max) if max is not None else sequence(1))
 
         # Check gradient dictionaries for non-valid keys
         for gradient_dict in ["negative_gradient", "positive_gradient"]:
@@ -252,6 +256,7 @@ class Flow(on.Edge):
         )
         if not self.investment:
             if self.nominal_value is None:
+                # todo: the following loop will be replaced by the loop below
                 for attr in need_nominal_value:
                     if kwargs.get(attr) is not None:
                         raise AttributeError(
@@ -259,8 +264,17 @@ class Flow(on.Edge):
                             "nominal_value must be set as well.\n"
                             "Otherwise, it won't have any effect.".format(attr)
                         )
+                for attr in need_nominal_value_dict.keys():
+                    if need_nominal_value_dict[attr] is not None:
+                        raise AttributeError(
+                            "If {} is set in a flow (except InvestmentFlow), "
+                            "nominal_value must be set as well.\n"
+                            "Otherwise, it won't have any effect.".format(attr)
+                        )
+
             elif not math.isfinite(self.nominal_value):
                 raise ValueError(infinite_error_msg.format("nominal_value"))
+
         if not math.isfinite(self.max[0]):
             raise ValueError(infinite_error_msg.format("max"))
 
