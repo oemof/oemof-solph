@@ -143,6 +143,11 @@ class Flow(on.Edge):
 
         super().__init__()
 
+        flow_attr = {
+            "max": max,
+            # ...
+        }
+
         scalars = [
             "nominal_value",
             "full_load_time_max",
