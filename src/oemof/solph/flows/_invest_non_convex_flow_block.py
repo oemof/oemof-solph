@@ -247,9 +247,9 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         r"""Objective expression for nonconvex investment flows.
 
             If `nonconvex.startup_costs` is set by the user:
-            .. math::
-                \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
-                \cdot c_{startup}
+                .. math::
+                    \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
+                    \cdot c_{startup}
 
             If `nonconvex.shutdown_costs` is set by the user:
                 .. math::

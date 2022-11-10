@@ -75,10 +75,10 @@ class NonConvexFlowBlock(ScalarBlock):
 
     def _create_variables(self):
         r"""
-        ::math:`Y_{status}` (binary) `om.NonConvexFlowBlock.status`:
+        :math:`Y_{status}` (binary) `om.NonConvexFlowBlock.status`:
             Variable indicating if flow is >= 0
 
-        ::math:`P_{max,status}` Status_nominal (continuous)
+        :math:`P_{max,status}` Status_nominal (continuous)
             Variable indicating if flow is >= 0
 
         .. automethod:: _variables_for_non_convex_flows
@@ -251,20 +251,20 @@ class NonConvexFlowBlock(ScalarBlock):
 
     def _variables_for_non_convex_flows(self):
         r"""
-        ::math:`Y_{startup}` (binary) `NonConvexFlowBlock.startup`:
+        :math:`Y_{startup}` (binary) `NonConvexFlowBlock.startup`:
             Variable indicating startup of flow (component) indexed by
             STARTUPFLOWS
 
-        ::math:`Y_{shutdown}` (binary) `NonConvexFlowBlock.shutdown`:
+        :math:`Y_{shutdown}` (binary) `NonConvexFlowBlock.shutdown`:
             Variable indicating shutdown of flow (component) indexed by
             SHUTDOWNFLOWS
 
-        ::math:`\dot{P}_{up}` (continuous) `NonConvexFlowBlock.positive_gradient`:
+        :math:`\dot{P}_{up}` (continuous) `NonConvexFlowBlock.positive_gradient`:
             Variable indicating the positive gradient, i.e. the load increase
             between two consecutive timesteps, indexed by
             POSITIVE_GRADIENT_FLOWS
 
-        ::math:`\dot{P}_{down} (continuous) `NonConvexFlowBlock.negative_gradient`:
+        :math:`\dot{P}_{down}` (continuous) `NonConvexFlowBlock.negative_gradient`:
             Variable indicating the negative gradient, i.e. the load decrease
             between two consecutive timesteps, indexed by
             NEGATIVE_GRADIENT_FLOWS
@@ -637,7 +637,7 @@ class NonConvexFlowBlock(ScalarBlock):
             .. math::
                 P(t-1) \cdot Y_{status}(t-1)
                 - P(t) \cdot Y_{status}(t) \leq \
-                \dot{P}_{down}(i, o, t), \\
+                \dot{P}_{down}(t), \\
                 \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()
