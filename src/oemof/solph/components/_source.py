@@ -41,7 +41,7 @@ class Source(on.Source):
     >>> type(pv_plant)
     <class 'oemof.solph.components._source.Source'>
 
-    >>> str(pv_plant.outputs()])
+    >>> str(pv_plant.outputs())
     ['electricity']
 
     Notes
