@@ -1148,6 +1148,26 @@ class TestsConstraint:
 
         self.compare_lp_files("offsettransformer.lp")
 
+    def test_link(self):
+        """Constraint test of a Link."""
+        bus_el_1 = solph.buses.Bus(label="el_1")
+        bus_el_2 = solph.buses.Bus(label="el_2")
+
+        solph.components.experimental._link.Link(
+            label="link",
+            inputs={
+                bus_el_1: solph.flows.Flow(nominal_value=4),
+                bus_el_2: solph.flows.Flow(nominal_value=2)
+            },
+            outputs={
+                bus_el_1: solph.flows.Flow(),
+                bus_el_2: solph.flows.Flow()
+            },
+            conversion_factors={(bus_el_1, bus_el_2): 0.8, (bus_el_2, bus_el_1): 0.9},
+        )
+
+        self.compare_lp_files("link.lp")
+
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""
 
