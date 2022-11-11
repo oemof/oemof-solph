@@ -41,6 +41,10 @@ class Flow(on.Edge):
         The nominal value of the flow. If this value is set the corresponding
         optimization variable of the flow object will be bounded by this value
         multiplied with min(lower bound)/max(upper bound).
+    variable_costs : numeric (iterable or scalar), default: 0, :math:`c`
+        The costs associated with one unit of the flow per hour. The
+        costs for each timestep (:math:`P_t \cdot c \cdot \delta(t)`)
+        will be added to the objective expression of the optimization problem.
     max : numeric (iterable or scalar), :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_value` with :attr:`max`
@@ -74,10 +78,6 @@ class Flow(on.Edge):
         the flow would have to run at full capacity to yield the same sum. The
         value will be multiplied with the nominal_value to get the absolute
         limit.
-    variable_costs : numeric (iterable or scalar)
-        The costs associated with one unit of the flow. If this is set the
-        costs will be added to the objective expression of the optimization
-        problem.
     fixed : boolean
         Boolean value indicating if a flow is fixed during the optimization
         problem to its ex-ante set value. Used in combination with the
