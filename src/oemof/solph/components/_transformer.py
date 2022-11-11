@@ -13,6 +13,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: David Fuhrländer
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
 
@@ -98,18 +100,15 @@ class Transformer(on.Transformer):
     ):
         self.label = label
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")  # label ???
+            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")  # label ???
+            warn_if_missing_attribute(self, "outputs")
             outputs = {}
 
         super().__init__(
             label=label, inputs=inputs, outputs=outputs, options=options
         )
-
-        # check_node_object_for_missing_attribute(self, "inputs")
-        # check_node_object_for_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
             conversion_factors = {}
