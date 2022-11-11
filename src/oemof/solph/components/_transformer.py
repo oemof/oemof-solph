@@ -100,9 +100,9 @@ class Transformer(on.Transformer):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        options=None,
     ):
         self.label = label
+
         if inputs is None:
             warn_if_missing_attribute(self, "inputs")
             inputs = {}
@@ -111,7 +111,7 @@ class Transformer(on.Transformer):
             outputs = {}
 
         super().__init__(
-            label=label, inputs=inputs, outputs=outputs, options=options
+            label=label, inputs=inputs, outputs=outputs,
         )
 
         if conversion_factors is None:
