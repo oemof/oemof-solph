@@ -52,8 +52,6 @@ class Transformer(on.Transformer):
         individual conversion factors for each time step.
         Default: 1. If no conversion_factor is given for an in- or outflow, the
         conversion_factor is set to 1.
-    options : dict
-        Dictionary for additional attributes.
 
     Examples
     --------
