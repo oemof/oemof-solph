@@ -136,23 +136,13 @@ class NonConvex:
         If both, up and downtimes are defined, the initial status is set for
         the maximum of both e.g. for six timesteps if a minimum downtime of
         six timesteps is defined in addition to a four timestep minimum uptime.
-    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
-        A dictionary containing the following two keys:
+    negative_gradient_limit : numeric (iterable, scalar or None)
+        the normed *upper bound* on the positive difference
+        (`flow[t-1] < flow[t]`) of two consecutive flow values.
 
-         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* on the positive difference (`flow[t-1] < flow[t]`) of
-           two consecutive flow values.
-         * `'costs``: numeric (scalar or None), the gradient cost per
-           unit.
-
-    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
-        A dictionary containing the following two keys:
-
-          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-            bound* on the negative difference (`flow[t-1] > flow[t]`) of
-            two consecutive flow values.
-          * `'costs``: numeric (scalar or None), the gradient cost per
-            unit.
+    negative_gradient_limit : numeric (iterable, scalar or None)
+            the normed *upper bound* on the negative difference
+            (`flow[t-1] > flow[t]`) of two consecutive flow values.
     """
 
     def __init__(self, **kwargs):
@@ -168,30 +158,24 @@ class NonConvex:
             "shutdown_costs",
             "activity_costs",
             "inactivity_costs",
+            "negative_gradient_limit",
+            "positive_gradient_limit",
         ]
-        dictionaries = ["positive_gradient", "negative_gradient"]
         defaults = {
             "initial_status": 0,
-            "positive_gradient": {"ub": None, "costs": 0},
-            "negative_gradient": {"ub": None, "costs": 0},
+            "positive_gradient_limit": None,
+            "negative_gradient_limit": None,
         }
 
         for attribute in set(
-            scalars + sequences + dictionaries + list(kwargs)
+            scalars + sequences + list(kwargs)
         ):
             value = kwargs.get(attribute, defaults.get(attribute))
-            if attribute in dictionaries:
-                setattr(
-                    self,
-                    attribute,
-                    {"ub": sequence(value["ub"])},
-                )
-            else:
-                setattr(
-                    self,
-                    attribute,
-                    sequence(value) if attribute in sequences else value,
-                )
+            setattr(
+                self,
+                attribute,
+                sequence(value) if attribute in sequences else value,
+            )
 
         self._max_up_down = None
 

@@ -24,7 +24,7 @@ def sequence(iterable_or_scalar):
     Parameters
     ----------
     iterable_or_scalar : iterable or None or int or float
-
+variable_costs
     Examples
     --------
     >>> sequence([1,2])

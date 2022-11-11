@@ -16,6 +16,7 @@ SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-License-Identifier: MIT
 
 """
+from collections.abc import Iterable
 import math
 from warnings import warn
 
@@ -49,20 +50,12 @@ class Flow(on.Edge):
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_value` to get the absolute value.
-    positive_gradient : :obj:`dict`, default: `{'ub': None}`
-        A dictionary containing the following key:
-
-         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* on the positive difference (`flow[t-1] < flow[t]`) of
-           two consecutive flow values.
-
-    negative_gradient : :obj:`dict`, default: `{'ub': None}`
-
-        A dictionary containing the following key:
-
-          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-            bound* on the negative difference (`flow[t-1] > flow[t]`) of
-            two consecutive flow values.
+    positive_gradient_limit : numeric (iterable, scalar or None)
+        the normed *upper bound* on the positive difference
+        (`flow[t-1] < flow[t]`) of two consecutive flow values.
+    negative_gradient_limit : numeric (iterable, scalar or None)
+            the normed *upper bound* on the negative difference
+            (`flow[t-1] > flow[t]`) of two consecutive flow values.
 
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Upper bound on the summed flow expressed as the equivalent time that
@@ -127,8 +120,8 @@ class Flow(on.Edge):
         min=None,
         max=None,
         fix=None,
-        positive_gradient=None,
-        negative_gradient=None,
+        positive_gradient_limit=None,
+        negative_gradient_limit=None,
         full_load_time_max=None,
         full_load_time_min=None,
         integer=None,
@@ -139,7 +132,7 @@ class Flow(on.Edge):
         summed_max=None,
         summed_min=None,
         # --- END ---
-        **kwargs,
+        custom_attributes=None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
@@ -163,36 +156,27 @@ class Flow(on.Edge):
 
         super().__init__()
 
+        if custom_attributes is not None:
+            for attribute, value in custom_attributes.items():
+                setattr(self, attribute, value)
+
+        infinite_error_msg = (
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
+        )
+        if nominal_value is not None and not math.isfinite(nominal_value):
+            raise ValueError(infinite_error_msg.format("nominal_value"))
         self.nominal_value = nominal_value
-        self.min = sequence(min) if min is not None else None
-        self.max = sequence(max) if max is not None else None
-        self.fix = sequence(fix) if fix is not None else None
 
-        if positive_gradient is None:
-            self.positive_gradient = {"ub": None}
-        else:
-            self.positive_gradient = {"ub": sequence(positive_gradient["ub"])}
-
-        if negative_gradient is None:
-            self.negative_gradient = {"ub": None}
-        else:
-            self.negative_gradient = {"ub": sequence(negative_gradient["ub"])}
+        self.positive_gradient_limit = sequence(positive_gradient_limit)
+        self.negative_gradient_limit = sequence(negative_gradient_limit)
 
         self.full_load_time_max = full_load_time_max
         self.full_load_time_min = full_load_time_min
-        self.variable_costs = sequence(variable_costs)
         self.integer = integer
         self.investment = investment
         self.nonconvex = nonconvex
         self.bidirectional = bidirectional
-
-        need_nominal_value = [
-            "fix",
-            "full_load_time_max",
-            "full_load_time_min",
-            "min",
-            "max",
-        ]
 
         # It is not allowed to define min or max if fix is defined.
         if fix is not None and (
@@ -202,15 +186,6 @@ class Flow(on.Edge):
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
 
-        # Check gradient dictionaries for non-valid keys
-        for gradient_dict in ["negative_gradient", "positive_gradient"]:
-            # if gradient_dict in kwargs:
-            if list(getattr(self, gradient_dict).keys()) != list(["ub"]):
-                msg = (
-                    "Only the key 'ub' is allowed for the '{0}' attribute"
-                )
-                raise AttributeError(msg.format(gradient_dict))
-
         # Checking for impossible attribute combinations
         if self.investment and self.nominal_value is not None:
             raise ValueError(
@@ -218,41 +193,48 @@ class Flow(on.Edge):
                 " has to be set to None."
             )
 
-        infinite_error_msg = (
-            "{} must be a finite value. Passing an infinite "
-            "value is not allowed."
-        )
-        if not self.investment:
-            if self.nominal_value is None:
-                for attr in need_nominal_value:
-                    if getattr(self, attr) is not None:
-                        raise AttributeError(
-                            "If {} is set in a flow (except InvestmentFlow), "
-                            "nominal_value must be set as well.\n"
-                            "Otherwise, it won't have any effect.".format(attr)
-                        )
+        need_nominal_value = [
+            "fix",
+            "full_load_time_max",
+            "full_load_time_min",
+            "min",
+            "max",
+        ]
+        sequences = ["fix", "variable_costs", "min", "max"]
+        if self.investment is None and self.nominal_value is None:
+            for attr in need_nominal_value:
+                if isinstance(eval(attr), Iterable):
+                    the_attr = eval(attr)[0]
+                else:
+                    the_attr = eval(attr)
+                if the_attr is not None:
+                    raise AttributeError(
+                        "If {} is set in a flow (except InvestmentFlow), "
+                        "nominal_value must be set as well.\n"
+                        "Otherwise, it won't have any effect.".format(attr)
+                    )
+        else:
+            # maximum (absolute values) just make sense when capacity is set
+            if max is None:
+                max = 1
+            if min is None and bidirectional:
+                min = -1
 
-            elif not math.isfinite(self.nominal_value):
-                raise ValueError(infinite_error_msg.format("nominal_value"))
+        # minumum will be set even without nominal limit
+        if min is None and not bidirectional:
+            min = 0
 
-        # Set default value for min and max
-        if min is None:
-            if bidirectional is True:
-                self.min = sequence(-1)
-            else:
-                self.min = sequence(0)
+        for attr in sequences:
+            setattr(self, attr, sequence(eval(attr)))
 
-        if max is None:
-            self.max = sequence(1)
-
-        if not math.isfinite(self.max[0]):
+        if self.nominal_value is not None and not math.isfinite(self.max[0]):
             raise ValueError(infinite_error_msg.format("max"))
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
-            if self.nonconvex.positive_gradient["ub"][0] is not None and (
-                self.positive_gradient["ub"][0] is not None
-                or self.negative_gradient["ub"][0] is not None
+            if self.nonconvex.positive_gradient_limit[0] is not None and (
+                self.positive_gradient_limit[0] is not None
+                or self.negative_gradient_limit[0] is not None
             ):
                 raise ValueError(
                     "You specified a positive gradient in your nonconvex "
@@ -260,9 +242,9 @@ class Flow(on.Edge):
                     "negative gradient for a standard flow!"
                 )
 
-            if self.nonconvex.negative_gradient["ub"][0] is not None and (
-                self.positive_gradient["ub"][0] is not None
-                or self.negative_gradient["ub"][0] is not None
+            if self.nonconvex.negative_gradient_limit[0] is not None and (
+                self.positive_gradient_limit[0] is not None
+                or self.negative_gradient_limit[0] is not None
             ):
                 raise ValueError(
                     "You specified a negative gradient in your nonconvex "

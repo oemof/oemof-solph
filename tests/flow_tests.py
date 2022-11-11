@@ -16,14 +16,6 @@ import pytest
 from oemof.solph.flows import Flow
 
 
-def test_error_in_gradient_attribute():
-    msg = "Only the key 'ub' is allowed for the '{0}' attribute"
-    with pytest.raises(AttributeError, match=msg.format("negative_gradient")):
-        Flow(negative_gradient={"costs": 5})
-    with pytest.raises(AttributeError, match=msg.format("positive_gradient")):
-        Flow(positive_gradient={"something": 5})
-
-
 def test_summed_max_future_warning():
     """Can be removed with v0.6."""
     msg = "The parameter 'summed_max' is deprecated and will be removed"

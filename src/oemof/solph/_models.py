@@ -341,7 +341,7 @@ class Model(BaseModel):
             initialize=[
                 k
                 for (k, v) in self.flows.items()
-                if hasattr(v, "bidirectional")
+                if v.bidirectional
             ],
             ordered=True,
             dimen=2,
@@ -352,7 +352,7 @@ class Model(BaseModel):
             initialize=[
                 k
                 for (k, v) in self.flows.items()
-                if not hasattr(v, "bidirectional")
+                if not v.bidirectional
             ],
             ordered=True,
             dimen=2,
