@@ -25,9 +25,7 @@ from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
-from oemof.solph._helpers import (
-    warn_if_missing_attribute,
-)
+from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
