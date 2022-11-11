@@ -61,6 +61,14 @@ class TestTransformerClass:
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
+    def test_transformer_missing_output_create_empty_dict(self):
+        trfr = solph.components.Transformer(inputs={})
+        assert trfr.outputs == {}
+
+    def test_transformer_missing_input_create_empty_dict(self):
+        trfr = solph.components.Transformer(outputs={})
+        assert trfr.inputs == {}
+
 
 def test_wrong_combination_invest_and_nominal_value():
     msg = "Using the investment object the nominal_value"
