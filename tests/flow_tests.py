@@ -11,8 +11,6 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
-import pytest
-
 from oemof.solph.flows import Flow
 
 
