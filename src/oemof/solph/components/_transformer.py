@@ -107,7 +107,9 @@ class Transformer(on.Transformer):
             outputs = {}
 
         super().__init__(
-            label=label, inputs=inputs, outputs=outputs,
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
         )
 
         if conversion_factors is None:
