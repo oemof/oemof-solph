@@ -16,8 +16,8 @@ SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-License-Identifier: MIT
 
 """
-from collections.abc import Iterable
 import math
+from collections.abc import Iterable
 from warnings import warn
 
 import numpy as np
