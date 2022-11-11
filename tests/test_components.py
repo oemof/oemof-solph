@@ -309,12 +309,14 @@ def test_generic_chp_without_warning():
             bgas: Flow(custom_attributes={"H_L_FG_share_max": [0.183]})
         },
         electrical_output={
-            bel: Flow(custom_attributes={
-                "P_max_woDH": [155.946],
-                "P_min_woDH": [68.787],
-                "Eta_el_max_woDH": [0.525],
-                "Eta_el_min_woDH": [0.444],
-            })
+            bel: Flow(
+                custom_attributes={
+                    "P_max_woDH": [155.946],
+                    "P_min_woDH": [68.787],
+                    "Eta_el_max_woDH": [0.525],
+                    "Eta_el_min_woDH": [0.444],
+                }
+            )
         },
         heat_output={bth: Flow(custom_attributes={"Q_CW_min": [10.552]})},
         Beta=[0.122],

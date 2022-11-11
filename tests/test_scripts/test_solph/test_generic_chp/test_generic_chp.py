@@ -68,21 +68,27 @@ def test_gen_chp():
     solph.components.GenericCHP(
         label="combined_cycle_extraction_turbine",
         fuel_input={
-            bgas: solph.flows.Flow(custom_attributes={
-                "H_L_FG_share_max": data["H_L_FG_share_max"]
-            })
+            bgas: solph.flows.Flow(
+                custom_attributes={
+                    "H_L_FG_share_max": data["H_L_FG_share_max"]
+                }
+            )
         },
         electrical_output={
-            bel: solph.flows.Flow(custom_attributes={
+            bel: solph.flows.Flow(
+                custom_attributes={
                     "P_max_woDH": data["P_max_woDH"],
                     "P_min_woDH": data["P_min_woDH"],
                     "Eta_el_max_woDH": data["Eta_el_max_woDH"],
                     "Eta_el_min_woDH": data["Eta_el_min_woDH"],
-            })
+                }
+            )
         },
-        heat_output={bth: solph.flows.Flow(custom_attributes={
-            "Q_CW_min": data["Q_CW_min"]
-        })},
+        heat_output={
+            bth: solph.flows.Flow(
+                custom_attributes={"Q_CW_min": data["Q_CW_min"]}
+            )
+        },
         Beta=data["Beta"],
         back_pressure=False,
     )

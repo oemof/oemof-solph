@@ -734,7 +734,8 @@ class TestsConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     nominal_value=100,
-                    custom_attributes={"emission_factor": 3.5})
+                    custom_attributes={"emission_factor": 3.5},
+                )
             },
         )
 
