@@ -124,7 +124,7 @@ class Flow(on.Edge):
         negative_gradient_limit=None,
         full_load_time_max=None,
         full_load_time_min=None,
-        integer=None,
+        integer=False,
         bidirectional=False,
         investment=None,
         nonconvex=None,
@@ -179,9 +179,7 @@ class Flow(on.Edge):
         self.bidirectional = bidirectional
 
         # It is not allowed to define min or max if fix is defined.
-        if fix is not None and (
-            min is not None or max is not None
-        ):
+        if fix is not None and (min is not None or max is not None):
             raise AttributeError(
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
@@ -213,16 +211,17 @@ class Flow(on.Edge):
                         "nominal_value must be set as well.\n"
                         "Otherwise, it won't have any effect.".format(attr)
                     )
-        else:
-            # maximum (absolute values) just make sense when capacity is set
-            if max is None:
-                max = 1
-            if min is None and bidirectional:
-                min = -1
-
         # minumum will be set even without nominal limit
-        if min is None and not bidirectional:
-            min = 0
+
+        # maximum and minimum (absolute values) should be always set,
+        # as nominal_value or invest might be defined later
+        if max is None:
+            max = 1
+        if min is None:
+            if bidirectional:
+                min = -1
+            else:
+                min = 0
 
         for attr in sequences:
             setattr(self, attr, sequence(eval(attr)))

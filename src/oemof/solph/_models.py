@@ -338,11 +338,7 @@ class Model(BaseModel):
         )
 
         self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if v.bidirectional
-            ],
+            initialize=[k for (k, v) in self.flows.items() if v.bidirectional],
             ordered=True,
             dimen=2,
             within=self.FLOWS,
@@ -350,9 +346,7 @@ class Model(BaseModel):
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if not v.bidirectional
+                k for (k, v) in self.flows.items() if not v.bidirectional
             ],
             ordered=True,
             dimen=2,

@@ -110,20 +110,14 @@ def test_attributes_needing_nominal_value_get_it():
 
 def test_min_max_values_for_bidirectional_flow():
     a = solph.flows.Flow(
-        bidirectional=True, nominal_value=2,
+        bidirectional=True
     )  # use default values
     b = solph.flows.Flow(
         bidirectional=True, nominal_value=1, min=-0.8, max=0.9
     )
-    c = solph.flows.Flow(
-        bidirectional=True,
-    )  # use default values
     assert a.bidirectional
     assert a.max[0] == 1
     assert a.min[0] == -1
     assert b.bidirectional
     assert b.max[0] == 0.9
     assert b.min[0] == -0.8
-    assert c.bidirectional
-    assert c.max[0] is None
-    assert c.min[0] is None

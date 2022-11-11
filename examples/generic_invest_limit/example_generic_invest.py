@@ -50,7 +50,10 @@ Johannes Röder <johannes.roeder@uni-bremen.de>
 import logging
 import os
 
-import matplotlib.pyplot as plt
+try:
+    import matplotlib.pyplot as plt
+except ModuleNotFoundError:
+    plt = None
 
 from oemof import solph
 

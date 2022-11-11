@@ -167,9 +167,7 @@ class NonConvex:
             "negative_gradient_limit": None,
         }
 
-        for attribute in set(
-            scalars + sequences + list(kwargs)
-        ):
+        for attribute in set(scalars + sequences + list(kwargs)):
             value = kwargs.get(attribute, defaults.get(attribute))
             setattr(
                 self,
