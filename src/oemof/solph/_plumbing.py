@@ -18,26 +18,26 @@ from itertools import repeat
 
 def sequence(iterable_or_scalar):
     """Tests if an object is iterable (except string) or scalar and returns
-        the original sequence if object is an iterable and an 'emulated'
-        sequence object of class _Sequence if object is a scalar or string.
+    the original sequence if object is an iterable and an 'emulated'
+    sequence object of class _Sequence if object is a scalar or string.
 
-        Parameters
-        ----------
-        iterable_or_scalar : iterable or None or int or float
+    Parameters
+    ----------
+    iterable_or_scalar : iterable or None or int or float
 
-        Examples
-        --------
-        >>> sequence([1,2])
-        [1, 2]
+    Examples
+    --------
+    >>> sequence([1,2])
+    [1, 2]
 
-        >>> x = sequence(10)
-        >>> x[0]
-        10
+    >>> x = sequence(10)
+    >>> x[0]
+    10
 
-        >>> x[10]
-        10
-        >>> print(x)
-        [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    >>> x[10]
+    10
+    >>> print(x)
+    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
     if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(

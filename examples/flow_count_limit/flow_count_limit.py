@@ -48,57 +48,65 @@ def main():
     #        ...)
     # But also any existing one (e.g. "emission_factor") can be used.
 
-    energy_system.add(solph.components.Source(
-        label="source1",
-        outputs={
-            bel: solph.Flow(
-                nonconvex=solph.NonConvex(),
-                nominal_value=210,
-                variable_costs=[-1, -5, -1, -1],
-                max=[1, 1, 1, 0],
-                custom_attributes={"my_keyword": True},
-            )
-        },
-    ))
+    energy_system.add(
+        solph.components.Source(
+            label="source1",
+            outputs={
+                bel: solph.Flow(
+                    nonconvex=solph.NonConvex(),
+                    nominal_value=210,
+                    variable_costs=[-1, -5, -1, -1],
+                    max=[1, 1, 1, 0],
+                    custom_attributes={"my_keyword": True},
+                )
+            },
+        )
+    )
 
     # Note: The keyword is also defined when set to False.
-    energy_system.add(solph.components.Sink(
-        label="sink1",
-        inputs={
-            bel: solph.Flow(
-                nonconvex=solph.NonConvex(),
-                variable_costs=[-2, -1, -2, -2],
-                nominal_value=250,
-                max=[1, 1, 1, 0],
-                custom_attributes={"my_keyword": False},
-            )
-        },
-    ))
+    energy_system.add(
+        solph.components.Sink(
+            label="sink1",
+            inputs={
+                bel: solph.Flow(
+                    nonconvex=solph.NonConvex(),
+                    variable_costs=[-2, -1, -2, -2],
+                    nominal_value=250,
+                    max=[1, 1, 1, 0],
+                    custom_attributes={"my_keyword": False},
+                )
+            },
+        )
+    )
 
     # Should be ignored because my_keyword is not defined.
-    energy_system.add(solph.components.Source(
-        label="source2",
-        outputs={
-            bel: solph.Flow(
-                variable_costs=1,
-                nonconvex=solph.NonConvex(),
-                max=[1, 1, 1, 0],
-                nominal_value=145,
-            )
-        },
-    ))
+    energy_system.add(
+        solph.components.Source(
+            label="source2",
+            outputs={
+                bel: solph.Flow(
+                    variable_costs=1,
+                    nonconvex=solph.NonConvex(),
+                    max=[1, 1, 1, 0],
+                    nominal_value=145,
+                )
+            },
+        )
+    )
 
     # Should be ignored because it is not NonConvex.
-    energy_system.add(solph.components.Sink(
-        label="sink2",
-        inputs={
-            bel: solph.Flow(
-                custom_attributes={"my_keyword": True},
-                fix=[0, 1, 1, 0],
-                nominal_value=130,
-            )
-        },
-    ))
+    energy_system.add(
+        solph.components.Sink(
+            label="sink2",
+            inputs={
+                bel: solph.Flow(
+                    custom_attributes={"my_keyword": True},
+                    fix=[0, 1, 1, 0],
+                    nominal_value=130,
+                )
+            },
+        )
+    )
 
     model = solph.Model(energy_system)
 
