@@ -35,9 +35,9 @@ def main():
     energy_system = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=4, freq="H")
     )
-    Node.registry = energy_system
 
     bel = solph.Bus(label="bel")
+    energy_system.add(bel)
 
     # There are a sink and a source, both creating a revenue (negative cost),
     # so it would be optimal to use both at the same time. To suppress this,
@@ -48,7 +48,7 @@ def main():
     #        ...)
     # But also any existing one (e.g. "emission_factor") can be used.
 
-    solph.components.Source(
+    energy_system.add(solph.components.Source(
         label="source1",
         outputs={
             bel: solph.Flow(
@@ -56,13 +56,13 @@ def main():
                 nominal_value=210,
                 variable_costs=[-1, -5, -1, -1],
                 max=[1, 1, 1, 0],
-                my_keyword=True,
+                custom_attributes={"my_keyword": True},
             )
         },
-    )
+    ))
 
     # Note: The keyword is also defined when set to False.
-    solph.components.Sink(
+    energy_system.add(solph.components.Sink(
         label="sink1",
         inputs={
             bel: solph.Flow(
@@ -70,13 +70,13 @@ def main():
                 variable_costs=[-2, -1, -2, -2],
                 nominal_value=250,
                 max=[1, 1, 1, 0],
-                my_keyword=False,
+                custom_attributes={"my_keyword": False},
             )
         },
-    )
+    ))
 
     # Should be ignored because my_keyword is not defined.
-    solph.components.Source(
+    energy_system.add(solph.components.Source(
         label="source2",
         outputs={
             bel: solph.Flow(
@@ -86,17 +86,19 @@ def main():
                 nominal_value=145,
             )
         },
-    )
+    ))
 
     # Should be ignored because it is not NonConvex.
-    solph.components.Sink(
+    energy_system.add(solph.components.Sink(
         label="sink2",
         inputs={
             bel: solph.Flow(
-                my_keyword=True, fix=[0, 1, 1, 0], nominal_value=130
+                custom_attributes={"my_keyword": True},
+                fix=[0, 1, 1, 0],
+                nominal_value=130,
             )
         },
-    )
+    ))
 
     model = solph.Model(energy_system)
 
