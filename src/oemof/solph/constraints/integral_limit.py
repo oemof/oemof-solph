@@ -84,7 +84,10 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
     >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
     >>> bel = solph.buses.Bus(label='electricityBus')
-    >>> flow1 = solph.flows.Flow(nominal_value=100, my_factor=0.8)
+    >>> flow1 = solph.flows.Flow(
+    ...     nominal_value=100,
+    ...     custom_attributes={"my_factor": 0.8},
+    ... )
     >>> flow2 = solph.flows.Flow(nominal_value=50)
     >>> src1 = solph.components.Source(label='source1', outputs={bel: flow1})
     >>> src2 = solph.components.Source(label='source2', outputs={bel: flow2})

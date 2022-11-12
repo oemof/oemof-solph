@@ -96,6 +96,8 @@ class TestParameterResult:
             param_results[(b_el2, demand)]["scalars"].sort_index(),
             pandas.Series(
                 {
+                    "bidirectional": False,
+                    "integer": False,
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
@@ -117,16 +119,17 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
-            "integer": None,
+            "integer": False,
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
+            "bidirectional": False,
             "full_load_time_max": None,
             "full_load_time_min": None,
             "max": 1,
             "min": 0,
-            "negative_gradient_ub": None,
-            "positive_gradient_ub": None,
+            "negative_gradient_limit": None,
+            "positive_gradient_limit": None,
             "variable_costs": 0,
             "flow": None,
             "values": None,
