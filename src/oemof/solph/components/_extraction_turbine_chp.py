@@ -126,20 +126,23 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
     The following constraints are created for all 
     instances of :class:`oemof.solph.components.ExtractionTurbineCHP`:
 
-    .. math::
-        &
-        (1)\dot H_{Fuel}(t) =
-            \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
-                {\eta_{el,woExtr}(t)} \\
-        &
-        (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
-
+    .. _ETCHP-equations:
+    
+        .. math::
+            &
+            (1)\dot H_{Fuel}(t) =
+                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
+                    {\eta_{el,woExtr}(t)} \\
+            &
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
+    
     where:
 
     .. math::
 
         \beta(t) = \frac{\eta_{el,woExtr}(t) -
             \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
+    
     and:
 
     .. math::
