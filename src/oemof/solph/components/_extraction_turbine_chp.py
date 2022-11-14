@@ -80,7 +80,7 @@ class ExtractionTurbineCHP(Transformer):
 
 
 class ExtractionTurbineCHPBlock(ScalarBlock):
-    r"""Block for all instances of 
+    r"""Block for all instances of
     :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
     **Variables**
@@ -90,17 +90,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
     * :math:`\dot H_{Fuel}`
 
         Fuel input flow, represented in code as `flow[i,n,t]`
-    
+
     * :math:`P_{el}`
 
-        Electric power outflow, represented in code as 
+        Electric power outflow, represented in code as
         `flow[n, main_output, t]`
-    
+
     * :math:`\dot Q_{th}`
 
-        Thermal output flow, represented in code as 
+        Thermal output flow, represented in code as
         `flow[n, tapped_output, t]`
-    
+
     **Parameters**
 
     The following parameters are created as attributes of
@@ -110,12 +110,12 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         Electric efficiency without heat extraction, represented in code as
         `conversion_factor_full_condensation[n, t]`
-    
+
     * :math:`\eta_{el,maxExtr}`
 
         Electric efficiency with maximal heat extraction, represented in code
         as `conversion_factors[main_output][n, t]`
-    
+
     * :math:`\eta_{th,maxExtr}`
 
         Thermal efficiency with maximal heat extraction, represented in code
@@ -123,11 +123,11 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
     **Constraints**
 
-    The following constraints are created for all 
+    The following constraints are created for all
     instances of :class:`oemof.solph.components.ExtractionTurbineCHP`:
 
     .. _ETCHP-equations:
-    
+
         .. math::
             &
             (1)\dot H_{Fuel}(t) =
@@ -135,18 +135,18 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
                     {\eta_{el,woExtr}(t)} \\
             &
             (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
-    
+
     where:
 
     .. math::
 
         \beta(t) = \frac{\eta_{el,woExtr}(t) -
             \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
-    
+
     and:
 
     .. math::
-    
+
         C_b = \frac{\eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
     The first equation is the result of the relation between the input
