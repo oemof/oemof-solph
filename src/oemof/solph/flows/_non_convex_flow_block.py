@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for nonconvex SimpleFlowBlock objects.
+for Flow objects with nonconvex but without investment options.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

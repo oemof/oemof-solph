@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""
-solph version of oemof.network.Edge including base constraints
+"""Creating sets, variables, constraints and parts of the objective function
+for Flow objects with neither nonconvex nor investment options.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
