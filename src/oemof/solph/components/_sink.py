@@ -12,10 +12,10 @@ SPDX-FileCopyrightText: Birgit Schachler
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 from oemof.network import network as on
-
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.tools import debugging
 
 
 class Sink(on.Sink):
@@ -53,8 +53,18 @@ class Sink(on.Sink):
         if inputs is None:
             inputs = {}
 
+        if len(inputs) != 1:
+            msg = (
+                "A Sink is designed to have one input but you provided {0}."
+                " If this is intended and you know what you are doing you can "
+                "disable the SuspiciousUsageWarning globally."
+            )
+            warn(
+                msg.format(len(inputs)),
+                debugging.SuspiciousUsageWarning,
+            )
+
         super().__init__(label=label, inputs=inputs, **kwargs)
-        check_node_object_for_missing_attribute(self, "inputs")
 
     def constraint_group(self):
         pass
