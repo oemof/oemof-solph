@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 
 SPDX-License-Identifier: MIT
 

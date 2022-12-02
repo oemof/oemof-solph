@@ -54,9 +54,10 @@ class Investment:
         existing=0,
         nonconvex=False,
         offset=0,
-        **kwargs,
+        custom_attributes=None,
     ):
-
+        if custom_attributes is None:
+            custom_attributes = {}
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
@@ -64,8 +65,8 @@ class Investment:
         self.nonconvex = nonconvex
         self.offset = offset
 
-        for attribute in kwargs.keys():
-            value = kwargs.get(attribute)
+        for attribute in custom_attributes.keys():
+            value = custom_attributes.get(attribute)
             setattr(self, attribute, value)
 
         self._check_invest_attributes()

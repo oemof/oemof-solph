@@ -687,7 +687,10 @@ class TestsConstraint:
             label="source_0",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=50, space=4)
+                    investment=solph.Investment(
+                        ep_costs=50,
+                        custom_attributes={"space": 4},
+                    )
                 )
             },
         )
@@ -696,7 +699,10 @@ class TestsConstraint:
             label="source_1",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=100, space=1)
+                    investment=solph.Investment(
+                        ep_costs=100,
+                        custom_attributes={"space": 1}
+                    ),
                 )
             },
         )
@@ -1236,7 +1242,8 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50, minimum=33, maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.compare_lp_files("dsm_module_DIW_invest.lp")
@@ -1259,7 +1266,8 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50, minimum=33, maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.compare_lp_files("dsm_module_DLR_invest.lp")
@@ -1281,7 +1289,8 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50, minimum=33, maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.compare_lp_files("dsm_module_oemof_invest.lp")
