@@ -148,7 +148,7 @@ class GenericStorage(network.Node):
         fixed_losses_relative=0,
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
-        outflow_conversion_factor=1
+        outflow_conversion_factor=1,
     ):
         if inputs is None:
             inputs = {}
@@ -162,9 +162,11 @@ class GenericStorage(network.Node):
         self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
         self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
         self.inflow_conversion_factor = solph_sequence(
-            inflow_conversion_factor)
+            inflow_conversion_factor
+        )
         self.outflow_conversion_factor = solph_sequence(
-            outflow_conversion_factor)
+            outflow_conversion_factor
+        )
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
         self.investment = investment
