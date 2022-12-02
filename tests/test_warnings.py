@@ -40,7 +40,9 @@ def test_filtered_warning(warning_fixture):
 def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     """Source doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
-    with pytest.raises(TypeError, match="got an unexpected keyword argument 'inputs'"):
+    with pytest.raises(
+        TypeError, match="got an unexpected keyword argument 'inputs'"
+    ):
         solph.components.Source(
             label="test_source", inputs={look_out: "A typo!"}
         )

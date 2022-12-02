@@ -51,8 +51,9 @@ class Source(on.Source):
 
     Notes
     -----
-    It is theoretically possible to use the Source object with multiple outputs.
-    However, we strongly recommend using multiple Source objects instead.
+    It is theoretically possible to use the Source object with multiple
+    outputs. However, we strongly recommend using multiple Source objects
+    instead.
     """
 
     def __init__(self, label=None, outputs=None):
