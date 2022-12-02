@@ -15,9 +15,8 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.tools import debugging
-
 from oemof.network import network as on
+from oemof.tools import debugging
 
 
 class Source(on.Source):
