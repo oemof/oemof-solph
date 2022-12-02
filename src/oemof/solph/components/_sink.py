@@ -38,11 +38,6 @@ class Sink(on.Sink):
     ...    label='el_export',
     ...    inputs={bel: solph.flows.Flow()})
 
-    >>> type(electricity_export)
-    <class 'oemof.solph.components._sink.Sink'>
-
-    >>> str(electricity_export.inputs[bel].inputs)
-    'electricity'
 
     Notes
     -----
