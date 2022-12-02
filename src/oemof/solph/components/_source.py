@@ -13,9 +13,11 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from warnings import warn
 
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.tools import debugging
+
+from oemof.network import network as on
 
 
 class Source(on.Source):
@@ -57,8 +59,18 @@ class Source(on.Source):
         if outputs is None:
             outputs = {}
 
+        if len(outputs) != 1:
+            msg = (
+                "A Source is designed to have one output but you provided {0}."
+                " If this is intended and you know what you are doing you can "
+                "disable the SuspiciousUsageWarning globally."
+            )
+            warn(
+                msg.format(len(outputs)),
+                debugging.SuspiciousUsageWarning,
+            )
+
         super().__init__(label=label, outputs=outputs)
-        check_node_object_for_missing_attribute(self, "outputs")
 
     def constraint_group(self):
         pass
