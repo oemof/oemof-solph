@@ -700,8 +700,7 @@ class TestsConstraint:
             outputs={
                 bus: solph.flows.Flow(
                     investment=solph.Investment(
-                        ep_costs=100,
-                        custom_attributes={"space": 1}
+                        ep_costs=100, custom_attributes={"space": 1}
                     ),
                 )
             },
@@ -1242,7 +1241,9 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                existing=50, minimum=33, maximum=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
                 custom_attributes={"ep_cost": 100},
             ),
         )
@@ -1266,7 +1267,9 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                existing=50, minimum=33, maximum=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
                 custom_attributes={"ep_cost": 100},
             ),
         )
@@ -1289,7 +1292,9 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                existing=50, minimum=33, maximum=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
                 custom_attributes={"ep_cost": 100},
             ),
         )
