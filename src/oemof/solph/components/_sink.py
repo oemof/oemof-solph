@@ -45,9 +45,11 @@ class Sink(on.Sink):
     However, we strongly recommend using multiple Sink objects instead.
     """
 
-    def __init__(self, label=None, inputs=None, **kwargs):
+    def __init__(self, label=None, inputs=None, custom_attributes=None):
         if inputs is None:
             inputs = {}
+        if custom_attributes is None:
+            custom_attributes = {}
 
         if len(inputs) != 1:
             msg = (
@@ -60,7 +62,7 @@ class Sink(on.Sink):
                 debugging.SuspiciousUsageWarning,
             )
 
-        super().__init__(label=label, inputs=inputs, **kwargs)
+        super().__init__(label=label, inputs=inputs, **custom_attributes)
 
     def constraint_group(self):
         pass

@@ -55,9 +55,11 @@ class Source(on.Source):
     instead.
     """
 
-    def __init__(self, label=None, outputs=None):
+    def __init__(self, label=None, outputs=None, custom_attributes=None):
         if outputs is None:
             outputs = {}
+        if custom_attributes is None:
+            custom_attributes = {}
 
         if len(outputs) != 1:
             msg = (
@@ -70,7 +72,7 @@ class Source(on.Source):
                 debugging.SuspiciousUsageWarning,
             )
 
-        super().__init__(label=label, outputs=outputs)
+        super().__init__(label=label, outputs=outputs, **custom_attributes)
 
     def constraint_group(self):
         pass

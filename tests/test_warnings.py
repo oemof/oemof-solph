@@ -28,18 +28,13 @@ def warning_fixture():
     warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
+def test_that_the_sink_errors_actually_get_raised(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
-    msg = (
-        "A Sink is designed to have one input but you provided 0."
-        " If this is intended and you know what you are doing you can "
-        "disable the SuspiciousUsageWarning globally."
-    )
-    with warnings.catch_warnings(record=True) as w:
+    with pytest.raises(
+        TypeError, match="got an unexpected keyword argument 'outputs'"
+    ):
         solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
 
 
 def test_filtered_warning(warning_fixture):
