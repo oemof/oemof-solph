@@ -146,35 +146,41 @@ class NonConvex:
             (`flow[t-1] > flow[t]`) of two consecutive flow values.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(
+        self,
+        initial_status=0,
+        startup_costs=None,
+        shutdown_costs=None,
+        activity_costs=None,
+        inactivity_costs=None,
+        negative_gradient_limit=None,
+        positive_gradient_limit=None,
+        custom_attributes=None,
+        **kwargs,
+    ):
+        if custom_attributes is None:
+            custom_attributes = {}
+
+        self.initial_status = initial_status
+
+        self.startup_costs = sequence(startup_costs)
+        self.shutdown_costs = sequence(shutdown_costs)
+        self.activity_costs = sequence(activity_costs)
+        self.inactivity_costs = sequence(inactivity_costs)
+        self.negative_gradient_limit = sequence(negative_gradient_limit)
+        self.positive_gradient_limit = sequence(positive_gradient_limit)
+
         scalars = [
             "minimum_uptime",
             "minimum_downtime",
-            "initial_status",
             "maximum_startups",
             "maximum_shutdowns",
         ]
-        sequences = [
-            "startup_costs",
-            "shutdown_costs",
-            "activity_costs",
-            "inactivity_costs",
-            "negative_gradient_limit",
-            "positive_gradient_limit",
-        ]
-        defaults = {
-            "initial_status": 0,
-            "positive_gradient_limit": None,
-            "negative_gradient_limit": None,
-        }
 
-        for attribute in set(scalars + sequences + list(kwargs)):
-            value = kwargs.get(attribute, defaults.get(attribute))
-            setattr(
-                self,
-                attribute,
-                sequence(value) if attribute in sequences else value,
-            )
+        for attribute in set(scalars):
+            setattr(self, attribute, kwargs.get(attribute))
+        for attribute, value in custom_attributes.items():
+            setattr(self, attribute, value)
 
         self._max_up_down = None
 
