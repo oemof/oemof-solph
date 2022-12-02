@@ -49,6 +49,7 @@ class Sink(on.Sink):
     It is theoretically possible to use the Sink object with multiple outputs.
     However, we strongly recommend using multiple Sink objects instead.
     """
+
     def __init__(self, label=None, inputs=None, **kwargs):
         if inputs is None:
             inputs = {}
