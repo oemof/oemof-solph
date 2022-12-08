@@ -601,16 +601,10 @@ class TestsConstraint:
             label="link",
             inputs={
                 bel0: solph.Flow(nominal_value=4),
-                bel1: solph.Flow(nominal_value=2)
+                bel1: solph.Flow(nominal_value=2),
             },
-            outputs={
-                bel0: solph.Flow(),
-                bel1: solph.Flow()
-            },
-            conversion_factors={
-                (bel0, bel1): 0.8,
-                (bel1, bel0): 0.9
-            }
+            outputs={bel0: solph.Flow(), bel1: solph.Flow()},
+            conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9},
         )
 
         self.compare_lp_files("link.lp")
