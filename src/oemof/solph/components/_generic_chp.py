@@ -26,7 +26,7 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 
 
 class GenericCHP(network.Transformer):
@@ -116,14 +116,25 @@ class GenericCHP(network.Transformer):
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        fuel_input,
+        electrical_output,
+        heat_output,
+        Beta,
+        back_pressure,
+        label=None,
+        custom_attributes=None,
+    ):
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(label, **custom_attributes)
 
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.heat_output = kwargs.get("heat_output")
-        self.Beta = solph_sequence(kwargs.get("Beta"))
-        self.back_pressure = kwargs.get("back_pressure")
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.heat_output = heat_output
+        self.Beta = sequence(Beta)
+        self.back_pressure = back_pressure
         self._alphas = None
 
         # map specific flows to standard API
@@ -131,8 +142,8 @@ class GenericCHP(network.Transformer):
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
 
-        self.outputs.update(kwargs.get("electrical_output"))
-        self.outputs.update(kwargs.get("heat_output"))
+        self.outputs.update(electrical_output)
+        self.outputs.update(heat_output)
 
     def _calculate_alphas(self):
         """
