@@ -96,6 +96,7 @@ class Transformer(on.Transformer):
         inputs=None,
         outputs=None,
         conversion_factors=None,
+        custom_attributes=None,
     ):
         self.label = label
 
@@ -106,10 +107,14 @@ class Transformer(on.Transformer):
             warn_if_missing_attribute(self, "outputs")
             outputs = {}
 
+        if custom_attributes is None:
+            custom_attributes = {}
+
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
+            **custom_attributes,
         )
 
         if conversion_factors is None:

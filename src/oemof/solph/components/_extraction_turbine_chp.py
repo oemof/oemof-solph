@@ -68,8 +68,22 @@ class ExtractionTurbineCHP(Transformer):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """  # noqa: E501
 
-    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        conversion_factor_full_condensation,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            conversion_factors=conversion_factors,
+            custom_attributes=custom_attributes,
+        )
         self.conversion_factor_full_condensation = {
             k: solph_sequence(v)
             for k, v in conversion_factor_full_condensation.items()
