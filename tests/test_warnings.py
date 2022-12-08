@@ -36,6 +36,18 @@ def test_that_the_sink_errors_actually_get_raised(warning_fixture):
     ):
         solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
 
+    msg = (
+        "A Sink is designed to have one input but you provided 0."
+        " If this is intended and you know what you are doing you can "
+        "disable the SuspiciousUsageWarning globally."
+    )
+    with warnings.catch_warnings(record=True) as w:
+        solph.components.Sink(
+            label="no input",
+        )
+        assert len(w) == 1
+        assert msg in str(w[-1].message)
+
 
 def test_filtered_warning(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
@@ -55,6 +67,18 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
         solph.components.Source(
             label="test_source", inputs={look_out: "A typo!"}
         )
+
+    msg = (
+        "A Source is designed to have one output but you provided 0."
+        " If this is intended and you know what you are doing you can "
+        "disable the SuspiciousUsageWarning globally."
+    )
+    with warnings.catch_warnings(record=True) as w:
+        solph.components.Source(
+            label="no output",
+        )
+        assert len(w) == 1
+        assert msg in str(w[-1].message)
 
 
 def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
