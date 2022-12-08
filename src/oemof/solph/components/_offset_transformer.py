@@ -22,7 +22,7 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 
 
 class OffsetTransformer(network.Transformer):
@@ -62,13 +62,25 @@ class OffsetTransformer(network.Transformer):
     <class 'oemof.solph.components._offset_transformer.OffsetTransformer'>
     """  # noqa: E501
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        inputs,
+        outputs,
+        label=None,
+        coefficients=None,
+        custom_attributes=None,
+    ):
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(
+            inputs=inputs,
+            outputs=outputs,
+            label=label,
+            **custom_attributes,
+        )
 
-        if kwargs.get("coefficients") is not None:
-            self.coefficients = tuple(
-                [solph_sequence(i) for i in kwargs.get("coefficients")]
-            )
+        if coefficients is not None:
+            self.coefficients = tuple([sequence(i) for i in coefficients])
             if len(self.coefficients) != 2:
                 raise ValueError(
                     "Two coefficients or coefficient series have to be given."
