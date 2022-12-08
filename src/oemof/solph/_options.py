@@ -149,6 +149,10 @@ class NonConvex:
     def __init__(
         self,
         initial_status=0,
+        minimum_uptime=None,
+        minimum_downtime=None,
+        maximum_startups=None,
+        maximum_shutdowns=None,
         startup_costs=None,
         shutdown_costs=None,
         activity_costs=None,
@@ -156,12 +160,15 @@ class NonConvex:
         negative_gradient_limit=None,
         positive_gradient_limit=None,
         custom_attributes=None,
-        **kwargs,
     ):
         if custom_attributes is None:
             custom_attributes = {}
 
         self.initial_status = initial_status
+        self.minimum_uptime = minimum_uptime
+        self.minimum_downtime = minimum_downtime
+        self.maximum_startups = maximum_startups
+        self.maximum_shutdowns = maximum_shutdowns
 
         self.startup_costs = sequence(startup_costs)
         self.shutdown_costs = sequence(shutdown_costs)
@@ -170,15 +177,6 @@ class NonConvex:
         self.negative_gradient_limit = sequence(negative_gradient_limit)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
 
-        scalars = [
-            "minimum_uptime",
-            "minimum_downtime",
-            "maximum_startups",
-            "maximum_shutdowns",
-        ]
-
-        for attribute in set(scalars):
-            setattr(self, attribute, kwargs.get(attribute))
         for attribute, value in custom_attributes.items():
             setattr(self, attribute, value)
 
