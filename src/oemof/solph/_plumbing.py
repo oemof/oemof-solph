@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Plumbing stuff.
+"""Helpers to fit scalar values into sequences.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

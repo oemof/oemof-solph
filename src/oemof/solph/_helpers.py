@@ -21,6 +21,15 @@ from oemof.tools import debugging
 
 
 def check_node_object_for_missing_attribute(obj, attribute):
+    """Raises a predefined warning if object does not have attribute.
+
+    Arguments
+    ---------
+
+    obj : python object
+    attribute : (string) name of the attribute to test for
+
+    """
     if not getattr(obj, attribute):
         warn_if_missing_attribute(obj, attribute)
 

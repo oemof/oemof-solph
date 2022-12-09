@@ -98,7 +98,7 @@ An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
 .. 	image:: _files/oemof_solph_example.svg
-   :scale: 10 %
+   :scale: 70 %
    :alt: alternate text
    :align: center
 
@@ -163,7 +163,7 @@ Oemof has different types of *flows* but you should be aware that you cannot con
 Components
 ++++++++++
 
-Components are divided in three categories. Basic components (solph.network), additional components (solph.components) and custom components (solph.custom). The custom section was created to lower the entry barrier for new components. Be aware that these components are in an experimental state. Let us know if you have used and tested these components. This is the first step to move them to the components section.
+Components can be classified into three categories. Basic components, detailed components, and experimental components. The experimental section was created to lower the entry barrier for new components. Be aware that these components might not be properly documented or even sometimes do not even work as intended. Let us know if you have used and tested these components. This is the first step to remove the experimental disclaimer.
 
 See :ref:`oemof_solph_components_label` for a list of all components.
 
@@ -285,7 +285,7 @@ Source (basic)
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have an hourly feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
+While a wind power plant will have as feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
 As we do have to pay for imported gas we should set variable costs.
 Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
 Alternatively, you might use *max* to allow for easy curtailment.
@@ -450,7 +450,7 @@ With the GenericCHP class it is possible to model different types of CHP plants 
 back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
 
 .. 	image:: _files/GenericCHP.svg
-   :scale: 10 %
+   :scale: 70 %
    :alt: scheme of GenericCHP operation range
    :align: center
 
@@ -623,9 +623,9 @@ As an addition to other flow-investments, the storage class implements the possi
 with the capacity of the storage.
 Three parameters are responsible for connecting the flows and the capacity of the storage:
 
-    *	' `invest_relation_input_capacity` ' fixes the input flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be filled within one time-period.
-    *	' `invest_relation_output_capacity` ' fixes the output flow investment to the capacity investment. A ratio of ‘1’ means that the storage can be emptied within one period.
-    *	' `invest_relation_input_output` ' fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger.
+    *	``invest_relation_input_capacity`` fixes the input flow investment to the capacity investment. A ratio of 1 means that the storage can be filled within one time-period.
+    *	``invest_relation_output_capacity`` fixes the output flow investment to the capacity investment. A ratio of 1 means that the storage can be emptied within one period.
+    *	``invest_relation_input_output`` fixes the input flow investment to the output flow investment. For values <1, the input will be smaller and for values >1 the input flow will be larger.
 
 You should not set all 3 parameters at the same time, since it will lead to overdetermination.
 
@@ -861,7 +861,7 @@ Yielding the following results
 
 .. _investment_mode_label:
 
-Using the investment mode
+Investment optimisation
 -------------------------
 
 As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
@@ -870,7 +870,7 @@ The annual savings by building up new capacity must therefore compensate the ann
 
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
-Basically an instance of the investment class can be added to a Flow or a
+Basically, an instance of the investment class can be added to a Flow or a
 Storage. All parameters that usually refer to the *nominal_value/capacity* will
 now refer to the investment variables and existing capacity. It is also
 possible to set a maximum limit for the capacity that can be build.
@@ -986,12 +986,12 @@ Mixed Integer (Linear) Problems
 -------------------------------
 
 Solph also allows you to model components with respect to more technical details,
-such as minimum power production. This can be done in two different modes:
-dispatch optimization with fixed capacities and combined dispatch and investment optimization.
+such as minimum power production. This can be done in both possible combinations,
+as dispatch optimization with fixed capacities or combined dispatch and investment optimization.
 
 Dispatch Optimization
 ^^^^^^^^^^^^^^^^^^^^^
-In the dispatch optimization mode, it is assumed that the capacities of the assets are already known,
+In dispatch optimization, it is assumed that the capacities of the assets are already known,
 but the optimal dispatch strategy must be obtained.
 For this purpose, the class :py:class:`~oemof.solph._options.NonConvex` should be used, as seen in the following example.
 
@@ -1028,41 +1028,17 @@ if corresponding attributes of the class are provided. For more information, see
 
 Combination of Dispatch and Investment Optimisation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-It is also possilbe to combine the investment and nonconvex option (not useable before version 'v0.5').
+Since version 'v0.5', it is also possilbe to combine the investment and nonconvex option.
 Therefore, a new constraint block for flows, called :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` has been developed,
 which combines both :py:class:`~oemof.solph._options.Investment` and :py:class:`~oemof.solph._options.NonConvex` classes.
 The new class offers the possibility to perform the investment optimization of an asset considering `min`/`max` values of the flow
 as fractions of the optimal capacity. Moreover, it obtains the optimal 'status' of the flow during the simulation period.
 
-It must be noted since in the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, a binary variable
+It must be noted that in a streighforward implementation, a binary variable
 representing the 'status' of the flow at each time is multiplied by the 'invest' parameter,
-which is a continuous variable representing the capacity of the asset being optimized (i.e., :math:`status \times invest`),
-the problem becomes nonlinear. For some solvers such as the 'Gurobi', this kind of nonlinearity is automatically linearized internally.
-Nevertheless, in other free solvers such as the 'CBC', this would cause an error in the optimization.
-For this reason, this nonlinearity is addressed by introducing a new variable in the
-:py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class called 'invest_non_convex', which represents the multiplication of the
-'status' attribute by the 'invest' attribute, and the following constraints have been added to linearize this multiplication.
-
-.. math::
-    :nowrap:
-
-    \begin{align}
-        &invest\_non\_convex \le status \times invest_{max} \\
-        &invest\_non\_convex \le invest \\
-        &invest\_non\_convex \ge invest - (1-status) \times invest_{max}
-    \end{align}
-
-In the above equations, :math:`status` is the binary variable denoting the operation status of the flow at each time,
-:math:`invest_{max}` is the maximum capacity of the component being optimized, which is a required fixed input parameter
-that must be given by providing the `maximum` parameter in the :py:mod:`~oemof.solph._options.Investment` of the
-flow (see example below), and :math:`invest\_non\_convex` is a variable
-of the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class representing :math:`status \times invest`.
-
-When :math:`status = 0`, according to equations (1) and (3), :math:`invest\_non\_convex` should be smaller or equal to 0, but since
-:math:`invest\_non\_convex` is defined as a 'non-negative' value, it is forced to be equal to 0.
-
-When :math:`status = 1`, from the combination of equations (2) and (3), :math:`invest\_non\_convex` is forced to be
-equal to :math:`invest`.
+which is a continuous variable representing the capacity of the asset being optimized (i.e., :math:`status \times invest`).
+This nonlinearity is linearised in the
+:py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock`
 
 .. code-block:: python
 

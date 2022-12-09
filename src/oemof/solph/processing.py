@@ -9,6 +9,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: henhuy
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -120,6 +121,15 @@ def create_dataframe(om):
 
 
 def divide_scalars_sequences(df_dict, k):
+    """Split results into scalars and sequences results
+
+    Parameters
+    ----------
+    df_dict: dict
+        dict of pd.DataFrames, keyed by oemof tuples
+    k: tuple
+        oemof tuple for results processing
+    """
     try:
         condition = df_dict[k][:-1].isnull().any()
         scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
@@ -135,6 +145,17 @@ def divide_scalars_sequences(df_dict, k):
 
 
 def set_result_index(df_dict, k, result_index):
+    """Define index for results
+
+    Parameters
+    ----------
+    df_dict: dict
+        dict of pd.DataFrames, keyed by oemof tuples
+    k: tuple
+        oemof tuple for results processing
+    result_index: pd.Index
+        Index to use for results
+    """
     try:
         df_dict[k].index = result_index
     except ValueError:
@@ -168,7 +189,7 @@ def results(model, remove_last_time_point=False):
     remove_last_time_point : bool
         The last time point of all TIMEPOINT variables is removed to get the
         same length as the TIMESTEP (interval) variables without getting
-        nan-values. By default the last time point is removed if it has not
+        nan-values. By default, the last time point is removed if it has not
         been defined by the user in the EnergySystem but inferred. If all
         time points has been defined explicitly by the user the last time point
         will not be removed by default. In that case all interval variables
@@ -265,7 +286,7 @@ def convert_keys_to_strings(result, keep_none_type=False):
 
 def meta_results(om, undefined=False):
     """
-    Fetch some meta data from the Solver. Feel free to add more keys.
+    Fetch some metadata from the Solver. Feel free to add more keys.
 
     Valid keys of the resulting dictionary are: 'objective', 'problem',
     'solver'.
@@ -376,7 +397,7 @@ def __separate_attrs(
                 continue
 
             # If the label is a tuple it is iterable, therefore it should be
-            # converted to a string. Otherwise it will be a sequence.
+            # converted to a string. Otherwise, it will be a sequence.
             if a == "label":
                 attr_value = str(attr_value)
 
