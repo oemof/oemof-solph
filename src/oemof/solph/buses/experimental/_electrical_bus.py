@@ -31,7 +31,7 @@ class ElectricalBus(Bus):
     v_max: numeric
         Maximum value of voltage angle at electrical bus
     v_min: numeric
-        Mininum value of voltag angle at electrical bus
+        Mininum value of voltage angle at electrical bus
 
     Note: This component is experimental. Use it with care.
 

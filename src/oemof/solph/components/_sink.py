@@ -8,6 +8,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -19,7 +20,7 @@ from oemof.solph._helpers import check_node_object_for_missing_attribute
 
 
 class Sink(on.Sink):
-    """An object with one input flow."""
+    """An object with one input flow and without any constraints."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

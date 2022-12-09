@@ -976,7 +976,7 @@ class TestsConstraint:
         with pytest.raises(ValueError, match=msg):
             solph.flows.Flow(
                 nonconvex=solph.NonConvex(
-                    negative_gradient={"ub": 0.03, "costs": 7},
+                    negative_gradient={"ub": 0.03},
                 ),
                 negative_gradient={"ub": 0.03},
             )
