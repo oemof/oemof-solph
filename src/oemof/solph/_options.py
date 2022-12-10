@@ -156,8 +156,8 @@ class NonConvex:
     def __init__(
         self,
         initial_status=0,
-        minimum_uptime=None,
-        minimum_downtime=None,
+        minimum_uptime=0,
+        minimum_downtime=0,
         maximum_startups=None,
         maximum_shutdowns=None,
         startup_costs=None,
@@ -189,29 +189,12 @@ class NonConvex:
 
         self._max_up_down = None
 
-    def _calculate_max_up_down(self):
-        """
-        Calculate maximum of up and downtime for direct usage in constraints.
-
-        The maximum of both is used to set the initial status for this
-        number of timesteps within the edge regions.
-        """
-        if self.minimum_uptime is not None:
-            if self.minimum_downtime is None:
-                max_up_down = self.minimum_uptime
-            else:
-                max_up_down = max(self.minimum_uptime, self.minimum_downtime)
-        elif self.minimum_downtime is not None:
-            max_up_down = self.minimum_downtime
-        else:
-            max_up_down = None
-
-        self._max_up_down = max_up_down
-
     @property
     def max_up_down(self):
-        """Compute or return the _max_up_down attribute."""
-        if self._max_up_down is None:
-            self._calculate_max_up_down()
+        """Return maximum of minimum_uptime and minimum_downtime.
 
-        return self._max_up_down
+        The maximum of both is used to set the initial status for this
+        number of time steps within the edge regions.
+        """
+
+        return max(self.minimum_uptime, self.minimum_downtime)

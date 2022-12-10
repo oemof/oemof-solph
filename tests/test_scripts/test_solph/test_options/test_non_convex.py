@@ -42,4 +42,4 @@ def test_max_up_down():
     assert non_convex_object1.max_up_down == 5
 
     non_convex_object1 = NonConvex()
-    assert non_convex_object1.max_up_down is None
+    assert non_convex_object1.max_up_down == 0
