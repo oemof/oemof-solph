@@ -9,6 +9,7 @@ available from its original location oemof/tests/test_components.py
 SPDX-License-Identifier: MIT
 """
 
+import pytest
 import warnings
 
 from oemof.solph.flows import Flow
@@ -42,3 +43,9 @@ def test_fix_sequence():
     assert flow.fix[0] == 0.3
     assert flow.fix[1] == 0.2
     assert flow.fix[2] == 0.7
+
+
+def test_fix_sequence_non_nominal():
+    """Attribute fix needs nominal_value"""
+    with pytest.raises(AttributeError):
+        Flow(fix=[0.3, 0.2, 0.7])
