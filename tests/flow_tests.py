@@ -34,3 +34,11 @@ def test_summed_min_future_warning():
 
 def test_source_with_full_load_time_max():
     Flow(nominal_value=1, full_load_time_max=2)
+
+
+def test_fix_sequence():
+    flow = Flow(nominal_value=4, fix=[0.3, 0.2, 0.7])
+
+    assert flow.fix[0] == 0.3
+    assert flow.fix[1] == 0.2
+    assert flow.fix[2] == 0.7
