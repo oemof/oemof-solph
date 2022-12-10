@@ -9,8 +9,9 @@ available from its original location oemof/tests/test_components.py
 SPDX-License-Identifier: MIT
 """
 
-import pytest
 import warnings
+
+import pytest
 
 from oemof.solph.flows import Flow
 
