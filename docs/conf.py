@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
+import matplotlib
 from sphinx.ext.autodoc import between
+
+matplotlib.use("agg")
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 
 def setup(app):
@@ -21,7 +26,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
 ]
 source_suffix = ".rst"

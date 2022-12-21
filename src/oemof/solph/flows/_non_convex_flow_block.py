@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for nonconvex SimpleFlowBlock objects.
+for Flow objects with nonconvex but without investment options.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -33,6 +33,8 @@ class NonConvexFlowBlock(ScalarBlock):
     .. automethod:: _create_sets
 
     .. automethod:: _objective_expression
+
+    Parameters are defined in :class:`Flow`.
     """
 
     def __init__(self, *args, **kwargs):
@@ -73,10 +75,10 @@ class NonConvexFlowBlock(ScalarBlock):
 
     def _create_variables(self):
         r"""
-        Status (binary) `om.NonConvexFlowBlock.status`:
+        :math:`Y_{status}` (binary) `om.NonConvexFlowBlock.status`:
             Variable indicating if flow is >= 0
 
-        Status_nominal (continuous)
+        :math:`P_{max,status}` Status_nominal (continuous)
             Variable indicating if flow is >= 0
 
         .. automethod:: _variables_for_non_convex_flows
@@ -132,7 +134,8 @@ class NonConvexFlowBlock(ScalarBlock):
         )
 
     def _sets_for_non_convex_flows(self, group):
-        r"""
+        r"""Creates all sets for non-convex flows.
+
         MIN_FLOWS
             A subset of set NONCONVEX_FLOWS with the attribute `min`
             being not None in the first timestep.
@@ -248,20 +251,22 @@ class NonConvexFlowBlock(ScalarBlock):
 
     def _variables_for_non_convex_flows(self):
         r"""
-        Startup variable (binary) `NonConvexFlowBlock.startup`:
+        :math:`Y_{startup}` (binary) `NonConvexFlowBlock.startup`:
             Variable indicating startup of flow (component) indexed by
             STARTUPFLOWS
 
-        Shutdown variable (binary) `NonConvexFlowBlock.shutdown`:
+        :math:`Y_{shutdown}` (binary) `NonConvexFlowBlock.shutdown`:
             Variable indicating shutdown of flow (component) indexed by
             SHUTDOWNFLOWS
 
-        Positive gradient (continuous) `NonConvexFlowBlock.positive_gradient`:
+        :math:`\dot{P}_{up}` (continuous)
+            `NonConvexFlowBlock.positive_gradient`:
             Variable indicating the positive gradient, i.e. the load increase
             between two consecutive timesteps, indexed by
             POSITIVE_GRADIENT_FLOWS
 
-        Negative gradient (continuous) `NonConvexFlowBlock.negative_gradient`:
+        :math:`\dot{P}_{down}` (continuous)
+            `NonConvexFlowBlock.negative_gradient`:
             Variable indicating the negative gradient, i.e. the load decrease
             between two consecutive timesteps, indexed by
             NEGATIVE_GRADIENT_FLOWS
@@ -287,8 +292,8 @@ class NonConvexFlowBlock(ScalarBlock):
     def _startup_costs(self):
         r"""
         .. math::
-            \sum_{i, o \in STARTUPFLOWS} \sum_t  startup(i, o, t) \
-            \cdot startup\_costs(i, o)
+            \sum_{i, o \in STARTUPFLOWS} \sum_t  Y_{startup}(t) \
+            \cdot c_{startup}
         """
         startup_costs = 0
 
@@ -309,8 +314,8 @@ class NonConvexFlowBlock(ScalarBlock):
     def _shutdown_costs(self):
         r"""
         .. math::
-            \sum_{i, o \in SHUTDOWNFLOWS} \sum_t shutdown(i, o, t) \
-            \cdot shutdown\_costs(i, o)
+            \sum_{SHUTDOWNFLOWS} \sum_t Y_{shutdown}(t) \
+            \cdot c_{shutdown}
         """
         shutdown_costs = 0
 
@@ -331,8 +336,8 @@ class NonConvexFlowBlock(ScalarBlock):
     def _activity_costs(self):
         r"""
         .. math::
-            \sum_{i, o \in ACTIVITYCOSTFLOWS} \sum_t status(i, o, t) \
-            \cdot activity\_costs(i, o)
+            \sum_{ACTIVITYCOSTFLOWS} \sum_t Y_{status}(t) \
+            \cdot c_{activity}
         """
         activity_costs = 0
 
@@ -354,8 +359,8 @@ class NonConvexFlowBlock(ScalarBlock):
     def _inactivity_costs(self):
         r"""
         .. math::
-            \sum_{i, o \in INACTIVITYCOSTFLOWS} \sum_t (1 - status(i, o, t)) \
-            \cdot inactivity\_costs(i, o)
+            \sum_{INACTIVITYCOSTFLOWS} \sum_t (1 - Y_{status}(t)) \
+            \cdot c_{inactivity}
         """
         inactivity_costs = 0
 
@@ -380,19 +385,19 @@ class NonConvexFlowBlock(ScalarBlock):
     def _min_downtime_constraint(self):
         r"""
         .. math::
-            (status(i, o, t-1)-status(i, o, t)) \
-            \cdot minimum\_downtime(i, o) \\
-            \leq minimum\_downtime(i, o) \
-            - \sum_{n=0}^{minimum\_downtime-1} status(i,o,t+n) \\
+            (Y_{status}(t-1) - Y_{status}(t)) \
+            \cdot t_{down,minimum} \\
+            \leq t_{down,minimum} \
+            - \sum_{n=0}^{t_{down,minimum}-1} Y_{status}(t+n) \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
+            t \neq \{0..t_{down,minimum}\} \cup \
+            \{t\_max-t_{down,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
             \\ \\
-            status(i, o, t) = initial\_status(i, o) \\
+            Y_{status}(t) = Y_{status,0} \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_downtime\} \cup \
-            \{t\_max-minimum\_downtime..t\_max\} , \\
+            t = \{0..t_{down,minimum}\} \cup \
+            \{t\_max-t_{down,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
         """
         m = self.parent_block()
@@ -427,17 +432,17 @@ class NonConvexFlowBlock(ScalarBlock):
     def _min_uptime_constraint(self):
         r"""
         .. math::
-            (status(i, o, t)-status(i, o, t-1)) \cdot minimum\_uptime(i, o) \\
-            \leq \sum_{n=0}^{minimum\_uptime-1} status(i,o,t+n) \\
+            (Y_{status}(t)-Y_{status}(t-1)) \cdot t_{up,minimum} \\
+            \leq \sum_{n=0}^{t_{up,minimum}-1} Y_{status}(t+n) \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t \neq \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
+            t \neq \{0..t_{up,minimum}\} \cup \
+            \{t\_max-t_{up,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
             \\ \\
-            status(i, o, t) = initial\_status(i, o) \\
+            Y_{status}(t) = Y_{status,0} \\
             \forall t \in \textrm{TIMESTEPS} | \\
-            t = \{0..minimum\_uptime\} \cup \
-            \{t\_max-minimum\_uptime..t\_max\} , \\
+            t = \{0..t_{up,minimum}\} \cup \
+            \{t\_max-t_{up,minimum}..t\_max\} , \\
             \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
         """
         m = self.parent_block()
@@ -471,10 +476,9 @@ class NonConvexFlowBlock(ScalarBlock):
     def _shutdown_constraint(self):
         r"""
         .. math::
-            shutdown(i, o, t) \geq \
-                status(i, o, t-1) - status(i, o, t) \\
+            Y_{shutdown}(t) \geq Y_{status}(t-1) - Y_{status}(t) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{SHUTDOWNFLOWS}.
+            \forall \textrm{SHUTDOWNFLOWS}.
         """
         m = self.parent_block()
 
@@ -498,10 +502,9 @@ class NonConvexFlowBlock(ScalarBlock):
     def _startup_constraint(self):
         r"""
         .. math::
-            startup(i, o, t) \geq \
-                status(i,o,t) - status(i, o, t-1) \\
+            Y_{startup}(t) \geq Y_{status}(t) - Y_{status}(t-1) \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i,o) \in \textrm{STARTUPFLOWS}.
+            \forall \textrm{STARTUPFLOWS}.
         """
         m = self.parent_block()
 
@@ -525,7 +528,7 @@ class NonConvexFlowBlock(ScalarBlock):
     def _max_startup_constraint(self):
         r"""
         .. math::
-            \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
+            \sum_{t \in \textrm{TIMESTEPS}} Y_{startup}(t) \leq \
                 N_{start}(i,o)\\
             \forall (i,o) \in \textrm{MAXSTARTUPFLOWS}.
         """
@@ -541,7 +544,7 @@ class NonConvexFlowBlock(ScalarBlock):
     def _max_shutdown_constraint(self):
         r"""
         .. math::
-            \sum_{t \in \textrm{TIMESTEPS}} startup(i, o, t) \leq \
+            \sum_{t \in \textrm{TIMESTEPS}} Y_{startup}(t) \leq \
                 N_{shutdown}(i,o)\\
             \forall (i,o) \in \textrm{MAXSHUTDOWNFLOWS}.
         """
@@ -557,10 +560,10 @@ class NonConvexFlowBlock(ScalarBlock):
     def _maximum_flow_constraint(self):
         r"""
         .. math::
-            flow(i, o, t) \leq max(i, o, t) \cdot nominal\_value \
-                \cdot status(i, o, t), \\
+            P(t) \leq max(i, o, t) \cdot P_{nom} \
+                \cdot status(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}.
+            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}.
         """
         m = self.parent_block()
 
@@ -577,9 +580,9 @@ class NonConvexFlowBlock(ScalarBlock):
     def _minimum_flow_constraint(self):
         r"""
         .. math::
-            flow(i, o, t) \geq min(i, o, t) \cdot nominal\_value \
-                \cdot status(i, o, t), \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}, \\
+            P(t) \geq min(i, o, t) \cdot P_{nom} \
+                \cdot Y_{status}(t), \\
+            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}, \\
             \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()
@@ -597,9 +600,7 @@ class NonConvexFlowBlock(ScalarBlock):
     def _status_nominal_constraint(self):
         r"""
         .. math::
-            status\_nominal(i, o, t) =  status(i, o, t)
-                                    \cdot nominal\_value, \\
-            \forall (i, o) \in \textrm{NONCONVEX\_FLOWS}, \\
+            P_{max,status}(t) =  Y_{status}(t) \cdot P_{nom}, \\
             \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()
@@ -627,18 +628,18 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _min_downtime_constraint
 
         positive_gradient_constraint
-            .. math:: flow(i, o, t) \cdot status(i, o, t)
-                - flow(i, o, t-1) \cdot status(i, o, t-1)  \geq \
-                positive\_gradient(i, o, t), \\
-                \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}, \\
+            .. math::
+
+                P(t) \cdot Y_{status}(t)
+                - P(t-1) \cdot Y_{status}(t-1)  \leq \
+                \dot{P}_{up}(t), \\
                 \forall t \in \textrm{TIMESTEPS}.
 
         negative_gradient_constraint
             .. math::
-                flow(i, o, t-1) \cdot status(i, o, t-1)
-                - flow(i, o, t) \cdot status(i, o, t) \geq \
-                negative\_gradient(i, o, t), \\
-                \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}, \\
+                P(t-1) \cdot Y_{status}(t-1)
+                - P(t) \cdot Y_{status}(t) \leq \
+                \dot{P}_{down}(t), \\
                 \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()

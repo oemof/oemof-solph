@@ -17,8 +17,8 @@ SimpleFlow
     :undoc-members:
     :show-inheritance:
 
-InvestFlow
-----------
+InvestmentFlow
+--------------
 
 .. automodule:: oemof.solph.flows._investment_flow_block
     :members:

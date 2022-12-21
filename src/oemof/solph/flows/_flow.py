@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.Edge including base constraints
+solph version of oemof.network.Edge
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
