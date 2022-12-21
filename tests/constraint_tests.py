@@ -141,15 +141,15 @@ class TestsConstraint:
 
     def test_linear_transformer(self):
         """Constraint test of a Transformer without Investment."""
-        bgas = solph.buses.Bus(label="gas")
+        bgas = solph.Bus(label="gas")
 
-        bel = solph.buses.Bus(label="electricity")
+        bel = solph.Bus(label="electricity")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="powerplantGas",
-            inputs={bgas: solph.flows.Flow()},
+            inputs={bgas: solph.Flow()},
             outputs={
-                bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+                bel: solph.Flow(nominal_value=10e10, variable_costs=50)
             },
             conversion_factors={bel: 0.58},
         )
@@ -160,15 +160,15 @@ class TestsConstraint:
     def test_linear_transformer_invest(self):
         """Constraint test of a Transformer with Investment."""
 
-        bgas = solph.buses.Bus(label="gas")
+        bgas = solph.Bus(label="gas")
 
-        bel = solph.buses.Bus(label="electricity")
+        bel = solph.Bus(label="electricity")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="powerplant_gas",
-            inputs={bgas: solph.flows.Flow()},
+            inputs={bgas: solph.Flow()},
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     variable_costs=50,
                     investment=solph.Investment(maximum=1000, ep_costs=20),
                 )
@@ -181,19 +181,19 @@ class TestsConstraint:
 
     def test_max_source_min_sink(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        wind = solph.components.Source(
+        wind = solph.Source(
             label="wind",
             outputs={
-                bel: solph.flows.Flow(nominal_value=54, max=(0.85, 0.95, 0.61))
+                bel: solph.Flow(nominal_value=54, max=(0.85, 0.95, 0.61))
             },
         )
 
-        demand = solph.components.Sink(
+        demand = solph.Sink(
             label="minDemand",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nominal_value=54, min=(0.84, 0.94, 0.59), variable_costs=14
                 )
             },
@@ -205,19 +205,19 @@ class TestsConstraint:
     def test_fixed_source_variable_sink(self):
         """Constraint test with a fixed source and a variable sink."""
 
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        wind = solph.components.Source(
+        wind = solph.Source(
             label="wind",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     fix=[0.43, 0.72, 0.29], nominal_value=10e5
                 )
             },
         )
 
-        excess = solph.components.Sink(
-            label="excess", inputs={bel: solph.flows.Flow(variable_costs=40)}
+        excess = solph.Sink(
+            label="excess", inputs={bel: solph.Flow(variable_costs=40)}
         )
 
         self.energysystem.add(bel, wind, excess)
@@ -226,10 +226,10 @@ class TestsConstraint:
 
     def test_nominal_value_to_zero(self):
         """If the nominal value is set to zero nothing should happen."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        s1 = solph.components.Source(
-            label="s1", outputs={bel: solph.flows.Flow(nominal_value=0)}
+        s1 = solph.Source(
+            label="s1", outputs={bel: solph.Flow(nominal_value=0)}
         )
         self.energysystem.add(bel, s1)
         self.compare_lp_files("nominal_value_to_zero.lp")
@@ -240,19 +240,19 @@ class TestsConstraint:
         `full_load_time_max`.
         """
 
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        wind = solph.components.Source(
+        wind = solph.Source(
             label="wind",
             outputs={
-                bel: solph.flows.Flow(fix=[12, 16, 14], nominal_value=1000000)
+                bel: solph.Flow(fix=[12, 16, 14], nominal_value=1000000)
             },
         )
 
-        excess = solph.components.Sink(
+        excess = solph.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
@@ -269,12 +269,12 @@ class TestsConstraint:
     def test_invest_source_fixed_sink(self):
         """Constraint test with a fixed sink and a dispatch invest source."""
 
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        pv = solph.components.Source(
+        pv = solph.Source(
             label="pv",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     max=[45, 83, 65],
                     variable_costs=13,
                     investment=solph.Investment(ep_costs=123),
@@ -282,10 +282,10 @@ class TestsConstraint:
             },
         )
 
-        excess = solph.components.Sink(
+        excess = solph.Sink(
             label="excess",
             inputs={
-                bel: solph.flows.Flow(fix=[0.5, 0.8, 0.3], nominal_value=10e4)
+                bel: solph.Flow(fix=[0.5, 0.8, 0.3], nominal_value=10e4)
             },
         )
         self.energysystem.add(bel, pv, excess)
@@ -294,15 +294,15 @@ class TestsConstraint:
 
     def test_storage(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage_no_invest",
             inputs={
-                bel: solph.flows.Flow(nominal_value=16667, variable_costs=56)
+                bel: solph.Flow(nominal_value=16667, variable_costs=56)
             },
             outputs={
-                bel: solph.flows.Flow(nominal_value=16667, variable_costs=24)
+                bel: solph.Flow(nominal_value=16667, variable_costs=24)
             },
             nominal_storage_capacity=10e4,
             loss_rate=0.13,
@@ -318,12 +318,12 @@ class TestsConstraint:
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage1",
-            inputs={bel: solph.flows.Flow(variable_costs=56)},
-            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
@@ -340,15 +340,15 @@ class TestsConstraint:
 
     def test_storage_invest_2(self):
         """All can be free extended to their own cost."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage2",
             inputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=99))
+                bel: solph.Flow(investment=solph.Investment(ep_costs=99))
             },
             outputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=9))
+                bel: solph.Flow(investment=solph.Investment(ep_costs=9))
             },
             investment=solph.Investment(ep_costs=145),
             initial_storage_level=0.5,
@@ -361,15 +361,15 @@ class TestsConstraint:
         e.g. PHES with a fixed basin but the pump and the turbine can be
         adapted
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage3",
             inputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=99))
+                bel: solph.Flow(investment=solph.Investment(ep_costs=99))
             },
             outputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=9))
+                bel: solph.Flow(investment=solph.Investment(ep_costs=9))
             },
             nominal_storage_capacity=5000,
         )
@@ -378,12 +378,12 @@ class TestsConstraint:
 
     def test_storage_invest_4(self):
         """Only the storage capacity can be extended."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage4",
-            inputs={bel: solph.flows.Flow(nominal_value=80)},
-            outputs={bel: solph.flows.Flow(nominal_value=100)},
+            inputs={bel: solph.Flow(nominal_value=80)},
+            outputs={bel: solph.Flow(nominal_value=100)},
             investment=solph.Investment(ep_costs=145, maximum=500),
         )
         self.energysystem.add(bel, storage)
@@ -395,17 +395,17 @@ class TestsConstraint:
         adapted. The installed capacity of the pump is 10 % bigger than the
         the capacity of the turbine due to 'invest_relation_input_output=1.1'.
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage5",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     investment=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     investment=solph.Investment(existing=100)
                 )
             },
@@ -419,17 +419,17 @@ class TestsConstraint:
         """Like test_storage_invest_5 but there can also be an investment in
         the basin.
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage6",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     investment=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     investment=solph.Investment(existing=100)
                 )
             },
@@ -443,12 +443,12 @@ class TestsConstraint:
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage1",
-            inputs={bel: solph.flows.Flow()},
-            outputs={bel: solph.flows.Flow()},
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
             investment=solph.Investment(
                 ep_costs=145, minimum=100, maximum=200
             ),
@@ -459,12 +459,12 @@ class TestsConstraint:
 
     def test_storage_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage1",
-            inputs={bel: solph.flows.Flow()},
-            outputs={bel: solph.flows.Flow()},
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
             nominal_storage_capacity=1111,
             initial_storage_level=None,
             balanced=False,
@@ -476,12 +476,12 @@ class TestsConstraint:
 
     def test_storage_invest_unbalanced(self):
         """Testing a unbalanced storage (e.g. battery)."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage1",
-            inputs={bel: solph.flows.Flow()},
-            outputs={bel: solph.flows.Flow()},
+            inputs={bel: solph.Flow()},
+            outputs={bel: solph.Flow()},
             nominal_storage_capacity=None,
             initial_storage_level=0.5,
             balanced=False,
@@ -494,15 +494,15 @@ class TestsConstraint:
 
     def test_storage_fixed_losses(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage_no_invest",
             inputs={
-                bel: solph.flows.Flow(nominal_value=16667, variable_costs=56)
+                bel: solph.Flow(nominal_value=16667, variable_costs=56)
             },
             outputs={
-                bel: solph.flows.Flow(nominal_value=16667, variable_costs=24)
+                bel: solph.Flow(nominal_value=16667, variable_costs=24)
             },
             nominal_storage_capacity=1e5,
             loss_rate=0.13,
@@ -520,12 +520,12 @@ class TestsConstraint:
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage1",
-            inputs={bel: solph.flows.Flow(variable_costs=56)},
-            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             fixed_losses_relative=0.01,
@@ -544,17 +544,17 @@ class TestsConstraint:
 
     def test_transformer(self):
         """Constraint test of a LinearN1Transformer without Investment."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bbms = solph.buses.Bus(label="biomassBus")
-        bel = solph.buses.Bus(label="electricityBus")
-        bth = solph.buses.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus")
+        bbms = solph.Bus(label="biomassBus")
+        bel = solph.Bus(label="electricityBus")
+        bth = solph.Bus(label="thermalBus")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="powerplantGasCoal",
-            inputs={bbms: solph.flows.Flow(), bgas: solph.flows.Flow()},
+            inputs={bbms: solph.Flow(), bgas: solph.Flow()},
             outputs={
-                bel: solph.flows.Flow(variable_costs=50),
-                bth: solph.flows.Flow(nominal_value=5e10, variable_costs=20),
+                bel: solph.Flow(variable_costs=50),
+                bth: solph.Flow(nominal_value=5e10, variable_costs=20),
             },
             conversion_factors={bgas: 0.4, bbms: 0.1, bel: 0.3, bth: 0.5},
         )
@@ -566,20 +566,20 @@ class TestsConstraint:
     def test_transformer_invest(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
-        bgas = solph.buses.Bus(label="gasBus")
-        bcoal = solph.buses.Bus(label="coalBus")
-        bel = solph.buses.Bus(label="electricityBus")
-        bth = solph.buses.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus")
+        bcoal = solph.Bus(label="coalBus")
+        bel = solph.Bus(label="electricityBus")
+        bth = solph.Bus(label="thermalBus")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="powerplant_gas_coal",
-            inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
+            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     variable_costs=50,
                     investment=solph.Investment(maximum=1000, ep_costs=20),
                 ),
-                bth: solph.flows.Flow(variable_costs=20),
+                bth: solph.Flow(variable_costs=20),
             },
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
@@ -590,22 +590,22 @@ class TestsConstraint:
     def test_transformer_invest_with_existing(self):
         """Constraint test of a LinearN1Transformer with Investment."""
 
-        bgas = solph.buses.Bus(label="gasBus")
-        bcoal = solph.buses.Bus(label="coalBus")
-        bel = solph.buses.Bus(label="electricityBus")
-        bth = solph.buses.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus")
+        bcoal = solph.Bus(label="coalBus")
+        bel = solph.Bus(label="electricityBus")
+        bth = solph.Bus(label="thermalBus")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="powerplant_gas_coal",
-            inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
+            inputs={bgas: solph.Flow(), bcoal: solph.Flow()},
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     variable_costs=50,
                     investment=solph.Investment(
                         maximum=1000, ep_costs=20, existing=200
                     ),
                 ),
-                bth: solph.flows.Flow(variable_costs=20),
+                bth: solph.Flow(variable_costs=20),
             },
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
@@ -617,16 +617,16 @@ class TestsConstraint:
         """
         Constraint test of a Transformer without Investment (two outputs).
         """
-        bgas = solph.buses.Bus(label="gasBus")
-        bheat = solph.buses.Bus(label="heatBus")
-        bel = solph.buses.Bus(label="electricityBus")
+        bgas = solph.Bus(label="gasBus")
+        bheat = solph.Bus(label="heatBus")
+        bel = solph.Bus(label="electricityBus")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="CHPpowerplantGas",
             inputs={
-                bgas: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+                bgas: solph.Flow(nominal_value=10e10, variable_costs=50)
             },
-            outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
+            outputs={bel: solph.Flow(), bheat: solph.Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
         self.energysystem.add(bgas, bheat, bel, transformer)
@@ -636,19 +636,19 @@ class TestsConstraint:
     def test_linear_transformer_chp_invest(self):
         """Constraint test of a Transformer with Investment (two outputs)."""
 
-        bgas = solph.buses.Bus(label="gasBus")
-        bheat = solph.buses.Bus(label="heatBus")
-        bel = solph.buses.Bus(label="electricityBus")
+        bgas = solph.Bus(label="gasBus")
+        bheat = solph.Bus(label="heatBus")
+        bel = solph.Bus(label="electricityBus")
 
-        transformer = solph.components.Transformer(
+        transformer = solph.Transformer(
             label="chp_powerplant_gas",
             inputs={
-                bgas: solph.flows.Flow(
+                bgas: solph.Flow(
                     variable_costs=50,
                     investment=solph.Investment(maximum=1000, ep_costs=20),
                 )
             },
-            outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
+            outputs={bel: solph.Flow(), bheat: solph.Flow()},
             conversion_factors={bel: 0.4, bheat: 0.5},
         )
         self.energysystem.add(bgas, bheat, bel, transformer)
@@ -673,22 +673,22 @@ class TestsConstraint:
 
     def test_variable_chp(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
-        bth = solph.buses.Bus(label="heatBus")
-        bgas = solph.buses.Bus(label="commodityBus")
+        bel = solph.Bus(label="electricityBus")
+        bth = solph.Bus(label="heatBus")
+        bgas = solph.Bus(label="commodityBus")
 
-        chp1 = solph.components.ExtractionTurbineCHP(
+        chp1 = solph.ExtractionTurbineCHP(
             label="variable_chp_gas1",
-            inputs={bgas: solph.flows.Flow(nominal_value=100)},
-            outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
         )
 
-        chp2 = solph.components.ExtractionTurbineCHP(
+        chp2 = solph.ExtractionTurbineCHP(
             label="variable_chp_gas2",
-            inputs={bgas: solph.flows.Flow(nominal_value=100)},
-            outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
+            inputs={bgas: solph.Flow(nominal_value=100)},
+            outputs={bel: solph.Flow(), bth: solph.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
         )
@@ -698,30 +698,30 @@ class TestsConstraint:
 
     def test_generic_invest_limit(self):
         """ """
-        bus = solph.buses.Bus(label="bus_1")
+        bus = solph.Bus(label="bus_1")
 
-        source_0 = solph.components.Source(
+        source_0 = solph.Source(
             label="source_0",
             outputs={
-                bus: solph.flows.Flow(
+                bus: solph.Flow(
                     investment=solph.Investment(ep_costs=50, space=4)
                 )
             },
         )
 
-        source_1 = solph.components.Source(
+        source_1 = solph.Source(
             label="source_1",
             outputs={
-                bus: solph.flows.Flow(
+                bus: solph.Flow(
                     investment=solph.Investment(ep_costs=100, space=1)
                 )
             },
         )
 
-        source_2 = solph.components.Source(
+        source_2 = solph.Source(
             label="source_2",
             outputs={
-                bus: solph.flows.Flow(investment=solph.Investment(ep_costs=75))
+                bus: solph.Flow(investment=solph.Investment(ep_costs=75))
             },
         )
 
@@ -737,26 +737,26 @@ class TestsConstraint:
 
     def test_emission_constraints(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        source1 = solph.components.Source(
+        source1 = solph.Source(
             label="source1",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nominal_value=100, emission_factor=[0.5, -1.0, 2.0]
                 )
             },
         )
-        source2 = solph.components.Source(
+        source2 = solph.Source(
             label="source2",
             outputs={
-                bel: solph.flows.Flow(nominal_value=100, emission_factor=3.5)
+                bel: solph.Flow(nominal_value=100, emission_factor=3.5)
             },
         )
 
         # Should be ignored because the emission attribute is not defined.
-        source3 = solph.components.Source(
-            label="source3", outputs={bel: solph.flows.Flow(nominal_value=100)}
+        source3 = solph.Source(
+            label="source3", outputs={bel: solph.Flow(nominal_value=100)}
         )
 
         self.energysystem.add(bel, source1, source2, source3)
@@ -769,22 +769,22 @@ class TestsConstraint:
 
     def test_flow_count_limit(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        source1 = solph.components.Source(
+        source1 = solph.Source(
             label="source1",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
                     emission_factor=[0.5, -1.0, 2.0],
                 )
             },
         )
-        source2 = solph.components.Source(
+        source2 = solph.Source(
             label="source2",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
                     emission_factor=3.5,
@@ -793,20 +793,20 @@ class TestsConstraint:
         )
 
         # Should be ignored because emission_factor is not defined.
-        source3 = solph.components.Source(
+        source3 = solph.Source(
             label="source3",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nonconvex=solph.NonConvex(), nominal_value=100
                 )
             },
         )
 
         # Should be ignored because it is not NonConvex.
-        source4 = solph.components.Source(
+        source4 = solph.Source(
             label="source4",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     emission_factor=1.5, min=0.3, nominal_value=100
                 )
             },
@@ -825,19 +825,19 @@ class TestsConstraint:
 
     def test_shared_limit(self):
         """ """
-        b1 = solph.buses.Bus(label="bus")
+        b1 = solph.Bus(label="bus")
 
-        storage1 = solph.components.GenericStorage(
+        storage1 = solph.GenericStorage(
             label="storage1",
             nominal_storage_capacity=5,
-            inputs={b1: solph.flows.Flow()},
-            outputs={b1: solph.flows.Flow()},
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()},
         )
-        storage2 = solph.components.GenericStorage(
+        storage2 = solph.GenericStorage(
             label="storage2",
             nominal_storage_capacity=5,
-            inputs={b1: solph.flows.Flow()},
-            outputs={b1: solph.flows.Flow()},
+            inputs={b1: solph.Flow()},
+            outputs={b1: solph.Flow()},
         )
 
         self.energysystem.add(b1, storage1, storage2)
@@ -861,18 +861,18 @@ class TestsConstraint:
         """ """
 
         def define_emission_limit():
-            bel = solph.buses.Bus(label="electricityBus")
-            source1 = solph.components.Source(
+            bel = solph.Bus(label="electricityBus")
+            source1 = solph.Source(
                 label="source1",
                 outputs={
-                    bel: solph.flows.Flow(
+                    bel: solph.Flow(
                         nominal_value=100, emission_factor=0.8
                     )
                 },
             )
-            source2 = solph.components.Source(
+            source2 = solph.Source(
                 label="source2",
-                outputs={bel: solph.flows.Flow(nominal_value=100)},
+                outputs={bel: solph.Flow(nominal_value=100)},
             )
             self.energysystem.add(bel, source1, source2)
             om = self.get_om()
@@ -882,15 +882,15 @@ class TestsConstraint:
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
         """ """
-        bel = solph.buses.Bus(label="electricityBus")
-        source1 = solph.components.Source(
+        bel = solph.Bus(label="electricityBus")
+        source1 = solph.Source(
             label="source1",
             outputs={
-                bel: solph.flows.Flow(nominal_value=100, emission_factor=0.8)
+                bel: solph.Flow(nominal_value=100, emission_factor=0.8)
             },
         )
-        source2 = solph.components.Source(
-            label="source2", outputs={bel: solph.flows.Flow(nominal_value=100)}
+        source2 = solph.Source(
+            label="source2", outputs={bel: solph.Flow(nominal_value=100)}
         )
         self.energysystem.add(bel, source1, source2)
         om = self.get_om()
@@ -898,27 +898,27 @@ class TestsConstraint:
 
     def test_equate_variables_constraint(self):
         """Testing the equate_variables function in the constraint module."""
-        bus1 = solph.buses.Bus(label="Bus1")
-        storage = solph.components.GenericStorage(
+        bus1 = solph.Bus(label="Bus1")
+        storage = solph.GenericStorage(
             label="storage_constraint",
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
-            inputs={bus1: solph.flows.Flow()},
-            outputs={bus1: solph.flows.Flow()},
+            inputs={bus1: solph.Flow()},
+            outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145),
         )
-        sink = solph.components.Sink(
+        sink = solph.Sink(
             label="Sink",
             inputs={
-                bus1: solph.flows.Flow(
+                bus1: solph.Flow(
                     investment=solph.Investment(ep_costs=500)
                 )
             },
         )
-        source = solph.components.Source(
+        source = solph.Source(
             label="Source",
             outputs={
-                bus1: solph.flows.Flow(
+                bus1: solph.Flow(
                     investment=solph.Investment(ep_costs=123)
                 )
             },
@@ -927,13 +927,13 @@ class TestsConstraint:
         om = self.get_om()
         solph.constraints.equate_variables(
             om,
-            om.InvestmentFlowBlock.invest[source, bus1],
-            om.InvestmentFlowBlock.invest[bus1, sink],
+            om.InvestmentFlow.invest[source, bus1],
+            om.InvestmentFlow.invest[bus1, sink],
             2,
         )
         solph.constraints.equate_variables(
             om,
-            om.InvestmentFlowBlock.invest[source, bus1],
+            om.InvestmentFlow.invest[source, bus1],
             om.GenericInvestmentStorageBlock.invest[storage],
         )
 
@@ -941,12 +941,12 @@ class TestsConstraint:
 
     def test_gradient(self):
         """Testing gradient constraints and costs."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        pp = solph.components.Source(
+        pp = solph.Source(
             label="powerplant",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nominal_value=999,
                     variable_costs=23,
                     positive_gradient={"ub": 0.03},
@@ -960,17 +960,17 @@ class TestsConstraint:
 
     def test_nonconvex_gradient(self):
         """Testing gradient constraints and costs."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        pp = solph.components.Source(
+        pp = solph.Source(
             label="powerplant",
             outputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     nominal_value=999,
                     variable_costs=23,
                     nonconvex=solph.NonConvex(
-                        positive_gradient={"ub": 0.03},
-                        negative_gradient={"ub": 0.05},
+                        positive_gradient={"ub": 0.03, "costs": 7},
+                        negative_gradient={"ub": 0.05, "costs": 8},
                     ),
                 )
             },
@@ -1013,19 +1013,19 @@ class TestsConstraint:
 
     def test_investment_limit(self):
         """Testing the investment_limit function in the constraint module."""
-        bus1 = solph.buses.Bus(label="Bus1")
-        storage = solph.components.GenericStorage(
+        bus1 = solph.Bus(label="Bus1")
+        storage = solph.GenericStorage(
             label="storage_invest_limit",
             invest_relation_input_capacity=0.2,
             invest_relation_output_capacity=0.2,
-            inputs={bus1: solph.flows.Flow()},
-            outputs={bus1: solph.flows.Flow()},
+            inputs={bus1: solph.Flow()},
+            outputs={bus1: solph.Flow()},
             investment=solph.Investment(ep_costs=145),
         )
-        source = solph.components.Source(
+        source = solph.Source(
             label="Source",
             outputs={
-                bus1: solph.flows.Flow(
+                bus1: solph.Flow(
                     investment=solph.Investment(ep_costs=123)
                 )
             },
@@ -1038,11 +1038,11 @@ class TestsConstraint:
 
     def test_min_max_runtime(self):
         """Testing min and max runtimes for nonconvex flows."""
-        bus_t = solph.buses.Bus(label="Bus_T")
-        pp = solph.components.Source(
+        bus_t = solph.Bus(label="Bus_T")
+        pp = solph.Source(
             label="cheap_plant_min_down_constraints",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
@@ -1063,11 +1063,11 @@ class TestsConstraint:
 
     def test_activity_costs(self):
         """Testing activity_costs attribute for nonconvex flows."""
-        bus_t = solph.buses.Bus(label="Bus_C")
-        pp = solph.components.Source(
+        bus_t = solph.Bus(label="Bus_C")
+        pp = solph.Source(
             label="cheap_plant_activity_costs",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
@@ -1082,14 +1082,14 @@ class TestsConstraint:
 
     def test_piecewise_linear_transformer_cc(self):
         """Testing PiecewiseLinearTransformer using CC formulation."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bel = solph.buses.Bus(label="electricityBus")
-        plt = solph.components.experimental.PiecewiseLinearTransformer(
+        bgas = solph.Bus(label="gasBus")
+        bel = solph.Bus(label="electricityBus")
+        plt = solph.custom.PiecewiseLinearTransformer(
             label="pwltf",
             inputs={
-                bgas: solph.flows.Flow(nominal_value=100, variable_costs=1)
+                bgas: solph.Flow(nominal_value=100, variable_costs=1)
             },
-            outputs={bel: solph.flows.Flow()},
+            outputs={bel: solph.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
             conversion_function=lambda x: x**2,
             pw_repn="CC",
@@ -1100,14 +1100,14 @@ class TestsConstraint:
 
     def test_piecewise_linear_transformer_dcc(self):
         """Testing PiecewiseLinearTransformer using DCC formulation."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bel = solph.buses.Bus(label="electricityBus")
-        plt = solph.components.experimental.PiecewiseLinearTransformer(
+        bgas = solph.Bus(label="gasBus")
+        bel = solph.Bus(label="electricityBus")
+        plt = solph.custom.PiecewiseLinearTransformer(
             label="pwltf",
             inputs={
-                bgas: solph.flows.Flow(nominal_value=100, variable_costs=1)
+                bgas: solph.Flow(nominal_value=100, variable_costs=1)
             },
-            outputs={bel: solph.flows.Flow()},
+            outputs={bel: solph.Flow()},
             in_breakpoints=[0, 25, 50, 75, 100],
             conversion_function=lambda x: x**2,
             pw_repn="DCC",
@@ -1117,11 +1117,11 @@ class TestsConstraint:
 
     def test_maximum_startups(self):
         """Testing maximum_startups attribute for nonconvex flows."""
-        bus_t = solph.buses.Bus(label="Bus_C")
-        pp = solph.components.Source(
+        bus_t = solph.Bus(label="Bus_C")
+        pp = solph.Source(
             label="cheap_plant_maximum_startups",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
@@ -1135,11 +1135,11 @@ class TestsConstraint:
 
     def test_maximum_shutdowns(self):
         """Testing maximum_shutdowns attribute for nonconvex flows."""
-        bus_t = solph.buses.Bus(label="Bus_C")
-        pp = solph.components.Source(
+        bus_t = solph.Bus(label="Bus_C")
+        pp = solph.Source(
             label="cheap_plant_maximum_shutdowns",
             outputs={
-                bus_t: solph.flows.Flow(
+                bus_t: solph.Flow(
                     nominal_value=10,
                     min=0.5,
                     max=1.0,
@@ -1153,19 +1153,19 @@ class TestsConstraint:
 
     def test_offsettransformer(self):
         """Constraint test of a OffsetTransformer."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bth = solph.buses.Bus(label="thermalBus")
+        bgas = solph.Bus(label="gasBus")
+        bth = solph.Bus(label="thermalBus")
 
-        transformer = solph.components.OffsetTransformer(
+        transformer = solph.OffsetTransformer(
             label="gasboiler",
             inputs={
-                bgas: solph.flows.Flow(
+                bgas: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
                     min=0.32,
                 )
             },
-            outputs={bth: solph.flows.Flow()},
+            outputs={bth: solph.Flow()},
             coefficients=[-17, 0.9],
         )
         self.energysystem.add(bgas, bth, transformer)
@@ -1175,10 +1175,10 @@ class TestsConstraint:
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
@@ -1197,10 +1197,10 @@ class TestsConstraint:
     def test_dsm_module_DLR(self):
         """Constraint test of SinkDSM with approach=DLR"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
@@ -1219,10 +1219,10 @@ class TestsConstraint:
     def test_dsm_module_oemof(self):
         """Constraint test of SinkDSM with approach=oemof"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5, 0.4, 0.5],
             capacity_down=[0.5, 0.4, 0.5],
@@ -1240,10 +1240,10 @@ class TestsConstraint:
     def test_dsm_module_DIW_invest(self):
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
@@ -1263,10 +1263,10 @@ class TestsConstraint:
     def test_dsm_module_DLR_invest(self):
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5] * 3,
             capacity_down=[0.5] * 3,
@@ -1287,10 +1287,10 @@ class TestsConstraint:
     def test_dsm_module_oemof_invest(self):
         """Constraint test of SinkDSM with approach=oemof and investments"""
 
-        b_elec = solph.buses.Bus(label="bus_elec")
-        sink = solph.components.experimental.SinkDSM(
+        b_elec = solph.Bus(label="bus_elec")
+        sink = solph.custom.SinkDSM(
             label="demand_dsm",
-            inputs={b_elec: solph.flows.Flow()},
+            inputs={b_elec: solph.Flow()},
             demand=[1] * 3,
             capacity_up=[0.5, 0.4, 0.5],
             capacity_down=[0.5, 0.4, 0.5],
@@ -1311,12 +1311,12 @@ class TestsConstraint:
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage_non_convex",
-            inputs={bel: solph.flows.Flow(variable_costs=56)},
-            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
@@ -1337,12 +1337,12 @@ class TestsConstraint:
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
         """
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storagenon_convex",
-            inputs={bel: solph.flows.Flow(variable_costs=56)},
-            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            inputs={bel: solph.Flow(variable_costs=56)},
+            outputs={bel: solph.Flow(variable_costs=24)},
             nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
@@ -1365,12 +1365,12 @@ class TestsConstraint:
 
     def test_nonconvex_invest_storage_all_nonconvex(self):
         """All invest variables are free and nonconvex."""
-        b1 = solph.buses.Bus(label="bus1")
+        b1 = solph.Bus(label="bus1")
 
-        storage = solph.components.GenericStorage(
+        storage = solph.GenericStorage(
             label="storage_all_nonconvex",
             inputs={
-                b1: solph.flows.Flow(
+                b1: solph.Flow(
                     investment=solph.Investment(
                         nonconvex=True,
                         minimum=5,
@@ -1381,7 +1381,7 @@ class TestsConstraint:
                 )
             },
             outputs={
-                b1: solph.flows.Flow(
+                b1: solph.Flow(
                     investment=solph.Investment(
                         nonconvex=True,
                         minimum=8,
@@ -1401,12 +1401,12 @@ class TestsConstraint:
 
     def test_nonconvex_invest_sink_without_offset(self):
         """Non-convex invest flow without offset, with minimum."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        sink = solph.components.Sink(
+        sink = solph.Sink(
             label="sink_nonconvex_invest",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
@@ -1421,12 +1421,12 @@ class TestsConstraint:
 
     def test_nonconvex_invest_source_with_offset(self):
         """Non-convex invest flow with offset, with minimum."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        source = solph.components.Source(
+        source = solph.Source(
             label="source_nonconvex_invest",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
@@ -1445,12 +1445,12 @@ class TestsConstraint:
 
     def test_nonconvex_invest_source_with_offset_no_minimum(self):
         """Non-convex invest flow with offset, without minimum."""
-        bel = solph.buses.Bus(label="electricityBus")
+        bel = solph.Bus(label="electricityBus")
 
-        source = solph.components.Source(
+        source = solph.Source(
             label="source_nonconvex_invest",
             inputs={
-                bel: solph.flows.Flow(
+                bel: solph.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
