@@ -237,7 +237,7 @@ class TestsConstraint:
     def test_fixed_source_invest_sink(self):
         """
         Wrong constraints for fixed source + invest sink w.
-        `full_load_time_max`.
+        `summed_max`.
         """
 
         bel = solph.Bus(label="electricityBus")
@@ -253,7 +253,7 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.Flow(
-                    full_load_time_max=2.3,
+                    summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -659,7 +659,7 @@ class TestsConstraint:
         bel0 = solph.Bus(label="bel0")
         bel1 = solph.Bus(label="bel1")
 
-        solph.custom.Link(
+        link = solph.custom.Link(
             label="link",
             inputs={
                 bel0: solph.Flow(nominal_value=4),
@@ -668,6 +668,7 @@ class TestsConstraint:
             outputs={bel0: solph.Flow(), bel1: solph.Flow()},
             conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9},
         )
+        self.energysystem.add(bel0, bel1, link)
 
         self.compare_lp_files("link.lp")
 
@@ -1407,7 +1408,7 @@ class TestsConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.Flow(
-                    full_load_time_max=2.3,
+                    summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1427,7 +1428,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.Flow(
-                    full_load_time_max=2.3,
+                    summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
@@ -1451,7 +1452,7 @@ class TestsConstraint:
             label="source_nonconvex_invest",
             inputs={
                 bel: solph.Flow(
-                    full_load_time_max=2.3,
+                    summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     investment=solph.Investment(
