@@ -18,8 +18,8 @@ from itertools import repeat
 
 def sequence(iterable_or_scalar):
     """Tests if an object is iterable (except string) or scalar and returns
-    a the original sequence if object is an iterable and a 'emulated' sequence
-    object of class _Sequence if object is a scalar or string.
+    the original sequence if object is an iterable and an 'emulated'
+    sequence object of class _Sequence if object is a scalar or string.
 
     Parameters
     ----------

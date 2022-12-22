@@ -12,6 +12,7 @@ Authors
 * Clemens Wingenbach
 * Cord Kaldemeyer
 * Daniel Rank
+* David Fuhrländer
 * Elisa Gaudchau
 * Elisa Papadis
 * Fabian Büllesbach

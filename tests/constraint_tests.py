@@ -713,7 +713,10 @@ class TestsConstraint:
             label="source_0",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=50, space=4)
+                    investment=solph.Investment(
+                        ep_costs=50,
+                        custom_attributes={"space": 4},
+                    )
                 )
             },
         )
@@ -722,7 +725,9 @@ class TestsConstraint:
             label="source_1",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=100, space=1)
+                    investment=solph.Investment(
+                        ep_costs=100, custom_attributes={"space": 1}
+                    ),
                 )
             },
         )
@@ -752,14 +757,18 @@ class TestsConstraint:
             label="source1",
             outputs={
                 bel: solph.flows.Flow(
-                    nominal_value=100, emission_factor=[0.5, -1.0, 2.0]
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": [0.5, -1.0, 2.0]},
                 )
             },
         )
         source2 = solph.components.Source(
             label="source2",
             outputs={
-                bel: solph.flows.Flow(nominal_value=100, emission_factor=3.5)
+                bel: solph.flows.Flow(
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": 3.5},
+                )
             },
         )
 
@@ -786,7 +795,7 @@ class TestsConstraint:
                 bel: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    emission_factor=[0.5, -1.0, 2.0],
+                    custom_attributes={"emission_factor": [0.5, -1.0, 2.0]},
                 )
             },
         )
@@ -796,7 +805,7 @@ class TestsConstraint:
                 bel: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    emission_factor=3.5,
+                    custom_attributes={"emission_factor": 3.5},
                 )
             },
         )
@@ -816,7 +825,9 @@ class TestsConstraint:
             label="source4",
             outputs={
                 bel: solph.flows.Flow(
-                    emission_factor=1.5, min=0.3, nominal_value=100
+                    min=0.3,
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": 1.5},
                 )
             },
         )
@@ -875,7 +886,8 @@ class TestsConstraint:
                 label="source1",
                 outputs={
                     bel: solph.flows.Flow(
-                        nominal_value=100, emission_factor=0.8
+                        nominal_value=100,
+                        custom_attributes={"emission_factor": 0.8},
                     )
                 },
             )
@@ -895,7 +907,10 @@ class TestsConstraint:
         source1 = solph.components.Source(
             label="source1",
             outputs={
-                bel: solph.flows.Flow(nominal_value=100, emission_factor=0.8)
+                bel: solph.flows.Flow(
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": 0.8},
+                )
             },
         )
         source2 = solph.components.Source(
@@ -958,8 +973,8 @@ class TestsConstraint:
                 bel: solph.flows.Flow(
                     nominal_value=999,
                     variable_costs=23,
-                    positive_gradient={"ub": 0.03},
-                    negative_gradient={"ub": 0.05},
+                    positive_gradient_limit=0.03,
+                    negative_gradient_limit=0.05,
                 )
             },
         )
@@ -978,8 +993,8 @@ class TestsConstraint:
                     nominal_value=999,
                     variable_costs=23,
                     nonconvex=solph.NonConvex(
-                        positive_gradient={"ub": 0.03},
-                        negative_gradient={"ub": 0.05},
+                        positive_gradient_limit=0.03,
+                        negative_gradient_limit=0.05,
                     ),
                 )
             },
@@ -1282,7 +1297,10 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50,
+                minimum=33,
+                maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.energysystem.add(b_elec, sink)
@@ -1306,7 +1324,10 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50,
+                minimum=33,
+                maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.energysystem.add(b_elec, sink)
@@ -1329,7 +1350,10 @@ class TestsConstraint:
             cost_dsm_down_shift=2,
             shed_eligibility=False,
             investment=solph.Investment(
-                ep_cost=100, existing=50, minimum=33, maximum=100
+                existing=50,
+                minimum=33,
+                maximum=100,
+                custom_attributes={"ep_cost": 100},
             ),
         )
         self.energysystem.add(b_elec, sink)
@@ -1476,7 +1500,7 @@ class TestsConstraint:
 
         source = solph.components.Source(
             label="source_nonconvex_invest",
-            inputs={
+            outputs={
                 bel: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,
@@ -1500,7 +1524,7 @@ class TestsConstraint:
 
         source = solph.components.Source(
             label="source_nonconvex_invest",
-            inputs={
+            outputs={
                 bel: solph.flows.Flow(
                     full_load_time_max=2.3,
                     variable_costs=25,

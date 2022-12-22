@@ -78,8 +78,10 @@ def main():
                 max=1.0,
                 min=0.9,
                 variable_costs=0.1,
-                minimum_uptime=5,
-                initial_status=1,
+                nonconvex=solph.NonConvex(
+                    minimum_uptime=5,
+                    initial_status=1,
+                ),
                 investment=solph.Investment(
                     ep_costs=epc,
                     minimum=1.0,

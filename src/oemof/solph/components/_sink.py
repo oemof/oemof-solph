@@ -13,18 +13,57 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 from oemof.network import network as on
-
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.tools import debugging
 
 
 class Sink(on.Sink):
-    """An object with one input flow and without any constraints."""
+    """A component which is designed for one input flow.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        check_node_object_for_missing_attribute(self, "inputs")
+    Parameters
+    ----------
+    label : str
+        String holding the label of the Sink object.
+        The label of each object must be unique.
+
+    Examples
+    --------
+    Defining a Sink:
+
+    >>> from oemof import solph
+    >>> bel = solph.buses.Bus(label='electricity')
+
+    >>> electricity_export = solph.components.Sink(
+    ...    label='el_export',
+    ...    inputs={bel: solph.flows.Flow()})
+
+
+    Notes
+    -----
+    It is theoretically possible to use the Sink object with multiple outputs.
+    However, we strongly recommend using multiple Sink objects instead.
+    """
+
+    def __init__(self, label=None, inputs=None, custom_attributes=None):
+        if inputs is None:
+            inputs = {}
+        if custom_attributes is None:
+            custom_attributes = {}
+
+        if len(inputs) != 1:
+            msg = (
+                "A Sink is designed to have one input but you provided {0}."
+                " If this is intended and you know what you are doing you can "
+                "disable the SuspiciousUsageWarning globally."
+            )
+            warn(
+                msg.format(len(inputs)),
+                debugging.SuspiciousUsageWarning,
+            )
+
+        super().__init__(label=label, inputs=inputs, **custom_attributes)
 
     def constraint_group(self):
         pass

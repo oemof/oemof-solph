@@ -88,9 +88,10 @@ def main():
                 min=0.4,
                 max=1.0,
                 variable_costs=0.1,
-                minimum_uptime=2,
-                initial_status=1,
-                nonconvex=solph.NonConvex(),
+                nonconvex=solph.NonConvex(
+                    minimum_uptime=2,
+                    initial_status=1,
+                ),
             )
         },
     )

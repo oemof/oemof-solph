@@ -250,6 +250,8 @@ class SinkDSM(Sink):
         capacity_up,
         capacity_down,
         approach,
+        label=None,
+        inputs=None,
         shift_interval=None,
         delay_time=None,
         shift_time=None,
@@ -274,9 +276,14 @@ class SinkDSM(Sink):
         fixes=True,
         shed_eligibility=True,
         shift_eligibility=True,
-        **kwargs,
+        investment=None,
+        custom_attributes=None,
     ):
-        super().__init__(**kwargs)
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(
+            label=label, inputs=inputs, custom_attributes=custom_attributes
+        )
 
         self.capacity_up = sequence(capacity_up)
         self.capacity_down = sequence(capacity_down)
@@ -364,7 +371,7 @@ class SinkDSM(Sink):
         self.shift_eligibility = shift_eligibility
 
         # Check whether investment mode is active or not
-        self.investment = kwargs.get("investment")
+        self.investment = investment
         self._invest_group = isinstance(self.investment, Investment)
 
         if (

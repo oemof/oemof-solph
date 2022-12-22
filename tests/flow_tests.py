@@ -17,14 +17,6 @@ from oemof.solph import NonConvex
 from oemof.solph.flows import Flow
 
 
-def test_error_in_gradient_attribute():
-    msg = "Only the key 'ub' is allowed for the '{0}' attribute"
-    with pytest.raises(AttributeError, match=msg.format("negative_gradient")):
-        Flow(negative_gradient={"costs": 5})
-    with pytest.raises(AttributeError, match=msg.format("positive_gradient")):
-        Flow(positive_gradient={"something": 5})
-
-
 def test_summed_max_future_warning():
     """Can be removed with v0.6."""
     msg = "The parameter 'summed_max' is deprecated and will be removed"
@@ -58,9 +50,9 @@ def test_nonconvex_positive_gradient_error():
     with pytest.raises(ValueError, match=msg):
         Flow(
             nonconvex=NonConvex(
-                positive_gradient={"ub": 0.03},
+                positive_gradient_limit=0.03,
             ),
-            positive_gradient={"ub": 0.03},
+            positive_gradient_limit=0.03,
         )
 
 
@@ -75,7 +67,21 @@ def test_non_convex_negative_gradient_error():
     with pytest.raises(ValueError, match=msg):
         Flow(
             nonconvex=NonConvex(
-                negative_gradient={"ub": 0.03, "costs": 7},
+                negative_gradient_limit=0.03,
             ),
-            negative_gradient={"ub": 0.03},
+            positive_gradient_limit=0.03,
         )
+
+
+def test_fix_sequence():
+    flow = Flow(nominal_value=4, fix=[0.3, 0.2, 0.7])
+
+    assert flow.fix[0] == 0.3
+    assert flow.fix[1] == 0.2
+    assert flow.fix[2] == 0.7
+
+
+def test_fix_sequence_non_nominal():
+    """Attribute fix needs nominal_value"""
+    with pytest.raises(AttributeError):
+        Flow(fix=[0.3, 0.2, 0.7])
