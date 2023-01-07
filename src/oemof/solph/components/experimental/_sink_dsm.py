@@ -118,14 +118,15 @@ class SinkDSM(Sink):
         None.
         It's the interval in which between :math:`DSM_{t}^{up}` and
         :math:`DSM_{t}^{down}` have to be compensated.
-    delay_time: int
+    delay_time: int or iterable
         Only used when :attr:`~approach` is set to 'DIW' or 'DLR'. Otherwise,
-        can be None.
+        can be None. Iterable only allowed in case approach 'DLR' is used.
         Length of symmetrical time windows around :math:`t` in which
         :math:`DSM_{t}^{up}` and :math:`DSM_{t,tt}^{down}` have to be
         compensated.
-        Note: For approach 'DLR', an iterable is constructed in order
-        to model flexible delay times
+        Note: For approach 'DLR', if an integer is passed,
+        an iterable is constructed in order to model flexible delay times.
+        In case an iterable is passed, this will be used directly.
     shift_time: int
         Only used when :attr:`~approach` is set to 'DLR'.
         Duration of a single upwards or downwards shift (half a shifting cycle
@@ -262,9 +263,18 @@ class SinkDSM(Sink):
         self.approach = approach
         self.shift_interval = shift_interval
         if not approach == "DLR":
+            if approach == "DIW":
+                if not isinstance(delay_time, int):
+                    raise ValueError(
+                        "If approach 'DIW' is used, "
+                        "delay time has to be of type int."
+                    )
             self.delay_time = delay_time
         else:
-            self.delay_time = [el for el in range(1, delay_time + 1)]
+            if isinstance(delay_time, int):
+                self.delay_time = [el for el in range(1, delay_time + 1)]
+            else:
+                self.delay_time = delay_time
         self.shift_time = shift_time
         self.shed_time = shed_time
         self.max_capacity_down = max_capacity_down

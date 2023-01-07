@@ -1500,6 +1500,28 @@ class TestsConstraint:
         )
         self.compare_lp_files("dsm_module_oemof_invest.lp")
 
+    def test_dsm_module_DLR_delay_time(self):
+        """Constraint test of SinkDSM with approach=DLR;
+        testing for passing an iterable for delay_time"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 3,
+            capacity_up=[0.5] * 3,
+            capacity_down=[0.5] * 3,
+            approach="DLR",
+            max_demand=1,
+            max_capacity_up=1,
+            max_capacity_down=1,
+            delay_time=[1, 3],
+            shift_time=1,
+            cost_dsm_down_shift=2,
+            shed_eligibility=False,
+        )
+        self.compare_lp_files("dsm_module_DLR_delay_time.lp")
+
     def test_invest_non_convex_flow(self):
         """Invest into a non-convex Flow"""
         b1 = solph.buses.Bus(label="b1")
