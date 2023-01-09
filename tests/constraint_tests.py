@@ -1163,7 +1163,9 @@ class TestsConstraint:
                 bus_el_1: solph.flows.Flow(),
                 bus_el_2: solph.flows.Flow()
             },
-            conversion_factors={(bus_el_1, bus_el_2): 0.8, (bus_el_2, bus_el_1): 0.9},
+            conversion_factors={
+                (bus_el_1, bus_el_2): 0.8,
+                (bus_el_2, bus_el_1): 0.9},
         )
 
         self.compare_lp_files("link.lp")
