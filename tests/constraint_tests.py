@@ -1150,8 +1150,8 @@ class TestsConstraint:
 
     def test_link(self):
         """Constraint test of a Link."""
-        bus_el_1 = solph.buses.Bus(label="el_1")
-        bus_el_2 = solph.buses.Bus(label="el_2")
+        bus_el_1 = solph.buses.Bus(label="el1")
+        bus_el_2 = solph.buses.Bus(label="el2")
 
         solph.components.experimental._link.Link(
             label="link",
@@ -1164,8 +1164,8 @@ class TestsConstraint:
                 bus_el_2: solph.flows.Flow()
             },
             conversion_factors={
-                (bus_el_1, bus_el_2): 0.8,
-                (bus_el_2, bus_el_1): 0.9},
+                (bus_el_1, bus_el_2): 0.75,
+                (bus_el_2, bus_el_1): 0.5},
         )
 
         self.compare_lp_files("link.lp")
