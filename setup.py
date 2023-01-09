@@ -81,7 +81,7 @@ setup(
     install_requires=[
         "blinker",
         "dill",
-        "numpy",
+        "numpy < 1.24",
         "pandas",
         "pyomo >= 5.7.0, < 5.7.3",
         "networkx",
