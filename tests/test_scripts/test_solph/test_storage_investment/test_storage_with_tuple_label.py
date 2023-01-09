@@ -68,7 +68,6 @@ def test_tuples_as_labels_example(
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -78,18 +77,18 @@ def test_tuples_as_labels_example(
     bel = solph.Bus(label=Label("bus", "electricity", ""))
 
     # Sinks
-    solph.Sink(
+    excess_el = solph.Sink(
         label=Label("sink", "electricity", "excess"),
         inputs={bel: solph.Flow()},
     )
 
-    solph.Sink(
+    demand_el = solph.Sink(
         label=Label("sink", "electricity", "demand"),
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
     # Sources
-    solph.Source(
+    source_gas = solph.Source(
         label=Label("source", "natural_gas", "commodity"),
         outputs={
             bgas: solph.Flow(
@@ -98,12 +97,12 @@ def test_tuples_as_labels_example(
         },
     )
 
-    solph.Source(
+    wind = solph.Source(
         label=Label("renewable", "electricity", "wind"),
         outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
     )
 
-    solph.Source(
+    pv = solph.Source(
         label=Label("renewable", "electricity", "pv"),
         outputs={
             bel: solph.Flow(
@@ -114,7 +113,7 @@ def test_tuples_as_labels_example(
     )
 
     # Transformer
-    solph.Transformer(
+    pp_gas = solph.Transformer(
         label=Label("pp", "electricity", "natural_gas"),
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
@@ -122,7 +121,7 @@ def test_tuples_as_labels_example(
     )
 
     # Investment storage
-    solph.components.GenericStorage(
+    storage = solph.components.GenericStorage(
         label=Label("storage", "electricity", "battery"),
         nominal_storage_capacity=204685,
         inputs={bel: solph.Flow(variable_costs=10e10)},
@@ -133,6 +132,18 @@ def test_tuples_as_labels_example(
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
+    )
+
+    energysystem.add(
+        bgas,
+        bel,
+        excess_el,
+        demand_el,
+        source_gas,
+        wind,
+        pv,
+        pp_gas,
+        storage,
     )
 
     # Solve model

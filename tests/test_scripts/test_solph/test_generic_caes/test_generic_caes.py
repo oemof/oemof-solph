@@ -40,22 +40,21 @@ def test_gen_caes():
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="H")
     es = EnergySystem(timeindex=idx)
-    Node.registry = es
 
     # resources
     bgas = Bus(label="bgas")
 
-    Source(label="rgas", outputs={bgas: Flow(variable_costs=20)})
+    rgas = Source(label="rgas", outputs={bgas: Flow(variable_costs=20)})
 
     # power
     bel_source = Bus(label="bel_source")
-    Source(
+    source_el = Source(
         label="source_el",
         outputs={bel_source: Flow(variable_costs=data["price_el_source"])},
     )
 
     bel_sink = Bus(label="bel_sink")
-    Sink(
+    sink_el = Sink(
         label="sink_el",
         inputs={bel_sink: Flow(variable_costs=data["price_el_sink"])},
     )
@@ -86,7 +85,7 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    custom.GenericCAES(
+    caes = custom.GenericCAES(
         label="caes",
         electrical_input={bel_source: Flow()},
         fuel_input={bgas: Flow()},
@@ -94,6 +93,8 @@ def test_gen_caes():
         params=concept,
         fixed_costs=0,
     )
+
+    es.add(bgas, rgas, bel_source, source_el, bel_sink, sink_el, caes)
 
     # create an optimization problem and solve it
     om = Model(es)

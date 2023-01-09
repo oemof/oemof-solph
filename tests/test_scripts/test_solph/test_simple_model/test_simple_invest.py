@@ -34,7 +34,6 @@ from oemof.solph import views
 
 def test_dispatch_example(solver="cbc", periods=24 * 5):
     """Create an energy system and optimize the dispatch at least costs."""
-    Node.registry = None
 
     filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
     data = pd.read_csv(filename, sep=",")

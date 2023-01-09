@@ -59,7 +59,6 @@ def test_optimise_storage_size(
     date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -69,15 +68,15 @@ def test_optimise_storage_size(
     bel = solph.Bus(label="electricity")
 
     # Sinks
-    solph.Sink(label="excess_bel", inputs={bel: solph.Flow()})
+    excess_bel = solph.Sink(label="excess_bel", inputs={bel: solph.Flow()})
 
-    solph.Sink(
+    demand = solph.Sink(
         label="demand",
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
     # Sources
-    solph.Source(
+    rgas =solph.Source(
         label="rgas",
         outputs={
             bgas: solph.Flow(
@@ -86,12 +85,12 @@ def test_optimise_storage_size(
         },
     )
 
-    solph.Source(
+    wind = solph.Source(
         label="wind",
         outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
     )
 
-    solph.Source(
+    pv = solph.Source(
         label="pv",
         outputs={bel: solph.Flow(fix=data["pv"], nominal_value=582000)},
     )
@@ -106,7 +105,7 @@ def test_optimise_storage_size(
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    solph.components.GenericStorage(
+    storage = solph.components.GenericStorage(
         label="storage",
         inputs={bel: solph.Flow(variable_costs=10e10)},
         outputs={bel: solph.Flow(variable_costs=10e10)},
@@ -117,6 +116,18 @@ def test_optimise_storage_size(
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
         investment=solph.Investment(ep_costs=epc, existing=6851),
+    )
+
+    energysystem.add(
+        bgas,
+        bel,
+        excess_bel,
+        demand,
+        rgas,
+        wind,
+        pv,
+        PP_GAS,
+        storage,
     )
 
     # Solve model

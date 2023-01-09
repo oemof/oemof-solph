@@ -29,7 +29,6 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -45,7 +44,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     bgas = solph.Bus(label=("natural", "gas"))
 
     # create commodity object for gas resource
-    solph.Source(
+    source_gas = solph.Source(
         label=("commodity", "gas"),
         outputs={bgas: solph.Flow(variable_costs=50)},
     )
@@ -57,33 +56,33 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     bth2 = solph.Bus(label=("heat", 2))
 
     # create excess components for the elec/heat bus to allow overproduction
-    solph.Sink(label=("excess", "bth_2"), inputs={bth2: solph.Flow()})
-    solph.Sink(label=("excess", "bth_1"), inputs={bth: solph.Flow()})
-    solph.Sink(label=("excess", "bel_2"), inputs={bel2: solph.Flow()})
-    solph.Sink(label=("excess", "bel_1"), inputs={bel: solph.Flow()})
+    excess_heat_1 = solph.Sink(label=("excess", "bth_1"), inputs={bth: solph.Flow()})
+    excess_heat_2 = solph.Sink(label=("excess", "bth_2"), inputs={bth2: solph.Flow()})
+    excess_electricity_1 = solph.Sink(label=("excess", "bel_1"), inputs={bel: solph.Flow()})
+    excess_electricity_2 = solph.Sink(label=("excess", "bel_2"), inputs={bel2: solph.Flow()})
 
     # create simple sink object for electrical demand for each electrical bus
-    solph.Sink(
+    demand_electricity_1 = solph.Sink(
         label=("demand", "elec1"),
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
-    solph.Sink(
+    demand_electricity_2 = solph.Sink(
         label=("demand", "elec2"),
         inputs={bel2: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
     # create simple sink object for heat demand for each thermal bus
-    solph.Sink(
+    demand_heat_1 = solph.Sink(
         label=("demand", "therm1"),
         inputs={bth: solph.Flow(fix=data["demand_th"], nominal_value=741000)},
     )
-    solph.Sink(
+    demand_heat_2 = solph.Sink(
         label=("demand", "therm2"),
         inputs={bth2: solph.Flow(fix=data["demand_th"], nominal_value=741000)},
     )
 
     # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    solph.Transformer(
+    fixed_chp = solph.Transformer(
         label=("fixed_chp", "gas"),
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel2: solph.Flow(), bth2: solph.Flow()},
@@ -91,12 +90,32 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     )
 
     # create a fixed transformer to distribute to the heat and elec buses
-    solph.components.ExtractionTurbineCHP(
+    variable_chp = solph.components.ExtractionTurbineCHP(
         label=("variable_chp", "gas"),
         inputs={bgas: solph.Flow(nominal_value=10e10)},
         outputs={bel: solph.Flow(), bth: solph.Flow()},
         conversion_factors={bel: 0.3, bth: 0.5},
         conversion_factor_full_condensation={bel: 0.5},
+    )
+
+    energysystem.add(
+        bgas,
+        source_gas,
+        bel,
+        bel2,
+        bth,
+        bth2,
+        source_gas,
+        excess_heat_1,
+        excess_heat_2,
+        excess_electricity_1,
+        excess_electricity_2,
+        demand_electricity_1,
+        demand_electricity_2,
+        demand_heat_1,
+        demand_heat_2,
+        fixed_chp,
+        variable_chp,
     )
 
     ##########################################################################
