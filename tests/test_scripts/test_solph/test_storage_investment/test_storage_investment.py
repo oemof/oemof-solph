@@ -76,7 +76,7 @@ def test_optimise_storage_size(
     )
 
     # Sources
-    rgas =solph.Source(
+    rgas = solph.Source(
         label="rgas",
         outputs={
             bgas: solph.Flow(

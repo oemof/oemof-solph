@@ -50,7 +50,9 @@ def test_connect_invest():
 
     # create excess component for the electricity bus to allow overproduction
     excess_el = Sink(label="excess_bel", inputs={bel2: Flow()})
-    shortage = Source(label="shortage", outputs={bel2: Flow(variable_costs=50000)})
+    shortage = Source(
+        label="shortage", outputs={bel2: Flow(variable_costs=50000)}
+    )
 
     # create fixed source object representing wind power plants
     wind = Source(
@@ -89,7 +91,9 @@ def test_connect_invest():
         outputs={bel1: Flow(investment=Investment(ep_costs=20))},
     )
 
-    energysystem.add(bel1, bel2, excess_el, shortage, wind, demand, storage, line12, line21)
+    energysystem.add(
+        bel1, bel2, excess_el, shortage, wind, demand, storage, line12, line21
+    )
 
     om = Model(energysystem)
 

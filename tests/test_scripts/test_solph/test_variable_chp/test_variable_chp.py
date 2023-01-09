@@ -56,10 +56,18 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     bth2 = solph.Bus(label=("heat", 2))
 
     # create excess components for the elec/heat bus to allow overproduction
-    excess_heat_1 = solph.Sink(label=("excess", "bth_1"), inputs={bth: solph.Flow()})
-    excess_heat_2 = solph.Sink(label=("excess", "bth_2"), inputs={bth2: solph.Flow()})
-    excess_electricity_1 = solph.Sink(label=("excess", "bel_1"), inputs={bel: solph.Flow()})
-    excess_electricity_2 = solph.Sink(label=("excess", "bel_2"), inputs={bel2: solph.Flow()})
+    excess_heat_1 = solph.Sink(
+        label=("excess", "bth_1"), inputs={bth: solph.Flow()}
+    )
+    excess_heat_2 = solph.Sink(
+        label=("excess", "bth_2"), inputs={bth2: solph.Flow()}
+    )
+    excess_electricity_1 = solph.Sink(
+        label=("excess", "bel_1"), inputs={bel: solph.Flow()}
+    )
+    excess_electricity_2 = solph.Sink(
+        label=("excess", "bel_2"), inputs={bel2: solph.Flow()}
+    )
 
     # create simple sink object for electrical demand for each electrical bus
     demand_electricity_1 = solph.Sink(
