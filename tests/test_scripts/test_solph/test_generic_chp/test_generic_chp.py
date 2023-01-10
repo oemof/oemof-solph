@@ -102,7 +102,7 @@ def test_gen_chp():
                     custom_attributes={"Q_CW_min": data["Q_CW_min"]}
                 )
             },
-            Beta=data["Beta"],
+            beta=data["beta"],
             back_pressure=False,
         )
     )

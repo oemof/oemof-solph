@@ -19,7 +19,6 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
 import pandas as pd
-from oemof.network.network import Node
 
 import oemof.solph as solph
 from oemof.solph import processing

@@ -42,7 +42,7 @@ class Sink(on.Sink):
 
     Notes
     -----
-    It is theoretically possible to use the Sink object with multiple outputs.
+    It is theoretically possible to use the Sink object with multiple inputs.
     However, we strongly recommend using multiple Sink objects instead.
     """
 

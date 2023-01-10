@@ -79,8 +79,8 @@ class GenericCHP(network.Transformer):
         Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
         for the heat output. Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
-    Beta : list of numerical values
-        Beta values in same dimension as all other parameters (length of
+    beta : list of numerical values
+        beta values in same dimension as all other parameters (length of
         optimization period).
     back_pressure : boolean
         Flag to use back-pressure characteristics. Set to `True` and
@@ -111,7 +111,7 @@ class GenericCHP(network.Transformer):
     ...        })},
     ...    heat_output={bth: solph.flows.Flow(
     ...        custom_attributes={"Q_CW_min": [10.552]})},
-    ...    Beta=[0.122], back_pressure=False)
+    ...    beta=[0.122], back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
@@ -121,7 +121,7 @@ class GenericCHP(network.Transformer):
         fuel_input,
         electrical_output,
         heat_output,
-        Beta,
+        beta,
         back_pressure,
         label=None,
         custom_attributes=None,
@@ -133,7 +133,7 @@ class GenericCHP(network.Transformer):
         self.fuel_input = fuel_input
         self.electrical_output = electrical_output
         self.heat_output = heat_output
-        self.Beta = sequence(Beta)
+        self.beta = sequence(beta)
         self.back_pressure = back_pressure
         self._alphas = None
 
@@ -290,7 +290,7 @@ class GenericCHPBlock(ScalarBlock):
     :math:`Y`                       `Y[n,t]`                V    status variable on/off
     :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient describing efficiency
     :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient describing efficiency
-    :math:`\beta`                   `Beta[n,t]`             P    power loss index
+    :math:`\beta`                   `beta[n,t]`             P    power loss index
     :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel flow w/o distr. heating
     :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel flow w/o distr. heating
     =============================== ======================= ==== =============================================
@@ -384,7 +384,7 @@ class GenericCHPBlock(ScalarBlock):
             expr = 0
             expr += -self.H_F[n, t]
             expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            expr += n.alphas[1][t] * (self.P[n, t] + n.beta[t] * self.Q[n, t])
             return expr == 0
 
         self.H_F_2 = Constraint(

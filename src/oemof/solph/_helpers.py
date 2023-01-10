@@ -35,6 +35,7 @@ def check_node_object_for_missing_attribute(obj, attribute):
 
 
 def warn_if_missing_attribute(obj, attribute):
+    """Raises warning if attribute is missing for given object"""
     msg = (
         "Attribute <{0}> is missing in Node <{1}> of {2}.\n"
         "If this is intended and you know what you are doing you can"

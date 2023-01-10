@@ -187,8 +187,6 @@ class NonConvex:
         for attribute, value in custom_attributes.items():
             setattr(self, attribute, value)
 
-        self._max_up_down = None
-
     @property
     def max_up_down(self):
         """Return maximum of minimum_uptime and minimum_downtime.
