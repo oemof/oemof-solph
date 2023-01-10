@@ -130,8 +130,8 @@ def main():
             outputs={
                 bel: flows.Flow(
                     nominal_value=10e5,
-                    negative_gradient={"ub": gradient},
-                    positive_gradient={"ub": gradient},
+                    negative_gradient_limit=gradient,
+                    positive_gradient_limit=gradient,
                 )
             },
             conversion_factors={bel: 0.58},

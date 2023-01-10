@@ -40,7 +40,6 @@ from collections import namedtuple
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -68,7 +67,6 @@ def test_tuples_as_labels_example(
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -76,67 +74,84 @@ def test_tuples_as_labels_example(
     # Buses
     bgas = solph.buses.Bus(label=Label("bus", "natural_gas", None))
     bel = solph.buses.Bus(label=Label("bus", "electricity", ""))
+    energysystem.add(bgas, bel)
 
     # Sinks
-    solph.components.Sink(
-        label=Label("sink", "electricity", "excess"),
-        inputs={bel: solph.flows.Flow()},
+    energysystem.add(
+        solph.components.Sink(
+            label=Label("sink", "electricity", "excess"),
+            inputs={bel: solph.flows.Flow()},
+        )
     )
 
-    solph.components.Sink(
-        label=Label("sink", "electricity", "demand"),
-        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+    energysystem.add(
+        solph.components.Sink(
+            label=Label("sink", "electricity", "demand"),
+            inputs={
+                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
 
     # Sources
-    solph.components.Source(
-        label=Label("source", "natural_gas", "commodity"),
-        outputs={
-            bgas: solph.flows.Flow(
-                nominal_value=194397000 * 400 / 8760, full_load_time_max=1
-            )
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("source", "natural_gas", "commodity"),
+            outputs={
+                bgas: solph.flows.Flow(
+                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                )
+            },
+        )
     )
 
-    solph.components.Source(
-        label=Label("renewable", "electricity", "wind"),
-        outputs={
-            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("renewable", "electricity", "wind"),
+            outputs={
+                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+            },
+        )
     )
 
-    solph.components.Source(
-        label=Label("renewable", "electricity", "pv"),
-        outputs={
-            bel: solph.flows.Flow(
-                fix=data["pv"],
-                nominal_value=582000,
-            )
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("renewable", "electricity", "pv"),
+            outputs={
+                bel: solph.flows.Flow(
+                    fix=data["pv"],
+                    nominal_value=582000,
+                )
+            },
+        )
     )
 
     # Transformer
-    solph.components.Transformer(
-        label=Label("pp", "electricity", "natural_gas"),
-        inputs={bgas: solph.flows.Flow()},
-        outputs={
-            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
-        },
-        conversion_factors={bel: 0.58},
+    energysystem.add(
+        solph.components.Transformer(
+            label=Label("pp", "electricity", "natural_gas"),
+            inputs={bgas: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+            },
+            conversion_factors={bel: 0.58},
+        )
     )
 
     # Investment storage
-    solph.components.GenericStorage(
-        label=Label("storage", "electricity", "battery"),
-        nominal_storage_capacity=204685,
-        inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        outputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
+    energysystem.add(
+        solph.components.GenericStorage(
+            label=Label("storage", "electricity", "battery"),
+            nominal_storage_capacity=204685,
+            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+        )
     )
 
     # Solve model

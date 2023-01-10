@@ -60,9 +60,10 @@ class Investment:
         existing=0,
         nonconvex=False,
         offset=0,
-        **kwargs,
+        custom_attributes=None,
     ):
-
+        if custom_attributes is None:
+            custom_attributes = {}
         self.maximum = maximum
         self.minimum = minimum
         self.ep_costs = ep_costs
@@ -70,8 +71,8 @@ class Investment:
         self.nonconvex = nonconvex
         self.offset = offset
 
-        for attribute in kwargs.keys():
-            value = kwargs.get(attribute)
+        for attribute in custom_attributes.keys():
+            value = custom_attributes.get(attribute)
             setattr(self, attribute, value)
 
         self._check_invest_attributes()
@@ -144,85 +145,56 @@ class NonConvex:
         If both, up and downtimes are defined, the initial status is set for
         the maximum of both e.g. for six timesteps if a minimum downtime of
         six timesteps is defined in addition to a four timestep minimum uptime.
-    positive_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
-        A dictionary containing the following two keys:
-
-         * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-           bound* of the positive difference (`flow[t-1] < flow[t]`) of
-           two consecutive flow values.
-         * `'costs'`: numeric (scalar or None), the gradient cost per
-           unit.
-
-    negative_gradient : :obj:`dict`, default: `{'ub': None, 'costs': 0}`
-        A dictionary containing the following two keys:
-
-          * `'ub'`: numeric (iterable, scalar or None), the normed *upper
-            bound* on the negative difference (`flow[t-1] > flow[t]`) of
-            two consecutive flow values.
-          * `'costs'`: numeric (scalar or None), the gradient cost per
-            unit.
+    negative_gradient_limit : numeric (iterable, scalar or None)
+        the normed *upper bound* on the positive difference
+        (`flow[t-1] < flow[t]`) of two consecutive flow values.
+    positive_gradient_limit : numeric (iterable, scalar or None)
+            the normed *upper bound* on the negative difference
+            (`flow[t-1] > flow[t]`) of two consecutive flow values.
     """
 
-    def __init__(self, **kwargs):
-        scalars = [
-            "minimum_uptime",
-            "minimum_downtime",
-            "initial_status",
-            "maximum_startups",
-            "maximum_shutdowns",
-        ]
-        sequences = [
-            "startup_costs",
-            "shutdown_costs",
-            "activity_costs",
-            "inactivity_costs",
-        ]
-        dictionaries = ["positive_gradient", "negative_gradient"]
-        defaults = {
-            "initial_status": 0,
-            "positive_gradient": {"ub": None},
-            "negative_gradient": {"ub": None},
-        }
+    def __init__(
+        self,
+        initial_status=0,
+        minimum_uptime=0,
+        minimum_downtime=0,
+        maximum_startups=None,
+        maximum_shutdowns=None,
+        startup_costs=None,
+        shutdown_costs=None,
+        activity_costs=None,
+        inactivity_costs=None,
+        negative_gradient_limit=None,
+        positive_gradient_limit=None,
+        custom_attributes=None,
+    ):
+        if custom_attributes is None:
+            custom_attributes = {}
 
-        for attribute in set(
-            scalars + sequences + dictionaries + list(kwargs)
-        ):
-            value = kwargs.get(attribute, defaults.get(attribute))
-            if attribute in dictionaries:
-                setattr(
-                    self,
-                    attribute,
-                    {"ub": sequence(value["ub"])},
-                )
-            else:
-                setattr(
-                    self,
-                    attribute,
-                    sequence(value) if attribute in sequences else value,
-                )
+        self.initial_status = initial_status
+        self.minimum_uptime = minimum_uptime
+        self.minimum_downtime = minimum_downtime
+        self.maximum_startups = maximum_startups
+        self.maximum_shutdowns = maximum_shutdowns
+
+        self.startup_costs = sequence(startup_costs)
+        self.shutdown_costs = sequence(shutdown_costs)
+        self.activity_costs = sequence(activity_costs)
+        self.inactivity_costs = sequence(inactivity_costs)
+        self.negative_gradient_limit = sequence(negative_gradient_limit)
+        self.positive_gradient_limit = sequence(positive_gradient_limit)
+
+        for attribute, value in custom_attributes.items():
+            setattr(self, attribute, value)
 
         self._max_up_down = None
 
-    def _calculate_max_up_down(self):
-        """
-        Calculate maximum of up and downtime for direct usage in constraints.
-
-        The maximum of both is used to set the initial status for this
-        number of timesteps within the edge regions.
-        """
-        if self.minimum_uptime is not None and self.minimum_downtime is None:
-            max_up_down = self.minimum_uptime
-        elif self.minimum_uptime is None and self.minimum_downtime is not None:
-            max_up_down = self.minimum_downtime
-        else:
-            max_up_down = max(self.minimum_uptime, self.minimum_downtime)
-
-        self._max_up_down = max_up_down
-
     @property
     def max_up_down(self):
-        """Compute or return the _max_up_down attribute."""
-        if self._max_up_down is None:
-            self._calculate_max_up_down()
+        """Return maximum of minimum_uptime and minimum_downtime.
 
-        return self._max_up_down
+        The maximum of both is used to set the initial status for this
+        number of time steps within the edge regions.
+        """
+
+        return max(self.minimum_uptime, self.minimum_downtime)

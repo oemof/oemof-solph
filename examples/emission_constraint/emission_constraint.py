@@ -47,8 +47,8 @@ def main():
                 bel: solph.Flow(
                     nominal_value=100,
                     variable_costs=10,
-                    emission_factor=0.01,
                     fix=[0.1, 0.2, 0.3],
+                    custom_attributes={"emission_factor": 0.01},
                 )
             },
         )
@@ -58,7 +58,12 @@ def main():
     energysystem.add(
         solph.components.Source(
             label="gas-source",
-            outputs={bgas: solph.Flow(variable_costs=10, emission_factor=0.2)},
+            outputs={
+                bgas: solph.Flow(
+                    variable_costs=10,
+                    custom_attributes={"emission_factor": 0.2},
+                )
+            },
         )
     )
 

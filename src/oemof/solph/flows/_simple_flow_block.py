@@ -89,7 +89,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].negative_gradient["ub"][0] is not None
+                if g[2].negative_gradient_limit[0] is not None
             ]
         )
 
@@ -97,7 +97,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].positive_gradient["ub"][0] is not None
+                if g[2].positive_gradient_limit[0] is not None
             ]
         )
 
@@ -142,15 +142,15 @@ class SimpleFlowBlock(ScalarBlock):
         )
         # set upper bound of gradient variable
         for i, o, f in group:
-            if m.flows[i, o].positive_gradient["ub"][0] is not None:
+            if m.flows[i, o].positive_gradient_limit[0] is not None:
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient["ub"][t] * f.nominal_value
+                        f.positive_gradient_limit[t] * f.nominal_value
                     )
-            if m.flows[i, o].negative_gradient["ub"][0] is not None:
+            if m.flows[i, o].negative_gradient_limit[0] is not None:
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient["ub"][t] * f.nominal_value
+                        f.negative_gradient_limit[t] * f.nominal_value
                     )
 
     def _create_constraints(self):

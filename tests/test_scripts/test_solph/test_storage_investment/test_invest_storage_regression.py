@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from oemof.network.network import Node
 
 from oemof import solph
 from oemof.solph import views
@@ -27,52 +26,62 @@ def test_regression_investment_storage(solver="cbc"):
     date_time_index = pd.date_range("1/1/2012", periods=4, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     # Buses
     bgas = solph.buses.Bus(label=("natural", "gas"))
     bel = solph.buses.Bus(label="electricity")
+    energysystem.add(bgas, bel)
 
-    solph.components.Sink(
-        label="demand",
-        inputs={
-            bel: solph.flows.Flow(
-                fix=[209643, 207497, 200108, 191892], nominal_value=1
-            )
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label="demand",
+            inputs={
+                bel: solph.flows.Flow(
+                    fix=[209643, 207497, 200108, 191892], nominal_value=1
+                )
+            },
+        )
     )
 
     # Sources
-    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
+    energysystem.add(
+        solph.components.Source(
+            label="rgas", outputs={bgas: solph.flows.Flow()}
+        )
+    )
 
     # Transformer
-    solph.components.Transformer(
-        label="pp_gas",
-        inputs={bgas: solph.flows.Flow()},
-        outputs={bel: solph.flows.Flow(nominal_value=300000)},
-        conversion_factors={bel: 0.58},
+    energysystem.add(
+        solph.components.Transformer(
+            label="pp_gas",
+            inputs={bgas: solph.flows.Flow()},
+            outputs={bel: solph.flows.Flow(nominal_value=300000)},
+            conversion_factors={bel: 0.58},
+        )
     )
 
     # Investment storage
-    solph.components.GenericStorage(
-        label="storage",
-        inputs={
-            bel: solph.flows.Flow(
-                investment=solph.Investment(existing=625046 / 6, maximum=0)
-            )
-        },
-        outputs={
-            bel: solph.flows.Flow(
-                investment=solph.Investment(existing=104174.33, maximum=1)
-            )
-        },
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=50, existing=625046),
+    energysystem.add(
+        solph.components.GenericStorage(
+            label="storage",
+            inputs={
+                bel: solph.flows.Flow(
+                    investment=solph.Investment(existing=625046 / 6, maximum=0)
+                )
+            },
+            outputs={
+                bel: solph.flows.Flow(
+                    investment=solph.Investment(existing=104174.33, maximum=1)
+                )
+            },
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+            investment=solph.Investment(ep_costs=50, existing=625046),
+        )
     )
 
     # Solve model
