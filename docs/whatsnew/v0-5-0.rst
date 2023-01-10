@@ -42,4 +42,5 @@ Contributors
 * Saeed Sayadi
 * Pierre-François Duc
 * Johannes Röder
+* David Fuhrländer
 

@@ -20,7 +20,7 @@ from itertools import groupby
 
 import numpy as np
 import pandas as pd
-from oemof.network.network import Node
+from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
@@ -37,7 +37,7 @@ def get_tuple(x):
     for i in x:
         if isinstance(i, tuple):
             return i
-        elif issubclass(type(i), Node):
+        elif issubclass(type(i), Entity):
             return (i,)
 
     # for standalone variables, x is used as identifying tuple
@@ -53,7 +53,7 @@ def get_timestep(x):
     is fetched as the last element. For time-independent data (scalars)
     zero ist returned.
     """
-    if all(issubclass(type(n), Node) for n in x):
+    if all(issubclass(type(n), Entity) for n in x):
         return 0
     else:
         return x[-1]
@@ -65,7 +65,7 @@ def remove_timestep(x):
 
     The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
     """
-    if all(issubclass(type(n), Node) for n in x):
+    if all(issubclass(type(n), Entity) for n in x):
         return x
     else:
         return x[:-1]

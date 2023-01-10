@@ -810,10 +810,10 @@ This small example of PV, grid and SinkDSM shows how to use the component
 
     # Create Energy System
     es = solph.EnergySystem(timeindex=datetimeindex)
-    Node.registry = es
 
     # Create bus representing electricity grid
     b_elec = solph.buses.Bus(label='Electricity bus')
+    es.add(b_elec)
 
     # Create a back supply
     grid = solph.components.Source(label='Grid',
@@ -822,6 +822,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
                                 nominal_value=10000,
                                 variable_costs=50)}
                         )
+    es.add(grid)
 
     # PV supply from time series
     s_wind = solph.components.Source(label='wind',
@@ -830,6 +831,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
                                   fix=data['pv'],
                                   nominal_value=3.5)}
                           )
+    es.add(s_wind)
 
     # Create DSM Sink
     demand_dsm = solph.custom.SinkDSM(label="DSM",
@@ -843,6 +845,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
                                       max_capacity_down=1,
                                       approach="DIW",
                                       cost_dsm_down=5)
+    es.add(demand_dsm)
 
 Yielding the following results
 
