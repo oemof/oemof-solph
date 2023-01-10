@@ -7,7 +7,7 @@ source =
     src
     tests
 parallel = true
-omit = *custom*
+omit = */custom/*
        *test*
 
 [report]
