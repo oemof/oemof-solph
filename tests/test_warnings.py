@@ -24,16 +24,27 @@ def warning_fixture():
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
     warnings.filterwarnings("ignore", category=FutureWarning)
 
+    # FutureWarning is i.e. emitted by network Entity registry
+    warnings.simplefilter(action="ignore", category=FutureWarning)
 
-def test_that_the_sink_warnings_actually_get_raised(warning_fixture):
+
+def test_that_the_sink_errors_actually_get_raised(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
+    with pytest.raises(
+        TypeError, match="got an unexpected keyword argument 'outputs'"
+    ):
+        solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
+
     msg = (
-        "Attribute <inputs> is missing in Node <test_sink> of <class"
-        " 'oemof.solph.components._sink.Sink'>"
+        "A Sink is designed to have one input but you provided 0."
+        " If this is intended and you know what you are doing you can "
+        "disable the SuspiciousUsageWarning globally."
     )
     with warnings.catch_warnings(record=True) as w:
-        solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
+        solph.components.Sink(
+            label="no input",
+        )
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -50,28 +61,21 @@ def test_filtered_warning(warning_fixture):
 def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     """Source doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
-    msg = (
-        "Attribute <outputs> is missing in Node <test_source> of <class"
-        " 'oemof.solph.components._source.Source'>."
-    )
-    with warnings.catch_warnings(record=True) as w:
+    with pytest.raises(
+        TypeError, match="got an unexpected keyword argument 'inputs'"
+    ):
         solph.components.Source(
             label="test_source", inputs={look_out: "A typo!"}
         )
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
 
-
-def test_that_the_solph_source_warnings_actually_get_raised(warning_fixture):
-    """Source doesn't warn about potentially erroneous usage."""
-    look_out = network.Bus()
     msg = (
-        "Attribute <outputs> is missing in Node <solph_sink> of <class"
-        " 'oemof.solph.components._source.Source'>."
+        "A Source is designed to have one output but you provided 0."
+        " If this is intended and you know what you are doing you can "
+        "disable the SuspiciousUsageWarning globally."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.components.Source(
-            label="solph_sink", inputs={look_out: "A typo!"}
+            label="no output",
         )
         assert len(w) == 1
         assert msg in str(w[-1].message)
@@ -130,3 +134,22 @@ def test_storage_without_inputs(warning_fixture):
         )
         assert len(w) == 1
         assert msg in str(w[-1].message)
+
+
+def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
+    """
+    <class 'solph.flows.Flow'> without specifying
+    the maximum attribute of the <class 'solph.Investment'>
+    """
+
+    with pytest.raises(AttributeError):
+        solph.flows.Flow(
+            nominal_value=None,
+            variable_costs=25,
+            min=0.2,
+            max=0.8,
+            investment=solph.Investment(
+                ep_costs=500,  # no maximum is provided here
+            ),
+            nonconvex=solph.NonConvex(),
+        )

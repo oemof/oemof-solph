@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof.solph import EnergySystem
@@ -31,7 +30,6 @@ from oemof.solph.flows import Flow
 
 def test_dispatch_fix_example(solver="cbc", periods=10):
     """Invest in a flow with a `fix` sequence containing values > 1."""
-    Node.registry = None
 
     filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
     data = pd.read_csv(filename, sep=",")
@@ -80,7 +78,7 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
     # ################################ results ################################
 
     # generic result object
-    results = processing.results(om=optimization_model)
+    results = processing.results(model=optimization_model)
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.

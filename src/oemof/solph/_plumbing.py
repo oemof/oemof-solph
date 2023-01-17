@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Plumbing stuff.
+"""Helpers to fit scalar values into sequences.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -18,8 +18,8 @@ from itertools import repeat
 
 def sequence(iterable_or_scalar):
     """Tests if an object is iterable (except string) or scalar and returns
-    a the original sequence if object is an iterable and a 'emulated' sequence
-    object of class _Sequence if object is a scalar or string.
+    the original sequence if object is an iterable and an 'emulated'
+    sequence object of class _Sequence if object is a scalar or string.
 
     Parameters
     ----------

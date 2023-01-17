@@ -23,7 +23,7 @@ from oemof.tools import debugging
 from pyomo.core import Binary
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
@@ -40,6 +40,8 @@ class Link(on.Transformer):
         Keys are the connected tuples (input, output) bus objects.
         The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
+    limit_direction : boolean, default: True
+        Wether direction constraint should be set for Link component
 
     Note: This component is experimental. Use it with care.
 
@@ -82,6 +84,7 @@ class Link(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get("conversion_factors", {}).items()
         }
+        self.limit_direction = kwargs.get("limit_direction", True)
 
         msg = (
             "Component `Link` should have exactly "
@@ -103,13 +106,14 @@ class Link(on.Transformer):
         return LinkBlock
 
 
-class LinkBlock(SimpleBlock):
+class LinkBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components.experimental.Link`
 
     Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
+    (Equation 2&3 are only implemented, if `limit_direction` is enabled)
 
     .. _Link-equations:
 
@@ -157,11 +161,19 @@ class LinkBlock(SimpleBlock):
             }
 
         self.LINKS = Set(initialize=[g for g in group])
+
+        directed_conversions = {
+            n: n.conversion_factors for n in group if n.limit_direction
+        }
         self.LINK_1ST_INFLOWS = Set(
-            initialize=[(list(c)[0][0], n) for n, c in all_conversions.items()]
+            initialize=[
+                (list(c)[0][0], n) for n, c in directed_conversions.items()
+            ]
         )
         self.LINK_2ND_INFLOWS = Set(
-            initialize=[(list(c)[1][0], n) for n, c in all_conversions.items()]
+            initialize=[
+                (list(c)[1][0], n) for n, c in directed_conversions.items()
+            ]
         )
 
         #  0: Flows 1 connected; 1: Flows 2 connected

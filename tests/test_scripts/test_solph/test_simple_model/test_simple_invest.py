@@ -17,7 +17,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof.solph import EnergySystem
@@ -34,7 +33,6 @@ from oemof.solph.flows import Flow
 
 def test_dispatch_example(solver="cbc", periods=24 * 5):
     """Create an energy system and optimize the dispatch at least costs."""
-    Node.registry = None
 
     filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
     data = pd.read_csv(filename, sep=",")
@@ -181,7 +179,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     # ################################ results ################################
 
     # generic result object
-    results = processing.results(om=optimization_model)
+    results = processing.results(model=optimization_model)
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.

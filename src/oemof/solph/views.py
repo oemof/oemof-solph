@@ -2,7 +2,7 @@
 
 """Modules for providing convenient views for solph results.
 
-Information about the possible usage is provided within the examples.
+See examples for to learn about the possible usage of the provided functions.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -223,18 +223,8 @@ def node_weight_by_type(results, node_type):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type for which node weights should be collected
-
-    Example
-    --------
-    from oemof.outputlib import views
-
-    # solve oemof model 'm'
-    # Then collect node weights
-    views.node_weight_by_type(
-        m.results(),
-        node_type=solph.components.GenericStorage
-    )
+        Specifies the type for which node weights should be collected,
+        e.g. solph.components.GenericStorage
     """
 
     group = {
@@ -263,17 +253,9 @@ def node_input_by_type(results, node_type, droplevel=None):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type of the node for that inputs are selected
+        Specifies the type of the node for that inputs are selected,
+        e.g. solph.components.Sink
     droplevel: list
-
-    Notes
-    -----
-    from oemof import solph
-    from oemof.outputlib import views
-
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.node_input_by_type(m.results(), node_type=solph.components.Sink)
     """
     if droplevel is None:
         droplevel = []
@@ -301,20 +283,9 @@ def node_output_by_type(results, node_type, droplevel=None):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type of the node for that outputs are selected
+        Specifies the type of the node for that outputs are selected,
+        e.g. solph.components.Transformer
     droplevel: list
-
-    Notes
-    -----
-    import oemof.solph as solph
-    from oemof.outputlib import views
-
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.node_output_by_type(
-        m.results(),
-        node_type=solph.components.Transformer
-    )
     """
     if droplevel is None:
         droplevel = []
@@ -342,24 +313,13 @@ def net_storage_flow(results, node_type):
     results: dict
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
-        Specifies the type for which (storage) type net flows are calculated
+        Specifies the type for which (storage) type net flows are calculated,
+        e.g. solph.components.GenericStorage
 
     Returns
     -------
     pandas.DataFrame object with multiindex colums. Names of levels of columns
     are: from, to, net_flow.
-
-    Examples
-    --------
-    import oemof.solph as solph
-    from oemof.outputlib import views
-
-    # solve oemof solph model 'm'
-    # Then collect node weights
-    views.net_storage_flow(
-        m.results(),
-        node_type=solph.components.GenericStorage
-    )
     """
 
     group = {

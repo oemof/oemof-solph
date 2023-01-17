@@ -31,14 +31,14 @@ class ElectricalBus(Bus):
     v_max: numeric
         Maximum value of voltage angle at electrical bus
     v_min: numeric
-        Mininum value of voltag angle at electrical bus
+        Mininum value of voltage angle at electrical bus
 
     Note: This component is experimental. Use it with care.
 
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.blocks.bus.BusBlock`
+     * :py:class:`~oemof.solph._bus.BusBlock`
     The objects are also used inside:
      * :py:class:`~oemof.solph.experimental._electrical_line.ElectricalLine`
 

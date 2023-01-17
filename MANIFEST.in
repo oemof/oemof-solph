@@ -22,4 +22,7 @@ include tox.ini
 include *.yml
 
 recursive-exclude examples *.py
+recursive-include examples *.csv
+recursive-include examples *.xlsx
+
 global-exclude *.py[cod] __pycache__/* *.so *.dylib

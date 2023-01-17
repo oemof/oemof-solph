@@ -7,24 +7,35 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 import logging
 import warnings
+from logging import getLogger
 
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
-from oemof.solph._plumbing import sequence
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
-from oemof.solph.flows._flow import FlowBlock
-from oemof.solph.flows._investment_flow import InvestmentFlowBlock
-from oemof.solph.flows._non_convex_flow import NonConvexFlowBlock
+from oemof.solph.flows._invest_non_convex_flow_block import (
+    InvestNonConvexFlowBlock,
+)
+from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
+from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
+from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
+
+
+class LoggingError(BaseException):
+    """Raised when the wrong logging level is used."""
+
+    pass
 
 
 class BaseModel(po.ConcreteModel):
@@ -41,7 +52,8 @@ class BaseModel(po.ConcreteModel):
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed `timeincrement` will be used which
-        is calculated from the freq length of the energy system timeindex .
+        is calculated from the freq length of the energy system timeindex or
+        can be directly passed as a sequence.
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
@@ -49,8 +61,8 @@ class BaseModel(po.ConcreteModel):
         and use methods `_add_parent_block_sets`,
         `_add_parent_block_variables`, `_add_blocks`, `_add_objective`
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     timeincrement : sequence
         Time increments.
     flows : dict
@@ -61,36 +73,44 @@ class BaseModel(po.ConcreteModel):
         Energy system of the model.
     meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results.
-    dual : ... or None
-    rc : ... or None
-
+    dual : `pyomo.core.base.suffix.Suffix` or None
+        Store the dual variables of the model if pyomo suffix is set to IMPORT
+    rc : `pyomo.core.base.suffix.Suffix` or None
+        Store the reduced costs of the model if pyomo suffix is set to IMPORT
     """
 
+    # The default list of constraint groups to be used for a model.
     CONSTRAINT_GROUPS = []
 
     def __init__(self, energysystem, **kwargs):
+        """Initialize a BaseModel, using its energysystem as well as
+        optional kwargs for specifying the timeincrement, objective_weigting
+        and constraint groups."""
         super().__init__()
+
+        # Check root logger. Due to a problem with pyomo the building of the
+        # model will take up to a 100 times longer if the root logger is set
+        # to DEBUG
+
+        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+            msg = (
+                "The root logger level is 'DEBUG'.\nDue to a communication "
+                "problem between solph and the pyomo package,\nusing the "
+                "DEBUG level will slow down the modelling process by the "
+                "factor ~100.\nIf you need the debug-logging you can "
+                "initialise the Model with 'debug=True`\nYou should only do "
+                "this for small models. To avoid the slow-down use the "
+                "logger\nfunction of oemof.tools (read docstring) or "
+                "change the level of the root logger:\n\nimport logging\n"
+                "logging.getLogger().setLevel(logging.INFO)"
+            )
+            raise LoggingError(msg)
 
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
         self.es = energysystem
-        self.timeincrement = sequence(
-            kwargs.get("timeincrement", self.es.timeincrement)
-        )
-        if self.timeincrement[0] is None:
-            try:
-                self.timeincrement = sequence(
-                    self.es.timeindex.freq.nanos / 3.6e12
-                )
-            except AttributeError:
-                msg = (
-                    "No valid time increment found. Please pass a valid "
-                    "timeincremet parameter or pass an EnergySystem with "
-                    "a valid time index. Please note that a valid time"
-                    "index need to have a 'freq' attribute."
-                )
-                raise AttributeError(msg)
+        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
@@ -117,30 +137,34 @@ class BaseModel(po.ConcreteModel):
             self._construct()
 
     def _construct(self):
-        """ """
+        """Construct a BaseModel by adding parent block sets and variables
+        as well as child blocks and variables to it."""
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
         self._add_objective()
 
     def _add_parent_block_sets(self):
-        """ " Method to create all sets located at the parent block, i.e. the
-        model itself as they are to be shared across all model components.
+        """Method to create all sets located at the parent block, i.e. in the
+        model itself, as they are to be shared across all model components.
+        See the class :py:class:~oemof.solph.models.Model for the sets created.
         """
         pass
 
     def _add_parent_block_variables(self):
-        """ " Method to create all variables located at the parent block,
+        """Method to create all variables located at the parent block,
         i.e. the model itself as these variables  are to be shared across
         all model components.
+        See the class :py:class:~oemof.solph._models.Model
+        for the `flow` variable created.
         """
         pass
 
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have
-        been grouped in the defined constraint groups.
+        been grouped in the defined constraint groups. This collects all the
+        constraints from the component blocks and adds them to the model.
         """
-
         for group in self._constraint_groups:
             # create instance for block
             block = group()
@@ -171,7 +195,6 @@ class BaseModel(po.ConcreteModel):
         """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
-
         """
         # shadow prices
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
@@ -179,7 +202,9 @@ class BaseModel(po.ConcreteModel):
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
-        """Returns a nested dictionary of the results of this optimization"""
+        """Returns a nested dictionary of the results of this optimization.
+        See the processing module for more information on results extraction.
+        """
         return processing.results(self)
 
     def solve(self, solver="cbc", solver_io="lp", **kwargs):
@@ -188,7 +213,7 @@ class BaseModel(po.ConcreteModel):
         Parameters
         ----------
         solver : string
-            solver to be used e.g. "glpk","gurobi","cplex"
+            solver to be used e.g. "cbc", "glpk","gurobi","cplex"
         solver_io : string
             pyomo solver interface file format: "lp","python","nl", etc.
         \**kwargs : keyword arguments
@@ -202,10 +227,9 @@ class BaseModel(po.ConcreteModel):
         cmdline_options : dict
             Dictionary with command line options for solver e.g.
             {"mipgap":"0.01"} results in "--mipgap 0.01"
-            {"interior":" "} results in "--interior"
-            Gurobi solver takes numeric parameter values such as
+            \{"interior":" "} results in "--interior"
+            \Gurobi solver takes numeric parameter values such as
             {"method": 2}
-
         """
         solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
@@ -247,7 +271,7 @@ class BaseModel(po.ConcreteModel):
 
 
 class Model(BaseModel):
-    """An  energy system model for operational and investment
+    """An  energy system model for operational and/or investment
     optimization.
 
     Parameters
@@ -257,23 +281,24 @@ class Model(BaseModel):
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
-        Defaults to `Model.CONSTRAINTS`
+        Defaults to `Model.CONSTRAINT_GROUPS`
+
 
     **The following basic sets are created**:
 
-    NODES :
+    NODES
         A set with all nodes of the given energy system.
 
-    TIMESTEPS :
+    TIMESTEPS
         A set with all timesteps of the given time horizon.
 
-    FLOWS :
+    FLOWS
         A 2 dimensional set with all flows. Index: `(source, target)`
 
     **The following basic variables are created**:
 
     flow
-        FlowBlock from source to target indexed by FLOWS, TIMESTEPS.
+        Flow from source to target indexed by FLOWS, TIMESTEPS.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
@@ -283,21 +308,32 @@ class Model(BaseModel):
         BusBlock,
         TransformerBlock,
         InvestmentFlowBlock,
-        FlowBlock,
+        SimpleFlowBlock,
         NonConvexFlowBlock,
+        InvestNonConvexFlowBlock,
     ]
 
     def __init__(self, energysystem, **kwargs):
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
-        """ """
+        """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS."""
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
+        if self.es.timeincrement is None:
+            msg = (
+                "The EnergySystem needs to have a valid 'timeincrement' "
+                "attribute to build a model."
+            )
+            raise AttributeError(msg)
+
         # pyomo set for timesteps of optimization problem
         self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+            initialize=range(len(self.es.timeincrement)), ordered=True
+        )
+        self.TIMEPOINTS = po.Set(
+            initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
         # previous timesteps
@@ -312,11 +348,7 @@ class Model(BaseModel):
         )
 
         self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if hasattr(v, "bidirectional")
-            ],
+            initialize=[k for (k, v) in self.flows.items() if v.bidirectional],
             ordered=True,
             dimen=2,
             within=self.FLOWS,
@@ -324,9 +356,7 @@ class Model(BaseModel):
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if not hasattr(v, "bidirectional")
+                k for (k, v) in self.flows.items() if not v.bidirectional
             ],
             ordered=True,
             dimen=2,
@@ -334,12 +364,13 @@ class Model(BaseModel):
         )
 
     def _add_parent_block_variables(self):
-        """ """
+        """Add the parent block variables, which is the `flow` variable,
+        indexed by FLOWS and TIMESTEPS."""
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS[1]] is not None:
+                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]

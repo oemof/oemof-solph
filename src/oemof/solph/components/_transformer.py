@@ -13,6 +13,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: David Fuhrländer
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
 
@@ -21,22 +23,33 @@ SPDX-License-Identifier: MIT
 from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
-from pyomo.core.base.block import SimpleBlock
+from pyomo.core.base.block import ScalarBlock
 
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
 class Transformer(on.Transformer):
-    """A linear TransformerBlock object with n inputs and n outputs.
+    """A linear converter object with n inputs and n outputs.
+
+    Node object that relates any number of inflow and outflows with
+    conversion factors. Inputs and outputs must be given as dictinaries.
 
     Parameters
     ----------
+    inputs : dict
+        Dictionary with inflows. Keys must be the starting node(s) of the
+        inflow(s).
+    outputs : dict
+        Dictionary with outflows. Keys must be the ending node(s) of the
+        outflow(s).
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
-        Keys are the connected bus objects.
-        The dictionary values can either be a scalar or an iterable with length
-        of time horizon for simulation.
+        Keys must be the connected nodes (typically Buses).
+        The dictionary values can either be a scalar or an iterable with
+        individual conversion factors for each time step.
+        Default: 1. If no conversion_factor is given for an in- or outflow, the
+        conversion_factor is set to 1.
 
     Examples
     --------
@@ -77,15 +90,38 @@ class Transformer(on.Transformer):
      * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        self.label = label
 
-        check_node_object_for_missing_attribute(self, "inputs")
-        check_node_object_for_missing_attribute(self, "outputs")
+        if inputs is None:
+            warn_if_missing_attribute(self, "inputs")
+            inputs = {}
+        if outputs is None:
+            warn_if_missing_attribute(self, "outputs")
+            outputs = {}
+
+        if custom_attributes is None:
+            custom_attributes = {}
+
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            **custom_attributes,
+        )
+
+        if conversion_factors is None:
+            conversion_factors = {}
 
         self.conversion_factors = {
-            k: sequence(v)
-            for k, v in kwargs.get("conversion_factors", {}).items()
+            k: sequence(v) for k, v in conversion_factors.items()
         }
 
         missing_conversion_factor_keys = (
@@ -99,41 +135,45 @@ class Transformer(on.Transformer):
         return TransformerBlock
 
 
-class TransformerBlock(SimpleBlock):
-    r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.components._transformer.TransformerBlock`
-
-    **The following sets are created:** (-> see basic sets at
-    :class:`.Model` )
-
-    TRANSFORMERS
-        A set with all
-        :class:`~oemof.solph.components._transformer.Transformer` objects.
+class TransformerBlock(ScalarBlock):
+    r"""
+    Block for the linear relation of nodes with type
+    :class:`~oemof.solph.network.transformer.Transformer`
 
     **The following constraints are created:**
 
-    Linear relation :attr:`om.TransformerBlock.relation[i,o,t]`
+    Linear relation `om.Transformer.relation[i,o,t]`
         .. math::
-            \P_{i,n}(t) \times \eta_{n,o}(t) = \
-            \P_{n,o}(t) \times \eta_{n,i}(t), \\
+            P_{i}(t) \cdot \eta_{o}(t) =
+            P_{o}(t) \cdot \eta_{i}(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall n \in \textrm{TRANSFORMERS}, \\
-            \forall i \in \textrm{INPUTS(n)}, \\
-            \forall o \in \textrm{OUTPUTS(n)},
+            \forall i \in \textrm{INPUTS}, \\
+            \forall o \in \textrm{OUTPUTS}
 
-    ======================  ============================  =============
+    While INPUTS is the set of Bus objects connected with the input of the
+    Transformer and OUPUTS the set of Bus objects connected with the output of
+    the Transformer. The constraint above will be created for all combinations
+    of INPUTS and OUTPUTS for all TIMESTEPS. A Transformer with two inflows and
+    two outflows for one day with an hourly resolution will lead to 96
+    constraints.
+
+    The index :math: n is the index for the Transformer node itself. Therefore,
+    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
+    time step t.
+
+    ======================  ============================  ====================
     symbol                  attribute                     explanation
-    ======================  ============================  =============
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               TransformerBlock
-                                                                  inflow
+    ======================  ============================  ====================
+    :math:`P_{i}(t)`        `flow[i, n, t]`               Transformer, inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               TransformerBlock
-                                                                  outflow
+    :math:`P_{o}(t)`        `flow[n, o, t]`               Transformer, outflow
 
-    :math:`\eta_{i,n}(t)`   `conversion_factor[i, n, t]`  Conversion
-                                                                  efficiency
+    :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
-    ======================  ============================  =============
+    :math:`\eta_{o}(t)`     `conversion_factor[n, o, t]`  Outflow, efficiency
+
+    ======================  ============================  ====================
+
     """
 
     def __init__(self, *args, **kwargs):
@@ -142,8 +182,10 @@ class TransformerBlock(SimpleBlock):
     def _create(self, group=None):
         """Creates the linear constraint for the class:`TransformerBlock`
         block.
+
         Parameters
         ----------
+
         group : list
             List of oemof.solph.components.Transformers objects for which
             the linear relation of inputs and outputs is created
