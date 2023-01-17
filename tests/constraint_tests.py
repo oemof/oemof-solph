@@ -966,36 +966,37 @@ class TestsConstraint:
     def test_equate_flows_constraint(self):
         """Testing the equate_flows function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
-        solph.components.Sink(
+        sink = solph.components.Sink(
             label="Sink",
             inputs={
                 bus1: solph.flows.Flow(
                     nominal_value=300,
-                    outgoing_flow=True,
                     variable_costs=2,
+                    custom_attributes={"outgoing_flow": True},
                 )
             },
         )
-        solph.components.Source(
+        source1 = solph.components.Source(
             label="Source1",
             outputs={
                 bus1: solph.flows.Flow(
                     nominal_value=400,
-                    incoming_flow=True,
                     variable_costs=2,
+                    custom_attributes={"incoming_flow": True},
                 )
             },
         )
-        solph.components.Source(
+        source2 = solph.components.Source(
             label="Source2",
             outputs={
                 bus1: solph.flows.Flow(
                     nominal_value=200,
-                    incoming_flow=True,
                     variable_costs=10,
+                    custom_attributes={"incoming_flow": True},
                 )
             },
         )
+        self.energysystem.add(bus1, sink, source1, source2)
         om = self.get_om()
         solph.constraints.equate_flows_by_keyword(
             om,
