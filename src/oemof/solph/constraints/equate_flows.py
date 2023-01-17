@@ -16,10 +16,10 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
     Adds a constraint to the given model that sets the sum of two groups of
     flows equal or proportional by a factor for each timestep.
 
-      **The following constraints are build:**
+    **The following constraints are built:**
 
         .. math::
-          \text{factor_1} \cdot \sum_{\text{flow in flows1}} \text{flow}_{t}  =
+          \text{factor\_1} \cdot \sum_{\text{flow in flows1}} \text{flow}_{t}  =
           \sum_{\text{flow in flows2}} \text{flow}_t \forall t
 
     Parameters
