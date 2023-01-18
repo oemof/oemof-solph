@@ -1153,7 +1153,7 @@ class TestsConstraint:
         bus_el_1 = solph.buses.Bus(label="el1")
         bus_el_2 = solph.buses.Bus(label="el2")
 
-        solph.components.experimental._link.Link(
+        solph.components.Link(
             label="link",
             inputs={
                 bus_el_1: solph.flows.Flow(nominal_value=4),

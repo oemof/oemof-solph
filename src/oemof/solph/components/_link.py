@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-In-development component to add some intelligence
-to connection between two Nodes.
+Link to connect two Busses.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -20,9 +19,7 @@ from warnings import warn
 
 from oemof.network import network as on
 from oemof.tools import debugging
-from pyomo.core import Binary
 from pyomo.core import Set
-from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -55,7 +52,7 @@ class Link(on.Transformer):
     >>> bel0 = solph.buses.Bus(label="el0")
     >>> bel1 = solph.buses.Bus(label="el1")
 
-    >>> link = solph.components.experimental.Link(
+    >>> link = solph.components.Link(
     ...    label="transshipment_link",
     ...    inputs={bel0: solph.flows.Flow(nominal_value=4),
     ...            bel1: solph.flows.Flow(nominal_value=2)},
@@ -66,7 +63,7 @@ class Link(on.Transformer):
     [0.8, 0.9]
 
     >>> type(link)
-    <class 'oemof.solph.components.experimental._link.Link'>
+    <class 'oemof.solph.components._link.Link'>
 
     >>> sorted([str(i) for i in link.inputs])
     ['el0', 'el1']
