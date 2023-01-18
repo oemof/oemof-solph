@@ -441,7 +441,7 @@ output of an example in the `example repository
 .. note:: See the :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
 
-.. _oemof_solph_components_generic_caes_label:
+.. _oemof_solph_components_generic_chp_label:
 
 GenericCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -660,6 +660,17 @@ The following example describes a battery with flows coupled to the capacity of 
 .. note:: See the :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class for all parameters and the mathematical background.
 
 
+.. _oemof_solph_custom_link_label:
+
+Link
+^^^^
+
+The `Link` allows to model connections between two busses, e.g. modeling the transshipment of electric energy between two regions.
+
+.. note:: See the :py:class:`~oemof.solph.components.experimental._link.Link` class for all parameters and the mathematical background.
+
+
+
 OffsetTransformer (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -741,7 +752,7 @@ Electrical line.
 .. note:: See the :py:class:`~oemof.solph.flows.experimental._electrical_line.ElectricalLine` class for all parameters and the mathematical background.
 
 
-.. _oemof_solph_custom_link_label:
+.. _oemof_solph_components_generic_caes_label:
 
 GenericCAES (experimental)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -755,18 +766,8 @@ The following constraints describe the CAES:
 
 .. note:: See the :py:class:`~oemof.solph.components.experimental._generic_caes.GenericCAES` class for all parameters and the mathematical background.
 
-.. _oemof_solph_components_generic_chp_label:
-
-Link (experimental)
-^^^^^^^^^^^^^^^^^^^
-
-Link.
-
-.. note:: See the :py:class:`~oemof.solph.components.experimental._link.Link` class for all parameters and the mathematical background.
-
 
 .. _oemof_solph_custom_sinkdsm_label:
-
 
 SinkDSM (experimental)
 ^^^^^^^^^^^^^^^^^^^^^^
