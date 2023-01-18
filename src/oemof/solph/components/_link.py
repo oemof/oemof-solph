@@ -38,12 +38,10 @@ class Link(on.Transformer):
         The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
 
-    Note: This component is experimental. Use it with care.
-
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.experimental._link.LinkBlock`
+     * :py:class:`~oemof.solph.components._link.LinkBlock`
 
     Examples
     --------
@@ -102,9 +100,7 @@ class Link(on.Transformer):
 
 class LinkBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.experimental.Link`
-
-    Note: This component is experimental. Use it with care.
+    :class:`~oemof.solph.components.Link`
 
     **The following constraints are created:**
 
