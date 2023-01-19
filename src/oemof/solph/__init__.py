@@ -1,4 +1,4 @@
-__version__ = "0.4.5.dev0"
+__version__ = "0.4.5"
 
 from . import constraints  # noqa: F401
 from . import custom  # noqa: F401
