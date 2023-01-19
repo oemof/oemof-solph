@@ -1,4 +1,4 @@
-v0.4.5 (January 16th, 2023)
+v0.4.5 (January 19th, 2023)
 ----------
 
 New features
