@@ -200,7 +200,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 
