@@ -428,10 +428,27 @@ class CellularModel(po.ConcreteModel):
 
     def __init__(self, EnergyCells, **kwargs):
         super().__init__()
-        self.name = kwargs.get("name", type(self).__name__)
 
-        # TODO: make this save for multi-level cells
-        # isn't it already?
+        # Check root logger. Due to a problem with pyomo the building of the
+        # model will take up to a 100 times longer if the root logger is set
+        # to DEBUG
+
+        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+            msg = (
+                "The root logger level is 'DEBUG'.\nDue to a communication "
+                "problem between solph and the pyomo package,\nusing the "
+                "DEBUG level will slow down the modelling process by the "
+                "factor ~100.\nIf you need the debug-logging you can "
+                "initialise the Model with 'debug=True`\nYou should only do "
+                "this for small models. To avoid the slow-down use the "
+                "logger\nfunction of oemof.tools (read docstring) or "
+                "change the level of the root logger:\n\nimport logging\n"
+                "logging.getLogger().setLevel(logging.INFO)"
+            )
+            raise LoggingError(msg)
+
+        ##########################  Arguments #################################
+        self.name = kwargs.get("name", type(self).__name__)
 
         # get the parent energy cell
         self.es = list(EnergyCells.keys())[0]
@@ -459,12 +476,6 @@ class CellularModel(po.ConcreteModel):
                         raise Warning(msg)
         # Add time increment (no idea what it does)
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
-        if self.timeincrement[0] is None:
-            msg = (
-                "The EnergyCell needs to have a valid 'timeincrement' "
-                "attribute to build a model."
-            )
-            raise AttributeError(msg)
 
         # Set objective weighting (no idea what it does)
         self.objective_weighting = kwargs.get(
@@ -527,12 +538,23 @@ class CellularModel(po.ConcreteModel):
                         "Two nodes of identical name are tried to be added"
                         " to `CellularModel.nodes`: {}".format(node)
                     )
+                    raise Warning(msg)
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.nodes])
 
-        # create pyomo set for timesteps of optimization problem
+        if self.es.timeincrement is None:
+            msg = (
+                "The EnergySystem needs to have a valid 'timeincrement' "
+                "attribute to build a model."
+            )
+            raise AttributeError(msg)
+
+        # create pyomo set for timesteps and timepoints of optimization problem
         self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeindex)), ordered=True
+            initialize=range(len(self.es.timeincrement)), ordered=True
+        )
+        self.TIMEPOINTS = po.Set(
+            initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
         # get previous timesteps
@@ -546,11 +568,7 @@ class CellularModel(po.ConcreteModel):
         )
 
         self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if hasattr(v, "bidirectional")
-            ],
+            initialize=[k for (k, v) in self.flows.items() if v.bidirectional],
             ordered=True,
             dimen=2,
             within=self.FLOWS,
@@ -558,9 +576,7 @@ class CellularModel(po.ConcreteModel):
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if not hasattr(v, "bidirectional")
+                k for (k, v) in self.flows.items() if not v.bidirectional
             ],
             ordered=True,
             dimen=2,
@@ -646,6 +662,7 @@ class CellularModel(po.ConcreteModel):
         for block in self.component_data_objects():
             if hasattr(block, "_objective_expression"):
                 expr += block._objective_expression()
+
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
@@ -653,7 +670,9 @@ class CellularModel(po.ConcreteModel):
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
         """
+        # shadow prices
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
+        # reduced costs
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
