@@ -20,7 +20,7 @@ from oemof.solph.components.experimental import CellConnector, EnergyCell
 # define the cells of the cellular energy system
 ###########################################################################
 
-n_periods = 3
+n_periods = 1
 
 # daterange = pd.date_range(
 #    start="01-01-2022 00:00:00", periods=n_periods, freq="1H"
@@ -102,49 +102,37 @@ ec3.add(pv_source_3)
 # cell and energy type (ele, gas, heat)
 # CC-Bennenung: cc_from_to
 
-cc_es_ec1 = CellConnector(
-    label="cc_es_ec1",
+cc_es = CellConnector(
+    label="cc_es",
     inputs={bus_el: flows.Flow()},
     outputs={bus_el: flows.Flow()},
     max_flow=10000,
 )
-es.add(cc_es_ec1)
+es.add(cc_es)
 
-cc_ec1_es = CellConnector(
-    label="cc_ec1_es",
+cc_ec1 = CellConnector(
+    label="cc_ec1",
     inputs={bus_el_1: flows.Flow()},
     outputs={bus_el_1: flows.Flow()},
     max_flow=10000,
 )
-cc_ec1_ec2 = CellConnector(
-    label="cc_ec1_ec2",
-    inputs={bus_el_1: flows.Flow()},
-    outputs={bus_el_1: flows.Flow()},
-    max_flow=10000,
-)
-cc_ec1_ec3 = CellConnector(
-    label="cc_ec1_ec3",
-    inputs={bus_el_1: flows.Flow()},
-    outputs={bus_el_1: flows.Flow()},
-    max_flow=10000,
-)
-ec1.add(cc_ec1_es, cc_ec1_ec2, cc_ec1_ec3)
+ec1.add(cc_ec1)
 
-cc_ec2_ec1 = CellConnector(
-    label="cc_ec2_ec1",
+cc_ec2 = CellConnector(
+    label="cc_ec2",
     inputs={bus_el_2: flows.Flow()},
     outputs={bus_el_2: flows.Flow()},
     max_flow=10000,
 )
-ec2.add(cc_ec2_ec1)
+ec2.add(cc_ec2)
 
-cc_ec3_ec1 = CellConnector(
-    label="cc_ec3_ec1",
+cc_ec3 = CellConnector(
+    label="cc_ec3",
     inputs={bus_el_3: flows.Flow()},
     outputs={bus_el_3: flows.Flow()},
     max_flow=10000,
 )
-ec3.add(cc_ec3_ec1)
+ec3.add(cc_ec3)
 
 ###########################################################################
 # create the cellular model
@@ -187,6 +175,7 @@ def link_connectors(model, cc1, cc2, factor=1):
         var1 = model.CellConnectorBlock.input_flow[cc1, t]
         var2 = model.CellConnectorBlock.output_flow[cc2, t]
         name = "_".join(["equate", var1.name, var2.name])
+        # TODO: is that "clean"? Why aren't the variables passed explicitly?
         setattr(model, name, po.Constraint(rule=equate_variables_rule))
         # connect input of cc2 with output of cc1
         var1 = model.CellConnectorBlock.input_flow[cc2, t]
@@ -195,9 +184,9 @@ def link_connectors(model, cc1, cc2, factor=1):
         setattr(model, name, po.Constraint(rule=equate_variables_rule))
 
 
-link_connectors(cmodel, cc_es_ec1, cc_ec1_es)
-link_connectors(cmodel, cc_ec1_ec2, cc_ec2_ec1)
-link_connectors(cmodel, cc_ec1_ec3, cc_ec3_ec1)
+link_connectors(cmodel, cc_es, cc_ec1)
+link_connectors(cmodel, cc_ec1, cc_ec2)
+link_connectors(cmodel, cc_ec1, cc_ec3)
 
 ###########################################################################
 # Solve the model
