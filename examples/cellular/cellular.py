@@ -3,20 +3,10 @@
 # imports
 ###########################################################################
 
-# import logging
-# import os
-# import pprint as pp
-# import warnings
-# from datetime import datetime
-
-# import matplotlib.pyplot as plt
 import pandas as pd
-
-# from oemof.tools import logger
 
 import pyomo.environ as po
 
-# from oemof.solph import EnergySystem
 from oemof.solph import CellularModel
 from oemof.solph import buses
 from oemof.solph import components as cmp
@@ -24,9 +14,6 @@ from oemof.solph import components as cmp
 from oemof.solph import create_time_index
 from oemof.solph import flows
 
-# from oemof.solph import helpers
-# from oemof.solph import processing
-# from oemof.solph import views
 from oemof.solph.components.experimental import CellConnector, EnergyCell
 
 ###########################################################################
@@ -165,6 +152,9 @@ ec3.add(cc_ec3_ec1)
 #%%
 # TODO: Rework, how the model is created from here on.
 # Would be neat to pass the CellularModel a graph-structure
+# ALTERNATIVELY: pass a list of all energy cells and make the connections
+# afterwards, so the connections determine the hierarchy. Adjustments need to
+# be made in the CellularModel __init__ function for that.
 cmodel = CellularModel(EnergyCells={es: [ec1, ec2, ec3]})
 
 ###########################################################################
@@ -213,9 +203,9 @@ link_connectors(cmodel, cc_ec1_ec3, cc_ec3_ec1)
 # Solve the model
 ###########################################################################
 
-res = cmodel.solve()
+res = cmodel.solve(solver=mysolver)
 cmodel.write(
-    "D:\prometheus\src\cmodel.lp", io_options={"symbolic_solver_labels": True}
+    "D:\solph-cellular\cmodel.lp", io_options={"symbolic_solver_labels": True}
 )
 
 # %%

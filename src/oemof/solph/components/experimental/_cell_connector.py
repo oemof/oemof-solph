@@ -42,9 +42,13 @@ class CellConnector(network.Transformer):
 
         # input mapping
         # TODO: Check if this does what it should
-        for bus, flow in self.inputs.items():
-            bus.outputs.update({self: flow})
-        # self.inputs.update(inputs)
+        # usually, the output of the connected bus is updated like so:
+        #
+        # for bus, flow in self.inputs.items():
+        #    bus.outputs.update({self: flow})
+        #
+        # this resulted in an infeasible model, because of the bus_balance rule
+        self.inputs.update(inputs)
 
         # output mapping
         self.outputs.update(outputs)
@@ -110,7 +114,7 @@ class CellConnectorBlock(ScalarBlock):
         # already added, just arm it
         def _input_flow_rule(block, n, t):
             lhs = block.input_flow[n, t]
-            # rhs = m.flow[n, list(n.inputs.keys())[0], t]
+            # rhs = m.flow[list(n.inputs.keys())[0], n, t]
             rhs = sum([m.flow[i, n, t] for i in list(n.inputs.keys())])
             return lhs == rhs
 
