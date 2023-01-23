@@ -99,8 +99,6 @@ class TestParameterResult:
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
-                    "negative_gradient_costs": 0,
-                    "positive_gradient_costs": 0,
                     "variable_costs": 0,
                     "label": str(b_el2.outputs[demand].label),
                 }
@@ -128,9 +126,7 @@ class TestParameterResult:
             "max": 1,
             "min": 0,
             "negative_gradient_ub": None,
-            "negative_gradient_costs": 0,
             "positive_gradient_ub": None,
-            "positive_gradient_costs": 0,
             "variable_costs": 0,
             "flow": None,
             "values": None,
@@ -235,6 +231,23 @@ class TestParameterResult:
                     "label": "diesel",
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
+                }
+            ),
+        )
+        assert_frame_equal(
+            param_results[(diesel, None)]["sequences"], pandas.DataFrame()
+        )
+
+    def test_nodes_with_excluded_attrs(self):
+        diesel = self.es.groups["diesel"]
+        param_results = processing.parameter_as_dict(
+            self.es, exclude_attrs=["conversion_factors"]
+        )
+        assert_series_equal(
+            param_results[(diesel, None)]["scalars"],
+            pandas.Series(
+                {
+                    "label": "diesel",
                 }
             ),
         )

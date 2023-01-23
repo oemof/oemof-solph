@@ -13,7 +13,6 @@ import os
 
 from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
-from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import Investment
@@ -24,7 +23,6 @@ from oemof.solph.helpers import extend_basic_path
 class TestsGrouping:
     def setup(self):
         self.es = EnSys(groupings=solph.GROUPINGS)
-        Node.registry = self.es
 
     def test_investment_flow_grouping(self):
         """Flows of investment sink should be grouped.
@@ -41,12 +39,12 @@ class TestsGrouping:
 
         b = solph.Bus(label="Bus")
 
-        solph.Source(
+        source = solph.Source(
             label="Source",
             outputs={b: solph.Flow(fix=[12, 16, 14], nominal_value=1000000)},
         )
 
-        solph.Sink(
+        sink = solph.Sink(
             label="Sink",
             inputs={
                 b: solph.Flow(
@@ -57,6 +55,8 @@ class TestsGrouping:
                 )
             },
         )
+
+        self.es.add(source, sink)
 
         ok_(
             self.es.groups.get(InvFlow),

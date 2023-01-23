@@ -16,7 +16,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -34,21 +33,20 @@ def test_gen_chp():
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="H")
     es = solph.EnergySystem(timeindex=idx)
-    Node.registry = es
 
     # resources
     bgas = solph.Bus(label="bgas")
 
-    solph.Source(label="rgas", outputs={bgas: solph.Flow()})
+    rgas = solph.Source(label="rgas", outputs={bgas: solph.Flow()})
 
     # heat
     bth = solph.Bus(label="bth")
 
-    solph.Source(
+    source_th = solph.Source(
         label="source_th", outputs={bth: solph.Flow(variable_costs=1000)}
     )
 
-    solph.Sink(
+    demand_th = solph.Sink(
         label="demand_th",
         inputs={bth: solph.Flow(fix=data["demand_th"], nominal_value=200)},
     )
@@ -56,14 +54,14 @@ def test_gen_chp():
     # power
     bel = solph.Bus(label="bel")
 
-    solph.Sink(
+    demand_el = solph.Sink(
         label="demand_el",
         inputs={bel: solph.Flow(variable_costs=data["price_el"])},
     )
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    solph.components.GenericCHP(
+    ccet = solph.components.GenericCHP(
         label="combined_cycle_extraction_turbine",
         fuel_input={
             bgas: solph.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])
@@ -80,6 +78,8 @@ def test_gen_chp():
         Beta=data["Beta"],
         back_pressure=False,
     )
+
+    es.add(bgas, rgas, bth, source_th, demand_th, bel, demand_el, ccet)
 
     # create an optimization problem and solve it
     om = solph.Model(es)

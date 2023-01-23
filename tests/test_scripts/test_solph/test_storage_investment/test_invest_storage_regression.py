@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from oemof.network.network import Node
 
 from oemof import solph
 from oemof.solph import views
@@ -27,13 +26,12 @@ def test_regression_investment_storage(solver="cbc"):
     date_time_index = pd.date_range("1/1/2012", periods=4, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     # Buses
     bgas = solph.Bus(label=("natural", "gas"))
     bel = solph.Bus(label="electricity")
 
-    solph.Sink(
+    demand = solph.Sink(
         label="demand",
         inputs={
             bel: solph.Flow(
@@ -43,10 +41,10 @@ def test_regression_investment_storage(solver="cbc"):
     )
 
     # Sources
-    solph.Source(label="rgas", outputs={bgas: solph.Flow()})
+    rgas = solph.Source(label="rgas", outputs={bgas: solph.Flow()})
 
     # Transformer
-    solph.Transformer(
+    pp_gas = solph.Transformer(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=300000)},
@@ -54,7 +52,7 @@ def test_regression_investment_storage(solver="cbc"):
     )
 
     # Investment storage
-    solph.components.GenericStorage(
+    storage = solph.components.GenericStorage(
         label="storage",
         inputs={
             bel: solph.Flow(
@@ -74,6 +72,8 @@ def test_regression_investment_storage(solver="cbc"):
         outflow_conversion_factor=0.8,
         investment=solph.Investment(ep_costs=50, existing=625046),
     )
+
+    energysystem.add(bgas, bel, demand, rgas, pp_gas, storage)
 
     # Solve model
     om = solph.Model(energysystem)

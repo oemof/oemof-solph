@@ -15,7 +15,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network import network
 
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -35,7 +34,6 @@ def test_connect_invest():
     date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
 
     energysystem = EnergySystem(timeindex=date_time_index)
-    network.Node.registry = energysystem
 
     # Read data file
     full_filename = os.path.join(
@@ -50,17 +48,19 @@ def test_connect_invest():
     bel2 = Bus(label="electricity2")
 
     # create excess component for the electricity bus to allow overproduction
-    Sink(label="excess_bel", inputs={bel2: Flow()})
-    Source(label="shortage", outputs={bel2: Flow(variable_costs=50000)})
+    excess_el = Sink(label="excess_bel", inputs={bel2: Flow()})
+    shortage = Source(
+        label="shortage", outputs={bel2: Flow(variable_costs=50000)}
+    )
 
     # create fixed source object representing wind power plants
-    Source(
+    wind = Source(
         label="wind",
         outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
     )
 
     # create simple sink object representing the electrical demand
-    Sink(
+    demand = Sink(
         label="demand",
         inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
     )
@@ -88,6 +88,10 @@ def test_connect_invest():
         label="line21",
         inputs={bel2: Flow()},
         outputs={bel1: Flow(investment=Investment(ep_costs=20))},
+    )
+
+    energysystem.add(
+        bel1, bel2, excess_el, shortage, wind, demand, storage, line12, line21
     )
 
     om = Model(energysystem)

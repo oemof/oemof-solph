@@ -16,8 +16,11 @@ SPDX-FileCopyrightText: jnnr
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 from oemof.network import network as on
+from oemof.tools import debugging
+from pyomo.core import Set
 from pyomo.core.base.block import SimpleBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -52,11 +55,12 @@ class Link(on.Transformer):
 
     >>> link = solph.custom.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.Flow(), bel1: solph.Flow()},
+    ...    inputs={bel0: solph.Flow(nominal_value=4),
+    ...            bel1: solph.Flow(nominal_value=2)},
     ...    outputs={bel0: solph.Flow(), bel1: solph.Flow()},
-    ...    conversion_factors={(bel0, bel1): 0.92, (bel1, bel0): 0.99})
+    ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
     >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
-    [0.92, 0.99]
+    [0.8, 0.9]
 
     >>> type(link)
     <class 'oemof.solph.custom.link.Link'>
@@ -65,7 +69,7 @@ class Link(on.Transformer):
     ['el0', 'el1']
 
     >>> link.conversion_factors[(bel0, bel1)][3]
-    0.92
+    0.8
     """
 
     def __init__(self, *args, **kwargs):
@@ -76,14 +80,21 @@ class Link(on.Transformer):
             for k, v in kwargs.get("conversion_factors", {}).items()
         }
 
-        wrong_args_message = (
-            "Component `Link` must have exactly"
-            + "2 inputs, 2 outputs, and 2"
-            + "conversion factors connecting these."
+        msg = (
+            "Component `Link` should have exactly "
+            + "2 inputs, 2 outputs, and 2 "
+            + "conversion factors connecting these. You are initializing "
+            + "a `Link`without obeying this specification. "
+            + "If this is intended and you know what you are doing you can "
+            + "disable the SuspiciousUsageWarning globally."
         )
-        assert len(self.inputs) == 2, wrong_args_message
-        assert len(self.outputs) == 2, wrong_args_message
-        assert len(self.conversion_factors) == 2, wrong_args_message
+
+        if (
+            len(self.inputs) != 2
+            or len(self.outputs) != 2
+            or len(self.conversion_factors) != 2
+        ):
+            warn(msg, debugging.SuspiciousUsageWarning)
 
     def constraint_group(self):
         return LinkBlock
@@ -97,8 +108,13 @@ class LinkBlock(SimpleBlock):
 
     **The following constraints are created:**
 
-    TODO: Add description for constraints
-    TODO: Add tests
+    .. _Link-equations:
+
+    .. math::
+        &
+        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+            \quad \forall t \in T, \forall n in {1,2} \\
+        &
 
     """
     CONSTRAINT_GROUP = True
@@ -128,6 +144,8 @@ class LinkBlock(SimpleBlock):
             all_conversions[n] = {
                 k: v for k, v in n.conversion_factors.items()
             }
+
+        self.LINKS = Set(initialize=[g for g in group])
 
         def _input_output_relation(block):
             for t in m.TIMESTEPS:

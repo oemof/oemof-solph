@@ -34,7 +34,7 @@
 
 .. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
     :alt: Coverage Status
-    :target: https://codecov.io/github/oemof/oemof-solph
+    :target: https://codecov.io/gh/oemof/oemof-solph
 
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
@@ -60,7 +60,7 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.3/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.4/dev
     :alt: Commits since latest release
     :target: https://github.com/oemof/oemof-solph/compare/v0.4.4...dev
 
@@ -179,6 +179,16 @@ GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 If you install the CBC solver via brew (highly recommended), it should work without additional configuration.
 
 
+**conda**
+
+The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+
+.. code:: console
+
+    conda install -c conda-forge coincbc
+    pip install oemof.solph
+
+
 .. _check_installation_label:
 
 Installation test
@@ -245,7 +255,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 License
 =======
 
-Copyright (c) 2019 oemof developer group
+Copyright (c) 2022 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

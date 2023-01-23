@@ -32,7 +32,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.4.4",
+    version="0.4.5",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -68,11 +68,11 @@ setup(
         "Topic :: Utilities",
     ],
     project_urls={
-        "Documentation": "https://oemofsolph.readthedocs.io/",
+        "Documentation": "https://oemof-solph.readthedocs.io/",
         "Changelog": (
-            "https://oemofsolph.readthedocs.io/en/latest/changelog.html"
+            "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
         ),
-        "Issue Tracker": "https://github.com/uvchik/oemof.solph/issues",
+        "Issue Tracker": "https://github.com/oemof/oemof-solph/issues",
     },
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
@@ -81,7 +81,7 @@ setup(
     install_requires=[
         "blinker",
         "dill",
-        "numpy",
+        "numpy < 1.24",
         "pandas",
         "pyomo >= 5.7.0, < 5.7.3",
         "networkx",

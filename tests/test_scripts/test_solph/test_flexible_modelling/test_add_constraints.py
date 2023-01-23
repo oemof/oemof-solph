@@ -18,7 +18,6 @@ import logging
 
 import pandas as pd
 from nose.tools import ok_
-from oemof.network.network import Node
 from pyomo import environ as po
 
 from oemof.solph import Bus
@@ -35,13 +34,13 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(timeindex=pd.date_range("1/1/2012", periods=4, freq="H"))
-    Node.registry = es
+
     # add some nodes
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)
     b_el = Bus(label="b_el")
 
-    Sink(
+    sink = Sink(
         label="Sink",
         inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
     )
@@ -51,12 +50,14 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    Transformer(
+    pp_lig = Transformer(
         label="pp_lig",
         inputs={blig: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
         conversion_factors={b_el: 0.41},
     )
+
+    es.add(boil, blig, b_el, sink, pp_oil, pp_lig)
 
     # create the model
     om = Model(energysystem=es)
