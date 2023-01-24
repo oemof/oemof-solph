@@ -17,15 +17,15 @@ import os
 import pandas as pd
 from oemof.tools import economics
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.flows import Flow
 
 
 def test_dispatch_fix_example(solver="cbc", periods=10):
@@ -77,7 +77,7 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
     # ################################ results ################################
 
     # generic result object
-    results = processing.results(om=optimization_model)
+    results = processing.results(model=optimization_model)
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.

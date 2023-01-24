@@ -45,7 +45,7 @@ New features
     experienced users.
 
 * Add fixed losses to GenericStorage
-    `~oemof.solph.GenericStorage` can now have ``fixed_losses``,
+    `~oemof.solph.components.GenericStorage` can now have ``fixed_losses``,
     that are independent from storage content.
 
 New components/constraints
