@@ -680,6 +680,23 @@ class TestsConstraint:
 
         self.compare_lp_files("linear_transformer_chp_invest.lp")
 
+    def test_link(self):
+        bel0 = solph.buses.Bus(label="bel0")
+        bel1 = solph.buses.Bus(label="bel1")
+
+        link = solph.components.experimental.Link(
+            label="link",
+            inputs={
+                bel0: solph.Flow(nominal_value=4),
+                bel1: solph.Flow(nominal_value=2),
+            },
+            outputs={bel0: solph.Flow(), bel1: solph.Flow()},
+            conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9},
+        )
+        self.energysystem.add(bel0, bel1, link)
+
+        self.compare_lp_files("link.lp")
+
     def test_variable_chp(self):
         """ """
         bel = solph.buses.Bus(label="electricityBus")
