@@ -2,7 +2,7 @@ v0.2.0 (January 12, 2018)
 -------------------------
 
 API changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The `NodesFromCSV` has been removed from the code base. An alternative excel
   (spreadsheet) reader is provided in the newly created
@@ -42,7 +42,7 @@ API changes
   due to the redesign of the outputlib module.
 
 New features
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * A new `oemof_examples <https://github.com/oemof/oemof-examples>`_ repository
   with some new examples was created.
@@ -81,7 +81,7 @@ New features
   barriers to test new components within the solph structure and find other testers.
 
 New components
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The nodes `ElectricalLine <oemof.solph.custom.ElectricalLine>`
   and `ElectricalBus <oemof.solph.custom.ElectricalBus>` can be used
@@ -108,7 +108,7 @@ New components
   uses a mixed-integer linear formulation.
 
 Documentation
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Large parts of the documentation have been proofread and improved since
   the last developer meeting in Flensburg.
@@ -118,21 +118,21 @@ Documentation
   developers. Furthermore, a template for pull request was created.
 
 Known issues
-^^^^^^^^^^^^^^^^^^^^
+####################
 * It is not possible to model one time step with oemof.solph. You have to model
   at least two timesteps
   (`Issue #306 <https://github.com/oemof/oemof-solph/issues/306>`_). Please leave a
   comment if this bug affects you.
 
 Bug fixes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * LP-file tests are now invariant against sign changes in equations, because
   the equations are now normalized to always have non-negative right hand
   sides.
 
 Testing
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * All known and newly created components are now tested within an independent
   testing environment which can be found in `/tests/`.
@@ -140,7 +140,7 @@ Testing
   example tests have been integrated in the nosetest environment.
 
 Other changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The plot functionalities have been removed completely from the outputlib as
   they are less a necessary part but more an optional tool .
@@ -154,7 +154,7 @@ Other changes
   been created to answer use questions.
 
 Contributors
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Cord Kaldemeyer
 * Jens-Olaf Delfs

@@ -3,7 +3,7 @@ v0.3.0 (June 5, 2019)
 
 
 API changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The ``param_results`` function does not exist anymore. It has been renamed to
   ``parameter_as_dict`` (`Issue #537 <https://github.com/oemof/oemof-solph/
@@ -18,7 +18,7 @@ API changes
   `Issue #522 <https://github.com/oemof/oemof-solph/pull/522>`_).
 
 New features
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Now it is possible to model just one time step. This is important for time
   step based models and all other models with an outer loop
@@ -60,7 +60,7 @@ New features
 
 
 Documentation
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The template for docstrings with equations (docstring of block classes) has
   been improved.
@@ -69,7 +69,7 @@ Documentation
 
 
 Bug fixes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * The timeincrement attribute of the model is not set to one anymore.
   In earlier versions the timeincrement was set to one by default. This was a
@@ -79,7 +79,7 @@ Bug fixes
   (`Issue #549 <https://github.com/oemof/oemof-solph/pull/549>`_).
 
 Testing
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Automatic test coverage control was implemented. Now a PR will not be
   accepted if it decreases the test coverage.
@@ -93,7 +93,7 @@ Testing
 
 
 Contributors
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 (alphabetical order)
 
