@@ -13,6 +13,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: David Fuhrländer
+SPDX-FileCopyrightText: Johannes Röder
 
 SPDX-License-Identifier: MIT
 
@@ -23,20 +25,31 @@ from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
-from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
 class Transformer(on.Transformer):
     """A linear converter object with n inputs and n outputs.
 
+    Node object that relates any number of inflow and outflows with
+    conversion factors. Inputs and outputs must be given as dictinaries.
+
     Parameters
     ----------
+    inputs : dict
+        Dictionary with inflows. Keys must be the starting node(s) of the
+        inflow(s).
+    outputs : dict
+        Dictionary with outflows. Keys must be the ending node(s) of the
+        outflow(s).
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
-        Keys are the connected bus objects.
-        The dictionary values can either be a scalar or an iterable with length
-        of time horizon for simulation.
+        Keys must be the connected nodes (typically Buses).
+        The dictionary values can either be a scalar or an iterable with
+        individual conversion factors for each time step.
+        Default: 1. If no conversion_factor is given for an in- or outflow, the
+        conversion_factor is set to 1.
 
     Examples
     --------
@@ -77,15 +90,38 @@ class Transformer(on.Transformer):
      * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        self.label = label
 
-        check_node_object_for_missing_attribute(self, "inputs")
-        check_node_object_for_missing_attribute(self, "outputs")
+        if inputs is None:
+            warn_if_missing_attribute(self, "inputs")
+            inputs = {}
+        if outputs is None:
+            warn_if_missing_attribute(self, "outputs")
+            outputs = {}
+
+        if custom_attributes is None:
+            custom_attributes = {}
+
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            **custom_attributes,
+        )
+
+        if conversion_factors is None:
+            conversion_factors = {}
 
         self.conversion_factors = {
-            k: sequence(v)
-            for k, v in kwargs.get("conversion_factors", {}).items()
+            k: sequence(v) for k, v in conversion_factors.items()
         }
 
         missing_conversion_factor_keys = (

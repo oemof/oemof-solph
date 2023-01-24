@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 
 SPDX-License-Identifier: MIT
 
@@ -131,37 +132,48 @@ class GenericStorage(network.Node):
     """  # noqa: E501
 
     def __init__(
-        self, *args, max_storage_level=1, min_storage_level=0, **kwargs
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        nominal_storage_capacity=None,
+        initial_storage_level=None,
+        investment=None,
+        invest_relation_input_output=None,
+        invest_relation_input_capacity=None,
+        invest_relation_output_capacity=None,
+        min_storage_level=0,
+        max_storage_level=1,
+        balanced=True,
+        loss_rate=0,
+        fixed_losses_relative=0,
+        fixed_losses_absolute=0,
+        inflow_conversion_factor=1,
+        outflow_conversion_factor=1,
     ):
-        super().__init__(*args, **kwargs)
-        self.nominal_storage_capacity = kwargs.get("nominal_storage_capacity")
-        self.initial_storage_level = kwargs.get("initial_storage_level")
-        self.balanced = kwargs.get("balanced", True)
-        self.loss_rate = solph_sequence(kwargs.get("loss_rate", 0))
-        self.fixed_losses_relative = solph_sequence(
-            kwargs.get("fixed_losses_relative", 0)
-        )
-        self.fixed_losses_absolute = solph_sequence(
-            kwargs.get("fixed_losses_absolute", 0)
-        )
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        super().__init__(label=label, inputs=inputs, outputs=outputs)
+        self.nominal_storage_capacity = nominal_storage_capacity
+        self.initial_storage_level = initial_storage_level
+        self.balanced = balanced
+        self.loss_rate = solph_sequence(loss_rate)
+        self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
+        self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
         self.inflow_conversion_factor = solph_sequence(
-            kwargs.get("inflow_conversion_factor", 1)
+            inflow_conversion_factor
         )
         self.outflow_conversion_factor = solph_sequence(
-            kwargs.get("outflow_conversion_factor", 1)
+            outflow_conversion_factor
         )
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
-        self.investment = kwargs.get("investment")
-        self.invest_relation_input_output = kwargs.get(
-            "invest_relation_input_output"
-        )
-        self.invest_relation_input_capacity = kwargs.get(
-            "invest_relation_input_capacity"
-        )
-        self.invest_relation_output_capacity = kwargs.get(
-            "invest_relation_output_capacity"
-        )
+        self.investment = investment
+        self.invest_relation_input_output = invest_relation_input_output
+        self.invest_relation_input_capacity = invest_relation_input_capacity
+        self.invest_relation_output_capacity = invest_relation_output_capacity
         self._invest_group = isinstance(self.investment, Investment)
 
         # Check number of flows.
@@ -172,34 +184,6 @@ class GenericStorage(network.Node):
         # Check attributes for the investment mode.
         if self._invest_group is True:
             self._check_invest_attributes()
-
-        # Check for old parameter names. This is a temporary fix and should
-        # be removed once a general solution is found.
-        # TODO: https://github.com/oemof/oemof-solph/issues/560
-        renamed_parameters = [
-            ("nominal_capacity", "nominal_storage_capacity"),
-            ("initial_capacity", "initial_storage_level"),
-            ("capacity_loss", "loss_rate"),
-            ("capacity_min", "min_storage_level"),
-            ("capacity_max", "max_storage_level"),
-        ]
-        messages = [
-            "`{0}` to `{1}`".format(old_name, new_name)
-            for old_name, new_name in renamed_parameters
-            if old_name in kwargs
-        ]
-        if messages:
-            message = (
-                "The following attributes have been renamed from v0.2 to v0.3:"
-                "\n\n  {}\n\n"
-                "You are using the old names as parameters, thus setting "
-                "deprecated\n"
-                "attributes, which is not what you might have intended.\n"
-                "Use the new names, or, if you know what you're doing, set "
-                "these\n"
-                "attributes explicitly after construction instead."
-            )
-            raise AttributeError(message.format("\n  ".join(messages)))
 
     def _set_flows(self):
         for flow in self.inputs.values():

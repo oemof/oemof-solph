@@ -39,7 +39,6 @@ import os
 
 import pandas as pd
 from nose.tools import eq_
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof import solph
@@ -57,8 +56,7 @@ def test_optimise_storage_size(
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
+    es = solph.EnergySystem(timeindex=date_time_index)
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -66,35 +64,52 @@ def test_optimise_storage_size(
     # Buses
     bgas = solph.buses.Bus(label="natural_gas")
     bel = solph.buses.Bus(label="electricity")
+    es.add(bgas, bel)
 
     # Sinks
-    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
+    es.add(
+        solph.components.Sink(
+            label="excess_bel", inputs={bel: solph.flows.Flow()}
+        )
+    )
 
-    solph.components.Sink(
-        label="demand",
-        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+    es.add(
+        solph.components.Sink(
+            label="demand",
+            inputs={
+                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
 
     # Sources
-    solph.components.Source(
-        label="rgas",
-        outputs={
-            bgas: solph.flows.Flow(
-                nominal_value=194397000 * 400 / 8760, full_load_time_max=1
-            )
-        },
+    es.add(
+        solph.components.Source(
+            label="rgas",
+            outputs={
+                bgas: solph.flows.Flow(
+                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                )
+            },
+        )
     )
 
-    solph.components.Source(
-        label="wind",
-        outputs={
-            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
-        },
+    es.add(
+        solph.components.Source(
+            label="wind",
+            outputs={
+                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+            },
+        )
     )
 
-    solph.components.Source(
-        label="pv",
-        outputs={bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)},
+    es.add(
+        solph.components.Source(
+            label="pv",
+            outputs={
+                bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)
+            },
+        )
     )
 
     # Transformer
@@ -106,31 +121,34 @@ def test_optimise_storage_size(
         },
         conversion_factors={bel: 0.58},
     )
+    es.add(PP_GAS)
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    solph.components.GenericStorage(
-        label="storage",
-        inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        outputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc, existing=6851),
+    es.add(
+        solph.components.GenericStorage(
+            label="storage",
+            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+            investment=solph.Investment(ep_costs=epc, existing=6851),
+        )
     )
 
     # Solve model
-    om = solph.Model(energysystem)
+    om = solph.Model(es)
     om.receive_duals()
     om.solve(solver=solver)
-    energysystem.results["main"] = processing.results(om)
-    energysystem.results["meta"] = processing.meta_results(om)
+    es.results["main"] = processing.results(om)
+    es.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    energysystem.dump()
+    es.dump()
 
 
 def test_results_with_actual_dump():

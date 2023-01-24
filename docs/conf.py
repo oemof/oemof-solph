@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
+import matplotlib
 from sphinx.ext.autodoc import between
+
+matplotlib.use("agg")
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 
 def setup(app):
@@ -29,7 +34,7 @@ project = "oemof.solph"
 year = "2014-2021"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.4.5.dev0"
+version = release = "0.5.1.dev0"
 
 pygments_style = "trac"
 templates_path = ["."]

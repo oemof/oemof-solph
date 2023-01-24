@@ -22,12 +22,14 @@ def test_optimal_solution():
     es.add(bel)
     es.add(
         solph.components.Sink(
-            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+            label="sink",
+            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])},
         )
     )
     es.add(
         solph.components.Source(
-            outputs={bel: solph.flows.Flow(variable_costs=5)}
+            label="source",
+            outputs={bel: solph.flows.Flow(variable_costs=5)},
         )
     )
     m = solph.Model(es)
