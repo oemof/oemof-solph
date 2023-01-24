@@ -16,16 +16,16 @@ from nose.tools import ok_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
+from oemof.solph import Bus
 from oemof.solph import EnergySystem
+from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.solph.buses import Bus
 from oemof.solph.components import GenericStorage
-from oemof.solph.components import Sink
-from oemof.solph.components import Transformer
-from oemof.solph.flows import Flow
 
 
 class TestParameterResult:
@@ -96,8 +96,6 @@ class TestParameterResult:
             param_results[(b_el2, demand)]["scalars"].sort_index(),
             pandas.Series(
                 {
-                    "bidirectional": False,
-                    "integer": False,
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
@@ -119,17 +117,16 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
-            "integer": False,
+            "integer": None,
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
-            "bidirectional": False,
-            "full_load_time_max": None,
-            "full_load_time_min": None,
+            "summed_max": None,
+            "summed_min": None,
             "max": 1,
             "min": 0,
-            "negative_gradient_limit": None,
-            "positive_gradient_limit": None,
+            "negative_gradient_ub": None,
+            "positive_gradient_ub": None,
             "variable_costs": 0,
             "flow": None,
             "values": None,
@@ -142,7 +139,10 @@ class TestParameterResult:
         sequences_attributes = {
             "fix": self.demand_values,
         }
-
+        default_sequences = ["fix"]
+        for attr in default_sequences:
+            if attr not in sequences_attributes:
+                sequences_attributes[attr] = [None]
         assert_frame_equal(
             param_results[(b_el2, demand)]["sequences"],
             pandas.DataFrame(sequences_attributes),
@@ -316,18 +316,17 @@ class TestParameterResult:
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
-
         compare = views.node(results, "storage", multiindex=True)["sequences"]
-
-        assert (
+        eq_(
             (
-                compare[("storage", "b_el2", "flow")]
-                - compare[("b_el1", "storage", "flow")]
-            )
-            .to_frame()
-            .fillna(0)
-            == storage_flow.values
-        ).all()[0]
+                (
+                    compare[("storage", "b_el2", "flow")]
+                    - compare[("b_el1", "storage", "flow")]
+                ).to_frame()
+                == storage_flow.values
+            ).all()[0],
+            True,
+        )
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)

@@ -6,32 +6,32 @@ objective:
 
 s.t.
 
-c_e_BusBlock_balance(bel0_0)_:
+c_e_Bus_balance(bel0_0)_:
 -1 flow(bel0_link_0)
 +1 flow(link_bel0_0)
 = 0
 
-c_e_BusBlock_balance(bel0_1)_:
+c_e_Bus_balance(bel0_1)_:
 -1 flow(bel0_link_1)
 +1 flow(link_bel0_1)
 = 0
 
-c_e_BusBlock_balance(bel0_2)_:
+c_e_Bus_balance(bel0_2)_:
 -1 flow(bel0_link_2)
 +1 flow(link_bel0_2)
 = 0
 
-c_e_BusBlock_balance(bel1_0)_:
+c_e_Bus_balance(bel1_0)_:
 -1 flow(bel1_link_0)
 +1 flow(link_bel1_0)
 = 0
 
-c_e_BusBlock_balance(bel1_1)_:
+c_e_Bus_balance(bel1_1)_:
 -1 flow(bel1_link_1)
 +1 flow(link_bel1_1)
 = 0
 
-c_e_BusBlock_balance(bel1_2)_:
+c_e_Bus_balance(bel1_2)_:
 -1 flow(bel1_link_2)
 +1 flow(link_bel1_2)
 = 0

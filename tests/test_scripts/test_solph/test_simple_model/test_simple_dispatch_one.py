@@ -13,15 +13,15 @@ SPDX-License-Identifier: MIT
 
 from nose.tools import eq_
 
+from oemof.solph import Bus
 from oemof.solph import EnergySystem
+from oemof.solph import Flow
 from oemof.solph import Model
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.solph.buses import Bus
-from oemof.solph.components import Sink
-from oemof.solph.components import Source
-from oemof.solph.components import Transformer
-from oemof.solph.flows import Flow
 
 
 def test_dispatch_one_time_step(solver="cbc"):
@@ -76,7 +76,7 @@ def test_dispatch_one_time_step(solver="cbc"):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1], timemode="explicit")
+    energysystem = EnergySystem(timeindex=[1])
     energysystem.add(
         bgas,
         bel,
@@ -94,7 +94,7 @@ def test_dispatch_one_time_step(solver="cbc"):
     # ################################ optimization ###########################
 
     # create optimization model based on energy_system
-    optimization_model = Model(energysystem=energysystem)
+    optimization_model = Model(energysystem=energysystem, timeincrement=1)
 
     # solve problem
     optimization_model.solve(solver=solver)
@@ -103,12 +103,10 @@ def test_dispatch_one_time_step(solver="cbc"):
     optimization_model.results()
 
     # ################################ results ################################
-    data = views.node(processing.results(model=optimization_model), "b_el")
+    data = views.node(processing.results(om=optimization_model), "b_el")
 
     # generate results to be evaluated in tests
     results = data["sequences"].sum(axis=0).to_dict()
-
-    print("DateTimeIndex:", data["sequences"].index)
 
     test_results = {
         (("wind", "b_el"), "flow"): 33,

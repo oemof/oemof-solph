@@ -12,8 +12,6 @@ Authors
 * Clemens Wingenbach
 * Cord Kaldemeyer
 * Daniel Rank
-* David Fuhrländer
-* Ekaterina Zolotarevskaya
 * Elisa Gaudchau
 * Elisa Papadis
 * Fabian Büllesbach
@@ -30,9 +28,6 @@ Authors
 * Lluis Millet
 * Martin Soethe
 * Patrik Schönfeldt
-* Saeed Sayadi
-* Sarah Berendes
-* Pierre-François Duc
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien

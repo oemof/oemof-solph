@@ -20,11 +20,12 @@ import pandas as pd
 from nose.tools import ok_
 from pyomo import environ as po
 
+from oemof.solph import Bus
 from oemof.solph import EnergySystem
+from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import components
-from oemof.solph.buses import Bus
-from oemof.solph.flows import Flow
+from oemof.solph import Sink
+from oemof.solph import Transformer
 
 
 def test_add_constraints_example(solver="cbc", nologg=False):
@@ -38,29 +39,25 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)
     b_el = Bus(label="b_el")
-    es.add(boil, blig, b_el)
 
-    es.add(
-        components.Sink(
-            label="Sink",
-            inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
-        )
+    sink = Sink(
+        label="Sink",
+        inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
     )
-    pp_oil = components.Transformer(
+    pp_oil = Transformer(
         label="pp_oil",
         inputs={boil: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    es.add(pp_oil)
-    es.add(
-        components.Transformer(
-            label="pp_lig",
-            inputs={blig: Flow()},
-            outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
-            conversion_factors={b_el: 0.41},
-        )
+    pp_lig = Transformer(
+        label="pp_lig",
+        inputs={blig: Flow()},
+        outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
+        conversion_factors={b_el: 0.41},
     )
+
+    es.add(boil, blig, b_el, sink, pp_oil, pp_lig)
 
     # create the model
     om = Model(energysystem=es)

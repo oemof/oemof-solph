@@ -8,84 +8,69 @@ objective:
 
 s.t.
 
-c_e_BusBlock_balance(Bus_C_0)_:
+c_e_Bus_balance(Bus_C_0)_:
 +1 flow(cheap_plant_maximum_startups_Bus_C_0)
 = 0
 
-c_e_BusBlock_balance(Bus_C_1)_:
+c_e_Bus_balance(Bus_C_1)_:
 +1 flow(cheap_plant_maximum_startups_Bus_C_1)
 = 0
 
-c_e_BusBlock_balance(Bus_C_2)_:
+c_e_Bus_balance(Bus_C_2)_:
 +1 flow(cheap_plant_maximum_startups_Bus_C_2)
 = 0
 
-c_e_NonConvexFlowBlock_status_nominal_constraint(cheap_plant_maximum_startups_Bus_C_0)_:
--10 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_0)
-+1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_0)
-= 0
-
-c_e_NonConvexFlowBlock_status_nominal_constraint(cheap_plant_maximum_startups_Bus_C_1)_:
--10 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_1)
-+1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_1)
-= 0
-
-c_e_NonConvexFlowBlock_status_nominal_constraint(cheap_plant_maximum_startups_Bus_C_2)_:
--10 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_2)
-+1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_2)
-= 0
-
-c_u_NonConvexFlowBlock_min(cheap_plant_maximum_startups_Bus_C_0)_:
-+0.5 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_0)
+c_u_NonConvexFlow_min(cheap_plant_maximum_startups_Bus_C_0)_:
++5 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0)
 -1 flow(cheap_plant_maximum_startups_Bus_C_0)
 <= 0
 
-c_u_NonConvexFlowBlock_min(cheap_plant_maximum_startups_Bus_C_1)_:
-+0.5 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_1)
+c_u_NonConvexFlow_min(cheap_plant_maximum_startups_Bus_C_1)_:
++5 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1)
 -1 flow(cheap_plant_maximum_startups_Bus_C_1)
 <= 0
 
-c_u_NonConvexFlowBlock_min(cheap_plant_maximum_startups_Bus_C_2)_:
-+0.5 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_2)
+c_u_NonConvexFlow_min(cheap_plant_maximum_startups_Bus_C_2)_:
++5 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_2)
 -1 flow(cheap_plant_maximum_startups_Bus_C_2)
 <= 0
 
-c_u_NonConvexFlowBlock_max(cheap_plant_maximum_startups_Bus_C_0)_:
--1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_0)
+c_u_NonConvexFlow_max(cheap_plant_maximum_startups_Bus_C_0)_:
+-10 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0)
 +1 flow(cheap_plant_maximum_startups_Bus_C_0)
 <= 0
 
-c_u_NonConvexFlowBlock_max(cheap_plant_maximum_startups_Bus_C_1)_:
--1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_1)
+c_u_NonConvexFlow_max(cheap_plant_maximum_startups_Bus_C_1)_:
+-10 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1)
 +1 flow(cheap_plant_maximum_startups_Bus_C_1)
 <= 0
 
-c_u_NonConvexFlowBlock_max(cheap_plant_maximum_startups_Bus_C_2)_:
--1 NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_2)
+c_u_NonConvexFlow_max(cheap_plant_maximum_startups_Bus_C_2)_:
+-10 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_2)
 +1 flow(cheap_plant_maximum_startups_Bus_C_2)
 <= 0
 
-c_u_NonConvexFlowBlock_startup_constr(cheap_plant_maximum_startups_Bus_C_0)_:
--1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_0)
-+1 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_0)
+c_u_NonConvexFlow_startup_constr(cheap_plant_maximum_startups_Bus_C_0)_:
+-1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_0)
++1 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0)
 <= 0
 
-c_u_NonConvexFlowBlock_startup_constr(cheap_plant_maximum_startups_Bus_C_1)_:
--1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_1)
--1 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_0)
-+1 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_1)
+c_u_NonConvexFlow_startup_constr(cheap_plant_maximum_startups_Bus_C_1)_:
+-1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_1)
+-1 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0)
++1 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1)
 <= 0
 
-c_u_NonConvexFlowBlock_startup_constr(cheap_plant_maximum_startups_Bus_C_2)_:
--1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_2)
--1 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_1)
-+1 NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_2)
+c_u_NonConvexFlow_startup_constr(cheap_plant_maximum_startups_Bus_C_2)_:
+-1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_2)
+-1 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1)
++1 NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_2)
 <= 0
 
-c_u_NonConvexFlowBlock_max_startup_constr(cheap_plant_maximum_startups_Bus_C)_:
-+1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_0)
-+1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_1)
-+1 NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_2)
+c_u_NonConvexFlow_max_startup_constr(cheap_plant_maximum_startups_Bus_C)_:
++1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_0)
++1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_1)
++1 NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_2)
 <= 2
 
 c_e_ONE_VAR_CONSTANT:
@@ -95,20 +80,17 @@ bounds
    0 <= flow(cheap_plant_maximum_startups_Bus_C_0) <= 10
    0 <= flow(cheap_plant_maximum_startups_Bus_C_1) <= 10
    0 <= flow(cheap_plant_maximum_startups_Bus_C_2) <= 10
-   0 <= NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_0) <= 1
-   0 <= NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_1) <= 1
-   0 <= NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_2) <= 1
-   0 <= NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_0) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_1) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(cheap_plant_maximum_startups_Bus_C_2) <= +inf
-   0 <= NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_0) <= 1
-   0 <= NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_1) <= 1
-   0 <= NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_2) <= 1
+   0 <= NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0) <= 1
+   0 <= NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1) <= 1
+   0 <= NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_2) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_0) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_1) <= 1
+   0 <= NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_2) <= 1
 binary
-  NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_0)
-  NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_1)
-  NonConvexFlowBlock_status(cheap_plant_maximum_startups_Bus_C_2)
-  NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_0)
-  NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_1)
-  NonConvexFlowBlock_startup(cheap_plant_maximum_startups_Bus_C_2)
+  NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_0)
+  NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_1)
+  NonConvexFlow_status(cheap_plant_maximum_startups_Bus_C_2)
+  NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_0)
+  NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_1)
+  NonConvexFlow_startup(cheap_plant_maximum_startups_Bus_C_2)
 end

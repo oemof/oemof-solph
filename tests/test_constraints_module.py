@@ -6,14 +6,11 @@ from oemof import solph
 def test_special():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    bel = solph.buses.Bus(label="electricityBus")
-    flow1 = solph.flows.Flow(
-        nominal_value=100,
-        custom_attributes={"my_factor": 0.8},
-    )
-    flow2 = solph.flows.Flow(nominal_value=50)
-    src1 = solph.components.Source(label="source1", outputs={bel: flow1})
-    src2 = solph.components.Source(label="source2", outputs={bel: flow2})
+    bel = solph.Bus(label="electricityBus")
+    flow1 = solph.Flow(nominal_value=100, my_factor=0.8)
+    flow2 = solph.Flow(nominal_value=50)
+    src1 = solph.Source(label="source1", outputs={bel: flow1})
+    src2 = solph.Source(label="source2", outputs={bel: flow2})
     energysystem.add(bel, src1, src2)
     model = solph.Model(energysystem)
     flow_with_keyword = {
@@ -27,28 +24,24 @@ def test_special():
 def test_something_else():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    bel1 = solph.buses.Bus(label="electricity1")
-    bel2 = solph.buses.Bus(label="electricity2")
+    bel1 = solph.Bus(label="electricity1")
+    bel2 = solph.Bus(label="electricity2")
     energysystem.add(bel1, bel2)
     energysystem.add(
-        solph.components.Transformer(
+        solph.Transformer(
             label="powerline_1_2",
-            inputs={bel1: solph.flows.Flow()},
+            inputs={bel1: solph.Flow()},
             outputs={
-                bel2: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=20)
-                )
+                bel2: solph.Flow(investment=solph.Investment(ep_costs=20))
             },
         )
     )
     energysystem.add(
-        solph.components.Transformer(
+        solph.Transformer(
             label="powerline_2_1",
-            inputs={bel2: solph.flows.Flow()},
+            inputs={bel2: solph.Flow()},
             outputs={
-                bel1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=20)
-                )
+                bel1: solph.Flow(investment=solph.Investment(ep_costs=20))
             },
         )
     )
@@ -57,7 +50,7 @@ def test_something_else():
     line21 = energysystem.groups["powerline_2_1"]
     solph.constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlow.invest[line12, bel2],
+        om.InvestmentFlow.invest[line21, bel1],
         name="my_name",
     )

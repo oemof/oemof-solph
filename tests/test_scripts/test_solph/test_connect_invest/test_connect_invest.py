@@ -16,21 +16,24 @@ import os
 import pandas as pd
 from nose.tools import eq_
 
+from oemof.solph import Bus
 from oemof.solph import EnergySystem
+from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import components as components
+from oemof.solph import Sink
+from oemof.solph import Source
+from oemof.solph import Transformer
+from oemof.solph import components
 from oemof.solph import constraints
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.solph.buses import Bus
-from oemof.solph.flows import Flow
 
 
 def test_connect_invest():
     date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
 
-    es = EnergySystem(timeindex=date_time_index)
+    energysystem = EnergySystem(timeindex=date_time_index)
 
     # Read data file
     full_filename = os.path.join(
@@ -43,30 +46,23 @@ def test_connect_invest():
     # create electricity bus
     bel1 = Bus(label="electricity1")
     bel2 = Bus(label="electricity2")
-    es.add(bel1, bel2)
 
     # create excess component for the electricity bus to allow overproduction
-    es.add(components.Sink(label="excess_bel", inputs={bel2: Flow()}))
-    es.add(
-        components.Source(
-            label="shortage", outputs={bel2: Flow(variable_costs=50000)}
-        )
+    excess_el = Sink(label="excess_bel", inputs={bel2: Flow()})
+    shortage = Source(
+        label="shortage", outputs={bel2: Flow(variable_costs=50000)}
     )
 
     # create fixed source object representing wind power plants
-    es.add(
-        components.Source(
-            label="wind",
-            outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
-        )
+    wind = Source(
+        label="wind",
+        outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
     )
 
     # create simple sink object representing the electrical demand
-    es.add(
-        components.Sink(
-            label="demand",
-            inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
-        )
+    demand = Sink(
+        label="demand",
+        inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
     storage = components.GenericStorage(
@@ -81,33 +77,34 @@ def test_connect_invest():
         outflow_conversion_factor=0.8,
         investment=Investment(ep_costs=0.2),
     )
-    es.add(storage)
 
-    line12 = components.Transformer(
+    line12 = Transformer(
         label="line12",
         inputs={bel1: Flow()},
         outputs={bel2: Flow(investment=Investment(ep_costs=20))},
     )
-    es.add(line12)
 
-    line21 = components.Transformer(
+    line21 = Transformer(
         label="line21",
         inputs={bel2: Flow()},
         outputs={bel1: Flow(investment=Investment(ep_costs=20))},
     )
-    es.add(line21)
 
-    om = Model(es)
+    energysystem.add(
+        bel1, bel2, excess_el, shortage, wind, demand, storage, line12, line21
+    )
+
+    om = Model(energysystem)
 
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlow.invest[line12, bel2],
+        om.InvestmentFlow.invest[line21, bel1],
         2,
     )
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
+        om.InvestmentFlow.invest[line12, bel2],
         om.GenericInvestmentStorageBlock.invest[storage],
     )
 

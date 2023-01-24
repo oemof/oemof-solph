@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +2 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_0)
 +2 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_1)
@@ -8,15 +8,15 @@ objective:
 
 s.t.
 
-c_e_BusBlock_balance(bus_elec_0)_:
+c_e_Bus_balance(bus_elec_0)_:
 +1 flow(bus_elec_demand_dsm_0)
 = 0
 
-c_e_BusBlock_balance(bus_elec_1)_:
+c_e_Bus_balance(bus_elec_1)_:
 +1 flow(bus_elec_demand_dsm_1)
 = 0
 
-c_e_BusBlock_balance(bus_elec_2)_:
+c_e_Bus_balance(bus_elec_2)_:
 +1 flow(bus_elec_demand_dsm_2)
 = 0
 
@@ -87,7 +87,7 @@ c_e_SinkDSMOemofBlock_dsm_sum_constraint(demand_dsm_0)_:
 +1 SinkDSMOemofBlock_dsm_up(demand_dsm_1)
 = 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds

@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +141 GenericInvestmentStorageBlock_invest(storage_non_convex)
 +56 flow(electricityBus_storage_non_convex_0)
@@ -12,48 +12,48 @@ objective:
 
 s.t.
 
-c_e_BusBlock_balance(electricityBus_0)_:
+c_e_Bus_balance(electricityBus_0)_:
 -1 flow(electricityBus_storage_non_convex_0)
 +1 flow(storage_non_convex_electricityBus_0)
 = 0
 
-c_e_BusBlock_balance(electricityBus_1)_:
+c_e_Bus_balance(electricityBus_1)_:
 -1 flow(electricityBus_storage_non_convex_1)
 +1 flow(storage_non_convex_electricityBus_1)
 = 0
 
-c_e_BusBlock_balance(electricityBus_2)_:
+c_e_Bus_balance(electricityBus_2)_:
 -1 flow(electricityBus_storage_non_convex_2)
 +1 flow(storage_non_convex_electricityBus_2)
 = 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_0)_:
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex)
+c_u_InvestmentFlow_max(electricityBus_storage_non_convex_0)_:
+-1 InvestmentFlow_invest(electricityBus_storage_non_convex)
 +1 flow(electricityBus_storage_non_convex_0)
 <= 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_1)_:
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex)
+c_u_InvestmentFlow_max(electricityBus_storage_non_convex_1)_:
+-1 InvestmentFlow_invest(electricityBus_storage_non_convex)
 +1 flow(electricityBus_storage_non_convex_1)
 <= 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_2)_:
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex)
+c_u_InvestmentFlow_max(electricityBus_storage_non_convex_2)_:
+-1 InvestmentFlow_invest(electricityBus_storage_non_convex)
 +1 flow(electricityBus_storage_non_convex_2)
 <= 0
 
-c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_0)_:
--1 InvestmentFlowBlock_invest(storage_non_convex_electricityBus)
+c_u_InvestmentFlow_max(storage_non_convex_electricityBus_0)_:
+-1 InvestmentFlow_invest(storage_non_convex_electricityBus)
 +1 flow(storage_non_convex_electricityBus_0)
 <= 0
 
-c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_1)_:
--1 InvestmentFlowBlock_invest(storage_non_convex_electricityBus)
+c_u_InvestmentFlow_max(storage_non_convex_electricityBus_1)_:
+-1 InvestmentFlow_invest(storage_non_convex_electricityBus)
 +1 flow(storage_non_convex_electricityBus_1)
 <= 0
 
-c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_2)_:
--1 InvestmentFlowBlock_invest(storage_non_convex_electricityBus)
+c_u_InvestmentFlow_max(storage_non_convex_electricityBus_2)_:
+-1 InvestmentFlow_invest(storage_non_convex_electricityBus)
 +1 flow(storage_non_convex_electricityBus_2)
 <= 0
 
@@ -90,12 +90,12 @@ c_e_GenericInvestmentStorageBlock_balanced_cstr(storage_non_convex)_:
 
 c_e_GenericInvestmentStorageBlock_storage_capacity_inflow(storage_non_convex)_:
 -0.16666666666666666 GenericInvestmentStorageBlock_invest(storage_non_convex)
-+1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex)
++1 InvestmentFlow_invest(electricityBus_storage_non_convex)
 = 0
 
 c_e_GenericInvestmentStorageBlock_storage_capacity_outflow(storage_non_convex)_:
 -0.16666666666666666 GenericInvestmentStorageBlock_invest(storage_non_convex)
-+1 InvestmentFlowBlock_invest(storage_non_convex_electricityBus)
++1 InvestmentFlow_invest(storage_non_convex_electricityBus)
 = 0
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(storage_non_convex_0)_:
@@ -138,7 +138,7 @@ c_l_GenericInvestmentStorageBlock_limit_min(storage_non_convex)_:
 -12 GenericInvestmentStorageBlock_invest_status(storage_non_convex)
 >= 0
 
-c_e_ONE_VAR_CONSTANT:
+c_e_ONE_VAR_CONSTANT: 
 ONE_VAR_CONSTANT = 1.0
 
 bounds
@@ -148,8 +148,8 @@ bounds
    0 <= flow(storage_non_convex_electricityBus_0) <= +inf
    0 <= flow(storage_non_convex_electricityBus_1) <= +inf
    0 <= flow(storage_non_convex_electricityBus_2) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex) <= +inf
-   0 <= InvestmentFlowBlock_invest(storage_non_convex_electricityBus) <= +inf
+   0 <= InvestmentFlow_invest(electricityBus_storage_non_convex) <= +inf
+   0 <= InvestmentFlow_invest(storage_non_convex_electricityBus) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_0) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_2) <= +inf

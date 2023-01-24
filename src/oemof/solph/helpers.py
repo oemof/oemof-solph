@@ -2,7 +2,8 @@
 
 """
 This is a collection of helper functions which work on their own and can be
-used by various classes.
+used by various classes. If there are too many helper-functions, they will
+be sorted in different modules.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Caroline Möller
@@ -15,8 +16,13 @@ SPDX-License-Identifier: MIT
 
 """
 
+import datetime as dt
 import os
 from collections.abc import MutableMapping
+
+import pandas as pd
+
+from oemof.solph.plumbing import sequence
 
 
 def get_basic_path():
@@ -46,8 +52,7 @@ def flatten(d, parent_key="", sep="_"):
     See: https://stackoverflow.com/questions/6027558/
          flatten-nested-python-dictionaries-compressing-keys
 
-    d : (dictionary)
-    parent_key : (do not use this, used internally for recursion)
+    d : dictionary
     sep : separator for flattening keys
 
     Returns
@@ -62,3 +67,38 @@ def flatten(d, parent_key="", sep="_"):
         else:
             items.append((new_key, v))
     return dict(items)
+
+
+def calculate_timeincrement(timeindex, fill_value=None):
+    """
+    Calculates timeincrement for `timeindex`
+
+    Parameters
+    ----------
+    timeindex: pd.DatetimeIndex
+        timeindex of energysystem
+    fill_value: numerical
+        timeincrement for first timestep in hours
+    """
+    if isinstance(timeindex, pd.DatetimeIndex) and (
+        fill_value
+        and isinstance(fill_value, pd.Timedelta)
+        or fill_value is None
+    ):
+        if len(set(timeindex)) != len(timeindex):
+            raise IndexError("No equal DatetimeIndex allowed!")
+        timeindex = timeindex.to_series()
+        timeindex_sorted = timeindex.sort_values()
+        if fill_value:
+            timeincrement = timeindex_sorted.diff().fillna(value=fill_value)
+        else:
+            timeincrement = timeindex_sorted.diff().fillna(method="bfill")
+        timeincrement_sec = timeincrement.map(dt.timedelta.total_seconds)
+        timeincrement_hourly = list(timeincrement_sec.map(lambda x: x / 3600))
+        timeincrement = sequence(timeincrement_hourly)
+        return timeincrement
+    else:
+        raise AttributeError(
+            "'timeindex' must be of type 'DatetimeIndex' and "
+            + "'fill_value' of type 'Timedelta'."
+        )

@@ -2,7 +2,6 @@
 ---
 cff-version: "1.1.0"
 doi: "10.5281/zenodo.596235"
-url: "https://github.com/oemof/oemof-solph/"
 license: MIT
 message: "If you use this software, please cite it using these metadata."
 title: "oemof.solph"
@@ -21,30 +20,27 @@ authors:
     family-names: Simon
     given-names: Hilpert
   -
-    alias: "@jnnr"
+    given-names: jnnr
   -
     family-names: "Möller"
     given-names: Caroline
   -
     family-names: "Schönfeldt"
     given-names: Patrik
-    alias: "@p-snft"
-    affiliation: "Deutsches Zentrum für Luft- und Raumfart (DLR)"
-    orcid: "https://orcid.org/0000-0002-4311-2753"
   -
     family-names: "Röder"
     given-names: Johannes
   -
-    alias: "@gplssm"
+    given-names: gplssm
   -
-    alias: "@steffenGit"
+    given-names: steffenGit
   -
     family-names: Schachler
     given-names: Birgit
   -
-    alias: "@cswh"
+    given-names: cswh
   -
-    alias: "@henhuy"
+    given-names: henhuy
   -
     family-names: Pl
     given-names: Franzi
@@ -52,9 +48,10 @@ authors:
     family-names: Endres
     given-names: Julian
   -
+    family-names: TU
     given-names: Fabian
   -
-    alias: "pkassing"
+    given-names: pkassing
   -
     family-names: Lancien
     given-names: Bryan
@@ -62,25 +59,23 @@ authors:
     family-names: Kochems
     given-names: Johannes
   -
-    familiy-names: Koehl
-    given-names: Caterina
-    alias: "@c-koehl"
+    given-names: c-koehl
   -
-    alias: "@nesnoj"
+    given-names: nesnoj
   -
-    alias: "@lmilletb"
+    given-names: lmilletb
   -
-    alias: "@mloenneberga"
+    given-names: mloenneberga
   -
     family-names: Delfs
     given-names: Jens-Olaf
   -
-    alias: "@RD-OTH"
+    given-names: RD-OTH
   -
     family-names: Francesco
     given-names: Witte
   -
-    alias: "@elisapap"
+    given-names: elisapap
   -
     family-names: Gaudchau
     given-names: Elisa
@@ -88,19 +83,13 @@ authors:
     family-names: Smalla
     given-names: Tjark
   -
-    alias: "@escalacjo"
+    given-names: escalacjo
   -
-    alias: "@ajimenezUCLA"
+    given-names: ajimenezUCLA
   -
-    alias: "@chrisflei"
+    given-names: chrisflei
   -
-    alias: "@stefansc1"
+    given-names: stefansc1
   -
-    alias: "@jakob-wo"
-  -
-    family-names: Sayadi
-    given-names: Saeed
-  -
-    family-names: Duc
-    given-names: Pierre-François
+    given-names: jakob-wo
 ...
