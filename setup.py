@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import print_function
-
 import io
 import re
 from glob import glob
@@ -61,9 +58,9 @@ setup(
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: CPython",
         "Topic :: Utilities",
     ],
@@ -77,19 +74,27 @@ setup(
     keywords=[
         # eg: 'keyword1', 'keyword2', 'keyword3',
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     install_requires=[
         "blinker",
         "dill",
         "numpy < 1.24",
         "pandas",
-        "pyomo >= 5.7.0, < 5.7.3",
+        "pyomo >= 6.0.0, < 7.0",
         "networkx",
-        "oemof.tools",
-        "oemof.network",
+        "oemof.tools >= 0.4.2",
+        "oemof.network >= 0.5.0a1",
     ],
     extras_require={
-        "dev": ["pytest", "sphinx", "sphinx_rtd_theme"],
+        "dev": [
+            "pytest",
+            "sphinx",
+            "sphinx_rtd_theme",
+            "nbformat",
+            "termcolor",
+            "matplotlib",
+        ],
+        "examples": ["matplotlib"],
         "dummy": ["oemof"],
     },
     entry_points={

@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
+import matplotlib
 from sphinx.ext.autodoc import between
+
+matplotlib.use("agg")
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 
 def setup(app):
@@ -21,7 +26,6 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
 ]
 source_suffix = ".rst"
@@ -35,8 +39,8 @@ version = release = "0.4.5"
 pygments_style = "trac"
 templates_path = ["."]
 extlinks = {
-    "issue": ("https://github.com/oemof/oemof-solph/issues/%s", "#"),
-    "pr": ("https://github.com/oemof/oemof-solph/pull/%s", "PR #"),
+    "issue": ("https://github.com/oemof/oemof-solph/issues/%s", "#%s"),
+    "pr": ("https://github.com/oemof/oemof-solph/pull/%s", "PR #%s"),
 }
 # on_rtd is whether we are on readthedocs.org
 on_rtd = os.environ.get("READTHEDOCS", None) == "True"
@@ -51,6 +55,7 @@ html_sidebars = {
     "**": ["searchbox.html", "globaltoc.html", "sourcelink.html"],
 }
 html_short_title = "%s-%s" % (project, version)
+html_logo = "./_logo/logo_oemof_solph_COMPACT_bg.svg"
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
@@ -59,7 +64,7 @@ nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
-linkcheck_ignore = [r"https://requires.io/.*"] + (
+linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
     [
         r"https://github.com/oemof/oemof-solph/issues/*",
         r"https://github.com/oemof/oemof-solph/pull/*",

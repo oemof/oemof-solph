@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -22,7 +23,7 @@ def limit_active_flow_count(
     active NonConvex flows. The flows are given as a list.
 
     Total actual counts after optimization can be retrieved
-    calling the :attr:`om.oemof.solph.Model.$(constraint_name)_count()`.
+    calling the `oemof.solph.Model.$(constraint_name)_count()`.
 
     Parameters
     ----------
@@ -43,7 +44,7 @@ def limit_active_flow_count(
 
     Note
     ----
-    Flow objects required to be NonConvex
+    SimpleFlowBlock objects required to be NonConvex
 
     **Constraint:**
 
@@ -56,15 +57,16 @@ def limit_active_flow_count(
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    ================== ==== ===================================================
-    math. symbol       type explanation
-    ================== ==== ===================================================
-    :math:`X_n(t)`     V    status (0 or 1) of the flow :math:`n`
-                            at time step :math:`t`
-    :math:`N_{X,min}`  P    lower_limit
-    :math:`N_{X,max}`  P    lower_limit
-    ================== ==== ===================================================
-    """
+    +-------------------+------+--------------------------------------------------------------+
+    | symbol            | type | explanation                                                  |
+    +===================+======+==============================================================+
+    | :math:`X_n(t)`    | V    | status (0 or 1) of the flow :math:`n` at time step :math:`t` |
+    +-------------------+------+--------------------------------------------------------------+
+    | :math:`N_{X,min}` | P    | lower_limit                                                  |
+    +-------------------+------+--------------------------------------------------------------+
+    | :math:`N_{X,max}` | P    | upper_limit                                                  |
+    +-------------------+------+--------------------------------------------------------------+
+    """  # noqa: E501
 
     # number of concurrent active flows
     setattr(model, constraint_name, po.Var(model.TIMESTEPS))
@@ -77,7 +79,9 @@ def limit_active_flow_count(
 
     def _flow_count_rule(m):
         for ts in m.TIMESTEPS:
-            lhs = sum(m.NonConvexFlow.status[fi, fo, ts] for fi, fo in flows)
+            lhs = sum(
+                m.NonConvexFlowBlock.status[fi, fo, ts] for fi, fo in flows
+            )
             rhs = getattr(model, constraint_name)[ts]
             expr = lhs == rhs
             if expr is not True:
@@ -122,11 +126,10 @@ def limit_active_flow_count_by_keyword(
 
     See Also
     --------
-    limit_active_flow_count(model, constraint_name, flows,
-                            lower_limit=0, upper_limit=None)
+    limit_active_flow_count
     """
     flows = []
-    for (i, o) in model.NonConvexFlow.NONCONVEX_FLOWS:
+    for (i, o) in model.NonConvexFlowBlock.NONCONVEX_FLOWS:
         if hasattr(model.flows[i, o], keyword):
             flows.append((i, o))
 

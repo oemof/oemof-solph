@@ -36,7 +36,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
-from unittest import skip
 
 import pandas as pd
 from nose.tools import eq_
@@ -57,87 +56,99 @@ def test_optimise_storage_size(
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    es = solph.EnergySystem(timeindex=date_time_index)
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
 
     # Buses
-    bgas = solph.Bus(label="natural_gas")
-    bel = solph.Bus(label="electricity")
+    bgas = solph.buses.Bus(label="natural_gas")
+    bel = solph.buses.Bus(label="electricity")
+    es.add(bgas, bel)
 
     # Sinks
-    excess_bel = solph.Sink(label="excess_bel", inputs={bel: solph.Flow()})
+    es.add(
+        solph.components.Sink(
+            label="excess_bel", inputs={bel: solph.flows.Flow()}
+        )
+    )
 
-    demand = solph.Sink(
-        label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+    es.add(
+        solph.components.Sink(
+            label="demand",
+            inputs={
+                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
 
     # Sources
-    rgas = solph.Source(
-        label="rgas",
-        outputs={
-            bgas: solph.Flow(
-                nominal_value=194397000 * 400 / 8760, summed_max=1
-            )
-        },
+    es.add(
+        solph.components.Source(
+            label="rgas",
+            outputs={
+                bgas: solph.flows.Flow(
+                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                )
+            },
+        )
     )
 
-    wind = solph.Source(
-        label="wind",
-        outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
+    es.add(
+        solph.components.Source(
+            label="wind",
+            outputs={
+                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+            },
+        )
     )
 
-    pv = solph.Source(
-        label="pv",
-        outputs={bel: solph.Flow(fix=data["pv"], nominal_value=582000)},
+    es.add(
+        solph.components.Source(
+            label="pv",
+            outputs={
+                bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)
+            },
+        )
     )
 
     # Transformer
-    PP_GAS = solph.Transformer(
+    PP_GAS = solph.components.Transformer(
         label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=50)},
+        inputs={bgas: solph.flows.Flow()},
+        outputs={
+            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+        },
         conversion_factors={bel: 0.58},
     )
+    es.add(PP_GAS)
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    storage = solph.components.GenericStorage(
-        label="storage",
-        inputs={bel: solph.Flow(variable_costs=10e10)},
-        outputs={bel: solph.Flow(variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc, existing=6851),
-    )
-
-    energysystem.add(
-        bgas,
-        bel,
-        excess_bel,
-        demand,
-        rgas,
-        wind,
-        pv,
-        PP_GAS,
-        storage,
+    es.add(
+        solph.components.GenericStorage(
+            label="storage",
+            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+            investment=solph.Investment(ep_costs=epc, existing=6851),
+        )
     )
 
     # Solve model
-    om = solph.Model(energysystem)
+    om = solph.Model(es)
     om.receive_duals()
     om.solve(solver=solver)
-    energysystem.results["main"] = processing.results(om)
-    energysystem.results["meta"] = processing.meta_results(om)
+    es.results["main"] = processing.results(om)
+    es.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    energysystem.dump()
+    es.dump()
 
 
 def test_results_with_actual_dump():
@@ -168,67 +179,29 @@ def test_results_with_actual_dump():
     }
 
     for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
 
     # Solver results
-    eq_(str(meta["solver"]["Termination condition"]), "optimal")
-    eq_(meta["solver"]["Error rc"], 0)
-    eq_(str(meta["solver"]["Status"]), "ok")
+    assert str(meta["solver"]["Termination condition"]) == "optimal"
+    assert meta["solver"]["Error rc"] == 0
+    assert str(meta["solver"]["Status"]) == "ok"
 
     # Problem results
-    eq_(meta["problem"]["Lower bound"], 4.231675777e17)
-    eq_(meta["problem"]["Upper bound"], 4.231675777e17)
-    eq_(meta["problem"]["Number of variables"], 2805)
-    eq_(meta["problem"]["Number of constraints"], 2806)
-    eq_(meta["problem"]["Number of nonzeros"], 1197)
-    eq_(meta["problem"]["Number of objectives"], 1)
-    eq_(str(meta["problem"]["Sense"]), "minimize")
+    assert meta["problem"]["Lower bound"] == 4.231675777e17
+    assert meta["problem"]["Upper bound"], 4.231675777e17
+    assert meta["problem"]["Number of variables"] == 2805
+    assert meta["problem"]["Number of constraints"] == 2806
+    assert meta["problem"]["Number of nonzeros"] == 1197
+    assert meta["problem"]["Number of objectives"] == 1
+    assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    eq_(round(meta["objective"]), 423167578261115584)
-
-
-@skip(
-    "Opening an old dump may fail due to different python versions or"
-    " version of other packages. We can try to reactivate the test with"
-    " v0.4.0."
-)
-def test_results_with_old_dump():
-    """
-    Test again with a stored dump created with v0.3.2dev (896a6d50)
-    """
-    energysystem = solph.EnergySystem()
-    energysystem.restore(
-        dpath=os.path.dirname(os.path.realpath(__file__)),
-        filename="es_dump_test_3_2dev.oemof",
-    )
-
-    results = energysystem.results["main"]
-
-    electricity_bus = views.node(results, "electricity")
-    my_results = electricity_bus["sequences"].sum(axis=0).to_dict()
-    storage = energysystem.groups["storage"]
-    my_results["storage_invest"] = results[(storage, None)]["scalars"][
-        "invest"
-    ]
-
-    stor_invest_dict = {
-        "storage_invest": 2040000,
-        (("electricity", "demand"), "flow"): 105867395,
-        (("electricity", "excess_bel"), "flow"): 211771291,
-        (("electricity", "storage"), "flow"): 2350931,
-        (("pp_gas", "electricity"), "flow"): 5148414,
-        (("pv", "electricity"), "flow"): 7488607,
-        (("storage", "electricity"), "flow"): 1880745,
-        (("wind", "electricity"), "flow"): 305471851,
-    }
-
-    for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+    assert round(meta["objective"]) == 423167578261115584
 
 
 def test_solph_transformer_attributes_before_dump_and_after_restore():
-    """dump/restore should preserve all attributes of `solph.Transformer`"""
+    """dump/restore should preserve all attributes
+    of `solph.components.Transformer`"""
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
