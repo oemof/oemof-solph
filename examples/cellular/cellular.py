@@ -11,10 +11,14 @@ from oemof.solph import CellularModel
 from oemof.solph import buses
 from oemof.solph import components as cmp
 
+from oemof.tools import debugging
+
 from oemof.solph import create_time_index
 from oemof.solph import flows
 
 from oemof.solph.components.experimental import CellConnector, EnergyCell
+
+import itertools
 
 ###########################################################################
 # define the cells of the cellular energy system
@@ -40,7 +44,7 @@ demand_1 = [80] * n_periods
 demand_2 = [10] * n_periods
 demand_3 = [10] * n_periods
 
-pv_1 = [0] * n_periods
+pv_1 = [10] * n_periods
 pv_2 = [40] * n_periods
 pv_3 = [50] * n_periods
 
@@ -102,6 +106,11 @@ ec3.add(pv_source_3)
 # cell and energy type (ele, gas, heat)
 # CC-Bennenung: cc_from_to
 
+# TODO: one CellConnector isn't enough. If ec1 is connected to ec2 and ec3,
+# than ec1 doesn't know which share goes to ec2 and which to ec3. The model
+# becomes infeasible. Look for another solution. This is the problems with
+# necessary subgraphs, Günni talked about.
+
 cc_es = CellConnector(
     label="cc_es",
     inputs={bus_el: flows.Flow()},
@@ -149,44 +158,67 @@ cmodel = CellularModel(EnergyCells={es: [ec1, ec2, ec3]})
 # link the grid connectors to each other
 ###########################################################################
 
+
 #%%
-def link_connectors(model, cc1, cc2, factor=1):
+def link_connectors(model, connections, factor=1):
     """
-    Connects two CellConnectors with each other, such that the inputs and outputs are interlinked.
+    Connects the CellConnectors of multiple cells with each other, such that
+    the inputs and outputs are interlinked.
     Return value does not need to be catched.
 
     Parameters:
     -----------
     model: CellularModel
         Model containing all GridConnector instances
-    gc1: GridConnector
-        One of the two GridConnectors to be linked
-    gc2: GridConnector
-        The second of the two GridConnectors to be linked
-    factor: numerical (optional)
-        Factor to account for transmission losses. Defaults to 1. Loss would be 1-`factor`. Is used as gc1.outflow * factor = gc2.inflow.
+    connections: set
+        A set of subsets, where each subset contains (at least) a pair of two
+        CellConnector objects which shall be linked with each other.
+    factor: numerical (optional) DEPRECATED
+        Factor to account for transmission losses. Defaults to 1. Loss would be
+        1-`factor`. Is used as gc1.outflow * factor = gc2.inflow.
     """
+    # TODO: enable usage of `factor` argument
 
-    def equate_variables_rule(m):
-        return var1 == var2 * factor
+    connection_block = po.Block()
 
-    for t in model.TIMESTEPS:
-        # connect input of cc1 with output of cc2
-        var1 = model.CellConnectorBlock.input_flow[cc1, t]
-        var2 = model.CellConnectorBlock.output_flow[cc2, t]
-        name = "_".join(["equate", var1.name, var2.name])
-        # TODO: is that "clean"? Why aren't the variables passed explicitly?
-        setattr(model, name, po.Constraint(rule=equate_variables_rule))
-        # connect input of cc2 with output of cc1
-        var1 = model.CellConnectorBlock.input_flow[cc2, t]
-        var2 = model.CellConnectorBlock.output_flow[cc1, t]
-        name = "_".join(["equate", var1.name, var2.name])
-        setattr(model, name, po.Constraint(rule=equate_variables_rule))
+    simple_connections = []
+    # for every connection pair
+    for c in connections:
+        # create a list of tuples with simple connections (cell1, cell2)
+        pairs = [x for x in itertools.product(c, c) if not x[0] == x[1]]
+        for pair in pairs:
+            if pair not in simple_connections:
+                simple_connections.append(pair)
+            else:
+                msg = "Connection between {0} and {1} is established twice.".format(
+                    pair[0], pair[1]
+                )
+                raise debugging.SuspiciousUsageWarning(msg)
+
+    # add these connections as a pyomo Set
+    connection_block.CONNECTIONS = po.Set(initialize=simple_connections)
+
+    model.add_component("ConnectionBlock", connection_block)
+
+    def link_cells_rule(model, cc1, cc2, t):
+        lhs = model.CellConnectorBlock.output_flow[cc1, t]
+        rhs = model.CellConnectorBlock.input_flow[cc2, t]
+        return lhs == rhs
+
+    model.connections = po.Constraint(
+        connection_block.CONNECTIONS, model.TIMESTEPS, rule=link_cells_rule
+    )
 
 
-link_connectors(cmodel, cc_es, cc_ec1)
-link_connectors(cmodel, cc_ec1, cc_ec2)
-link_connectors(cmodel, cc_ec1, cc_ec3)
+pairings = {
+    (cc_es, cc_ec1),
+    (cc_ec1, cc_ec2),
+    (cc_ec1, cc_ec3),
+}
+link_connectors(cmodel, pairings, factor=1)
+# link_connectors(cmodel, cc_es, cc_ec1)
+# link_connectors(cmodel, cc_ec1, cc_ec2)
+# link_connectors(cmodel, cc_ec1, cc_ec3)
 
 ###########################################################################
 # Solve the model
