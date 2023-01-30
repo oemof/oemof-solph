@@ -121,7 +121,7 @@ class TestsConstraint:
                 expected = normalize_to_positive_results(expected)
                 generated = normalize_to_positive_results(generated)
 
-                assert generated  == expected, (
+                assert generated == expected, (
                     "Failed matching expected with generated lp file:\n"
                     + "\n".join(
                         unified_diff(
