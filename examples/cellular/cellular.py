@@ -15,6 +15,7 @@ from oemof.tools import debugging
 
 from oemof.solph import create_time_index
 from oemof.solph import flows
+from oemof.solph import processing, views
 
 from oemof.solph.components.experimental import CellConnector, EnergyCell
 
@@ -45,8 +46,8 @@ demand_2 = [10] * n_periods
 demand_3 = [10] * n_periods
 
 pv_1 = [10] * n_periods
-pv_2 = [40] * n_periods
-pv_3 = [50] * n_periods
+pv_2 = [400] * n_periods
+pv_3 = [10] * n_periods
 
 bus_el = buses.Bus(label="bus_el")
 bus_el_1 = buses.Bus(label="bus_el_1")
@@ -160,7 +161,7 @@ cmodel = CellularModel(EnergyCells={es: [ec1, ec2, ec3]})
 
 
 #%%
-def link_connectors(model, connections, factor=1):
+def link_connectors(model, linkages):
     """
     Connects the CellConnectors of multiple cells with each other, such that
     the inputs and outputs are interlinked.
@@ -169,53 +170,68 @@ def link_connectors(model, connections, factor=1):
     Parameters:
     -----------
     model: CellularModel
-        Model containing all GridConnector instances
-    connections: set
-        A set of subsets, where each subset contains (at least) a pair of two
-        CellConnector objects which shall be linked with each other.
-    factor: numerical (optional) DEPRECATED
-        Factor to account for transmission losses. Defaults to 1. Loss would be
-        1-`factor`. Is used as gc1.outflow * factor = gc2.inflow.
+        Model of the energy system. Must already contain all CellConnectors
+        used in the `linkages` set.
+    linkages: set
+        A set of tuples, where each tuple is created as (CellConnector1,
+        CellConnector2, loss_factor).
+        Links are established symmetrically, so loss_factor is applied in
+        both directions. See equation (x) for usage of loss_factor.
     """
-    # TODO: enable usage of `factor` argument
+    # TODO: maybe move this into the CellularModel class to hide it from the user
 
+    # block for new connections
     connection_block = po.Block()
 
-    simple_connections = []
-    # for every connection pair
-    for c in connections:
-        # create a list of tuples with simple connections (cell1, cell2)
-        pairs = [x for x in itertools.product(c, c) if not x[0] == x[1]]
-        for pair in pairs:
-            if pair not in simple_connections:
-                simple_connections.append(pair)
-            else:
-                msg = "Connection between {0} and {1} is established twice.".format(
-                    pair[0], pair[1]
-                )
-                raise debugging.SuspiciousUsageWarning(msg)
+    # Set with all CellConnector objects in linkages
+    cell_connectors = set(
+        [
+            x
+            for x in itertools.chain.from_iterable(linkages)
+            if isinstance(x, CellConnector)
+        ]
+    )
 
-    # add these connections as a pyomo Set
-    connection_block.CONNECTIONS = po.Set(initialize=simple_connections)
+    # create a mapping of the cells {from_cell: (to_cell, loss_factor)}
+    mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
 
+    for (from_cell, to_cell, loss_factor) in linkages:
+        mapping[from_cell].add((to_cell, loss_factor))
+        mapping[to_cell].add((from_cell, loss_factor))
+
+    # TODO: implement check for duplicate links with conflicting loss_factors
+
+    # add mapping to the block
+    connection_block.LINKAGES = mapping
+
+    # add block to the model
     model.add_component("ConnectionBlock", connection_block)
 
-    def link_cells_rule(model, cc1, cc2, t):
-        lhs = model.CellConnectorBlock.output_flow[cc1, t]
-        rhs = model.CellConnectorBlock.input_flow[cc2, t]
+    def link_cells_rule(model, cell, t):
+        """rule for link creation between CellConnectors"""
+        lhs = model.CellConnectorBlock.input_flow[cell, t]
+        rhs = sum(
+            [
+                (1 - loss_factor)
+                * model.CellConnectorBlock.output_flow[other_cell, t]
+                for (other_cell, loss_factor) in connection_block.LINKAGES[
+                    cell
+                ]
+            ]
+        )
         return lhs == rhs
 
-    model.connections = po.Constraint(
-        connection_block.CONNECTIONS, model.TIMESTEPS, rule=link_cells_rule
+    model.ConnectionBalance = po.Constraint(
+        connection_block.LINKAGES, model.TIMESTEPS, rule=link_cells_rule
     )
 
 
 pairings = {
-    (cc_es, cc_ec1),
-    (cc_ec1, cc_ec2),
-    (cc_ec1, cc_ec3),
+    (cc_es, cc_ec1, 0.5),
+    (cc_ec1, cc_ec2, 0.5),
+    (cc_ec1, cc_ec3, 0.5),
 }
-link_connectors(cmodel, pairings, factor=1)
+link_connectors(cmodel, pairings)
 # link_connectors(cmodel, cc_es, cc_ec1)
 # link_connectors(cmodel, cc_ec1, cc_ec2)
 # link_connectors(cmodel, cc_ec1, cc_ec3)
@@ -228,5 +244,6 @@ res = cmodel.solve(solver=mysolver)
 cmodel.write(
     "D:\solph-cellular\cmodel.lp", io_options={"symbolic_solver_labels": True}
 )
+results = processing.results(cmodel)
 
 # %%
