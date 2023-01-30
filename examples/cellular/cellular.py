@@ -47,7 +47,7 @@ demand_3 = [10] * n_periods
 
 pv_1 = [10] * n_periods
 pv_2 = [400] * n_periods
-pv_3 = [10] * n_periods
+pv_3 = [45] * n_periods
 
 bus_el = buses.Bus(label="bus_el")
 bus_el_1 = buses.Bus(label="bus_el_1")
@@ -103,14 +103,8 @@ ec3.add(pv_source_3)
 # add the grid connectors to the cells
 ###########################################################################
 
-# TODO: Refactor, such that there's only one CellConnector necessary per
-# cell and energy type (ele, gas, heat)
-# CC-Bennenung: cc_from_to
+# TODO: Enabe energy-type specific input and output flows?
 
-# TODO: one CellConnector isn't enough. If ec1 is connected to ec2 and ec3,
-# than ec1 doesn't know which share goes to ec2 and which to ec3. The model
-# becomes infeasible. Look for another solution. This is the problems with
-# necessary subgraphs, Günni talked about.
 
 cc_es = CellConnector(
     label="cc_es",
@@ -148,11 +142,8 @@ ec3.add(cc_ec3)
 # create the cellular model
 ###########################################################################
 #%%
-# TODO: Rework, how the model is created from here on.
-# Would be neat to pass the CellularModel a graph-structure
-# ALTERNATIVELY: pass a list of all energy cells and make the connections
-# afterwards, so the connections determine the hierarchy. Adjustments need to
-# be made in the CellularModel __init__ function for that.
+# TODO: include the `link_connectors` in the CellularModel class and use
+# the hierarchy to create the model
 cmodel = CellularModel(EnergyCells={es: [ec1, ec2, ec3]})
 
 ###########################################################################
