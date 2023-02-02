@@ -10,7 +10,7 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas
-from nose.tools import assert_raises
+import pytest
 from nose.tools import eq_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
@@ -276,7 +276,7 @@ class TestParameterResult:
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]
         self.mod.flow[trsf, bus, 5] = float("nan")
-        with assert_raises(ValueError):
+        with pytest.raises(ValueError):
             processing.results(self.mod)
 
     def test_duals(self):
