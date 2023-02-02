@@ -16,8 +16,6 @@ from os import path as ospath
 
 import pandas as pd
 import pytest
-from nose.tools import assert_raises
-from nose.tools import eq_
 
 from oemof import solph
 
@@ -36,7 +34,7 @@ class TestsConstraint:
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
 
-    def setup(self):
+    def setup_method(self):
         self.energysystem = solph.EnergySystem(
             groupings=solph.GROUPINGS, timeindex=self.date_time_index
         )
@@ -123,9 +121,7 @@ class TestsConstraint:
                 expected = normalize_to_positive_results(expected)
                 generated = normalize_to_positive_results(generated)
 
-                eq_(
-                    generated,
-                    expected,
+                assert generated == expected, (
                     "Failed matching expected with generated lp file:\n"
                     + "\n".join(
                         unified_diff(
@@ -896,8 +892,7 @@ class TestsConstraint:
 
     def test_flow_without_emission_for_emission_constraint(self):
         """ """
-
-        def define_emission_limit():
+        with pytest.raises(AttributeError):
             bel = solph.buses.Bus(label="electricityBus")
             source1 = solph.components.Source(
                 label="source1",
@@ -915,8 +910,6 @@ class TestsConstraint:
             self.energysystem.add(bel, source1, source2)
             om = self.get_om()
             solph.constraints.emission_limit(om, om.flows, limit=777)
-
-        assert_raises(AttributeError, define_emission_limit)
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
         """ """
