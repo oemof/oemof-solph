@@ -119,7 +119,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     """  # noqa: E501
     invest_flows = {}
 
-    for (i, o) in model.flows:
+    for i, o in model.flows:
         if hasattr(model.flows[i, o].investment, keyword):
             invest_flows[(i, o)] = model.flows[i, o].investment
 

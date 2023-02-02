@@ -106,7 +106,7 @@ class TestsConstraint:
                         + 1
                         for nri in negative_result_indices
                     ]
-                    for (start, end) in zip(
+                    for start, end in zip(
                         equation_start_indices, negative_result_indices
                     ):
                         for n in range(start, end):
