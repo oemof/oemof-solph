@@ -61,9 +61,7 @@ class TestsGrouping:
             )
         )
 
-        assert (
-            self.es.groups.get(InvestmentFlowBlock),
-            (
-                "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
-            ).format(self.es.groups.get(InvestmentFlowBlock)),
+        assert self.es.groups.get(InvestmentFlowBlock), (
+            "Expected InvestmentFlow group to be nonempty.\n"
+            + "Got: {}".format(self.es.groups.get(InvestmentFlowBlock))
         )
