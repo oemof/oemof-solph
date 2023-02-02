@@ -35,7 +35,6 @@ from oemof import solph
 
 
 def main():
-
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 

@@ -62,7 +62,6 @@ def test_label():
 def test_tuples_as_labels_example(
     filename="storage_investment.csv", solver="cbc"
 ):
-
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 

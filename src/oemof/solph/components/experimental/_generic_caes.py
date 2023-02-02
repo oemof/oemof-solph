@@ -98,7 +98,6 @@ class GenericCAES(on.Transformer):
     """
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         self.electrical_input = kwargs.get("electrical_input")
