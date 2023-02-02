@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import pandas
 from nose.tools import assert_raises
 from nose.tools import eq_
-from nose.tools import ok_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
@@ -332,21 +331,21 @@ class TestParameterResult:
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)
         view = views.node_output_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
 
     def test_input_by_type_view_empty(self):
         results = processing.results(self.om)
         view = views.node_input_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
 
     def test_net_storage_flow_empty(self):
         results = processing.results(self.om)
         view = views.net_storage_flow(results, node_type=Sink)
-        ok_(view is None)
+        assert view is None
         view2 = views.net_storage_flow(results, node_type=Flow)
-        ok_(view2 is None)
+        assert view2 is None
 
     def test_node_weight_by_type_empty(self):
         results = processing.results(self.om)
         view = views.node_weight_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
