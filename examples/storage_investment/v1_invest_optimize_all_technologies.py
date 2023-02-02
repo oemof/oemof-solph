@@ -78,7 +78,7 @@ from oemof import solph
 
 def main():
     # Read data file
-    filename = os.path.join(os.getcwd(), "storage_investmentd.csv")
+    filename = os.path.join(os.getcwd(), "storage_investment.csv")
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:

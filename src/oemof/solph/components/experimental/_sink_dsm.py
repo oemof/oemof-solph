@@ -1245,7 +1245,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                 for g in group:
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
@@ -1264,7 +1263,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
@@ -1285,7 +1283,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # last time steps: end - delay time
                     else:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
@@ -1322,10 +1319,8 @@ class SinkDSMDIWBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -1339,7 +1334,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -1355,7 +1349,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # last time steps: end - delay time
                     else:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -1405,10 +1398,8 @@ class SinkDSMDIWBlock(ScalarBlock):
             """
             for tt in m.TIMESTEPS:
                 for g in group:
-
                     # first times steps: 0 + delay
                     if tt <= g.delay_time:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -1425,7 +1416,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -1444,7 +1434,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # last time steps: end - delay time
                     else:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -1476,10 +1465,8 @@ class SinkDSMDIWBlock(ScalarBlock):
             """
             for tt in m.TIMESTEPS:
                 for g in group:
-
                     # first times steps: 0 + delay time
                     if tt <= g.delay_time:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -1499,7 +1486,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -1521,7 +1507,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     else:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -1554,14 +1539,11 @@ class SinkDSMDIWBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # No need to build constraint if no recovery
                     # time is defined.
                     if g.recovery_time_shift not in [None, 0]:
-
                         # main use case
                         if t <= m.TIMESTEPS[-1] - g.recovery_time_shift:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -1579,7 +1561,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                         # last time steps: end - recovery time
                         else:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -1614,13 +1595,10 @@ class SinkDSMDIWBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # Only applicable for load shedding
                     if g.shed_eligibility:
-
                         # main use case
                         if t <= m.TIMESTEPS[-1] - g.recovery_time_shed:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
@@ -1640,7 +1618,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                         # last time steps: end - recovery time
                         else:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
@@ -1878,7 +1855,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if not g.shift_eligibility:
                         lhs = self.dsm_up[g, t]
                         rhs = 0
@@ -1902,10 +1878,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
@@ -1925,7 +1899,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
@@ -1984,10 +1957,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -2001,7 +1972,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -2017,7 +1987,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # last time steps: end - delay time
                     else:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -2071,10 +2040,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for tt in m.TIMESTEPS:
                 for g in group:
-
                     # first times steps: 0 + delay
                     if tt <= g.delay_time:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -2095,7 +2062,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -2118,7 +2084,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # last time steps: end - delay time
                     else:
-
                         # DSM down
                         lhs = (
                             sum(
@@ -2154,10 +2119,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for tt in m.TIMESTEPS:
                 for g in group:
-
                     # first times steps: 0 + delay time
                     if tt <= g.delay_time:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -2177,7 +2140,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     elif g.delay_time < tt <= m.TIMESTEPS[-1] - g.delay_time:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -2199,7 +2161,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         block.C2_constraint.add((g, tt), (lhs <= rhs))
 
                     else:
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -2232,14 +2193,11 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # No need to build constraint if no recovery
                     # time is defined.
                     if g.recovery_time_shift not in [None, 0]:
-
                         # main use case
                         if t <= m.TIMESTEPS[-1] - g.recovery_time_shift:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -2258,7 +2216,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                         # last time steps: end - recovery time
                         else:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -2294,13 +2251,10 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # Only applicable for load shedding
                     if g.shed_eligibility:
-
                         # main use case
                         if t <= m.TIMESTEPS[-1] - g.recovery_time_shed:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
@@ -2321,7 +2275,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                         # last time steps: end - recovery time
                         else:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
@@ -2674,7 +2627,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if not g.shift_eligibility:
                             lhs = self.dsm_up[g, h, t]
                             rhs = 0
@@ -2734,9 +2686,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if g.shift_eligibility:
-
                             # main use case
                             if t >= h:
                                 # balance load reduction
@@ -2789,9 +2739,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if g.shift_eligibility:
-
                             # main use case
                             if t >= h:
                                 # balance load increase
@@ -2840,10 +2788,8 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.fixes:
                         for h in g.delay_time:
-
                             if t > m.TIMESTEPS[-1] - h:
                                 # no load reduction anymore (dsm_do_shift = 0)
                                 lhs = self.dsm_do_shift[g, h, t]
@@ -2865,10 +2811,8 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.fixes:
                         for h in g.delay_time:
-
                             if t > m.TIMESTEPS[-1] - h:
                                 # no load increase anymore (dsm_up = 0)
                                 lhs = self.dsm_up[g, h, t]
@@ -2938,7 +2882,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # avoid timesteps prior to t = 0
                     if t > 0:
                         # reduction minus balancing of reductions
@@ -2976,7 +2919,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # avoid timesteps prior to t = 0
                     if t > 0:
                         # increases minus balancing of reductions
@@ -3015,7 +2957,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.shift_eligibility:
                         # fictious demand response load reduction storage level
                         lhs = self.dsm_do_level[g, t]
@@ -3077,7 +3018,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             to the others.
             """
             for g in group:
-
                 if g.shed_eligibility:
                     # sum of all load reductions
                     lhs = sum(self.dsm_do_shed[g, t] for t in m.TIMESTEPS)
@@ -3109,7 +3049,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             resp. overall limit for optimization timeframe considered
             """
             for g in group:
-
                 if g.ActivateYearLimit:
                     # sum of all load reductions
                     lhs = sum(
@@ -3142,7 +3081,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             resp. overall limit for optimization timeframe considered
             """
             for g in group:
-
                 if g.ActivateYearLimit:
                     # sum of all load increases
                     lhs = sum(
@@ -3177,11 +3115,9 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.ActivateDayLimit:
                         # main use case
                         if t >= g.t_dayLimit:
-
                             # load reduction
                             lhs = sum(
                                 self.dsm_do_shift[g, h, t]
@@ -3228,11 +3164,9 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.ActivateDayLimit:
                         # main use case
                         if t >= g.t_dayLimit:
-
                             # load increase
                             lhs = sum(
                                 self.dsm_up[g, h, t] for h in g.delay_time
@@ -3278,7 +3212,6 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.addition:
                         # sum of load increases and reductions
                         lhs = (
@@ -3549,7 +3482,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-
         if group is None:
             return None
 
@@ -3642,7 +3574,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if not g.shift_eligibility:
                             lhs = self.dsm_up[g, h, t]
                             rhs = 0
@@ -3667,7 +3598,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             BusBlock outflow == Demand +- DR (i.e. effective Sink consumption)
             """
             for t in m.TIMESTEPS:
-
                 for g in group:
                     # outflow from bus
                     lhs = m.flow[g.inflow, g, t]
@@ -3703,9 +3633,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if g.shift_eligibility:
-
                             # main use case
                             if t >= h:
                                 # balance load reduction
@@ -3758,9 +3686,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for t in m.TIMESTEPS:
                 for g in group:
                     for h in g.delay_time:
-
                         if g.shift_eligibility:
-
                             # main use case
                             if t >= h:
                                 # balance load increase
@@ -3809,10 +3735,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.fixes:
                         for h in g.delay_time:
-
                             if t > m.TIMESTEPS[-1] - h:
                                 # no load reduction anymore (dsm_do_shift = 0)
                                 lhs = self.dsm_do_shift[g, h, t]
@@ -3834,10 +3758,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.fixes:
                         for h in g.delay_time:
-
                             if t > m.TIMESTEPS[-1] - h:
                                 # no load increase anymore (dsm_up = 0)
                                 lhs = self.dsm_up[g, h, t]
@@ -3915,7 +3837,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # avoid timesteps prior to t = 0
                     if t > 0:
                         # reduction minus balancing of reductions
@@ -3954,7 +3875,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     # avoid timesteps prior to t = 0
                     if t > 0:
                         # increases minus balancing of reductions
@@ -3993,7 +3913,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.shift_eligibility:
                         # fictious demand response load reduction storage level
                         lhs = self.dsm_do_level[g, t]
@@ -4090,7 +4009,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             resp. overall limit for optimization timeframe considered
             """
             for g in group:
-
                 if g.ActivateYearLimit:
                     # sum of all load reductions
                     lhs = sum(
@@ -4124,7 +4042,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             resp. overall limit for optimization timeframe considered
             """
             for g in group:
-
                 if g.ActivateYearLimit:
                     # sum of all load increases
                     lhs = sum(
@@ -4160,12 +4077,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.ActivateDayLimit:
-
                         # main use case
                         if t >= g.t_dayLimit:
-
                             # load reduction
                             lhs = sum(
                                 self.dsm_do_shift[g, h, t]
@@ -4207,12 +4121,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.ActivateDayLimit:
-
                         # main use case
                         if t >= g.t_dayLimit:
-
                             # load increase
                             lhs = sum(
                                 self.dsm_up[g, h, t] for h in g.delay_time
@@ -4253,9 +4164,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for t in m.TIMESTEPS:
                 for g in group:
-
                     if g.addition:
-
                         # sum of load increases and reductions
                         lhs = (
                             sum(

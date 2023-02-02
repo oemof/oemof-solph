@@ -64,7 +64,11 @@ nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
-linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
+linkcheck_ignore = [
+    r"https://requires.io/.*",
+    r"https://matrix.to/*",
+    r"https://forum.openmod-initiative.org/*",
+] + (
     [
         r"https://github.com/oemof/oemof-solph/issues/*",
         r"https://github.com/oemof/oemof-solph/pull/*",
