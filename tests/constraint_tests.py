@@ -34,7 +34,7 @@ class TestsConstraint:
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
 
-    def setup(self):
+    def setup_method(self):
         self.energysystem = solph.EnergySystem(
             groupings=solph.GROUPINGS, timeindex=self.date_time_index
         )
