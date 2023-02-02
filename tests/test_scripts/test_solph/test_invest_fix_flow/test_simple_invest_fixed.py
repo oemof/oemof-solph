@@ -92,13 +92,3 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
     comp_results["pv_capacity"] = results[(pv, bel)]["scalars"].invest
 
     assert comp_results[(("pv", "b_el"), "flow")] > 0
-
-    # test_results = {
-    #     (('pv', 'b_el'), 'flow'): 2150.5,
-    #     (('b_el', 'demand_elec'), 'flow'): 436.05,
-    #     (('b_el', 'excess_el'), 'flow'): 1714.45,
-    #     'pv_capacity': 467.5,
-    # }
-
-    # for key in test_results.keys():
-    #     eq_(int(round(comp_results[key])), int(round(test_results[key])))

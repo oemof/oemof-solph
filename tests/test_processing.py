@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import pandas
 import pytest
-from nose.tools import eq_
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
@@ -265,12 +264,14 @@ class TestParameterResult:
         )
 
         bel1_m = views.node(param_results, "b_el1", multiindex=True)
-        eq_(bel1_m["scalars"][("b_el1", "storage", "variable_costs")], 3)
+        assert bel1_m["scalars"][("b_el1", "storage", "variable_costs")] == 3
 
     def test_multiindex_sequences(self):
         results = processing.results(self.om)
         bel1 = views.node(results, "b_el1", multiindex=True)
-        eq_(int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()), 2875)
+        assert (
+            int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()) == 2875
+        )
 
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
@@ -282,14 +283,14 @@ class TestParameterResult:
     def test_duals(self):
         results = processing.results(self.om)
         bel = views.node(results, "b_el1", multiindex=True)
-        eq_(int(bel["sequences"]["b_el1", "None", "duals"].sum()), 48)
+        assert int(bel["sequences"]["b_el1", "None", "duals"].sum()) == 48
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        eq_(round(float(storage_content.sum()), 6), 1437.500003)
+        assert round(float(storage_content.sum()), 6) == 1437.500003
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
@@ -299,15 +300,14 @@ class TestParameterResult:
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        eq_(int(transformer_output.sum()), int(compare.sum()))
+        assert int(transformer_output.sum()) == int(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)
         sink_input = views.node_input_by_type(results, node_type=Sink)
         compare = views.node(results, "demand_el", multiindex=True)
-        eq_(
-            int(sink_input.sum()),
-            int(compare["sequences"][("b_el2", "demand_el", "flow")].sum()),
+        assert int(sink_input.sum()) == int(
+            compare["sequences"][("b_el2", "demand_el", "flow")].sum()
         )
 
     def test_net_storage_flow(self):

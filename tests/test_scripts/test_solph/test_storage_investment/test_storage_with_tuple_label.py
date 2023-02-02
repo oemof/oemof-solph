@@ -39,7 +39,6 @@ import os
 from collections import namedtuple
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -55,8 +54,8 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
 
 def test_label():
     my_label = Label("arg", 5, None)
-    eq_(str(my_label), "arg_5_None")
-    eq_(repr(my_label), "Label(tag1='arg', tag2=5, tag3=None)")
+    assert str(my_label) == "arg_5_None"
+    assert repr(my_label) == "Label(tag1='arg', tag2=5, tag3=None)"
 
 
 def test_tuples_as_labels_example(
@@ -203,21 +202,21 @@ def test_tuples_as_labels_example(
     }
 
     for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
 
     # Solver results
-    eq_(str(meta["solver"]["Termination condition"]), "optimal")
-    eq_(meta["solver"]["Error rc"], 0)
-    eq_(str(meta["solver"]["Status"]), "ok")
+    assert str(meta["solver"]["Termination condition"]) == "optimal"
+    assert meta["solver"]["Error rc"] == 0
+    assert str(meta["solver"]["Status"]) == "ok"
 
     # Problem results
-    eq_(int(meta["problem"]["Lower bound"]), 37819254)
-    eq_(int(meta["problem"]["Upper bound"]), 37819254)
-    eq_(meta["problem"]["Number of variables"], 281)
-    eq_(meta["problem"]["Number of constraints"], 163)
-    eq_(meta["problem"]["Number of nonzeros"], 116)
-    eq_(meta["problem"]["Number of objectives"], 1)
-    eq_(str(meta["problem"]["Sense"]), "minimize")
+    assert int(meta["problem"]["Lower bound"]) == 37819254
+    assert int(meta["problem"]["Upper bound"]) == 37819254
+    assert meta["problem"]["Number of variables"] == 281
+    assert meta["problem"]["Number of constraints"] == 163
+    assert meta["problem"]["Number of nonzeros"] == 116
+    assert meta["problem"]["Number of objectives"] == 1
+    assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    eq_(round(meta["objective"]), 37819254)
+    assert round(meta["objective"]) == 37819254
