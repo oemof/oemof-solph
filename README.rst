@@ -39,7 +39,7 @@
 
 .. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
     :alt: Coverage Status
-    :target: https://codecov.io/github/oemof/oemof-solph
+    :target: https://codecov.io/gh/oemof/oemof-solph
 
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
@@ -200,7 +200,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 

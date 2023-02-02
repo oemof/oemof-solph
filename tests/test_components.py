@@ -299,7 +299,7 @@ def test_generic_chp_without_warning():
             )
         },
         heat_output={bth: Flow(custom_attributes={"Q_CW_min": [10.552]})},
-        Beta=[0.122],
+        beta=[0.122],
         back_pressure=False,
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
