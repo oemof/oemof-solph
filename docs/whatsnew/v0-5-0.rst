@@ -47,7 +47,7 @@ Contributors
 * David Fuhrländer
 * "lensum"
 * Jan Launner
-* "henhuy"
+* Hendrik Huyskens
 * Ekaterina Zolotarevskaia
 * Sarah Berendes
 * Francesco Witte
