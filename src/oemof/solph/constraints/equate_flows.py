@@ -96,7 +96,7 @@ def equate_flows_by_keyword(
     flows = {}
     for n, keyword in enumerate([keyword1, keyword2]):
         flows[n] = []
-        for (i, o) in model.flows:
+        for i, o in model.flows:
             if hasattr(model.flows[i, o], keyword):
                 flows[n].append((i, o))
 
