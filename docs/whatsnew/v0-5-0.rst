@@ -1,0 +1,53 @@
+v0.5.0
+------
+
+
+API changes
+###########
+
+* Parts of the energy system graph are now clearly structured into `buses`, `components`, and `flows`.
+* Public and private API are be more distinguished now. ('_' signifies private, public API is defined in init files.)
+* Experimental code is now sitting in submodules called `experimental` (replaces "custom").
+* The flow arguments `summed_min`and `summed_max` now have the more descriptive names `full_load_time_min` and `full_load_time_max`.
+* Keyword arguments are now explicit. This will i.e. catch typos. Custom attributes can be added using the argument `custom_attributes`. Those will be passed down the class hierachy and can (possibly) be handled in parent classes.
+
+
+New features
+############
+
+* Add `inactivity_costs` as an option for `Flow`s. Inactivity costs is a cost for times where a Flow is not operated.
+* It is now possible to optimise the size of `Flow`s that have a status variable. Internally, this is done by the `InvestNonConvexFlowBlock` which provides the possibility to perform capacity optimization of assets considering their min/max loads, as well as their operation status.
+
+Documentation
+#############
+
+* Examples are added to the documentation.
+
+
+Testing
+#######
+
+* Discontinued usage of Nose, as it is `deprecated in Pytest <https://docs.pytest.org/en/stable/deprecations.html#support-for-tests-written-for-nose>`.
+
+
+Known issues
+############
+
+* The format of the examples could be improved.
+
+
+Contributors
+############
+
+* Patrik Schönfeldt
+* Uwe Krien
+* Saeed Sayadi
+* Pierre-François Duc
+* Johannes Röder
+* David Fuhrländer
+* "lensum"
+* Jan Launner
+* Hendrik Huyskens
+* Ekaterina Zolotarevskaia
+* Sarah Berendes
+* Francesco Witte

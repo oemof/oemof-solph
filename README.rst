@@ -1,9 +1,14 @@
-|tox-pytest| |tox-checks| |appveyor| |requires| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate| |docs| |requires| |packaging|
+|tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|version| |wheel| |supported-versions| |supported-implementations|
-|commits-since| |zenodo|
+|scrutinizer| |codacy| |codeclimate|
+
+|wheel| |packaging| |supported-versions|
+
+|docs| |zenodo|
+
+|version| |commits-since| |chat|
+
 
 ------------------------------
 
@@ -23,10 +28,6 @@
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
-
-.. |requires| image:: https://requires.io/github/oemof/oemof-solph/requirements.svg?branch=dev
-    :alt: Requirements Status
-    :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
@@ -60,24 +61,33 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.4/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.0/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.4.4...dev
+    :target: https://github.com/oemof/oemof-solph/compare/v0.5.0...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
-    :alt: DOI
+    :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
 
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
+.. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
+     :alt: matrix-chat
+     :target: https://matrix.to/#/#oemof:matrix.org
+
+
+.. figure:: https://raw.githubusercontent.com/oemof/oemof-solph/492e3f5a0dda7065be30d33a37b0625027847518/docs/_logo/logo_oemof_solph_FULL.svg
+    :align: center
+
+------------------------------
+
 ===========
 oemof.solph
 ===========
 
 **A model generator for energy system modelling and optimisation (LP/MILP)**
-
 
 .. contents::
     :depth: 2
@@ -94,10 +104,11 @@ This an organisational framework to bundle tools for energy (system) modelling.
 oemof-solph is a model generator for energy system modelling and optimisation.
 
 The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
-oemof meta package. Now you need to install ``oemof.solph`` separately, but
+oemof meta package. Now you need to install ``oemof.solph`` instead of ``oemof``, but
 everything else is still the same.
-Since v0.4.0. it is not possible to install just oemof, use
-``pip install oemof.solph`` instead.
+(Note: Since the oemof package refers to legacy versions before v0.4,
+it is not possible to install both, oemof and oemof.solph, at the same time.
+Just use ``pip install oemof.solph``.)
 
 Everybody is welcome to use and/or develop oemof.solph.
 Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
@@ -105,7 +116,7 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof repository to your own
-github account and make changes as described in the github guidelines: https://guides.github.com/activities/hello-world/
+github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
 If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
 
@@ -151,7 +162,7 @@ But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
-Check the solver installation by executing the test_installation example below (section `Installation test`).
+Check the solver installation by executing the test_installation example below (see section Installation Test).
 
 **Linux**
 
@@ -181,7 +192,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 

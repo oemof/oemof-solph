@@ -15,17 +15,17 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import custom
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import experimental as exp_bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.flows import Flow
+from oemof.solph.flows import experimental as exp_flow
 
 
 def test_lopf(solver="cbc"):
@@ -41,16 +41,16 @@ def test_lopf(solver="cbc"):
 
     logging.info("Create oemof.solph objects")
 
-    b_el0 = custom.ElectricalBus(label="b_0", v_min=-1, v_max=1)
+    b_el0 = exp_bus.ElectricalBus(label="b_0", v_min=-1, v_max=1)
 
-    b_el1 = custom.ElectricalBus(label="b_1", v_min=-1, v_max=1)
+    b_el1 = exp_bus.ElectricalBus(label="b_1", v_min=-1, v_max=1)
 
-    b_el2 = custom.ElectricalBus(label="b_2", v_min=-1, v_max=1)
+    b_el2 = exp_bus.ElectricalBus(label="b_2", v_min=-1, v_max=1)
 
     es.add(b_el0, b_el1, b_el2)
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
@@ -61,7 +61,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el1,
             output=b_el2,
             reactance=0.0001,
@@ -72,7 +72,7 @@ def test_lopf(solver="cbc"):
     )
 
     es.add(
-        custom.ElectricalLine(
+        exp_flow.ElectricalLine(
             input=b_el2,
             output=b_el0,
             reactance=0.0001,
@@ -113,7 +113,7 @@ def test_lopf(solver="cbc"):
     logging.info("Running lopf on 3-Node exmaple system")
     om.solve(solver=solver)
 
-    results = processing.results(om)
+    results = processing.results(om, remove_last_time_point=True)
 
     generators = views.node_output_by_type(results, Source)
 
@@ -124,24 +124,24 @@ def test_lopf(solver="cbc"):
 
     for key in generators_test_results.keys():
         logging.debug("Test genertor production of {0}".format(key))
-        eq_(
-            int(round(generators[key])),
-            int(round(generators_test_results[key])),
+        assert int(round(generators[key])) == int(
+            round(generators_test_results[key])
         )
 
-    eq_(
-        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"][0],
-        -40,
+    assert (
+        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"][0]
+        == -40
     )
 
-    eq_(
-        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"][0], 60
+    assert (
+        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"][0]
+        == 60
     )
 
-    eq_(
-        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"][0],
-        -20,
+    assert (
+        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"][0]
+        == -20
     )
 
     # objective function
-    eq_(round(processing.meta_results(om)["objective"]), 3200)
+    assert round(processing.meta_results(om)["objective"]) == 3200

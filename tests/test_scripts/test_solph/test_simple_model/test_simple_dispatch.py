@@ -16,17 +16,16 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Source
-from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
+from oemof.solph.components import Transformer
+from oemof.solph.flows import Flow
 
 
 def test_dispatch_example(solver="cbc", periods=24 * 5):
@@ -165,7 +164,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     # ################################ results ################################
 
     # generic result object
-    results = processing.results(om=optimization_model)
+    results = processing.results(model=optimization_model)
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.
@@ -191,4 +190,4 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     }
 
     for key in test_results.keys():
-        eq_(int(round(results[key])), int(round(test_results[key])))
+        assert int(round(results[key])) == int(round(test_results[key]))

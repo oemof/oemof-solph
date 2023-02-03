@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -35,51 +34,77 @@ def test_gen_chp():
     es = solph.EnergySystem(timeindex=idx)
 
     # resources
-    bgas = solph.Bus(label="bgas")
+    bgas = solph.buses.Bus(label="bgas")
+    es.add(bgas)
 
-    rgas = solph.Source(label="rgas", outputs={bgas: solph.Flow()})
-
-    # heat
-    bth = solph.Bus(label="bth")
-
-    source_th = solph.Source(
-        label="source_th", outputs={bth: solph.Flow(variable_costs=1000)}
+    es.add(
+        solph.components.Source(
+            label="rgas", outputs={bgas: solph.flows.Flow()}
+        )
     )
 
-    demand_th = solph.Sink(
-        label="demand_th",
-        inputs={bth: solph.Flow(fix=data["demand_th"], nominal_value=200)},
+    # heat
+    bth = solph.buses.Bus(label="bth")
+    es.add(bth)
+
+    es.add(
+        solph.components.Source(
+            label="source_th",
+            outputs={bth: solph.flows.Flow(variable_costs=1000)},
+        )
+    )
+
+    es.add(
+        solph.components.Sink(
+            label="demand_th",
+            inputs={
+                bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=200)
+            },
+        )
     )
 
     # power
-    bel = solph.Bus(label="bel")
+    bel = solph.buses.Bus(label="bel")
+    es.add(bel)
 
-    demand_el = solph.Sink(
-        label="demand_el",
-        inputs={bel: solph.Flow(variable_costs=data["price_el"])},
+    es.add(
+        solph.components.Sink(
+            label="demand_el",
+            inputs={bel: solph.flows.Flow(variable_costs=data["price_el"])},
+        )
     )
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    ccet = solph.components.GenericCHP(
-        label="combined_cycle_extraction_turbine",
-        fuel_input={
-            bgas: solph.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])
-        },
-        electrical_output={
-            bel: solph.Flow(
-                P_max_woDH=data["P_max_woDH"],
-                P_min_woDH=data["P_min_woDH"],
-                Eta_el_max_woDH=data["Eta_el_max_woDH"],
-                Eta_el_min_woDH=data["Eta_el_min_woDH"],
-            )
-        },
-        heat_output={bth: solph.Flow(Q_CW_min=data["Q_CW_min"])},
-        Beta=data["Beta"],
-        back_pressure=False,
+    es.add(
+        solph.components.GenericCHP(
+            label="combined_cycle_extraction_turbine",
+            fuel_input={
+                bgas: solph.flows.Flow(
+                    custom_attributes={
+                        "H_L_FG_share_max": data["H_L_FG_share_max"]
+                    }
+                )
+            },
+            electrical_output={
+                bel: solph.flows.Flow(
+                    custom_attributes={
+                        "P_max_woDH": data["P_max_woDH"],
+                        "P_min_woDH": data["P_min_woDH"],
+                        "Eta_el_max_woDH": data["Eta_el_max_woDH"],
+                        "Eta_el_min_woDH": data["Eta_el_min_woDH"],
+                    }
+                )
+            },
+            heat_output={
+                bth: solph.flows.Flow(
+                    custom_attributes={"Q_CW_min": data["Q_CW_min"]}
+                )
+            },
+            beta=data["beta"],
+            back_pressure=False,
+        )
     )
-
-    es.add(bgas, rgas, bth, source_th, demand_th, bel, demand_el, ccet)
 
     # create an optimization problem and solve it
     om = solph.Model(es)
@@ -99,4 +124,4 @@ def test_gen_chp():
     }
 
     for key in test_dict.keys():
-        eq_(int(round(data[key])), int(round(test_dict[key])))
+        assert int(round(data[key])) == int(round(test_dict[key]))

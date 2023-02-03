@@ -10,22 +10,20 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas
-from nose.tools import assert_raises
-from nose.tools import eq_
-from nose.tools import ok_
+import pytest
 from pandas.testing import assert_frame_equal
 from pandas.testing import assert_series_equal
 
-from oemof.solph import Bus
 from oemof.solph import EnergySystem
-from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Sink
-from oemof.solph import Transformer
 from oemof.solph import processing
 from oemof.solph import views
+from oemof.solph.buses import Bus
 from oemof.solph.components import GenericStorage
+from oemof.solph.components import Sink
+from oemof.solph.components import Transformer
+from oemof.solph.flows import Flow
 
 
 class TestParameterResult:
@@ -96,6 +94,8 @@ class TestParameterResult:
             param_results[(b_el2, demand)]["scalars"].sort_index(),
             pandas.Series(
                 {
+                    "bidirectional": False,
+                    "integer": False,
                     "nominal_value": 1,
                     "max": 1,
                     "min": 0,
@@ -117,16 +117,17 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         scalar_attributes = {
-            "integer": None,
+            "integer": False,
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
-            "summed_max": None,
-            "summed_min": None,
+            "bidirectional": False,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
             "max": 1,
             "min": 0,
-            "negative_gradient_ub": None,
-            "positive_gradient_ub": None,
+            "negative_gradient_limit": None,
+            "positive_gradient_limit": None,
             "variable_costs": 0,
             "flow": None,
             "values": None,
@@ -139,10 +140,7 @@ class TestParameterResult:
         sequences_attributes = {
             "fix": self.demand_values,
         }
-        default_sequences = ["fix"]
-        for attr in default_sequences:
-            if attr not in sequences_attributes:
-                sequences_attributes[attr] = [None]
+
         assert_frame_equal(
             param_results[(b_el2, demand)]["sequences"],
             pandas.DataFrame(sequences_attributes),
@@ -266,31 +264,33 @@ class TestParameterResult:
         )
 
         bel1_m = views.node(param_results, "b_el1", multiindex=True)
-        eq_(bel1_m["scalars"][("b_el1", "storage", "variable_costs")], 3)
+        assert bel1_m["scalars"][("b_el1", "storage", "variable_costs")] == 3
 
     def test_multiindex_sequences(self):
         results = processing.results(self.om)
         bel1 = views.node(results, "b_el1", multiindex=True)
-        eq_(int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()), 2875)
+        assert (
+            int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()) == 2875
+        )
 
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]
         self.mod.flow[trsf, bus, 5] = float("nan")
-        with assert_raises(ValueError):
+        with pytest.raises(ValueError):
             processing.results(self.mod)
 
     def test_duals(self):
         results = processing.results(self.om)
         bel = views.node(results, "b_el1", multiindex=True)
-        eq_(int(bel["sequences"]["b_el1", "None", "duals"].sum()), 48)
+        assert int(bel["sequences"]["b_el1", "None", "duals"].sum()) == 48
 
     def test_node_weight_by_type(self):
         results = processing.results(self.om)
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        eq_(round(float(storage_content.sum()), 6), 1437.500003)
+        assert round(float(storage_content.sum()), 6) == 1437.500003
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
@@ -300,15 +300,14 @@ class TestParameterResult:
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        eq_(int(transformer_output.sum()), int(compare.sum()))
+        assert int(transformer_output.sum()) == int(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)
         sink_input = views.node_input_by_type(results, node_type=Sink)
         compare = views.node(results, "demand_el", multiindex=True)
-        eq_(
-            int(sink_input.sum()),
-            int(compare["sequences"][("b_el2", "demand_el", "flow")].sum()),
+        assert int(sink_input.sum()) == int(
+            compare["sequences"][("b_el2", "demand_el", "flow")].sum()
         )
 
     def test_net_storage_flow(self):
@@ -316,36 +315,37 @@ class TestParameterResult:
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
+
         compare = views.node(results, "storage", multiindex=True)["sequences"]
-        eq_(
+
+        assert (
             (
-                (
-                    compare[("storage", "b_el2", "flow")]
-                    - compare[("b_el1", "storage", "flow")]
-                ).to_frame()
-                == storage_flow.values
-            ).all()[0],
-            True,
-        )
+                compare[("storage", "b_el2", "flow")]
+                - compare[("b_el1", "storage", "flow")]
+            )
+            .to_frame()
+            .fillna(0)
+            == storage_flow.values
+        ).all()[0]
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)
         view = views.node_output_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
 
     def test_input_by_type_view_empty(self):
         results = processing.results(self.om)
         view = views.node_input_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
 
     def test_net_storage_flow_empty(self):
         results = processing.results(self.om)
         view = views.net_storage_flow(results, node_type=Sink)
-        ok_(view is None)
+        assert view is None
         view2 = views.net_storage_flow(results, node_type=Flow)
-        ok_(view2 is None)
+        assert view2 is None
 
     def test_node_weight_by_type_empty(self):
         results = processing.results(self.om)
         view = views.node_weight_by_type(results, node_type=Flow)
-        ok_(view is None)
+        assert view is None
