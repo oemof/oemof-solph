@@ -38,7 +38,6 @@ import logging
 import os
 
 import pandas as pd
-from nose.tools import eq_
 from oemof.tools import economics
 
 from oemof import solph
@@ -212,4 +211,4 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
     )
 
     # Compare attributes before dump and after restore
-    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+    assert trsf_attr_before_dump == trsf_attr_after_restore

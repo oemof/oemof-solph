@@ -100,12 +100,12 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     """
     if flows is None:
         flows = {}
-        for (i, o) in om.flows:
+        for i, o in om.flows:
             if hasattr(om.flows[i, o], keyword):
                 flows[(i, o)] = om.flows[i, o]
 
     else:
-        for (i, o) in flows:
+        for i, o in flows:
             if not hasattr(flows[i, o], keyword):
                 raise AttributeError(
                     (

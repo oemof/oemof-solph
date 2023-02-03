@@ -29,7 +29,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.4.5",
+    version="0.5.0.beta2",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -78,7 +78,7 @@ setup(
     install_requires=[
         "blinker",
         "dill",
-        "numpy < 1.24",
+        "numpy",
         "pandas",
         "pyomo >= 6.0.0, < 7.0",
         "networkx",

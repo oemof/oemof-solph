@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from nose.tools import ok_
 from pyomo import environ as po
 
 from oemof.solph import EnergySystem
@@ -126,5 +125,5 @@ def test_add_constraints_example(solver="cbc", nologg=False):
 
     # solve and write results to dictionary
     # you may print the model with om.pprint()
-    ok_(om.solve(solver=solver))
+    assert om.solve(solver=solver)
     logging.info("Successfully finished.")

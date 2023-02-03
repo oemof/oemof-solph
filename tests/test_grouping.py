@@ -9,7 +9,6 @@ available from its original location oemof/tests/solph_tests.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import ok_
 from oemof.network.energy_system import EnergySystem as EnSys
 
 from oemof import solph as solph
@@ -18,7 +17,7 @@ from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 
 
 class TestsGrouping:
-    def setup(self):
+    def setup_method(self):
         self.es = EnSys(groupings=solph.GROUPINGS)
 
     def test_investment_flow_grouping(self):
@@ -62,9 +61,7 @@ class TestsGrouping:
             )
         )
 
-        ok_(
-            self.es.groups.get(InvestmentFlowBlock),
-            (
-                "Expected InvestmentFlow group to be nonempty.\n" + "Got: {}"
-            ).format(self.es.groups.get(InvestmentFlowBlock)),
+        assert self.es.groups.get(InvestmentFlowBlock), (
+            "Expected InvestmentFlow group to be nonempty.\n"
+            + "Got: {}".format(self.es.groups.get(InvestmentFlowBlock))
         )
