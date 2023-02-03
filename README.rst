@@ -1,13 +1,13 @@
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate| |requires|
+|scrutinizer| |codacy| |codeclimate|
 
 |wheel| |packaging| |supported-versions|
 
 |docs| |zenodo|
 
-|version| |commits-since| |meeting| |chat|
+|version| |commits-since| |chat|
 
 
 ------------------------------
