@@ -150,12 +150,20 @@ class GenericStorage(network.Node):
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
+        custom_attributes=None,
     ):
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-        super().__init__(label=label, inputs=inputs, outputs=outputs)
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            **custom_attributes,
+        )
         self.nominal_storage_capacity = nominal_storage_capacity
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
