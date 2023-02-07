@@ -71,8 +71,8 @@ class TestTransformerClass:
 
 
 def test_wrong_combination_invest_and_nominal_value():
-    msg = "Using the investment object the nominal_value"
-    with pytest.raises(ValueError, match=msg):
+    msg = "For backward compatibility, the option investment overwrites"
+    with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
 
 

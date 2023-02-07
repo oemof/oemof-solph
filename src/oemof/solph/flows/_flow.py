@@ -17,12 +17,14 @@ SPDX-License-Identifier: MIT
 
 """
 import math
+import numbers
 from collections.abc import Iterable
 from warnings import warn
 
 import numpy as np
 from oemof.network import network as on
 
+from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
 
 
@@ -121,9 +123,9 @@ class Flow(on.Edge):
         full_load_time_min=None,
         integer=False,
         bidirectional=False,
-        investment=None,
         nonconvex=None,
         # --- BEGIN: To be removed for versions >= v0.6 ---
+        investment=None,
         summed_max=None,
         summed_min=None,
         # --- END ---
@@ -136,16 +138,28 @@ class Flow(on.Edge):
         # populate with information afterwards when creating objects.
 
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        if investment is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option investment overwrites the option nominal_value."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_value is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_value = investment
+
         msg = (
-            "\nThe parameter 'summed_{0}' is deprecated and will be removed "
-            "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
-            "to avoid this warning and future problems. "
+            "\nThe parameter '{0}' is deprecated and will be removed "
+            + "in version v0.6.\nUse the parameter '{1}', "
+            + "to avoid this warning and future problems. "
         )
         if summed_max is not None:
-            warn(msg.format("max"), FutureWarning)
+            warn(msg.format("summed_max", "full_load_time_max"), FutureWarning)
             full_load_time_max = summed_max
         if summed_min is not None:
-            warn(msg.format("min"), FutureWarning)
+            warn(msg.format("summed_min", "full_load_time_min"), FutureWarning)
             full_load_time_min = summed_min
         # --- END ---
 
@@ -155,13 +169,19 @@ class Flow(on.Edge):
             for attribute, value in custom_attributes.items():
                 setattr(self, attribute, value)
 
+        self.nominal_value = None
+        self.investment = None
+
         infinite_error_msg = (
             "{} must be a finite value. Passing an infinite "
             "value is not allowed."
         )
-        if nominal_value is not None and not math.isfinite(nominal_value):
-            raise ValueError(infinite_error_msg.format("nominal_value"))
-        self.nominal_value = nominal_value
+        if isinstance(nominal_value, numbers.Real):
+            if not math.isfinite(nominal_value):
+                raise ValueError(infinite_error_msg.format("nominal_value"))
+            self.nominal_value = nominal_value
+        elif isinstance(nominal_value, Investment):
+            self.investment = nominal_value
 
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
@@ -169,7 +189,6 @@ class Flow(on.Edge):
         self.full_load_time_max = full_load_time_max
         self.full_load_time_min = full_load_time_min
         self.integer = integer
-        self.investment = investment
         self.nonconvex = nonconvex
         self.bidirectional = bidirectional
 
