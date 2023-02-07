@@ -17,6 +17,7 @@ SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 SPDX-License-Identifier: MIT
 
 """
+import numbers
 
 from oemof.network import network
 from pyomo.core.base.block import ScalarBlock
@@ -26,6 +27,7 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
+from warnings import warn
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
@@ -164,7 +166,29 @@ class GenericStorage(network.Node):
             outputs=outputs,
             **custom_attributes,
         )
-        self.nominal_storage_capacity = nominal_storage_capacity
+        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        if investment is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option investment overwrites the option nominal_value."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_storage_capacity is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_storage_capacity = investment
+        # --- END ---
+
+        self.nominal_storage_capacity = None
+        self.investment = None
+        self._invest_group = False
+        if isinstance(nominal_storage_capacity, numbers.Real):
+            self.nominal_storage_capacity = nominal_storage_capacity
+        elif isinstance(nominal_storage_capacity, Investment):
+            self.investment = investment
+            self._invest_group = True
+
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
         self.loss_rate = solph_sequence(loss_rate)
@@ -178,19 +202,16 @@ class GenericStorage(network.Node):
         )
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
-        self.investment = investment
         self.invest_relation_input_output = invest_relation_input_output
         self.invest_relation_input_capacity = invest_relation_input_capacity
         self.invest_relation_output_capacity = invest_relation_output_capacity
-        self._invest_group = isinstance(self.investment, Investment)
 
         # Check number of flows.
         self._check_number_of_flows()
         # Check for infeasible parameter combinations
         self._check_infeasible_parameter_combinations()
 
-        # Check attributes for the investment mode.
-        if self._invest_group is True:
+        if self._invest_group:
             self._check_invest_attributes()
 
     def _set_flows(self):
