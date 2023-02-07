@@ -47,7 +47,7 @@ def test_generic_storage_2():
     bel = Bus()
     with pytest.raises(
         AttributeError,
-        match="For backward compatibility, the option investment overwrites"
+        match="For backward compatibility, the option investment overwrites",
     ):
         components.GenericStorage(
             label="storage3",
