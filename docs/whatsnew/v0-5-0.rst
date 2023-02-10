@@ -5,6 +5,7 @@ v0.5.0 (February 3rd, 2023)
 API changes
 ###########
 
+* Clean definition of time indexes: You need N+1 points in time do define N time spans.
 * Parts of the energy system graph are now clearly structured into `buses`, `components`, and `flows`.
 * Public and private API are be more distinguished now. ('_' signifies private, public API is defined in init files.)
 * Experimental code is now sitting in submodules called `experimental` (replaces "custom").
