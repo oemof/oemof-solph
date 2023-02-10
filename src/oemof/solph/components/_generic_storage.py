@@ -32,7 +32,7 @@ from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class GenericStorage(network.Node):
+class GenericStorage(network.Component):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
