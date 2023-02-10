@@ -39,10 +39,12 @@ class Flow(on.Edge):
 
     Parameters
     ----------
-    nominal_value : numeric, :math:`P_{nom}`
-        The nominal value of the flow. If this value is set the corresponding
-        optimization variable of the flow object will be bounded by this value
-        multiplied with min(lower bound)/max(upper bound).
+    nominal_value : numeric, :math:`P_{nom}` or
+            :class:`Investment <oemof.solph.options.Investment>`
+        The nominal value of the flow, either fixed or as an investement
+        optimisation. If this value is set the corresponding optimization
+        variable of the flow object will be bounded by this value
+        multiplied by min(lower bound)/max(upper bound).
     variable_costs : numeric (iterable or scalar), default: 0, :math:`c`
         The costs associated with one unit of the flow per hour. The
         costs for each timestep (:math:`P_t \cdot c \cdot \delta(t)`)
@@ -61,7 +63,6 @@ class Flow(on.Edge):
     negative_gradient_limit : numeric (iterable, scalar or None)
             the normed *upper bound* on the negative difference
             (`flow[t-1] > flow[t]`) of two consecutive flow values.
-
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Upper bound on the summed flow expressed as the equivalent time that
         the flow would have to run at full capacity to yield the same sum. The
@@ -74,11 +75,6 @@ class Flow(on.Edge):
         limit.
     integer : boolean
         Set True to bound the flow values to integers.
-    investment : :class:`Investment <oemof.solph.options.Investment>`
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable rather than to the nominal_value. The nominal_value
-        should not be set (or set to None) if an investment object is used.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow

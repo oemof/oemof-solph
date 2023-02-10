@@ -42,8 +42,10 @@ class GenericStorage(network.Node):
 
     Parameters
     ----------
-    nominal_storage_capacity : numeric, :math:`E_{nom}`
-        Absolute nominal capacity of the storage
+    nominal_storage_capacity : numeric, :math:`E_{nom}` or
+            :class:`oemof.solph.options.Investment` object
+        Absolute nominal capacity of the storage, fixed value or
+        object describing parameter of investment optimisations.
     invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage:
@@ -85,12 +87,6 @@ class GenericStorage(network.Node):
         To set different values in every time step use a sequence.
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
-    investment : :class:`oemof.solph.options.Investment` object
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_storage_capacity. The
-        nominal_storage_capacity should not be set (or set to None) if an
-        investment object is used.
 
     Notes
     -----
