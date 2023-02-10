@@ -5,6 +5,9 @@ v0.5.1 (?)
 API changes
 ###########
 
+* Unify API for constant size and size investment. For both, `Flow` and
+  `GenericStorage`, the argument `investment` is now deprecated. Instead,
+  `nominal_value` and `nominal_storage_capacity` accept an `Investment` object.
 
 New features
 ############
@@ -29,4 +32,6 @@ Other changes
 
 Contributors
 ############
+
+* Patrik Schönfeldt
 
