@@ -18,6 +18,7 @@ SPDX-License-Identifier: MIT
 
 """
 import numbers
+from warnings import warn
 
 from oemof.network import network
 from pyomo.core.base.block import ScalarBlock
@@ -27,7 +28,6 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
-from warnings import warn
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
