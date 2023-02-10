@@ -16,7 +16,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -191,4 +190,4 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     }
 
     for key in test_results.keys():
-        eq_(int(round(results[key])), int(round(test_results[key])))
+        assert int(round(results[key])) == int(round(test_results[key]))

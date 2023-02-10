@@ -2,8 +2,7 @@
 
 """
 This is a collection of helper functions which work on their own and can be
-used by various classes. If there are too many helper-functions, they will
-be sorted in different modules.
+used by various classes.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Caroline Möller
@@ -47,7 +46,8 @@ def flatten(d, parent_key="", sep="_"):
     See: https://stackoverflow.com/questions/6027558/
          flatten-nested-python-dictionaries-compressing-keys
 
-    d : dictionary
+    d : (dictionary)
+    parent_key : (do not use this, used internally for recursion)
     sep : separator for flattening keys
 
     Returns

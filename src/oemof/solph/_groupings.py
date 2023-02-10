@@ -5,21 +5,21 @@
 If you want to use solph on an energy system, you need to create it with these
 groupings specified like this:
 
-    .. code-block: python
+    .. code-block:: python
 
-    from oemof.network import EnergySystem
-    import solph
+        from oemof.network import EnergySystem
+        import oemof.solph as solph
 
-    energy_system = EnergySystem(groupings=solph.GROUPINGS)
+        energy_system = EnergySystem(groupings=solph.GROUPINGS)
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
-
 """
 
 from oemof.network import groupings as groupings

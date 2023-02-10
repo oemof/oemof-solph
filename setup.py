@@ -29,7 +29,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.4.5.dev0",
+    version="0.5.1.dev0",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -79,14 +79,22 @@ setup(
         "blinker",
         "dill",
         "numpy",
-        "pandas",
+        "pandas >= 1.5.3",
         "pyomo >= 6.0.0, < 7.0",
         "networkx",
         "oemof.tools >= 0.4.2",
-        "oemof.network",
+        "oemof.network >= 0.5.0a1",
     ],
     extras_require={
-        "dev": ["pytest", "sphinx", "sphinx_rtd_theme"],
+        "dev": [
+            "pytest",
+            "sphinx",
+            "sphinx_rtd_theme",
+            "nbformat",
+            "termcolor",
+            "matplotlib",
+        ],
+        "examples": ["matplotlib"],
         "dummy": ["oemof"],
     },
     entry_points={

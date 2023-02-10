@@ -68,8 +68,22 @@ class ExtractionTurbineCHP(Converter):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """  # noqa: E501
 
-    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        conversion_factor_full_condensation,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            conversion_factors=conversion_factors,
+            custom_attributes=custom_attributes,
+        )
         self.conversion_factor_full_condensation = {
             k: solph_sequence(v)
             for k, v in conversion_factor_full_condensation.items()
@@ -80,53 +94,78 @@ class ExtractionTurbineCHP(Converter):
 
 
 class ExtractionTurbineCHPBlock(ScalarBlock):
-    r"""Block for the linear relation of nodes with type
+    r"""Block for all instances of
     :class:`~oemof.solph.components.ExtractionTurbineCHP`
 
-    **The following two constraints are created:**
+    **Variables**
+
+    The following variables are used:
+
+    * :math:`\dot H_{Fuel}`
+
+        Fuel input flow, represented in code as `flow[i,n,t]`
+
+    * :math:`P_{el}`
+
+        Electric power outflow, represented in code as
+        `flow[n, main_output, t]`
+
+    * :math:`\dot Q_{th}`
+
+        Thermal output flow, represented in code as
+        `flow[n, tapped_output, t]`
+
+    **Parameters**
+
+    The following parameters are created as attributes of
+    :attr:`om.ExtractionTurbineCHP`:
+
+    * :math:`\eta_{el,woExtr}`
+
+        Electric efficiency without heat extraction, represented in code as
+        `conversion_factor_full_condensation[n, t]`
+
+    * :math:`\eta_{el,maxExtr}`
+
+        Electric efficiency with maximal heat extraction, represented in code
+        as `conversion_factors[main_output][n, t]`
+
+    * :math:`\eta_{th,maxExtr}`
+
+        Thermal efficiency with maximal heat extraction, represented in code
+        as `conversion_factors[tapped_output][n, t]`
+
+    **Constraints**
+
+    The following constraints are created for all
+    instances of :class:`oemof.solph.components.ExtractionTurbineCHP`:
 
     .. _ETCHP-equations:
 
         .. math::
             &
             (1)\dot H_{Fuel}(t) =
-               \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
-                 {\eta_{el,woExtr}(t)} \\
+                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
+                    {\eta_{el,woExtr}(t)} \\
             &
-            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b =
-               \dot Q_{th}(t) \cdot
-               \frac{\eta_{el,maxExtr}(t)}
-                 {\eta_{th,maxExtr}(t)}
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
 
-    where :math:`\beta` is defined as:
+    where:
 
-         .. math::
-            \beta(t) = \frac{\eta_{el,woExtr}(t) -
+    .. math::
+
+        \beta(t) = \frac{\eta_{el,woExtr}(t) -
             \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
-    where the first equation is the result of the relation between the input
+    and:
+
+    .. math::
+
+        C_b = \frac{\eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
+
+    The first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
-    output flows relate to each other, and the symbols used are defined as
-    follows (with Variables (V) and Parameters (P)):
-
-    ========================= ============================================ ==== =========
-    symbol                    attribute                                    type explanation
-    ========================= ============================================ ==== =========
-    :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
-
-    :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
-
-    :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
-
-    :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
-
-    :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
-                                                                                        without heat extraction
-    :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
-                                                                                        with max heat extraction
-    :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
-                                                                                        maximal heat extraction
-    ========================= ============================================ ==== =========
+    output flows relate to each other.
 
     """  # noqa: E501
 

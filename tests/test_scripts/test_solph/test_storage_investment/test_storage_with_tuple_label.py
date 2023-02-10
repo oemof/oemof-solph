@@ -39,8 +39,6 @@ import os
 from collections import namedtuple
 
 import pandas as pd
-from nose.tools import eq_
-from oemof.network.network import Node
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -56,19 +54,17 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
 
 def test_label():
     my_label = Label("arg", 5, None)
-    eq_(str(my_label), "arg_5_None")
-    eq_(repr(my_label), "Label(tag1='arg', tag2=5, tag3=None)")
+    assert str(my_label) == "arg_5_None"
+    assert repr(my_label) == "Label(tag1='arg', tag2=5, tag3=None)"
 
 
 def test_tuples_as_labels_example(
     filename="storage_investment.csv", solver="cbc"
 ):
-
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 
     energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -76,67 +72,84 @@ def test_tuples_as_labels_example(
     # Buses
     bgas = solph.buses.Bus(label=Label("bus", "natural_gas", None))
     bel = solph.buses.Bus(label=Label("bus", "electricity", ""))
+    energysystem.add(bgas, bel)
 
     # Sinks
-    solph.components.Sink(
-        label=Label("sink", "electricity", "excess"),
-        inputs={bel: solph.flows.Flow()},
+    energysystem.add(
+        solph.components.Sink(
+            label=Label("sink", "electricity", "excess"),
+            inputs={bel: solph.flows.Flow()},
+        )
     )
 
-    solph.components.Sink(
-        label=Label("sink", "electricity", "demand"),
-        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+    energysystem.add(
+        solph.components.Sink(
+            label=Label("sink", "electricity", "demand"),
+            inputs={
+                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+            },
+        )
     )
 
     # Sources
-    solph.components.Source(
-        label=Label("source", "natural_gas", "commodity"),
-        outputs={
-            bgas: solph.flows.Flow(
-                nominal_value=194397000 * 400 / 8760, full_load_time_max=1
-            )
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("source", "natural_gas", "commodity"),
+            outputs={
+                bgas: solph.flows.Flow(
+                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                )
+            },
+        )
     )
 
-    solph.components.Source(
-        label=Label("renewable", "electricity", "wind"),
-        outputs={
-            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("renewable", "electricity", "wind"),
+            outputs={
+                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+            },
+        )
     )
 
-    solph.components.Source(
-        label=Label("renewable", "electricity", "pv"),
-        outputs={
-            bel: solph.flows.Flow(
-                fix=data["pv"],
-                nominal_value=582000,
-            )
-        },
+    energysystem.add(
+        solph.components.Source(
+            label=Label("renewable", "electricity", "pv"),
+            outputs={
+                bel: solph.flows.Flow(
+                    fix=data["pv"],
+                    nominal_value=582000,
+                )
+            },
+        )
     )
 
     # Converter
-    solph.components.Converter(
-        label=Label("pp", "electricity", "natural_gas"),
-        inputs={bgas: solph.flows.Flow()},
-        outputs={
-            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
-        },
-        conversion_factors={bel: 0.58},
+    energysystem.add(
+        solph.components.Converter(
+            label=Label("pp", "electricity", "natural_gas"),
+            inputs={bgas: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+            },
+            conversion_factors={bel: 0.58},
+        )
     )
 
     # Investment storage
-    solph.components.GenericStorage(
-        label=Label("storage", "electricity", "battery"),
-        nominal_storage_capacity=204685,
-        inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        outputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
+    energysystem.add(
+        solph.components.GenericStorage(
+            label=Label("storage", "electricity", "battery"),
+            nominal_storage_capacity=204685,
+            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+        )
     )
 
     # Solve model
@@ -188,21 +201,21 @@ def test_tuples_as_labels_example(
     }
 
     for key in stor_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(stor_invest_dict[key])))
+        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
 
     # Solver results
-    eq_(str(meta["solver"]["Termination condition"]), "optimal")
-    eq_(meta["solver"]["Error rc"], 0)
-    eq_(str(meta["solver"]["Status"]), "ok")
+    assert str(meta["solver"]["Termination condition"]) == "optimal"
+    assert meta["solver"]["Error rc"] == 0
+    assert str(meta["solver"]["Status"]) == "ok"
 
     # Problem results
-    eq_(int(meta["problem"]["Lower bound"]), 37819254)
-    eq_(int(meta["problem"]["Upper bound"]), 37819254)
-    eq_(meta["problem"]["Number of variables"], 281)
-    eq_(meta["problem"]["Number of constraints"], 163)
-    eq_(meta["problem"]["Number of nonzeros"], 116)
-    eq_(meta["problem"]["Number of objectives"], 1)
-    eq_(str(meta["problem"]["Sense"]), "minimize")
+    assert int(meta["problem"]["Lower bound"]) == 37819254
+    assert int(meta["problem"]["Upper bound"]) == 37819254
+    assert meta["problem"]["Number of variables"] == 281
+    assert meta["problem"]["Number of constraints"] == 163
+    assert meta["problem"]["Number of nonzeros"] == 116
+    assert meta["problem"]["Number of objectives"] == 1
+    assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    eq_(round(meta["objective"]), 37819254)
+    assert round(meta["objective"]) == 37819254

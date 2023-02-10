@@ -2,7 +2,7 @@
 
 """Modules for providing convenient views for solph results.
 
-Information about the possible usage is provided within the examples.
+See examples for to learn about the possible usage of the provided functions.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

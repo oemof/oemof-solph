@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.bus
-
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
@@ -31,7 +29,7 @@ class Bus(on.Bus):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.buses.bus.BusBlock`
+     * :py:class:`~oemof.solph.buses._bus.BusBlock`
 
     """
 
