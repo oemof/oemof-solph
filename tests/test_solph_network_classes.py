@@ -70,6 +70,16 @@ class TestTransformerClass:
         assert trfr.inputs == {}
 
 
+def test_transformer_wrapper():
+    with pytest.warns(FutureWarning):
+        solph.components.Transformer()
+
+
+def test_offset_transformer_wrapper():
+    with pytest.warns(FutureWarning):
+        solph.components.OffsetTransformer(inputs={}, outputs={})
+
+
 def test_wrong_combination_invest_and_nominal_value():
     msg = "Using the investment object the nominal_value"
     with pytest.raises(ValueError, match=msg):

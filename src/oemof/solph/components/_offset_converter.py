@@ -17,6 +17,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from warnings import warn
+
 from oemof.network import network
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
@@ -101,6 +103,34 @@ class OffsetConverter(network.Transformer):
 
     def constraint_group(self):
         return OffsetConverterBlock
+
+
+# --- BEGIN: To be removed for versions >= v0.6 ---
+class OffsetTransformer(OffsetConverter):
+    def __init__(
+        self,
+        inputs,
+        outputs,
+        label=None,
+        coefficients=None,
+        custom_attributes=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            coefficients=coefficients,
+            custom_attributes=custom_attributes,
+        )
+        warn(
+            "solph.components.OffsetTransformer has been renamed to"
+            " solph.components.OffsetConverter. The transitional wrapper"
+            " will be deleted in the future.",
+            FutureWarning,
+        )
+
+
+# --- END ---
 
 
 class OffsetConverterBlock(ScalarBlock):
