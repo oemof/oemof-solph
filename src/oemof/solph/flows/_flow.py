@@ -194,13 +194,6 @@ class Flow(on.Edge):
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
 
-        # Checking for impossible attribute combinations
-        if self.investment and self.nominal_value is not None:
-            raise ValueError(
-                "Using the investment object the nominal_value"
-                " has to be set to None."
-            )
-
         need_nominal_value = [
             "fix",
             "full_load_time_max",
