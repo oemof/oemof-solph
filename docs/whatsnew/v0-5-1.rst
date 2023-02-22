@@ -17,6 +17,8 @@ Documentation
 Bug fixes
 #########
 
+* Fixed error when calling `oemof_installation_test` as console script
+
 
 Testing
 #######
@@ -29,4 +31,6 @@ Other changes
 
 Contributors
 ############
+
+* Tobi Rohrer
 
