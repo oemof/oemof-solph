@@ -36,3 +36,4 @@ Authors
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien
+* Tobi Rohrer
