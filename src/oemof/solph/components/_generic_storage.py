@@ -32,7 +32,7 @@ from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class GenericStorage(network.Node):
+class GenericStorage(network.Component):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
@@ -150,12 +150,20 @@ class GenericStorage(network.Node):
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
+        custom_attributes=None,
     ):
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-        super().__init__(label=label, inputs=inputs, outputs=outputs)
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            **custom_attributes,
+        )
         self.nominal_storage_capacity = nominal_storage_capacity
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
@@ -899,7 +907,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         def _balanced_storage_rule(block, n):
             return (
-                block.storage_content[n, m.TIMESTEPS[-1]]
+                block.storage_content[n, m.TIMESTEPS.at(-1)]
                 == block.init_content[n]
             )
 

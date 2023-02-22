@@ -30,9 +30,9 @@ Authors
 * Lluis Millet
 * Martin Soethe
 * Patrik Schönfeldt
+* Pierre-François Duc
 * Saeed Sayadi
 * Sarah Berendes
-* Pierre-François Duc
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien

@@ -31,10 +31,10 @@ extensions = [
 source_suffix = ".rst"
 master_doc = "index"
 project = "oemof.solph"
-year = "2014-2021"
+year = "2014-2022"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.4.5.dev0"
+version = release = "0.5.1.dev0"
 
 pygments_style = "trac"
 templates_path = ["."]
@@ -64,7 +64,11 @@ nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
-linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
+linkcheck_ignore = [
+    r"https://requires.io/.*",
+    r"https://matrix.to/*",
+    r"https://forum.openmod-initiative.org/*",
+] + (
     [
         r"https://github.com/oemof/oemof-solph/issues/*",
         r"https://github.com/oemof/oemof-solph/pull/*",

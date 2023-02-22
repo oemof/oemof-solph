@@ -8,6 +8,7 @@ source =
     tests
 parallel = true
 omit = */experimental/*
+       *test*
 
 [report]
 show_missing = true

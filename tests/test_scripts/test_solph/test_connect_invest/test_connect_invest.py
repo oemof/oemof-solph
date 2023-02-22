@@ -14,7 +14,6 @@ import logging
 import os
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -139,4 +138,6 @@ def test_connect_invest():
     }
 
     for key in connect_invest_dict.keys():
-        eq_(int(round(my_results[key])), int(round(connect_invest_dict[key])))
+        assert int(round(my_results[key])) == int(
+            round(connect_invest_dict[key])
+        )

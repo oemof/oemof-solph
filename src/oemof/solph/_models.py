@@ -369,7 +369,7 @@ class Model(BaseModel):
         indexed by FLOWS and TIMESTEPS."""
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
-        for (o, i) in self.FLOWS:
+        for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:

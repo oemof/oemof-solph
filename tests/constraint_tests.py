@@ -16,8 +16,6 @@ from os import path as ospath
 
 import pandas as pd
 import pytest
-from nose.tools import assert_raises
-from nose.tools import eq_
 
 from oemof import solph
 
@@ -36,7 +34,7 @@ class TestsConstraint:
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
 
-    def setup(self):
+    def setup_method(self):
         self.energysystem = solph.EnergySystem(
             groupings=solph.GROUPINGS, timeindex=self.date_time_index
         )
@@ -106,7 +104,7 @@ class TestsConstraint:
                         + 1
                         for nri in negative_result_indices
                     ]
-                    for (start, end) in zip(
+                    for start, end in zip(
                         equation_start_indices, negative_result_indices
                     ):
                         for n in range(start, end):
@@ -123,9 +121,7 @@ class TestsConstraint:
                 expected = normalize_to_positive_results(expected)
                 generated = normalize_to_positive_results(generated)
 
-                eq_(
-                    generated,
-                    expected,
+                assert generated == expected, (
                     "Failed matching expected with generated lp file:\n"
                     + "\n".join(
                         unified_diff(
@@ -680,6 +676,23 @@ class TestsConstraint:
 
         self.compare_lp_files("linear_transformer_chp_invest.lp")
 
+    def test_link(self):
+        bel0 = solph.buses.Bus(label="bel0")
+        bel1 = solph.buses.Bus(label="bel1")
+
+        link = solph.components.experimental.Link(
+            label="link",
+            inputs={
+                bel0: solph.Flow(nominal_value=4),
+                bel1: solph.Flow(nominal_value=2),
+            },
+            outputs={bel0: solph.Flow(), bel1: solph.Flow()},
+            conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9},
+        )
+        self.energysystem.add(bel0, bel1, link)
+
+        self.compare_lp_files("link.lp")
+
     def test_variable_chp(self):
         """ """
         bel = solph.buses.Bus(label="electricityBus")
@@ -879,8 +892,7 @@ class TestsConstraint:
 
     def test_flow_without_emission_for_emission_constraint(self):
         """ """
-
-        def define_emission_limit():
+        with pytest.raises(AttributeError):
             bel = solph.buses.Bus(label="electricityBus")
             source1 = solph.components.Source(
                 label="source1",
@@ -898,8 +910,6 @@ class TestsConstraint:
             self.energysystem.add(bel, source1, source2)
             om = self.get_om()
             solph.constraints.emission_limit(om, om.flows, limit=777)
-
-        assert_raises(AttributeError, define_emission_limit)
 
     def test_flow_without_emission_for_emission_constraint_no_error(self):
         """ """
@@ -962,6 +972,49 @@ class TestsConstraint:
         )
 
         self.compare_lp_files("connect_investment.lp", my_om=om)
+
+    def test_equate_flows_constraint(self):
+        """Testing the equate_flows function in the constraint module."""
+        bus1 = solph.buses.Bus(label="Bus1")
+        sink = solph.components.Sink(
+            label="Sink",
+            inputs={
+                bus1: solph.flows.Flow(
+                    nominal_value=300,
+                    variable_costs=2,
+                    custom_attributes={"outgoing_flow": True},
+                )
+            },
+        )
+        source1 = solph.components.Source(
+            label="Source1",
+            outputs={
+                bus1: solph.flows.Flow(
+                    nominal_value=400,
+                    variable_costs=2,
+                    custom_attributes={"incoming_flow": True},
+                )
+            },
+        )
+        source2 = solph.components.Source(
+            label="Source2",
+            outputs={
+                bus1: solph.flows.Flow(
+                    nominal_value=200,
+                    variable_costs=10,
+                    custom_attributes={"incoming_flow": True},
+                )
+            },
+        )
+        self.energysystem.add(bus1, sink, source1, source2)
+        om = self.get_om()
+        solph.constraints.equate_flows_by_keyword(
+            om,
+            "incoming_flow",
+            "outgoing_flow",
+            2,
+        )
+        self.compare_lp_files("equate_flows.lp", my_om=om)
 
     def test_gradient(self):
         """Testing gradient constraints and costs."""

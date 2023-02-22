@@ -70,10 +70,6 @@ class Flow(on.Edge):
         the flow would have to run at full capacity to yield the same sum. The
         value will be multiplied with the nominal_value to get the absolute
         limit.
-    fixed : boolean
-        Boolean value indicating if a flow is fixed during the optimization
-        problem to its ex-ante set value. Used in combination with the
-        :attr:`fix`.
     integer : boolean
         Set True to bound the flow values to integers.
     investment : :class:`Investment <oemof.solph.options.Investment>`

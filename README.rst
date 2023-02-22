@@ -1,13 +1,13 @@
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate| |requires|
+|scrutinizer| |codacy| |codeclimate|
 
 |wheel| |packaging| |supported-versions|
 
 |docs| |zenodo|
 
-|version| |commits-since| |meeting| |chat|
+|version| |commits-since| |chat|
 
 
 ------------------------------
@@ -28,10 +28,6 @@
 .. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
     :alt: AppVeyor Build Status
     :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
-
-.. |requires| image:: https://img.shields.io/requires/github/oemof/oemof-solph/dev
-     :target: https://requires.io/github/oemof/oemof-solph/requirements/?branch=dev
-     :alt: Requirements Status
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
@@ -65,9 +61,9 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.4.4/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.0/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.4.4...dev
+    :target: https://github.com/oemof/oemof-solph/compare/v0.5.0...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
@@ -76,10 +72,6 @@
 .. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
     :alt: Scrutinizer Status
     :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
-
-.. |meeting| image:: https://img.shields.io/date/1667998800?color=%23094714&label=Next%20meeting&logoColor=%230947ff
-     :alt: Relative date
-     :target: https://github.com/oemof/oemof/issues/100
 
 .. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat

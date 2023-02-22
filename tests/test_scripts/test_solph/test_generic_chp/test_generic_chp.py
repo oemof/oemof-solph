@@ -15,7 +15,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -125,4 +124,4 @@ def test_gen_chp():
     }
 
     for key in test_dict.keys():
-        eq_(int(round(data[key])), int(round(test_dict[key])))
+        assert int(round(data[key])) == int(round(test_dict[key]))
