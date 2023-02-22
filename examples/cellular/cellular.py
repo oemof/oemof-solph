@@ -46,8 +46,8 @@ demand_2 = [10] * n_periods
 demand_3 = [10] * n_periods
 
 pv_1 = [10] * n_periods
-pv_2 = [400] * n_periods
-pv_3 = [45] * n_periods
+pv_2 = [10] * n_periods
+pv_3 = [60] * n_periods
 
 bus_el = buses.Bus(label="bus_el")
 bus_el_1 = buses.Bus(label="bus_el_1")
@@ -60,7 +60,8 @@ ec2.add(bus_el_2)
 ec3.add(bus_el_3)
 
 source_es = cmp.Source(
-    label="source_es", outputs={bus_el: flows.Flow(variable_costs=100)}
+    label="source_es",
+    outputs={bus_el: flows.Flow(variable_costs=100, nominal_value=1, max=50)},
 )
 es.add(source_es)
 
@@ -170,6 +171,13 @@ def link_connectors(model, linkages):
         both directions. See equation (x) for usage of loss_factor.
     """
     # TODO: maybe move this into the CellularModel class to hide it from the user
+    # TODO: this creates a problem if one CellConnector output is connected to
+    # multiple CellConnector inputs. In this case, all of the CellConnector
+    # inputs would receive the same amount of energy from the CellConnector
+    # outputs, and thus, energy would be created from thin air (also, it leads
+    # to infeasibilities, as this is not the intended behaviour).
+    # Maybe, additional variables between the inputs and outputs (i.e.
+    # belonging to the block containing the cells) could fix this problem?
 
     # block for new connections
     connection_block = po.Block()
@@ -219,8 +227,8 @@ def link_connectors(model, linkages):
 
 pairings = {
     (cc_es, cc_ec1, 0.5),
-    (cc_ec1, cc_ec2, 0.5),
-    (cc_ec1, cc_ec3, 0.5),
+    (cc_ec1, cc_ec2, 0.2),
+    (cc_ec1, cc_ec3, 0.1),
 }
 link_connectors(cmodel, pairings)
 # link_connectors(cmodel, cc_es, cc_ec1)
@@ -236,5 +244,6 @@ cmodel.write(
     "D:\solph-cellular\cmodel.lp", io_options={"symbolic_solver_labels": True}
 )
 results = processing.results(cmodel)
+views.node(results, "cc_ec1")["sequences"]
 
 # %%

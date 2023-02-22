@@ -30,6 +30,8 @@ class CellConnector(network.Transformer):
         Maximum allowed flow value in a timestep (in either direction)
     """
 
+    # TODO rename inputs and outputs to inflows and outflows to make it clearer what they do
+
     def __init__(
         self, inputs, outputs, max_flow, label=None, custom_attributes=None
     ):
@@ -115,7 +117,7 @@ class CellConnectorBlock(ScalarBlock):
         def _input_flow_rule(block, n, t):
             lhs = block.input_flow[n, t]
             # rhs = m.flow[list(n.inputs.keys())[0], n, t]
-            rhs = sum([m.flow[i, n, t] for i in list(n.inputs.keys())])
+            rhs = sum([m.flow[n, i, t] for i in list(n.inputs.keys())])
             return lhs == rhs
 
         self.input_flow_rule = Constraint(
@@ -125,7 +127,7 @@ class CellConnectorBlock(ScalarBlock):
         # map output flow to internal variable
         def _output_flow_rule(block, n, t):
             lhs = block.output_flow[n, t]
-            rhs = m.flow[n, list(n.outputs.keys())[0], t]
+            rhs = m.flow[list(n.outputs.keys())[0], n, t]
             # rhs = sum([m.flow[n, o, t] for o in list(n.outputs.keys())])
             return lhs == rhs
 
