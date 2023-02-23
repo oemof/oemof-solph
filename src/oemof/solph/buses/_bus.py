@@ -21,7 +21,7 @@ from pyomo.core.base.block import ScalarBlock
 
 
 class Bus(on.Bus):
-    """A balance object. Every node has to be connected to BusBlock.
+    """A balance object. Every component has to be connected to buses.
 
     The sum of all inputs of a Bus object must equal the sum of all outputs
     within one time step.
