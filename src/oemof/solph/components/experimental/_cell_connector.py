@@ -21,19 +21,24 @@ class CellConnector(network.Transformer):
     Parameters
     ----------
     inputs: dict
-        Key-value pairs, where key is the bus and value the energy flow from
-        the external grid or parent cell into this energy cell.
+        Key-value pair, where key is the bus and value the energy flow from
+        the external grid or parent cell into this energy cell. Should only
+        contain a single key-value pair!
     outputs: dict
-        Key-value pairs, where key is the bus and value the energy flow from
-        the energy cell to the external grid or parent cell.
-    max_flow: numeric
-        Maximum allowed flow value in a timestep (in either direction)
+        Key-value pair, where key is the bus and value the energy flow from
+        the energy cell to the external grid or parent cell. Should only
+        contain a single key-value pair!
+    max_power: numeric
+        Numeric value indicating the maximum power from or to the grid.
+        If a `max` value is set in the `inputs` or `output` flows as well,
+        the lower value will be given preference.
     """
 
     # TODO rename inputs and outputs to inflows and outflows to make it clearer what they do
+    # TODO enable max_power to be an iterable as well (sequence)
 
     def __init__(
-        self, inputs, outputs, max_flow, label=None, custom_attributes=None
+        self, inputs, outputs, max_power, label=None, custom_attributes=None
     ):
         # TODO: extend the input/output handling to represent multiple commodities (electricity, gas, heat, ...)
 
@@ -42,23 +47,22 @@ class CellConnector(network.Transformer):
             custom_attributes = {}
         super().__init__(label, **custom_attributes)
 
+        # TODO: raise Warning if more than one key in inputs or outputs
+
         # input mapping
-        # TODO: Check if this does what it should
-        # usually, the output of the connected bus is updated like so:
-        #
-        # for bus, flow in self.inputs.items():
-        #    bus.outputs.update({self: flow})
-        #
-        # this resulted in an infeasible model, because of the bus_balance rule
         self.inputs.update(inputs)
 
         # output mapping
         self.outputs.update(outputs)
 
-        # max_flow mapping
-        # TODO: can this be deleted? The maximum of the Flow can be set
-        # in the flow instance. import-export constraint must be reformulated.
-        self.max_flow = max_flow
+        # set maximum power
+        self.max_power = max_power
+
+        # connected input bus
+        self.input_bus = list(inputs.keys())[0]
+
+        # connected output bus
+        self.output_bus = list(outputs.keys())[0]
 
     def constraint_group(self):
         """
@@ -81,7 +85,7 @@ class CellConnectorBlock(ScalarBlock):
 
     def _create(self, group=None):
         """
-        Create the constriants for CellConnectorBlock
+        Create the constraints for CellConnectorBlock
 
         Parameters
         ----------
@@ -112,8 +116,6 @@ class CellConnectorBlock(ScalarBlock):
         self.Y_exp = Var(self.CELLCONNECTORS, m.TIMESTEPS, within=Binary)
 
         # map input flow to internal variable
-        # TODO: make this mapping safe for multi-flow inputs
-        # already added, just arm it
         def _input_flow_rule(block, n, t):
             lhs = block.input_flow[n, t]
             # rhs = m.flow[list(n.inputs.keys())[0], n, t]
@@ -127,8 +129,8 @@ class CellConnectorBlock(ScalarBlock):
         # map output flow to internal variable
         def _output_flow_rule(block, n, t):
             lhs = block.output_flow[n, t]
-            rhs = m.flow[list(n.outputs.keys())[0], n, t]
-            # rhs = sum([m.flow[n, o, t] for o in list(n.outputs.keys())])
+            rhs = sum([m.flow[o, n, t] for o in list(n.outputs.keys())])
+            # rhs = m.flow[list(n.outputs.keys())[0], n, t]
             return lhs == rhs
 
         self.output_flow_rule = Constraint(
@@ -136,10 +138,12 @@ class CellConnectorBlock(ScalarBlock):
         )
 
         # rule for maximum input (contains input.output restriction)
-        # TODO: reformulate this, so n.max_flow is not necessary
+        # TODO: find a way to prevent usage of max_power
+        # Maybe using flows between the CellConnectors could alleviate this
+        # and other problems?
         def _max_input_rule(block, n, t):
             lhs = block.input_flow[n, t]
-            rhs = (1 - block.Y_exp[n, t]) * n.max_flow
+            rhs = (1 - block.Y_exp[n, t]) * n.max_power
             return lhs <= rhs
 
         self.max_input_rule = Constraint(
@@ -148,9 +152,11 @@ class CellConnectorBlock(ScalarBlock):
 
         def _max_output_rule(block, n, t):
             lhs = block.output_flow[n, t]
-            rhs = block.Y_exp[n, t] * n.max_flow
+            rhs = block.Y_exp[n, t] * n.max_power
             return lhs <= rhs
 
         self.max_output_rule = Constraint(
             self.CELLCONNECTORS, m.TIMESTEPS, rule=_max_output_rule
         )
+
+        # TODO: add objective function term. Cost calculation might be a major issue!

@@ -104,40 +104,59 @@ ec3.add(pv_source_3)
 # add the grid connectors to the cells
 ###########################################################################
 
-# TODO: Enabe energy-type specific input and output flows?
+# Each cell needs a CellConnector object for each connection with another cell.
+# So if Cell1 and Cell2 should be connected, each one of them needs one
+# CellConnector object.
 
-
-cc_es = CellConnector(
-    label="cc_es",
+# CellConnector for es
+cc_es_ec1 = CellConnector(
+    label="cc_es_ec1",
     inputs={bus_el: flows.Flow()},
     outputs={bus_el: flows.Flow()},
-    max_flow=10000,
+    max_power=10000,
 )
-es.add(cc_es)
+es.add(cc_es_ec1)
 
-cc_ec1 = CellConnector(
-    label="cc_ec1",
+# CellConnectors for ec1
+cc_ec1_es = CellConnector(
+    label="cc_ec1_es",
     inputs={bus_el_1: flows.Flow()},
     outputs={bus_el_1: flows.Flow()},
-    max_flow=10000,
+    max_power=10000,
 )
-ec1.add(cc_ec1)
 
-cc_ec2 = CellConnector(
-    label="cc_ec2",
+cc_ec1_ec2 = CellConnector(
+    label="cc_ec1_ec2",
+    inputs={bus_el_1: flows.Flow()},
+    outputs={bus_el_1: flows.Flow()},
+    max_power=10000,
+)
+
+cc_ec1_ec3 = CellConnector(
+    label="cc_ec1_ec3",
+    inputs={bus_el_1: flows.Flow()},
+    outputs={bus_el_1: flows.Flow()},
+    max_power=10000,
+)
+ec1.add(cc_ec1_es, cc_ec1_ec2, cc_ec1_ec3)
+
+# CellConnector for ec2
+cc_ec2_ec1 = CellConnector(
+    label="cc_ec2_ec1",
     inputs={bus_el_2: flows.Flow()},
     outputs={bus_el_2: flows.Flow()},
-    max_flow=10000,
+    max_power=10000,
 )
-ec2.add(cc_ec2)
+ec2.add(cc_ec2_ec1)
 
-cc_ec3 = CellConnector(
-    label="cc_ec3",
+# CellConnector for ec_3
+cc_ec3_ec1 = CellConnector(
+    label="cc_ec3_ec1",
     inputs={bus_el_3: flows.Flow()},
     outputs={bus_el_3: flows.Flow()},
-    max_flow=10000,
+    max_power=10000,
 )
-ec3.add(cc_ec3)
+ec3.add(cc_ec3_ec1)
 
 ###########################################################################
 # create the cellular model
@@ -171,13 +190,6 @@ def link_connectors(model, linkages):
         both directions. See equation (x) for usage of loss_factor.
     """
     # TODO: maybe move this into the CellularModel class to hide it from the user
-    # TODO: this creates a problem if one CellConnector output is connected to
-    # multiple CellConnector inputs. In this case, all of the CellConnector
-    # inputs would receive the same amount of energy from the CellConnector
-    # outputs, and thus, energy would be created from thin air (also, it leads
-    # to infeasibilities, as this is not the intended behaviour).
-    # Maybe, additional variables between the inputs and outputs (i.e.
-    # belonging to the block containing the cells) could fix this problem?
 
     # block for new connections
     connection_block = po.Block()
@@ -190,7 +202,40 @@ def link_connectors(model, linkages):
             if isinstance(x, CellConnector)
         ]
     )
+    # TODO: check if all CellConnectors in cell_connectors are in model.CELLCONNECTORS and vice versa
 
+    mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
+    for pair in linkages:
+        (Connector1, Connector2, lf) = pair
+        mapping[Connector1].add((Connector2, lf))
+        mapping[Connector2].add((Connector1, lf))
+
+    # TODO: Check if max_power is the same in all pairings
+
+    connection_block.LINKAGES = mapping
+    model.add_component("ConnectionBlock", connection_block)
+
+    def _equate_CellConnector_flows_rule(model, cell, t):
+        """arbitrary docstring"""
+        lhs = model.flow[cell, cell.input_bus, t]
+        rhs = sum(
+            [
+                (1 - loss_factor)
+                * model.flow[other_cell.output_bus, other_cell, t]
+                for (other_cell, loss_factor) in connection_block.LINKAGES[
+                    cell
+                ]
+            ]
+        )
+        return lhs == rhs
+
+    model.ConnectionBalance = po.Constraint(
+        connection_block.LINKAGES,
+        model.TIMESTEPS,
+        rule=_equate_CellConnector_flows_rule,
+    )
+
+    """
     # create a mapping of the cells {from_cell: (to_cell, loss_factor)}
     mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
 
@@ -207,7 +252,7 @@ def link_connectors(model, linkages):
     model.add_component("ConnectionBlock", connection_block)
 
     def link_cells_rule(model, cell, t):
-        """rule for link creation between CellConnectors"""
+        #rule for link creation between CellConnectors
         lhs = model.CellConnectorBlock.input_flow[cell, t]
         rhs = sum(
             [
@@ -223,12 +268,13 @@ def link_connectors(model, linkages):
     model.ConnectionBalance = po.Constraint(
         connection_block.LINKAGES, model.TIMESTEPS, rule=link_cells_rule
     )
+    """
 
 
 pairings = {
-    (cc_es, cc_ec1, 0.5),
-    (cc_ec1, cc_ec2, 0.2),
-    (cc_ec1, cc_ec3, 0.1),
+    (cc_es_ec1, cc_ec1_es, 0.5),
+    (cc_ec1_ec2, cc_ec2_ec1, 0.2),
+    (cc_ec1_ec3, cc_ec3_ec1, 0.1),
 }
 link_connectors(cmodel, pairings)
 # link_connectors(cmodel, cc_es, cc_ec1)
@@ -244,6 +290,6 @@ cmodel.write(
     "D:\solph-cellular\cmodel.lp", io_options={"symbolic_solver_labels": True}
 )
 results = processing.results(cmodel)
-views.node(results, "cc_ec1")["sequences"]
+views.node(results, "cc_ec1_ec3")["sequences"]
 
 # %%
