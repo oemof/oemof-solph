@@ -40,7 +40,6 @@ class CellConnector(network.Transformer):
     def __init__(
         self, inputs, outputs, max_power, label=None, custom_attributes=None
     ):
-        # TODO: extend the input/output handling to represent multiple commodities (electricity, gas, heat, ...)
 
         # initialize all custom_attributes
         if custom_attributes is None:

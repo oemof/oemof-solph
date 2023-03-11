@@ -12,6 +12,7 @@ from oemof.solph import buses
 from oemof.solph import components as cmp
 
 from oemof.tools import debugging
+from warnings import warn
 
 from oemof.solph import create_time_index
 from oemof.solph import flows
@@ -113,7 +114,7 @@ cc_es_ec1 = CellConnector(
     label="cc_es_ec1",
     inputs={bus_el: flows.Flow()},
     outputs={bus_el: flows.Flow()},
-    max_power=10000,
+    max_power=100000,
 )
 es.add(cc_es_ec1)
 
@@ -194,7 +195,7 @@ def link_connectors(model, linkages):
     # block for new connections
     connection_block = po.Block()
 
-    # Set with all CellConnector objects in linkages
+    # Set with all CellConnector instances in linkages
     cell_connectors = set(
         [
             x
@@ -202,8 +203,50 @@ def link_connectors(model, linkages):
             if isinstance(x, CellConnector)
         ]
     )
-    # TODO: check if all CellConnectors in cell_connectors are in model.CELLCONNECTORS and vice versa
 
+    # check for orphaned CellConnector instances (without linkage)
+    # TODO: can this be done prettier via set comparison?
+    orphaned = []
+    for cc in model.CellConnectorBlock.CELLCONNECTORS:
+        if cc in cell_connectors:
+            pass
+        else:
+            orphaned.append(cc)
+    if len(orphaned):  # false if list = 0, true otherwise
+        msg = (
+            "A CellConnector is designed to always be connected to one other "
+            "CellConnector. The following CellConnector(s) are not connected "
+            "to a counterpart: {0}. If this is intended and you know what you "
+            "are doing, you can ignore or disable the SuspiciousUsageWarning."
+        )
+        warn(
+            msg.format(orphaned),
+            debugging.SuspiciousUsageWarning,
+        )
+
+    # Check if max_power is the same in all pairs of CellConnectors
+    for pair in linkages:
+        if not pair[0].max_power == pair[1].max_power:
+            msg = (
+                "Two connected CellConnectors need to have the same max_power "
+                "value. The following values where set:\n"
+                "{0}: {1}\n"
+                "{2}: {3}"
+            )
+            raise ValueError(
+                msg.format(
+                    pair[0].label,
+                    pair[0].max_power,
+                    pair[1].label,
+                    pair[1].max_power,
+                )
+            )
+
+    # create a dict as mapping looking like:
+    # {
+    #   CellConnector1: (CellConnector2, loss_factor),
+    #   CellConnector2: (CellConnector1, loss_factor),
+    # }
     mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
     for pair in linkages:
         (Connector1, Connector2, lf) = pair
@@ -234,41 +277,6 @@ def link_connectors(model, linkages):
         model.TIMESTEPS,
         rule=_equate_CellConnector_flows_rule,
     )
-
-    """
-    # create a mapping of the cells {from_cell: (to_cell, loss_factor)}
-    mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
-
-    for (from_cell, to_cell, loss_factor) in linkages:
-        mapping[from_cell].add((to_cell, loss_factor))
-        mapping[to_cell].add((from_cell, loss_factor))
-
-    # TODO: implement check for duplicate links with conflicting loss_factors
-
-    # add mapping to the block
-    connection_block.LINKAGES = mapping
-
-    # add block to the model
-    model.add_component("ConnectionBlock", connection_block)
-
-    def link_cells_rule(model, cell, t):
-        #rule for link creation between CellConnectors
-        lhs = model.CellConnectorBlock.input_flow[cell, t]
-        rhs = sum(
-            [
-                (1 - loss_factor)
-                * model.CellConnectorBlock.output_flow[other_cell, t]
-                for (other_cell, loss_factor) in connection_block.LINKAGES[
-                    cell
-                ]
-            ]
-        )
-        return lhs == rhs
-
-    model.ConnectionBalance = po.Constraint(
-        connection_block.LINKAGES, model.TIMESTEPS, rule=link_cells_rule
-    )
-    """
 
 
 pairings = {
