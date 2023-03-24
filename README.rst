@@ -266,7 +266,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 License
 =======
 
-Copyright (c) 2022 oemof developer group
+Copyright (c) 2023 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
