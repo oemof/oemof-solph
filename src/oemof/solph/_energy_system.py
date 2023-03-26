@@ -118,9 +118,12 @@ class EnergySystem(es.EnergySystem):
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
             timedelta = df.diff()
-            timeincrement = pd.Series(
-                (timedelta / np.timedelta64(1, "h"))[1:].set_index(0).index
-            )
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
 
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
