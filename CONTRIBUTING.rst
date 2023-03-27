@@ -75,8 +75,8 @@ For merging, you should:
 3. Add a note about the changes to ``docs/whatsnew/next_version.rst``.
 4. Add your name to ``AUTHORS.rst`` and ``CITATION.cff``.
 
-.. [1] If you don't have all the necessary python versions available locally you can rely on Travis - it will
-       `run the tests <https://travis-ci.org/oemof/oemof-solph/pull_requests>`_ for each change you add in the pull request.
+.. [1] If you don't have all the necessary python versions available locally,
+       you can rely on the CI pipeline at GitHub.
 
        It will be slower though ...
 
