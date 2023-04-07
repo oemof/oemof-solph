@@ -114,7 +114,7 @@ cc_es_ec1 = CellConnector(
     label="cc_es_ec1",
     inputs={bus_el: flows.Flow()},
     outputs={bus_el: flows.Flow()},
-    max_power=100000,
+    max_power=10000,
 )
 es.add(cc_es_ec1)
 
@@ -203,16 +203,12 @@ def link_connectors(model, linkages):
             if isinstance(x, CellConnector)
         ]
     )
+    # check for orphaned CellConnector instances
+    # TODO: make this a separate function?
+    all_cell_connectors = set(model.CellConnectorBlock.CELLCONNECTORS)
+    orphaned_cell_connectors = all_cell_connectors - cell_connectors
 
-    # check for orphaned CellConnector instances (without linkage)
-    # TODO: can this be done prettier via set comparison?
-    orphaned = []
-    for cc in model.CellConnectorBlock.CELLCONNECTORS:
-        if cc in cell_connectors:
-            pass
-        else:
-            orphaned.append(cc)
-    if len(orphaned):  # false if list = 0, true otherwise
+    if orphaned_cell_connectors:  # True if there are orphaned cc's
         msg = (
             "A CellConnector is designed to always be connected to one other "
             "CellConnector. The following CellConnector(s) are not connected "
@@ -220,11 +216,12 @@ def link_connectors(model, linkages):
             "are doing, you can ignore or disable the SuspiciousUsageWarning."
         )
         warn(
-            msg.format(orphaned),
+            msg.format(orphaned_cell_connectors),
             debugging.SuspiciousUsageWarning,
         )
 
     # Check if max_power is the same in all pairs of CellConnectors
+    # TODO: make this a separate function?
     for pair in linkages:
         if not pair[0].max_power == pair[1].max_power:
             msg = (
@@ -242,40 +239,32 @@ def link_connectors(model, linkages):
                 )
             )
 
-    # create a dict as mapping looking like:
-    # {
-    #   CellConnector1: (CellConnector2, loss_factor),
-    #   CellConnector2: (CellConnector1, loss_factor),
-    # }
-    mapping = dict(zip(cell_connectors, [set() for x in cell_connectors]))
-    for pair in linkages:
-        (Connector1, Connector2, lf) = pair
-        mapping[Connector1].add((Connector2, lf))
-        mapping[Connector2].add((Connector1, lf))
+    # mirror all linkages
+    connection_block.LINKAGES = set()
+    for link in linkages:
+        # add the original link
+        connection_block.LINKAGES.add(link)
+        # add the mirrored link
+        connection_block.LINKAGES.add((link[1], link[0], link[2]))
 
-    # TODO: Check if max_power is the same in all pairings
-
-    connection_block.LINKAGES = mapping
     model.add_component("ConnectionBlock", connection_block)
 
-    def _equate_CellConnector_flows_rule(model, cell, t):
-        """arbitrary docstring"""
-        lhs = model.flow[cell, cell.input_bus, t]
-        rhs = sum(
-            [
-                (1 - loss_factor)
-                * model.flow[other_cell.output_bus, other_cell, t]
-                for (other_cell, loss_factor) in connection_block.LINKAGES[
-                    cell
-                ]
-            ]
-        )
-        return lhs == rhs
+    def _equate_CellConnector_flows_rule(m):
+        for (cc1, cc2, lf) in linkages:
+            for t in m.TIMESTEPS:
+                lhs = model.flow[cc1, cc1.input_bus, t]
+                rhs = (1 - lf) * model.flow[cc2.output_bus, cc2, t]
+                return lhs == rhs
 
-    model.ConnectionBalance = po.Constraint(
-        connection_block.LINKAGES,
-        model.TIMESTEPS,
-        rule=_equate_CellConnector_flows_rule,
+    setattr(
+        model,
+        "equate_CellConnector_flows",
+        po.Constraint(model.TIMESTEPS, noruleinit=True),
+    )
+    setattr(
+        model,
+        "equate_CellConnector_flows_build",
+        po.BuildAction(rule=_equate_CellConnector_flows_rule),
     )
 
 
@@ -292,7 +281,7 @@ link_connectors(cmodel, pairings)
 ###########################################################################
 # Solve the model
 ###########################################################################
-
+cmodel.receive_duals()
 res = cmodel.solve(solver=mysolver)
 cmodel.write(
     "D:\solph-cellular\cmodel.lp", io_options={"symbolic_solver_labels": True}
