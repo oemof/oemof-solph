@@ -32,6 +32,11 @@ from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 from oemof.solph._plumbing import sequence
 
+# imports for CellularModel
+from oemof.solph.components.experimental._cell_connector import CellConnector
+import itertools
+from oemof.tools import debugging
+
 
 class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
@@ -411,6 +416,12 @@ class CellularModel(po.ConcreteModel):
         containing all other cell instances (from a model point of view) and
         value is a list containing all EnergyCell objects (from an object point
         of view).
+    Connections: set
+        A set of tuples, where each tuple is created as (CellConnector1,
+        CellConnector2, loss_factor).
+        Connections are established symmetrically, so loss_factor is applied in
+        both directions. See equation (x) for usage of loss_factor. Use
+        `auto_connect=False` to prevent automatic connection of CellConnectors.
     """
 
     # TODO: Fill this
@@ -426,7 +437,7 @@ class CellularModel(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, EnergyCells, **kwargs):
+    def __init__(self, EnergyCells, Connections, **kwargs):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
@@ -453,8 +464,11 @@ class CellularModel(po.ConcreteModel):
         # get the parent energy cell
         self.es = list(EnergyCells.keys())[0]
 
-        # get all child energy cells (includes grand-grand-...-children)
+        # get all child energy cells
         self.ec = EnergyCells[self.es]
+
+        # get the cell connection object
+        self.CONNECTIONS = Connections
 
         # add all groups together
         self.groups = {}
@@ -515,8 +529,12 @@ class CellularModel(po.ConcreteModel):
         if kwargs.get("auto_construct", True):
             self._construct()
 
+        # start connecting of cells (turn off with auto_connect=False)
+        if kwargs.get("auto_connect", True):
+            self._auto_connect()
+
     def _construct(self):
-        "This is basicall copy-pasted from the Model class"
+        "This is basically copy-pasted from the Model class"
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
@@ -664,6 +682,99 @@ class CellularModel(po.ConcreteModel):
                 expr += block._objective_expression()
 
         self.objective = po.Objective(sense=sense, expr=expr)
+
+    def _auto_connect(self):
+        self._check_orphaned_connectors()
+        self._check_max_power_compliance()
+        self._mirror_connections()
+        self._connect_cells()
+
+    def _check_orphaned_connectors(self):
+        """
+        Check if there are orphaned (unused) connectors and hand out a warning
+        if not.
+        """
+        # create set containing Connectors in use
+        cell_connector_set = set(
+            [
+                x
+                for x in itertools.chain.from_iterable(self.CONNECTIONS)
+                if isinstance(x, CellConnector)
+            ]
+        )
+        # create set containing all Connectors
+        all_cell_connectors = set(self.CellConnectorBlock.CELLCONNECTORS)
+        # set comparison for fast calculation of orphans
+        orphaned_connectors = all_cell_connectors - cell_connector_set
+
+        if orphaned_connectors:
+            # only entered if there are orphaned Connectors
+            msg = (
+                "A CellConnector is designed to always be connected to one other "
+                "CellConnector. The following CellConnector(s) are not connected "
+                "to a counterpart: {0}. If this is intended and you know what you "
+                "are doing, you can ignore or disable the SuspiciousUsageWarning."
+            )
+            warnings.warn(
+                msg.format(orphaned_connectors),
+                debugging.SuspiciousUsageWarning,
+            )
+
+    def _check_max_power_compliance(self):
+        """
+        Check if max_power values comply and hand out an error if not.
+        """
+        for con in self.CONNECTIONS:
+            if not con[0].max_power == con[1].max_power:
+                msg = (
+                    "Two connected CellConnectors need to have the same max_power "
+                    "value. The following values where set:\n"
+                    "{0}: {1}\n"
+                    "{2}: {3}"
+                )
+                raise ValueError(
+                    msg.format(
+                        con[0].label,
+                        con[0].max_power,
+                        con[1].label,
+                        con[1].max_power,
+                    )
+                )
+
+    def _mirror_connections(self):
+        """
+        For convenience, users only need to add (cc1, cc2, lf) to connect two
+        CellConnectors. This creates the opposite connection (cc2, cc1, lf).
+        """
+        complete_connections = set()
+        for con in self.CONNECTIONS:
+            # add original connection
+            complete_connections.add(con)
+            # add mirrored connection
+            complete_connections.add((con[1], con[0], con[2]))
+        self.CONNECTIONS = complete_connections
+
+    def _connect_cells(self):
+        """
+        This function actually connects the cells by equating the flows of
+        the CellConnectors.
+
+        TODO: When building the distributed model, this needs to stay in
+        the main problem as complicating constraint.
+        """
+        # connection_block = po.Block()
+        # self.add_component("ConnectionBlock", connection_block)
+
+        def _equate_CellConnector_flows_rule(self, cc1, cc2, lf, t):
+            lhs = self.flow[cc1, cc1.input_bus, t]
+            rhs = (1 - lf) * self.flow[cc2.output_bus, cc2, t]
+            return lhs == rhs
+
+        self.equate_CellConnector_flows = po.Constraint(
+            self.CONNECTIONS,
+            self.TIMESTEPS,
+            rule=_equate_CellConnector_flows_rule,
+        )
 
     def receive_duals(self):
         """Method sets solver suffix to extract information about dual
