@@ -73,10 +73,11 @@ def test_multi_period_default_discount_rate():
     warnings.filterwarnings("ignore", category=FutureWarning)
     timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
     es = solph.EnergySystem(timeindex=timeindex, multi_period=True)
-    bel = solph.buses.Bus()
+    bel = solph.buses.Bus(label="bus")
     es.add(bel)
     es.add(
         solph.components.Sink(
+            label="sink",
             inputs={
                 bel: solph.flows.Flow(
                     nominal_value=5, fix=[1] * len(timeindex)
@@ -86,6 +87,7 @@ def test_multi_period_default_discount_rate():
     )
     es.add(
         solph.components.Source(
+            label="source",
             outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)}
         )
     )
