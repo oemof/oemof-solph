@@ -194,6 +194,7 @@ class Flow(on.Edge):
             )
             warn(msg, debugging.SuspiciousUsageWarning)
 
+        self.fixed_costs = sequence(fixed_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
 

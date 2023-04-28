@@ -143,12 +143,12 @@ class SimpleFlowBlock(ScalarBlock):
             :math:`P(p, t) = f_\mathrm{fix}(t) \cdot P_\mathrm{nom}`.
 
         * :math:`ve_n` (`Flow.negative_gradient` is not `None`)
-            Difference of a flow in consecutive timesteps if flow is reduced. The
-            variable is bound to: :math:`0 \ge ve_n \ge ve_n^{max}`.
+            Difference of a flow in consecutive timesteps if flow is reduced.
+            The variable is bound to: :math:`0 \ge ve_n \ge ve_n^{max}`.
 
         * :math:`ve_p` (`Flow.positive_gradient` is not `None`)
-            Difference of a flow in consecutive timesteps if flow is increased. The
-            variable is bound to: :math:`0 \ge ve_p \ge ve_p^{max}`.
+            Difference of a flow in consecutive timesteps if flow is increased.
+            The variable is bound to: :math:`0 \ge ve_p \ge ve_p^{max}`.
 
         The following variable is build for Flows with the attribute
         `integer_flows` being not None.
@@ -186,8 +186,8 @@ class SimpleFlowBlock(ScalarBlock):
     def _create_constraints(self):
         r"""Creates all constraints for standard flows.
 
-        The following constraints are created, if the appropriate attribute of the
-        *Flow* (see :class:`~oemof.solph.flows._flow.Flow`) object is set:
+        The following constraints are created, if the appropriate attribute of
+        the *Flow* (see :class:`~oemof.solph.flows._flow.Flow`) object is set:
 
         * `Flow.full_load_time_max` is not `None` (full_load_time_max_constr):
             .. math::

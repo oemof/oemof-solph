@@ -15,7 +15,6 @@ Add wind source and demand sink for FR and links for exchange.
 """
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -397,12 +396,9 @@ def test_multi_period_investment_model(solver="cbc"):
         }
 
         for key in test_results.keys():
-            eq_(
-                (
-                    views.node(results, key)["period_scalars"]
-                    .sum(axis=0)
-                    .round(0)
-                    .convert_dtypes("int")
-                ).any(),
-                test_results[key].any(),
-            )
+            assert (
+                views.node(results, key)["period_scalars"]
+                .sum(axis=0)
+                .round(0)
+                .convert_dtypes("int")
+            ).any() == test_results[key].any()

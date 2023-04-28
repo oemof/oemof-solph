@@ -2394,7 +2394,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down

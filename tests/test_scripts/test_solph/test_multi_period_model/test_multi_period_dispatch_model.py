@@ -15,7 +15,6 @@ Add wind source and demand sink for FR and links for exchange.
 """
 
 import pandas as pd
-from nose.tools import eq_
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -296,14 +295,11 @@ def test_multi_period_dispatch_model(solver="cbc"):
     }
 
     for key in test_results.keys():
-        eq_(
-            (
-                int(
-                    views.node(results, key)["sequences"]
-                    .sum(axis=0)
-                    .round(0)
-                    .sum()
-                )
-            ),
-            test_results[key],
-        )
+        assert (
+            int(
+                views.node(results, key)["sequences"]
+                .sum(axis=0)
+                .round(0)
+                .sum()
+            )
+        ) == test_results[key]

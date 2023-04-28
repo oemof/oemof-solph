@@ -119,7 +119,7 @@ class TestParameterResult:
         default_attributes = {
             "age": None,
             "lifetime": None,
-            "integer": None,
+            "integer": False,
             "investment": None,
             "nominal_value": 1,
             "nonconvex": None,
