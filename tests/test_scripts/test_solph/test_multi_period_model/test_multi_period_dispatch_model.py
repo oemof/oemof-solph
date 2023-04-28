@@ -277,7 +277,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         "DE_bus_lignite": 606,
         "DE_bus_hardcoal": 0,
         "DE_bus_natgas": 0,
-        "DE_bus_el": 2020,
+        "DE_bus_el": 1900,
         "DE_pp_lignite": 418,
         "DE_pp_hardcoal": 0,
         "DE_pp_natgas_CCGT": 0,
