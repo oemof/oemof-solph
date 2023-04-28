@@ -140,6 +140,7 @@ class Flow(on.Edge):
         nonconvex=None,
         lifetime=None,
         age=None,
+        fixed_costs=None,
         # --- BEGIN: To be removed for versions >= v0.6 ---
         summed_max=None,
         summed_min=None,
@@ -180,7 +181,7 @@ class Flow(on.Edge):
             raise ValueError(infinite_error_msg.format("nominal_value"))
         self.nominal_value = nominal_value
 
-        if "fixed_costs" in keys:
+        if fixed_costs is not None:
             msg = (
                 "Be aware that the fixed costs attribute is only\n"
                 "meant to be used for multi-period models.\n"
@@ -238,7 +239,7 @@ class Flow(on.Edge):
                         "nominal_value must be set as well.\n"
                         "Otherwise, it won't have any effect.".format(attr)
                     )
-        # minumum will be set even without nominal limit
+        # minimum will be set even without nominal limit
 
         # maximum and minimum (absolute values) should be always set,
         # as nominal_value or invest might be defined later

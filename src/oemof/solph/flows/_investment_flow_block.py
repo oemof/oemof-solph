@@ -41,8 +41,8 @@ class InvestmentFlowBlock(ScalarBlock):
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
 
-    See :class:`oemof.solph.flows._simple_flow_block.SimpleFlowBlock` for all parameters of the *SimpleFlowBlock*
-    class.
+    See :class:`oemof.solph.flows._simple_flow_block.SimpleFlowBlock`
+    for all parameters of the *SimpleFlowBlock* class.
 
     The overall summed cost expressions for all *InvestmentFlowBlock* objects
     can be accessed by
@@ -174,9 +174,9 @@ class InvestmentFlowBlock(ScalarBlock):
     def _create_variables(self, _):
         r"""Creates all variables for investment flows.
 
-        All *InvestmentFlowBlock* objects are indexed by a starting and ending node
-        :math:`(i, o)`, which is omitted in the following for the sake
-        of convenience. The following variables are created:
+        All *InvestmentFlowBlock* objects are indexed by a starting and
+        ending node :math:`(i, o)`, which is omitted in the following
+        for the sake of convenience. The following variables are created:
 
         * :math:`P(p, t)`
 
@@ -198,21 +198,22 @@ class InvestmentFlowBlock(ScalarBlock):
         * :math:`P_{old}(p)`
 
             Old capacity / energy to be decommissioned in period p
-            due to reaching its lifetime; applicable only for multi-period models.
+            due to reaching its lifetime; applicable only
+            for multi-period models.
 
         * :math:`P_{old,exo}(p)`
 
             Old exogenous capacity / energy to be decommissioned in period p
-            due to reaching its lifetime, i.e. the amount that has been specified
-            by :attr:`existing` when it is decommisioned;
+            due to reaching its lifetime, i.e. the amount that has
+            been specified by :attr:`existing` when it is decommisioned;
             applicable only for multi-period models.
 
         * :math:`P_{old,end}(p)`
 
             Old endogenous capacity / energy to be decommissioned in period p
-            due to reaching its lifetime, i.e. the amount that has been invested in
-            by the model itself that is decommissioned in a later period because
-            of reaching its lifetime;
+            due to reaching its lifetime, i.e. the amount that has been
+            invested in by the model itself that is decommissioned in
+            a later period because of reaching its lifetime;
             applicable only for multi-period models.
 
         * :math:`Y_{invest}(p)`
@@ -266,8 +267,9 @@ class InvestmentFlowBlock(ScalarBlock):
     def _create_constraints(self):
         r"""Creates all constraints for standard flows.
 
-        Depending on the attributes of the *InvestmentFlowBlock* and *SimpleFlowBlock*,
-        different constraints are created. The following constraints are created
+        Depending on the attributes of the *InvestmentFlowBlock*
+        and *SimpleFlowBlock*, different constraints are created.
+        The following constraints are created
         for all *InvestmentFlowBlock* objects:\
 
             Total capacity / energy
@@ -335,12 +337,12 @@ class InvestmentFlowBlock(ScalarBlock):
 
             whereby:
 
-            * (*) is only performed for the first period the condition is True.
-              A decommissioning flag is then set to True to prevent having falsely
-              added old capacity in future periods.
+            * (*) is only performed for the first period the condition
+              is True. A decommissioning flag is then set to True
+              to prevent having falsely added old capacity in future periods.
             * :math:`year(p)` is the year corresponding to period p
-            * :math:`p_{comm}` is the commissioning period of the flow (which is
-              determined by the model itself)
+            * :math:`p_{comm}` is the commissioning period of the flow
+              (which is determined by the model itself)
 
         Depending on the attribute :attr:`nonconvex`, the constraints for the
         bounds of the decision variable :math:`P_{invest}(p)` are different:\
@@ -368,7 +370,8 @@ class InvestmentFlowBlock(ScalarBlock):
         (independent of the attribute :attr:`nonconvex`),
         the following additional constraints are created, if the appropriate
         attribute of the *SimpleFlowBlock*
-        (see :class:`oemof.solph.flows._simple_flow_block.SimpleFlowBlock`) is set:
+        (see :class:`oemof.solph.flows._simple_flow_block.SimpleFlowBlock`)
+        is set:
 
             * :attr:`fix` is not None
 
@@ -410,7 +413,8 @@ class InvestmentFlowBlock(ScalarBlock):
                 \sum_{p, t} P(t) \cdot \tau(t) \geq P_{total}
                 \cdot t_{full\_load, min}
 
-            * :attr:`overall_maximum` is not None (for multi-period model only)
+            * :attr:`overall_maximum` is not None
+              (for multi-period model only)
 
                 Overall maximum of total installed capacity / energy for flow
 
@@ -421,7 +425,8 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 \forall p \in \textrm{PERIODS}
 
-            * :attr:`overall_minimum` is not None (for multi-period model only)
+            * :attr:`overall_minimum` is not None
+              (for multi-period model only)
 
                 Overall minimum of total installed capacity / energy for flow;
                 applicable only in last period
@@ -687,10 +692,10 @@ class InvestmentFlowBlock(ScalarBlock):
         objective expression.
 
         Objective terms for a standard model and a multi-period model differ
-        quite strongly. Besides, the part of the objective function added by the
-        *InvestmentFlowBlock* also depends on whether a convex or nonconvex
-        *InvestmentFlowBlock* is selected. The following parts of the objective
-        function are created:
+        quite strongly. Besides, the part of the objective function added by
+        the *InvestmentFlowBlock* also depends on whether a convex
+        or nonconvex *InvestmentFlowBlock* is selected.
+        The following parts of the objective function are created:
 
         *Standard model*
 
@@ -705,8 +710,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     P_{invest}(0) \cdot c_{invest,var}(0)
                     + c_{invest,fix}(0) \cdot Y_{invest}(0) \\
 
-        Whereby 0 denotes the 0th (investment) period since in a standard model,
-        there is only this one period.
+        Whereby 0 denotes the 0th (investment) period since
+        in a standard model, there is only this one period.
 
         *Multi-period model*
 
@@ -751,9 +756,10 @@ class InvestmentFlowBlock(ScalarBlock):
             whereby:
 
             * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-              investment expenses :math:`c_{invest,var}(p)` lifetime :math:`l` and
-              interest rate :math:`ir`
-            * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
+              investment expenses :math:`c_{invest,var}(p)` lifetime :math:`l`
+              and interest rate :math:`ir`
+            * :math:`DF=(1+dr)` is the discount factor with discount rate
+              :math:`dr`
 
         The annuity hereby is:
 
@@ -763,8 +769,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     \frac {(1+i)^l \cdot i} {(1+i)^l - 1} \cdot
 
         It is retrieved, using oemof.tools.economics annuity function. The
-        interest rate is defined as a weighted average costs of capital (wacc) and
-        assumed constant over time.
+        interest rate is defined as a weighted average costs of capital (wacc)
+        and assumed constant over time.
         """
         if not hasattr(self, "INVESTFLOWS"):
             return 0
