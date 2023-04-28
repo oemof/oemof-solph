@@ -422,7 +422,8 @@ class SimpleFlowBlock(ScalarBlock):
 
         * `Flow.variable_costs` is not `None`:
             .. math::
-              \sum_{(i,o)} \sum_{p, t} P(p, t) \cdot w(t) \cdot c_{var}(i, o, t)
+              \sum_{(i,o)} \sum_{p, t} P(p, t) \cdot w(t)
+              \cdot c_{var}(i, o, t)
 
         * `Flow.fixed_costs` is not `None` and flow has no lifetime limit
             .. math::
@@ -438,8 +439,8 @@ class SimpleFlowBlock(ScalarBlock):
         * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
            and an initial age
             .. math::
-              \sum_{(i,o)} \sum_{p}^{p+n-a} P_{nominal} \cdot c_{fixed}(i, o, p)
-              \cdot DF^{-p}
+              \sum_{(i,o)} \sum_{p}^{p+n-a} P_{nominal}
+              \cdot c_{fixed}(i, o, p) \cdot DF^{-p}
 
         Hereby
         * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`

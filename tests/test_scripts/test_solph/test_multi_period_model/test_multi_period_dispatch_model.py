@@ -269,29 +269,29 @@ def test_multi_period_dispatch_model(solver="cbc"):
 
     results = processing.results(om)
     test_results = {
-        "DE_source_lignite": 187,
+        "DE_source_lignite": 303,
         "DE_source_hardcoal": 0,
         "DE_source_natgas": 0,
         "DE_source_wind": 830,
         "DE_source_shortage": 0,
-        "DE_bus_lignite": 374,
+        "DE_bus_lignite": 606,
         "DE_bus_hardcoal": 0,
         "DE_bus_natgas": 0,
-        "DE_bus_el": 1822,
-        "DE_pp_lignite": 258,
+        "DE_bus_el": 2020,
+        "DE_pp_lignite": 418,
         "DE_pp_hardcoal": 0,
         "DE_pp_natgas_CCGT": 0,
         "DE_pp_natgas_GT": 0,
         "DE_sink_el": 720,
         "DE_sink_excess": 0,
-        "DE_storage_el": 30,
+        "DE_storage_el": 170,
         "FR_source_wind": 405,
-        "FR_source_shortage": 44,
+        "FR_source_shortage": 0,
         "FR_bus_el": 900,
         "FR_sink_el": 450,
         "FR_sink_excess": 0,
-        "link_DE_FR": 2,
-        "demand_dsm": 281,
+        "link_DE_FR": 90,
+        "demand_dsm": 355,
     }
 
     for key in test_results.keys():

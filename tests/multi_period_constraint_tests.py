@@ -17,7 +17,6 @@ from os import path as ospath
 
 import pandas as pd
 import pytest
-from oemof.network.network import Node
 
 from oemof import solph
 
