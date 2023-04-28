@@ -16,8 +16,8 @@ API changes
 New features
 ############
 
-* Add `inactivity_costs` as an option for `Flow`s. Inactivity costs is a cost for times where a Flow is not operated.
-* It is now possible to optimise the size of `Flow`s that have a status variable. Internally, this is done by the `InvestNonConvexFlowBlock` which provides the possibility to perform capacity optimization of assets considering their min/max loads, as well as their operation status.
+* Add `inactivity_costs` as an option for `Flow`\s. Inactivity costs is a cost for times where a Flow is not operated.
+* It is now possible to optimise the size of `Flow`\s that have a status variable. Internally, this is done by the `InvestNonConvexFlowBlock` which provides the possibility to perform capacity optimization of assets considering their min/max loads, as well as their operation status.
 
 Documentation
 #############
