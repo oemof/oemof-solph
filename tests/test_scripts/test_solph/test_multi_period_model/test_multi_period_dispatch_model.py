@@ -303,3 +303,11 @@ def test_multi_period_dispatch_model(solver="cbc"):
                 .sum()
             )
         ) == test_results[key]
+        print(
+            int(
+                views.node(results, key)["sequences"]
+                .sum(axis=0)
+                .round(0)
+                .sum()
+            )
+        )
