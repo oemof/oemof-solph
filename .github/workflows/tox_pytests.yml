@@ -37,7 +37,7 @@ jobs:
       run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 89 || 90 }}
 
     - name: Report to coveralls
-      run: coveralls --service=github
+      run: coveralls
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         COVERALLS_SERVICE_NAME: github
