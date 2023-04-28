@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.bus
-
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
@@ -24,7 +22,7 @@ from pyomo.core.base.block import ScalarBlock
 
 
 class Bus(on.Bus):
-    """A balance object. Every node has to be connected to BusBlock.
+    """A balance object. Every component has to be connected to buses.
 
     The sum of all inputs of a Bus object must equal the sum of all outputs
     within one time step.
@@ -38,7 +36,7 @@ class Bus(on.Bus):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.buses.bus.BusBlock`
+     * :py:class:`~oemof.solph.buses._bus.BusBlock`
 
     """
 

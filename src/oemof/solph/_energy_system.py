@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 """
 
 import calendar
+import datetime
 import warnings
 
 import numpy as np
@@ -241,7 +242,12 @@ class EnergySystem(es.EnergySystem):
         self.periods_years = periods_years
 
 
-def create_time_index(year, interval=1, number=None):
+def create_time_index(
+    year: int = None,
+    interval: float = 1,
+    number: int = None,
+    start: datetime.datetime or datetime.date = None,
+):
     """
     Create a datetime index for one year.
 
@@ -253,8 +259,9 @@ def create_time_index(year, interval=1, number=None):
 
     Parameters
     ----------
-    year : int
-        The year of the index.
+    year : int, datetime
+        The year of the index. If number and start is set the year parameter is
+        ignored.
     interval : float
         The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
         interval (default: 1).
@@ -262,6 +269,9 @@ def create_time_index(year, interval=1, number=None):
         The number of time intervals. By default number is calculated to create
         an index of one year. For a shorter or longer period the number of
         intervals can be set by the user.
+    start : datetime.datetime or datetime.date
+        Optional start time. If start is not set, 00:00 of the first day of
+        the given year is the start time.
 
     Examples
     --------
@@ -286,6 +296,6 @@ def create_time_index(year, interval=1, number=None):
         else:
             hoy = 8760
         number = round(hoy / interval)
-    return pd.date_range(
-        f"1/1/{year}", periods=number + 1, freq=f"{interval}H"
-    )
+    if start is None:
+        start = f"1/1/{year}"
+    return pd.date_range(start, periods=number + 1, freq=f"{interval}H")

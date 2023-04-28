@@ -21,9 +21,7 @@ from warnings import warn
 
 from oemof.network import network as on
 from oemof.tools import debugging
-from pyomo.core import Binary
 from pyomo.core import Set
-from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -41,8 +39,6 @@ class Link(on.Transformer):
         Keys are the connected tuples (input, output) bus objects.
         The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
-    limit_direction : boolean, default: True
-        Wether direction constraint should be set for Link component
 
     Note: This component is experimental. Use it with care.
 
@@ -85,7 +81,6 @@ class Link(on.Transformer):
             k: sequence(v)
             for k, v in kwargs.get("conversion_factors", {}).items()
         }
-        self.limit_direction = kwargs.get("limit_direction", True)
 
         msg = (
             "Component `Link` should have exactly "
@@ -114,7 +109,6 @@ class LinkBlock(ScalarBlock):
     Note: This component is experimental. Use it with care.
 
     **The following constraints are created:**
-    (Equation 2&3 are only implemented, if `limit_direction` is enabled)
 
     .. _Link-equations:
 
@@ -123,14 +117,6 @@ class LinkBlock(ScalarBlock):
         (1) \qquad P_{\mathrm{in},n}(p, t) = c_n(t)
         \times P_{\mathrm{out},n}(p, t)
             \quad \forall t \in T, \forall n in {1,2} \\
-        &
-        (2) \qquad 1 \ge \hat{S} + P_{\mathrm{in},1}(p, t)
-                                 / P_{\mathrm{in},1,\mathrm{max}}
-            \quad \forall t \in T \\
-        &
-        (3) \qquad 0 \le \hat{S} - P_{\mathrm{in},2}(t)
-                                 / P_{2\mathrm{in},2,\mathrm{max}}
-            \quad \forall t \in T \\
         &
 
     """
@@ -164,23 +150,6 @@ class LinkBlock(ScalarBlock):
 
         self.LINKS = Set(initialize=[g for g in group])
 
-        directed_conversions = {
-            n: n.conversion_factors for n in group if n.limit_direction
-        }
-        self.LINK_1ST_INFLOWS = Set(
-            initialize=[
-                (list(c)[0][0], n) for n, c in directed_conversions.items()
-            ]
-        )
-        self.LINK_2ND_INFLOWS = Set(
-            initialize=[
-                (list(c)[1][0], n) for n, c in directed_conversions.items()
-            ]
-        )
-
-        #  0: Flows 1 connected; 1: Flows 2 connected
-        self.direction = Var(self.LINKS, m.TIMESTEPS, within=Binary)
-
         def _input_output_relation(block):
             for p, t in m.TIMEINDEX:
                 for n, conversion in all_conversions.items():
@@ -209,31 +178,3 @@ class LinkBlock(ScalarBlock):
             noruleinit=True,
         )
         self.relation_build = BuildAction(rule=_input_output_relation)
-
-        def _flow1_rule(block, i, link, p, t):
-            """Rule definition for Eq. (2)."""
-            expr = 1 >= (
-                self.direction[link, t]
-                + m.flow[i, link, p, t]
-                * m.flows[i, link].max[t]
-                * m.flows[i, link].nominal_value
-            )
-            return expr
-
-        self.flow1 = Constraint(
-            self.LINK_1ST_INFLOWS, m.TIMEINDEX, rule=_flow1_rule
-        )
-
-        def _flow2_rule(block, i, link, p, t):
-            """Rule definition for Eq. (3)."""
-            expr = 0 <= (
-                self.direction[link, t]
-                - m.flow[i, link, p, t]
-                * m.flows[i, link].max[t]
-                * m.flows[i, link].nominal_value
-            )
-            return expr
-
-        self.flow2 = Constraint(
-            self.LINK_2ND_INFLOWS, m.TIMEINDEX, rule=_flow2_rule
-        )

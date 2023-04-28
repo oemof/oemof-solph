@@ -1,6 +1,6 @@
 \* Source Pyomo model name=Model *\
 
-min 
+min
 objective:
 +500 InvestmentFlowBlock_invest(electricityBus_source_nonconvex_invest_0)
 +34 InvestmentFlowBlock_invest_status(electricityBus_source_nonconvex_invest_0)
@@ -58,7 +58,7 @@ c_u_InvestmentFlowBlock_full_load_time_max(electricityBus_source_nonconvex_inves
 +1 flow(electricityBus_source_nonconvex_invest_0_2)
 <= 0
 
-c_e_ONE_VAR_CONSTANT: 
+c_e_ONE_VAR_CONSTANT:
 ONE_VAR_CONSTANT = 1.0
 
 bounds

@@ -25,7 +25,7 @@ def emission_limit(om, flows=None, limit=None):
 
     Note
     ----
-    Flow objects required an attribute "emission_factor"!
+    Flow objects require an attribute "emission_factor"!
 
     """
     generic_integral_limit(
@@ -50,12 +50,13 @@ def emission_limit_per_period(om, flows=None, limit=None):
 
 
 def generic_integral_limit(om, keyword, flows=None, limit=None):
-    r"""Set a global limit for flows weighted by attribute called keyword.
-    The attribute named by keyword has to be added
+    r"""Set a global limit for flows weighted by attribute named keyword.
+    The attribute named keyword has to be added
     to every flow you want to take into account.
 
     Total value of keyword attributes after optimization can be retrieved
-    calling the :attr:`om.oemof.solph.Model.integral_limit_${keyword}()`.
+    calling the
+    `om.oemof.solph._models.Model.integral_limit_${keyword}()`.
 
     Parameters
     ----------
@@ -73,7 +74,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
 
     Note
     ----
-    Flow objects required an attribute named like keyword!
+    Flow objects require an attribute named like keyword!
 
 
     **Constraint:**
@@ -104,7 +105,10 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
     >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
     >>> bel = solph.buses.Bus(label='electricityBus')
-    >>> flow1 = solph.flows.Flow(nominal_value=100, my_factor=0.8)
+    >>> flow1 = solph.flows.Flow(
+    ...     nominal_value=100,
+    ...     custom_attributes={"my_factor": 0.8},
+    ... )
     >>> flow2 = solph.flows.Flow(nominal_value=50)
     >>> src1 = solph.components.Source(label='source1', outputs={bel: flow1})
     >>> src2 = solph.components.Source(label='source2', outputs={bel: flow2})
@@ -243,12 +247,12 @@ def _check_and_set_flows(om, flows, keyword):
     """
     if flows is None:
         flows = {}
-        for (i, o) in om.flows:
+        for i, o in om.flows:
             if hasattr(om.flows[i, o], keyword):
                 flows[(i, o)] = om.flows[i, o]
 
     else:
-        for (i, o) in flows:
+        for i, o in flows:
             if not hasattr(flows[i, o], keyword):
                 raise AttributeError(
                     (

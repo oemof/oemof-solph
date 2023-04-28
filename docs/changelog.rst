@@ -10,6 +10,7 @@ These are new features and improvements of note in each release
 
 
 .. include::  whatsnew/v0-5-0.rst
+.. include::  whatsnew/v0-4-5.rst
 .. include::  whatsnew/v0-4-4.rst
 .. include::  whatsnew/v0-4-2.rst
 .. include::  whatsnew/v0-4-1.rst

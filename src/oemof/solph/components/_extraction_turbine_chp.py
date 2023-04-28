@@ -37,7 +37,7 @@ class ExtractionTurbineCHP(Transformer):
     The conversion factors have to be defined for the maximum tapped flow (
     full CHP mode) and for no tapped flow (full condensing mode). Even though,
     it is possible to limit the variability of the tapped flow, so that the
-    full condensing might never be reached.
+    full condensing mode will never be reached.
 
     Parameters
     ----------
@@ -54,7 +54,7 @@ class ExtractionTurbineCHP(Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :class:`.ExtractionTurbineCHPBlock`
+     * :py:class:`~oemof.solph.components.extraction_turbine_chp.ExtractionTurbineCHPBlock`
 
     Examples
     --------
@@ -70,8 +70,22 @@ class ExtractionTurbineCHP(Transformer):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """  # noqa: E501
 
-    def __init__(self, conversion_factor_full_condensation, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        conversion_factor_full_condensation,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            conversion_factors=conversion_factors,
+            custom_attributes=custom_attributes,
+        )
         self.conversion_factor_full_condensation = {
             k: solph_sequence(v)
             for k, v in conversion_factor_full_condensation.items()
@@ -82,10 +96,51 @@ class ExtractionTurbineCHP(Transformer):
 
 
 class ExtractionTurbineCHPBlock(ScalarBlock):
-    r"""Block for the linear relation of nodes with type
-    :class:`oemof.solph.components.experimental._ExtractionTurbineCHP`
+    r"""Block for all instances of
+    :class:`~oemof.solph.components.experimental._ExtractionTurbineCHP`
 
-    **The following two constraints are created:**
+    **Variables**
+
+    The following variables are used:
+
+    * :math:`\dot H_{Fuel}`
+
+        Fuel input flow, represented in code as `flow[i, n, p, t]`
+
+    * :math:`P_{el}`
+
+        Electric power outflow, represented in code as
+        `flow[n, main_output, p, t]`
+
+    * :math:`\dot Q_{th}`
+
+        Thermal output flow, represented in code as
+        `flow[n, tapped_output, p, t]`
+
+    **Parameters**
+
+    The following parameters are created as attributes of
+    :attr:`om.ExtractionTurbineCHP`:
+
+    * :math:`\eta_{el,woExtr}`
+
+        Electric efficiency without heat extraction, represented in code as
+        `conversion_factor_full_condensation[n, t]`
+
+    * :math:`\eta_{el,maxExtr}`
+
+        Electric efficiency with maximal heat extraction, represented in code
+        as `conversion_factors[main_output][n, t]`
+
+    * :math:`\eta_{th,maxExtr}`
+
+        Thermal efficiency with maximal heat extraction, represented in code
+        as `conversion_factors[tapped_output][n, t]`
+
+    **Constraints**
+
+    The following constraints are created for all
+    instances of :class:`oemof.solph.components.ExtractionTurbineCHP`:
 
     .. _ETCHP-equations:
 
@@ -95,18 +150,22 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
                  {\eta_{el,woExtr}(t)} \\
             &
-            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b =
-               \dot Q_{th}(t) \cdot
-               \frac{\eta_{el,maxExtr}(t)}
-                 {\eta_{th,maxExtr}(t)}
+            (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
 
-    where :math:`\beta` is defined as:
+    where:
 
-         .. math::
-            \beta(t) = \frac{\eta_{el,woExtr}(t) -
+    .. math::
+
+        \beta(t) = \frac{\eta_{el,woExtr}(t) -
             \eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
 
-    where the first equation is the result of the relation between the input
+    and:
+
+    .. math::
+
+        C_b = \frac{\eta_{el,maxExtr}(t)}{\eta_{th,maxExtr}(t)}
+
+    The first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
     output flows relate to each other, and the symbols used are defined as
     follows (with Variables (V) and Parameters (P)):
@@ -114,20 +173,20 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
     ========================= ============================================ ==== =========
     symbol                    attribute                                    type explanation
     ========================= ============================================ ==== =========
-    :math:`\dot H_{Fuel}`     `flow[i, n, p, t]`                           V    fuel input flow
+    :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
 
-    :math:`P_{el}`            `flow[n, main_output, p, t]`                 V    electric power
+    :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
 
-    :math:`\dot Q_{th}`       `flow[n, tapped_output, p, t]`               V    thermal output
+    :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
 
     :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
 
     :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
-                                                                                without heat extraction
+                                                                                        without heat extraction
     :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
-                                                                                with max heat extraction
+                                                                                        with max heat extraction
     :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
-                                                                                maximal heat extraction
+                                                                                        maximal heat extraction
     ========================= ============================================ ==== =========
 
     """  # noqa: E501

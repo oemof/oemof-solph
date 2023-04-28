@@ -8,11 +8,12 @@ Welcome to oemof's documentation!
 =================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    readme
    usage
    reference/index
+   examples/index
    contributing
    authors
    changelog

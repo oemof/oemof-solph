@@ -53,7 +53,8 @@ class BaseModel(po.ConcreteModel):
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed, `timeincrement` will be used which
-        is calculated from the freq length of the energy system timeindex.
+        is calculated from the freq length of the energy system timeindex or
+        can be directly passed as a sequence.
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
@@ -77,7 +78,6 @@ class BaseModel(po.ConcreteModel):
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
         Store the reduced costs of the model if pyomo suffix is set to IMPORT
-
     """
 
     # The default list of constraint groups to be used for a model
@@ -157,8 +157,9 @@ class BaseModel(po.ConcreteModel):
     def _add_parent_block_variables(self):
         """Method to create all variables located at the parent block,
         i.e. the model itself as these variables  are to be shared across
-        all model components. See the class
-        :py:class:~oemof.solph._models.Model for the `flow` variable created.
+        all model components.
+        See the class :py:class:~oemof.solph._models.Model
+        for the `flow` variable created.
         """
         pass
 
@@ -168,7 +169,6 @@ class BaseModel(po.ConcreteModel):
         constraints from the buses, components and flows blocks
         and adds them to the model.
         """
-
         for group in self._constraint_groups:
             # create instance for block
             block = group()
@@ -199,13 +199,10 @@ class BaseModel(po.ConcreteModel):
         """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
-
         """
         # shadow prices
-        del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
         # reduced costs
-        del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
@@ -237,7 +234,6 @@ class BaseModel(po.ConcreteModel):
             \{"interior":" "} results in "--interior"
             \Gurobi solver takes numeric parameter values such as
             {"method": 2}
-
         """
         solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
@@ -412,11 +408,7 @@ class Model(BaseModel):
         )
 
         self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if hasattr(v, "bidirectional")
-            ],
+            initialize=[k for (k, v) in self.flows.items() if v.bidirectional],
             ordered=True,
             dimen=2,
             within=self.FLOWS,
@@ -424,9 +416,7 @@ class Model(BaseModel):
 
         self.UNIDIRECTIONAL_FLOWS = po.Set(
             initialize=[
-                k
-                for (k, v) in self.flows.items()
-                if not hasattr(v, "bidirectional")
+                k for (k, v) in self.flows.items() if not v.bidirectional
             ],
             ordered=True,
             dimen=2,
@@ -438,7 +428,7 @@ class Model(BaseModel):
         indexed by FLOWS and TIMEINDEX."""
         self.flow = po.Var(self.FLOWS, self.TIMEINDEX, within=po.Reals)
 
-        for (o, i) in self.FLOWS:
+        for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for p, t in self.TIMEINDEX:

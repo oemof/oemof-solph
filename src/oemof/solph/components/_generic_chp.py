@@ -27,7 +27,7 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 
 
 class GenericCHP(network.Transformer):
@@ -82,8 +82,8 @@ class GenericCHP(network.Transformer):
         and `oemof.solph.Flow` objects for the heat output.
         Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
-    Beta : list of numerical values
-        Beta values in same dimension as all other parameters (length of
+    beta : list of numerical values
+        beta values in same dimension as all other parameters (length of
         optimization period).
     back_pressure : boolean
         Flag to use back-pressure characteristics. Set to `True` and
@@ -104,27 +104,40 @@ class GenericCHP(network.Transformer):
     >>> ccet = solph.components.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
     ...    fuel_input={bgas: solph.flows.Flow(
-    ...        H_L_FG_share_max=[0.183])},
+    ...        custom_attributes={"H_L_FG_share_max": [0.183]})},
     ...    electrical_output={bel: solph.flows.Flow(
-    ...        P_max_woDH=[155.946],
-    ...        P_min_woDH=[68.787],
-    ...        Eta_el_max_woDH=[0.525],
-    ...        Eta_el_min_woDH=[0.444])},
+    ...        custom_attributes={
+    ...            "P_max_woDH": [155.946],
+    ...            "P_min_woDH": [68.787],
+    ...            "Eta_el_max_woDH": [0.525],
+    ...            "Eta_el_min_woDH": [0.444],
+    ...        })},
     ...    heat_output={bth: solph.flows.Flow(
-    ...        Q_CW_min=[10.552])},
-    ...    Beta=[0.122], back_pressure=False)
+    ...        custom_attributes={"Q_CW_min": [10.552]})},
+    ...    beta=[0.122], back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        fuel_input,
+        electrical_output,
+        heat_output,
+        beta,
+        back_pressure,
+        label=None,
+        custom_attributes=None,
+    ):
+        if custom_attributes is None:
+            custom_attributes = {}
+        super().__init__(label, **custom_attributes)
 
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.heat_output = kwargs.get("heat_output")
-        self.Beta = solph_sequence(kwargs.get("Beta"))
-        self.back_pressure = kwargs.get("back_pressure")
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.heat_output = heat_output
+        self.beta = sequence(beta)
+        self.back_pressure = back_pressure
         self._alphas = None
 
         # map specific flows to standard API
@@ -132,8 +145,8 @@ class GenericCHP(network.Transformer):
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
 
-        self.outputs.update(kwargs.get("electrical_output"))
-        self.outputs.update(kwargs.get("heat_output"))
+        self.outputs.update(electrical_output)
+        self.outputs.update(heat_output)
 
     def _calculate_alphas(self):
         """
@@ -263,44 +276,27 @@ class GenericCHPBlock(ScalarBlock):
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    =============================== ======================= ==== =======================
+    =============================== ======================= ==== =============================================
     math. symbol                    attribute               type explanation
-    =============================== ======================= ==== =======================
-    :math:`\dot{H}_{F}`             `H_F[n,t]`              V    input of enthalpy
-                                                                 through fuel input
-    :math:`P_{el}`                  `P[n,t]`                V    provided
-                                                                 electric power
-    :math:`P_{el,woDH}`             `P_woDH[n,t]`           V    electric power without
-                                                                 district heating
-    :math:`P_{el,min,woDH}`         `P_min_woDH[n,t]`       P    min. electric power
-                                                                 without district heating
-    :math:`P_{el,max,woDH}`         `P_max_woDH[n,t]`       P    max. electric power
-                                                                 without district heating
+    =============================== ======================= ==== =============================================
+    :math:`\dot{H}_{F}`             `H_F[n,t]`              V    input of enthalpy through fuel input
+    :math:`P_{el}`                  `P[n,t]`                V    provided electric power
+    :math:`P_{el,woDH}`             `P_woDH[n,t]`           V    electric power without district heating
+    :math:`P_{el,min,woDH}`         `P_min_woDH[n,t]`       P    min. electric power without district heating
+    :math:`P_{el,max,woDH}`         `P_max_woDH[n,t]`       P    max. electric power without district heating
     :math:`\dot{Q}`                 `Q[n,t]`                V    provided heat
-
-    :math:`\dot{Q}_{CW, min}`       `Q_CW_min[n,t]`         P    minimal therm. condenser
-                                                                 load to cooling water
-    :math:`\dot{H}_{L,FG,min}`      `H_L_FG_min[n,t]`       V    flue gas enthalpy loss
-                                                                 at min heat extraction
-    :math:`\dot{H}_{L,FG,max}`      `H_L_FG_max[n,t]`       V    flue gas enthalpy loss
-                                                                 at max heat extraction
-    :math:`\dot{H}_{L,FG,sharemin}` `H_L_FG_share_min[n,t]` P    share of flue gas loss
-                                                                 at min heat extraction
-    :math:`\dot{H}_{L,FG,sharemax}` `H_L_FG_share_max[n,t]` P    share of flue gas loss
-                                                                 at max heat extraction
-    :math:`Y`                       `Y[n,t]`                V    status variable
-                                                                 on/off
-    :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient
-                                                                 describing efficiency
-    :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient
-                                                                 describing efficiency
-    :math:`\beta`                   `Beta[n,t]`             P    power loss index
-
-    :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel
-                                                                 flow w/o distr. heating
-    :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
-                                                                 flow w/o distr. heating
-    =============================== ======================= ==== =======================
+    :math:`\dot{Q}_{CW, min}`       `Q_CW_min[n,t]`         P    minimal therm. condenser load to cooling water
+    :math:`\dot{H}_{L,FG,min}`      `H_L_FG_min[n,t]`       V    flue gas enthalpy loss at min heat extraction
+    :math:`\dot{H}_{L,FG,max}`      `H_L_FG_max[n,t]`       V    flue gas enthalpy loss at max heat extraction
+    :math:`\dot{H}_{L,FG,sharemin}` `H_L_FG_share_min[n,t]` P    share of flue gas loss at min heat extraction
+    :math:`\dot{H}_{L,FG,sharemax}` `H_L_FG_share_max[n,t]` P    share of flue gas loss at max heat extraction
+    :math:`Y`                       `Y[n,t]`                V    status variable on/off
+    :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient describing efficiency
+    :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient describing efficiency
+    :math:`\beta`                   `beta[n,t]`             P    power loss index
+    :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel flow w/o distr. heating
+    :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel flow w/o distr. heating
+    =============================== ======================= ==== =============================================
 
     """  # noqa: E501
     CONSTRAINT_GROUP = True
@@ -391,7 +387,7 @@ class GenericCHPBlock(ScalarBlock):
             expr = 0
             expr += -self.H_F[n, t]
             expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            expr += n.alphas[1][t] * (self.P[n, t] + n.beta[t] * self.Q[n, t])
             return expr == 0
 
         self.H_F_2 = Constraint(

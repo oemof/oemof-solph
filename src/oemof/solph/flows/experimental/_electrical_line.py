@@ -58,9 +58,27 @@ class ElectricalLine(Flow):
 
     """  # noqa: E501
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(
+            nominal_value=kwargs.get("nominal_value"),
+            variable_costs=kwargs.get("variable_costs", 0),
+            min=kwargs.get("min"),
+            max=kwargs.get("max"),
+            fix=kwargs.get("fix"),
+            positive_gradient_limit=kwargs.get("positive_gradient_limit"),
+            negative_gradient_limit=kwargs.get("negative_gradient_limit"),
+            full_load_time_max=kwargs.get("full_load_time_max"),
+            full_load_time_min=kwargs.get("full_load_time_min"),
+            integer=kwargs.get("integer", False),
+            bidirectional=kwargs.get("bidirectiona", False),
+            investment=kwargs.get("investment"),
+            nonconvex=kwargs.get("nonconvex"),
+            custom_attributes=kwargs.get("costom_attributes"),
+        )
         self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+
+        self.input = kwargs.get("input")
+        self.output = kwargs.get("output")
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:

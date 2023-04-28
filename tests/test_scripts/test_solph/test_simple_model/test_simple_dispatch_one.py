@@ -11,9 +11,6 @@ oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 SPDX-License-Identifier: MIT
 """
 
-from nose.tools import eq_
-from oemof.network.network import Node
-
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import processing
@@ -29,8 +26,6 @@ def test_dispatch_one_time_step(solver="cbc"):
     """Create an energy system and optimize the dispatch at least costs."""
 
     # ######################### create energysystem components ################
-    Node.registry = None
-
     # resource buses
     bgas = Bus(label="gas", balanced=False)
 
@@ -121,4 +116,4 @@ def test_dispatch_one_time_step(solver="cbc"):
     }
 
     for key in test_results.keys():
-        eq_(int(round(results[key])), int(round(test_results[key])))
+        assert int(round(results[key])) == int(round(test_results[key]))

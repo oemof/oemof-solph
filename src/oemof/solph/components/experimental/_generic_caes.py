@@ -57,8 +57,6 @@ class GenericCAES(on.Transformer):
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.generic_caes.GenericCAES`
 
-    TODO: Add description for constraints. See referenced paper until then!
-
     Examples
     --------
 
@@ -100,7 +98,6 @@ class GenericCAES(on.Transformer):
     """
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         self.electrical_input = kwargs.get("electrical_input")
@@ -295,17 +292,18 @@ class GenericCAESBlock(ScalarBlock):
         compression power"
         ":math:`r_{cmp\_tes}`", "`cmp_q_tes_share[n,t]`", "P", "Ratio
         between waste heat flow and heat flow into TES"
-        ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "Ratio
-        between external heat flow into expansion and heat flows from TES and
-        additional source"
+        ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "
+        | Ratio between external heat flow into expansion
+        | and heat flows from TES and additional source"
         ":math:`\tau`", "`m.timeincrement[n,t]`", "P", "Time interval
         length"
         ":math:`TES_{fil\_max}`", "`tes_level_max[n,t]`", "P", "Max.
         filling level of TES"
         ":math:`CAS_{fil\_max}`", "`cav_level_max[n,t]`", "P", "Max.
         filling level of TES"
-        ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
-        (loss factor to take intertemporal losses into account)"
+        ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "
+        | Temporal efficiency
+        | (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
         `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
@@ -313,7 +311,7 @@ class GenericCAESBlock(ScalarBlock):
         `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
+        `flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
         (external) into Expansion"
 
     """

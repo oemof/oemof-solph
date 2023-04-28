@@ -61,6 +61,14 @@ class TestTransformerClass:
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
+    def test_transformer_missing_output_create_empty_dict(self):
+        trfr = solph.components.Transformer(inputs={})
+        assert trfr.outputs == {}
+
+    def test_transformer_missing_input_create_empty_dict(self):
+        trfr = solph.components.Transformer(outputs={})
+        assert trfr.inputs == {}
+
 
 def test_wrong_combination_invest_and_nominal_value():
     msg = "Using the investment object the nominal_value"
@@ -126,9 +134,7 @@ def test_attributes_needing_nominal_value_get_it():
 
 
 def test_min_max_values_for_bidirectional_flow():
-    a = solph.flows.Flow(
-        bidirectional=True,
-    )  # use default values
+    a = solph.flows.Flow(bidirectional=True)  # use default values
     b = solph.flows.Flow(
         bidirectional=True, nominal_value=1, min=-0.8, max=0.9
     )
@@ -138,23 +144,3 @@ def test_min_max_values_for_bidirectional_flow():
     assert b.bidirectional
     assert b.max[0] == 0.9
     assert b.min[0] == -0.8
-
-
-def test_deprecated_actual_value():
-    """Deprecated error for actual_warning is not raised correctly."""
-    msg = "The `actual_value` attribute has been renamed to `fix`"
-    with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(actual_value=5)
-
-
-def test_warning_fixed_still_used():
-    """If fixed attribute is still used, a warning is raised."""
-    msg = (
-        "The `fixed` attribute is deprecated.\nIf you have defined "
-        "the `fix` attribute the flow variable will be fixed.\n"
-        "The `fixed` attribute does not change anything."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.flows.Flow(nominal_value=1, fixed=True)
-        assert len(w) != 0
-        assert msg == str(w[-1].message)

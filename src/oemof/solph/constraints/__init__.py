@@ -3,6 +3,8 @@
 Additional constraints to be used in an oemof energy model.
 """
 
+from .equate_flows import equate_flows
+from .equate_flows import equate_flows_by_keyword
 from .equate_variables import equate_variables
 from .flow_count_limit import limit_active_flow_count
 from .flow_count_limit import limit_active_flow_count_by_keyword
@@ -16,6 +18,8 @@ from .investment_limit import investment_limit_per_period
 from .shared_limit import shared_limit
 
 __all__ = [
+    "equate_flows",
+    "equate_flows_by_keyword",
     "equate_variables",
     "limit_active_flow_count",
     "limit_active_flow_count_by_keyword",

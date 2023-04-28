@@ -26,7 +26,7 @@ def investment_limit(model, limit=None):
 
     Parameters
     ----------
-    model : oemof.solph.Model
+    model : oemof.solph._models.Model
         Model to which the constraint is added
     limit : float
         Absolute limit of the investment (i.e. RHS of constraint)
@@ -130,7 +130,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
-    calling the :attr:`oemof.solph.Model.invest_limit_${keyword}()`.
+    calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
 
     .. math::
         \sum_{p \in \textrm{PERIODS}}
@@ -176,10 +176,18 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> bus = solph.buses.Bus(label='bus_1')
     >>> sink = solph.components.Sink(label="sink", inputs={bus:
     ...     solph.flows.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
-    >>> src1 = solph.components.Source(label='source_0', outputs={bus: solph.flows.Flow(
-    ...     investment=solph.Investment(ep_costs=50, space=4))})
-    >>> src2 = solph.components.Source(label='source_1', outputs={bus: solph.flows.Flow(
-    ...     investment=solph.Investment(ep_costs=100, space=1))})
+    >>> src1 = solph.components.Source(
+    ...     label='source_0', outputs={bus: solph.flows.Flow(
+    ...         investment=solph.Investment(
+    ...             ep_costs=50, custom_attributes={"space": 4},
+    ...         ))
+    ...     })
+    >>> src2 = solph.components.Source(
+    ...     label='source_1', outputs={bus: solph.flows.Flow(
+    ...         investment=solph.Investment(
+    ...              ep_costs=100, custom_attributes={"space": 1},
+    ...         ))
+    ...     })
     >>> es.add(bus, sink, src1, src2)
     >>> model = solph.Model(es)
     >>> model = solph.constraints.additional_investment_flow_limit(
@@ -190,7 +198,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     """  # noqa: E501
     invest_flows = {}
 
-    for (i, o) in model.flows:
+    for i, o in model.flows:
         if hasattr(model.flows[i, o].investment, keyword):
             invest_flows[(i, o)] = model.flows[i, o].investment
 

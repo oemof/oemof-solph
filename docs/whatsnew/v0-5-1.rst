@@ -1,5 +1,5 @@
-v0.5.1
-------
+v0.5.1 (?)
+----------
 
 
 API changes
@@ -32,6 +32,7 @@ Documentation
 Bug fixes
 #########
 
+* Fixed error when calling `oemof_installation_test` as console script.
 * Correct several typos in the docs.
 
 Testing
@@ -48,4 +49,5 @@ Contributors
 ############
 
 * Johannes Kochems
+* Tobi Rohrer
 
