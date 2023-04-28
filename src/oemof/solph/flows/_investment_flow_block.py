@@ -171,7 +171,6 @@ class InvestmentFlowBlock(ScalarBlock):
             ]
         )
 
-
     def _create_variables(self, _):
         r"""Creates all variables for investment flows.
 

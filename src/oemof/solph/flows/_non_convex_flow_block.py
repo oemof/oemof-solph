@@ -470,7 +470,7 @@ class NonConvexFlowBlock(ScalarBlock):
             Rule definition for min-downtime constraints of non-convex flows.
             """
             if self._time_step_allows_flexibility(
-                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS[-1]
+                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS.at(-1)
             ):
                 expr = 0
                 expr += (
@@ -515,7 +515,7 @@ class NonConvexFlowBlock(ScalarBlock):
             Rule definition for min-uptime constraints of non-convex flows.
             """
             if self._time_step_allows_flexibility(
-                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS[-1]
+                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS.at(-1)
             ):
                 expr = 0
                 expr += (
@@ -547,7 +547,7 @@ class NonConvexFlowBlock(ScalarBlock):
 
         def _shutdown_rule(_, i, o, t):
             """Rule definition for shutdown constraints of non-convex flows."""
-            if t > m.TIMESTEPS[1]:
+            if t > m.TIMESTEPS.at(1):
                 expr = (
                     self.shutdown[i, o, t]
                     >= self.status[i, o, t - 1] - self.status[i, o, t]
@@ -573,7 +573,7 @@ class NonConvexFlowBlock(ScalarBlock):
 
         def _startup_rule(_, i, o, t):
             """Rule definition for startup constraint of nonconvex flows."""
-            if t > m.TIMESTEPS[1]:
+            if t > m.TIMESTEPS.at(1):
                 expr = (
                     self.startup[i, o, t]
                     >= self.status[i, o, t] - self.status[i, o, t - 1]

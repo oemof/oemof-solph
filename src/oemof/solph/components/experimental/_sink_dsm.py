@@ -1500,7 +1500,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
@@ -1576,7 +1575,6 @@ class SinkDSMDIWBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
-
                         # DSM up
                         lhs = self.dsm_up[g, t] * g.efficiency
                         # DSM down
@@ -1661,7 +1659,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                     elif (
                         g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
                     ):
-
                         # DSM down
                         lhs = (
                             sum(
@@ -1734,7 +1731,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                     elif (
                         g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
                     ):
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -1793,7 +1789,6 @@ class SinkDSMDIWBlock(ScalarBlock):
                     if g.recovery_time_shift not in [None, 0]:
                         # main use case
                         if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shift:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -2324,7 +2319,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
-
                         # Inflow from bus
                         lhs = m.flow[g.inflow, g, p, t]
                         # Demand +- DSM
@@ -2485,7 +2479,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     elif (
                         g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
                     ):
-
                         # DSM down
                         lhs = (
                             sum(
@@ -2561,7 +2554,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     elif (
                         g.delay_time < tt <= m.TIMESTEPS.at(-1) - g.delay_time
                     ):
-
                         # DSM up/down
                         lhs = (
                             self.dsm_up[g, tt]
@@ -2626,7 +2618,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     if g.recovery_time_shift not in [None, 0]:
                         # main use case
                         if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shift:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_up[g, tt]
@@ -2686,7 +2677,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     if g.shed_eligibility:
                         # main use case
                         if t <= m.TIMESTEPS.at(-1) - g.recovery_time_shed:
-
                             # DSM up
                             lhs = sum(
                                 self.dsm_do_shed[g, tt]
@@ -4356,7 +4346,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             BusBlock outflow == Demand +- DR (i.e. effective Sink consumption)
             """
             for p, t in m.TIMEINDEX:
-
                 for g in group:
                     # outflow from bus
                     lhs = m.flow[g.inflow, g, p, t]

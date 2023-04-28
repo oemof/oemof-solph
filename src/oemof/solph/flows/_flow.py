@@ -20,7 +20,7 @@ SPDX-License-Identifier: MIT
 import math
 from collections.abc import Iterable
 from warnings import warn
-import debugging
+from oemof.tools import debugging
 
 import numpy as np
 from oemof.network import network as on

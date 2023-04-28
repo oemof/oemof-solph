@@ -17,7 +17,6 @@ from os import path as ospath
 
 import pandas as pd
 import pytest
-from nose.tools import eq_
 from oemof.network.network import Node
 
 from oemof import solph
@@ -115,7 +114,7 @@ class TestsMultiPeriodConstraint:
                         + 1
                         for nri in negative_result_indices
                     ]
-                    for (start, end) in zip(
+                    for start, end in zip(
                         equation_start_indices, negative_result_indices
                     ):
                         for n in range(start, end):
