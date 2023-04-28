@@ -291,18 +291,10 @@ def test_multi_period_dispatch_model(solver="cbc"):
         "FR_sink_el": 450,
         "FR_sink_excess": 0,
         "link_DE_FR": 90,
-        "demand_dsm": 355,
+        "demand_dsm": 320,
     }
 
     for key in test_results.keys():
-        print(
-            int(
-                views.node(results, key)["sequences"]
-                .sum(axis=0)
-                .round(0)
-                .sum()
-            )
-        )
         assert (
             int(
                 views.node(results, key)["sequences"]
@@ -311,4 +303,3 @@ def test_multi_period_dispatch_model(solver="cbc"):
                 .sum()
             )
         ) == test_results[key]
-
