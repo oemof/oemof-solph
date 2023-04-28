@@ -1826,12 +1826,12 @@ class TestsConstraint:
 
         source = solph.components.Source(
             label="pv_source",
-            inputs={
+            outputs={
                 bel: solph.flows.Flow(
                     nominal_value=100,
                     variable_costs=20,
-                    space=40,
                     fix=[0.3, 0.5, 0.8],
+                    custom_attributes={"space": 40},
                 )
             },
         )
