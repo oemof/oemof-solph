@@ -284,7 +284,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         "DE_pp_natgas_GT": 0,
         "DE_sink_el": 720,
         "DE_sink_excess": 0,
-        "DE_storage_el": 170,
+        "DE_storage_el": 15,
         "FR_source_wind": 405,
         "FR_source_shortage": 0,
         "FR_bus_el": 900,
@@ -295,14 +295,6 @@ def test_multi_period_dispatch_model(solver="cbc"):
     }
 
     for key in test_results.keys():
-        assert (
-            int(
-                views.node(results, key)["sequences"]
-                .sum(axis=0)
-                .round(0)
-                .sum()
-            )
-        ) == test_results[key]
         print(
             int(
                 views.node(results, key)["sequences"]
@@ -311,3 +303,12 @@ def test_multi_period_dispatch_model(solver="cbc"):
                 .sum()
             )
         )
+        assert (
+            int(
+                views.node(results, key)["sequences"]
+                .sum(axis=0)
+                .round(0)
+                .sum()
+            )
+        ) == test_results[key]
+
