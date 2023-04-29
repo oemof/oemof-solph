@@ -386,9 +386,7 @@ class Model(BaseModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(
-                initialize=[0]
-            )
+            self.PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
                 [k] * len(self.es.periods[k]) for k in self.es.periods.keys()

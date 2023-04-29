@@ -362,6 +362,7 @@ class SimpleFlowBlock(ScalarBlock):
         )
 
         if m.es.periods is not None:
+
             def _lifetime_output_rule(block):
                 """Force flow value to zero when lifetime is reached"""
                 for inp, out in self.LIFETIME_FLOWS:
