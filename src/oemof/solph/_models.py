@@ -286,6 +286,20 @@ class Model(BaseModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
+    discount_rate : float or None
+        The rate used for discounting in a multi-period model.
+        A 2% discount rate needs to be defined as 0.02.
+
+    Note
+    ----
+
+    * The discount rate is only applicable for a multi-period model.
+    * If you want to work with costs data in nominal terms,
+      you should specify a discount rate.
+    * By default, there is a discount rate of 2% in a multi-period model.
+    * If you want to provide your costs data in real terms,
+      just specify `discount_rate = 0`, i.e. effectively there will be
+      no discounting.
 
 
     **The following basic sets are created**:

@@ -1000,7 +1000,7 @@ mathematical background, like variables and constraints, which are used.
 
 Using the multi-period (investment) mode (experimental)
 -------------------------------------------------------
-Sometimes you might be interested in how energy systems could evolve in the longer-term until 2045 or 2050 to meet some
+Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
 While in principle, you could try to model this in oemof using the standard investment mode described above (see :ref:`investment_mode_label`),
@@ -1008,10 +1008,10 @@ you would make the implicit assumption that your entire system is built at the s
 To address this shortcoming, the multi-period (investment) feature has been introduced. Be aware that it is still experimental.
 So feel free to report any bugs or unexpected behaviour if you come across them.
 
-While you can define a dispatch-ony multi-period system, it doesn't make much sense. The power of the multi-period feature
+While in principle, you can define a dispatch-only multi-period system, this doesn't make much sense. The power of the multi-period feature
 only unfolds if you look at long-term investments. Let's see how.
 
-First, you start by defining your energy system again, but you
+First, you start by defining your energy system as you might have done before, but you
 
 * choose a longer-term time horizon (spanning multiple years, i.e. multiple periods) and
 * set the `multi_period` attribute of your energy system to True.
@@ -1024,7 +1024,7 @@ First, you start by defining your energy system again, but you
     my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
     my_energysystem = solph.EnergySystem(timeindex=my_index, multi_period=True)
 
-By default, the years of your timeindex will be used as periods. So in this example 2013 is period 0 and 2014 is period 1.
+By default, the years of your timeindex will be used as periods. So in this example, 2013 is period 0 and 2014 is period 1.
 You could also define periods of your energy system explicitly. Please refer to the API reference on :py:class:`~oemof.solph.energy_system.EnergySystem` class for that.
 
 Then you add all the *components* and *buses* to your energy system, just as you are used to with, but with few additions.
@@ -1101,17 +1101,42 @@ Here is an example
 
     The `ep_costs` attribute for investments is used in a different way in a multi-period model. Instead
     of periodical costs, it depicts (nominal or real) investment expenses, so actual Euros you have to pay per kW or MW
-    installed.
+    (or whatever power or energy unit) installed. Also, you can depict a change in investment expenses over time,
+    so instead of providing a scalar value, you could define a list with investment expenses with one value for each period modelled.
 
     Annuities are calculated within the model. You do not have to do that.
     Also the model takes care of discounting future expenses / cashflows.
+
+Below is what it would look like if you altered `ep_costs` and `fixed_costs` per period. This can be done by simply
+providing a list. Note that the length of the list must equal the number of periods of your model.
+This would mean that for investments in the particular period, these values would be the one that are applied over their lifetime.
+
+.. code-block:: python
+
+    hydrogen_power_plant = solph.components.Transformer(
+        label="hydrogen_pp",
+        inputs={hydrogen_bus: solph.flows.Flow()},
+        outputs={
+            electricity_bus: solph.flows.Flow(
+                investment=solph.Investment(
+                    maximum=1000,
+                    ep_costs=[1e6, 1.1e6],
+                    lifetime=30,
+                    interest_rate=0.06,
+                    fixed_costs=[100, 110],
+                ),
+                variable_costs=3,
+            )
+        },
+        conversion_factors={electricity_bus: 0.6},
+    )
 
 For components that is not invested into, you also can specify some additional attributes for their inflows and outflows:
 
 * You can specify a `lifetime` attribute. This can be used to depict existing plants going offline when reaching their lifetime.
 * You can define an initial `age`. Also, this can be used for existing plants.
 * You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage. How they are handled
-  depends on whether the flow has a limit or unlimited lifetime.
+  depends on whether the flow has a limited or an unlimited lifetime.
 
 .. code-block:: python
 
@@ -1163,8 +1188,8 @@ So for sequences, it is all the same, while for scalar values, we now have value
 
 Besides the `invest` variable, new variables are introduced as well. These are:
 
-* `total`: The total capacity installed
-* `old`: Capacity to be decommissioned in a given period
+* `total`: The total capacity installed, i.e. how much is actually there in a given period.
+* `old`: (Overall) capacity to be decommissioned in a given period.
 * `old_end`: Endogenous capacity to be decommissioned in a given period. This is capacity that has been invested into
   in the model itself.
 * `old_exo`: Exogenous capacity to be decommissioned in a given period. This is capacity that was already existing and
@@ -1173,11 +1198,20 @@ Besides the `invest` variable, new variables are introduced as well. These are:
 .. note::
 
     * You can specify a `discount_rate` for the model. If you do not do so, 0.02 will be used as a default, corresponding
-      to sort of a social discount rate.
+      to sort of a social discount rate. If you work with costs in real terms, discounting is obsolete, so define
+      `discount_rate = 0` in that case.
     * You can specify an `interest_rate` for every investment object. If you do not do so, it will be chosen the same
-      as the model's `discount_rate`. This corresponds to a social planner point of view.
+      as the model's `discount_rate`. You could use this default to model a perfect competition administered by some sort of
+      social planner, but even in a social planner setting, you might want to deviate from the `discount_rate`
+      value and/or discriminate among technologies with different risk profiles and hence different interest requirements.
     * For storage units, the `initial_content` is not allowed combined with multi-period investments.
       The storage inflow and outflow are forced to zero until the storage unit is invested into.
+    * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
+      you could use the `timeincrement` attribute of the energy system to model different weightings. Be aware that this
+      has not yet been tested.
+    * Also please be aware, that periods correspond to years by default. You could also choose
+      monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
+      this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
 
 Mixed Integer (Linear) Problems
 -------------------------------
