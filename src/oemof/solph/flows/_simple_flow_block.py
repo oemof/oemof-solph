@@ -361,8 +361,7 @@ class SimpleFlowBlock(ScalarBlock):
             self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule
         )
 
-        if m.es.multi_period:
-
+        if m.es.periods is not None:
             def _lifetime_output_rule(block):
                 """Force flow value to zero when lifetime is reached"""
                 for inp, out in self.LIFETIME_FLOWS:
@@ -452,7 +451,7 @@ class SimpleFlowBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for i, o in m.FLOWS:
                 if m.flows[i, o].variable_costs[0] is not None:
                     for p, t in m.TIMEINDEX:

@@ -563,7 +563,7 @@ class GenericStorageBlock(ScalarBlock):
 
         fixed_costs = 0
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             for n in self.STORAGES:
                 if n.fixed_costs[0] is not None:
                     for p in m.PERIODS:
@@ -1007,7 +1007,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             return None
 
         # ########################## CHECKS ###################################
-        if m.es.multi_period:
+        if m.es.periods is not None:
             for n in group:
                 error = (
                     "For a multi-period investment model, fixed absolute"
@@ -1129,7 +1129,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=0,
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(
                 self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
@@ -1192,7 +1192,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         # multi-period storage implementation for time intervals
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _old_storage_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -1375,7 +1375,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=_storage_balance_rule,
         )
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
 
             def _balanced_storage_rule(block, n):
                 return (
@@ -1518,7 +1518,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             self.NON_CONVEX_INVESTSTORAGES, m.PERIODS, rule=smallest_invest
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _overall_storage_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -1569,7 +1569,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         period_investment_costs = {p: 0 for p in m.PERIODS}
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for n in self.CONVEX_INVESTSTORAGES:
                 for p in m.PERIODS:
                     investment_costs += (

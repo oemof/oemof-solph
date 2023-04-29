@@ -663,7 +663,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for t in m.TIMESTEPS:
                 for g in self.dsm:
                     variable_costs += (
@@ -855,7 +855,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         # Total capacity
         self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
@@ -911,7 +911,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -1124,7 +1124,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             rule=dsm_sum_constraint_rule
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -1174,7 +1174,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for g in self.investdsm:
                 for p in m.PERIODS:
                     if g.investment.ep_costs is not None:
@@ -1898,7 +1898,7 @@ class SinkDSMDIWBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for t in m.TIMESTEPS:
                 for g in self.dsm:
                     variable_costs += (
@@ -2123,7 +2123,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         # Total capacity
         self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             # Old capacity built out of old exogenous and endogenous capacities
             self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
@@ -2184,7 +2184,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -2722,7 +2722,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             rule=shed_limit_constraint_rule
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -2772,7 +2772,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for g in self.investdsm:
                 for p in m.PERIODS:
                     if g.investment.ep_costs is not None:
@@ -3824,7 +3824,7 @@ class SinkDSMDLRBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for t in m.TIMESTEPS:
                 for g in self.DR:
                     variable_costs += (
@@ -4154,7 +4154,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         # Total capacity
         self.total = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
 
@@ -4230,7 +4230,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
         self.total_dsm_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -4948,7 +4948,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             rule=dr_logical_constraint_rule
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -4999,7 +4999,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for g in self.INVESTDR:
                 for p in m.PERIODS:
                     if g.investment.ep_costs is not None:

@@ -343,7 +343,7 @@ class Model(BaseModel):
     def __init__(self, energysystem, discount_rate=None, **kwargs):
         if discount_rate is not None:
             self.discount_rate = discount_rate
-        elif energysystem.multi_period:
+        elif energysystem.periods is not None:
             self.discount_rate = 0.02
             msg = (
                 f"By default, a discount_rate of {self.discount_rate} "
@@ -376,7 +376,7 @@ class Model(BaseModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if not self.es.multi_period:
+        if self.es.periods is None:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
@@ -385,6 +385,9 @@ class Model(BaseModel):
                     )
                 ),
                 ordered=True,
+            )
+            self.PERIODS = po.Set(
+                initialize=[0]
             )
         else:
             nested_list = [
@@ -399,10 +402,9 @@ class Model(BaseModel):
                 ),
                 ordered=True,
             )
-
-        self.PERIODS = po.Set(
-            initialize=sorted(list(set(self.es.periods.keys())))
-        )
+            self.PERIODS = po.Set(
+                initialize=sorted(list(set(self.es.periods.keys())))
+            )
 
         # (Re-)Map timesteps to periods
         timesteps_in_period = {p: [] for p in self.PERIODS}

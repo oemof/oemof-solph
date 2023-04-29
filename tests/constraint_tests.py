@@ -1220,7 +1220,7 @@ class TestsConstraint:
         msg = (
             "investment_limit_per_period is only applicable "
             "for multi-period models.\nIn order to create such a model, "
-            "set attribute `multi_period` of your energy system to True."
+            "explicitly set attribute `periods` of your energy system."
         )
         with pytest.raises(ValueError, match=msg):
             solph.constraints.investment_limit_per_period(om, limit=900)
