@@ -453,7 +453,7 @@ class SinkDSMOemofBlock(ScalarBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
-    .. table:: Variables (V) and Parameters (P)
+    .. table:: Variables (V), Parameters (P) and Sets (S)
         :widths: 1, 1, 1, 1
 
         ================================= ======================== ==== =======================================
@@ -474,7 +474,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         :math:`\tau`                      `shift_interval`         P    | interval (time within which the
                                                                         | energy balance must be levelled out)
         :math:`\eta`                      `efficiency`             P    Efficiency for load shifting processes
-        :math:`\mathbb{T}`                                         P    Time steps of the model
+        :math:`\mathbb{T}`                                         S    Time steps of the model
         :math:`e_{shift}`                 `shift_eligibility`      P    | Boolean parameter indicating if unit can be used
                                                                         | for load shifting
         :math:`e_{shed}`                  `shed_eligibility`       P    | Boolean parameter indicating if unit can be used
@@ -721,6 +721,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
     .. math::
         &
         (1) \quad invest_{min}(p) \leq invest(p) \leq invest_{max}(p) \\
+        & \quad \quad \quad \quad \forall p \in \mathbb{P}
         & \\
         &
         (2) \quad DSM_{t}^{up} = 0 \\
@@ -733,19 +734,19 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         \quad \textrm{if} \quad e_{shed} = \textrm{False} \\
         & \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}(p)
         + DSM_{t}^{up}
-        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed}
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        - DSM_{t}^{do, shift} - DSM_{t}^{do, shed} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
-        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p)
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (6) \quad DSM_{t}^{do, shift} +  DSM_{t}^{do, shed} \leq
-        E_{t}^{do} \cdot (invest + E_{exist})
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        E_{t}^{do} \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (7) \quad  \sum_{t=t_s}^{t_s+\tau} DSM_{t}^{up} \cdot \eta =
@@ -753,26 +754,72 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         & \quad \quad \quad \quad \forall t_s \in
         \{k \in \mathbb{T} \mid k \mod \tau = 0\} \\
 
+
     **The following parts of the objective function are created:**
 
-    * Investment annuity:
+    *Standard model*
 
-    .. math::
-        &
-        invest \cdot costs_{invest} \\
+        * Investment annuity:
 
-    * Variable costs:
+            .. math::
+                P_{invest}(0) \cdot c_{invest}(0)
 
-    .. math::
-        &
-        (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
-        \cdot \omega_{t} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        * Variable costs:
+
+            .. math::
+                &
+                (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t} \\
+                & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+
+    *Multi-period model*
+
+        * Investment annuity:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot A(c_{invest}(p), l, ir) \cdot l
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * :attr:`fixed_costs` not None for investments
+
+            .. math::
+                &
+                (\sum_{pp=year(p)}^{year(p)+l}
+                P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * Variable costs:
+
+            .. math::
+                &
+                (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t}
+                \cdot DF^{-p} \\
+                & \quad \quad \quad \quad
+                \forall p, t \in \textrm{TIMEINDEX} \\
+
+    whereby:
+
+    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+      investment expenses :math:`c_{invest}(p)` lifetime :math:`l`
+      and interest rate :math:`ir`
+    * :math:`DF=(1+dr)` is the discount factor with discount rate
+      :math:`dr`
 
     See remarks in
     :class:`oemof.solph.components.experimental._sink_dsm.SinkDSMOemofBlock`.
+
 
     **Symbols and attribute names of variables and parameters**
 
@@ -782,20 +829,21 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
     * The following variables and parameters are exclusively used for
       investment modeling:
 
-    .. table:: Variables (V) and Parameters (P)
+    .. table:: Variables (V), Parameters (P) and Sets (S)
         :widths: 1, 1, 1, 1
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
         ================================= ======================== ==== =======================================
-        :math:`invest(p)`                 `invest`                 V    | DSM capacity invested into in period p.
+        :math:`P_{invest}(p)`             `invest[p]`              V    | DSM capacity invested into in period p.
                                                                         | Equals to the additionally shiftable resp. sheddable capacity.
-        :math:`invest_{min}(p)`           `investment.minimum`     P    minimum investment in period p
-        :math:`invest_{max}(p)`           `investment.maximum`     P    maximum investment in period p
-        :math:`E_{exist}`                 `investment.existing`    P    existing DSM capacity
-        :math:`s_{flex, up}`              `flex_share_up`          P    share of invested capacity that may be shift upwards at maximum
-        :math:`s_{flex, do}`              `flex_share_do`          P    share of invested capacity that may be shift downwards at maximum
-        :math:`costs_{invest}`            `investment.ep_costs`    P    specific investment annuity
+        :math:`invest_{min}(p)`           `investment.minimum[p]`  P    minimum investment in period p
+        :math:`invest_{max}(p)`           `investment.maximum[p]`  P    maximum investment in period p
+        :math:`P_{total}`                 `investment.total[p]`    P    total DSM capacity
+        :math:`costs_{invest}(p)`         `investment.ep_costs[p]` P    | specific investment annuity (standard model) resp.
+                                                                        | specific investment expenses (multi-period model)
+        :math:`\mathbb{P}`                                         S    Periods of the model
+        :math:`\textrm{TIMEINDEX}`                                 S    Timeindex set of the model (periods, timesteps)
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
@@ -1362,7 +1410,7 @@ class SinkDSMDIWBlock(ScalarBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
-    .. table:: Variables (V) and Parameters (P)
+    .. table:: Variables (V), Parameters (P) and Sets (S)
         :widths: 1, 1, 1, 1
 
         ================================= ======================== ==== =======================================
@@ -1387,7 +1435,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                                                                         | (shifting + shedding)
         :math:`E_{up, max}`               `max_capacity_up`        P    Maximum capacity allowed for a shift upwards
         :math:`\eta`                      `efficiency`             P    Efficiency for load shifting processes
-        :math:`\mathbb{T}`                                         P    Time steps of the model
+        :math:`\mathbb{T}`                                         S    Time steps of the model
         :math:`e_{shift}`                 `shift_eligibility`      P    | Boolean parameter indicating if unit can be used
                                                                         | for load shifting
         :math:`e_{shed}`                  `shed_eligibility`       P    | Boolean parameter indicating if unit can be used
@@ -1959,7 +2007,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
     .. math::
         &
-        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
+        (1) \quad invest_{min}(p) \leq invest(p) \leq invest_{max}(p) \\
+        & \quad \quad \quad \quad \forall p \in \mathbb{P}
         & \\
         &
         (2) \quad DSM_{t}^{up} = 0 \\
@@ -1972,10 +2021,10 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         \quad \textrm{if} \quad e_{shed} = \textrm{False} \\
         & \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}(p)
         + DSM_{t}^{up} -
         \sum_{tt=t-L}^{t+L} DSM_{tt,t}^{do, shift} - DSM_{t}^{do, shed} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (5) \quad DSM_{t}^{up} \cdot \eta =
@@ -1983,33 +2032,34 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
         & \\
         &
-        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot (invest + E_{exist})
+        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p)
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
         & \\
         &
         (7) \quad \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
-        + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot (invest + E_{exist}) \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        + DSM_{tt}^{do, shed} \leq E_{tt}^{do} \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (8) \quad DSM_{tt}^{up} + \sum_{t=tt-L}^{tt+L} DSM_{t,tt}^{do, shift}
         + DSM_{tt}^{do, shed} \\
         & \quad \quad \leq max \{ E_{tt}^{up}, E_{tt}^{do} \}
-        \cdot (invest + E_{exist}) \\
-        & \quad \quad \quad \quad \forall tt \in \mathbb{T} \\
+        \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (9) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{up}
-        \leq E_{t}^{up} \cdot (invest + E_{exist})
+        \leq E_{t}^{up} \cdot P_{total}(p)
         \cdot L \cdot \Delta t \\
-        & \quad \quad \quad \quad \forall tt \in \mathbb{T} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (10) \quad \sum_{tt=t}^{t+R-1} DSM_{tt}^{do, shed}
-        \leq E_{t}^{do} \cdot (invest + E_{exist})
+        \leq E_{t}^{do} \cdot P_{total}(p)
         \cdot t_{shed}
         \cdot \Delta t \\
-        & \quad \quad \quad \quad \forall tt \in \mathbb{T} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
 
     Note
     ----
@@ -2024,22 +2074,69 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
     **The following parts of the objective function are created:**
 
-    * Investment annuity:
+    *Standard model*
 
-    .. math::
-        &
-        invest \cdot costs_{invest} \\
+        * Investment annuity:
 
-    * Variable costs:
+            .. math::
+                P_{invest}(0) \cdot c_{invest}(0)
 
-    .. math::
-        &
-        (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{T} DSM_{tt, t}^{do, shift} \cdot
-        cost_{t}^{dsm, do, shift}
-        + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
-        \cdot \omega_{t} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        * Variable costs:
+
+            .. math::
+                &
+                (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t} \\
+                & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+
+    *Multi-period model*
+
+        * Investment annuity:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot A(c_{invest}(p), l, ir) \cdot l
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * :attr:`fixed_costs` not None for investments
+
+            .. math::
+                &
+                (\sum_{pp=year(p)}^{year(p)+l}
+                P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * Variable costs:
+
+            .. math::
+                &
+                (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t}
+                \cdot DF^{-p} \\
+                & \quad \quad \quad \quad
+                \forall p, t \in \textrm{TIMEINDEX} \\
+
+    whereby:
+
+    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+      investment expenses :math:`c_{invest}(p)` lifetime :math:`l`
+      and interest rate :math:`ir`
+    * :math:`DF=(1+dr)` is the discount factor with discount rate
+      :math:`dr`
+
+    See remarks in
+    :class:`oemof.solph.components.experimental._sink_dsm.SinkDSMOemofBlock`.
+
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -2049,21 +2146,21 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
     * The following variables and parameters are exclusively used for
       investment modeling:
 
-    .. table:: Variables (V) and Parameters (P)
+    .. table:: Variables (V), Parameters (P) and Sets (S)
         :widths: 1, 1, 1, 1
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
         ================================= ======================== ==== =======================================
-        :math:`invest`                    `invest`                 V    | DSM capacity invested in
-                                                                        | Equals to the additionally installed capacity.
-                                                                        | The capacity share eligible for a shift is determined by flex share(s).
-        :math:`invest_{min}`              `investment.minimum`     P    minimum investment
-        :math:`invest_{max}`              `investment.maximum`     P    maximum investment
-        :math:`E_{exist}`                 `investment.existing`    P    existing DSM capacity
-        :math:`s_{flex, up}`              `flex_share_up`          P    share of invested capacity that may be shift upwards at maximum
-        :math:`s_{flex, do}`              `flex_share_do`          P    share of invested capacity that may be shift downwards at maximum
-        :math:`costs_{invest}`            `investment.ep_costs`    P    specific investment annuity
+        :math:`P_{invest}(p)`             `invest[p]`              V    | DSM capacity invested into in period p.
+                                                                        | Equals to the additionally shiftable resp. sheddable capacity.
+        :math:`invest_{min}(p)`           `investment.minimum[p]`  P    minimum investment in period p
+        :math:`invest_{max}(p)`           `investment.maximum[p]`  P    maximum investment in period p
+        :math:`P_{total}`                 `investment.total[p]`    P    total DSM capacity
+        :math:`costs_{invest}(p)`         `investment.ep_costs[p]` P    | specific investment annuity (standard model) resp.
+                                                                        | specific investment expenses (multi-period model)
+        :math:`\mathbb{P}`                                         S    Periods of the model
+        :math:`\textrm{TIMEINDEX}`                                 S    Timeindex set of the model (periods, timesteps)
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
@@ -3040,7 +3137,7 @@ class SinkDSMDLRBlock(ScalarBlock):
 
     **Table: Symbols and attribute names of variables and parameters**
 
-        .. table:: Variables (V), Parameters (P) and additional Sets (S)
+        .. table:: Variables (V), Parameters (P) and (additional) Sets (S)
             :widths: 1, 1, 1, 1
 
             =========================================== ================================= ==== =======================================
@@ -3074,7 +3171,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                                                                                                | (shifting + shedding)
             :math:`E_{up, max}`                         `max_capacity_up`                 P    Maximum capacity allowed for a shift upwards
             :math:`\eta`                                `efficiency`                      P    Efficiency for load shifting processes
-            :math:`\mathbb{T}`                                                            P    Time steps of the model
+            :math:`\mathbb{T}`                                                            S    Time steps of the model
             :math:`e_{shift}`                           `shift_eligibility`               P    | Boolean parameter indicating if unit can be used
                                                                                                | for load shifting
             :math:`e_{shed}`                            `shed_eligibility`                P    | Boolean parameter indicating if unit can be used
@@ -3899,7 +3996,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
     .. math::
         &
-        (1) \quad invest_{min} \leq invest \leq invest_{max} \\
+        (1) \quad invest_{min}(p) \leq invest(p) \leq invest_{max}(p) \\
+        & \quad \quad \quad \quad \forall p \in \mathbb{P}
         & \\
         &
         (2) \quad DSM_{h, t}^{up} = 0 \\
@@ -3911,11 +4009,11 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         \quad \textrm{if} \quad e_{shed} = \textrm{False} \\
         & \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}(p)
         & \quad \quad \quad \quad + \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
         - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (5) \quad DSM_{h, t}^{balanceDo} =
@@ -3939,14 +4037,14 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         &
         (9) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
         + DSM_{h, t}^{balanceUp}) + DSM_{t}^{do, shed}
-        \leq E_{t}^{do} \cdot (invest + E_{exist}) \\
-        & \quad \quad \quad \quad  \forall t \in \mathbb{T} \\
+        \leq E_{t}^{do} \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad  \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (10) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo})
-        \leq E_{t}^{up} \cdot (invest + E_{exist}) \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        \leq E_{t}^{up} \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad  \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (11) \quad \Delta t \cdot \displaystyle\sum_{h=1}^{H_{DR}}
@@ -3962,25 +4060,24 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         & \\
         &
         (13) \quad W_{t}^{levelDo} \leq \overline{E}_{t}^{do}
-        \cdot (invest + E_{exist}) \cdot t_{shift} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        \cdot P_{total}(p) \cdot t_{shift} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (14) \quad W_{t}^{levelUp} \leq \overline{E}_{t}^{up}
-        \cdot (invest + E_{exist}) \cdot t_{shift} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        \cdot P_{total}(p)  \cdot t_{shift} \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
         (15) \quad \displaystyle\sum_{t=0}^{T} DSM_{t}^{do, shed}
-        \leq (invest + E_{exist})
-        \cdot s_{flex, do} \cdot \overline{E}_{t}^{do}
+        \leq P_{total}(p) \cdot \overline{E}_{t}^{do}
         \cdot t_{shed}
         \cdot n^{yearLimitShed} \\
         & \\
         &
         (16) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{do, shift}
-        \leq (invest + E_{exist})
+        \leq P_{total}(p)
         \cdot \overline{E}_{t}^{do}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
@@ -3989,14 +4086,14 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         &
         (17) \quad \displaystyle\sum_{t=0}^{T} \sum_{h=1}^{H_{DR}}
         DSM_{h, t}^{up}
-        \leq (invest + E_{exist})
+        \leq P_{total}(p)
         \cdot \overline{E}_{t}^{up}
         \cdot t_{shift}
         \cdot n^{yearLimitShift} \\
         & \quad \quad \textrm{(optional constraint)} \\
         &
         (18) \quad \displaystyle\sum_{h=1}^{H_{DR}} DSM_{h, t}^{do, shift}
-        \leq (invest + E_{exist})
+        \leq P_{total}(p)
         \cdot \overline{E}_{t}^{do}
         \cdot t_{shift} -
         \displaystyle\sum_{t'=1}^{t_{dayLimit}} \sum_{h=1}^{H_{DR}}
@@ -4019,8 +4116,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         + DSM_{h, t}^{balanceDo}
         + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
         + DSM_{t}^{shed}
-        \leq \max \{E_{t}^{up}, E_{t}^{do} \} \cdot (invest + E_{exist}) \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        \leq \max \{E_{t}^{up}, E_{t}^{do} \} \cdot P_{total}(p) \\
+        & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \quad \quad \textrm{(optional constraint)} \\
         &
 
@@ -4037,24 +4134,73 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
     **The following parts of the objective function are created:**
 
-    * Investment annuity:
+    *Standard model*
 
-    .. math::
-        &
-        invest \cdot costs_{invest} \\
+        * Investment annuity:
 
-    * Variable costs:
+            .. math::
+                P_{invest}(0) \cdot c_{invest}(0)
 
-    .. math::
-        &
-        (\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up} + DSM_{h, t}^{balanceDo})
-        \cdot cost_{t}^{dsm, up} \\
-        & + \sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
-        + DSM_{h, t}^{balanceUp})
-        \cdot cost_{t}^{dsm, do, shift} \\
-        & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
-        \cdot \omega_{t} \\
-        & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+        * Variable costs:
+
+            .. math::
+                &
+                (\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up} + DSM_{h, t}^{balanceDo})
+                \cdot cost_{t}^{dsm, up} \\
+                & + \sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+                + DSM_{h, t}^{balanceUp})
+                \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t} \\
+                & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+
+    *Multi-period model*
+
+        * Investment annuity:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot A(c_{invest}(p), l, ir) \cdot l
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * :attr:`fixed_costs` not None for investments
+
+            .. math::
+                &
+                (\sum_{pp=year(p)}^{year(p)+l}
+                P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
+                \cdot DF^{-p} \\
+                &\\
+                &
+                \forall p \in \mathbb{P}
+
+        * Variable costs:
+
+            .. math::
+                &
+                (\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up} + DSM_{h, t}^{balanceDo})
+                \cdot cost_{t}^{dsm, up} \\
+                & + \sum_{h=1}^{H_{DR}} (DSM_{h, t}^{do, shift}
+                + DSM_{h, t}^{balanceUp})
+                \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                \cdot \omega_{t} \cdot DF^{-p} \\
+                & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
+
+    whereby:
+
+    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+      investment expenses :math:`c_{invest}(p)` lifetime :math:`l`
+      and interest rate :math:`ir`
+    * :math:`DF=(1+dr)` is the discount factor with discount rate
+      :math:`dr`
+
+    See remarks in
+    :class:`oemof.solph.components.experimental._sink_dsm.SinkDSMOemofBlock`.
+
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -4063,22 +4209,22 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
     * The following variables and parameters are exclusively used for
       investment modeling:
 
-        .. table:: Variables (V) and Parameters (P)
-            :widths: 1, 1, 1, 1
+    .. table:: Variables (V), Parameters (P) and Sets (S)
+        :widths: 1, 1, 1, 1
 
-            ================================= ======================== ==== =======================================
-            symbol                            attribute                type explanation
-            ================================= ======================== ==== =======================================
-            :math:`invest`                    `invest`                 V    | DSM capacity invested in
-                                                                            | Equals to the additionally installed capacity.
-                                                                            | The capacity share eligible for a shift is determined by flex share(s).
-            :math:`invest_{min}`              `investment.minimum`     P    minimum investment
-            :math:`invest_{max}`              `investment.maximum`     P    maximum investment
-            :math:`E_{exist}`                 `investment.existing`    P    existing DSM capacity
-            :math:`s_{flex, up}`              `flex_share_up`          P    share of invested capacity that may be shift upwards at maximum
-            :math:`s_{flex, do}`              `flex_share_do`          P    share of invested capacity that may be shift downwards at maximum
-            :math:`costs_{invest}`            `investment.ep_costs`    P    specific investment annuity
-            ================================= ======================== ==== =======================================
+        ================================= ======================== ==== =======================================
+        symbol                            attribute                type explanation
+        ================================= ======================== ==== =======================================
+        :math:`P_{invest}(p)`             `invest[p]`              V    | DSM capacity invested into in period p.
+                                                                        | Equals to the additionally shiftable resp. sheddable capacity.
+        :math:`invest_{min}(p)`           `investment.minimum[p]`  P    minimum investment in period p
+        :math:`invest_{max}(p)`           `investment.maximum[p]`  P    maximum investment in period p
+        :math:`P_{total}`                 `investment.total[p]`    P    total DSM capacity
+        :math:`costs_{invest}(p)`         `investment.ep_costs[p]` P    | specific investment annuity (standard model) resp.
+                                                                        | specific investment expenses (multi-period model)
+        :math:`\mathbb{P}`                                         S    Periods of the model
+        :math:`\textrm{TIMEINDEX}`                                 S    Timeindex set of the model (periods, timesteps)
+        ================================= ======================== ==== =======================================
 
     """  # noqa: E501
     CONSTRAINT_GROUP = True
