@@ -244,7 +244,7 @@ class InvestmentFlowBlock(ScalarBlock):
         # Total capacity
         self.total = Var(self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
             self.old = Var(
                 self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
             )
@@ -468,7 +468,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
         self.total_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _old_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -647,7 +647,7 @@ class InvestmentFlowBlock(ScalarBlock):
             rule=_full_load_time_min_investflow_rule,
         )
 
-        if m.es.multi_period:
+        if m.es.periods is not None:
 
             def _overall_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -780,7 +780,7 @@ class InvestmentFlowBlock(ScalarBlock):
         period_investment_costs = {p: 0 for p in m.PERIODS}
         fixed_costs = 0
 
-        if not m.es.multi_period:
+        if m.es.periods is None:
             for i, o in self.CONVEX_INVESTFLOWS:
                 for p in m.PERIODS:
                     investment_costs += (

@@ -34,6 +34,7 @@ class TestsMultiPeriodConstraint:
         timeindex2 = pd.date_range("1/1/2013", periods=2, freq="H")
         timeindex3 = pd.date_range("1/1/2014", periods=2, freq="H")
         cls.date_time_index = timeindex1.append(timeindex2).append(timeindex3)
+        cls.periods = {0: timeindex1, 1: timeindex2, 2: timeindex3}
 
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
@@ -44,7 +45,7 @@ class TestsMultiPeriodConstraint:
             timeindex=self.date_time_index,
             timeincrement=[1] * len(self.date_time_index),
             infer_last_interval=False,
-            multi_period=True,
+            periods=self.periods,
         )
 
     def get_om(self):

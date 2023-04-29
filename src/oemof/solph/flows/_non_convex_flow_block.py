@@ -316,7 +316,7 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.STARTUPFLOWS:
             m = self.parent_block()
 
-            if not m.es.multi_period:
+            if m.es.periods is None:
                 for i, o in self.STARTUPFLOWS:
                     if m.flows[i, o].nonconvex.startup_costs[0] is not None:
                         startup_costs += sum(
@@ -350,7 +350,7 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.SHUTDOWNFLOWS:
             m = self.parent_block()
 
-            if not m.es.multi_period:
+            if m.es.periods is None:
                 for i, o in self.SHUTDOWNFLOWS:
                     if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
                         shutdown_costs += sum(
@@ -384,7 +384,7 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.ACTIVITYCOSTFLOWS:
             m = self.parent_block()
 
-            if not m.es.multi_period:
+            if m.es.periods is None:
                 for i, o in self.ACTIVITYCOSTFLOWS:
                     if m.flows[i, o].nonconvex.activity_costs[0] is not None:
                         activity_costs += sum(
@@ -418,7 +418,7 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.INACTIVITYCOSTFLOWS:
             m = self.parent_block()
 
-            if not m.es.multi_period:
+            if m.es.periods is None:
                 for i, o in self.INACTIVITYCOSTFLOWS:
                     if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
                         inactivity_costs += sum(

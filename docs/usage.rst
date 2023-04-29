@@ -1014,7 +1014,7 @@ only unfolds if you look at long-term investments. Let's see how.
 First, you start by defining your energy system as you might have done before, but you
 
 * choose a longer-term time horizon (spanning multiple years, i.e. multiple periods) and
-* set the `multi_period` attribute of your energy system to True.
+* explicitly define the `periods` attribute of your energy system which maps time steps to the simulated period.
 
 .. code-block:: python
 
@@ -1022,10 +1022,61 @@ First, you start by defining your energy system as you might have done before, b
     import oemof.solph as solph
 
     my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
-    my_energysystem = solph.EnergySystem(timeindex=my_index, multi_period=True)
+    periods = {
+        0: pd.date_range('1/1/2013', periods=8760, freq='H'),
+        1: pd.date_range('1/1/2013', periods=8760, freq='H'),
+    }
+    my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
-By default, the years of your timeindex will be used as periods. So in this example, 2013 is period 0 and 2014 is period 1.
-You could also define periods of your energy system explicitly. Please refer to the API reference on :py:class:`~oemof.solph.energy_system.EnergySystem` class for that.
+If you want to use a multi-period model you have define periods of your energy system explicitly. This way,
+you are forced to critically think, e.g. about handling leap years, and take some design decisions.
+
+To assist you, here is a plain python snippet that includes leap years which you can just copy
+and adjust to your needs:
+
+.. code-block:: python
+
+    def determine_periods(datetimeindex):
+        """Explicitly define and return periods of the energy system
+
+        Leap years have 8784 hourly time steps, regular years 8760.
+
+        Parameters
+        ----------
+        datetimeindex : pd.date_range
+            DatetimeIndex of the model comprising all time steps
+
+        Returns
+        -------
+        periods : dict
+            pd.date_ranges defining the time stamps for the respective period,
+            starting with period 0
+        """
+        years = sorted(list(set(getattr(datetimeindex, "year"))))
+        periods = {}
+        filter_series = datetimeindex.to_series()
+        for number, year in enumerate(years):
+            start = filter_series.loc[filter_series.index.year == year].min()
+            end = filter_series.loc[filter_series.index.year == year].max()
+            periods[number] = pd.date_range(start, end, freq=datetimeindex.freq)
+
+        return periods
+
+So if you want to use this, the above would simplify to:
+
+.. code-block:: python
+
+    import pandas as pd
+    import oemof.solph as solph
+
+    # Define your method (or import it from somewhere else)
+    def determine_periods(datetimeindex):
+        ...
+
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    periods = determine_periods(my_index)  # Make use of method
+    my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
+
 
 Then you add all the *components* and *buses* to your energy system, just as you are used to with, but with few additions.
 

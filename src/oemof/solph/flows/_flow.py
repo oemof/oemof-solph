@@ -185,8 +185,8 @@ class Flow(on.Edge):
             msg = (
                 "Be aware that the fixed costs attribute is only\n"
                 "meant to be used for multi-period models.\n"
-                "If you wish to set up a multi-period model, set the"
-                " multi_period attribute of your energy system to True.\n"
+                "If you wish to set up a multi-period model, explicitly "
+                "set the `periods` attribute of your energy system.\n"
                 "It has been decided to remove the `fixed_costs` "
                 "attribute with v0.2 for regular uses.\n"
                 "If you specify `fixed_costs` for a regular model, "

@@ -75,11 +75,11 @@ def investment_limit_per_period(model, limit=None):
         (i.e. RHS of constraint)
     """
 
-    if not model.es.multi_period:
+    if model.es.periods is None:
         msg = (
             "investment_limit_per_period is only applicable "
             "for multi-period models.\nIn order to create such a model, "
-            "set attribute `multi_period` of your energy system to True."
+            "explicitly set attribute `periods` of your energy system."
         )
         raise ValueError(msg)
 

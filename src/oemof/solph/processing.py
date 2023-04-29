@@ -249,7 +249,7 @@ def results(model, remove_last_time_point=False):
     result = {}
 
     # Standard model results extraction
-    if not model.es.multi_period:
+    if model.es.periods is None:
         result = _extract_standard_model_result(
             df_dict, result, result_index, remove_last_time_point
         )
@@ -279,7 +279,7 @@ def results(model, remove_last_time_point=False):
                 model.dual[model.BusBlock.balance[bus, p, t]]
                 for _, p, t in timeindex
             ]
-            if not model.es.multi_period:
+            if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             # TODO: Align with standard model
             else:

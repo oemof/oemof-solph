@@ -51,19 +51,17 @@ class EnergySystem(es.EnergySystem):
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
 
-    multi_period : boolean
-        If True, a multi-period model is used; defaults to False
+    periods : dict or None
+        The periods of a multi-period model.
+        If this is explicitly specified, it leads to creating a multi-period
+        model, providing a respective user warning as a feedback.
 
-    periods : dict
-        The periods of a multi-period model;
         Keys are the numbers of the respective period, starting with zero,
         values are pd.date_range objects carrying the timeindex for the
         respective period;
-        For a standard model, periods only holds one entry, i.e. {0: 0}
 
-    freq : str
-        The frequency of a multi-period model;
-        Defaults to "H"
+        For a standard model, periods are not (to be) declared, i.e. None.
+        A dict with one entry is derived, i.e. {0: 0}
 
     kwargs
     """
@@ -73,9 +71,7 @@ class EnergySystem(es.EnergySystem):
         timeindex=None,
         timeincrement=None,
         infer_last_interval=None,
-        multi_period=False,
         periods=None,
-        freq="H",
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -128,7 +124,7 @@ class EnergySystem(es.EnergySystem):
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            if not multi_period:
+            if periods is None:
                 msg = (
                     "Specifying the timeincrement and the timeindex parameter "
                     "at the same time is not allowed since these might be "
@@ -162,9 +158,9 @@ class EnergySystem(es.EnergySystem):
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
 
-        if multi_period:
+        if periods is not None:
             msg = (
-                "CAUTION! You specified 'multi_period=True' for your "
+                "CAUTION! You specified the 'periods' attribute for your "
                 "energy system.\n This will lead to creating "
                 "a multi-period optimization modeling which can be "
                 "used e.g. for long-term investment modeling.\n"
@@ -173,11 +169,10 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        self.multi_period = multi_period
-        self.periods = self._add_periods(periods, freq)
+        self.periods = self._add_periods(periods)
         self._extract_periods_years()
 
-    def _add_periods(self, periods, freq="H"):
+    def _add_periods(self, periods):
         """Returns periods to be added to the energy system
 
         * For a standard model, periods only contain one value {0: 0}
@@ -194,29 +189,12 @@ class EnergySystem(es.EnergySystem):
             values are the periods defined by a pd.date_range object;
             For a standard model, only one period is used.
 
-        freq : str
-            The frequency of a multi-period model;
-            Defaults to "H"
-
         Returns
         -------
         periods : dict
             Periods of the energy system (to ensure it being set)
         """
-        if not self.multi_period:
-            periods = {0: 0}
-        elif periods is None:
-            years = sorted(list(set(getattr(self.timeindex, "year"))))
-
-            periods = {}
-            filter_series = self.timeindex.to_series()
-            for number, year in enumerate(years):
-                start = filter_series.loc[
-                    filter_series.index.year == year
-                ].min()
-                end = filter_series.loc[filter_series.index.year == year].max()
-                periods[number] = pd.date_range(start, end, freq=freq)
-        else:
+        if periods is not None:
             for k in periods.keys():
                 if not isinstance(k, int):
                     raise ValueError("Period keys must be of type int.")
@@ -233,13 +211,13 @@ class EnergySystem(es.EnergySystem):
             relative to the start of the optimization rund and starting with 0
         """
         periods_years = {0: 0}
-        if self.multi_period:
+        if self.periods is not None:
             start_year = self.periods[0].min().year
             for k, v in self.periods.items():
                 if k >= 1:
                     periods_years[k] = v.min().year - start_year
 
-        self.periods_years = periods_years
+            self.periods_years = periods_years
 
 
 def create_time_index(
