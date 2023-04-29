@@ -24,6 +24,36 @@ from oemof.network import energy_system as es
 from oemof.tools import debugging
 
 
+def _add_periods(periods):
+    """Returns periods to be added to the energy system
+
+    * For a standard model, periods only contain one value {0: 0}
+    * For a multi-period model, periods are indexed with integer values
+      starting from zero. The keys are the time indices for the resective
+      period given by a pd.date_range object. As a default,
+      each year in the timeindex is mapped to its own period.
+
+    Parameters
+    ----------
+    periods : dict
+        Periods of a (multi-period) model
+        Keys are periods as increasing integer values, starting from 0,
+        values are the periods defined by a pd.date_range object;
+        For a standard model, only one period is used.
+
+    Returns
+    -------
+    periods : dict
+        Periods of the energy system (to ensure it being set)
+    """
+    if periods is not None:
+        for k in periods.keys():
+            if not isinstance(k, int):
+                raise ValueError("Period keys must be of type int.")
+
+    return periods
+
+
 class EnergySystem(es.EnergySystem):
     """A variant of the class EnergySystem from
     <oemof.network.network.energy_system.EnergySystem> specially tailored to
@@ -169,37 +199,8 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        self.periods = self._add_periods(periods)
+        self.periods = _add_periods(periods)
         self._extract_periods_years()
-
-    def _add_periods(self, periods):
-        """Returns periods to be added to the energy system
-
-        * For a standard model, periods only contain one value {0: 0}
-        * For a multi-period model, periods are indexed with integer values
-          starting from zero. The keys are the time indices for the resective
-          period given by a pd.date_range object. As a default,
-          each year in the timeindex is mapped to its own period.
-
-        Parameters
-        ----------
-        periods : dict
-            Periods of a (multi-period) model
-            Keys are periods as increasing integer values, starting from 0,
-            values are the periods defined by a pd.date_range object;
-            For a standard model, only one period is used.
-
-        Returns
-        -------
-        periods : dict
-            Periods of the energy system (to ensure it being set)
-        """
-        if periods is not None:
-            for k in periods.keys():
-                if not isinstance(k, int):
-                    raise ValueError("Period keys must be of type int.")
-
-        return periods
 
     def _extract_periods_years(self):
         """Map simulation years to the respective period based on time indices
