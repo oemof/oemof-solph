@@ -454,7 +454,7 @@ class SinkDSMOemofBlock(ScalarBlock):
     **Table: Symbols and attribute names of variables and parameters**
 
     .. table:: Variables (V), Parameters (P) and Sets (S)
-        :widths: 1, 1, 1, 1
+        :widths: 25, 25, 10, 40
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
@@ -740,7 +740,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
-        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p)
+        (5) \quad  DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p) \\
         & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \\
         &
@@ -769,8 +769,8 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
                 \cdot \omega_{t} \\
                 & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
 
@@ -802,8 +802,8 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
                 \cdot \omega_{t}
                 \cdot DF^{-p} \\
                 & \quad \quad \quad \quad
@@ -830,7 +830,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
       investment modeling:
 
     .. table:: Variables (V), Parameters (P) and Sets (S)
-        :widths: 1, 1, 1, 1
+        :widths: 25, 25, 10, 40
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
@@ -1411,7 +1411,7 @@ class SinkDSMDIWBlock(ScalarBlock):
     **Table: Symbols and attribute names of variables and parameters**
 
     .. table:: Variables (V), Parameters (P) and Sets (S)
-        :widths: 1, 1, 1, 1
+        :widths: 25, 25, 10, 40
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
@@ -2032,7 +2032,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
         & \\
         &
-        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p)
+        (6) \quad DSM_{t}^{up} \leq E_{t}^{up} \cdot P_{total}(p) \\
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
         & \\
         &
@@ -2086,8 +2086,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
                 \cdot \omega_{t} \\
                 & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
 
@@ -2100,8 +2100,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 P_{invest}(p) \cdot A(c_{invest}(p), l, ir) \cdot l
                 \cdot DF^{-p} \\
                 &\\
-                &
-                \forall p \in \mathbb{P}
+                & \quad \quad \quad \quad \forall p \in \mathbb{P}
 
         * :attr:`fixed_costs` not None for investments
 
@@ -2111,16 +2110,15 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
                 \cdot DF^{-p} \\
                 &\\
-                &
-                \forall p \in \mathbb{P}
+                & \quad \quad \quad \quad \forall p \in \mathbb{P}
 
         * Variable costs:
 
             .. math::
                 &
                 (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
-                + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
+                + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift} \\
+                & + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
                 \cdot \omega_{t}
                 \cdot DF^{-p} \\
                 & \quad \quad \quad \quad
@@ -2128,7 +2126,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
     whereby:
 
-    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+    * :math:`A(c_{invest,var}(p), l, ir)` is the annuity for
       investment expenses :math:`c_{invest}(p)` lifetime :math:`l`
       and interest rate :math:`ir`
     * :math:`DF=(1+dr)` is the discount factor with discount rate
@@ -2147,7 +2145,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
       investment modeling:
 
     .. table:: Variables (V), Parameters (P) and Sets (S)
-        :widths: 1, 1, 1, 1
+        :widths: 25, 25, 10, 40
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
@@ -3138,7 +3136,7 @@ class SinkDSMDLRBlock(ScalarBlock):
     **Table: Symbols and attribute names of variables and parameters**
 
         .. table:: Variables (V), Parameters (P) and (additional) Sets (S)
-            :widths: 1, 1, 1, 1
+            :widths: 25, 25, 10, 40
 
             =========================================== ================================= ==== =======================================
             symbol                                      attribute                         type explanation
@@ -4009,8 +4007,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         \quad \textrm{if} \quad e_{shed} = \textrm{False} \\
         & \\
         &
-        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}(p)
-        & \quad \quad \quad \quad + \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
+        (4) \quad \dot{E}_{t} = demand_{t} \cdot demand_{max}(p) \\
+        & \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo} - DSM_{h, t}^{do, shift}
         - DSM_{h, t}^{balanceUp}) - DSM_{t}^{do, shed} \\
         & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
@@ -4114,8 +4112,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         &
         (20) \quad \displaystyle\sum_{h=1}^{H_{DR}} (DSM_{h, t}^{up}
         + DSM_{h, t}^{balanceDo}
-        + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp})
-        + DSM_{t}^{shed}
+        + DSM_{h, t}^{do, shift} + DSM_{h, t}^{balanceUp}) \\
+        & + DSM_{t}^{shed}
         \leq \max \{E_{t}^{up}, E_{t}^{do} \} \cdot P_{total}(p) \\
         & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
         & \quad \quad \textrm{(optional constraint)} \\
@@ -4210,7 +4208,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
       investment modeling:
 
     .. table:: Variables (V), Parameters (P) and Sets (S)
-        :widths: 1, 1, 1, 1
+        :widths: 25, 25, 10, 40
 
         ================================= ======================== ==== =======================================
         symbol                            attribute                type explanation
