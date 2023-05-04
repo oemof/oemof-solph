@@ -389,7 +389,8 @@ class Model(BaseModel):
             self.PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
-                [k] * len(self.es.periods[k]) for k in range(len(self.es.periods))
+                [k] * len(self.es.periods[k])
+                for k in range(len(self.es.periods))
             ]
             flattened_list = [
                 item for sublist in nested_list for item in sublist
