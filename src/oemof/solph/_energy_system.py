@@ -51,17 +51,16 @@ class EnergySystem(es.EnergySystem):
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
 
-    periods : dict or None
+    periods : list or None
         The periods of a multi-period model.
         If this is explicitly specified, it leads to creating a multi-period
         model, providing a respective user warning as a feedback.
 
-        Keys are the numbers of the respective period, starting with zero,
-        values are pd.date_range objects carrying the timeindex for the
+        list of pd.date_range objects carrying the timeindex for the
         respective period;
 
         For a standard model, periods are not (to be) declared, i.e. None.
-        A dict with one entry is derived, i.e. {0: 0}
+        A list with one entry is derived, i.e. [0].
 
     kwargs
     """
