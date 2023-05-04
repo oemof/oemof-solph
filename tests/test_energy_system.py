@@ -8,7 +8,6 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas as pd
-import pytest
 
 from oemof.solph import EnergySystem
 
