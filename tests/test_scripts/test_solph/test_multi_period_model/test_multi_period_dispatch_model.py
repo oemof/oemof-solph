@@ -40,7 +40,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
     timeindex = pd.concat(
         [t_idx_1_series, t_idx_2_series, t_idx_3_series]
     ).index
-    periods = {0: t_idx_1, 1: t_idx_2, 2: t_idx_3}
+    periods = [t_idx_1, t_idx_2, t_idx_3]
 
     es = EnergySystem(
         timeindex=timeindex,

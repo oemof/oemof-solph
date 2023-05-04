@@ -24,36 +24,6 @@ from oemof.network import energy_system as es
 from oemof.tools import debugging
 
 
-def _add_periods(periods):
-    """Returns periods to be added to the energy system
-
-    * For a standard model, periods only contain one value {0: 0}
-    * For a multi-period model, periods are indexed with integer values
-      starting from zero. The keys are the time indices for the resective
-      period given by a pd.date_range object. As a default,
-      each year in the timeindex is mapped to its own period.
-
-    Parameters
-    ----------
-    periods : dict
-        Periods of a (multi-period) model
-        Keys are periods as increasing integer values, starting from 0,
-        values are the periods defined by a pd.date_range object;
-        For a standard model, only one period is used.
-
-    Returns
-    -------
-    periods : dict
-        Periods of the energy system (to ensure it being set)
-    """
-    if periods is not None:
-        for k in periods.keys():
-            if not isinstance(k, int):
-                raise ValueError("Period keys must be of type int.")
-
-    return periods
-
-
 class EnergySystem(es.EnergySystem):
     """A variant of the class EnergySystem from
     <oemof.network.network.energy_system.EnergySystem> specially tailored to
@@ -199,7 +169,7 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        self.periods = _add_periods(periods)
+        self.periods = periods
         self._extract_periods_years()
 
     def _extract_periods_years(self):
@@ -211,12 +181,12 @@ class EnergySystem(es.EnergySystem):
             the simulation year of the start of each a period,
             relative to the start of the optimization rund and starting with 0
         """
-        periods_years = {0: 0}
+        periods_years = [0]
         if self.periods is not None:
             start_year = self.periods[0].min().year
-            for k, v in self.periods.items():
+            for k, v in enumerate(self.periods):
                 if k >= 1:
-                    periods_years[k] = v.min().year - start_year
+                    periods_years.append(v.min().year - start_year)
 
             self.periods_years = periods_years
 
