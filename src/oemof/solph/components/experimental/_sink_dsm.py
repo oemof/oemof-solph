@@ -975,7 +975,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
                             comm_p = 0
-                            for k, v in m.es.periods_years.items():
+                            for k, v in enumerate(m.es.periods_years):
                                 if m.es.periods_years[p] - lifetime - v < 0:
                                     # change of sign is detected
                                     comm_p = k - 1
@@ -2295,7 +2295,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
                             comm_p = 0
-                            for k, v in m.es.periods_years.items():
+                            for k, v in enumerate(m.es.periods_years):
                                 if m.es.periods_years[p] - lifetime - v < 0:
                                     # change of sign is detected
                                     comm_p = k - 1
@@ -4390,7 +4390,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         elif lifetime <= m.es.periods_years[p]:
                             # Obtain commissioning period
                             comm_p = 0
-                            for k, v in m.es.periods_years.items():
+                            for k, v in enumerate(m.es.periods_years):
                                 if m.es.periods_years[p] - lifetime - v < 0:
                                     # change of sign is detected
                                     comm_p = k - 1

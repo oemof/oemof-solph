@@ -390,7 +390,7 @@ def _extract_multi_period_model_result(
         # map periods to their start years for displaying period results
         d = {
             key: val + model.es.periods[0].min().year
-            for key, val in model.es.periods_years.items()
+            for key, val in enumerate(model.es.periods_years)
         }
         period_scalars = df_dict[k].loc[:, period_cols].dropna()
         sequences = df_dict[k].loc[
