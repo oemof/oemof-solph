@@ -305,13 +305,13 @@ class GenericCAESBlock(ScalarBlock):
         | Temporal efficiency
         | (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
+        `flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
         (external) into Expansion"
 
     """
@@ -430,14 +430,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # Compression: Capacity on markets
-        def cmp_p_constr_rule(block, n, t):
+        def cmp_p_constr_rule(block, n, p, t):
             expr = 0
             expr += -self.cmp_p[n, t]
-            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
+            expr += m.flow[list(n.electrical_input.keys())[0], n, p, t]
             return expr == 0
 
         self.cmp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule
+            self.GENERICCAES, m.TIMEINDEX, rule=cmp_p_constr_rule
         )
 
         # Compression: Max. capacity depending on cavern filling level
@@ -520,14 +520,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # (10) Expansion: Capacity on markets
-        def exp_p_constr_rule(block, n, t):
+        def exp_p_constr_rule(block, n, p, t):
             expr = 0
             expr += -self.exp_p[n, t]
-            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
+            expr += m.flow[n, list(n.electrical_output.keys())[0], p, t]
             return expr == 0
 
         self.exp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule
+            self.GENERICCAES, m.TIMEINDEX, rule=exp_p_constr_rule
         )
 
         # (11-12) Expansion: Max. capacity depending on cavern filling level
@@ -591,14 +591,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # (17) Expansion: Fuel allocation
-        def exp_q_fuel_constr_rule(block, n, t):
+        def exp_q_fuel_constr_rule(block, n, p, t):
             expr = 0
             expr += -self.exp_q_fuel_in[n, t]
-            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
+            expr += m.flow[list(n.fuel_input.keys())[0], n, p, t]
             return expr == 0
 
         self.exp_q_fuel_constr = Constraint(
-            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule
+            self.GENERICCAES, m.TIMEINDEX, rule=exp_q_fuel_constr_rule
         )
 
         # (18) Expansion: Definition of single heat flows
