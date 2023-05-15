@@ -1909,3 +1909,74 @@ class TestsConstraint:
         es.add(b_gas, b_th, boiler, storage)
         om = solph.Model(es)
         self.compare_lp_files("nonequidistant_timeindex.lp", my_om=om)
+
+    def test_nonequidistant_storage(self):
+        """Constraint test of an energy system
+        with storage_level_constraint
+        """
+        es = solph.EnergySystem(
+            timeindex=pd.date_range("2022-01-01", freq="1H", periods=2),
+            infer_last_interval=True,
+        )
+
+        multiplexer = solph.Bus(
+            label="multiplexer",
+        )
+
+        storage = solph.components.GenericStorage(
+            label="storage",
+            nominal_storage_capacity=4,
+            initial_storage_level=1,
+            balanced=True,
+            loss_rate=0.25,
+            inputs={multiplexer: solph.Flow()},
+            outputs={multiplexer: solph.Flow()},
+        )
+
+        es.add(multiplexer, storage)
+
+        in_0 = solph.components.Source(
+            label="in_0",
+            outputs={
+                multiplexer: solph.Flow(nominal_value=0.5, variable_costs=0.25)
+            },
+        )
+        es.add(in_0)
+
+        in_1 = solph.components.Source(
+            label="in_1",
+            outputs={multiplexer: solph.Flow(nominal_value=0.125)},
+        )
+        es.add(in_1)
+
+        out_0 = solph.components.Sink(
+            label="out_0",
+            inputs={
+                multiplexer: solph.Flow(
+                    nominal_value=0.25, variable_costs=-0.125
+                )
+            },
+        )
+        es.add(out_0)
+
+        out_1 = solph.components.Sink(
+            label="out_1",
+            inputs={
+                multiplexer: solph.Flow(
+                    nominal_value=0.125, variable_costs=-0.125
+                )
+            },
+        )
+        es.add(out_1)
+
+        om = solph.Model(es)
+
+        solph.constraints.storage_level_constraint(
+            model=om,
+            name="multiplexer",
+            storage_component=storage,
+            multiplexer_bus=multiplexer,
+            input_levels={in_1: 1 / 4},  # in_0 is always active
+            output_levels={out_0: 1 / 8, out_1: 1 / 2},
+        )
+        self.compare_lp_files("storage_level_constraint.lp", my_om=om)
