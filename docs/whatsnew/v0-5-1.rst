@@ -25,6 +25,7 @@ New features
       `old_end` holding model-endogenously installed capacity to be decommissioned after its lifetime.
     * Include discounting and calculating annuities in the objective function terms. Introduce attribute `discount_rate`
       of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
+* Add `storage_level_constraint` that allows to set flows from/to storage (in)active based on storage content.
 
 Documentation
 #############
@@ -52,4 +53,5 @@ Contributors
 
 * Johannes Kochems
 * Tobi Rohrer
+* Patrik Schönfeldt
 
