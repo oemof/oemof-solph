@@ -1910,7 +1910,7 @@ class TestsConstraint:
         om = solph.Model(es)
         self.compare_lp_files("nonequidistant_timeindex.lp", my_om=om)
 
-    def test_nonequidistant_storage(self):
+    def test_storage_level_constraint(self):
         """Constraint test of an energy system
         with storage_level_constraint
         """
