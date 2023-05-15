@@ -15,8 +15,8 @@ def storage_level_constraint(
     name,
     storage_component,
     multiplexer_bus,
-    input_levels=None,
-    output_levels=None,
+    input_levels,
+    output_levels,
 ):
     r"""
     Add constraints to implement storage content based access.
@@ -44,10 +44,6 @@ def storage_level_constraint(
 
     Verbose description can be found in https://arxiv.org/abs/2211.14080
     """
-    if input_levels is None:
-        input_levels = {}
-    if output_levels is None:
-        output_levels = {}
 
     def _outputs():
         OUTPUTS = po.Set(initialize=output_levels.keys())
