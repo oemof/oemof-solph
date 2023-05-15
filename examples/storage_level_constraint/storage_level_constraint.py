@@ -82,12 +82,14 @@ plt.step(df.index, df["out1"], where="post", label="outflow (> 1/2)")
 
 plt.grid()
 plt.legend()
+plt.ylabel("Flow Power (arb. units)")
 
 plt.twinx()
 
 plt.plot(df.index, df["storage_content"], "r-", label="storage content")
 plt.ylim(0, 3)
 plt.legend(loc="center right")
+plt.ylabel("Stored Energy (arb. units)")
 
 print(df)
 
