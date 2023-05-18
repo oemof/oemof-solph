@@ -1,6 +1,6 @@
 # %%
 
-from oemof.solph import CellularModel
+from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
 
@@ -183,7 +183,7 @@ connector_el_ec_1_1 = buses.Bus(
         bus_el_ec_1_1: flows.Flow(),
     },
     outputs={
-        bus_el_ec_1: flows.Flow(max=30, nominal_value=1),
+        bus_el_ec_1: flows.Flow(max=20, nominal_value=1),
         bus_el_ec_1_1: flows.Flow(),
     },
 )
@@ -235,9 +235,7 @@ es.add(
 )
 
 # %%
-cmodel = CellularModel(
-    EnergyCells={es: [ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2]}
-)
+cmodel = Model(energysystem={es: [ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2]})
 # %%
 cmodel.write(
     "D:/solph-cellular/examples/cellular/cmodel.lp",

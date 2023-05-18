@@ -45,8 +45,11 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object
-        Object that holds the nodes of an oemof energy system graph
+    energysystem : EnergySystem object or dict
+        Object that holds the nodes of an oemof energy system graph.
+        If a dict is passed, a cellular structure is assumed and the
+        key needs to be the upmost energy cell and the value must be a list
+        of EnergyCell objects.
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -111,7 +114,13 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
-        self.es = energysystem
+        self.iscellular = isinstance(energysystem, dict)
+
+        if self.iscellular:
+            self.es = list(energysystem.keys())[0]
+            self.ec = energysystem[self.es]
+        else:
+            self.es = energysystem
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
@@ -130,6 +139,18 @@ class BaseModel(po.ConcreteModel):
         ]
 
         self.flows = self.es.flows()
+        if self.iscellular:
+            for cell in self.ec:
+                for io, f in cell.flows().items():
+                    if io not in self.flows.keys():
+                        self.flows.update({io: f})
+                    else:
+                        msg = (
+                            "Two flows with identical input-output are tried "
+                            "to be added to the Model. Second flow is skipped."
+                            "\n{}"
+                        )
+                        raise Warning(msg.format({io: f}))
 
         self.solver_results = None
         self.dual = None
@@ -218,9 +239,9 @@ class BaseModel(po.ConcreteModel):
         Parameters
         ----------
         solver : string
-            solver to be used e.g. "cbc", "glpk","gurobi","cplex"
+            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
         solver_io : string
-            pyomo solver interface file format: "lp","python","nl", etc.
+            pyomo solver interface file format: "lp", "python", "nl", etc.
         \**kwargs : keyword arguments
             Possible keys can be set see below:
 
@@ -281,8 +302,11 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object
+    energysystem : EnergySystem object or dict
         Object that holds the nodes of an oemof energy system graph
+        If a dict is passed, a cellular structure is assumed and the
+        key needs to be the upmost energy cell and the value must be a list
+        of EnergyCell objects.
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -342,9 +366,10 @@ class Model(BaseModel):
     ]
 
     def __init__(self, energysystem, discount_rate=None, **kwargs):
+        super().__init__(energysystem, **kwargs)
         if discount_rate is not None:
             self.discount_rate = discount_rate
-        elif energysystem.periods is not None:
+        elif self.es.periods is not None:
             self.discount_rate = 0.02
             msg = (
                 f"By default, a discount_rate of {self.discount_rate} "
@@ -353,14 +378,30 @@ class Model(BaseModel):
                 f"you have to specify the `discount_rate` attribute."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
-        # set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+        if self.iscellular:
+            # collect all nodes from the child cells
+            self.nodes = self.es.nodes
+            for cell in self.ec:
+                for node in cell.nodes:
+                    if node not in self.nodes:
+                        self.nodes.append(node)
+                    else:
+                        msg = (
+                            "Two nodes of identical name are tried to be added"
+                            " to `CellularModel.nodes`. Second node is"
+                            " skipped.\n{}"
+                        )
+                        raise Warning(msg.format(node))
+            # set with all nodes
+            self.NODES = po.Set(initialize=[n for n in self.nodes])
+        else:
+            # set with all nodes
+            self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
         if self.es.timeincrement is None:
             msg = (
@@ -447,6 +488,8 @@ class Model(BaseModel):
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
+                    # if nominal_value and fix is given,
+                    # set flow to fix * nominal value
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
@@ -454,237 +497,10 @@ class Model(BaseModel):
                         )
                         self.flow[o, i, p, t].fix()
                 else:
-                    for p, t in self.TIMEINDEX:
-                        self.flow[o, i, p, t].setub(
-                            self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
-                        )
-
-                    if not self.flows[o, i].nonconvex:
-                        for p, t in self.TIMEINDEX:
-                            self.flow[o, i, p, t].setlb(
-                                self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
-                            )
-                    elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for p, t in self.TIMEINDEX:
-                            self.flow[o, i, p, t].setlb(0)
-            else:
-                if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for p, t in self.TIMEINDEX:
-                        self.flow[o, i, p, t].setlb(0)
-
-
-class CellularModel(po.ConcreteModel):
-    """
-    bla bla bla
-
-    Parameters
-    ----------
-    EnergyCells: dict
-        Dictionary where key is the upmost EnergyCell ("parent cell")
-        containing all other cell instances (from a model point of view) and
-        value is a list containing all EnergyCell objects (from an object point
-        of view).
-    """
-
-    CONSTRAINT_GROUPS = [
-        BusBlock,
-        TransformerBlock,
-        InvestmentFlowBlock,
-        SimpleFlowBlock,
-        NonConvexFlowBlock,
-        InvestNonConvexFlowBlock,
-    ]
-
-    def __init__(self, EnergyCells, **kwargs):
-        super().__init__()
-
-        # Check root logger. Due to a problem with pyomo the building of the
-        # model will take up to a 100 times longer if the root logger is set
-        # to DEBUG
-
-        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
-            msg = (
-                "The root logger level is 'DEBUG'.\nDue to a communication "
-                "problem between solph and the pyomo package,\nusing the "
-                "DEBUG level will slow down the modelling process by the "
-                "factor ~100.\nIf you need the debug-logging you can "
-                "initialise the Model with 'debug=True`\nYou should only do "
-                "this for small models. To avoid the slow-down use the "
-                "logger\nfunction of oemof.tools (read docstring) or "
-                "change the level of the root logger:\n\nimport logging\n"
-                "logging.getLogger().setLevel(logging.INFO)"
-            )
-            raise LoggingError(msg)
-
-        self.name = kwargs.get("name", type(self).__name__)
-
-        # get the upmost energy cell
-        self.es = list(EnergyCells.keys())[0]
-
-        # get all child energy cells
-        self.ec = EnergyCells[self.es]
-
-        # add all groups together (concerns the constraint groups)
-        self.groups = {}
-        self.groups.update(self.es.groups)
-        for cell in self.ec:
-            for group_name, components in cell.groups.items():
-                if group_name not in self.groups.keys():
-                    self.groups.update({group_name: components})
-                else:
-                    try:
-                        self.groups[group_name].update(components)
-                    except:
-                        msg = (
-                            "Couldn't add components {0} to the already"
-                            " existing set \n\n {1}".format(
-                                components, self.groups[group_name]
-                            )
-                        )
-                        raise Warning(msg)
-
-        # add time increment
-        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
-
-        # set objective weighting
-        self.objective_weighting = kwargs.get(
-            "objective_weighting", self.timeincrement
-        )
-
-        # Create constraint groups of all groups-objects to _constraint_groups
-        self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
-            "constraint_groups", []
-        )
-        self._constraint_groups += [
-            i
-            for i in self.groups
-            if hasattr(i, "CONSTRAINT_GROUP")
-            and i not in self._constraint_groups
-        ]
-
-        # add flows to the model
-        self.flows = self.es.flows()
-        for cell in self.ec:
-            for io, f in cell.flows().items():
-                if io not in self.flows.keys():
-                    self.flows.update({io: f})
-                else:
-                    msg = (
-                        "Two flows with identical input-output are tried to"
-                        " be added to the CellularModel. Second flow is"
-                        " skipped. {}".format({io: f})
-                    )
-                    raise Warning(msg)
-
-        # create solver attributes
-        self.solver_results = None
-        self.dual = None
-        self.rc = None
-
-        # start construction of the model (if set to auto_construct)
-        if kwargs.get("auto_construct", True):
-            self._construct()
-
-    def _construct(self):
-        "copy pasted from Model class"
-        self._add_parent_block_sets()
-        self._add_parent_block_variables()
-        self._add_child_blocks()
-        self._add_objective()
-
-    def _add_parent_block_sets(self):
-        """Method to create all sets located at the parent block, i.e. in the
-        model itself, as they are to be shared across all model components.
-        See the class :py:class:~oemof.solph.models.Model for the sets created.
-        """
-        # collect all nodes from the child cells
-        self.nodes = self.es.nodes
-        for cell in self.ec:
-            for node in cell.nodes:
-                if node not in self.nodes:
-                    self.nodes.append(node)
-                else:
-                    msg = (
-                        "Two nodes of identical name are tried to be added"
-                        " to `CellularModel.nodes`. Second node is skipped."
-                        " \n{}".format(node)
-                    )
-                    raise Warning(msg)
-
-        # create set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.nodes])
-
-        if self.es.timeincrement is None:
-            msg = (
-                "The EnergySystem needs to have a valid 'timeincrement' "
-                "attribute to build a model."
-            )
-            raise AttributeError(msg)
-
-        # create pyomo set for timesteps and timepoints of optimization problem
-        self.TIMESTEPS = po.Set(
-            initialize=range(len(self.es.timeincrement)), ordered=True
-        )
-        self.TIMEPOINTS = po.Set(
-            initialize=range(len(self.es.timeincrement) + 1), ordered=True
-        )
-
-        # get previous timesteps
-        previous_timesteps = [x - 1 for x in self.TIMESTEPS]
-        previous_timesteps[0] = self.TIMESTEPS.last()
-        self.previous_timesteps = dict(zip(self.TIMESTEPS, previous_timesteps))
-
-        # create pyomo set for all flows in the energy system graph
-        self.FLOWS = po.Set(
-            initialize=self.flows.keys(), ordered=True, dimen=2
-        )
-
-        self.BIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[k for (k, v) in self.flows.items() if v.bidirectional],
-            ordered=True,
-            dimen=2,
-            within=self.FLOWS,
-        )
-
-        self.UNIDIRECTIONAL_FLOWS = po.Set(
-            initialize=[
-                k for (k, v) in self.flows.items() if not v.bidirectional
-            ],
-            ordered=True,
-            dimen=2,
-            within=self.FLOWS,
-        )
-
-    def _add_parent_block_variables(self):
-        """Method to create all variables located at the parent block,
-        i.e. the model itself as these variables are to be shared across
-        all model components.
-        See the class :py:class:~oemof.solph._models.Model
-        for the `flow` variable created.
-        """
-        # create a set of variables for all flows and timesteps as reals
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
-        # self.FLOWS: pyomo set of all flows of the energy system
-        # self.flows: dict with all flows of the energy system
-        # self.flow: pyomo Variable(s) for all flows at all timesteps
-        for (o, i) in self.FLOWS:
-            if self.flows[o, i].nominal_value is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
-                    # if nominal_value and fix is given,
-                    # set flow to fix * nominal value
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
-                        )
-                        self.flow[o, i, p, t].fix()
-                else:
                     # if max is set, set that as upper bound for the variable
                     # max is by default set to 1
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
@@ -703,116 +519,7 @@ class CellularModel(po.ConcreteModel):
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(0)
             else:
-                # restrict flow to > 0 if unidirectional
+                # restrict flow to >=0 if unidirectional (default)
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
-
-    def _add_child_blocks(self):
-        """Method to add the defined child blocks for components that have
-        been grouped in the defined constraint groups. This collects all the
-        constraints from the component blocks and adds them to the model.
-        """
-        for group in self._constraint_groups:
-            # create instance for block from _constraint_groups
-            block = group()
-            # add block to model
-            self.add_component(str(block), block)
-            # create the constraints of the block
-            block._create(group=self.groups.get(group))
-
-    def _add_objective(self, sense=po.minimize, update=False):
-        """Method to sum up all objective expressions from the child blocks
-        that have been created. This method looks for `_objective_expression`
-        attribute in the block definition and will call this method to add
-        their return value to the objective function.
-        """
-        if update:
-            self.del_component("objective")
-
-        expr = 0
-        # TODO: for distributed optimization, this needs to be fitted!
-        # get the objective function expression from each block
-        for block in self.component_data_objects():
-            if hasattr(block, "_objective_expression"):
-                expr += block._objective_expression()
-
-        self.objective = po.Objective(sense=sense, expr=expr)
-
-    def receive_duals(self):
-        """Method sets solver suffix to extract information about dual
-        variables from solver. Shadow prices (duals) and reduced costs (rc) are
-        set as attributes of the model.
-        """
-        # shadow prices
-        self.dual = po.Suffix(direction=po.Suffix.IMPORT)
-        # reduced costs
-        self.rc = po.Suffix(direction=po.Suffix.IMPORT)
-
-    def results(self):
-        """Returns a nested dictionary of the results of this optimization.
-        See the processing module for more information on results extraction.
-        """
-        return processing.results(self)
-
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
-        r"""Takes care of communication with solver to solve the model.
-
-        Parameters
-        ----------
-        solver : string
-            solver to be used e.g. "cbc", "glpk","gurobi","cplex"
-        solver_io : string
-            pyomo solver interface file format: "lp","python","nl", etc.
-        \**kwargs : keyword arguments
-            Possible keys can be set see below:
-
-        Other Parameters
-        ----------------
-        solve_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory.solve() method
-            Example : {"tee":True}
-        cmdline_options : dict
-            Dictionary with command line options for solver e.g.
-            {"mipgap":"0.01"} results in "--mipgap 0.01"
-            \{"interior":" "} results in "--interior"
-            \Gurobi solver takes numeric parameter values such as
-            {"method": 2}
-        """
-        solve_kwargs = kwargs.get("solve_kwargs", {})
-        solver_cmdline_options = kwargs.get("cmdline_options", {})
-
-        opt = SolverFactory(solver, solver_io=solver_io)
-        # set command line options
-        options = opt.options
-        for k in solver_cmdline_options:
-            options[k] = solver_cmdline_options[k]
-
-        solver_results = opt.solve(self, **solve_kwargs)
-
-        status = solver_results["Solver"][0]["Status"]
-        termination_condition = solver_results["Solver"][0][
-            "Termination condition"
-        ]
-
-        if status == "ok" and termination_condition == "optimal":
-            logging.info("Optimization successful...")
-        else:
-            msg = (
-                "Optimization ended with status {0} and termination "
-                "condition {1}"
-            )
-            warnings.warn(
-                msg.format(status, termination_condition), UserWarning
-            )
-        self.es.results = solver_results
-        self.solver_results = solver_results
-
-        return solver_results
-
-    def relax_problem(self):
-        """Relaxes integer variables of optimization model to reals."""
-        relaxer = RelaxIntegrality()
-        relaxer._apply_to(self)
-
-        return self

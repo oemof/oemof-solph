@@ -12,4 +12,3 @@ class EnergyCell(EnergySystem):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # self.label = kwargs.get("label", None)
