@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -55,29 +56,31 @@ class GenericCHP(network.Transformer):
 
     Note
     ----
-    An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
-    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
-    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum heat extraction `H_L_FG_min` as share of
-    the fuel flow `H_F` e.g. for motoric CHPs.
-    The boolean component parameter `back_pressure` can be set to model
-    back-pressure characteristics.
+    * An adaption for the flow parameter `H_L_FG_share_max` has been made to
+      set the flue gas losses at maximum heat extraction `H_L_FG_max` as share
+      of the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    * The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+      losses at minimum heat extraction `H_L_FG_min` as share of
+      the fuel flow `H_F` e.g. for motoric CHPs.
+    * The boolean component parameter `back_pressure` can be set to model
+      back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
     Parameters
     ----------
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output. Related parameters like `P_max_woDH` are
-        passed as attributes of the `oemof.Flow` object.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the electrical output.
+        Related parameters like `P_max_woDH` are passed as
+        attributes of the `oemof.Flow` object.
     heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the heat output. Related parameters like `Q_CW_min` are passed as
+        Dictionary with key-value-pair of `oemof.solph.Bus`
+        and `oemof.solph.Flow` objects for the heat output.
+        Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
     beta : list of numerical values
         beta values in same dimension as all other parameters (length of
@@ -334,37 +337,37 @@ class GenericCHPBlock(ScalarBlock):
         self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
 
         # constraint rules
-        def _H_flow_rule(block, n, t):
+        def _H_flow_rule(block, n, p, t):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += -m.flow[list(n.fuel_input.keys())[0], n, t]
+            expr += -m.flow[list(n.fuel_input.keys())[0], n, p, t]
             return expr == 0
 
         self.H_flow = Constraint(
-            self.GENERICCHPS, m.TIMESTEPS, rule=_H_flow_rule
+            self.GENERICCHPS, m.TIMEINDEX, rule=_H_flow_rule
         )
 
-        def _Q_flow_rule(block, n, t):
+        def _Q_flow_rule(block, n, p, t):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
-            expr += -m.flow[n, list(n.heat_output.keys())[0], t]
+            expr += -m.flow[n, list(n.heat_output.keys())[0], p, t]
             return expr == 0
 
         self.Q_flow = Constraint(
-            self.GENERICCHPS, m.TIMESTEPS, rule=_Q_flow_rule
+            self.GENERICCHPS, m.TIMEINDEX, rule=_Q_flow_rule
         )
 
-        def _P_flow_rule(block, n, t):
+        def _P_flow_rule(block, n, p, t):
             """Link power flow to component outflow."""
             expr = 0
             expr += self.P[n, t]
-            expr += -m.flow[n, list(n.electrical_output.keys())[0], t]
+            expr += -m.flow[n, list(n.electrical_output.keys())[0], p, t]
             return expr == 0
 
         self.P_flow = Constraint(
-            self.GENERICCHPS, m.TIMESTEPS, rule=_P_flow_rule
+            self.GENERICCHPS, m.TIMEINDEX, rule=_P_flow_rule
         )
 
         def _H_F_1_rule(block, n, t):

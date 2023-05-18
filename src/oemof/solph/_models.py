@@ -17,6 +17,7 @@ import logging
 import warnings
 from logging import getLogger
 
+from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
@@ -40,7 +41,7 @@ class LoggingError(BaseException):
 
 
 class BaseModel(po.ConcreteModel):
-    """The BaseModel for other solph-models (Model, MultiPeriodModel, etc.)
+    """The BaseModel for other solph-models (Model)
 
     Parameters
     ----------
@@ -52,7 +53,7 @@ class BaseModel(po.ConcreteModel):
         Defaults to `Model.CONSTRAINTS`
     objective_weighting : array like (optional)
         Weights used for temporal objective function
-        expressions. If nothing is passed `timeincrement` will be used which
+        expressions. If nothing is passed, `timeincrement` will be used which
         is calculated from the freq length of the energy system timeindex or
         can be directly passed as a sequence.
     auto_construct : boolean
@@ -65,28 +66,28 @@ class BaseModel(po.ConcreteModel):
     Attributes
     ----------
     timeincrement : sequence
-        Time increments.
+        Time increments
     flows : dict
-        Flows of the model.
+        Flows of the model
     name : str
-        Name of the model.
+        Name of the model
     es : solph.EnergySystem
-        Energy system of the model.
+        Energy system of the model
     meta : `pyomo.opt.results.results_.SolverResults` or None
-        Solver results.
+        Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
         Store the reduced costs of the model if pyomo suffix is set to IMPORT
     """
 
-    # The default list of constraint groups to be used for a model.
+    # The default list of constraint groups to be used for a model
     CONSTRAINT_GROUPS = []
 
     def __init__(self, energysystem, **kwargs):
         """Initialize a BaseModel, using its energysystem as well as
-        optional kwargs for specifying the timeincrement, objective_weigting
-        and constraint groups."""
+        optional kwargs for specifying the timeincrement, objective_weighting
+        and constraint_groups."""
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
@@ -139,7 +140,8 @@ class BaseModel(po.ConcreteModel):
 
     def _construct(self):
         """Construct a BaseModel by adding parent block sets and variables
-        as well as child blocks and variables to it."""
+        as well as child blocks and variables to it.
+        """
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
@@ -148,7 +150,8 @@ class BaseModel(po.ConcreteModel):
     def _add_parent_block_sets(self):
         """Method to create all sets located at the parent block, i.e. in the
         model itself, as they are to be shared across all model components.
-        See the class :py:class:~oemof.solph.models.Model for the sets created.
+        See the class :py:class:~oemof.solph._models.Model
+        for the sets created.
         """
         pass
 
@@ -164,7 +167,8 @@ class BaseModel(po.ConcreteModel):
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have
         been grouped in the defined constraint groups. This collects all the
-        constraints from the component blocks and adds them to the model.
+        constraints from the buses, components and flows blocks
+        and adds them to the model.
         """
         for group in self._constraint_groups:
             # create instance for block
@@ -272,7 +276,7 @@ class BaseModel(po.ConcreteModel):
 
 
 class Model(BaseModel):
-    """An  energy system model for operational and/or investment
+    """An energy system model for operational and/or investment
     optimization.
 
     Parameters
@@ -283,6 +287,20 @@ class Model(BaseModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
+    discount_rate : float or None
+        The rate used for discounting in a multi-period model.
+        A 2% discount rate needs to be defined as 0.02.
+
+    Note
+    ----
+
+    * The discount rate is only applicable for a multi-period model.
+    * If you want to work with costs data in nominal terms,
+      you should specify a discount rate.
+    * By default, there is a discount rate of 2% in a multi-period model.
+    * If you want to provide your costs data in real terms,
+      just specify `discount_rate = 0`, i.e. effectively there will be
+      no discounting.
 
 
     **The following basic sets are created**:
@@ -293,13 +311,22 @@ class Model(BaseModel):
     TIMESTEPS
         A set with all timesteps of the given time horizon.
 
+    PERIODS
+        A set with all investment periods of the given time horizon.
+
+    TIMEINDEX
+        A set with all time indices of the given time horizon, whereby
+        time indices are defined as a tuple consisting of the period and the
+        timestep. E.g. (2, 10) would be timestep 10 (which is exactly the same
+        as in the TIMESTEPS set) and which is in period 2.
+
     FLOWS
         A 2 dimensional set with all flows. Index: `(source, target)`
 
     **The following basic variables are created**:
 
     flow
-        Flow from source to target indexed by FLOWS, TIMESTEPS.
+        Flow from source to target indexed by FLOWS, TIMEINDEX.
         Note: Bounds of this variable are set depending on attributes of
         the corresponding flow object.
 
@@ -314,11 +341,24 @@ class Model(BaseModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(self, energysystem, discount_rate=None, **kwargs):
+        if discount_rate is not None:
+            self.discount_rate = discount_rate
+        elif energysystem.periods is not None:
+            self.discount_rate = 0.02
+            msg = (
+                f"By default, a discount_rate of {self.discount_rate} "
+                f"is used for a multi-period model. "
+                f"If you want to use another value, "
+                f"you have to specify the `discount_rate` attribute."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
         super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
-        """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS."""
+        """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
+        Also create sets PERIODS and TIMEINDEX used for multi-period models.
+        """
         # set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.es.nodes])
 
@@ -336,6 +376,41 @@ class Model(BaseModel):
         self.TIMEPOINTS = po.Set(
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
+
+        if self.es.periods is None:
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip(
+                        [0] * len(self.es.timeincrement),
+                        range(len(self.es.timeincrement)),
+                    )
+                ),
+                ordered=True,
+            )
+            self.PERIODS = po.Set(initialize=[0])
+        else:
+            nested_list = [
+                [k] * len(self.es.periods[k])
+                for k in range(len(self.es.periods))
+            ]
+            flattened_list = [
+                item for sublist in nested_list for item in sublist
+            ]
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip(flattened_list, range(len(self.es.timeincrement)))
+                ),
+                ordered=True,
+            )
+            self.PERIODS = po.Set(
+                initialize=sorted(list(set(range(len(self.es.periods)))))
+            )
+
+        # (Re-)Map timesteps to periods
+        timesteps_in_period = {p: [] for p in self.PERIODS}
+        for p, t in self.TIMEINDEX:
+            timesteps_in_period[p].append(t)
+        self.TIMESTEPS_IN_PERIOD = timesteps_in_period
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
@@ -366,38 +441,38 @@ class Model(BaseModel):
 
     def _add_parent_block_variables(self):
         """Add the parent block variables, which is the `flow` variable,
-        indexed by FLOWS and TIMESTEPS."""
-        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
+        indexed by FLOWS and TIMEINDEX."""
+        self.flow = po.Var(self.FLOWS, self.TIMEINDEX, within=po.Reals)
 
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
                             * self.flows[o, i].nominal_value
                         )
-                        self.flow[o, i, t].fix()
+                        self.flow[o, i, p, t].fix()
                 else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
 
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setlb(0)
 
 
 class CellularModel(po.ConcreteModel):
@@ -604,7 +679,7 @@ class CellularModel(po.ConcreteModel):
                             self.flows[o, i].fix[t]
                             * self.flows[o, i].nominal_value
                         )
-                        self.flow[o, i, t].fix()
+                        self.flow[o, i, p, t].fix()
                 else:
                     # if max is set, set that as upper bound for the variable
                     # max is by default set to 1
@@ -617,21 +692,21 @@ class CellularModel(po.ConcreteModel):
                     # TODO: why is that check for nonconvex necessary?
                     # set min value (if nonconvex isn't set) as lower bound
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
                     # if flow is unidirectional (default)
                     # set lower bound to zero
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, t in self.TIMEINDEX:
+                            self.flow[o, i, p, t].setlb(0)
             else:
                 # restrict flow to > 0 if unidirectional
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, t in self.TIMEINDEX:
+                        self.flow[o, i, p, t].setlb(0)
 
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have

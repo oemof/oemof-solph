@@ -57,7 +57,7 @@ def test_something_else():
     line21 = energysystem.groups["powerline_2_1"]
     solph.constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.InvestmentFlowBlock.invest[line21, bel1, 0],
         name="my_name",
     )

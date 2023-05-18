@@ -5,22 +5,42 @@ v0.5.1 (?)
 API changes
 ###########
 
+* Change investment for experimental :class:`oemof.solph.components.experimental._sink_dsm.SinkDSM`: Remove
+  obsolete parameters `flex_share_down` and `flex_share_up`.
 
 New features
 ############
 
+* Add option to run multi-period (dynamic) investment models with oemof.solph as an experimental feature:
+    * You can change from standard model to multi-period model by defining the newly introduced `periods`
+      attribute of your energy system. Be aware that it is experimental as of now. `periods` is a dictionary
+      mapping the periods you want to model (usually years) to pandas.date_range objects.
+    * Add attributes `periods` to :class:`oemof.solph._energy_system.EnergySystem`.
+    * Introduce new Pyomo Sets `PERIODS` and `TIMEINDEX` in :class:`oemof.solph.models.Model`.
+    * Index all investment-related variables with `PERIODS` and flow variable with `TIMEINDEX`, which
+      is a tuple of periods and timesteps.
+    * Add lifetime tracking for investment options by introducing the attributes `lifetime` and `age`.
+    * Add new investment-related variables `total` holding the total capacity, `old` holding capacity
+      to be decommissioned, `old_exo` (for exogenous) holding existing capacity to be decommissioned and
+      `old_end` holding model-endogenously installed capacity to be decommissioned after its lifetime.
+    * Include discounting and calculating annuities in the objective function terms. Introduce attribute `discount_rate`
+      of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
 
 Documentation
 #############
 
+* See extensive documentation in user guide and API reference for the new (experimental) multi-period feature.
 
 Bug fixes
 #########
 
+* Fixed error when calling `oemof_installation_test` as console script.
+* Corrected several typos in the docs.
 
 Testing
 #######
 
+* Add tests for experimental SinkDSM component.
 
 Other changes
 #############
@@ -29,4 +49,7 @@ Other changes
 
 Contributors
 ############
+
+* Johannes Kochems
+* Tobi Rohrer
 

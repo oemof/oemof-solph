@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -113,7 +114,7 @@ class OffsetTransformerBlock(ScalarBlock):
 
     .. math::
         &
-        P_{out}(t) = C_1(t) \cdot P_{in}(t) + C_0(t) \cdot Y(t) \\
+        P_{out}(p, t) = C_1(t) \cdot P_{in}(p, t) + C_0(t) \cdot Y(t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
@@ -121,9 +122,9 @@ class OffsetTransformerBlock(ScalarBlock):
     +--------------------+------------------------+------+--------------------------------------------+
     | symbol             | attribute              | type | explanation                                |
     +====================+========================+======+============================================+
-    | :math:`P_{out}(t)` | `flow[n,o,t]`          | V    | Outflow of transformer                     |
+    | :math:`P_{out}(t)` | `flow[n,o,p,t]`        | V    | Outflow of transformer                     |
     +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,t]`          | V    | Inflow of transformer                      |
+    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`        | V    | Inflow of transformer                      |
     +--------------------+------------------------+------+--------------------------------------------+
     | :math:`Y(t)`       | `status[i,n,t]`        | V    | Binary status variable of nonconvex inflow |
     +--------------------+------------------------+------+--------------------------------------------+
@@ -156,12 +157,13 @@ class OffsetTransformerBlock(ScalarBlock):
 
         self.OFFSETTRANSFORMERS = Set(initialize=[n for n in group])
 
-        def _relation_rule(block, n, t):
+        def _relation_rule(block, n, p, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[n, list(n.outputs.keys())[0], t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
             expr += (
-                m.flow[list(n.inputs.keys())[0], n, t] * n.coefficients[1][t]
+                m.flow[list(n.inputs.keys())[0], n, p, t]
+                * n.coefficients[1][t]
             )
             expr += (
                 m.NonConvexFlowBlock.status[list(n.inputs.keys())[0], n, t]
@@ -170,5 +172,5 @@ class OffsetTransformerBlock(ScalarBlock):
             return expr == 0
 
         self.relation = Constraint(
-            self.OFFSETTRANSFORMERS, m.TIMESTEPS, rule=_relation_rule
+            self.OFFSETTRANSFORMERS, m.TIMEINDEX, rule=_relation_rule
         )

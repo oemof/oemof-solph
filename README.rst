@@ -170,7 +170,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 **Windows**
 
- 1. Download CBC (`64 <https://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <https://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
@@ -266,7 +266,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 License
 =======
 
-Copyright (c) 2022 oemof developer group
+Copyright (c) 2023 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
