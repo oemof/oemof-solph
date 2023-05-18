@@ -32,11 +32,6 @@ from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 from oemof.solph._plumbing import sequence
 
-# imports for CellularModel
-from oemof.solph.components.experimental._cell_connector import CellConnector
-import itertools
-from oemof.tools import debugging
-
 
 class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
@@ -416,17 +411,7 @@ class CellularModel(po.ConcreteModel):
         containing all other cell instances (from a model point of view) and
         value is a list containing all EnergyCell objects (from an object point
         of view).
-    Connections: set
-        A set of tuples, where each tuple is created as (CellConnector1,
-        CellConnector2, loss_factor).
-        Connections are established symmetrically, so loss_factor is applied in
-        both directions. See equation (x) for usage of loss_factor. Use
-        `auto_connect=False` to prevent automatic connection of CellConnectors.
     """
-
-    # TODO: Fill this
-    # TODO: Adjust this to new BaseModel and Model code!
-    # TODO: Remove redundancies by inheriting from BaseModel or Model
 
     CONSTRAINT_GROUPS = [
         BusBlock,
@@ -437,7 +422,7 @@ class CellularModel(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, EnergyCells, Connections, **kwargs):
+    def __init__(self, EnergyCells, **kwargs):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
@@ -458,19 +443,15 @@ class CellularModel(po.ConcreteModel):
             )
             raise LoggingError(msg)
 
-        ##########################  Arguments #################################
         self.name = kwargs.get("name", type(self).__name__)
 
-        # get the parent energy cell
+        # get the upmost energy cell
         self.es = list(EnergyCells.keys())[0]
 
         # get all child energy cells
         self.ec = EnergyCells[self.es]
 
-        # get the cell connection object
-        self.CONNECTIONS = Connections
-
-        # add all groups together
+        # add all groups together (concerns the constraint groups)
         self.groups = {}
         self.groups.update(self.es.groups)
         for cell in self.ec:
@@ -488,10 +469,11 @@ class CellularModel(po.ConcreteModel):
                             )
                         )
                         raise Warning(msg)
-        # Add time increment (no idea what it does)
+
+        # add time increment
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
-        # Set objective weighting (no idea what it does)
+        # set objective weighting
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
         )
@@ -515,8 +497,9 @@ class CellularModel(po.ConcreteModel):
                     self.flows.update({io: f})
                 else:
                     msg = (
-                        "Two flows with identical input-ouput are tried to"
-                        " be added to the CellularModel. {}".format({io: f})
+                        "Two flows with identical input-output are tried to"
+                        " be added to the CellularModel. Second flow is"
+                        " skipped. {}".format({io: f})
                     )
                     raise Warning(msg)
 
@@ -529,12 +512,8 @@ class CellularModel(po.ConcreteModel):
         if kwargs.get("auto_construct", True):
             self._construct()
 
-        # start connecting of cells (turn off with auto_connect=False)
-        if kwargs.get("auto_connect", True):
-            self._auto_connect()
-
     def _construct(self):
-        "This is basically copy-pasted from the Model class"
+        "copy pasted from Model class"
         self._add_parent_block_sets()
         self._add_parent_block_variables()
         self._add_child_blocks()
@@ -554,9 +533,11 @@ class CellularModel(po.ConcreteModel):
                 else:
                     msg = (
                         "Two nodes of identical name are tried to be added"
-                        " to `CellularModel.nodes`: {}".format(node)
+                        " to `CellularModel.nodes`. Second node is skipped."
+                        " \n{}".format(node)
                     )
                     raise Warning(msg)
+
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.nodes])
 
@@ -603,13 +584,16 @@ class CellularModel(po.ConcreteModel):
 
     def _add_parent_block_variables(self):
         """Method to create all variables located at the parent block,
-        i.e. the model itself as these variables  are to be shared across
+        i.e. the model itself as these variables are to be shared across
         all model components.
         See the class :py:class:~oemof.solph._models.Model
         for the `flow` variable created.
         """
-        # TODO: what does this do?
+        # create a set of variables for all flows and timesteps as reals
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
+        # self.FLOWS: pyomo set of all flows of the energy system
+        # self.flows: dict with all flows of the energy system
+        # self.flow: pyomo Variable(s) for all flows at all timesteps
         for (o, i) in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
@@ -622,14 +606,15 @@ class CellularModel(po.ConcreteModel):
                         )
                         self.flow[o, i, t].fix()
                 else:
-                    # if max is set, set that as upper bound
+                    # if max is set, set that as upper bound for the variable
+                    # max is by default set to 1
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
 
-                    # TODO: why is that check necessary?
+                    # TODO: why is that check for nonconvex necessary?
                     # set min value (if nonconvex isn't set) as lower bound
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
@@ -637,12 +622,13 @@ class CellularModel(po.ConcreteModel):
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
-                    # TODO: what does this do?
+                    # if flow is unidirectional (default)
+                    # set lower bound to zero
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(0)
             else:
-                # restrict flow values to >0 if unidirectional
+                # restrict flow to > 0 if unidirectional
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
@@ -671,110 +657,12 @@ class CellularModel(po.ConcreteModel):
 
         expr = 0
         # TODO: for distributed optimization, this needs to be fitted!
-        # TODO: is it necessary to add an _objective_expression to the
-        # CellConnectorBlock?
-        # TODO: Check if component_data_objects contains all relevant
-        # objects from the child-cells
-
         # get the objective function expression from each block
         for block in self.component_data_objects():
             if hasattr(block, "_objective_expression"):
                 expr += block._objective_expression()
 
         self.objective = po.Objective(sense=sense, expr=expr)
-
-    def _auto_connect(self):
-        self._check_orphaned_connectors()
-        self._check_max_power_compliance()
-        self._mirror_connections()
-        self._connect_cells()
-
-    def _check_orphaned_connectors(self):
-        """
-        Check if there are orphaned (unused) connectors and hand out a warning
-        if not.
-        """
-        # create set containing Connectors in use
-        cell_connector_set = set(
-            [
-                x
-                for x in itertools.chain.from_iterable(self.CONNECTIONS)
-                if isinstance(x, CellConnector)
-            ]
-        )
-        # create set containing all Connectors
-        all_cell_connectors = set(self.CellConnectorBlock.CELLCONNECTORS)
-        # set comparison for fast calculation of orphans
-        orphaned_connectors = all_cell_connectors - cell_connector_set
-
-        if orphaned_connectors:
-            # only entered if there are orphaned Connectors
-            msg = (
-                "A CellConnector is designed to always be connected to one other "
-                "CellConnector. The following CellConnector(s) are not connected "
-                "to a counterpart: {0}. If this is intended and you know what you "
-                "are doing, you can ignore or disable the SuspiciousUsageWarning."
-            )
-            warnings.warn(
-                msg.format(orphaned_connectors),
-                debugging.SuspiciousUsageWarning,
-            )
-
-    def _check_max_power_compliance(self):
-        """
-        Check if max_power values comply and hand out an error if not.
-        """
-        for con in self.CONNECTIONS:
-            if not con[0].max_power == con[1].max_power:
-                msg = (
-                    "Two connected CellConnectors need to have the same max_power "
-                    "value. The following values where set:\n"
-                    "{0}: {1}\n"
-                    "{2}: {3}"
-                )
-                raise ValueError(
-                    msg.format(
-                        con[0].label,
-                        con[0].max_power,
-                        con[1].label,
-                        con[1].max_power,
-                    )
-                )
-
-    def _mirror_connections(self):
-        """
-        For convenience, users only need to add (cc1, cc2, lf) to connect two
-        CellConnectors. This creates the opposite connection (cc2, cc1, lf).
-        """
-        complete_connections = set()
-        for con in self.CONNECTIONS:
-            # add original connection
-            complete_connections.add(con)
-            # add mirrored connection
-            complete_connections.add((con[1], con[0], con[2]))
-        self.CONNECTIONS = complete_connections
-
-    def _connect_cells(self):
-        """
-        This function actually connects the cells by equating the flows of
-        the CellConnectors.
-
-        TODO: When building the distributed model, this needs to stay in
-        the main problem as complicating constraint.
-        """
-        # connection_block = po.Block()
-        # self.add_component("ConnectionBlock", connection_block)
-
-        def _equate_CellConnector_flows_rule(self, cc1, cc2, lf, t):
-            lhs = self.flow[cc1, cc1.input_bus, t]
-            rhs = (1 - lf) * self.flow[cc2.output_bus, cc2, t]
-            return lhs == rhs
-
-        self.equate_CellConnector_flows = po.Constraint(
-            self.CONNECTIONS,
-            self.TIMESTEPS,
-            rule=_equate_CellConnector_flows_rule,
-        )
 
     def receive_duals(self):
         """Method sets solver suffix to extract information about dual
@@ -848,7 +736,7 @@ class CellularModel(po.ConcreteModel):
         return solver_results
 
     def relax_problem(self):
-        """Relaxes integer variables to reals of optimization model self."""
+        """Relaxes integer variables of optimization model to reals."""
         relaxer = RelaxIntegrality()
         relaxer._apply_to(self)
 

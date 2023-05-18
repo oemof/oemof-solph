@@ -1,26 +1,14 @@
-#%%
-###########################################################################
-# imports
-###########################################################################
-
-import pandas as pd
-
-import pyomo.environ as po
+# %%
 
 from oemof.solph import CellularModel
 from oemof.solph import buses
 from oemof.solph import components as cmp
 
-from oemof.tools import debugging
-from warnings import warn
-
 from oemof.solph import create_time_index
 from oemof.solph import flows
 from oemof.solph import processing, views
 
-from oemof.solph.components.experimental import CellConnector, EnergyCell
-
-import itertools
+from oemof.solph.components.experimental import EnergyCell
 
 ###########################################################################
 # define the cells of the cellular energy system
@@ -28,155 +16,237 @@ import itertools
 
 n_periods = 3
 
-# daterange = pd.date_range(
-#    start="01-01-2022 00:00:00", periods=n_periods, freq="1H"
-# )
-
 daterange = create_time_index(year=2020, interval=1, number=n_periods)
 
 mysolver = "gurobi"
 
 # create the energy cells
 es = EnergyCell(label="es", timeindex=daterange, infer_last_interval=False)
-ec1 = EnergyCell(label="ec1", timeindex=daterange, infer_last_interval=False)
-ec2 = EnergyCell(label="ec2", timeindex=daterange, infer_last_interval=False)
-ec3 = EnergyCell(label="ec3", timeindex=daterange, infer_last_interval=False)
+ec_1 = EnergyCell(label="ec1", timeindex=daterange, infer_last_interval=False)
+ec_2 = EnergyCell(label="ec2", timeindex=daterange, infer_last_interval=False)
+ec_1_1 = EnergyCell(
+    label="ec1_1", timeindex=daterange, infer_last_interval=False
+)
+ec_1_2 = EnergyCell(
+    label="ec1_2", timeindex=daterange, infer_last_interval=False
+)
+ec_2_1 = EnergyCell(
+    label="ec2_1", timeindex=daterange, infer_last_interval=False
+)
+ec_2_2 = EnergyCell(
+    label="ec2_2", timeindex=daterange, infer_last_interval=False
+)
 
 demand_1 = [10] * n_periods
 demand_2 = [10] * n_periods
-demand_3 = [80] * n_periods
+demand_1_1 = [10] * n_periods
+demand_1_2 = [10] * n_periods
+demand_2_1 = [10] * n_periods
+demand_2_2 = [10] * n_periods
 
 pv_1 = [100] * n_periods
-pv_2 = [10] * n_periods
-pv_3 = [10] * n_periods
+pv_2 = [100] * n_periods
+pv_1_1 = [100] * n_periods
+pv_1_2 = [100] * n_periods
+pv_2_1 = [100] * n_periods
+pv_2_2 = [100] * n_periods
 
-bus_el = buses.Bus(label="bus_el")
-bus_el_1 = buses.Bus(label="bus_el_1")
-bus_el_2 = buses.Bus(label="bus_el_2")
-bus_el_3 = buses.Bus(label="bus_el_3")
+bus_el_es = buses.Bus(label="bus_el_es")
+bus_el_ec_1 = buses.Bus(label="bus_el_ec_1")
+bus_el_ec_2 = buses.Bus(label="bus_el_ec_2")
+bus_el_ec_1_1 = buses.Bus(label="bus_el_ec_1_1")
+bus_el_ec_1_2 = buses.Bus(label="bus_el_ec_1_2")
+bus_el_ec_2_1 = buses.Bus(label="bus_el_ec_2_1")
+bus_el_ec_2_2 = buses.Bus(label="bus_el_ec_2_2")
 
-es.add(bus_el)
-ec1.add(bus_el_1)
-ec2.add(bus_el_2)
-ec3.add(bus_el_3)
+es.add(bus_el_es)
+ec_1.add(bus_el_ec_1)
+ec_2.add(bus_el_ec_2)
+ec_1_1.add(bus_el_ec_1_1)
+ec_1_2.add(bus_el_ec_1_2)
+ec_2_1.add(bus_el_ec_2_1)
+ec_2_2.add(bus_el_ec_2_2)
 
-dem_1 = cmp.Sink(
-    label="dem_1", inputs={bus_el_1: flows.Flow(fix=demand_1, nominal_value=1)}
+sink_el_ec_1 = cmp.Sink(
+    label="sink_el_ec_1",
+    inputs={bus_el_ec_1: flows.Flow(fix=demand_1, nominal_value=1)},
 )
-dem_2 = cmp.Sink(
-    label="dem_2", inputs={bus_el_2: flows.Flow(fix=demand_2, nominal_value=1)}
+sink_el_ec_2 = cmp.Sink(
+    label="sink_el_ec_2",
+    inputs={bus_el_ec_2: flows.Flow(fix=demand_2, nominal_value=1)},
 )
-dem_3 = cmp.Sink(
-    label="dem_3", inputs={bus_el_3: flows.Flow(fix=demand_3, nominal_value=1)}
+sink_el_ec_1_1 = cmp.Sink(
+    label="sink_el_ec_1_1",
+    inputs={bus_el_ec_1_1: flows.Flow(fix=demand_1_1, nominal_value=1)},
 )
-ec1.add(dem_1)
-ec2.add(dem_2)
-ec3.add(dem_3)
+sink_el_ec_1_2 = cmp.Sink(
+    label="sink_el_ec_1_2",
+    inputs={bus_el_ec_1_2: flows.Flow(fix=demand_1_2, nominal_value=1)},
+)
+sink_el_ec_2_1 = cmp.Sink(
+    label="sink_el_ec_2_1",
+    inputs={bus_el_ec_2_1: flows.Flow(fix=demand_2_1, nominal_value=1)},
+)
+sink_el_ec_2_2 = cmp.Sink(
+    label="sink_el_ec_2_2",
+    inputs={bus_el_ec_2_2: flows.Flow(fix=demand_2_2, nominal_value=1)},
+)
 
-pv_source_1 = cmp.Source(
-    label="pv_source_1",
+ec_1.add(sink_el_ec_1)
+ec_2.add(sink_el_ec_2)
+ec_1_1.add(sink_el_ec_1_1)
+ec_1_2.add(sink_el_ec_1_2)
+ec_2_1.add(sink_el_ec_2_1)
+ec_2_2.add(sink_el_ec_2_2)
+
+source_el_ec_1 = cmp.Source(
+    label="source_el_ec_1",
     outputs={
-        bus_el_1: flows.Flow(variable_costs=0, max=pv_1, nominal_value=1)
+        bus_el_ec_1: flows.Flow(max=pv_1, nominal_value=1, variable_costs=5)
     },
 )
-pv_source_2 = cmp.Source(
-    label="pv_source_2",
+source_el_ec_2 = cmp.Source(
+    label="source_el_ec_2",
     outputs={
-        bus_el_2: flows.Flow(variable_costs=0, max=pv_2, nominal_value=1)
+        bus_el_ec_2: flows.Flow(max=pv_2, nominal_value=1, variable_costs=5)
     },
 )
-pv_source_3 = cmp.Source(
-    label="pv_source_3",
+source_el_ec_1_1 = cmp.Source(
+    label="source_el_ec_1_1",
     outputs={
-        bus_el_3: flows.Flow(variable_costs=0, max=pv_3, nominal_value=1)
+        bus_el_ec_1_1: flows.Flow(
+            max=pv_1_1, nominal_value=1, variable_costs=0
+        )
     },
 )
-ec1.add(pv_source_1)
-ec2.add(pv_source_2)
-ec3.add(pv_source_3)
-
-###########################################################################
-# add the grid connectors to the cells
-###########################################################################
-
-# Each cell needs a CellConnector object for each connection with another cell.
-# So if Cell1 and Cell2 should be connected, each one of them needs one
-# CellConnector object.
-
-# CellConnector for es
-cc_es_ec1 = CellConnector(
-    label="cc_es_ec1",
-    inputs={bus_el: flows.Flow()},
-    outputs={bus_el: flows.Flow()},
-    max_power=10000,
+source_el_ec_1_2 = cmp.Source(
+    label="source_el_ec_1_2",
+    outputs={
+        bus_el_ec_1_2: flows.Flow(
+            max=pv_1_2, nominal_value=1, variable_costs=5
+        )
+    },
 )
-es.add(cc_es_ec1)
-
-# CellConnectors for ec1
-cc_ec1_es = CellConnector(
-    label="cc_ec1_es",
-    inputs={bus_el_1: flows.Flow()},
-    outputs={bus_el_1: flows.Flow()},
-    max_power=10000,
+source_el_ec_2_1 = cmp.Source(
+    label="source_el_ec_2_1",
+    outputs={
+        bus_el_ec_2_1: flows.Flow(
+            max=pv_2_1, nominal_value=1, variable_costs=10
+        )
+    },
+)
+source_el_ec_2_2 = cmp.Source(
+    label="source_el_ec_2_2",
+    outputs={
+        bus_el_ec_2_2: flows.Flow(
+            max=pv_2_2, nominal_value=1, variable_costs=10
+        )
+    },
 )
 
-cc_ec1_ec2 = CellConnector(
-    label="cc_ec1_ec2",
-    inputs={bus_el_1: flows.Flow()},
-    outputs={bus_el_1: flows.Flow()},
-    max_power=10000,
+ec_1.add(source_el_ec_1)
+ec_2.add(source_el_ec_2)
+ec_1_1.add(source_el_ec_1_1)
+ec_1_2.add(source_el_ec_1_2)
+ec_2_1.add(source_el_ec_2_1)
+ec_2_2.add(source_el_ec_2_2)
+
+connector_el_ec_1 = buses.Bus(
+    label="connector_el_ec_1",
+    inputs={
+        bus_el_es: flows.Flow(),
+        bus_el_ec_1: flows.Flow(),
+    },
+    outputs={
+        bus_el_es: flows.Flow(),
+        bus_el_ec_1: flows.Flow(),
+    },
 )
 
-cc_ec1_ec3 = CellConnector(
-    label="cc_ec1_ec3",
-    inputs={bus_el_1: flows.Flow()},
-    outputs={bus_el_1: flows.Flow()},
-    max_power=10000,
+connector_el_ec_2 = buses.Bus(
+    label="connector_el_ec_2",
+    inputs={
+        bus_el_es: flows.Flow(),
+        bus_el_ec_2: flows.Flow(),
+    },
+    outputs={
+        bus_el_es: flows.Flow(),
+        bus_el_ec_2: flows.Flow(),
+    },
 )
-ec1.add(cc_ec1_es, cc_ec1_ec2, cc_ec1_ec3)
 
-# CellConnector for ec2
-cc_ec2_ec1 = CellConnector(
-    label="cc_ec2_ec1",
-    inputs={bus_el_2: flows.Flow()},
-    outputs={bus_el_2: flows.Flow()},
-    max_power=10000,
+# relax the max constraint to see different results
+connector_el_ec_1_1 = buses.Bus(
+    label="connector_el_ec_1_1",
+    inputs={
+        bus_el_ec_1: flows.Flow(),
+        bus_el_ec_1_1: flows.Flow(),
+    },
+    outputs={
+        bus_el_ec_1: flows.Flow(max=30, nominal_value=1),
+        bus_el_ec_1_1: flows.Flow(),
+    },
 )
-ec2.add(cc_ec2_ec1)
 
-# CellConnector for ec_3
-cc_ec3_ec1 = CellConnector(
-    label="cc_ec3_ec1",
-    inputs={bus_el_3: flows.Flow()},
-    outputs={bus_el_3: flows.Flow()},
-    max_power=10000,
+connector_el_ec_1_2 = buses.Bus(
+    label="connector_el_ec_1_2",
+    inputs={
+        bus_el_ec_1: flows.Flow(),
+        bus_el_ec_1_2: flows.Flow(),
+    },
+    outputs={
+        bus_el_ec_1: flows.Flow(),
+        bus_el_ec_1_2: flows.Flow(),
+    },
 )
-ec3.add(cc_ec3_ec1)
 
-###########################################################################
-# create the cellular model
-###########################################################################
-#%%
-pairings = {
-    (cc_es_ec1, cc_ec1_es, 0),
-    (cc_ec1_ec2, cc_ec2_ec1, 0),
-    (cc_ec1_ec3, cc_ec3_ec1, 0),
-}
-cmodel = CellularModel(EnergyCells={es: [ec1, ec2, ec3]}, Connections=pairings)
+connector_el_ec_2_1 = buses.Bus(
+    label="connector_el_ec_2_1",
+    inputs={
+        bus_el_ec_2: flows.Flow(),
+        bus_el_ec_2_1: flows.Flow(),
+    },
+    outputs={
+        bus_el_ec_2: flows.Flow(),
+        bus_el_ec_2_1: flows.Flow(),
+    },
+)
 
-###########################################################################
-# link the grid connectors to each other
-###########################################################################
+connector_el_ec_2_2 = buses.Bus(
+    label="connector_el_ec_2_2",
+    inputs={
+        bus_el_ec_2: flows.Flow(),
+        bus_el_ec_2_2: flows.Flow(),
+    },
+    outputs={
+        bus_el_ec_2: flows.Flow(),
+        bus_el_ec_2_2: flows.Flow(),
+    },
+)
 
-#%%
+# the connectors are all part of the overarching es
+es.add(
+    connector_el_ec_1,
+    connector_el_ec_2,
+    connector_el_ec_1_1,
+    connector_el_ec_1_2,
+    connector_el_ec_2_1,
+    connector_el_ec_2_2,
+)
 
-# cmodel.receive_duals()
-res = cmodel.solve(solver=mysolver)
+# %%
+cmodel = CellularModel(
+    EnergyCells={es: [ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2]}
+)
+# %%
 cmodel.write(
-    "D:\solph-cellular\examples\cellular\cmodel.lp",
+    "D:/solph-cellular/examples/cellular/cmodel.lp",
     io_options={"symbolic_solver_labels": True},
 )
-results = processing.results(cmodel)
-views.node(results, "cc_ec1_ec3")["sequences"]
+# %%
+cmodel.solve()
 
+# %%
+results = processing.results(cmodel)
+views.node(results, "connector_el_ec_1_1")["sequences"]
 # %%
