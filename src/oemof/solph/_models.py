@@ -366,10 +366,12 @@ class Model(BaseModel):
     ]
 
     def __init__(self, energysystem, discount_rate=None, **kwargs):
-        super().__init__(energysystem, **kwargs)
         if discount_rate is not None:
             self.discount_rate = discount_rate
-        elif self.es.periods is not None:
+        elif (
+            not isinstance(energysystem, dict)
+            and energysystem.periods is not None
+        ):
             self.discount_rate = 0.02
             msg = (
                 f"By default, a discount_rate of {self.discount_rate} "
@@ -378,6 +380,22 @@ class Model(BaseModel):
                 f"you have to specify the `discount_rate` attribute."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        elif (
+            isinstance(energysystem, dict)
+            and list(energysystem.keys())[0].periods is not None
+        ):
+            self.discount_rate = 0.02
+            msg = (
+                f"By default, a discount_rate of {self.discount_rate} "
+                f"is used for a multi-period model. "
+                f"If you want to use another value, "
+                f"you have to specify the `discount_rate` attribute."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+
+        else:
+            pass
+        super().__init__(energysystem, **kwargs)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.

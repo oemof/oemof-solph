@@ -31,7 +31,6 @@ __all__ = [
     "create_time_index",
     "GROUPINGS",
     "Model",
-    "CellularModel",
     "Investment",
     "NonConvex",
     "sequence",
