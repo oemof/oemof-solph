@@ -171,5 +171,3 @@ def storage_level_constraint(
         )
 
     _inputs()
-
-    return
