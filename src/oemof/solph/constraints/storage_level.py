@@ -121,7 +121,7 @@ def storage_level_constraint(
         def _input_active_rule(m):
             r"""
             .. math::
-                \hat{y}_n \ge (E(t) - E_n) - E_{max}
+                \hat{y}_n \ge (E(t) - E_n) / E_{max}
             """
             for t in m.TIMESTEPS:
                 for o in input_levels:
@@ -131,9 +131,9 @@ def storage_level_constraint(
                             m.GenericStorageBlock.storage_content[
                                 storage_component, t
                             ]
+                            / storage_component.nominal_storage_capacity
                             - input_levels[o]
                         )
-                        / storage_component.nominal_storage_capacity
                         <= inactive_input[o, t],
                     )
 

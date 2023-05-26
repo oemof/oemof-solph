@@ -53,12 +53,12 @@ c_u_multiplexer_output_constraint(out_1_0_1)_:
 
 c_u_multiplexer_input_active_constraint(in_1_0)_:
 -1 multiplexer_active_input(in_1_0)
-<= -0.9375
+<= -0.75
 
 c_u_multiplexer_input_active_constraint(in_1_1)_:
 +0.25 GenericStorageBlock_storage_content(storage_1)
 -1 multiplexer_active_input(in_1_1)
-<= 0.0625
+<= 0.25
 
 c_u_multiplexer_input_constraint(in_1_0_0)_:
 +8 flow(in_1_multiplexer_0_0)
