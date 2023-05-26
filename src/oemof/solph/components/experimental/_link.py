@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -29,7 +30,7 @@ from oemof.solph._plumbing import sequence
 
 
 class Link(on.Transformer):
-    """A Link object with 1...2 inputs and 1...2 outputs.
+    """A Link object with 2 inputs and 2 outputs.
 
     Parameters
     ----------
@@ -113,7 +114,8 @@ class LinkBlock(ScalarBlock):
 
     .. math::
         &
-        (1) \qquad P_{\mathrm{in},n}(t) = c_n(t) \times P_{\mathrm{out},n}(t)
+        (1) \qquad P_{\mathrm{in},n}(p, t) = c_n(t)
+        \times P_{\mathrm{out},n}(p, t)
             \quad \forall t \in T, \forall n in {1,2} \\
         &
 
@@ -149,13 +151,13 @@ class LinkBlock(ScalarBlock):
         self.LINKS = Set(initialize=[g for g in group])
 
         def _input_output_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
                             expr = (
-                                m.flow[n, cidx[1], t]
-                                == c[t] * m.flow[cidx[0], n, t]
+                                m.flow[n, cidx[1], p, t]
+                                == c[t] * m.flow[cidx[0], n, p, t]
                             )
                         except ValueError:
                             raise ValueError(
@@ -164,12 +166,12 @@ class LinkBlock(ScalarBlock):
                                     cidx[0], cidx[1], n
                                 ),
                             )
-                        block.relation.add((n, cidx[0], cidx[1], t), (expr))
+                        block.relation.add((n, cidx[0], cidx[1], p, t), expr)
 
         self.relation = Constraint(
             [
-                (n, cidx[0], cidx[1], t)
-                for t in m.TIMESTEPS
+                (n, cidx[0], cidx[1], p, t)
+                for p, t in m.TIMEINDEX
                 for n, conversion in all_conversions.items()
                 for cidx, c in conversion.items()
             ],
