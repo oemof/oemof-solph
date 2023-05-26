@@ -124,17 +124,17 @@ def storage_level_constraint(
                 \hat{y}_n \ge (E(t) - E_n) / E_{max}
             """
             for t in m.TIMESTEPS:
-                for o in input_levels:
+                for i in input_levels:
                     getattr(m, constraint_name).add(
-                        (o, t),
+                        (i, t),
                         (
                             m.GenericStorageBlock.storage_content[
                                 storage_component, t
                             ]
                             / storage_component.nominal_storage_capacity
-                            - input_levels[o]
+                            - input_levels[i]
                         )
-                        <= inactive_input[o, t],
+                        <= inactive_input[i, t],
                     )
 
         setattr(
