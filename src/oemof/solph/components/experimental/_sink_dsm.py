@@ -4859,7 +4859,11 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 for p in m.PERIODS:
                     if g.shed_eligibility:
                         # sum of all load reductions
-                        lhs = sum(self.dsm_do_shed[g, t] for t in m.TIMESTEPS)
+                        lhs = sum(
+                            self.dsm_do_shed[g, t]
+                            for pp, t in m.TIMEINDEX
+                            if pp == p
+                        )
 
                         # year limit
                         rhs = (
