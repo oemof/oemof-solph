@@ -178,7 +178,7 @@ class EnergySystem(es.EnergySystem):
         -------
         periods_years: dict
             the simulation year of the start of each a period,
-            relative to the start of the optimization rund and starting with 0
+            relative to the start of the optimization run and starting with 0
         """
         periods_years = [0]
         if self.periods is not None:
