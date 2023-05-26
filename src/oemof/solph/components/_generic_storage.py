@@ -22,8 +22,6 @@ SPDX-License-Identifier: MIT
 import numbers
 from warnings import warn
 
-from warnings import warn
-
 from oemof.network import network
 from oemof.tools import debugging
 from oemof.tools import economics
