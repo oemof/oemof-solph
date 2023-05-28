@@ -45,7 +45,10 @@ def test_generic_storage_1():
 def test_generic_storage_2():
     """Nominal value defined with investment model."""
     bel = Bus()
-    with pytest.raises(AttributeError, match="If an investment object"):
+    with pytest.raises(
+        AttributeError,
+        match="For backward compatibility, the option investment overwrites",
+    ):
         components.GenericStorage(
             label="storage3",
             nominal_storage_capacity=45,

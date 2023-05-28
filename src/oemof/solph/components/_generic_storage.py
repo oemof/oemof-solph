@@ -19,7 +19,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
-
+import numbers
 from warnings import warn
 
 from oemof.network import network
@@ -47,8 +47,10 @@ class GenericStorage(network.Component):
 
     Parameters
     ----------
-    nominal_storage_capacity : numeric, :math:`E_{nom}`
-        Absolute nominal capacity of the storage
+    nominal_storage_capacity : numeric, :math:`E_{nom}` or
+            :class:`oemof.solph.options.Investment` object
+        Absolute nominal capacity of the storage, fixed value or
+        object describing parameter of investment optimisations.
     invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage:
@@ -191,7 +193,29 @@ class GenericStorage(network.Component):
             outputs=outputs,
             **custom_attributes,
         )
-        self.nominal_storage_capacity = nominal_storage_capacity
+        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        if investment is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option investment overwrites the option nominal_value."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_storage_capacity is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_storage_capacity = investment
+        # --- END ---
+
+        self.nominal_storage_capacity = None
+        self.investment = None
+        self._invest_group = False
+        if isinstance(nominal_storage_capacity, numbers.Real):
+            self.nominal_storage_capacity = nominal_storage_capacity
+        elif isinstance(nominal_storage_capacity, Investment):
+            self.investment = investment
+            self._invest_group = True
+
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
         self.loss_rate = solph_sequence(loss_rate)
@@ -219,8 +243,7 @@ class GenericStorage(network.Component):
         # Check for infeasible parameter combinations
         self._check_infeasible_parameter_combinations()
 
-        # Check attributes for the investment mode.
-        if self._invest_group is True:
+        if self._invest_group:
             self._check_invest_attributes()
 
     def _set_flows(self):
