@@ -86,8 +86,8 @@ class TestsMultiPeriodConstraint:
                 exp_diff, gen_diff = lp_diff(exp, gen)
 
                 # sometimes, 0.0 is printed, sometimes 0, harmonise that
-                for diff in [exp_diff, gen_diff]:
-                    diff = [d.replace(' 0.0 ', ' 0 ') for d in diff]
+                exp_diff = [line + " ".replace(' 0.0 ', ' 0 ') for line in exp_diff]
+                gen_diff = [line + " ".replace(' 0.0 ', ' 0 ') for line in gen_diff]
 
                 assert len(exp_diff) == len(gen_diff)
 
