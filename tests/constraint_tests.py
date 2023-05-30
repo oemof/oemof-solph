@@ -77,8 +77,14 @@ class TestsConstraint:
                 # It automatically prints the diff
                 exp_diff, gen_diff = lp_diff(exp, gen)
 
+                # sometimes, 0.0 is printed, sometimes 0, harmonise that
+                for diff in [exp_diff, gen_diff]:
+                    diff = [d.replace(' 0.0 ', ' 0 ') for d in diff]
+
                 assert len(exp_diff) == len(gen_diff)
 
+                # Created the LP files do not have a reproducable
+                # order of the lines. Thus, we sort the lines.
                 for exp, gen in zip(sorted(exp_diff), sorted(gen_diff)):
                     assert (
                         exp == gen
