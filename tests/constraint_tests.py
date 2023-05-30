@@ -77,8 +77,12 @@ class TestsConstraint:
                 exp_diff, gen_diff = lp_diff(exp, gen)
 
                 # sometimes, 0.0 is printed, sometimes 0, harmonise that
-                exp_diff = [line + " ".replace(' 0.0 ', ' 0 ') for line in exp_diff]
-                gen_diff = [line + " ".replace(' 0.0 ', ' 0 ') for line in gen_diff]
+                exp_diff = [
+                    line + " ".replace(" 0.0 ", " 0 ") for line in exp_diff
+                ]
+                gen_diff = [
+                    line + " ".replace(" 0.0 ", " 0 ") for line in gen_diff
+                ]
 
                 assert len(exp_diff) == len(gen_diff)
 
