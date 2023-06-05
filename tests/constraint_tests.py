@@ -86,7 +86,7 @@ class TestsConstraint:
 
                 assert len(exp_diff) == len(gen_diff)
 
-                # Created the LP files do not have a reproducable
+                # Created the LP files do not have a reproducible
                 # order of the lines. Thus, we sort the lines.
                 for exp, gen in zip(sorted(exp_diff), sorted(gen_diff)):
                     assert (
