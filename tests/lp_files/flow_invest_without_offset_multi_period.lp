@@ -2,8 +2,8 @@
 
 min 
 objective:
-+611.56718125290342 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_0)
-+599.57566789500333 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_1)
++611.5671812529034 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_0)
++599.5756678950033 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_1)
 +587.8192822500032 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_2)
 +25 flow(electricityBus_sink_nonconvex_invest_0_0)
 +25 flow(electricityBus_sink_nonconvex_invest_0_1)
@@ -75,16 +75,16 @@ c_e_InvestmentFlowBlock_total_rule(electricityBus_sink_nonconvex_invest_0)_:
 
 c_e_InvestmentFlowBlock_total_rule(electricityBus_sink_nonconvex_invest_1)_:
 -1 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_1)
-+1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_1)
 -1 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
 +1 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
++1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_1)
 = 0
 
 c_e_InvestmentFlowBlock_total_rule(electricityBus_sink_nonconvex_invest_2)_:
 -1 InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_2)
-+1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_2)
 -1 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
 +1 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
++1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_2)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule_end(electricityBus_sink_nonconvex_invest_0)_:
@@ -112,9 +112,9 @@ c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_sink_nonconvex_invest_2)_:
 = 0
 
 c_e_InvestmentFlowBlock_old_rule(electricityBus_sink_nonconvex_invest_0)_:
-+1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_0)
 -1 InvestmentFlowBlock_old_end(electricityBus_sink_nonconvex_invest_0)
 -1 InvestmentFlowBlock_old_exo(electricityBus_sink_nonconvex_invest_0)
++1 InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_0)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule(electricityBus_sink_nonconvex_invest_1)_:
@@ -130,65 +130,64 @@ c_e_InvestmentFlowBlock_old_rule(electricityBus_sink_nonconvex_invest_2)_:
 = 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_0_0)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
 +1 flow(electricityBus_sink_nonconvex_invest_0_0)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
 <= 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_0_1)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
 +1 flow(electricityBus_sink_nonconvex_invest_0_1)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
 <= 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_1_2)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
 +1 flow(electricityBus_sink_nonconvex_invest_1_2)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
 <= 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_1_3)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
 +1 flow(electricityBus_sink_nonconvex_invest_1_3)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
 <= 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_2_4)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
 +1 flow(electricityBus_sink_nonconvex_invest_2_4)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
 <= 0
 
 c_u_InvestmentFlowBlock_max(electricityBus_sink_nonconvex_invest_2_5)_:
--0.80000000000000004 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
 +1 flow(electricityBus_sink_nonconvex_invest_2_5)
+-0.8 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
 <= 0
 
 c_u_InvestmentFlowBlock_full_load_time_max(electricityBus_sink_nonconvex_invest)_:
--2.2999999999999998 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
--2.2999999999999998 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
--2.2999999999999998 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
 +1 flow(electricityBus_sink_nonconvex_invest_0_0)
 +1 flow(electricityBus_sink_nonconvex_invest_0_1)
 +1 flow(electricityBus_sink_nonconvex_invest_1_2)
 +1 flow(electricityBus_sink_nonconvex_invest_1_3)
 +1 flow(electricityBus_sink_nonconvex_invest_2_4)
 +1 flow(electricityBus_sink_nonconvex_invest_2_5)
-<= 0
-
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
+-2.3 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0)
+-2.3 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1)
+-2.3 InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2)
+<= 0.0
 
 bounds
+   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_0) <= 172
+   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_1) <= 172
+   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_2) <= 172
    0 <= flow(electricityBus_sink_nonconvex_invest_0_0) <= +inf
    0 <= flow(electricityBus_sink_nonconvex_invest_0_1) <= +inf
    0 <= flow(electricityBus_sink_nonconvex_invest_1_2) <= +inf
    0 <= flow(electricityBus_sink_nonconvex_invest_1_3) <= +inf
    0 <= flow(electricityBus_sink_nonconvex_invest_2_4) <= +inf
    0 <= flow(electricityBus_sink_nonconvex_invest_2_5) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_0) <= 172
-   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_1) <= 172
-   0 <= InvestmentFlowBlock_invest(electricityBus_sink_nonconvex_invest_2) <= 172
+   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_0) <= 1
+   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_1) <= 1
+   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_2) <= 1
    0 <= InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_0) <= +inf
    0 <= InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_1) <= +inf
-   0 <= InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2) <= +inf
-   0 <= InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_0) <= +inf
    0 <= InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_1) <= +inf
+   0 <= InvestmentFlowBlock_total(electricityBus_sink_nonconvex_invest_2) <= +inf
    0 <= InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_2) <= +inf
    0 <= InvestmentFlowBlock_old_end(electricityBus_sink_nonconvex_invest_0) <= +inf
    0 <= InvestmentFlowBlock_old_end(electricityBus_sink_nonconvex_invest_1) <= +inf
@@ -196,9 +195,7 @@ bounds
    0 <= InvestmentFlowBlock_old_exo(electricityBus_sink_nonconvex_invest_0) <= +inf
    0 <= InvestmentFlowBlock_old_exo(electricityBus_sink_nonconvex_invest_1) <= +inf
    0 <= InvestmentFlowBlock_old_exo(electricityBus_sink_nonconvex_invest_2) <= +inf
-   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_0) <= 1
-   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_1) <= 1
-   0 <= InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_2) <= 1
+   0 <= InvestmentFlowBlock_old(electricityBus_sink_nonconvex_invest_0) <= +inf
 binary
   InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_0)
   InvestmentFlowBlock_invest_status(electricityBus_sink_nonconvex_invest_1)
