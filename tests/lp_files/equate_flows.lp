@@ -50,9 +50,6 @@ c_e_BusBlock_balance(Bus1_0_2)_:
 +1 flow(Source2_Bus1_0_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
-
 bounds
    0 <= flow(Bus1_Sink_0_0) <= 300
    0 <= flow(Bus1_Sink_0_1) <= 300

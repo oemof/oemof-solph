@@ -12,11 +12,11 @@ SPDX-License-Identifier: MIT
 import logging
 import re
 import warnings
-from difflib import unified_diff
 from os import path as ospath
 
 import pandas as pd
 import pytest
+from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
 
@@ -78,70 +78,29 @@ class TestsMultiPeriodConstraint:
                     filename,
                 )
             ) as expected_file:
+                exp = expected_file.read()
+                gen = generated_file.read()
 
-                def chop_trailing_whitespace(lines):
-                    return [re.sub(r"\s*$", "", ln) for ln in lines]
+                # lp_diff returns two arrays of strings with cleaned lp syntax
+                # It automatically prints the diff
+                exp_diff, gen_diff = lp_diff(exp, gen)
 
-                def remove(pattern, lines):
-                    if not pattern:
-                        return lines
-                    return re.subn(pattern, "", "\n".join(lines))[0].split(
-                        "\n"
-                    )
+                # sometimes, 0.0 is printed, sometimes 0, harmonise that
+                exp_diff = [
+                    (line + " ").replace(" 0.0 ", " 0 ") for line in exp_diff
+                ]
+                gen_diff = [
+                    (line + " ").replace(" 0.0 ", " 0 ") for line in gen_diff
+                ]
 
-                expected = remove(
-                    ignored,
-                    chop_trailing_whitespace(expected_file.readlines()),
-                )
-                generated = remove(
-                    ignored,
-                    chop_trailing_whitespace(generated_file.readlines()),
-                )
+                assert len(exp_diff) == len(gen_diff)
 
-                def normalize_to_positive_results(lines):
-                    negative_result_indices = [
-                        n
-                        for n, line in enumerate(lines)
-                        if re.match("^= -", line)
-                    ]
-                    equation_start_indices = [
-                        [
-                            n
-                            for n in reversed(range(0, nri))
-                            if re.match(".*:$", lines[n])
-                        ][0]
-                        + 1
-                        for nri in negative_result_indices
-                    ]
-                    for start, end in zip(
-                        equation_start_indices, negative_result_indices
-                    ):
-                        for n in range(start, end):
-                            lines[n] = (
-                                "-"
-                                if lines[n] and lines[n][0] == "+"
-                                else "+"
-                                if lines[n]
-                                else lines[n]
-                            ) + lines[n][1:]
-                        lines[end] = "= " + lines[end][3:]
-                    return lines
-
-                expected = normalize_to_positive_results(expected)
-                generated = normalize_to_positive_results(generated)
-
-                assert generated == expected, (
-                    "Failed matching expected with generated lp file:\n"
-                    + "\n".join(
-                        unified_diff(
-                            expected,
-                            generated,
-                            fromfile=ospath.relpath(expected_file.name),
-                            tofile=ospath.basename(generated_file.name),
-                            lineterm="",
-                        )
-                    ),
-                )
+                # Created the LP files do not have a reproducable
+                # order of the lines. Thus, we sort the lines.
+                for exp, gen in zip(sorted(exp_diff), sorted(gen_diff)):
+                    assert (
+                        exp == gen
+                    ), "Failed matching expected with generated lp file."
 
     def test_linear_transformer(self):
         """Constraint test of a Transformer without Investment."""

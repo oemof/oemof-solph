@@ -5,6 +5,9 @@ v0.5.1 (?)
 API changes
 ###########
 
+* Unify API for constant sized objects and sizing of investment. For both, `Flow` and
+  `GenericStorage`, the argument `investment` is now deprecated. Instead,
+  `nominal_value` and `nominal_storage_capacity` accept an `Investment` object.
 * Change investment for experimental :class:`oemof.solph.components.experimental._sink_dsm.SinkDSM`: Remove
   obsolete parameters `flex_share_down` and `flex_share_up`.
 
@@ -25,6 +28,7 @@ New features
       `old_end` holding model-endogenously installed capacity to be decommissioned after its lifetime.
     * Include discounting and calculating annuities in the objective function terms. Introduce attribute `discount_rate`
       of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
+* Add `storage_level_constraint` that allows to set flows from/to storage (in)active based on storage content.
 
 Documentation
 #############
@@ -50,6 +54,8 @@ Other changes
 Contributors
 ############
 
+* Patrik Schönfeldt
 * Johannes Kochems
 * Tobi Rohrer
+* Patrik Schönfeldt
 
