@@ -29,7 +29,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.5.1.dev1",
+    version="0.5.1.dev2",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
