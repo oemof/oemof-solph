@@ -132,7 +132,7 @@ def main():
                     nominal_value=None,
                     investment=solph.Investment(
                         ep_costs=epc_invest,
-                        space=2,
+                        custom_attributes={"space": 2},
                     ),
                 )
             },
@@ -150,7 +150,7 @@ def main():
                     nominal_value=None,
                     investment=solph.Investment(
                         ep_costs=epc_invest,
-                        space=1,
+                        custom_attributes={"space": 1},
                     ),
                 )
             },

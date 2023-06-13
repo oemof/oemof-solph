@@ -43,17 +43,17 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
     """
 
     def _equate_flow_groups_rule(m):
-        for ts in m.TIMESTEPS:
-            sum1_t = sum(m.flow[fi, fo, ts] for fi, fo in flows1)
-            sum2_t = sum(m.flow[fi, fo, ts] for fi, fo in flows2)
+        for p, ts in m.TIMEINDEX:
+            sum1_t = sum(m.flow[fi, fo, p, ts] for fi, fo in flows1)
+            sum2_t = sum(m.flow[fi, fo, p, ts] for fi, fo in flows2)
             expr = sum1_t * factor1 == sum2_t
             if expr is not True:
-                getattr(m, name).add(ts, expr)
+                getattr(m, name).add((p, ts), expr)
 
     setattr(
         model,
         name,
-        po.Constraint(model.TIMESTEPS, noruleinit=True),
+        po.Constraint(model.TIMEINDEX, noruleinit=True),
     )
     setattr(
         model,
@@ -96,7 +96,7 @@ def equate_flows_by_keyword(
     flows = {}
     for n, keyword in enumerate([keyword1, keyword2]):
         flows[n] = []
-        for (i, o) in model.flows:
+        for i, o in model.flows:
             if hasattr(model.flows[i, o], keyword):
                 flows[n].append((i, o))
 

@@ -8,6 +8,7 @@ SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -20,6 +21,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from oemof.network import energy_system as es
+from oemof.tools import debugging
 
 
 class EnergySystem(es.EnergySystem):
@@ -48,6 +50,18 @@ class EnergySystem(es.EnergySystem):
         is unknown so it does only work for an equidistant DatetimeIndex with
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
+
+    periods : list or None
+        The periods of a multi-period model.
+        If this is explicitly specified, it leads to creating a multi-period
+        model, providing a respective user warning as a feedback.
+
+        list of pd.date_range objects carrying the timeindex for the
+        respective period;
+
+        For a standard model, periods are not (to be) declared, i.e. None.
+        A list with one entry is derived, i.e. [0].
+
     kwargs
     """
 
@@ -56,6 +70,7 @@ class EnergySystem(es.EnergySystem):
         timeindex=None,
         timeincrement=None,
         infer_last_interval=None,
+        periods=None,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -108,19 +123,30 @@ class EnergySystem(es.EnergySystem):
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            msg = (
-                "Specifying the timeincrement and the timeindex parameter at "
-                "the same time is not allowed since these might be "
-                "conflicting to each other."
-            )
-            raise AttributeError(msg)
+            if periods is None:
+                msg = (
+                    "Specifying the timeincrement and the timeindex parameter "
+                    "at the same time is not allowed since these might be "
+                    "conflicting to each other."
+                )
+                raise AttributeError(msg)
+            else:
+                msg = (
+                    "Ensure that your timeindex and timeincrement are "
+                    "consistent.\nIf you are not considering non-equidistant "
+                    "timeindices, consider only specifying a timeindex."
+                )
+                warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
             timedelta = df.diff()
-            timeincrement = pd.Series(
-                (timedelta / np.timedelta64(1, "h"))[1:].set_index(0).index
-            )
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
 
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
@@ -133,6 +159,38 @@ class EnergySystem(es.EnergySystem):
         super().__init__(
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
+
+        if periods is not None:
+            msg = (
+                "CAUTION! You specified the 'periods' attribute for your "
+                "energy system.\n This will lead to creating "
+                "a multi-period optimization modeling which can be "
+                "used e.g. for long-term investment modeling.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        self.periods = periods
+        self._extract_periods_years()
+
+    def _extract_periods_years(self):
+        """Map simulation years to the respective period based on time indices
+
+        Returns
+        -------
+        periods_years: dict
+            the simulation year of the start of each a period,
+            relative to the start of the optimization run and starting with 0
+        """
+        periods_years = [0]
+        if self.periods is not None:
+            start_year = self.periods[0].min().year
+            for k, v in enumerate(self.periods):
+                if k >= 1:
+                    periods_years.append(v.min().year - start_year)
+
+            self.periods_years = periods_years
 
 
 def create_time_index(

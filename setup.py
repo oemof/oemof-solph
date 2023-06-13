@@ -29,7 +29,7 @@ long_description = "%s" % (
 
 setup(
     name="oemof.solph",
-    version="0.5.1.dev0",
+    version="0.5.1.dev2",
     license="MIT",
     description=(
         "A model generator for energy system modelling and optimisation."
@@ -78,9 +78,9 @@ setup(
     install_requires=[
         "blinker",
         "dill",
-        "numpy < 1.24",
-        "pandas",
-        "pyomo >= 6.0.0, < 7.0",
+        "numpy",
+        "pandas >= 1.5.3",
+        "pyomo >= 6.6.0, < 7.0",
         "networkx",
         "oemof.tools >= 0.4.2",
         "oemof.network >= 0.5.0a1",
@@ -100,7 +100,7 @@ setup(
     entry_points={
         "console_scripts": [
             "oemof_installation_test = "
-            + "oemof.solph.console_scripts:check_oemof_installation"
+            + "oemof.solph._console_scripts:check_oemof_installation"
         ]
     },
 )

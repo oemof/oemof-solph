@@ -28,8 +28,7 @@ from .helpers import flatten
 
 
 def get_tuple(x):
-    """
-    Get oemof tuple within iterable or create it.
+    """Get oemof tuple within iterable or create it
 
     Tuples from Pyomo are of type `(n, n, int)`, `(n, n)` and `(n, int)`.
     For single nodes `n` a tuple with one object `(n,)` is created.
@@ -46,8 +45,7 @@ def get_tuple(x):
 
 
 def get_timestep(x):
-    """
-    Get the timestep from oemof tuples.
+    """Get the timestep from oemof tuples
 
     The timestep from tuples `(n, n, int)`, `(n, n)`, `(n, int)` and (n,)
     is fetched as the last element. For time-independent data (scalars)
@@ -60,8 +58,7 @@ def get_timestep(x):
 
 
 def remove_timestep(x):
-    """
-    Remove the timestep from oemof tuples.
+    """Remove the timestep from oemof tuples
 
     The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
     """
@@ -72,12 +69,11 @@ def remove_timestep(x):
 
 
 def create_dataframe(om):
-    """
-    Create a result dataframe with all optimization data.
+    """Create a result DataFrame with all optimization data
 
-    Results from Pyomo are written into pandas DataFrame where separate columns
-    are created for the variable index e.g. for tuples of the flows and
-    components or the timesteps.
+    Results from Pyomo are written into one common pandas.DataFrame where
+    separate columns are created for the variable index e.g. for tuples
+    of the flows and components or the timesteps.
     """
     # get all pyomo variables including their block
     block_vars = list(
@@ -110,6 +106,11 @@ def create_dataframe(om):
     df = df[df["oemof_tuple"].map(lambda x: x is not None)]
     df["timestep"] = df["oemof_tuple"].map(get_timestep)
     df["oemof_tuple"] = df["oemof_tuple"].map(remove_timestep)
+
+    # Use another call of remove timestep to get rid of period not needed
+    df.loc[df["variable_name"] == "flow", "oemof_tuple"] = df.loc[
+        df["variable_name"] == "flow", "oemof_tuple"
+    ].map(remove_timestep)
 
     # order the data by oemof tuple and timestep
     df = df.sort_values(["oemof_tuple", "timestep"], ascending=[True, True])
@@ -172,15 +173,45 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
-def results(model, remove_last_time_point=False):
-    """
-    Create a result dictionary from the result DataFrame.
+def set_sequences_index(df, result_index):
+    try:
+        df.index = result_index
+    except ValueError:
+        try:
+            df = df[:-1]
+            df.index = result_index
+        except ValueError:
+            raise ValueError("Results extraction failed!")
 
-    Results from Pyomo are written into a dictionary of pandas objects where
-    a Series holds all scalar values and a dataframe all sequences for nodes
-    and flows.
-    The dictionary is keyed by the nodes e.g. `results[idx]['scalars']`
-    and flows e.g. `results[n, n]['sequences']`.
+
+def results(model, remove_last_time_point=False):
+    """Create a nested result dictionary from the result DataFrame
+
+    The already rearranged results from Pyomo from the result DataFrame are
+    transferred into a nested dictionary of pandas objects.
+    The first level key of that dictionary is a node (denoting the respective
+    flow or component).
+
+    The second level keys are "sequences" and "scalars" for a *standard model*:
+
+    * A pd.DataFrame holds all results that are time-dependent, i.e. given as
+      a sequence and can be indexed with the energy system's timeindex.
+    * A pd.Series holds all scalar values which are applicable for timestep 0
+      (i.e. investments).
+
+    For a *multi-period model*, the second level key for "sequences" remains
+    the same while instead of "scalars", the key "period_scalars" is used:
+
+    * For sequences, see standard model.
+    * Instead of a pd.Series, a pd.DataFrame holds scalar values indexed
+      by periods. These hold investment-related variables.
+
+    Examples
+    --------
+    * *Standard model*: `results[idx]['scalars']`
+      and flows `results[n, n]['sequences']`.
+    * *Multi-period model*: `results[idx]['period_scalars']`
+      and flows `results[n, n]['sequences']`.
 
     Parameters
     ----------
@@ -191,11 +222,12 @@ def results(model, remove_last_time_point=False):
         same length as the TIMESTEP (interval) variables without getting
         nan-values. By default, the last time point is removed if it has not
         been defined by the user in the EnergySystem but inferred. If all
-        time points has been defined explicitly by the user the last time point
-        will not be removed by default. In that case all interval variables
-        will get one row with nan-values to have the same index for all
-        variables.
+        time points have been defined explicitly by the user the last time
+        point will not be removed by default. In that case all interval
+        variables will get one row with nan-values to have the same index
+        for all variables.
     """
+    # Extraction steps that are the same for both model types
     df = create_dataframe(model)
 
     # create a dict of dataframes keyed by oemof tuples
@@ -215,7 +247,82 @@ def results(model, remove_last_time_point=False):
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
-    if remove_last_time_point is True:
+
+    # Standard model results extraction
+    if model.es.periods is None:
+        result = _extract_standard_model_result(
+            df_dict, result, result_index, remove_last_time_point
+        )
+        scalars_col = "scalars"
+
+    # Results extraction for a multi-period model
+    else:
+        period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
+
+        result = _extract_multi_period_model_result(
+            model,
+            df_dict,
+            period_indexed,
+            result,
+            result_index,
+            remove_last_time_point,
+        )
+        scalars_col = "period_scalars"
+
+    # add dual variables for bus constraints
+    if model.dual is not None:
+        grouped = groupby(
+            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
+        )
+        for bus, timeindex in grouped:
+            duals = [
+                model.dual[model.BusBlock.balance[bus, p, t]]
+                for _, p, t in timeindex
+            ]
+            if model.es.periods is None:
+                df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
+            # TODO: Align with standard model
+            else:
+                df = pd.DataFrame({"duals": duals}, index=result_index)
+            if (bus, None) not in result.keys():
+                result[(bus, None)] = {
+                    "sequences": df,
+                    scalars_col: pd.Series(dtype=float),
+                }
+            else:
+                result[(bus, None)]["sequences"]["duals"] = duals
+
+    return result
+
+
+def _extract_standard_model_result(
+    df_dict, result, result_index, remove_last_time_point
+):
+    """Extract and return the results of a standard model
+
+    * Optionally remove last time point or include it elsewise.
+    * Set index to timeindex and pivot results such that values are displayed
+      for the respective variables. Reindex with the energy system's timeindex.
+    * Filter for columns with nan values to retrieve scalar variables. Split
+      up the DataFrame into sequences and scalars and return it.
+
+    Parameters
+    ----------
+    df_dict : dict
+        dictionary of results DataFrames
+    result : dict
+        dictionary to store the results
+    result_index : pd.DatetimeIndex
+        timeindex to use for the results (derived from EnergySystem)
+    remove_last_time_point : bool
+        if True, remove the last time point
+
+    Returns
+    -------
+    result : dict
+        dictionary with results stored
+    """
+    if remove_last_time_point:
         # The values of intervals belong to the time at the beginning of the
         # interval.
         for k in df_dict:
@@ -237,24 +344,77 @@ def results(model, remove_last_time_point=False):
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
 
-    # add dual variables for bus constraints
-    if model.dual is not None:
-        grouped = groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
-        )
-        for bus, timesteps in grouped:
-            duals = [
-                model.dual[model.BusBlock.balance[bus, t]]
-                for _, t in timesteps
-            ]
-            df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
-            if (bus, None) not in result.keys():
-                result[(bus, None)] = {
-                    "sequences": df,
-                    "scalars": pd.Series(dtype=float),
-                }
-            else:
-                result[(bus, None)]["sequences"]["duals"] = duals
+    return result
+
+
+def _extract_multi_period_model_result(
+    model,
+    df_dict,
+    period_indexed=None,
+    result=None,
+    result_index=None,
+    remove_last_time_point=False,
+):
+    """Extract and return the results of a multi-period model
+
+    Difference to standard model is in the way, scalar values are extracted
+    since they now depend on periods.
+
+    Parameters
+    ----------
+    model : oemof.solph.models.Model
+        The optimization model
+    df_dict : dict
+        dictionary of results DataFrames
+    period_indexed : list
+        list of variables that are indexed by periods
+    result : dict
+        dictionary to store the results
+    result_index : pd.DatetimeIndex
+        timeindex to use for the results (derived from EnergySystem)
+    remove_last_time_point : bool
+        if True, remove the last time point
+
+    Returns
+    -------
+    result : dict
+        dictionary with results stored
+    """
+    for k in df_dict:
+        df_dict[k].set_index("timestep", inplace=True)
+        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
+        # Split data set
+        period_cols = [
+            col for col in df_dict[k].columns if col in period_indexed
+        ]
+        # map periods to their start years for displaying period results
+        d = {
+            key: val + model.es.periods[0].min().year
+            for key, val in enumerate(model.es.periods_years)
+        }
+        period_scalars = df_dict[k].loc[:, period_cols].dropna()
+        sequences = df_dict[k].loc[
+            :, [col for col in df_dict[k].columns if col not in period_cols]
+        ]
+        if remove_last_time_point:
+            set_sequences_index(sequences, result_index[:-1])
+        else:
+            set_sequences_index(sequences, result_index)
+        if period_scalars.empty:
+            period_scalars = pd.DataFrame(index=d.values())
+        try:
+            period_scalars.rename(index=d, inplace=True)
+            period_scalars.index.name = "period"
+            result[k] = {
+                "period_scalars": period_scalars,
+                "sequences": sequences,
+            }
+        except IndexError:
+            error_message = (
+                "Some indices seem to be not matching.\n"
+                "Cannot properly extract model results."
+            )
+            raise IndexError(error_message)
 
     return result
 

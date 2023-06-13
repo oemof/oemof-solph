@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -20,14 +21,16 @@ from oemof.solph.buses._bus import Bus
 
 
 class ElectricalBus(Bus):
-    r"""A electrical bus object. Every node has to be connected to BusBlock.
+    r"""An electrical bus object used for linear optimal power flow (LOPF)
+
+    Every (spatial) node has to be connected to a BusBlock.
     This BusBlock is used in combination with ElectricalLine objects
     for linear optimal power flow (lopf) calculations.
 
     Parameters
     ----------
     slack: boolean
-        If True BusBlock is slack bus for network
+        If True BusBlock is slack bus for electrical network
     v_max: numeric
         Maximum value of voltage angle at electrical bus
     v_min: numeric

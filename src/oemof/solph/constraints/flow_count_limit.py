@@ -46,6 +46,7 @@ def limit_active_flow_count(
     ----
     SimpleFlowBlock objects required to be NonConvex
 
+
     **Constraint:**
 
     .. math:: N_{X,min} \le \sum_{n \in F} X_n(t)
@@ -129,7 +130,7 @@ def limit_active_flow_count_by_keyword(
     limit_active_flow_count
     """
     flows = []
-    for (i, o) in model.NonConvexFlowBlock.NONCONVEX_FLOWS:
+    for i, o in model.NonConvexFlowBlock.NONCONVEX_FLOWS:
         if hasattr(model.flows[i, o], keyword):
             flows.append((i, o))
 

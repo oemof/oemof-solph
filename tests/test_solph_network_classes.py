@@ -71,9 +71,26 @@ class TestTransformerClass:
 
 
 def test_wrong_combination_invest_and_nominal_value():
-    msg = "Using the investment object the nominal_value"
-    with pytest.raises(ValueError, match=msg):
+    msg = "For backward compatibility, the option investment overwrites"
+    with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
+
+
+def test_fixed_costs_warning():
+    msg = (
+        "Be aware that the fixed costs attribute is only\n"
+        "meant to be used for multi-period models.\n"
+        "If you wish to set up a multi-period model, explicitly "
+        "set the `periods` attribute of your energy system.\n"
+        "It has been decided to remove the `fixed_costs` "
+        "attribute with v0.2 for regular uses.\n"
+        "If you specify `fixed_costs` for a regular model, "
+        "it will simply be ignored."
+    )
+    with warnings.catch_warnings(record=True) as w:
+        solph.flows.Flow(fixed_costs=34)
+        assert len(w) != 0
+        assert msg == str(w[-1].message)
 
 
 def test_flow_with_fix_and_min_max():

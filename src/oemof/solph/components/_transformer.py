@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: David Fuhrländer
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -136,17 +137,23 @@ class Transformer(on.Transformer):
 
 
 class TransformerBlock(ScalarBlock):
-    r"""
-    Block for the linear relation of nodes with type
-    :class:`~oemof.solph.network.transformer.Transformer`
+    r"""Block for the linear relation of nodes with type
+    :class:`~oemof.solph.components._transformer.TransformerBlock`
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.Model` )
+
+    TRANSFORMERS
+        A set with all
+        :class:`~oemof.solph.components._transformer.Transformer` objects.
 
     **The following constraints are created:**
 
     Linear relation `om.Transformer.relation[i,o,t]`
         .. math::
-            P_{i}(t) \cdot \eta_{o}(t) =
-            P_{o}(t) \cdot \eta_{i}(t), \\
-            \forall t \in \textrm{TIMESTEPS}, \\
+            P_{i}(p, t) \cdot \eta_{o}(t) =
+            P_{o}(p, t) \cdot \eta_{i}(t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
             \forall i \in \textrm{INPUTS}, \\
             \forall o \in \textrm{OUTPUTS}
 
@@ -158,15 +165,15 @@ class TransformerBlock(ScalarBlock):
     constraints.
 
     The index :math: n is the index for the Transformer node itself. Therefore,
-    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
-    time step t.
+    a `flow[i, n, p, t]` is a flow from the Bus i to the Transformer n at
+    time index p, t.
 
     ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  ====================
-    :math:`P_{i}(t)`        `flow[i, n, t]`               Transformer, inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Transformer, inflow
 
-    :math:`P_{o}(t)`        `flow[n, o, t]`               Transformer, outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Transformer, outflow
 
     :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
@@ -205,8 +212,8 @@ class TransformerBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, t)
-                for t in m.TIMESTEPS
+                (n, i, o, p, t)
+                for p, t in m.TIMEINDEX
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -215,17 +222,17 @@ class TransformerBlock(ScalarBlock):
         )
 
         def _input_output_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
                                 lhs = (
-                                    m.flow[i, n, t]
+                                    m.flow[i, n, p, t]
                                     * n.conversion_factors[o][t]
                                 )
                                 rhs = (
-                                    m.flow[n, o, t]
+                                    m.flow[n, o, p, t]
                                     * n.conversion_factors[i][t]
                                 )
                             except ValueError:
@@ -235,6 +242,6 @@ class TransformerBlock(ScalarBlock):
                                         n.label, o.label
                                     ),
                                 )
-                            block.relation.add((n, i, o, t), (lhs == rhs))
+                            block.relation.add((n, i, o, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)

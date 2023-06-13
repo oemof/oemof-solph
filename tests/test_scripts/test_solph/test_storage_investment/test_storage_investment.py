@@ -38,7 +38,6 @@ import logging
 import os
 
 import pandas as pd
-from nose.tools import eq_
 from oemof.tools import economics
 
 from oemof import solph
@@ -152,6 +151,7 @@ def test_optimise_storage_size(
 
 
 def test_results_with_actual_dump():
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -189,8 +189,8 @@ def test_results_with_actual_dump():
     # Problem results
     assert meta["problem"]["Lower bound"] == 4.231675777e17
     assert meta["problem"]["Upper bound"], 4.231675777e17
-    assert meta["problem"]["Number of variables"] == 2805
-    assert meta["problem"]["Number of constraints"] == 2806
+    assert meta["problem"]["Number of variables"] == 2807
+    assert meta["problem"]["Number of constraints"] == 2808
     assert meta["problem"]["Number of nonzeros"] == 1197
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
@@ -202,6 +202,7 @@ def test_results_with_actual_dump():
 def test_solph_transformer_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
     of `solph.components.Transformer`"""
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -212,4 +213,4 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
     )
 
     # Compare attributes before dump and after restore
-    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+    assert trsf_attr_before_dump == trsf_attr_after_restore

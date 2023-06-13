@@ -419,7 +419,6 @@ def main():
     ##########################################################################
 
     if plt is not None:
-
         # Create the duration curve for the diesel genset.
         fig, ax = plt.subplots(figsize=(10, 5))
 
