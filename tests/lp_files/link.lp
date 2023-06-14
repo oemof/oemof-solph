@@ -66,10 +66,8 @@ c_e_LinkBlock_relation(link_el2_el1_0_2)_:
 +1 flow(link_el1_0_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT:
-ONE_VAR_CONSTANT = 1.0
-
 bounds
+   1 <= ONE_VAR_CONSTANT <= 1
    0 <= flow(el1_link_0_0) <= 4
    0 <= flow(el1_link_0_1) <= 4
    0 <= flow(el1_link_0_2) <= 4
