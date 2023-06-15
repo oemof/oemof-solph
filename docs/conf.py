@@ -22,7 +22,6 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
-    "sphinx.ext.imgconverter",
     "sphinx.ext.extlinks",
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
