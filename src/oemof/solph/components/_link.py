@@ -126,7 +126,7 @@ class LinkBlock(ScalarBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.components.experimental.Link objects for which
+            List of oemof.solph.components.Link objects for which
             the relation of inputs and outputs is createdBuildAction
             e.g. group = [link1, link2, link3, ...]. The components inside
             the list need to hold an attribute `conversion_factors` of type
