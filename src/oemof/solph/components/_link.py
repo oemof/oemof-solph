@@ -25,6 +25,7 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
+from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
@@ -33,6 +34,12 @@ class Link(on.Transformer):
 
     Parameters
     ----------
+    inputs : dict
+        Dictionary with inflows. Keys must be the starting node(s) of the
+        inflow(s).
+    outputs : dict
+        Dictionary with outflows. Keys must be the ending node(s) of the
+        outflow(s).
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected tuples (input, output) bus objects.
@@ -71,14 +78,30 @@ class Link(on.Transformer):
     0.8
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    def __init__(
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+    ):
+        if inputs is None:
+            warn_if_missing_attribute(self, "inputs")
+            inputs = {}
+        if outputs is None:
+            warn_if_missing_attribute(self, "outputs")
+            outputs = {}
+        if conversion_factors is None:
+            warn_if_missing_attribute(self, "conversion_factors")
+            conversion_factors = {}
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+        )
         self.conversion_factors = {
-            k: sequence(v)
-            for k, v in kwargs.get("conversion_factors", {}).items()
+            k: sequence(v) for k, v in conversion_factors.items()
         }
-
         msg = (
             "Component `Link` should have exactly "
             + "2 inputs, 2 outputs, and 2 "
