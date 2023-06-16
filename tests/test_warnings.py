@@ -153,3 +153,26 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
             ),
             nonconvex=solph.NonConvex(),
         )
+
+def test_that_link_warns_about_not_matching_number_of_flows(warning_fixture):
+    """Link warns about missing parameters and not matching number of flows."""
+
+    msg = (
+        "Component `Link` should have exactly "
+        + "2 inputs, 2 outputs, and 2 "
+        + "conversion factors connecting these. You are initializing "
+        + "a `Link`without obeying this specification. "
+        + "If this is intended and you know what you are doing you can "
+        + "disable the SuspiciousUsageWarning globally."
+    )
+
+    with warnings.catch_warnings(record=True) as w:
+        solph.components.Link(label="empty_link")
+        # Check  number of raised warnings:
+        # 1. empty inputs, 2. empty outputs 3. empty conversion_factors
+        # 4. unmatched number of flows
+        assert len(w) == 4
+
+        # Check warning for unmatched number of flows
+        assert msg in str(w[-1].message)
+
