@@ -37,7 +37,7 @@ from oemof.solph import Model
 from oemof.solph import components as cmp
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.solph.components.experimental import Link
+from oemof.solph.components import Link
 
 try:
     import pygraphviz as pygz
