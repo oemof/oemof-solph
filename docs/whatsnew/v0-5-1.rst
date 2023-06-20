@@ -10,6 +10,7 @@ API changes
   `nominal_value` and `nominal_storage_capacity` accept an `Investment` object.
 * Change investment for experimental :class:`oemof.solph.components.experimental._sink_dsm.SinkDSM`: Remove
   obsolete parameters `flex_share_down` and `flex_share_up`.
+* Mainline link component :class:`oemof.solph.components._link.Link` from experimental.
 
 New features
 ############
@@ -58,4 +59,6 @@ Contributors
 * Johannes Kochems
 * Tobi Rohrer
 * Patrik Schönfeldt
+* Julian Endres
+* Jann Launer
 
