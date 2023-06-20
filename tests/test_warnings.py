@@ -156,7 +156,7 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
         )
 
 
-def test_that_link_warns_about_not_matching_number_of_flows(warning_fixture):
+def test_link_to_warn_about_not_matching_number_of_flows(warning_fixture):
     """Link warns about missing parameters and not matching number of flows."""
 
     msg = (
@@ -180,7 +180,7 @@ def test_that_link_warns_about_not_matching_number_of_flows(warning_fixture):
         assert msg in str(w[-1].message)
 
 
-def test_key_error_in_link_block(warning_fixture):
+def test_link_raise_key_error_in_Linkblock(warning_fixture):
     """Link raises KeyError if conversion factors don't match the connected
     busses."""
 
