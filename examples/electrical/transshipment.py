@@ -37,7 +37,7 @@ from oemof.solph import Model
 from oemof.solph import components as cmp
 from oemof.solph import processing
 from oemof.solph import views
-from oemof.solph.components.experimental import Link
+from oemof.solph.components import Link
 
 try:
     import pygraphviz as pygz
@@ -135,7 +135,6 @@ def main():
                 b_0: Flow(investment=Investment()),
             },
             conversion_factors={(b_0, b_1): 0.95, (b_1, b_0): 0.9},
-            limit_direction=False,
         )
     )
 
