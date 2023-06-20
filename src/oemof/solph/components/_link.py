@@ -177,12 +177,12 @@ class LinkBlock(ScalarBlock):
                                 m.flow[n, cidx[1], p, t]
                                 == c[t] * m.flow[cidx[0], n, p, t]
                             )
-                        except ValueError:
-                            raise ValueError(
-                                "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {2}".format(
-                                    cidx[0], cidx[1], n
-                                ),
+                        except KeyError:
+                            raise KeyError(
+                                "Error in constraint creation "
+                                f"from: {cidx[0]}, to: {cidx[1]}, via: {n}. "
+                                "Check if all connected buses match "
+                                "the conversion factors.",
                             )
                         block.relation.add((n, cidx[0], cidx[1], p, t), expr)
 
