@@ -85,10 +85,13 @@ class Link(on.Transformer):
         conversion_factors,
     ):
         if inputs is None:
+            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
+            warn_if_missing_attribute(self, "outputs")
             outputs = {}
         if conversion_factors is None:
+            warn_if_missing_attribute(self, "conversion_factors")
             conversion_factors = {}
         super().__init__(
             label=label,
