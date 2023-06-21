@@ -80,10 +80,10 @@ class Link(on.Transformer):
 
     def __init__(
         self,
-        label,
-        inputs,
-        outputs,
-        conversion_factors,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
     ):
         if inputs is None:
             warn_if_missing_attribute(self, "inputs")
