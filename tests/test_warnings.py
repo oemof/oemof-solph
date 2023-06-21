@@ -171,11 +171,11 @@ def test_link_to_warn_about_not_matching_number_of_flows(warning_fixture):
     with warnings.catch_warnings(record=True) as w:
         solph.components.Link(
             label="empty_link",
-            inputs=None,
-            outputs=None,
-            conversion_factors=None,
         )
-        assert len(w) == 1
+        assert len(w) == 4
+        # Check  number of raised warnings:
+        # 1. empty inputs, 2. empty outputs 3. empty conversion_factors
+        # 4. unmatched number of flows
         # Check warning for unmatched number of flows
         assert msg in str(w[-1].message)
 
