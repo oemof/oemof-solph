@@ -127,8 +127,8 @@ def test_sub_cell_node_consideration():
     ec_1 = solph.EnergySystem(
         label="ec_1", timeindex=timeindex, infer_last_interval=True
     )
-    bus_es = solph.buses.Bus(label="bus_el_es")
-    bus_ec_1 = solph.buses.Bus(label="bus_el_ec_1")
+    bus_es = solph.buses.Bus(label="bus_es")
+    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
     es.add(bus_es)
     ec_1.add(bus_ec_1)
     m = solph.Model(energysystem=[es, ec_1])
@@ -147,8 +147,8 @@ def test_sub_cell_flow_consideration():
     ec_1 = solph.EnergySystem(
         label="ec_1", timeindex=timeindex, infer_last_interval=True
     )
-    bus_es = solph.buses.Bus(label="bus_el_es")
-    bus_ec_1 = solph.buses.Bus(label="bus_el_ec_1")
+    bus_es = solph.buses.Bus(label="bus_es")
+    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
     es.add(bus_es)
     ec_1.add(bus_ec_1)
 

@@ -142,15 +142,7 @@ class BaseModel(po.ConcreteModel):
         if self.is_cellular:
             for cell in self.ec:
                 for io, f in cell.flows().items():
-                    if io not in self.flows.keys():
-                        self.flows.update({io: f})
-                    else:
-                        msg = (
-                            "Two flows with identical input-output values are "
-                            "tried to be added to the Model."
-                            "\n{}"
-                        )
-                        raise ValueError(msg.format({io: f}))
+                    self.flows.update({io: f})
 
         self.solver_results = None
         self.dual = None
@@ -406,14 +398,7 @@ class Model(BaseModel):
             # collect all nodes from the child cells
             for cell in self.ec:
                 for node in cell.nodes:
-                    if node not in self.nodes:
-                        self.nodes.append(node)
-                    else:
-                        msg = (
-                            "Two nodes of identical name are tried to be added"
-                            " to `CellularModel.nodes`.\n{}"
-                        )
-                        raise ValueError(msg.format(node))
+                    self.nodes.append(node)
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.nodes])
 
