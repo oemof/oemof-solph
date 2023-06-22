@@ -9,6 +9,7 @@ SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Lennart Schürmann
 
 SPDX-License-Identifier: MIT
 
@@ -113,9 +114,9 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
-        self.iscellular = isinstance(energysystem, list)
+        self.is_cellular = isinstance(energysystem, list)
 
-        if self.iscellular:
+        if self.is_cellular:
             self.es = energysystem[0]
             self.ec = energysystem[1:]
         else:
@@ -138,7 +139,7 @@ class BaseModel(po.ConcreteModel):
         ]
 
         self.flows = self.es.flows()
-        if self.iscellular:
+        if self.is_cellular:
             for cell in self.ec:
                 for io, f in cell.flows().items():
                     if io not in self.flows.keys():
@@ -401,7 +402,7 @@ class Model(BaseModel):
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
         self.nodes = self.es.nodes
-        if self.iscellular:
+        if self.is_cellular:
             # collect all nodes from the child cells
             for cell in self.ec:
                 for node in cell.nodes:

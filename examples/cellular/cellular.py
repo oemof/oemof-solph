@@ -1,3 +1,39 @@
+"""
+General description
+-------------------
+
+Cellular energy systems are proposed by the VDE-ETG. They are, as the name
+implies, energy systems that are made up of cells. Each cell can contain
+multiple other cells. So there is a hierarchy between them.
+
+The energy system modelled below looks like this:
+
+___________________________________
+|                es                 |
+-------------------------------------
+          /              \
+_________________ _________________
+|       ec_1      |      ec_2       |
+------------------ -----------------
+    /        \         /       \
+_________ ________ ________ ________
+| ec_1_1 | ec_1_2 | ec_2_1 | ec_2_2 |
+-------- -------- -------- --------
+
+The connections between the cells are modelled as buses. Each connector bus
+has two inputs (from the parent cell and the child cell) and two outputs (
+to the parent cell and the child cell).
+
+
+Licence
+-------
+
+SPDX-FileCopyrightText: Lennart Schürmann
+
+SPDX-License-Identifier: MIT
+"""
+
+
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
@@ -9,31 +45,6 @@ from oemof.solph import processing, views
 
 
 def main():
-    """
-    Cellular energy systems are proposed by the VDE-ETG. They are, as the name
-    implies, energy systems that are made up of cells. Each cell can contain
-    multiple other cells. So there is a hierarchy between them.
-
-    The energy system modelled below looks like this:
-
-    ___________________________________
-    |                es                 |
-    -------------------------------------
-            |               |
-    _________________ _________________
-    |       ec_1      |      ec_2       |
-    ------------------ -----------------
-        |        |        |        |
-    _________ ________ ________ ________
-    | ec_1_1 | ec_1_2 | ec_2_1 | ec_2_2 |
-    -------- -------- -------- --------
-
-    The connections between the cells are modelled as buses. Each connector bus
-    has two inputs (from the parent cell and the child cell) and two outputs (
-    to the parent cell and the child cell).
-
-    """
-
     ###########################################################################
     # define the cells of the cellular energy system
     ###########################################################################
@@ -273,7 +284,7 @@ def main():
         energysystem=[es, ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2]
     )
 
-    cmodel.solve()
+    cmodel.solve(solver=mysolver)
 
     results = processing.results(cmodel)
     print(views.node(results, "connector_el_ec_1_1")["sequences"])
