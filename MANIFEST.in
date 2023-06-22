@@ -20,6 +20,7 @@ include pytest.ini
 
 include tox.ini
 include *.yml
+include *.yaml
 
 recursive-exclude examples *.py
 recursive-include examples *.csv

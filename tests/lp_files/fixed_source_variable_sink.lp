@@ -10,18 +10,15 @@ s.t.
 
 c_e_BusBlock_balance(electricityBus_0_0)_:
 -1 flow(electricityBus_excess_0_0)
-= -430000
+= -430000.0
 
 c_e_BusBlock_balance(electricityBus_0_1)_:
 -1 flow(electricityBus_excess_0_1)
-= -720000
+= -720000.0
 
 c_e_BusBlock_balance(electricityBus_0_2)_:
 -1 flow(electricityBus_excess_0_2)
-= -290000
-
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
+= -290000.0
 
 bounds
    0 <= flow(electricityBus_excess_0_0) <= +inf

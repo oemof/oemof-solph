@@ -263,7 +263,7 @@ def test_multi_period_investment_model(solver="cbc"):
             ),
         )
 
-        link_DE_FR = components.experimental.Link(
+        link_DE_FR = components.Link(
             label="link_DE_FR",
             inputs={
                 bus_el: flows.Flow(

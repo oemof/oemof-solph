@@ -178,7 +178,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         fixed_costs=10,
     )
 
-    link_de_fr = components.experimental.Link(
+    link_de_fr = components.Link(
         label="link_DE_FR",
         inputs={
             bus_el: flows.Flow(nominal_value=10),

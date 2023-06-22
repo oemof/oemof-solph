@@ -141,9 +141,12 @@ class EnergySystem(es.EnergySystem):
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
             timedelta = df.diff()
-            timeincrement = pd.Series(
-                (timedelta / np.timedelta64(1, "h"))[1:].set_index(0).index
-            )
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
 
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
@@ -178,7 +181,7 @@ class EnergySystem(es.EnergySystem):
         -------
         periods_years: dict
             the simulation year of the start of each a period,
-            relative to the start of the optimization rund and starting with 0
+            relative to the start of the optimization run and starting with 0
         """
         periods_years = [0]
         if self.periods is not None:

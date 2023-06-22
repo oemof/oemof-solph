@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-In-development component to add some intelligence
-to connection between two Nodes.
+Link to connect two Busses.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -34,18 +33,22 @@ class Link(on.Transformer):
 
     Parameters
     ----------
+    inputs : dict
+        Dictionary with inflows. Keys must be the starting node(s) of the
+        inflow(s).
+    outputs : dict
+        Dictionary with outflows. Keys must be the ending node(s) of the
+        outflow(s).
     conversion_factors : dict
         Dictionary containing conversion factors for conversion of each flow.
         Keys are the connected tuples (input, output) bus objects.
         The dictionary values can either be a scalar or an iterable with length
         of time horizon for simulation.
 
-    Note: This component is experimental. Use it with care.
-
     Notes
     -----
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.experimental._link.LinkBlock`
+     * :py:class:`~oemof.solph.components._link.LinkBlock`
 
     Examples
     --------
@@ -54,7 +57,7 @@ class Link(on.Transformer):
     >>> bel0 = solph.buses.Bus(label="el0")
     >>> bel1 = solph.buses.Bus(label="el1")
 
-    >>> link = solph.components.experimental.Link(
+    >>> link = solph.components.Link(
     ...    label="transshipment_link",
     ...    inputs={bel0: solph.flows.Flow(nominal_value=4),
     ...            bel1: solph.flows.Flow(nominal_value=2)},
@@ -65,7 +68,7 @@ class Link(on.Transformer):
     [0.8, 0.9]
 
     >>> type(link)
-    <class 'oemof.solph.components.experimental._link.Link'>
+    <class 'oemof.solph.components._link.Link'>
 
     >>> sorted([str(i) for i in link.inputs])
     ['el0', 'el1']
@@ -74,14 +77,27 @@ class Link(on.Transformer):
     0.8
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
+    def __init__(
+        self,
+        label,
+        inputs,
+        outputs,
+        conversion_factors,
+    ):
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        if conversion_factors is None:
+            conversion_factors = {}
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+        )
         self.conversion_factors = {
-            k: sequence(v)
-            for k, v in kwargs.get("conversion_factors", {}).items()
+            k: sequence(v) for k, v in conversion_factors.items()
         }
-
         msg = (
             "Component `Link` should have exactly "
             + "2 inputs, 2 outputs, and 2 "
@@ -104,9 +120,7 @@ class Link(on.Transformer):
 
 class LinkBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.experimental.Link`
-
-    Note: This component is experimental. Use it with care.
+    :class:`~oemof.solph.components.Link`
 
     **The following constraints are created:**
 
@@ -131,7 +145,7 @@ class LinkBlock(ScalarBlock):
         Parameters
         ----------
         group : list
-            List of oemof.solph.components.experimental.Link objects for which
+            List of oemof.solph.components.Link objects for which
             the relation of inputs and outputs is createdBuildAction
             e.g. group = [link1, link2, link3, ...]. The components inside
             the list need to hold an attribute `conversion_factors` of type
@@ -159,12 +173,12 @@ class LinkBlock(ScalarBlock):
                                 m.flow[n, cidx[1], p, t]
                                 == c[t] * m.flow[cidx[0], n, p, t]
                             )
-                        except ValueError:
-                            raise ValueError(
-                                "Error in constraint creation",
-                                "from: {0}, to: {1}, via: {2}".format(
-                                    cidx[0], cidx[1], n
-                                ),
+                        except KeyError:
+                            raise KeyError(
+                                "Error in constraint creation "
+                                f"from: {cidx[0]}, to: {cidx[1]}, via: {n}. "
+                                "Check if all connected buses match "
+                                "the conversion factors.",
                             )
                         block.relation.add((n, cidx[0], cidx[1], p, t), expr)
 

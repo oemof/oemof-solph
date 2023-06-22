@@ -11,11 +11,11 @@ SPDX-License-Identifier: MIT
 
 import logging
 import re
-from difflib import unified_diff
 from os import path as ospath
 
 import pandas as pd
 import pytest
+from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
 
@@ -69,70 +69,29 @@ class TestsConstraint:
                     filename,
                 )
             ) as expected_file:
+                exp = expected_file.read()
+                gen = generated_file.read()
 
-                def chop_trailing_whitespace(lines):
-                    return [re.sub(r"\s*$", "", ln) for ln in lines]
+                # lp_diff returns two arrays of strings with cleaned lp syntax
+                # It automatically prints the diff
+                exp_diff, gen_diff = lp_diff(exp, gen)
 
-                def remove(pattern, lines):
-                    if not pattern:
-                        return lines
-                    return re.subn(pattern, "", "\n".join(lines))[0].split(
-                        "\n"
-                    )
+                # sometimes, 0.0 is printed, sometimes 0, harmonise that
+                exp_diff = [
+                    line + " ".replace(" 0.0 ", " 0 ") for line in exp_diff
+                ]
+                gen_diff = [
+                    line + " ".replace(" 0.0 ", " 0 ") for line in gen_diff
+                ]
 
-                expected = remove(
-                    ignored,
-                    chop_trailing_whitespace(expected_file.readlines()),
-                )
-                generated = remove(
-                    ignored,
-                    chop_trailing_whitespace(generated_file.readlines()),
-                )
+                assert len(exp_diff) == len(gen_diff)
 
-                def normalize_to_positive_results(lines):
-                    negative_result_indices = [
-                        n
-                        for n, line in enumerate(lines)
-                        if re.match("^= -", line)
-                    ]
-                    equation_start_indices = [
-                        [
-                            n
-                            for n in reversed(range(0, nri))
-                            if re.match(".*:$", lines[n])
-                        ][0]
-                        + 1
-                        for nri in negative_result_indices
-                    ]
-                    for start, end in zip(
-                        equation_start_indices, negative_result_indices
-                    ):
-                        for n in range(start, end):
-                            lines[n] = (
-                                "-"
-                                if lines[n] and lines[n][0] == "+"
-                                else "+"
-                                if lines[n]
-                                else lines[n]
-                            ) + lines[n][1:]
-                        lines[end] = "= " + lines[end][3:]
-                    return lines
-
-                expected = normalize_to_positive_results(expected)
-                generated = normalize_to_positive_results(generated)
-
-                assert generated == expected, (
-                    "Failed matching expected with generated lp file:\n"
-                    + "\n".join(
-                        unified_diff(
-                            expected,
-                            generated,
-                            fromfile=ospath.relpath(expected_file.name),
-                            tofile=ospath.basename(generated_file.name),
-                            lineterm="",
-                        )
-                    ),
-                )
+                # Created the LP files do not have a reproducible
+                # order of the lines. Thus, we sort the lines.
+                for exp, gen in zip(sorted(exp_diff), sorted(gen_diff)):
+                    assert (
+                        exp == gen
+                    ), "Failed matching expected with generated lp file."
 
     def test_linear_transformer(self):
         """Constraint test of a Transformer without Investment."""
@@ -661,19 +620,26 @@ class TestsConstraint:
         self.compare_lp_files("linear_transformer_chp_invest.lp")
 
     def test_link(self):
-        bel0 = solph.buses.Bus(label="bel0")
-        bel1 = solph.buses.Bus(label="bel1")
+        """Constraint test of a Link."""
+        bus_el_1 = solph.buses.Bus(label="el1")
+        bus_el_2 = solph.buses.Bus(label="el2")
 
-        link = solph.components.experimental.Link(
+        link = solph.components.Link(
             label="link",
             inputs={
-                bel0: solph.Flow(nominal_value=4),
-                bel1: solph.Flow(nominal_value=2),
+                bus_el_1: solph.flows.Flow(nominal_value=4),
+                bus_el_2: solph.flows.Flow(nominal_value=2),
             },
-            outputs={bel0: solph.Flow(), bel1: solph.Flow()},
-            conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9},
+            outputs={
+                bus_el_1: solph.flows.Flow(),
+                bus_el_2: solph.flows.Flow(),
+            },
+            conversion_factors={
+                (bus_el_1, bus_el_2): 0.75,
+                (bus_el_2, bus_el_1): 0.5,
+            },
         )
-        self.energysystem.add(bel0, bel1, link)
+        self.energysystem.add(bus_el_1, bus_el_2, link)
         self.compare_lp_files("link.lp")
 
     def test_variable_chp(self):
@@ -1909,3 +1875,74 @@ class TestsConstraint:
         es.add(b_gas, b_th, boiler, storage)
         om = solph.Model(es)
         self.compare_lp_files("nonequidistant_timeindex.lp", my_om=om)
+
+    def test_storage_level_constraint(self):
+        """Constraint test of an energy system
+        with storage_level_constraint
+        """
+        es = solph.EnergySystem(
+            timeindex=pd.date_range("2022-01-01", freq="1H", periods=2),
+            infer_last_interval=True,
+        )
+
+        multiplexer = solph.Bus(
+            label="multiplexer",
+        )
+
+        storage = solph.components.GenericStorage(
+            label="storage",
+            nominal_storage_capacity=4,
+            initial_storage_level=1,
+            balanced=True,
+            loss_rate=0.25,
+            inputs={multiplexer: solph.Flow()},
+            outputs={multiplexer: solph.Flow()},
+        )
+
+        es.add(multiplexer, storage)
+
+        in_0 = solph.components.Source(
+            label="in_0",
+            outputs={
+                multiplexer: solph.Flow(nominal_value=0.5, variable_costs=0.25)
+            },
+        )
+        es.add(in_0)
+
+        in_1 = solph.components.Source(
+            label="in_1",
+            outputs={multiplexer: solph.Flow(nominal_value=0.125)},
+        )
+        es.add(in_1)
+
+        out_0 = solph.components.Sink(
+            label="out_0",
+            inputs={
+                multiplexer: solph.Flow(
+                    nominal_value=0.25, variable_costs=-0.125
+                )
+            },
+        )
+        es.add(out_0)
+
+        out_1 = solph.components.Sink(
+            label="out_1",
+            inputs={
+                multiplexer: solph.Flow(
+                    nominal_value=0.125, variable_costs=-0.125
+                )
+            },
+        )
+        es.add(out_1)
+
+        om = solph.Model(es)
+
+        solph.constraints.storage_level_constraint(
+            model=om,
+            name="multiplexer",
+            storage_component=storage,
+            multiplexer_bus=multiplexer,
+            input_levels={in_1: 1 / 4},  # in_0 is always active
+            output_levels={out_0: 1 / 8, out_1: 1 / 2},
+        )
+        self.compare_lp_files("storage_level_constraint.lp", my_om=om)

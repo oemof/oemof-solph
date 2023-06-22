@@ -53,14 +53,11 @@ c_l_SimpleFlowBlock_full_load_time_min_constr(electricityBus_excess)_:
 +1 flow(electricityBus_excess_2_5)
 >= 30
 
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
-
 bounds
-   0 <= flow(electricityBus_excess_0_0) <= 8
-   0 <= flow(electricityBus_excess_0_1) <= 8
-   0 <= flow(electricityBus_excess_1_2) <= 8
-   0 <= flow(electricityBus_excess_1_3) <= 8
-   0 <= flow(electricityBus_excess_2_4) <= 8
-   0 <= flow(electricityBus_excess_2_5) <= 8
+   0 <= flow(electricityBus_excess_0_0) <= 8.0
+   0 <= flow(electricityBus_excess_0_1) <= 8.0
+   0 <= flow(electricityBus_excess_1_2) <= 8.0
+   0 <= flow(electricityBus_excess_1_3) <= 8.0
+   0 <= flow(electricityBus_excess_2_4) <= 8.0
+   0 <= flow(electricityBus_excess_2_5) <= 8.0
 end

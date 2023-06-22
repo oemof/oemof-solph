@@ -13,6 +13,7 @@ from . import experimental
 from ._extraction_turbine_chp import ExtractionTurbineCHP
 from ._generic_chp import GenericCHP
 from ._generic_storage import GenericStorage
+from ._link import Link
 from ._offset_transformer import OffsetTransformer
 from ._sink import Sink
 from ._source import Source
@@ -23,6 +24,7 @@ __all__ = [
     "ExtractionTurbineCHP",
     "GenericCHP",
     "GenericStorage",
+    "Link",
     "OffsetTransformer",
     "Sink",
     "Source",

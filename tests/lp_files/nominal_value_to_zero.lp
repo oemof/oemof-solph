@@ -18,10 +18,8 @@ c_e_BusBlock_balance(electricityBus_0_2)_:
 +1 flow(s1_electricityBus_0_2)
 = 0
 
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
-
 bounds
+   1 <= ONE_VAR_CONSTANT <= 1
    0 <= flow(s1_electricityBus_0_0) <= 0
    0 <= flow(s1_electricityBus_0_1) <= 0
    0 <= flow(s1_electricityBus_0_2) <= 0

@@ -8,8 +8,8 @@ s.t.
 
 c_u_integral_limit_emission_factor_constraint_:
 +0.5 flow(source1_electricityBus_0_0)
--1 flow(source1_electricityBus_0_1)
-+2 flow(source1_electricityBus_1_2)
+-1.0 flow(source1_electricityBus_0_1)
++2.0 flow(source1_electricityBus_1_2)
 +1 flow(source1_electricityBus_1_3)
 +0.5 flow(source1_electricityBus_2_4)
 +0.5 flow(source1_electricityBus_2_5)
@@ -21,10 +21,8 @@ c_u_integral_limit_emission_factor_constraint_:
 +3.5 flow(source2_electricityBus_2_5)
 <= 777
 
-c_e_ONE_VAR_CONSTANT: 
-ONE_VAR_CONSTANT = 1.0
-
 bounds
+   1 <= ONE_VAR_CONSTANT <= 1
    0 <= flow(source1_electricityBus_0_0) <= 100
    0 <= flow(source1_electricityBus_0_1) <= 100
    0 <= flow(source1_electricityBus_1_2) <= 100

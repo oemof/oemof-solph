@@ -5,7 +5,7 @@ build:
     - coinor-cbc
 sphinx:
   configuration: docs/conf.py
-formats: all
+formats: []
 python:
   version: "3.8"
   install:

@@ -49,6 +49,14 @@ GenericStorage
     :undoc-members:
     :show-inheritance:
 
+Link
+----
+
+.. automodule:: oemof.solph.components._link
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 OffsetTransformer
 -----------------
 
@@ -69,14 +77,6 @@ experimental.GenericCAES
 ------------------------
 
 .. automodule:: oemof.solph.components.experimental._generic_caes
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-experimental.Link
------------------
-
-.. automodule:: oemof.solph.components.experimental._link
     :members:
     :undoc-members:
     :show-inheritance:
