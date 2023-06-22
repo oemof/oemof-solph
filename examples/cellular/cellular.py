@@ -3,12 +3,11 @@
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
+from oemof.solph import EnergySystem
 
 from oemof.solph import create_time_index
 from oemof.solph import flows
 from oemof.solph import processing, views
-
-from oemof.solph.components.experimental import EnergyCell
 
 ###########################################################################
 # define the cells of the cellular energy system
@@ -21,19 +20,23 @@ daterange = create_time_index(year=2020, interval=1, number=n_periods)
 mysolver = "gurobi"
 
 # create the energy cells
-es = EnergyCell(label="es", timeindex=daterange, infer_last_interval=False)
-ec_1 = EnergyCell(label="ec1", timeindex=daterange, infer_last_interval=False)
-ec_2 = EnergyCell(label="ec2", timeindex=daterange, infer_last_interval=False)
-ec_1_1 = EnergyCell(
+es = EnergySystem(label="es", timeindex=daterange, infer_last_interval=False)
+ec_1 = EnergySystem(
+    label="ec1", timeindex=daterange, infer_last_interval=False
+)
+ec_2 = EnergySystem(
+    label="ec2", timeindex=daterange, infer_last_interval=False
+)
+ec_1_1 = EnergySystem(
     label="ec1_1", timeindex=daterange, infer_last_interval=False
 )
-ec_1_2 = EnergyCell(
+ec_1_2 = EnergySystem(
     label="ec1_2", timeindex=daterange, infer_last_interval=False
 )
-ec_2_1 = EnergyCell(
+ec_2_1 = EnergySystem(
     label="ec2_1", timeindex=daterange, infer_last_interval=False
 )
-ec_2_2 = EnergyCell(
+ec_2_2 = EnergySystem(
     label="ec2_2", timeindex=daterange, infer_last_interval=False
 )
 
@@ -235,7 +238,7 @@ es.add(
 )
 
 # %%
-cmodel = Model(energysystem={es: [ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2]})
+cmodel = Model(energysystem=[es, ec_1, ec_2, ec_1_1, ec_1_2, ec_2_1, ec_2_2])
 # %%
 cmodel.write(
     "D:/solph-cellular/examples/cellular/cmodel.lp",

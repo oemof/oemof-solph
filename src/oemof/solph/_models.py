@@ -31,7 +31,6 @@ from oemof.solph.flows._invest_non_convex_flow_block import (
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
-from oemof.solph._plumbing import sequence
 
 
 class LoggingError(BaseException):
@@ -45,11 +44,11 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or dict
+    energysystem : EnergySystem object or list of EnergySystem objects
         Object that holds the nodes of an oemof energy system graph.
-        If a dict is passed, a cellular structure is assumed and the
-        key needs to be the upmost energy cell and the value must be a list
-        of EnergyCell objects.
+        If a list is passed, a cellular structure is assumed and the
+        first element needs to be the upmost energy cell (structurally
+        containing all other cells).
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -75,7 +74,7 @@ class BaseModel(po.ConcreteModel):
     name : str
         Name of the model
     es : solph.EnergySystem
-        Energy system of the model
+        Energy system of the model (upmost energy cell for cellular structures)
     meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
@@ -114,11 +113,11 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
-        self.iscellular = isinstance(energysystem, dict)
+        self.iscellular = isinstance(energysystem, list)
 
         if self.iscellular:
-            self.es = list(energysystem.keys())[0]
-            self.ec = energysystem[self.es]
+            self.es = energysystem[0]
+            self.ec = energysystem[1:]
         else:
             self.es = energysystem
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
@@ -146,11 +145,11 @@ class BaseModel(po.ConcreteModel):
                         self.flows.update({io: f})
                     else:
                         msg = (
-                            "Two flows with identical input-output are tried "
-                            "to be added to the Model. Second flow is skipped."
+                            "Two flows with identical input-output values are "
+                            "tried to be added to the Model."
                             "\n{}"
                         )
-                        raise Warning(msg.format({io: f}))
+                        raise ValueError(msg.format({io: f}))
 
         self.solver_results = None
         self.dual = None
@@ -302,11 +301,11 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or dict
-        Object that holds the nodes of an oemof energy system graph
-        If a dict is passed, a cellular structure is assumed and the
-        key needs to be the upmost energy cell and the value must be a list
-        of EnergyCell objects.
+    energysystem : EnergySystem object or list of EnergySystem objects
+        Object that holds the nodes of an oemof energy system graph.
+        If a list is passed, a cellular structure is assumed and the
+        first element needs to be the upmost energy cell (structurally
+        containing all other cells).
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -369,7 +368,7 @@ class Model(BaseModel):
         if discount_rate is not None:
             self.discount_rate = discount_rate
         elif (
-            not isinstance(energysystem, dict)
+            not isinstance(energysystem, list)
             and energysystem.periods is not None
         ):
             self.discount_rate = 0.02
@@ -381,8 +380,8 @@ class Model(BaseModel):
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         elif (
-            isinstance(energysystem, dict)
-            and list(energysystem.keys())[0].periods is not None
+            isinstance(energysystem, list)
+            and energysystem[0].periods is not None
         ):
             self.discount_rate = 0.02
             msg = (
@@ -401,9 +400,9 @@ class Model(BaseModel):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
+        self.nodes = self.es.nodes
         if self.iscellular:
             # collect all nodes from the child cells
-            self.nodes = self.es.nodes
             for cell in self.ec:
                 for node in cell.nodes:
                     if node not in self.nodes:
@@ -411,15 +410,11 @@ class Model(BaseModel):
                     else:
                         msg = (
                             "Two nodes of identical name are tried to be added"
-                            " to `CellularModel.nodes`. Second node is"
-                            " skipped.\n{}"
+                            " to `CellularModel.nodes`.\n{}"
                         )
-                        raise Warning(msg.format(node))
-            # set with all nodes
-            self.NODES = po.Set(initialize=[n for n in self.nodes])
-        else:
-            # set with all nodes
-            self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+                        raise ValueError(msg.format(node))
+        # create set with all nodes
+        self.NODES = po.Set(initialize=[n for n in self.nodes])
 
         if self.es.timeincrement is None:
             msg = (
