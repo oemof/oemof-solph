@@ -11,12 +11,10 @@ from ._generic_caes import GenericCAES
 from ._link import Link
 from ._piecewise_linear_transformer import PiecewiseLinearTransformer
 from ._sink_dsm import SinkDSM
-from ._energy_cell import EnergyCell
 
 __all__ = [
     "GenericCAES",
     "Link",
     "PiecewiseLinearTransformer",
     "SinkDSM",
-    "EnergyCell",
 ]
