@@ -6,31 +6,26 @@ Cellular energy systems are proposed by the VDE-ETG. They are, as the name
 implies, energy systems that are made up of cells. Each cell can contain
 multiple other cells. So there is a hierarchy between them.
 
-The energy system modelled below looks like this:
-
-___________________________________
-|                es                 |
--------------------------------------
-          /              \
-_________________ _________________
-|       ec_1      |      ec_2       |
------------------- -----------------
-    /        \         /       \
-_________ ________ ________ ________
-| ec_1_1 | ec_1_2 | ec_2_1 | ec_2_2 |
--------- -------- -------- --------
+However, the hierarchical levels are abstracted here and the structure is flat.
 
 The connections between the cells are modelled as buses. Each connector bus
 has two inputs (from the parent cell and the child cell) and two outputs (
 to the parent cell and the child cell).
 
+Installation requirements
+-------------------------
+
+This example requires at least oemof.solph (v0.5.1), install by:
+
+    pip install oemof.solph[examples]
 
 Licence
 -------
 
-SPDX-FileCopyrightText: Lennart Schürmann
+Lennart Schürmann <lennart.schuermann@umsicht.fraunhofer.de>
 
-SPDX-License-Identifier: MIT
+`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+
 """
 
 
@@ -286,12 +281,23 @@ def main():
 
     cmodel.solve(solver=mysolver)
 
+    # evaluate and plot the results
     results = processing.results(cmodel)
-    print(
-        views.node(results, "bus_el_ec_1")["sequences"][
-            (("connector_el_ec_1_1", "bus_el_ec_1"), "flow")
-        ]
+
+    print(views.node(results, "bus_el_ec_1")["sequences"].iloc[0, :])
+    msg = (
+        "\nAs we can see, a flow of 70 kW is going from the bus_el_ec_1 "
+        "to the connector_el_ec_1. It is composed of 30 kW from "
+        "connector_el_ec_1_2 (and therefore ec_1_2) and 40 kW from "
+        "connector_el_ec_1_1 (and therefore ec_1_1). Where does it go?\n"
     )
+    print(msg)
+    print(views.node(results, "bus_el_ec_2_2")["sequences"].iloc[0, :])
+    msg = (
+        "\nIt is going into bus_el_ec_2_2 (and therefore ec_2_2), to "
+        "supply the demand.\n"
+    )
+    print(msg)
 
 
 if __name__ == "__main__":
