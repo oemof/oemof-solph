@@ -28,6 +28,7 @@ Authors
 * Jonathan Amme
 * Julian Endres
 * Lluis Millet
+* Lennart Schürmann
 * Martin Soethe
 * Patrik Schönfeldt
 * Pierre-François Duc
