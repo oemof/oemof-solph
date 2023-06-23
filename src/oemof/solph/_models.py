@@ -487,8 +487,6 @@ class Model(BaseModel):
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
-                    # if nominal_value and fix is given,
-                    # set flow to fix * nominal value
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].value = (
                             self.flows[o, i].fix[t]
@@ -496,28 +494,21 @@ class Model(BaseModel):
                         )
                         self.flow[o, i, p, t].fix()
                 else:
-                    # if max is set, set that as upper bound for the variable
-                    # max is by default set to 1
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
-
-                    # set min value (if nonconvex isn't set) as lower bound
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
-                    # if flow is unidirectional (default)
-                    # set lower bound to zero
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(0)
             else:
-                # restrict flow to >=0 if unidirectional (default)
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
