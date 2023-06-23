@@ -504,7 +504,6 @@ class Model(BaseModel):
                             * self.flows[o, i].nominal_value
                         )
 
-                    # TODO: why is that check for nonconvex necessary?
                     # set min value (if nonconvex isn't set) as lower bound
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:

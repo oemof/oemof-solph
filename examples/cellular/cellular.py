@@ -84,14 +84,14 @@ def main():
     demand_1_1 = [10] * n_periods
     demand_1_2 = [10] * n_periods
     demand_2_1 = [10] * n_periods
-    demand_2_2 = [10] * n_periods
+    demand_2_2 = [80] * n_periods
 
-    pv_1 = [100] * n_periods
-    pv_2 = [100] * n_periods
-    pv_1_1 = [100] * n_periods
-    pv_1_2 = [100] * n_periods
-    pv_2_1 = [100] * n_periods
-    pv_2_2 = [100] * n_periods
+    pv_1 = [10] * n_periods
+    pv_2 = [10] * n_periods
+    pv_1_1 = [80] * n_periods
+    pv_1_2 = [40] * n_periods
+    pv_2_1 = [10] * n_periods
+    pv_2_2 = [10] * n_periods
 
     bus_el_es = buses.Bus(label="bus_el_es")
     bus_el_ec_1 = buses.Bus(label="bus_el_ec_1")
@@ -161,7 +161,7 @@ def main():
         label="source_el_ec_1_1",
         outputs={
             bus_el_ec_1_1: flows.Flow(
-                max=pv_1_1, nominal_value=1, variable_costs=0
+                max=pv_1_1, nominal_value=1, variable_costs=10
             )
         },
     )
@@ -169,7 +169,7 @@ def main():
         label="source_el_ec_1_2",
         outputs={
             bus_el_ec_1_2: flows.Flow(
-                max=pv_1_2, nominal_value=1, variable_costs=5
+                max=pv_1_2, nominal_value=1, variable_costs=1
             )
         },
     )
@@ -177,7 +177,7 @@ def main():
         label="source_el_ec_2_1",
         outputs={
             bus_el_ec_2_1: flows.Flow(
-                max=pv_2_1, nominal_value=1, variable_costs=10
+                max=pv_2_1, nominal_value=1, variable_costs=5
             )
         },
     )
@@ -185,7 +185,7 @@ def main():
         label="source_el_ec_2_2",
         outputs={
             bus_el_ec_2_2: flows.Flow(
-                max=pv_2_2, nominal_value=1, variable_costs=10
+                max=pv_2_2, nominal_value=1, variable_costs=5
             )
         },
     )
@@ -229,7 +229,7 @@ def main():
             bus_el_ec_1_1: flows.Flow(),
         },
         outputs={
-            bus_el_ec_1: flows.Flow(max=20, nominal_value=1),
+            bus_el_ec_1: flows.Flow(),
             bus_el_ec_1_1: flows.Flow(),
         },
     )
@@ -287,7 +287,11 @@ def main():
     cmodel.solve(solver=mysolver)
 
     results = processing.results(cmodel)
-    print(views.node(results, "connector_el_ec_1_1")["sequences"])
+    print(
+        views.node(results, "bus_el_ec_1")["sequences"][
+            (("connector_el_ec_1_1", "bus_el_ec_1"), "flow")
+        ]
+    )
 
 
 if __name__ == "__main__":
