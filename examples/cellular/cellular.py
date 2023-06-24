@@ -3,7 +3,7 @@ General description
 -------------------
 
 Cellular energy systems are proposed by the VDE-ETG. They are, as the name
-implies, energy systems that are made up of cells. Each cell can contain
+implies, energy systems that consist of cells. Each cell can contain
 multiple other cells. So there is a hierarchy between them.
 
 However, the hierarchical levels are abstracted here and the structure is flat.

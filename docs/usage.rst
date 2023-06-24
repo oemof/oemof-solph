@@ -1265,19 +1265,21 @@ Besides the `invest` variable, new variables are introduced as well. These are:
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
 
-Modelling cellular energy systems
----------------------------------
+Modelling cellular energy systems and modularizing energy system models
+-----------------------------------------------------------------------
 
-The cellular approach is a concept proposed by the VDE-ETG. It is related to smart-grids and multi-microgrid systems but extends
-both. The idea is to group the components of an energy system into a hierarchically aggregating structure of cells. For example,
-the sources, sinks, storages and converters of a household could be a single cell. Then a group of physically neighboring 
-households could form another cell, made up of household-cells. This behaviour can be scaled up. The real game-changer in the 
-cellular approach is the way the cells are operated, which will not be covered here. Here, we focus on the way such cellular
-energy systems can be modeled.
+The cellular approach is a concept proposed by the [VDE-ETG](https://shop.vde.com/en/vde-study-the-cellular-approach). It is 
+related to smart-grids and multi-microgrid systems but extends both. The idea is to group the components of an energy system 
+into a hierarchically aggregating structure of cells. For example, the sources, sinks, storages and converters of a household 
+could be a single cell. Then a group of physically neighboring households could form another cell, consisting of household-cells. 
+This behaviour can be scaled up. The real game-changer in the cellular approach is the way the cells are operated, which will 
+not be covered here. Here, we focus on the way such cellular energy systems can be modeled.
 
-So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. Further 
-functionality is expected to make its way into solph in the future, e.g. a distributed optimization procedure based on 
-Dantzig-Wolfe decomposition.
+So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. However, 
+the implementation can also be regarded as a precursor for further functionality. Decomposition techniques such
+as [Benders](https://en.wikipedia.org/wiki/Benders_decomposition) or 
+[Dantzig-Wolfe](https://en.wikipedia.org/wiki/Dantzig%E2%80%93Wolfe_decomposition) could be implemented in solph. These methods 
+are dependent on a special constraint matrix structure, which the cellular modelling approach presented here is helping to obtain. 
 
 Modelling procedure
 ^^^^^^^^^^^^^^^^^^^
@@ -1286,6 +1288,8 @@ Similar to the creation of regular energy systems, the creation of energy cells 
 each energy cell is just an energy system, therefore we use the class :py:class:`oemof.solph.EnergySystem` to create energy cells.
 
 .. code-block:: python
+
+    from oemof.solph import EnergySystem
 
     es = EnergySystem(
         label="es", timeindex=timeindex, infer_last_interval=False
@@ -1301,15 +1305,17 @@ Now we can go on and add components to the energy cells just like we do with reg
 
 .. code-block:: python
 
-    bus_el_es = buses.Bus(label="bus_el_es")
+    from oemof import solph
+
+    bus_el_es = solph.buses.Bus(label="bus_el_es")
     es.add(bus_el_es)
 
-    bus_el_ec_1 = buses.Bus(label="bus_el_ec_1")
-    sink_el_ec_1 = cmp.Sink(
+    bus_el_ec_1 = solph.buses.Bus(label="bus_el_ec_1")
+    sink_el_ec_1 = solph.components.Sink(
         label="sink_el_ec_1",
         inputs={bus_el_ec_1: flows.Flow(fix=10, nominal_value=1)},
     )
-    source_el_ec_1 = cmp.Source(
+    source_el_ec_1 = solph.components.Source(
         label="source_el_ec_1",
         outputs={
             bus_el_ec_1: flows.Flow(
@@ -1330,7 +1336,7 @@ like this:
 
 .. code-block:: python
     
-    connector_el_ec_1 = buses.Bus(
+    connector_el_ec_1 = solph.buses.Bus(
         label="connector_el_ec_1",
         inputs={
             bus_el_es: flows.Flow(),
