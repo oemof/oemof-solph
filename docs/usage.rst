@@ -1329,7 +1329,7 @@ Now we can go on and add components to the energy cells just like we do with reg
     example can be found in the examples.
     
 The next step would be to model the connections between cells. Here, we resort to the class 
-:py:class:`oemof.solph.buses.Bus`. Usually  each connection bus has two inputs (from the 
+:py:class:`oemof.solph.components.Link`. Each connection Link has two inputs (from the 
 "parent cell" and the "child cell") and two outputs (to the "parent cell" and the "child 
 cell"). A connection between the "parent cell" `es` and the "child cell" `ec_1` could look 
 like this:
@@ -1346,10 +1346,16 @@ like this:
             bus_el_es: flows.Flow(),
             bus_el_ec_1: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_es, bus_el_ec_1): 0.85,
+            (bus_el_ec_1, bus_el_es): 0.85
+        }
     )
     es.add(connector_el_ec_1)
 
-All connection buses are added to the upmost energy cell.
+The `conversion_factors` can be used to model transmission losses. Here, a symmetrical 
+loss of 15% is assumed.
+All connection Links are added to the upmost energy cell.
 
 .. note:: Note that we do not add the energy cells as components to their parent cells! 
     Instead, the hierarchical structure is flattened and all connections between the cells

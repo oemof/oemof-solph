@@ -8,9 +8,10 @@ multiple other cells. So there is a hierarchy between them.
 
 However, the hierarchical levels are abstracted here and the structure is flat.
 
-The connections between the cells are modelled as buses. Each connector bus
-has two inputs (from the parent cell and the child cell) and two outputs (
-to the parent cell and the child cell).
+The connections between the cells are modelled as Links. Each connector Link
+has two inputs (buses of the parent and child cell) and two outputs (buses of
+the parent and child cell). Losses can be modelled by using the
+`conversion_factors` of the Link class.
 
 Installation requirements
 -------------------------
@@ -192,7 +193,7 @@ def main():
     ec_2_1.add(source_el_ec_2_1)
     ec_2_2.add(source_el_ec_2_2)
 
-    connector_el_ec_1 = buses.Bus(
+    connector_el_ec_1 = cmp.Link(
         label="connector_el_ec_1",
         inputs={
             bus_el_es: flows.Flow(),
@@ -202,9 +203,13 @@ def main():
             bus_el_es: flows.Flow(),
             bus_el_ec_1: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_es, bus_el_ec_1): 1,
+            (bus_el_ec_1, bus_el_es): 1,
+        },
     )
 
-    connector_el_ec_2 = buses.Bus(
+    connector_el_ec_2 = cmp.Link(
         label="connector_el_ec_2",
         inputs={
             bus_el_es: flows.Flow(),
@@ -214,10 +219,13 @@ def main():
             bus_el_es: flows.Flow(),
             bus_el_ec_2: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_es, bus_el_ec_2): 1,
+            (bus_el_ec_2, bus_el_es): 1,
+        },
     )
 
-    # relax the max constraint to see different results
-    connector_el_ec_1_1 = buses.Bus(
+    connector_el_ec_1_1 = cmp.Link(
         label="connector_el_ec_1_1",
         inputs={
             bus_el_ec_1: flows.Flow(),
@@ -227,9 +235,13 @@ def main():
             bus_el_ec_1: flows.Flow(),
             bus_el_ec_1_1: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_ec_1, bus_el_ec_1_1): 0.85,
+            (bus_el_ec_1_1, bus_el_ec_1): 0.85,
+        },
     )
 
-    connector_el_ec_1_2 = buses.Bus(
+    connector_el_ec_1_2 = cmp.Link(
         label="connector_el_ec_1_2",
         inputs={
             bus_el_ec_1: flows.Flow(),
@@ -239,9 +251,13 @@ def main():
             bus_el_ec_1: flows.Flow(),
             bus_el_ec_1_2: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_ec_1, bus_el_ec_1_2): 1,
+            (bus_el_ec_1_2, bus_el_ec_1): 1,
+        },
     )
 
-    connector_el_ec_2_1 = buses.Bus(
+    connector_el_ec_2_1 = cmp.Link(
         label="connector_el_ec_2_1",
         inputs={
             bus_el_ec_2: flows.Flow(),
@@ -251,9 +267,13 @@ def main():
             bus_el_ec_2: flows.Flow(),
             bus_el_ec_2_1: flows.Flow(),
         },
+        conversion_factors={
+            (bus_el_ec_2, bus_el_ec_2_1): 1,
+            (bus_el_ec_2_1, bus_el_ec_2): 1,
+        },
     )
 
-    connector_el_ec_2_2 = buses.Bus(
+    connector_el_ec_2_2 = cmp.Link(
         label="connector_el_ec_2_2",
         inputs={
             bus_el_ec_2: flows.Flow(),
@@ -262,6 +282,10 @@ def main():
         outputs={
             bus_el_ec_2: flows.Flow(),
             bus_el_ec_2_2: flows.Flow(),
+        },
+        conversion_factors={
+            (bus_el_ec_2, bus_el_ec_2_2): 1,
+            (bus_el_ec_2_2, bus_el_ec_2): 1,
         },
     )
 
@@ -298,6 +322,12 @@ def main():
         "supply the demand.\n"
     )
     print(msg)
+
+    msg = (
+        "Here we can see that the conversion factors are in fact considered:\n"
+    )
+    print(msg)
+    print(views.node(results, "connector_el_ec_1_1")["sequences"].iloc[0, :])
 
 
 if __name__ == "__main__":
