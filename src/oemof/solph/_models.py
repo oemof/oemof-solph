@@ -364,30 +364,26 @@ class Model(BaseModel):
             not isinstance(energysystem, list)
             and energysystem.periods is not None
         ):
-            self.discount_rate = 0.02
-            msg = (
-                f"By default, a discount_rate of {self.discount_rate} "
-                f"is used for a multi-period model. "
-                f"If you want to use another value, "
-                f"you have to specify the `discount_rate` attribute."
-            )
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+            self._set_discount_rate_with_warning()
         elif (
             isinstance(energysystem, list)
             and energysystem[0].periods is not None
         ):
-            self.discount_rate = 0.02
-            msg = (
-                f"By default, a discount_rate of {self.discount_rate} "
-                f"is used for a multi-period model. "
-                f"If you want to use another value, "
-                f"you have to specify the `discount_rate` attribute."
-            )
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
-
+            self._set_discount_rate_with_warning()
         else:
             pass
         super().__init__(energysystem, **kwargs)
+
+    def _set_discount_rate_with_warning(self):
+        """sets the discount rate to the standard value and raises a warning."""
+        self.discount_rate = 0.02
+        msg = (
+            f"By default, a discount_rate of {self.discount_rate} "
+            f"is used for a multi-period model. "
+            f"If you want to use another value, "
+            f"you have to specify the `discount_rate` attribute."
+        )
+        warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
