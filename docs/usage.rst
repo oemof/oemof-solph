@@ -156,7 +156,7 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.flow
 
     solph.flows.Flow()
 
-Oemof has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
+oemof.solph has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
 
 .. note:: See the :py:class:`~oemof.solph.flows._flow.Flow` class for all parameters and the mathematical background.
 
@@ -1004,7 +1004,7 @@ Using the multi-period (investment) mode (experimental)
 Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
-While in principle, you could try to model this in oemof using the standard investment mode described above (see :ref:`investment_mode_label`),
+While in principle, you could try to model this in oemof.solph using the standard investment mode described above (see :ref:`investment_mode_label`),
 you would make the implicit assumption that your entire system is built at the start of your optimization and doesn't change over time.
 To address this shortcoming, the multi-period (investment) feature has been introduced. Be aware that it is still experimental.
 So feel free to report any bugs or unexpected behaviour if you come across them.
