@@ -135,7 +135,7 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 Installation
 ============
 
-If you have a working Python3 environment, use pypi to install the latest oemof-solph version. Python >= 3.6 is recommended. Lower versions may work but are not tested.
+If you have a working Python3 environment, use pypi to install the latest version of oemof.solph. Python >= 3.8 is recommended. Lower versions may work but are not tested.
 
 
 ::
