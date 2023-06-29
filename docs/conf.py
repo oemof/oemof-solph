@@ -34,7 +34,7 @@ project = "oemof.solph"
 year = "2014-2023"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.5.1.dev2"
+version = release = "0.5.1.dev3"
 
 pygments_style = "trac"
 templates_path = ["."]
