@@ -35,6 +35,7 @@ Documentation
 #############
 
 * See extensive documentation in user guide and API reference for the new (experimental) multi-period feature.
+* Be more strict about about oemof (meta package) oemof.solph (this package).
 
 Bug fixes
 #########
@@ -55,10 +56,10 @@ Other changes
 Contributors
 ############
 
-* Patrik Schönfeldt
 * Johannes Kochems
-* Tobi Rohrer
 * Patrik Schönfeldt
+* Tobi Rohrer
 * Julian Endres
 * Jann Launer
+* Lennart Schürmann
 
