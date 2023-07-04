@@ -25,6 +25,7 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
+from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
@@ -79,16 +80,19 @@ class Link(on.Transformer):
 
     def __init__(
         self,
-        label,
-        inputs,
-        outputs,
-        conversion_factors,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
     ):
         if inputs is None:
+            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
+            warn_if_missing_attribute(self, "outputs")
             outputs = {}
         if conversion_factors is None:
+            warn_if_missing_attribute(self, "conversion_factors")
             conversion_factors = {}
         super().__init__(
             label=label,

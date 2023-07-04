@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 =======================================
-Welcome to oemof's documentation!
+Welcome to oemof.solph's documentation!
 =======================================
 
 .. toctree::
