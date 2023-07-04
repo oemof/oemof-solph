@@ -45,11 +45,11 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list of EnergySystem objects (experimental)
-        Object that holds the nodes of an oemof energy system graph.
-        If a list is passed, a cellular structure is assumed and the
-        first element needs to be the upmost energy cell (structurally
-        containing all other cells).
+    energysystem : EnergySystem object or list (experimental)
+        Object that holds the nodes of an oemof energy system graph. If a list
+        is passed, the list needs to hold EnergySystem objects and a cellular
+        structure is assumed. In this case, the first element needs to be the
+        upmost energy cell (structurally containing all other cells).
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -294,11 +294,11 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list of EnergySystem objects (experimental)
-        Object that holds the nodes of an oemof energy system graph.
-        If a list is passed, a cellular structure is assumed and the
-        first element needs to be the upmost energy cell (structurally
-        containing all other cells).
+    energysystem : EnergySystem object or list (experimental)
+        Object that holds the nodes of an oemof energy system graph. If a list
+        is passed, the list needs to hold EnergySystem objects and a cellular
+        structure is assumed. In this case, the first element needs to be the
+        upmost energy cell (structurally containing all other cells).
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -375,7 +375,9 @@ class Model(BaseModel):
         super().__init__(energysystem, **kwargs)
 
     def _set_discount_rate_with_warning(self):
-        """sets the discount rate to the standard value and raises a warning."""
+        """
+        Sets the discount rate to the standard value and raises a warning.
+        """
         self.discount_rate = 0.02
         msg = (
             f"By default, a discount_rate of {self.discount_rate} "
