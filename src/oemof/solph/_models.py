@@ -45,7 +45,7 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list of EnergySystem objects
+    energysystem : EnergySystem object or list of EnergySystem objects (experimental)
         Object that holds the nodes of an oemof energy system graph.
         If a list is passed, a cellular structure is assumed and the
         first element needs to be the upmost energy cell (structurally
@@ -294,7 +294,7 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list of EnergySystem objects
+    energysystem : EnergySystem object or list of EnergySystem objects (experimental)
         Object that holds the nodes of an oemof energy system graph.
         If a list is passed, a cellular structure is assumed and the
         first element needs to be the upmost energy cell (structurally
