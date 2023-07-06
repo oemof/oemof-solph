@@ -22,6 +22,12 @@ Balanced and unbalanced storage
 .. automodule:: storage_balanced_unbalanced.storage
 
 
+Cellular modelling
+------------------
+
+.. automodule:: cellular.cellular
+
+
 Electrical
 ----------
 

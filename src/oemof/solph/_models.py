@@ -9,6 +9,7 @@ SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Lennart Schürmann
 
 SPDX-License-Identifier: MIT
 
@@ -44,8 +45,12 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object
-        Object that holds the nodes of an oemof energy system graph
+    energysystem : EnergySystem object or (experimental) list
+        Object that holds the nodes of an oemof energy system graph.
+        Experimental: If a list is passed, the list needs to hold EnergySystem
+        objects and a cellular structure is assumed. In this case, the first
+        element needs to be the upmost energy cell (structurally containing
+        all other cells).
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -71,7 +76,7 @@ class BaseModel(po.ConcreteModel):
     name : str
         Name of the model
     es : solph.EnergySystem
-        Energy system of the model
+        Energy system of the model (upmost energy cell for cellular structures)
     meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
@@ -110,7 +115,13 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
-        self.es = energysystem
+        self.is_cellular = isinstance(energysystem, list)
+
+        if self.is_cellular:
+            self.es = energysystem[0]
+            self.ec = energysystem[1:]
+        else:
+            self.es = energysystem
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
@@ -129,6 +140,10 @@ class BaseModel(po.ConcreteModel):
         ]
 
         self.flows = self.es.flows()
+        if self.is_cellular:
+            for cell in self.ec:
+                for io, f in cell.flows().items():
+                    self.flows.update({io: f})
 
         self.solver_results = None
         self.dual = None
@@ -217,9 +232,9 @@ class BaseModel(po.ConcreteModel):
         Parameters
         ----------
         solver : string
-            solver to be used e.g. "cbc", "glpk","gurobi","cplex"
+            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
         solver_io : string
-            pyomo solver interface file format: "lp","python","nl", etc.
+            pyomo solver interface file format: "lp", "python", "nl", etc.
         \**kwargs : keyword arguments
             Possible keys can be set see below:
 
@@ -280,8 +295,12 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object
-        Object that holds the nodes of an oemof energy system graph
+    energysystem : EnergySystem object or (experimental) list
+        Object that holds the nodes of an oemof energy system graph.
+        Experimental: If a list is passed, the list needs to hold EnergySystem
+        objects and a cellular structure is assumed. In this case, the first
+        element needs to be the upmost energy cell (structurally containing
+        all other cells).
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -343,23 +362,45 @@ class Model(BaseModel):
     def __init__(self, energysystem, discount_rate=None, **kwargs):
         if discount_rate is not None:
             self.discount_rate = discount_rate
-        elif energysystem.periods is not None:
-            self.discount_rate = 0.02
-            msg = (
-                f"By default, a discount_rate of {self.discount_rate} "
-                f"is used for a multi-period model. "
-                f"If you want to use another value, "
-                f"you have to specify the `discount_rate` attribute."
-            )
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        elif (
+            not isinstance(energysystem, list)
+            and energysystem.periods is not None
+        ):
+            self._set_discount_rate_with_warning()
+        elif (
+            isinstance(energysystem, list)
+            and energysystem[0].periods is not None
+        ):
+            self._set_discount_rate_with_warning()
+        else:
+            pass
         super().__init__(energysystem, **kwargs)
+
+    def _set_discount_rate_with_warning(self):
+        """
+        Sets the discount rate to the standard value and raises a warning.
+        """
+        self.discount_rate = 0.02
+        msg = (
+            f"By default, a discount_rate of {self.discount_rate} "
+            f"is used for a multi-period model. "
+            f"If you want to use another value, "
+            f"you have to specify the `discount_rate` attribute."
+        )
+        warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
-        # set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.es.nodes])
+        self.nodes = self.es.nodes
+        if self.is_cellular:
+            # collect all nodes from the child cells
+            for cell in self.ec:
+                for node in cell.nodes:
+                    self.nodes.append(node)
+        # create set with all nodes
+        self.NODES = po.Set(initialize=[n for n in self.nodes])
 
         if self.es.timeincrement is None:
             msg = (
@@ -458,7 +499,6 @@ class Model(BaseModel):
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
-
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:
                             self.flow[o, i, p, t].setlb(
