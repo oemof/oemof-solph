@@ -100,7 +100,7 @@ Introduction
 
 The oemof.solph package is part of the
 `Open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
-This an organisational framework to bundle tools for energy (system) modelling.
+This is an organisational framework to bundle tools for energy (system) modelling.
 oemof-solph is a model generator for energy system modelling and optimisation.
 
 The package ``oemof.solph`` is very often called just ``oemof``.
@@ -115,7 +115,7 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof-solph repository to your own
-github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
+GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
 If you have questions regarding the use of oemof including oemof.solph you can visit the openmod forum (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and open a new thread if your questions hasn't been already answered.
 
@@ -138,14 +138,14 @@ Installation
 If you have a working Python installation, use pypi to install the latest version of oemof.solph.
 Python >= 3.8 is recommended. Lower versions may work but are not tested.
 
-We highly reccomend to use virtual environments.
+We highly recommend to use virtual environments.
 Please refer to the documentation of your Python distribution (e.g. Anaconda,
 Micromamba, or the version of Python that came with your Linux installation)
 to learn how to set up and use virtual environments.
 
 ::
 
-    (venv )pip install oemof.solph
+    (venv) pip install oemof.solph
 
 If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
@@ -153,7 +153,7 @@ If you want to use the latest features, you might want to install the **develope
 
 
 For running an oemof-solph optimisation model, you need to install a solver.
-Following you will find guidelines for the installation process for different operation systems.
+Following you will find guidelines for the installation process for different operating systems.
 
 .. _windows_solver_label:
 .. _linux_solver_label:
@@ -162,7 +162,7 @@ Installing a solver
 -------------------
 
 There are various commercial and open-source solvers that can be used with oemof.
-There are two common OpenSource solvers available (CBC, GLPK), while oemof recommends CBC (Coin-or branch and cut).
+There are two common Open-Source solvers available (CBC, GLPK), while oemof recommends CBC (Coin-or branch and cut).
 But sometimes its worth comparing the results of different solvers.
 Other commercial solvers like Gurobi or Cplex can be used as well.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
@@ -197,7 +197,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 
@@ -262,13 +262,13 @@ The combination of specific modules (often including other packages) is called a
 application (app). For example, it can depict a concrete energy system model.
 You can find a large variety of helpful examples e.g. in the example directory,
 e.g. `for the latest development version at GitHub <https://github.com/oemof/oemof-solph/tree/dev/examples>`_.
-The examples show optimisations of different energy systems and are supposed
+The examples show optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.
 The repository has sections for each major release.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
-or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact information).
 
 License
 =======

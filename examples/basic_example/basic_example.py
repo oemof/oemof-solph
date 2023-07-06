@@ -33,7 +33,7 @@ Code
 
 Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
 
-.. dropdown:: Click to display to code section
+.. dropdown:: Click to display code
 
     .. literalinclude:: /../examples/basic_example/basic_example.py
         :language: python
