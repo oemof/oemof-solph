@@ -45,11 +45,12 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list (experimental)
-        Object that holds the nodes of an oemof energy system graph. If a list
-        is passed, the list needs to hold EnergySystem objects and a cellular
-        structure is assumed. In this case, the first element needs to be the
-        upmost energy cell (structurally containing all other cells).
+    energysystem : EnergySystem object or (experimental) list
+        Object that holds the nodes of an oemof energy system graph.
+        Experimental: If a list is passed, the list needs to hold EnergySystem
+        objects and a cellular structure is assumed. In this case, the first
+        element needs to be the upmost energy cell (structurally containing
+        all other cells).
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -294,11 +295,12 @@ class Model(BaseModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or list (experimental)
-        Object that holds the nodes of an oemof energy system graph. If a list
-        is passed, the list needs to hold EnergySystem objects and a cellular
-        structure is assumed. In this case, the first element needs to be the
-        upmost energy cell (structurally containing all other cells).
+    energysystem : EnergySystem object or (experimental) list
+        Object that holds the nodes of an oemof energy system graph.
+        Experimental: If a list is passed, the list needs to hold EnergySystem
+        objects and a cellular structure is assumed. In this case, the first
+        element needs to be the upmost energy cell (structurally containing
+        all other cells).
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
