@@ -135,16 +135,22 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 Installation
 ============
 
-If you have a working Python3 environment, use pypi to install the latest version of oemof.solph. Python >= 3.8 is recommended. Lower versions may work but are not tested.
 
+If you have a working Python installation, use pypi to install the latest version of oemof.solph.
+Python >= 3.8 is recommended. Lower versions may work but are not tested.
+
+We highly reccomend to use virtual environments.
+Please refer to the documentation of your Python distribution (e.g. Anaconda,
+Micromamba, or the version of Python that came with your Linux installation)
+to learn how to set up and use virtual environments.
 
 ::
 
-    pip install oemof.solph
+    (venv )pip install oemof.solph
 
 If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
-    pip install https://github.com/oemof/oemof-solph/archive/dev.zip
+    (venv) pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
 
 For running an oemof-solph optimisation model, you need to install a solver.
@@ -196,8 +202,8 @@ Provided you are using a Linux or MacOS, the CBC-solver can also be installed in
 
 .. code:: console
 
-    conda install -c conda-forge coincbc
-    pip install oemof.solph
+    (venv) conda install -c conda-forge coincbc
+    (venv) pip install oemof.solph
 
 
 .. _check_installation_label:
@@ -210,7 +216,7 @@ in your virtual environment:
 
 .. code:: console
 
-  oemof_installation_test
+  (venv) oemof_installation_test
 
 If the installation was successful, you will receive something like this:
 
