@@ -253,15 +253,17 @@ To allow citing specific versions, we use the zenodo project to get a DOI for ea
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an
-application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-examples>`_ on github to download or clone.
+The combination of specific modules (often including other packages) is called an
+application (app). For example, it can depict a concrete energy system model.
+You can find a large variety of helpful examples e.g. in the example directory,
+e.g. `for the latest development version at GitHub <https://github.com/oemof/oemof-solph/tree/dev/examples>`_.
 The examples show optimisations of different energy systems and are supposed
 to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.
 The repository has sections for each major release.
 
-You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
+or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
 
 License
 =======
