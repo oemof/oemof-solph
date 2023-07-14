@@ -30,20 +30,17 @@ The following energy system is modeled:
 
 Code
 ----
-
 Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
 
 .. dropdown:: Click to display code
 
     .. literalinclude:: /../examples/basic_example/basic_example.py
         :language: python
-        :lines: 58-301
+        :lines: 55-298
 
 Data
 ----
-
 Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
-
 
 Installation requirements
 -------------------------

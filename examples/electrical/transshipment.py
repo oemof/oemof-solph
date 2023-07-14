@@ -6,6 +6,15 @@ General description:
 This script shows how use the custom component `solph.custom.Link` to build
 a simple transshipment model.
 
+Code
+----
+Download source code: :download:`transshipment.py </../examples/electrical/transshipment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/electrical/transshipment.py
+        :language: python
+        :lines: 36-208
 
 Installation requirements
 -------------------------

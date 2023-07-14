@@ -5,6 +5,16 @@ General description
 -------------------
 Example that shows how to add an emission constraint in a model.
 
+Code
+----
+Download source code: :download:`emission_constraint.py </../examples/emission_constraint/emission_constraint.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/emission_constraint/emission_constraint.py
+        :language: python
+        :lines: 30-127
+
 Installation requirements
 -------------------------
 

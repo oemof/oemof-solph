@@ -7,6 +7,16 @@ General description
 A basic example to show how to get the dual variables from the system. Try
 to understand the plot.
 
+Code
+----
+Download source code: :download:`dual_variable_example.py </../examples/dual_variable_example/dual_variable_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/dual_variable_example/dual_variable_example.py
+        :language: python
+        :lines: 32-295
+
 
 Installation requirements
 -------------------------
@@ -19,27 +29,26 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
+###########################################################################
+# imports
+###########################################################################
+
+import pandas as pd
+from matplotlib import pyplot as plt
+from oemof.tools import logger
+
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import flows
+from oemof.solph import processing
 
 
 def main():
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
-
-    ###########################################################################
-    # imports
-    ###########################################################################
-
-    import pandas as pd
-    from matplotlib import pyplot as plt
-    from oemof.tools import logger
-
-    from oemof.solph import EnergySystem
-    from oemof.solph import Model
-    from oemof.solph import buses
-    from oemof.solph import components as cmp
-    from oemof.solph import flows
-    from oemof.solph import processing
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 48

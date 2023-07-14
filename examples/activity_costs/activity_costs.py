@@ -16,6 +16,15 @@ Notice that activity_costs is an attribute to NonConvex.
 This is because it relies on the activity status of a component
 which is only available for nonconvex flows.
 
+Code
+----
+Download source code: :download:`activity_costs.py </../examples/activity_costs/activity_costs.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/activity_costs/activity_costs.py
+        :language: python
+        :lines: 41-116
 
 Installation requirements
 -------------------------

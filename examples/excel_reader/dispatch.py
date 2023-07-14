@@ -9,11 +9,21 @@ Following the example one can customise the excel reader to ones own needs.
 
 The pandas package supports the '.xls' and the '.xlsx' format but one can
 create read and adept the files with open source software such as libreoffice,
-openoffice, gnumeric,...
+openoffice, gnumeric, ...
+
+Code
+----
+Download source code: :download:`dispatch.py </../examples/excel_reader/dispatch.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/excel_reader/dispatch.py
+        :language: python
+        :lines: 54-434
 
 Data
 ----
-scenario.xlsx
+Download data: :download:`scenario.xlsx </../examples/excel_reader/scenario.xlsx>`
 
 Installation requirements
 -------------------------

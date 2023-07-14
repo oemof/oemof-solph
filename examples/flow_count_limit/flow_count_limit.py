@@ -6,10 +6,18 @@ General description
 
 Something...
 
+Code
+----
+Download source code: :download:`flow_count_limit.py </../examples/flow_count_limit/flow_count_limit.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flow_count_limit/flow_count_limit.py
+        :language: python
+        :lines: 29-149
 
 Installation requirements
 -------------------------
-
 This example requires oemof.solph (v0.5.x), install by:
 
     pip install oemof.solph[examples]
