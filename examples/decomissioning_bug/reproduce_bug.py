@@ -66,7 +66,7 @@ storage = solph.components.GenericStorage(
 demand = solph.components.Sink(
     label="demand",
     inputs={bel: solph.Flow(fix=df_profiles["demand"],
-                            nominal_value=1000)},
+                            nominal_value=1e5)},
 )
 
 pv = solph.components.Source(
