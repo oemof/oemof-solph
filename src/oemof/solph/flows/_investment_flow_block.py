@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
+import numpy as np
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core import Binary
@@ -485,27 +486,77 @@ class InvestmentFlowBlock(ScalarBlock):
                             "is missing.".format((i, o))
                         )
                         raise ValueError(msg)
+
+                    # get the period matrix describing the temporal distance
+                    # between all period combinations. Row indexes indicating
+                    # the investment period, column indexes the decommissioning
+                    # period.
+                    periods_matrix = m.es.periods_matrix
+                    # matrix = np.where(matrix == 0, np.nan, matrix)
+
+                    # get the index of the minimum value in each row greater
+                    # equal than the lifetime. This value equals the
+                    # decommissioning period if not zero. The index of this
+                    # value represents the investment period.
+                    decomm_periods = np.argmin(
+                        np.where(
+                            (periods_matrix >= lifetime),
+                            periods_matrix,
+                            np.inf,
+                        ),
+                        axis=1,
+                    )
+
+                    # first period doesn't have any decommissioning
+                    expr = self.old_end[i, o, 0] == 0
+                    self.old_rule_end.add((i, o, 0), expr)
+
+                    # all periods not in decomm_periods have no decommissioning
                     for p in m.PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
+                        if p not in decomm_periods and p != 0:
                             expr = self.old_end[i, o, p] == 0
                             self.old_rule_end.add((i, o, p), expr)
-                        elif lifetime <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in enumerate(m.es.periods_years):
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            expr = (
-                                self.old_end[i, o, p]
-                                == self.invest[i, o, comm_p]
-                            )
-                            self.old_rule_end.add((i, o, p), expr)
+
+                    # multiple invests can decommission in the same period
+                    # but only sequential ones, thus a memory is introduced and
+                    # constraints are added to equation one iteration later.
+                    last_decomm_p = np.nan
+                    # loop over invest periods (values are decomm_periods)
+                    for invest_p, decomm_p in enumerate(decomm_periods):
+                        # Add constraint of iteration before
+                        # (skipped in first iteration)
+                        if (
+                            (decomm_p != last_decomm_p)
+                            and (last_decomm_p is not np.nan)
+                        ):
+                            #
+                            expr = self.old_end[i, o, last_decomm_p] == expr
+                            self.old_rule_end.add((i, o, last_decomm_p), expr)
+
+                        # no decommissioning if decomm_p is zero
+                        if decomm_p == 0:
+                            # overwrite decomm_p memory with nan to avoid
+                            # chaining invest periods in next iteration
+                            last_decomm_p = 0
+
+                        # if decomm_p is the same as the last one chain invest
+                        # period
+                        elif decomm_p == last_decomm_p:
+                            expr += self.invest[i, o, invest_p]
+                            # overwrite decomm_p memory
+                            last_decomm_p = decomm_p
+
+                        # if decomm_p is not zero, not the same as the last one,
+                        # and it's not the first period
                         else:
-                            expr = self.old_end[i, o, p] == 0
-                            self.old_rule_end.add((i, o, p), expr)
+                            expr = self.invest[i, o, invest_p]
+                            # overwrite decomm_p memory
+                            last_decomm_p = decomm_p
+
+                    if last_decomm_p != 0:
+                        # Add constraint of last iteration
+                        expr = self.old_end[i, o, last_decomm_p] == expr
+                        self.old_rule_end.add((i, o, last_decomm_p), expr)
 
             self.old_rule_end = Constraint(
                 self.INVESTFLOWS, m.PERIODS, noruleinit=True
