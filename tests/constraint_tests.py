@@ -2006,8 +2006,8 @@ class TestsConstraint:
             {
                 "demand": [7e-05] * len(timeindex),
                 "pv-profile": ([0.0] * 8 + [0.1] * 4) * len(periods),
-                "wind-profile": ([0.1] * 5 + [0.2] * 4 + [0.1] * 3) * len(
-                    periods),
+                "wind-profile": ([0.1] * 5 + [0.2] * 4 + [0.1] * 3)
+                * len(periods),
             },
             index=timeindex,
         )
@@ -2061,8 +2061,9 @@ class TestsConstraint:
 
         demand = solph.components.Sink(
             label="demand",
-            inputs={bel: solph.Flow(fix=df_profiles["demand"],
-                                    nominal_value=1e5)},
+            inputs={
+                bel: solph.Flow(fix=df_profiles["demand"], nominal_value=1e5)
+            },
         )
 
         pv = solph.components.Source(

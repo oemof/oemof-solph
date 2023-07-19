@@ -160,7 +160,6 @@ def test_multi_period_varying_period_length(lp=False):
     if lp:
         return om
     else:
-
         # Solve the optimization problem
         om.solve(solver="cbc")
 
@@ -172,7 +171,9 @@ def test_multi_period_varying_period_length(lp=False):
 
         # Investment results for
         # storage capacity investment
-        df_storage_invest_mwh = result_views[("storage", "None")]["period_scalars"]
+        df_storage_invest_mwh = result_views[("storage", "None")][
+            "period_scalars"
+        ]
         # capacity investment
         df_storage_invest_mw = result_views[("storage", "electricity")][
             "period_scalars"
