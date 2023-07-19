@@ -244,9 +244,9 @@ class Flow(on.Edge):
                     the_attr = eval(attr)
                 if the_attr is not None:
                     raise AttributeError(
-                        "If {} is set in a flow (except InvestmentFlow), "
+                        f"If {attr} is set in a flow (except InvestmentFlow), "
                         "nominal_value must be set as well.\n"
-                        "Otherwise, it won't have any effect.".format(attr)
+                        "Otherwise, it won't have any effect."
                     )
         # minimum will be set even without nominal limit
 
