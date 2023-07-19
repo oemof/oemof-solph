@@ -173,6 +173,7 @@ class EnergySystem(es.EnergySystem):
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.periods = periods
         self._extract_periods_years()
+        self._extract_periods_matrix()
 
     def _extract_periods_years(self):
         """Map simulation years to the respective period based on time indices
@@ -192,6 +193,25 @@ class EnergySystem(es.EnergySystem):
 
             self.periods_years = periods_years
 
+    def _extract_periods_matrix(self):
+        """Determines a matrix describing the temporal distance to each period.
+        Rows represent investment/commissioning periods, columns represent
+        decommissioning periods. The values describe the temporal distance
+        between each investment period to each decommissioning period.
+
+        Returns
+        -------
+        period_distance_matrix: np.array
+
+        """
+        periods_matrix =[]
+        if self.periods is not None:
+            period_years = np.array(self.periods_years)
+            for k, v in enumerate(period_years):
+                row = period_years - v
+                row = np.where(row < 0, 0, row)
+                periods_matrix.append(row)
+            self.periods_matrix = np.array(periods_matrix)
 
 def create_time_index(
     year: int = None,
