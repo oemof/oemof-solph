@@ -204,7 +204,7 @@ class EnergySystem(es.EnergySystem):
         period_distance_matrix: np.array
 
         """
-        periods_matrix =[]
+        periods_matrix = []
         if self.periods is not None:
             period_years = np.array(self.periods_years)
             for k, v in enumerate(period_years):
@@ -212,6 +212,7 @@ class EnergySystem(es.EnergySystem):
                 row = np.where(row < 0, 0, row)
                 periods_matrix.append(row)
             self.periods_matrix = np.array(periods_matrix)
+
 
 def create_time_index(
     year: int = None,

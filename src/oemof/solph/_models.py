@@ -26,9 +26,8 @@ from pyomo.opt import SolverFactory
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._transformer import TransformerBlock
-from oemof.solph.flows._invest_non_convex_flow_block import (
-    InvestNonConvexFlowBlock,
-)
+from oemof.solph.flows._invest_non_convex_flow_block import \
+    InvestNonConvexFlowBlock
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock

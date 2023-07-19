@@ -36,8 +36,9 @@ __license__ = "MIT"
 
 import numpy as np
 import pandas as pd
-from oemof import solph
 from oemof.tools import economics
+
+from oemof import solph
 
 try:
     import matplotlib.pyplot as plt

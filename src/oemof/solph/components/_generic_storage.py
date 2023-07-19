@@ -1271,9 +1271,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     for invest_p, decomm_p in enumerate(decomm_periods):
                         # Add constraint of iteration before
                         # (skipped in first iteration)
-                        if (
-                            (decomm_p != last_decomm_p)
-                            and (last_decomm_p is not np.nan)
+                        if (decomm_p != last_decomm_p) and (
+                            last_decomm_p is not np.nan
                         ):
                             #
                             expr = self.old_end[n, last_decomm_p] == expr
