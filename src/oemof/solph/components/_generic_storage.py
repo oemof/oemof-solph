@@ -1234,16 +1234,14 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         )
                         raise ValueError(msg)
                     # get the period matrix describing the temporal distance
-                    # between all period combinations. Row indexes indicating
-                    # the investment period, column indexes the decommissioning
-                    # period.
+                    # between all period combinations.
                     periods_matrix = m.es.periods_matrix
-                    # matrix = np.where(matrix == 0, np.nan, matrix)
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
                     # decommissioning period if not zero. The index of this
-                    # value represents the investment period.
+                    # value represents the investment period. If np.where
+                    # condition is not met in any row, min value will be zero
                     decomm_periods = np.argmin(
                         np.where(
                             (periods_matrix >= lifetime),
@@ -1253,11 +1251,12 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         axis=1,
                     )
 
-                    # first period doesn't have any decommissioning
+                    # no decommissioning in first period
                     expr = self.old_end[n, 0] == 0
                     self.old_rule_end.add((n, 0), expr)
 
                     # all periods not in decomm_periods have no decommissioning
+                    # zero is excluded
                     for p in m.PERIODS:
                         if p not in decomm_periods and p != 0:
                             expr = self.old_end[n, p] == 0
@@ -1269,18 +1268,18 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     last_decomm_p = np.nan
                     # loop over invest periods (values are decomm_periods)
                     for invest_p, decomm_p in enumerate(decomm_periods):
+
                         # Add constraint of iteration before
-                        # (skipped in first iteration)
+                        # (skipped in first iteration by last_decomm_p = nan)
                         if (decomm_p != last_decomm_p) and (
                             last_decomm_p is not np.nan
                         ):
-                            #
                             expr = self.old_end[n, last_decomm_p] == expr
                             self.old_rule_end.add((n, last_decomm_p), expr)
 
                         # no decommissioning if decomm_p is zero
                         if decomm_p == 0:
-                            # overwrite decomm_p memory with nan to avoid
+                            # overwrite decomm_p memory with zero to avoid
                             # chaining invest periods in next iteration
                             last_decomm_p = 0
 
@@ -1298,8 +1297,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                             # overwrite decomm_p memory
                             last_decomm_p = decomm_p
 
+                    # Add constraint of very last iteration
                     if last_decomm_p != 0:
-                        # Add constraint of last iteration
                         expr = self.old_end[n, last_decomm_p] == expr
                         self.old_rule_end.add((n, last_decomm_p), expr)
 
