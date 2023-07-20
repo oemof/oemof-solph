@@ -493,8 +493,8 @@ class InvestmentFlowBlock(ScalarBlock):
                             "You have to specify a lifetime "
                             "for a Flow with an associated "
                             "investment object in "
-                            "a multi-period model! Value for {} "
-                            "is missing.".format((i, o))
+                            f"a multi-period model! Value for {(i, o)} "
+                            "is missing."
                         )
                         raise ValueError(msg)
 

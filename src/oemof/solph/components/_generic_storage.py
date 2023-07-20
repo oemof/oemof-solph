@@ -1241,7 +1241,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                             "for a Flow going into or out of "
                             "a GenericStorage unit "
                             "in a multi-period model!"
-                            " Value for {} is missing.".format(n)
+                            f" Value for {n} is missing."
                         )
                         raise ValueError(msg)
                     # get the period matrix describing the temporal distance
