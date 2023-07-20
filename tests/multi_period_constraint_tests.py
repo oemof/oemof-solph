@@ -1996,8 +1996,7 @@ def test_multi_period_varying_period_length(self):
     years = [2000, 2020, 2035, 2045, 2050, 2060, 2075, 2095]
 
     # Create a list of timeindex for each period
-    periods = [pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in
-               years]
+    periods = [pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years]
 
     # Create an overall timeindex
     timeindex = pd.concat(
@@ -2058,9 +2057,93 @@ def test_multi_period_varying_period_length(self):
             interest_rate=0.02,
         ),
     )
+    # Create a DSM sink with DIW approach
+    sinkdsm_diw = solph.components.experimental.SinkDSM(
+        label="demand_dsm_diw",
+        inputs={bel: solph.flows.Flow()},
+        demand=[1] * len(timeindex),
+        capacity_up=[0.5] * len(timeindex),
+        capacity_down=[0.5] * len(timeindex),
+        approach="DIW",
+        max_demand=[1] * len(timeindex),
+        delay_time=1,
+        cost_dsm_down_shift=1,
+        cost_dsm_up=1,
+        cost_dsm_down_shed=100,
+        shed_eligibility=True,
+        recovery_time_shed=2,
+        shed_time=2,
+        investment=solph.Investment(
+            ep_costs=100,
+            minimum=33,
+            maximum=100,
+            lifetime=20,
+            fixed_costs=20,
+            overall_maximum=1000,
+            overall_minimum=5,
+        ),
+    )
+
+    # Create a DSM sink with DLR approach
+    sinkdsm_dlr = solph.components.experimental.SinkDSM(
+        label="demand_dsm_dlr",
+        inputs={bel: solph.flows.Flow()},
+        demand=[1] * len(timeindex),
+        capacity_up=[0.5] * len(timeindex),
+        capacity_down=[0.5] * len(timeindex),
+        approach="DLR",
+        max_demand=[1] * len(timeindex),
+        delay_time=2,
+        shift_time=1,
+        cost_dsm_down_shift=1,
+        cost_dsm_up=1,
+        cost_dsm_down_shed=100,
+        shed_eligibility=True,
+        recovery_time_shed=2,
+        shed_time=2,
+        n_yearLimit_shed=50,
+        investment=solph.Investment(
+            ep_costs=100,
+            minimum=33,
+            maximum=100,
+            lifetime=20,
+            fixed_costs=20,
+            overall_maximum=1000,
+            overall_minimum=5,
+        ),
+    )
+
+    # Create a DSM sink with oemof approach
+    sinkdsm_oemof = solph.components.experimental.SinkDSM(
+        label="demand_dsm_oemof",
+        inputs={bel: solph.flows.Flow()},
+        demand=[1] * len(timeindex),
+        capacity_up=[0.5] * len(timeindex),
+        capacity_down=[0.5] * len(timeindex),
+        approach="oemof",
+        max_demand=[1] * len(timeindex),
+        shift_interval=2,
+        cost_dsm_down_shift=1,
+        cost_dsm_up=1,
+        cost_dsm_down_shed=100,
+        shed_eligibility=True,
+        recovery_time_shed=2,
+        shed_time=2,
+        investment=solph.Investment(
+            ep_costs=100,
+            existing=50,
+            minimum=33,
+            maximum=100,
+            age=1,
+            lifetime=20,
+            fixed_costs=20,
+            overall_maximum=1000,
+            overall_minimum=5,
+        ),
+    )
 
     # Add components to the energy system
-    es.add(bel, storage)
+    es.add(bel, storage, sinkdsm_diw, sinkdsm_dlr, sinkdsm_oemof)
 
     # Create an optimization problem
     om = solph.Model(es)
