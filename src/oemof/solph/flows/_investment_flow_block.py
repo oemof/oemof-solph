@@ -522,7 +522,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     last_decomm_p = np.nan
                     # loop over invest periods (values are decomm_periods)
                     for invest_p, decomm_p in enumerate(decomm_periods):
-
                         # Add constraint of iteration before
                         # (skipped in first iteration by last_decomm_p = nan)
                         if (decomm_p != last_decomm_p) and (
