@@ -1988,7 +1988,6 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, source1, source2, source3)
         self.compare_lp_files("fixed_costs_sources.lp")
 
-
     def test_multi_period_varying_period_length(self):
         """Test multi period with varying period length"""
 
@@ -1996,7 +1995,9 @@ class TestsMultiPeriodConstraint:
         years = [2000, 2020, 2035, 2045, 2050, 2060, 2075, 2095]
 
         # Create a list of timeindex for each period
-        periods = [pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years]
+        periods = [
+            pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years
+        ]
 
         # Create an overall timeindex
         timeindex = pd.concat(
