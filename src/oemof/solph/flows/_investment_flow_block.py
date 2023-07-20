@@ -473,7 +473,18 @@ class InvestmentFlowBlock(ScalarBlock):
 
             def _old_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime
+                capacity to be decommissioned due to reaching its lifetime.
+                Investment periods and decommissioning periods are linked within
+                the constraint. The respective decommissioning period is
+                determined for every investment period based on the components
+                lifetime and a matrix describing its age of each endogenous
+                investment. Decommissioning can only occur at the beginning of
+                each period.
+
+                Note
+                ----
+                For further information on the implementation check
+                PR#957 https://github.com/oemof/oemof-solph/pull/957
                 """
                 for i, o in self.INVESTFLOWS:
                     lifetime = m.flows[i, o].investment.lifetime
