@@ -207,7 +207,7 @@ class EnergySystem(es.EnergySystem):
         periods_matrix = []
         if self.periods is not None:
             period_years = np.array(self.periods_years)
-            for k, v in enumerate(period_years):
+            for v in period_years:
                 row = period_years - v
                 row = np.where(row < 0, 0, row)
                 periods_matrix.append(row)
