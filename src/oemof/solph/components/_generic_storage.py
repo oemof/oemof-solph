@@ -1221,7 +1221,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             def _old_storage_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
                 capacity to be decommissioned due to reaching its lifetime.
-                Investment periods and decommissioning periods are linked within
+                Investment and decommissioning periods are linked within
                 the constraint. The respective decommissioning period is
                 determined for every investment period based on the components
                 lifetime and a matrix describing its age of each endogenous
@@ -1300,7 +1300,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                             # overwrite decomm_p memory
                             last_decomm_p = decomm_p
 
-                        # if decomm_p is not zero, not the same as the last one,
+                        # if decomm_p is not zero, not the same as the last one
                         # and it's not the first period
                         else:
                             expr = self.invest[n, invest_p]
