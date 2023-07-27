@@ -17,9 +17,14 @@ from itertools import repeat
 
 
 def sequence(iterable_or_scalar):
-    """Tests if an object is iterable (except string) or scalar and returns
-    the original sequence if object is an iterable and an 'emulated'
-    sequence object of class _Sequence if object is a scalar or string.
+    """This function checks whether an object is a mutable or immutable
+    iterable (excluding strings) or a scalar. If the object is a mutable
+    iterable, it returns the original sequence. For a scalar or string object,
+    it returns an 'emulated' sequence object of the class _Sequence with a
+    default value. If the object is an immutable iterable, it returns an
+    'emulated' sequence object of class _Sequence with periodic values, and
+    the total length is determined by the first value of the iterable.
+
 
     Parameters
     ----------
@@ -39,11 +44,34 @@ def sequence(iterable_or_scalar):
     >>> print(x)
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
+    >>> x = sequence((3,0,1,2))
+    >>> print(x)
+    []
+    >>> x[1]
+    10
+
+    >>> x[9]
+    10
+    >>> print(x)
+    [0, 0, 0, 1, 1, 1, 2, 2, 2]
+
+
     """
     if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
         iterable_or_scalar, str
     ):
-        return iterable_or_scalar
+        if isinstance(iterable_or_scalar, abc.MutableSequence):
+            return iterable_or_scalar
+        else:
+            if iterable_or_scalar[0] % len(iterable_or_scalar[1:]) != 0:
+                raise KeyError(
+                    "The first value must be a multiple of the "
+                    "length of the remaining values!"
+                )
+            return _Sequence(
+                highest_index=iterable_or_scalar[0],
+                period_values=iterable_or_scalar[1:],
+            )
     else:
         return _Sequence(default=iterable_or_scalar)
 
