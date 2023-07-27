@@ -60,8 +60,10 @@ def sequence(iterable_or_scalar):
         iterable_or_scalar, str
     ):
         if isinstance(iterable_or_scalar, abc.MutableMapping):
-            if iterable_or_scalar["len"] % len(
-                iterable_or_scalar["values"]) != 0:
+            if (
+                iterable_or_scalar["len"] % len(iterable_or_scalar["values"])
+                != 0
+            ):
                 raise KeyError(
                     "The length must be a multiple of the numer of the values!"
                 )
