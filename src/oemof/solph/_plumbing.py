@@ -49,12 +49,21 @@ def sequence(iterable_or_scalar):
 
 
 class _Sequence(UserList):
-    """Emulates a list whose length is not known in advance.
+    """Emulates a list whose length is not known in advance if default
+    is passed. If period_values and highest_index are passed, the length
+    is known in advance and the sequence is periodic. The periods will have
+    the values passed in period_values and the lengths of the periods are equal
+    and sum up to the value of highest_index.
 
     Parameters
     ----------
     source:
-    default:
+    default: int or float or string
+        Default value for the sequence
+    period_values: iterable
+        Values for the periods of the sequence
+    highest_index: int
+        The highest index of the sequence (default: -1)
 
 
     Examples
@@ -73,21 +82,61 @@ class _Sequence(UserList):
     >>> s[8]
     42
 
+    >>> s = _Sequence(period_values=(0,1,2), highest_index=9)
+    >>> len(s)
+    9
+    >>> s[1]
+    0
+    >>> s[4]
+    1
+    >>> s[7]
+    2
+    >>> s
+    [0, 0, 0, 1, 1, 1, 2, 2, 2]
+
 
     """
 
-    def __init__(self, *args, **kwargs):
-        self.default = kwargs["default"]
+    def __init__(
+        self,
+        *args,
+        default=None,
+        period_values=None,
+        highest_index=-1,
+        **kwargs,
+    ):
+        if all([default is not None, period_values is not None]):
+            raise ValueError("Only default or periods must be given.")
+        self.default = default
+        self.period_values = period_values
         self.default_changed = False
-        self.highest_index = -1
+        self.highest_index = highest_index
+        self.period_length = (
+            int(highest_index / len(period_values)) if period_values else None
+        )
         super().__init__(*args)
 
+    def _get_period_(self, key):
+        period = key // self.period_length
+        return period
+
     def __getitem__(self, key):
-        self.highest_index = max(self.highest_index, key)
-        return self.default
+        if self.period_values:
+            period = self._get_period_(key)
+            return self.period_values[period]
+        else:
+            self.highest_index = max(self.highest_index, key)
+            return self.default
 
     def __init_list(self):
-        self.data = [self.default] * (self.highest_index + 1)
+        if self.period_values:
+            self.data = [
+                value
+                for value in self.period_values
+                for _ in range(self.highest_index)
+            ]
+        else:
+            self.data = [self.default] * (self.highest_index + 1)
 
     def __repr__(self):
         return str([i for i in self])
@@ -96,4 +145,13 @@ class _Sequence(UserList):
         return max(len(self.data), self.highest_index + 1)
 
     def __iter__(self):
-        return repeat(self.default, self.highest_index + 1)
+        if self.period_values:
+            return iter(
+                [
+                    value
+                    for value in self.period_values
+                    for _ in range(self.highest_index)
+                ]
+            )
+        else:
+            return repeat(self.default, self.highest_index + 1)
