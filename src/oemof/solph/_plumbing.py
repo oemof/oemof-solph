@@ -44,9 +44,9 @@ def sequence(iterable_or_scalar):
     >>> print(x)
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
-    >>> x = sequence({"len":9,"values":[1,2,3]})
+    >>> x = sequence({"len":9,"values":[0,1,2]})
     >>> print(x)
-    []
+    [0, 0, 0, 1, 1, 1, 2, 2, 2]
     >>> x[1]
     0
     >>> x[4]
