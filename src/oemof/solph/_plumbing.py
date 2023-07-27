@@ -44,7 +44,7 @@ def sequence(iterable_or_scalar):
     >>> print(x)
     [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
-    >>> x = sequence((3,0,1,2))
+    >>> x = sequence({"len":9,"values":[1,2,3]})
     >>> print(x)
     []
     >>> x[1]
@@ -59,18 +59,18 @@ def sequence(iterable_or_scalar):
     if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
         iterable_or_scalar, str
     ):
-        if isinstance(iterable_or_scalar, abc.MutableSequence):
-            return iterable_or_scalar
-        else:
-            if iterable_or_scalar[0] % len(iterable_or_scalar[1:]) != 0:
+        if isinstance(iterable_or_scalar, abc.MutableMapping):
+            if iterable_or_scalar["len"] % len(
+                iterable_or_scalar["values"]) != 0:
                 raise KeyError(
-                    "The first value must be a multiple of the "
-                    "length of the remaining values!"
+                    "The length must be a multiple of the numer of the values!"
                 )
             return _Sequence(
-                highest_index=iterable_or_scalar[0],
-                period_values=iterable_or_scalar[1:],
+                highest_index=iterable_or_scalar.get("len"),
+                period_values=iterable_or_scalar.get("values"),
             )
+        else:
+            return iterable_or_scalar
     else:
         return _Sequence(default=iterable_or_scalar)
 
@@ -109,7 +109,7 @@ class _Sequence(UserList):
     >>> s[8]
     42
 
-    >>> s = _Sequence(period_values=(0,1,2), highest_index=9)
+    >>> s = _Sequence(period_values=[0,1,2], highest_index=9)
     >>> len(s)
     9
     >>> s[1]
