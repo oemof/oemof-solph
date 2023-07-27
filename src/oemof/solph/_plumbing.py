@@ -48,12 +48,11 @@ def sequence(iterable_or_scalar):
     >>> print(x)
     []
     >>> x[1]
-    10
-
-    >>> x[9]
-    10
-    >>> print(x)
-    [0, 0, 0, 1, 1, 1, 2, 2, 2]
+    0
+    >>> x[4]
+    1
+    >>> x[7]
+    2
 
 
     """
