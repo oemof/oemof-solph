@@ -162,7 +162,7 @@ class _Sequence(UserList):
             self.data = [
                 value
                 for value in self.period_values
-                for _ in range(self.highest_index)
+                for _ in range(self.period_length)
             ]
         else:
             self.data = [self.default] * (self.highest_index + 1)
@@ -179,7 +179,7 @@ class _Sequence(UserList):
                 [
                     value
                     for value in self.period_values
-                    for _ in range(self.highest_index)
+                    for _ in range(self.period_length)
                 ]
             )
         else:
