@@ -68,7 +68,8 @@ def sequence(iterable_or_scalar):
                 != 0
             ):
                 raise KeyError(
-                    "The length must be a multiple of the numer of the values!"
+                    "The length must be a multiple of the number of periodic"
+                    " values!"
                 )
             return _Sequence(
                 highest_index=iterable_or_scalar.get("len"),
