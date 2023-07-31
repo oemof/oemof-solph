@@ -17,11 +17,14 @@ from itertools import repeat
 
 
 def sequence(iterable_or_scalar):
-    """This function checks whether an object is a mutable or immutable
-    iterable (excluding strings) or a scalar. If the object is a mutable
+    """
+    This function checks whether an object is a mutable or immutable
+    iterable (excluding strings) or a scalar.
+    If the object is a mutable
     iterable, it returns the original sequence. For a scalar or string object,
     it returns an 'emulated' sequence object of the class _Sequence with a
-    default value. If the object is an immutable iterable, it returns an
+    default value.
+    If the object is an immutable iterable, it returns an
     'emulated' sequence object of class _Sequence with periodic values, and
     the total length is determined by the first value of the iterable.
 
