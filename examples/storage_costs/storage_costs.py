@@ -29,7 +29,6 @@ def storage_costs_example():
     idx = pd.date_range("1/1/2023", periods=13, freq="H")
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
-    
     # power bus
     bel = solph.Bus(label="bel")
     es.add(bel)
@@ -53,7 +52,7 @@ def storage_costs_example():
     )
 
     # Electric Storage
-    battery =solph.components.GenericStorage(
+    battery = solph.components.GenericStorage(
         label="battery",
         nominal_storage_capacity=100,  # no effective limit
         storage_costs=-1,  # revenue for storing of 1/4 of the buying costs
@@ -74,7 +73,12 @@ def storage_costs_example():
     results = solph.processing.results(model)
 
     plt.plot(results[(battery, None)]["sequences"], "r--", label="content")
-    plt.step(results[(bel, battery)]["sequences"], "b-", label="inflow", where="post")
+    plt.step(
+        results[(bel, battery)]["sequences"],
+        "b-",
+        label="inflow",
+        where="post",
+    )
     plt.legend()
     plt.grid()
 
