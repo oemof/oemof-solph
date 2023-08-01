@@ -2,6 +2,10 @@
 
 min 
 objective:
++4000.0 ONE_VAR_CONSTANT
++0.1 GenericStorageBlock_storage_content(storage_no_invest_1)
++0.1 GenericStorageBlock_storage_content(storage_no_invest_2)
++0.1 GenericStorageBlock_storage_content(storage_no_invest_3)
 +56 flow(electricityBus_storage_no_invest_0_0)
 +56 flow(electricityBus_storage_no_invest_0_1)
 +56 flow(electricityBus_storage_no_invest_0_2)
@@ -51,6 +55,7 @@ c_e_GenericStorageBlock_balanced_cstr(storage_no_invest)_:
 = 40000.0
 
 bounds
+   +1 <= ONE_VAR_CONSTANT <= 1
    0 <= flow(electricityBus_storage_no_invest_0_0) <= 16667
    0 <= flow(electricityBus_storage_no_invest_0_1) <= 16667
    0 <= flow(electricityBus_storage_no_invest_0_2) <= 16667
