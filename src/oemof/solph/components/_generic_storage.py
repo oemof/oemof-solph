@@ -427,7 +427,7 @@ class GenericStorageBlock(ScalarBlock):
 
     *Standard model*
 
-    * :attr: `storage_costs`not 0
+    * :attr: `storage_costs` not 0
 
         ..math::
             \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
