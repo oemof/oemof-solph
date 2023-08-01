@@ -108,7 +108,7 @@ class GenericStorage(network.Component):
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
-        Cost (per energy) for using the storage.
+        Cost (per energy) for having energy in the storage.
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -419,8 +419,8 @@ class GenericStorageBlock(ScalarBlock):
                                 :math:`\delta(t)` and
                                 timeincrement
                                 :math:`\tau(t)`
-    :math:`c_{storage}(t)`      costs for storaging     `storage_costs`
-                                energy
+    :math:`c_{storage}(t)`      costs of having         `storage_costs`
+                                energy stored
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
