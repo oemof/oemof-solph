@@ -1312,6 +1312,22 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
+            def _initially_empty_rule(block):
+                """Ensure storage to be empty initially"""
+                for n in self.INVESTSTORAGES:
+                    for t in m.TIMESTEPS:
+                        if t == 0:
+                            expr = self.storage_content[n, 0] == 0
+                            self.initially_empty.add((n, t), expr)
+
+            self.initially_empty = Constraint(
+                self.INVESTSTORAGES, m.TIMESTEPS, noruleinit=True
+            )
+
+            self.initially_empty_build = BuildAction(
+                rule=_initially_empty_rule
+            )
+
         # Standard storage implementation for discrete time points
         else:
 
