@@ -85,8 +85,8 @@ class _Sequence(UserList):
     """Emulates a list whose length is not known in advance if default
     is passed. If periodic_values and highest_index are passed, the length
     is known in advance and the sequence is periodic. The periods will have
-    the values passed in periodic_values and the lengths of the periods are equal
-    and sum up to the value of highest_index.
+    the values passed in periodic_values and the lengths of the periods are
+    equal and sum up to the value of highest_index.
 
     Parameters
     ----------
@@ -145,7 +145,9 @@ class _Sequence(UserList):
         self.default_changed = False
         self.highest_index = highest_index
         self.period_length = (
-            int(highest_index / len(periodic_values)) if periodic_values else None
+            int(highest_index / len(periodic_values))
+            if periodic_values
+            else None
         )
         super().__init__(*args)
 
