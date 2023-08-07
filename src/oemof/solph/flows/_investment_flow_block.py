@@ -527,9 +527,10 @@ class InvestmentFlowBlock(ScalarBlock):
                             expr = self.old_end[i, o, p] == 0
                             self.old_rule_end.add((i, o, p), expr)
 
-                    # multiple invests can decommission in the same period
-                    # but only sequential ones, thus a memory is introduced and
-                    # constraints are added to equation one iteration later.
+                    # multiple invests can be decommissioned in the same period
+                    # but only sequential ones, thus a bookkeeping is
+                    # introduced andconstraints are added to equation one
+                    # iteration later.
                     last_decomm_p = np.nan
                     # loop over invest periods (values are decomm_periods)
                     for invest_p, decomm_p in enumerate(decomm_periods):
@@ -543,7 +544,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
                         # no decommissioning if decomm_p is zero
                         if decomm_p == 0:
-                            # overwrite decomm_p memory with zero to avoid
+                            # overwrite decomm_p with zero to avoid
                             # chaining invest periods in next iteration
                             last_decomm_p = 0
 
@@ -551,14 +552,14 @@ class InvestmentFlowBlock(ScalarBlock):
                         # period
                         elif decomm_p == last_decomm_p:
                             expr += self.invest[i, o, invest_p]
-                            # overwrite decomm_p memory
+                            # overwrite decomm_p
                             last_decomm_p = decomm_p
 
                         # if decomm_p is not zero, not the same as the last one
                         # and it's not the first period
                         else:
                             expr = self.invest[i, o, invest_p]
-                            # overwrite decomm_p memory
+                            # overwrite decomm_p
                             last_decomm_p = decomm_p
 
                     # Add constraint of very last iteration
