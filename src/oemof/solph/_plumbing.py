@@ -177,7 +177,10 @@ class _Sequence(UserList):
         return str([i for i in self])
 
     def __len__(self):
-        return max(len(self.data), self.highest_index + 1)
+        if self.periodic_values:
+            return self.highest_index
+        else:
+            return max(len(self.data), self.highest_index + 1)
 
     def __iter__(self):
         if self.periodic_values:
