@@ -385,7 +385,6 @@ class TestsMultiPeriodConstraint:
             investment=solph.Investment(
                 ep_costs=145, lifetime=20, existing=20, age=19
             ),
-            initial_storage_level=0.5,
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_2_multi_period.lp")
@@ -612,7 +611,7 @@ class TestsMultiPeriodConstraint:
             self.get_om()
 
     def test_storage_invest_1_initial_storage_level(self):
-        """Test warning for initial storage level
+        """Test error for initial storage level
         with multi-period investments"""
         bel = solph.buses.Bus(label="electricityBus")
         storage = solph.components.GenericStorage(
@@ -642,14 +641,12 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, storage)
         msg = (
             "For a multi-period model, initial_storage_level is"
-            " not supported.\nIt is suggested to remove that"
-            " parameter since it has no effect.\nstorage_content"
-            " will be zero, until there is some usable storage "
-            " capacity installed."
+            " not supported.\nIt needs to be removed since it"
+            " has no effect.\nstorage_content will be zero,"
+            " until there is some usable storage capacity installed."
         )
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.raises(ValueError, match=msg):
             self.get_om()
-            assert msg in str(w[1].message)
 
     def test_storage_invest_1_missing_lifetime(self):
         """Test error thrown if storage misses necessary lifetime"""

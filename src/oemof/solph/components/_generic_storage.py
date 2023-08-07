@@ -1032,21 +1032,20 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         # ########################## CHECKS ###################################
         if m.es.periods is not None:
             for n in group:
-                error = (
+                error_fixed_absolute_losses = (
                     "For a multi-period investment model, fixed absolute"
                     " losses are not supported. Please remove parameter."
                 )
                 if n.fixed_losses_absolute.default != 0:
-                    raise ValueError(error)
-                warning = (
+                    raise ValueError(error_fixed_absolute_losses)
+                error_initial_storage_level = (
                     "For a multi-period model, initial_storage_level is"
-                    " not supported.\nIt is suggested to remove that"
-                    " parameter since it has no effect.\nstorage_content"
-                    " will be zero, until there is some usable storage "
-                    " capacity installed."
+                    " not supported.\nIt needs to be removed since it"
+                    " has no effect.\nstorage_content will be zero,"
+                    " until there is some usable storage capacity installed."
                 )
                 if n.initial_storage_level is not None:
-                    warn(warning, debugging.SuspiciousUsageWarning)
+                    raise ValueError(error_initial_storage_level)
 
         # ########################## SETS #####################################
 
@@ -1315,10 +1314,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             def _initially_empty_rule(block):
                 """Ensure storage to be empty initially"""
                 for n in self.INVESTSTORAGES:
-                    for t in m.TIMESTEPS:
-                        if t == 0:
-                            expr = self.storage_content[n, 0] == 0
-                            self.initially_empty.add((n, t), expr)
+                    expr = self.storage_content[n, 0] == 0
+                    self.initially_empty.add((n, 0), expr)
 
             self.initially_empty = Constraint(
                 self.INVESTSTORAGES, m.TIMESTEPS, noruleinit=True
