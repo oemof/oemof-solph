@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 import re
-import warnings
 from os import path as ospath
 
 import pandas as pd
