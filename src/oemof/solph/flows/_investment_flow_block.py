@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Creating sets, variables, constraints and parts of the objective function
-for SimpleFlowBlock objects with investment option.
+for Flow objects with investment but without nonconvex option.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -27,185 +27,25 @@ from pyomo.core.base.block import ScalarBlock
 class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
 
+    .. automethod:: _create_constraints
+    .. automethod:: _create_variables
+    .. automethod:: _create_sets
+
+    .. automethod:: _objective_expression
+
     See :class:`oemof.solph.options.Investment` for all parameters of the
     *Investment* class.
 
     See :class:`oemof.solph.network.SimpleFlowBlock` for all parameters of the *SimpleFlowBlock*
     class.
 
-    **Variables**
-
-    All *InvestmentFlowBlock* are indexed by a starting and ending node
-    :math:`(i, o)`, which is omitted in the following for the sake
-    of convenience. The following variables are created:
-
-    * :math:`P(t)`
-
-        Actual flow value (created in :class:`oemof.solph.models.BaseModel`).
-
-    * :math:`P_{invest}`
-
-        Value of the investment variable, i.e. equivalent to the nominal
-        value of the flows after optimization.
-
-    * :math:`b_{invest}`
-
-        Binary variable for the status of the investment, if
-        :attr:`nonconvex` is `True`.
-
-    **Constraints**
-
-    Depending on the attributes of the *InvestmentFlowBlock* and *SimpleFlowBlock*, different
-    constraints are created. The following constraint is created for all
-    *InvestmentFlowBlock*:\
-
-            Upper bound for the flow value
-
-        .. math::
-            P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
-
-    Depeding on the attribute :attr:`nonconvex`, the constraints for the bounds
-    of the decision variable :math:`P_{invest}` are different:\
-
-        * :attr:`nonconvex = False`
-
-        .. math::
-            P_{invest, min} \le P_{invest} \le P_{invest, max}
-
-        * :attr:`nonconvex = True`
-
-        .. math::
-            &
-            P_{invest, min} \cdot b_{invest} \le P_{invest}\\
-            &
-            P_{invest} \le P_{invest, max} \cdot b_{invest}\\
-
-    For all *InvestmentFlowBlock* (independent of the attribute :attr:`nonconvex`),
-    the following additional constraints are created, if the appropriate
-    attribute of the *SimpleFlowBlock* (see :class:`oemof.solph.network.SimpleFlowBlock`) is set:
-
-        * :attr:`fix` is not None
-
-            Actual value constraint for investments with fixed flow values
-
-        .. math::
-            P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
-
-        * :attr:`min != 0`
-
-            Lower bound for the flow values
-
-        .. math::
-            P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
-
-        * :attr:`full_load_time_max is not None`
-
-            Upper bound for the sum of all flow values (e.g. maximum full load
-            hours)
-
-        .. math::
-            \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
-            \cdot t_{full\_load, min}
-
-        * :attr:`full_load_time_min is not None`
-
-            Lower bound for the sum of all flow values (e.g. minimum full load
-            hours)
-
-        .. math::
-            \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
-            \cdot t_{full\_load, min}
-
-
-    **Objective function**
-
-    The part of the objective function added by the *InvestmentFlowBlock*
-    also depends on whether a convex or nonconvex
-    *InvestmentFlowBlock* is selected. The following parts of the objective function
-    are created:
-
-        * :attr:`nonconvex = False`
-
-            .. math::
-                P_{invest} \cdot c_{invest,var}
-
-        * :attr:`nonconvex = True`
-
-            .. math::
-                P_{invest} \cdot c_{invest,var}
-                + c_{invest,fix} \cdot b_{invest}\\
-
     The total value of all costs of all *InvestmentFlowBlock* can be retrieved
     calling :meth:`om.InvestmentFlowBlock.investment_costs.expr()`.
-
-    .. csv-table:: List of Variables (in csv table syntax)
-        :header: "symbol", "attribute", "explanation"
-        :widths: 1, 1, 1
-
-        ":math:`P(t)`", ":py:obj:`flow[n, o, t]`", "Actual flow value"
-        ":math:`P_{invest}`", ":py:obj:`invest[i, o]`", "Invested flow
-        capacity"
-        ":math:`b_{invest}`", ":py:obj:`invest_status[i, o]`", "Binary status
-        of investment"
-
-    List of Variables (in rst table syntax):
-
-    ===================  =============================  =========
-    symbol               attribute                      explanation
-    ===================  =============================  =========
-    :math:`P(t)`         :py:obj:`flow[n, o, t]`         Actual flow value
-
-    :math:`P_{invest}`   :py:obj:`invest[i, o]`          Invested flow capacity
-
-    :math:`b_{invest}`   :py:obj:`invest_status[i, o]`   Binary status of investment
-
-    ===================  =============================  =========
-
-    Grid table style:
-
-    +--------------------+-------------------------------+-----------------------------+
-    | symbol             | attribute                     | explanation                 |
-    +====================+===============================+=============================+
-    | :math:`P(t)`       | :py:obj:`flow[n, o, t]`       | Actual flow value           |
-    +--------------------+-------------------------------+-----------------------------+
-    | :math:`P_{invest}` | :py:obj:`invest[i, o]`        | Invested flow capacity      |
-    +--------------------+-------------------------------+-----------------------------+
-    | :math:`b_{invest}` | :py:obj:`invest_status[i, o]` | Binary status of investment |
-    +--------------------+-------------------------------+-----------------------------+
-
-    .. csv-table:: List of Parameters
-        :header: "symbol", "attribute", "explanation"
-        :widths: 1, 1, 1
-
-        ":math:`P_{exist}`", ":py:obj:`flows[i, o].investment.existing`", "
-        Existing flow capacity"
-        ":math:`P_{invest,min}`", ":py:obj:`flows[i, o].investment.minimum`", "
-        Minimum investment capacity"
-        ":math:`P_{invest,max}`", ":py:obj:`flows[i, o].investment.maximum`", "
-        Maximum investment capacity"
-        ":math:`c_{invest,var}`", ":py:obj:`flows[i, o].investment.ep_costs`
-        ", "Variable investment costs"
-        ":math:`c_{invest,fix}`", ":py:obj:`flows[i, o].investment.offset`", "
-        Fix investment costs"
-        ":math:`f_{actual}`", ":py:obj:`flows[i, o].fix[t]`", "Normed
-        fixed value for the flow variable"
-        ":math:`f_{max}`", ":py:obj:`flows[i, o].max[t]`", "Normed maximum
-        value of the flow"
-        ":math:`f_{min}`", ":py:obj:`flows[i, o].min[t]`", "Normed minimum
-        value of the flow"
-        ":math:`t_{full\_load,max}`", ":py:obj:`flows[i, o].full_load_time_max`", "Specific
-        maximum of summed flow values (per installed capacity)"
-        ":math:`t_{full\_load,min}`", ":py:obj:`flows[i, o].full_load_time_min`", "Specific
-        minimum of summed flow values (per installed capacity)"
-        ":math:`\tau(t)`", ":py:obj:`timeincrement[t]`", "Time step width for
-        each time step"
 
     Note
     ----
     In case of a nonconvex investment flow (:attr:`nonconvex=True`),
     the existing flow capacity :math:`P_{exist}` needs to be zero.
-    At least, it is not tested yet, whether this works out, or makes any sense
-    at all.
 
     Note
     ----
@@ -290,9 +130,27 @@ class InvestmentFlowBlock(ScalarBlock):
             ]
         )
 
-    def _create_variables(self, group):
-        """
-        Creates all variables for investment flows.
+    def _create_variables(self, _):
+        r"""Creates all variables for investment flows.
+
+        All *InvestmentFlowBlock* are indexed by a starting and ending node
+        :math:`(i, o)`, which is omitted in the following for the sake
+        of convenience. The following variables are created:
+
+        * :math:`P(t)`
+
+            Actual flow value
+            (created in :class:`oemof.solph.models.BaseModel`).
+
+        * :math:`P_{invest}`
+
+            Value of the investment variable, i.e. equivalent to the nominal
+            value of the flows after optimization.
+
+        * :math:`Y_{invest}`
+
+        Binary variable for the status of the investment, if
+        :attr:`nonconvex` is `True`.
         """
         m = self.parent_block()
 
@@ -317,8 +175,70 @@ class InvestmentFlowBlock(ScalarBlock):
         self.invest_status = Var(self.NON_CONVEX_INVESTFLOWS, within=Binary)
 
     def _create_constraints(self):
-        """
-        Creates all constraints for standard flows.
+        r"""Creates all constraints for standard flows.
+
+        Depending on the attributes of the *InvestmentFlowBlock*
+        and *SimpleFlowBlock*, different constraints are created.
+        The following constraint is created for all
+        *InvestmentFlowBlock*:
+
+                Upper bound for the flow value
+
+            .. math::
+                P(t) \le ( P_{invest} + P_{exist} ) \cdot f_{max}(t)
+
+        Depeding on the attribute :attr:`nonconvex`, the constraints for
+        the bounds of the decision variable :math:`P_{invest}` are different:
+
+            * :attr:`nonconvex = False`
+
+            .. math::
+                P_{invest, min} \le P_{invest} \le P_{invest, max}
+
+            * :attr:`nonconvex = True`
+
+            .. math::
+                &
+                P_{invest, min} \cdot Y_{invest} \le P_{invest}\\
+                &
+                P_{invest} \le P_{invest, max} \cdot Y_{invest}\\
+
+        For all *InvestmentFlowBlock* (independent of the attribute
+        :attr:`nonconvex`), the following additional constraints are created,
+        if the appropriate attribute of the *SimpleFlowBlock* (see
+        :class:`oemof.solph.network.SimpleFlowBlock`) is set:
+
+            * :attr:`fix` is not None
+
+                Actual value constraint for investments with fixed flow values
+
+            .. math::
+                P(t) = ( P_{invest} + P_{exist} ) \cdot f_{fix}(t)
+
+            * :attr:`min != 0`
+
+                Lower bound for the flow values
+
+            .. math::
+                P(t) \geq ( P_{invest} + P_{exist} ) \cdot f_{min}(t)
+
+            * :attr:`full_load_time_max is not None`
+
+                Upper bound for the sum of all flow values
+                (e.g. maximum full load hours)
+
+            .. math::
+                \sum_t P(t) \cdot \tau(t) \leq ( P_{invest} + P_{exist} )
+                \cdot t_{full\_load, min}
+
+            * :attr:`full_load_time_min is not None`
+
+                Lower bound for the sum of all flow values
+                (e.g. minimum full load hours)
+
+            .. math::
+                \sum_t P(t) \cdot \tau(t) \geq ( P_{invest} + P_{exist} )
+                \cdot t_{full\_load, min}
         """
         m = self.parent_block()
 
@@ -368,7 +288,7 @@ class InvestmentFlowBlock(ScalarBlock):
             self.MIN_INVESTFLOWS, m.TIMESTEPS, rule=_min_investflow_rule
         )
 
-        def _full_load_time_max_investflow_rule(block, i, o):
+        def _full_load_time_max_investflow_rule(_, i, o):
             """Rule definition for build action of max. sum flow constraint
             in investment case.
             """
@@ -384,7 +304,7 @@ class InvestmentFlowBlock(ScalarBlock):
             rule=_full_load_time_max_investflow_rule,
         )
 
-        def _full_load_time_min_investflow_rule(block, i, o):
+        def _full_load_time_min_investflow_rule(_, i, o):
             """Rule definition for build action of min. sum flow constraint
             in investment case.
             """
@@ -405,6 +325,22 @@ class InvestmentFlowBlock(ScalarBlock):
         r"""Objective expression for flows with investment attribute of type
         class:`.Investment`. The returned costs are fixed, variable and
         investment costs.
+
+        The part of the objective function added by the *InvestmentFlowBlock*
+        also depends on whether a convex or nonconvex
+        *InvestmentFlowBlock* is selected. The following parts of the
+        objective function are created:
+
+        * :attr:`nonconvex = False`
+
+            .. math::
+                P_{invest} \cdot c_{invest,var}
+
+        * :attr:`nonconvex = True`
+
+        .. math::
+            P_{invest} \cdot c_{invest,var}
+            + c_{invest,fix} \cdot Y_{invest}\\
         """
         if not hasattr(self, "INVESTFLOWS"):
             return 0

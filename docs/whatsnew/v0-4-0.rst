@@ -3,7 +3,7 @@ v0.4.0 (June 6, 2020)
 
 
 API changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * New package name
     For installation via pypi use ``pip install oemof.solph``.
@@ -26,7 +26,7 @@ API changes
 
 
 New features
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Allows having a non equidistant timeindex
     By adding the calculate_timeincrement function to tools/helpers.py a non
@@ -49,7 +49,7 @@ New features
     that are independent from storage content.
 
 New components/constraints
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+##########################
 
 * Allows a generic limit for attribute weighted investment flows
     InvestmentFlow, which share other limited resources (e.g. space), can be
@@ -65,13 +65,13 @@ New components/constraints
     and logs with their respective energy density.
 
 Documentation
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * **Restructure and clean-up documentation due to the unbundling**
 * **Improved documentation of ExtractionTurbineCHP**
 
 Known issues
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Results of one-time-step optimisation counterintuitive
     If an optimisation with one time-step is performed, at the processing of the
@@ -80,14 +80,14 @@ Known issues
 
 
 Testing
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Use ``tox`` for testing
     Now, pep8 tests and build of documentation are tested.
 * **Skip github link checks when testing locally**
 
 Other changes
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Redefine ``loss_rate`` of `GenericStorage`
     The ``loss_rate`` of `~oemof.solph.components.GenericStorage`
@@ -99,7 +99,7 @@ Other changes
 * **Add python 3.8 support, remove python 3.5 support**
 
 Contributors
-^^^^^^^^^^^^^^^^^^^^
+####################
 
 * Caterina Köhl
 * Jonathan Amme

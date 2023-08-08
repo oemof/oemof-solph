@@ -8,4 +8,5 @@ pycodestyle:  # Same as scanner.linter value.
     max-line-length: 79  # Default in PEP 8
     ignore:  # Errors and warnings to ignore
         - W503  # line break before binary operator
+        - E203
 

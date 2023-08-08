@@ -97,37 +97,6 @@ def test_generic_storage_4():
         )
 
 
-def test_generic_storage_with_old_parameters():
-    deprecated = {
-        "nominal_capacity": 45,
-        "initial_capacity": 0,
-        "capacity_loss": 0,
-        "capacity_min": 0,
-        "capacity_max": 0,
-    }
-    # Make sure an `AttributeError` is raised if we supply all deprecated
-    # parameters.
-    with pytest.raises(AttributeError) as caught:
-        components.GenericStorage(
-            label="`GenericStorage` with all deprecated parameters",
-            **deprecated,
-        )
-    for parameter in deprecated:
-        # Make sure every parameter used is mentioned in the exception's
-        # message.
-        assert parameter in str(caught.value)
-        # Make sure an `AttributeError` is raised for each deprecated
-        # parameter.
-        pytest.raises(
-            AttributeError,
-            components.GenericStorage,
-            **{
-                "label": "`GenericStorage` with `{}`".format(parameter),
-                parameter: deprecated[parameter],
-            },
-        )
-
-
 def test_generic_storage_with_non_convex_investment():
     """Tests error if `offset` and `existing` attribute are given."""
     with pytest.raises(
@@ -270,7 +239,13 @@ def test_offsetconverter_not_enough_coefficients():
         ValueError,
         match="Two coefficients or coefficient series have to be given.",
     ):
-        components.OffsetConverter(label="of1", coefficients=([1, 4, 7]))
+        bus = Bus(label="Bus")
+        components.OffsetConverter(
+            label="of1",
+            inputs={bus: Flow(nonconvex=NonConvex())},
+            outputs={bus: Flow(nonconvex=NonConvex())},
+            coefficients=([1, 4, 7]),
+        )
 
 
 def test_offsetconverter_too_many_coefficients():
@@ -278,10 +253,16 @@ def test_offsetconverter_too_many_coefficients():
         ValueError,
         match="Two coefficients or coefficient series have to be given.",
     ):
-        components.OffsetConverter(label="of2", coefficients=(1, 4, 7))
+        bus = Bus(label="Bus")
+        components.OffsetConverter(
+            label="of2",
+            inputs={bus: Flow(nonconvex=NonConvex())},
+            outputs={bus: Flow(nonconvex=NonConvex())},
+            coefficients=(1, 4, 7),
+        )
 
 
-def test_offsetconverter_too_many_input_flows():
+def test_offsettransformer__too_many_input_flows():
     """Too many Input Flows defined."""
     with pytest.raises(
         ValueError,
@@ -295,6 +276,7 @@ def test_offsetconverter_too_many_input_flows():
                 b_gas: Flow(),
                 b_coal: Flow(),
             },
+            outputs={bcoal: Flow(nonconvex=NonConvex())},
             coefficients=(20, 0.5),
         )
 
@@ -326,17 +308,21 @@ def test_generic_chp_without_warning():
     bgas = Bus(label="commodityBus")
     components.GenericCHP(
         label="combined_cycle_extraction_turbine",
-        fuel_input={bgas: Flow(H_L_FG_share_max=[0.183])},
+        fuel_input={
+            bgas: Flow(custom_attributes={"H_L_FG_share_max": [0.183]})
+        },
         electrical_output={
             bel: Flow(
-                P_max_woDH=[155.946],
-                P_min_woDH=[68.787],
-                Eta_el_max_woDH=[0.525],
-                Eta_el_min_woDH=[0.444],
+                custom_attributes={
+                    "P_max_woDH": [155.946],
+                    "P_min_woDH": [68.787],
+                    "Eta_el_max_woDH": [0.525],
+                    "Eta_el_min_woDH": [0.444],
+                }
             )
         },
-        heat_output={bth: Flow(Q_CW_min=[10.552])},
-        Beta=[0.122],
+        heat_output={bth: Flow(custom_attributes={"Q_CW_min": [10.552]})},
+        beta=[0.122],
         back_pressure=False,
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)

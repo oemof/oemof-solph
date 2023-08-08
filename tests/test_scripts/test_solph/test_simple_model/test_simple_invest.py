@@ -16,8 +16,6 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
-from oemof.network.network import Node
 from oemof.tools import economics
 
 from oemof.solph import EnergySystem
@@ -34,7 +32,6 @@ from oemof.solph.flows import Flow
 
 def test_dispatch_example(solver="cbc", periods=24 * 5):
     """Create an energy system and optimize the dispatch at least costs."""
-    Node.registry = None
 
     filename = os.path.join(os.path.dirname(__file__), "input_data.csv")
     data = pd.read_csv(filename, sep=",")
@@ -211,4 +208,4 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     }
 
     for key in test_results.keys():
-        eq_(int(round(comp_results[key])), int(round(test_results[key])))
+        assert int(round(comp_results[key])) == int(round(test_results[key]))

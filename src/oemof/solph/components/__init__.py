@@ -11,10 +11,12 @@ experimental code should be included in oemof.experimental.
 
 from . import experimental
 from ._converter import Converter
+from ._converter import Transformer
 from ._extraction_turbine_chp import ExtractionTurbineCHP
 from ._generic_chp import GenericCHP
 from ._generic_storage import GenericStorage
 from ._offset_converter import OffsetConverter
+from ._offset_converter import OffsetTransformer
 from ._sink import Sink
 from ._source import Source
 
@@ -25,6 +27,8 @@ __all__ = [
     "GenericCHP",
     "GenericStorage",
     "OffsetConverter",
+    "OffsetTransformer",
     "Sink",
+    "Transformer",
     "Source",
 ]
