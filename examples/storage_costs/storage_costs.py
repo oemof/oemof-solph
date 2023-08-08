@@ -52,21 +52,23 @@ def storage_costs_example():
         )
     )
 
-    electricity_price= np.array([
-        0.38,
-        0.31,
-        0.32,
-        0.33,
-        0.37,
-        0.32,
-        0.33,
-        0.34,
-        0.39,
-        0.38,
-        0.37,
-        0.35,
-        0.35,
-    ])
+    electricity_price = np.array(
+        [
+            0.38,
+            0.31,
+            0.32,
+            0.33,
+            0.37,
+            0.32,
+            0.33,
+            0.34,
+            0.39,
+            0.38,
+            0.37,
+            0.35,
+            0.35,
+        ]
+    )
 
     # Electric Storage 1
     # Costs are designed in a way that storing energy is benificial until the
@@ -74,14 +76,18 @@ def storage_costs_example():
     battery1 = solph.components.GenericStorage(
         label="battery 1",
         nominal_storage_capacity=10,
-        inputs={bel: solph.Flow(
-            nominal_value=1,
-            variable_costs=electricity_price,
-        )},
-        outputs={bel: solph.Flow(
-            nominal_value=1,
-            variable_costs=-electricity_price,
-        )},
+        inputs={
+            bel: solph.Flow(
+                nominal_value=1,
+                variable_costs=electricity_price,
+            )
+        },
+        outputs={
+            bel: solph.Flow(
+                nominal_value=1,
+                variable_costs=-electricity_price,
+            )
+        },
         initial_storage_level=0.5,
         balanced=False,
     )
@@ -92,15 +98,19 @@ def storage_costs_example():
     battery2 = solph.components.GenericStorage(
         label="battery 2",
         nominal_storage_capacity=10,
-        inputs={bel: solph.Flow(
-            nominal_value=1,
-            variable_costs=electricity_price,
-        )},
-        outputs={bel: solph.Flow(
-            nominal_value=1,
-            variable_costs=-electricity_price,
-        )},
-        storage_costs=12*[0] + [-np.mean(electricity_price)],
+        inputs={
+            bel: solph.Flow(
+                nominal_value=1,
+                variable_costs=electricity_price,
+            )
+        },
+        outputs={
+            bel: solph.Flow(
+                nominal_value=1,
+                variable_costs=-electricity_price,
+            )
+        },
+        storage_costs=12 * [0] + [-np.mean(electricity_price)],
         initial_storage_level=0.5,
         balanced=False,
     )
@@ -115,8 +125,14 @@ def storage_costs_example():
     # create result object
     results = solph.processing.results(model)
 
-    plt.plot(results[(battery1, None)]["sequences"], label="content w/o storage costs")
-    plt.plot(results[(battery2, None)]["sequences"], label="content w/ storage revenue")
+    plt.plot(
+        results[(battery1, None)]["sequences"],
+        label="content w/o storage costs",
+    )
+    plt.plot(
+        results[(battery2, None)]["sequences"],
+        label="content w/ storage revenue",
+    )
     plt.legend()
     plt.grid()
 
