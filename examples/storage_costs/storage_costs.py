@@ -4,6 +4,10 @@
 General description
 -------------------
 Example that shows the parameter `storage_costs` of `GenericStorage`.
+A battery is used to make profit from fluctuating electricity prices.
+For a battery without storage costs, it is beneficial to be empty
+the end of the time horizon of the optimisation. For a battery that
+assumes the average revenue, energy is kept at the end. 
 
 
 Installation requirements
@@ -18,6 +22,7 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
 
+import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
@@ -36,32 +41,70 @@ def storage_costs_example():
     es.add(
         solph.components.Source(
             label="source_el",
-            outputs={
-                bel: solph.Flow(nominal_value=1, variable_costs=4),
-            },
+            outputs={bel: solph.Flow()},
         )
     )
 
     es.add(
         solph.components.Sink(
             label="sink_el",
-            inputs={
-                bel: solph.Flow(nominal_value=1, variable_costs=1),
-            },
+            inputs={bel: solph.Flow()},
         )
     )
 
-    # Electric Storage
-    battery = solph.components.GenericStorage(
-        label="battery",
-        nominal_storage_capacity=100,  # no effective limit
-        storage_costs=-1,  # revenue for storing of 1/4 of the buying costs
-        inputs={bel: solph.Flow()},
-        outputs={bel: solph.Flow(variable_costs=2)},
-        initial_storage_level=0,
+    electricity_price= np.array([
+        0.38,
+        0.31,
+        0.32,
+        0.33,
+        0.37,
+        0.32,
+        0.33,
+        0.34,
+        0.39,
+        0.38,
+        0.37,
+        0.35,
+        0.35,
+    ])
+
+    # Electric Storage 1
+    # Costs are designed in a way that storing energy is benificial until the
+    # last four time steps but emptying it is not a good option.
+    battery1 = solph.components.GenericStorage(
+        label="battery 1",
+        nominal_storage_capacity=10,
+        inputs={bel: solph.Flow(
+            nominal_value=1,
+            variable_costs=electricity_price,
+        )},
+        outputs={bel: solph.Flow(
+            nominal_value=1,
+            variable_costs=-electricity_price,
+        )},
+        initial_storage_level=0.5,
         balanced=False,
     )
-    es.add(battery)
+    es.add(battery1)
+
+    # storages that balance our fluctuating costs
+    # Electric Storage 2
+    battery2 = solph.components.GenericStorage(
+        label="battery 2",
+        nominal_storage_capacity=10,
+        inputs={bel: solph.Flow(
+            nominal_value=1,
+            variable_costs=electricity_price,
+        )},
+        outputs={bel: solph.Flow(
+            nominal_value=1,
+            variable_costs=-electricity_price,
+        )},
+        storage_costs=12*[0] + [-np.mean(electricity_price)],
+        initial_storage_level=0.5,
+        balanced=False,
+    )
+    es.add(battery2)
 
     # create an optimization problem and solve it
     model = solph.Model(es)
@@ -72,13 +115,8 @@ def storage_costs_example():
     # create result object
     results = solph.processing.results(model)
 
-    plt.plot(results[(battery, None)]["sequences"], "r--", label="content")
-    plt.step(
-        results[(bel, battery)]["sequences"],
-        "b-",
-        label="inflow",
-        where="post",
-    )
+    plt.plot(results[(battery1, None)]["sequences"], label="content w/o storage costs")
+    plt.plot(results[(battery2, None)]["sequences"], label="content w/ storage revenue")
     plt.legend()
     plt.grid()
 
