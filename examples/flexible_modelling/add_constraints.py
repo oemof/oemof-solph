@@ -113,26 +113,26 @@ def run_add_constraints_example(solver="cbc", nologg=False):
     # add the sub-model to the oemof Model instance
     om.add_component("MyBlock", myblock)
 
-    def _inflow_share_rule(m, s, e, t):
+    def _inflow_share_rule(m, s, e, p, t):
         """pyomo rule definition: Here we can use all objects from the block or
         the om object, in this case we don't need anything from the block
         except the newly defined set MYFLOWS.
         """
-        expr = om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] * sum(
-            om.flow[i, o, t] for (i, o) in om.FLOWS if o == e
+        expr = om.flow[s, e, p, t] >= om.flows[s, e].outflow_share[t] * sum(
+            om.flow[i, o, p, t] for (i, o) in om.FLOWS if o == e
         )
         return expr
 
     myblock.inflow_share = po.Constraint(
-        myblock.MYFLOWS, om.TIMESTEPS, rule=_inflow_share_rule
+        myblock.MYFLOWS, om.TIMEINDEX, rule=_inflow_share_rule
     )
     # add emission constraint
     myblock.emission_constr = po.Constraint(
         expr=(
             sum(
-                om.flow[i, o, t]
+                om.flow[i, o, p, t]
                 for (i, o) in myblock.COMMODITYFLOWS
-                for t in om.TIMESTEPS
+                for p, t in om.TIMEINDEX
             )
             <= emission_limit
         )
