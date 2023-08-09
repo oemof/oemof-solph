@@ -125,7 +125,7 @@ def main():
         },
     )
 
-    # -------------------- TRANSFORMERS --------------------
+    # -------------------- CONVERTERS --------------------
     # The diesel genset assumed to have a fixed efficiency of 33%.
 
     # The output power of the diesel genset can only vary between
@@ -136,7 +136,7 @@ def main():
     variable_cost_diesel_genset = 0.045  # currency/kWh
     min_load = 0.2
     max_load = 1.0
-    diesel_genset = solph.components.Transformer(
+    diesel_genset = solph.components.Converter(
         label="diesel_genset",
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
@@ -157,7 +157,7 @@ def main():
 
     # The rectifier assumed to have a fixed efficiency of 98%.
     epc_rectifier = 62.35  # currency/kW/year
-    rectifier = solph.components.Transformer(
+    rectifier = solph.components.Converter(
         label="rectifier",
         inputs={
             b_el_ac: solph.flows.Flow(
@@ -176,7 +176,7 @@ def main():
 
     # The inverter assumed to have a fixed efficiency of 98%.
     epc_inverter = 62.35  # currency/kW/year
-    inverter = solph.components.Transformer(
+    inverter = solph.components.Converter(
         label="inverter",
         inputs={
             b_el_dc: solph.flows.Flow(

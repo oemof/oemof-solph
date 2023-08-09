@@ -199,9 +199,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bus_gas: flows.Flow()},
             outputs={bus_elec: flows.Flow(nominal_value=400)},

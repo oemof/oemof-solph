@@ -44,7 +44,7 @@ from oemof.solph import create_time_index
 from oemof.solph import views
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Transformer
+from oemof.solph.components import Converter
 
 
 def main():
@@ -123,7 +123,7 @@ def main():
 
     # power plants
     energysystem.add(
-        Transformer(
+        Converter(
             label="pp_coal",
             inputs={bcoal: Flow()},
             outputs={bel: Flow(nominal_value=20.2, variable_costs=25)},
@@ -132,7 +132,7 @@ def main():
     )
 
     energysystem.add(
-        Transformer(
+        Converter(
             label="pp_lig",
             inputs={blig: Flow()},
             outputs={bel: Flow(nominal_value=11.8, variable_costs=19)},
@@ -141,7 +141,7 @@ def main():
     )
 
     energysystem.add(
-        Transformer(
+        Converter(
             label="pp_gas",
             inputs={bgas: Flow()},
             outputs={bel: Flow(nominal_value=41, variable_costs=40)},
@@ -150,7 +150,7 @@ def main():
     )
 
     energysystem.add(
-        Transformer(
+        Converter(
             label="pp_oil",
             inputs={boil: Flow()},
             outputs={bel: Flow(nominal_value=5, variable_costs=50)},
@@ -160,7 +160,7 @@ def main():
 
     # combined heat and power plant (chp)
     energysystem.add(
-        Transformer(
+        Converter(
             label="pp_chp",
             inputs={bgas: Flow()},
             outputs={
@@ -181,7 +181,7 @@ def main():
 
     cop = 3
     energysystem.add(
-        Transformer(
+        Converter(
             label="heat_pump",
             inputs={bel: Flow(), b_heat_source: Flow()},
             outputs={bth: Flow(nominal_value=10)},

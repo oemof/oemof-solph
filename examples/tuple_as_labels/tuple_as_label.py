@@ -208,9 +208,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple Converter object representing a gas power plant
     energysystem.add(
-        comp.Transformer(
+        comp.Converter(
             label=Label("power plant", "electricity", "gas"),
             inputs={bgas: flows.Flow()},
             outputs={bel: flows.Flow(nominal_value=10000, variable_costs=50)},
