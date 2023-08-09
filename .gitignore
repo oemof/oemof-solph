@@ -44,6 +44,7 @@ htmlcov
 .project
 .pydevproject
 .idea
+.vscode
 *.iml
 *.komodoproject
 

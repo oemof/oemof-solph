@@ -115,10 +115,10 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
-If you want to support us that way please fork the oemof repository to your own
+If you want to support us that way please fork the oemof-solph repository to your own
 github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
-If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
+If you have questions regarding the use of oemof including oemof.solph you can visit the openmod forum (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and open a new thread if your questions hasn't been already answered.
 
 Keep in touch! - You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 but this will bring you quite a few mails and might be more interesting for developers.
@@ -135,7 +135,7 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 Installation
 ============
 
-If you have a working Python3 environment, use pypi to install the latest oemof version. Python >= 3.6 is recommended. Lower versions may work but are not tested.
+If you have a working Python3 environment, use pypi to install the latest version of oemof.solph. Python >= 3.8 is recommended. Lower versions may work but are not tested.
 
 
 ::
@@ -170,7 +170,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 **Windows**
 
- 1. Download CBC (`64 <https://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <https://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
@@ -266,7 +266,7 @@ You are welcome to contribute your own examples via a `pull request <https://git
 License
 =======
 
-Copyright (c) 2022 oemof developer group
+Copyright (c) 2023 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

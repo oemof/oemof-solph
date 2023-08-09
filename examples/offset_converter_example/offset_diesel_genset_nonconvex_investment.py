@@ -449,7 +449,6 @@ if __name__ == "__main__":
     ##########################################################################
 
     if plt is not None:
-
         # Create the duration curve for the diesel genset.
         fig1, ax = plt.subplots(figsize=(10, 5))
 

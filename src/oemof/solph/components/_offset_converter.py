@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -159,7 +160,7 @@ class OffsetConverterBlock(ScalarBlock):
 
     .. math::
         &
-        P_{in}(t) = C_1(t) \cdot P_{out}(t) + C_0(t) \cdot Y(t) \\
+        P_{in}(p, t) = C_1(t) \cdot P_{out}(p, t) + C_0(t) \cdot Y(p, t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
@@ -167,9 +168,9 @@ class OffsetConverterBlock(ScalarBlock):
     +--------------------+------------------------+------+--------------------------------------------+
     | symbol             | attribute              | type | explanation                                |
     +====================+========================+======+============================================+
-    | :math:`P_{out}(t)` | `flow[n,o,t]`          | V    | Outflow of transformer                     |
+    | :math:`P_{out}(t)` | `flow[n,o,p,t]`        | V    | Outflow of transformer                     |
     +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,t]`          | V    | Inflow of transformer                      |
+    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`        | V    | Inflow of transformer                      |
     +--------------------+------------------------+------+--------------------------------------------+
     | :math:`Y(t)`       | `status[i,n,t]`        | V    | Binary status variable of nonconvex inflow |
     +--------------------+------------------------+------+--------------------------------------------+
@@ -202,46 +203,64 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
-        def _relation_rule(block, n, t):
-            """Link binary input and output flow to component outflow."""
-
-            expr = 0
-            expr += -m.flow[list(n.inputs.keys())[0], n, t]
-            expr += (
-                m.flow[n, list(n.outputs.keys())[0], t] * n.coefficients[1][t]
-            )
-            # `Y(t)` in the last term of the constraint
-            # (":math:`C_0(t) \cdot Y(t)`") is different for different cases.
-            # If both `Investment` and `NonConvex` attributes are used for the
-            # `OffsetConverter`, `Y(t)` would represent the
-            # `status_nominal[n,o,t]` in the `InvestNonConvexFlow`.
-            # But if only the `NonConvex` attribute is defined for the
-            # `OffsetConverter`, `Y(t)` would correspond to the
-            # `status_nominal[n,o,t]` in the `NonConvexFlow`.
-            try:
-                expr += (
-                    m.InvestNonConvexFlowBlock.status_nominal[
-                        n, list(n.outputs.keys())[0], t
-                    ]
-                    * n.coefficients[0][t]
-                )
-            # `KeyError` occurs when more than one `OffsetConverter` is
-            # defined, and in some of them only the `NonConvex` attribute is
-            # considered, while in others both `NonConvex` and `Investment`
-            # attributes are defined.
-            # `AttributeError` only occurs when the `OffsetConverter` has
-            # only the `NonConvex` attribute, and therefore,
-            # `m.InvestNonConvexFlowBlock.status_nominal` (inside the `try`
-            # block) does not exist.
-            except (KeyError, AttributeError):
-                expr += (
-                    m.NonConvexFlowBlock.status_nominal[
-                        n, list(n.outputs.keys())[0], t
-                    ]
-                    * n.coefficients[0][t]
-                )
-            return expr == 0
+        in_flows = {n: [i for i in n.inputs.keys()] for n in group}
+        out_flows = {n: [o for o in n.outputs.keys()] for n in group}
 
         self.relation = Constraint(
-            self.OFFSETCONVERTERS, m.TIMESTEPS, rule=_relation_rule
+            [
+                (n, i, o, p, t)
+                for p, t in m.TIMEINDEX
+                for n in group
+                for o in out_flows[n]
+                for i in in_flows[n]
+            ],
+            noruleinit=True,
         )
+
+        def _relation_rule(block):
+            """Link binary input and output flow to component outflow."""
+            for p, t in m.TIMEINDEX:
+                for n in group:
+                    for o in out_flows[n]:
+                        for i in in_flows[n]:
+                            expr = 0
+                            expr += -m.flow[n, o, p, t]
+                            expr += (
+                                m.flow[i, n, p, t]
+                                * n.coefficients[1][t]
+                            )
+                            expr += (
+                                m.NonConvexFlowBlock.status[i, n, t]
+                                * n.coefficients[0][t]
+                            )
+                            # `Y(t)` in the last term of the constraint
+                            # (":math:`C_0(t) \cdot Y(t)`") is different for different cases.
+                            # If both `Investment` and `NonConvex` attributes are used for the
+                            # `OffsetConverter`, `Y(t)` would represent the
+                            # `status_nominal[n,o,t]` in the `InvestNonConvexFlow`.
+                            # But if only the `NonConvex` attribute is defined for the
+                            # `OffsetConverter`, `Y(t)` would correspond to the
+                            # `status_nominal[n,o,t]` in the `NonConvexFlow`.
+                            try:
+                                expr += (
+                                    m.InvestNonConvexFlowBlock.status_nominal[
+                                        n, o, t
+                                    ]
+                                    * n.coefficients[0][t]
+                                )
+                            # `KeyError` occurs when more than one `OffsetConverter` is
+                            # defined, and in some of them only the `NonConvex` attribute is
+                            # considered, while in others both `NonConvex` and `Investment`
+                            # attributes are defined.
+                            # `AttributeError` only occurs when the `OffsetConverter` has
+                            # only the `NonConvex` attribute, and therefore,
+                            # `m.InvestNonConvexFlowBlock.status_nominal` (inside the `try`
+                            # block) does not exist.
+                            except (KeyError, AttributeError):
+                                expr += (
+                                    m.NonConvexFlowBlock.status_nominal[
+                                        n, o, t
+                                    ]
+                                    * n.coefficients[0][t]
+                                )
+                            block.relation.add((n, i, o, p, t), (expr == 0))

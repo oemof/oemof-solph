@@ -18,6 +18,7 @@ SPDX-License-Identifier: MIT
 
 """
 from pyomo.core import Binary
+from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
@@ -105,14 +106,15 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
 
-        def _investvar_bound_rule(block, i, o):
+        def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of the invest variable."""
             if (i, o) in self.INVEST_NON_CONVEX_FLOWS:
-                return 0, m.flows[i, o].investment.maximum
+                return 0, m.flows[i, o].investment.maximum[p]
 
         # Create the `invest` variable for the nonconvex investment flow.
         self.invest = Var(
             self.INVEST_NON_CONVEX_FLOWS,
+            m.PERIODS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )
@@ -188,16 +190,16 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         """
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_one(_, i, o, t):
+        def _linearization_rule_invest_non_convex_one(_, i, o, p, t):
             expr = (
-                self.status[i, o, t] * m.flows[i, o].investment.maximum
+                self.status[i, o, t] * m.flows[i, o].investment.maximum[p]
                 >= self.status_nominal[i, o, t]
             )
             return expr
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMESTEPS,
+            m.TIMEINDEX,
             rule=_linearization_rule_invest_non_convex_one,
         )
 
@@ -209,13 +211,13 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_two(_, i, o, t):
-            expr = self.invest[i, o] >= self.status_nominal[i, o, t]
+        def _linearization_rule_invest_non_convex_two(_, i, o, p, t):
+            expr = self.invest[i, o, p] >= self.status_nominal[i, o, t]
             return expr
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMESTEPS,
+            m.TIMEINDEX,
             rule=_linearization_rule_invest_non_convex_two,
         )
 
@@ -228,17 +230,18 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_three(_, i, o, t):
+        def _linearization_rule_invest_non_convex_three(_, i, o, p, t):
             expr = (
-                self.invest[i, o]
-                - (1 - self.status[i, o, t]) * m.flows[i, o].investment.maximum
+                self.invest[i, o, p]
+                - (1 - self.status[i, o, t])
+                * m.flows[i, o].investment.maximum[p]
                 <= self.status_nominal[i, o, t]
             )
             return expr
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMESTEPS,
+            m.TIMEINDEX,
             rule=_linearization_rule_invest_non_convex_three,
         )
 
@@ -270,10 +273,11 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         investment_costs = 0
 
         for i, o in self.INVEST_NON_CONVEX_FLOWS:
-            investment_costs += (
-                self.invest[i, o] * m.flows[i, o].investment.ep_costs
-                + m.flows[i, o].investment.offset
-            )
+            for p in m.PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
+                    + m.flows[i, o].investment.offset[p]
+                )
 
         self.investment_costs = Expression(expr=investment_costs)
 
@@ -292,12 +296,22 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         """
         m = self.parent_block()
 
-        def _min_invest_rule(_, i, o):
+        def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            expr = m.flows[i, o].investment.minimum <= self.invest[i, o]
-            return expr
+            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+                for p in m.PERIODS:
+                    expr = (
+                        m.flows[i, o].investment.minimum[p]
+                        <= self.invest[i, o, p]
+                    )
+                    self.minimum_investment.add((i, o, p), expr)
 
-        return Constraint(self.INVEST_NON_CONVEX_FLOWS, rule=_min_invest_rule)
+        self.minimum_investment = Constraint(
+            self.INVEST_NON_CONVEX_FLOWS, m.PERIODS, noruleinit=True
+        )
+        self.minimum_rule_build = BuildAction(rule=_min_invest_rule)
+
+        return self.minimum_investment
 
     def _maximum_invest_constraint(self):
         r"""
@@ -306,9 +320,19 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         """
         m = self.parent_block()
 
-        def _max_invest_rule(_, i, o):
+        def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            expr = self.invest[i, o] <= m.flows[i, o].investment.maximum
-            return expr
+            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+                for p in m.PERIODS:
+                    expr = (
+                        self.invest[i, o, p]
+                        <= m.flows[i, o].investment.maximum[p]
+                    )
+                    self.maximum_investment.add((i, o, p), expr)
 
-        return Constraint(self.INVEST_NON_CONVEX_FLOWS, rule=_max_invest_rule)
+        self.maximum_investment = Constraint(
+            self.INVEST_NON_CONVEX_FLOWS, m.PERIODS, noruleinit=True
+        )
+        self.maximum_rule_build = BuildAction(rule=_max_invest_rule)
+
+        return self.maximum_investment

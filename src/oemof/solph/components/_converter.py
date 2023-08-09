@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: David Fuhrländer
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -180,12 +181,12 @@ class ConverterBlock(ScalarBlock):
 
     Linear relation :attr:`om.ConverterBlock.relation[i,o,t]`
         .. math::
-            P_{i}(t) \cdot \eta_{o}(t) =
-            P_{o}(t) \cdot \eta_{i}(t), \\
-            \forall t \in \textrm{TIMESTEPS}, \\
+            P_{i}(p, t) \cdot \eta_{o}(t) =
+            P_{o}(p, t) \cdot \eta_{i}(t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
             \forall n \in \textrm{CONVERTERS}, \\
-            \forall i \in \textrm{INPUTS(n)}, \\
-            \forall o \in \textrm{OUTPUTS(n)},
+            \forall i \in \textrm{INPUTS}, \\
+            \forall o \in \textrm{OUTPUTS}
 
     While INPUTS is the set of Bus objects connected with the input of the
     Transformer and OUPUTS the set of Bus objects connected with the output of
@@ -195,15 +196,15 @@ class ConverterBlock(ScalarBlock):
     constraints.
 
     The index :math: n is the index for the Transformer node itself. Therefore,
-    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
-    time step t.
+    a `flow[i, n, p, t]` is a flow from the Bus i to the Transformer n at
+    time index p, t.
 
     ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  ====================
-    :math:`P_{i,n}(t)`      `flow[i, n, t]`               Converter inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Converter, inflow
 
-    :math:`P_{n,o}(t)`      `flow[n, o, t]`               Converter outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Converter, outflow
 
     :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
@@ -242,8 +243,8 @@ class ConverterBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, t)
-                for t in m.TIMESTEPS
+                (n, i, o, p, t)
+                for p, t in m.TIMEINDEX
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -252,17 +253,17 @@ class ConverterBlock(ScalarBlock):
         )
 
         def _input_output_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
                                 lhs = (
-                                    m.flow[i, n, t]
+                                    m.flow[i, n, p, t]
                                     * n.conversion_factors[o][t]
                                 )
                                 rhs = (
-                                    m.flow[n, o, t]
+                                    m.flow[n, o, p, t]
                                     * n.conversion_factors[i][t]
                                 )
                             except ValueError:
@@ -272,6 +273,6 @@ class ConverterBlock(ScalarBlock):
                                         n.label, o.label
                                     ),
                                 )
-                            block.relation.add((n, i, o, t), (lhs == rhs))
+                            block.relation.add((n, i, o, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)

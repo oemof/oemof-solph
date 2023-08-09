@@ -45,7 +45,10 @@ def test_generic_storage_1():
 def test_generic_storage_2():
     """Nominal value defined with investment model."""
     bel = Bus()
-    with pytest.raises(AttributeError, match="If an investment object"):
+    with pytest.raises(
+        AttributeError,
+        match="For backward compatibility, the option investment overwrites",
+    ):
         components.GenericStorage(
             label="storage3",
             nominal_storage_capacity=45,
@@ -116,7 +119,7 @@ def test_generic_storage_with_non_convex_investment():
 def test_generic_storage_with_non_convex_invest_maximum():
     """No investment maximum at nonconvex investment."""
     with pytest.raises(
-        AttributeError, match=r"Please provide an maximum investment value"
+        AttributeError, match=r"Please provide a maximum investment value"
     ):
         bel = Bus()
         components.GenericStorage(
@@ -232,7 +235,11 @@ def test_offsetconverter_investment_on_inputs():
         b_diesel = Bus(label="bus_diesel")
         components.OffsetConverter(
             inputs={b_diesel: Flow(investment=Investment())},
-            outputs={b_diesel: Flow(nonconvex=NonConvex(), investment=Investment(maximum=1))},
+            outputs={
+                b_diesel: Flow(
+                    nonconvex=NonConvex(), investment=Investment(maximum=1)
+                )
+            },
             coefficients=(2.5, 0.5),
         )
 

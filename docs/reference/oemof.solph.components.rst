@@ -57,6 +57,14 @@ OffsetConverter
     :undoc-members:
     :show-inheritance:
 
+Link
+----
+
+.. automodule:: oemof.solph.components._link
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 experimental.ElectricalLine
 ---------------------------
 
@@ -73,17 +81,8 @@ experimental.GenericCAES
     :undoc-members:
     :show-inheritance:
 
-experimental.Link
------------------
-
-.. automodule:: oemof.solph.components.experimental._link
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 experimental.PiecewiseLinearConverter
 -------------------------------------
-
 .. automodule:: oemof.solph.components.experimental._piecewise_linear_converter
     :members:
     :undoc-members:

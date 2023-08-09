@@ -69,12 +69,7 @@ def main():
 
     # Import data.
     filename = os.path.join(os.getcwd(), "solar_generation.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    data = pd.read_csv(filename)
 
     # Change the index of data to be able to select data based on the time
     # range.
@@ -174,7 +169,7 @@ def main():
             )
         },
         outputs={b_el_dc: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_dc: 0.98,
         },
     )
@@ -193,7 +188,7 @@ def main():
             )
         },
         outputs={b_el_ac: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_ac: 0.98,
         },
     )

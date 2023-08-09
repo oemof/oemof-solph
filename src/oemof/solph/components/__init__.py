@@ -15,6 +15,7 @@ from ._converter import Transformer
 from ._extraction_turbine_chp import ExtractionTurbineCHP
 from ._generic_chp import GenericCHP
 from ._generic_storage import GenericStorage
+from ._link import Link
 from ._offset_converter import OffsetConverter
 from ._offset_converter import OffsetTransformer
 from ._sink import Sink
@@ -27,6 +28,7 @@ __all__ = [
     "GenericCHP",
     "GenericStorage",
     "OffsetConverter",
+    "Link",
     "OffsetTransformer",
     "Sink",
     "Transformer",
