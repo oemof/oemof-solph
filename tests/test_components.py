@@ -201,6 +201,7 @@ def test_offsetconverter_without_nonconvex():
         b_el = Bus(label="bus_electricity")
         components.OffsetConverter(
             label="diesel_genset",
+            inputs={b_el: Flow()},
             outputs={b_el: Flow()},
             coefficients=(2.5, 0.5),
         )
@@ -216,6 +217,7 @@ def test_offsetconverter_nonconvex_on_inputs():
         b_diesel = Bus(label="bus_diesel")
         components.OffsetConverter(
             inputs={b_diesel: Flow(nonconvex=NonConvex())},
+            outputs={b_diesel: Flow(nonconvex=NonConvex())},
             coefficients=(2.5, 0.5),
         )
 
@@ -230,6 +232,7 @@ def test_offsetconverter_investment_on_inputs():
         b_diesel = Bus(label="bus_diesel")
         components.OffsetConverter(
             inputs={b_diesel: Flow(investment=Investment())},
+            outputs={b_diesel: Flow(nonconvex=NonConvex(), investment=Investment(maximum=1))},
             coefficients=(2.5, 0.5),
         )
 
@@ -242,7 +245,7 @@ def test_offsetconverter_not_enough_coefficients():
         bus = Bus(label="Bus")
         components.OffsetConverter(
             label="of1",
-            inputs={bus: Flow(nonconvex=NonConvex())},
+            inputs={bus: Flow()},
             outputs={bus: Flow(nonconvex=NonConvex())},
             coefficients=([1, 4, 7]),
         )
@@ -256,7 +259,7 @@ def test_offsetconverter_too_many_coefficients():
         bus = Bus(label="Bus")
         components.OffsetConverter(
             label="of2",
-            inputs={bus: Flow(nonconvex=NonConvex())},
+            inputs={bus: Flow()},
             outputs={bus: Flow(nonconvex=NonConvex())},
             coefficients=(1, 4, 7),
         )
@@ -276,7 +279,7 @@ def test_offsettransformer__too_many_input_flows():
                 b_gas: Flow(),
                 b_coal: Flow(),
             },
-            outputs={bcoal: Flow(nonconvex=NonConvex())},
+            outputs={b_coal: Flow(nonconvex=NonConvex())},
             coefficients=(20, 0.5),
         )
 
@@ -292,6 +295,9 @@ def test_offsetconverter_too_many_output_flows():
         b_th = Bus(label="bus_thermal")
 
         components.OffsetConverter(
+            inputs={
+                b_el: Flow(),
+            },
             outputs={
                 b_el: Flow(nonconvex=NonConvex()),
                 b_th: Flow(nonconvex=NonConvex()),

@@ -1254,14 +1254,16 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
-        converter = solph.components.OffsetConverter(
-            label="gasboiler",
+        solph.components.OffsetConverter(
+            label="diesel_genset",
             inputs={
-                bgas: solph.flows.Flow(
+                b_diesel: solph.flows.Flow(),
+            },
+            outputs={
+                b_el: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
                     min=0.2,
-                    nonconvex=solph.NonConvex(),
                 )
             },
             coefficients=[2.5, 0.5],
@@ -1275,7 +1277,7 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
-        solph.components.OffsetConverter(
+        converter = solph.components.OffsetConverter(
             label="diesel_genset",
             inputs={b_diesel: solph.flows.Flow()},
             outputs={
@@ -1291,7 +1293,7 @@ class TestsConstraint:
             },
             coefficients=[2.5, 0.5],
         )
-        self.energysystem.add(bgas, bth, transformer)
+        self.energysystem.add(b_diesel, b_el, converter)
 
         self.compare_lp_files("offsetconverter_nonconvex_investment.lp")
 
