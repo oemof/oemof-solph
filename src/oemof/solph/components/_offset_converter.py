@@ -231,13 +231,16 @@ class OffsetConverterBlock(ScalarBlock):
                                 * n.coefficients[0][t]
                             )
                             # `Y(t)` in the last term of the constraint
-                            # (":math:`C_0(t) \cdot Y(t)`") is different for different cases.
-                            # If both `Investment` and `NonConvex` attributes are used for the
+                            # (":math:`C_0(t) \cdot Y(t)`") is different for
+                            # different cases. If both `Investment` and
+                            # `NonConvex` attributes are used for the
                             # `OffsetConverter`, `Y(t)` would represent the
-                            # `status_nominal[n,o,t]` in the `InvestNonConvexFlow`.
-                            # But if only the `NonConvex` attribute is defined for the
-                            # `OffsetConverter`, `Y(t)` would correspond to the
-                            # `status_nominal[n,o,t]` in the `NonConvexFlow`.
+                            # `status_nominal[n,o,t]` in the
+                            # `InvestNonConvexFlow`. But if only the
+                            # `NonConvex` attribute is defined for the
+                            # `OffsetConverter`, `Y(t)` would correspond to
+                            # the `status_nominal[n,o,t]` in the
+                            # `NonConvexFlow`.
                             try:
                                 expr += (
                                     m.InvestNonConvexFlowBlock.status_nominal[
@@ -245,14 +248,16 @@ class OffsetConverterBlock(ScalarBlock):
                                     ]
                                     * n.coefficients[0][t]
                                 )
-                            # `KeyError` occurs when more than one `OffsetConverter` is
-                            # defined, and in some of them only the `NonConvex` attribute is
-                            # considered, while in others both `NonConvex` and `Investment`
-                            # attributes are defined.
-                            # `AttributeError` only occurs when the `OffsetConverter` has
-                            # only the `NonConvex` attribute, and therefore,
-                            # `m.InvestNonConvexFlowBlock.status_nominal` (inside the `try`
-                            # block) does not exist.
+                            # `KeyError` occurs when more than one
+                            # `OffsetConverter` is defined, and in some of
+                            # them only the `NonConvex` attribute is
+                            # considered, while in others both `NonConvex`
+                            # and `Investment` attributes are defined.
+                            # `AttributeError` only occurs when the
+                            # `OffsetConverter` has only the `NonConvex`
+                            # attribute, and therefore,
+                            # `m.InvestNonConvexFlowBlock.status_nominal`
+                            # (inside the `try` block) does not exist.
                             except (KeyError, AttributeError):
                                 expr += (
                                     m.NonConvexFlowBlock.status_nominal[
