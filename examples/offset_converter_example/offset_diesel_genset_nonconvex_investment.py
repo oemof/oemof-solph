@@ -180,7 +180,7 @@ rectifier = solph.components.Converter(
         )
     },
     outputs={b_el_dc: solph.flows.Flow()},
-    conversion_factor={
+    conversion_factors={
         b_el_dc: 0.98,
     },
 )
@@ -199,7 +199,7 @@ inverter = solph.components.Converter(
         )
     },
     outputs={b_el_ac: solph.flows.Flow()},
-    conversion_factor={
+    conversion_factors={
         b_el_ac: 0.98,
     },
 )
