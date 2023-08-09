@@ -22,6 +22,7 @@ SPDX-License-Identifier: MIT
 from warnings import warn
 
 from oemof.network import network
+from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
@@ -160,7 +161,7 @@ class OffsetConverterBlock(ScalarBlock):
 
     .. math::
         &
-        P_{in}(p, t) = C_1(t) \cdot P_{out}(p, t) + C_0(t) \cdot Y(p, t) \\
+        P_{in}(p, t) = C_1(t) \cdot P_{out}(p, t) + C_0(t) \cdot P_max(p) \cdot Y(t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
@@ -168,16 +169,21 @@ class OffsetConverterBlock(ScalarBlock):
     +--------------------+------------------------+------+--------------------------------------------+
     | symbol             | attribute              | type | explanation                                |
     +====================+========================+======+============================================+
-    | :math:`P_{out}(t)` | `flow[n,o,p,t]`        | V    | Outflow of transformer                     |
+    | :math:`P_{out}(t)` | `flow[n,o,p,t]`        | V    | Outflow of converter                       |
     +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`        | V    | Inflow of transformer                      |
+    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`        | V    | Inflow of converter                        |
     +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`Y(t)`       | `status[i,n,t]`        | V    | Binary status variable of nonconvex inflow |
+    | :math:`Y(t)`       |                        | V    | Binary status variable of nonconvex inflow |
+    +--------------------+------------------------+------+--------------------------------------------+
+    | :math:`P_{max}(t)` |                        | V    | Maximum Outflow of converter               |
     +--------------------+------------------------+------+--------------------------------------------+
     | :math:`C_1(t)`     | `coefficients[1][n,t]` | P    | Linear coefficient 1 (slope)               |
     +--------------------+------------------------+------+--------------------------------------------+
     | :math:`C_0(t)`     | `coefficients[0][n,t]` | P    | Linear coefficient 0 (y-intersection)      |
     +--------------------+------------------------+------+--------------------------------------------+
+
+    Note that :math:`P_{max}(t) \cdot Y(t)` is merged into one variable,
+    called `status_nominal[n, o, p, t]`.
     """  # noqa: E501
     CONSTRAINT_GROUP = True
 
@@ -226,10 +232,6 @@ class OffsetConverterBlock(ScalarBlock):
                             expr = 0
                             expr += -m.flow[n, o, p, t]
                             expr += m.flow[i, n, p, t] * n.coefficients[1][t]
-                            expr += (
-                                m.NonConvexFlowBlock.status[i, n, t]
-                                * n.coefficients[0][t]
-                            )
                             # `Y(t)` in the last term of the constraint
                             # (":math:`C_0(t) \cdot Y(t)`") is different for
                             # different cases. If both `Investment` and
@@ -266,3 +268,5 @@ class OffsetConverterBlock(ScalarBlock):
                                     * n.coefficients[0][t]
                                 )
                             block.relation.add((n, i, o, p, t), (expr == 0))
+
+        self.relation_build = BuildAction(rule=_relation_rule)

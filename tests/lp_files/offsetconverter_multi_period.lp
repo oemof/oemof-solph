@@ -144,6 +144,42 @@ c_u_NonConvexFlowBlock_max(gasboiler_thermalBus_2_5)_:
 -1 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5)
 <= 0
 
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_0_0)_:
++0.9 flow(gasBus_gasboiler_0_0)
+-1 flow(gasboiler_thermalBus_0_0)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_0)
+= 0
+
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_0_1)_:
++0.9 flow(gasBus_gasboiler_0_1)
+-1 flow(gasboiler_thermalBus_0_1)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_1)
+= 0
+
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_1_2)_:
++0.9 flow(gasBus_gasboiler_1_2)
+-1 flow(gasboiler_thermalBus_1_2)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_2)
+= 0
+
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_1_3)_:
++0.9 flow(gasBus_gasboiler_1_3)
+-1 flow(gasboiler_thermalBus_1_3)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_3)
+= 0
+
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_2_4)_:
++0.9 flow(gasBus_gasboiler_2_4)
+-1 flow(gasboiler_thermalBus_2_4)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_4)
+= 0
+
+c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_2_5)_:
++0.9 flow(gasBus_gasboiler_2_5)
+-1 flow(gasboiler_thermalBus_2_5)
+-17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5)
+= 0
+
 bounds
 1 <= ONE_VAR_CONSTANT <= 1
 0 <= flow(gasboiler_thermalBus_0_0) <= 100
