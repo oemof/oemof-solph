@@ -65,5 +65,5 @@ class Sink(on.Sink):
 
         super().__init__(label=label, inputs=inputs, **custom_attributes)
 
-    def constraint_group(self):
+    def constraint_group(_):
         pass
