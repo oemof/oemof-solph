@@ -757,9 +757,7 @@ class TestsMultiPeriodConstraint:
             conversion_factors={bgas: 0.58, bcoal: 0.2, bel: 0.3, bth: 0.5},
         )
         self.energysystem.add(bgas, bcoal, bel, bth, trf)
-        self.compare_lp_files(
-            "converter_invest_with_existing_multi_period.lp"
-        )
+        self.compare_lp_files("converter_invest_with_existing_multi_period.lp")
 
     def test_linear_converter_chp(self):
         """
@@ -1378,9 +1376,7 @@ class TestsMultiPeriodConstraint:
             pw_repn="CC",
         )
         self.energysystem.add(bgas, bel, pwltf)
-        self.compare_lp_files(
-            "piecewise_linear_converter_cc_multi_period.lp"
-        )
+        self.compare_lp_files("piecewise_linear_converter_cc_multi_period.lp")
 
     def test_piecewise_linear_converter_dcc(self):
         """Testing PiecewiseLinearConverter using DCC formulation."""
@@ -1397,9 +1393,7 @@ class TestsMultiPeriodConstraint:
             pw_repn="DCC",
         )
         self.energysystem.add(bgas, bel, pwltf)
-        self.compare_lp_files(
-            "piecewise_linear_converter_dcc_multi_period.lp"
-        )
+        self.compare_lp_files("piecewise_linear_converter_dcc_multi_period.lp")
 
     def test_maximum_startups(self):
         """Testing maximum_startups attribute for nonconvex flows."""

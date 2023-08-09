@@ -225,10 +225,7 @@ class OffsetConverterBlock(ScalarBlock):
                         for i in in_flows[n]:
                             expr = 0
                             expr += -m.flow[n, o, p, t]
-                            expr += (
-                                m.flow[i, n, p, t]
-                                * n.coefficients[1][t]
-                            )
+                            expr += m.flow[i, n, p, t] * n.coefficients[1][t]
                             expr += (
                                 m.NonConvexFlowBlock.status[i, n, t]
                                 * n.coefficients[0][t]
