@@ -91,7 +91,7 @@ class OffsetConverter(network.Transformer):
         # `InvestNonConvexFlow` will be used in the definition of constraints,
         # otherwise, the `NonConvexFlow` will be used.
         if len(self.outputs):
-            for k, v in self.outputs.items():
+            for v in self.outputs.values():
                 if not v.nonconvex:
                     raise TypeError(
                         "Output flow must have the `NonConvex` attribute!"
@@ -100,7 +100,7 @@ class OffsetConverter(network.Transformer):
         # `Investment` and `NonConvex` attributes cannot be defined for the
         # input flow.
         if len(self.inputs):
-            for k, v in self.inputs.items():
+            for v in self.inputs.values():
                 if v.investment:
                     raise TypeError(
                         "`Investment` attribute must be defined only for the "
