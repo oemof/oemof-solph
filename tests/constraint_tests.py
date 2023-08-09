@@ -1248,26 +1248,52 @@ class TestsConstraint:
         self.energysystem.add(bus_t, pp)
         self.compare_lp_files("maximum_shutdowns.lp")
 
-    def test_offsetconverter(self):
-        """Constraint test of a OffsetConverter."""
-        bgas = solph.buses.Bus(label="gasBus")
-        bth = solph.buses.Bus(label="thermalBus")
+    def test_offsetconverter_nonconvex(self):
+        """Constraint test of an OffsetConverter only with NonConvex
+        attribute."""
+        b_diesel = solph.buses.Bus(label="bus_diesel")
+        b_el = solph.buses.Bus(label="bus_electricity")
 
-        transformer = solph.components.OffsetConverter(
+        converter = solph.components.OffsetConverter(
             label="gasboiler",
             inputs={
                 bgas: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    min=0.32,
+                    min=0.2,
+                    nonconvex=solph.NonConvex(),
                 )
             },
-            outputs={bth: solph.flows.Flow()},
-            coefficients=[-17, 0.9],
+            coefficients=[2.5, 0.5],
+        )
+
+        self.compare_lp_files("offsetconverter_nonconvex.lp")
+
+    def test_offsetconverter_nonconvex_investment(self):
+        """Constraint test of an OffsetConverter with both NonConvex and
+        Investment attributes."""
+        b_diesel = solph.buses.Bus(label="bus_diesel")
+        b_el = solph.buses.Bus(label="bus_electricity")
+
+        solph.components.OffsetConverter(
+            label="diesel_genset",
+            inputs={b_diesel: solph.flows.Flow()},
+            outputs={
+                b_el: solph.flows.Flow(
+                    nominal_value=None,
+                    min=0.2,
+                    nonconvex=solph.NonConvex(),
+                    investment=solph.Investment(
+                        ep_costs=100,
+                        maximum=1234,
+                    ),
+                )
+            },
+            coefficients=[2.5, 0.5],
         )
         self.energysystem.add(bgas, bth, transformer)
 
-        self.compare_lp_files("offset_converter.lp")
+        self.compare_lp_files("offsetconverter_nonconvex_investment.lp")
 
     def test_dsm_module_DIW(self):
         """Constraint test of SinkDSM with approach=DLR"""
