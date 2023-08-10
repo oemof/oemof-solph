@@ -49,6 +49,7 @@ Bug fixes
 
 * Fixed error when calling `oemof_installation_test` as console script.
 * Corrected several typos in the docs.
+* Add missing 'custom_attributes' for the link component
 
 Testing
 #######

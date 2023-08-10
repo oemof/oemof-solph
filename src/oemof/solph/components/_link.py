@@ -84,6 +84,7 @@ class Link(on.Transformer):
         inputs=None,
         outputs=None,
         conversion_factors=None,
+        custom_attributes=None,
     ):
         if inputs is None:
             warn_if_missing_attribute(self, "inputs")
@@ -94,10 +95,13 @@ class Link(on.Transformer):
         if conversion_factors is None:
             warn_if_missing_attribute(self, "conversion_factors")
             conversion_factors = {}
+        if custom_attributes is None:
+            custom_attributes = {}
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
+            **custom_attributes,
         )
         self.conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
@@ -118,7 +122,7 @@ class Link(on.Transformer):
         ):
             warn(msg, debugging.SuspiciousUsageWarning)
 
-    def constraint_group(_):
+    def constraint_group(self):
         return LinkBlock
 
 

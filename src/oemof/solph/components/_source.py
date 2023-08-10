@@ -75,5 +75,5 @@ class Source(on.Source):
 
         super().__init__(label=label, outputs=outputs, **custom_attributes)
 
-    def constraint_group(_):
+    def constraint_group(self):
         pass

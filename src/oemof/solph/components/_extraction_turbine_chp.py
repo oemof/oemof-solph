@@ -91,7 +91,7 @@ class ExtractionTurbineCHP(Converter):
             for k, v in conversion_factor_full_condensation.items()
         }
 
-    def constraint_group(_):
+    def constraint_group(self):
         return ExtractionTurbineCHPBlock
 
 

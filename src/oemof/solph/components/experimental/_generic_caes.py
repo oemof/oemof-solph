@@ -110,7 +110,7 @@ class GenericCAES(on.Transformer):
         self.inputs.update(kwargs.get("fuel_input"))
         self.outputs.update(kwargs.get("electrical_output"))
 
-    def constraint_group(_):
+    def constraint_group(self):
         return GenericCAESBlock
 
 
