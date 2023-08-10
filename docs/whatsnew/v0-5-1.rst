@@ -43,12 +43,14 @@ Bug fixes
 
 * Fixed error when calling `oemof_installation_test` as console script.
 * Corrected several typos in the docs.
+* Periods with multiple period lengths are now supported in multi-period investment.
 * Add missing 'custom_attributes' for the link component
 
 Testing
 #######
 
 * Add tests for experimental SinkDSM component.
+* Add tests for multi-period investment.
 
 Other changes
 #############

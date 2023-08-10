@@ -64,8 +64,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 

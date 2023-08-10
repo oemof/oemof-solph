@@ -41,16 +41,16 @@ Jonathan Amme <jonathan.amme@rl-institut.de>
 
 """
 
-import os
 import logging
-import pandas as pd
+import os
 
-from oemof.tools import logger
-from oemof import solph
-
-from oemof.network.graph import create_nx_graph
-from matplotlib import pyplot as plt
 import networkx as nx
+import pandas as pd
+from matplotlib import pyplot as plt
+from oemof.network.graph import create_nx_graph
+from oemof.tools import logger
+
+from oemof import solph
 
 
 def nodes_from_excel(filename):

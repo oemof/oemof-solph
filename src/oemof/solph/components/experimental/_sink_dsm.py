@@ -25,7 +25,7 @@ SPDX-License-Identifier: MIT
 import itertools
 from warnings import warn
 
-from numpy import mean
+import numpy as np
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
@@ -305,8 +305,8 @@ class SinkDSM(Sink):
         self.cost_dsm_down_shift = sequence(cost_dsm_down_shift)
         self.cost_dsm_down_shed = sequence(cost_dsm_down_shed)
         self.efficiency = efficiency
-        self.capacity_down_mean = mean(capacity_down)
-        self.capacity_up_mean = mean(capacity_up)
+        self.capacity_down_mean = np.mean(capacity_down)
+        self.capacity_up_mean = np.mean(capacity_up)
         self.recovery_time_shift = recovery_time_shift
         self.recovery_time_shed = recovery_time_shed
         self.ActivateYearLimit = ActivateYearLimit
@@ -963,28 +963,99 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime
+                capacity to be decommissioned due to reaching its lifetime.
+                Investment and decommissioning periods are linked within
+                the constraint. The respective decommissioning period is
+                determined for every investment period based on the components
+                lifetime and a matrix describing its age of each endogenous
+                investment. Decommissioning can only occur at the beginning of
+                each period.
+
+                Note
+                ----
+                For further information on the implementation check
+                PR#957 https://github.com/oemof/oemof-solph/pull/957
                 """
                 for g in group:
                     lifetime = g.investment.lifetime
+                    if lifetime is None:
+                        msg = (
+                            "You have to specify a lifetime "
+                            "for a Flow with an associated "
+                            "investment object in "
+                            f"a multi-period model! Value for {(g)} "
+                            "is missing."
+                        )
+                        raise ValueError(msg)
+
+                    # get the period matrix describing the temporal distance
+                    # between all period combinations.
+                    periods_matrix = m.es.periods_matrix
+
+                    # get the index of the minimum value in each row greater
+                    # equal than the lifetime. This value equals the
+                    # decommissioning period if not zero. The index of this
+                    # value represents the investment period. If np.where
+                    # condition is not met in any row, min value will be zero
+                    decomm_periods = np.argmin(
+                        np.where(
+                            (periods_matrix >= lifetime),
+                            periods_matrix,
+                            np.inf,
+                        ),
+                        axis=1,
+                    )
+
+                    # no decommissioning in first period
+                    expr = self.old_end[g, 0] == 0
+                    self.old_dsm_rule_end.add((g, 0), expr)
+
+                    # all periods not in decomm_periods have no decommissioning
+                    # zero is excluded
                     for p in m.PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
+                        if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
-                        elif lifetime <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in enumerate(m.es.periods_years):
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            expr = self.old_end[g, p] == self.invest[g, comm_p]
-                            self.old_dsm_rule_end.add((g, p), expr)
+
+                    # multiple invests can be decommissioned in the same period
+                    # but only sequential ones, thus a bookkeeping is
+                    # introduced andconstraints are added to equation one
+                    # iteration later.
+                    last_decomm_p = np.nan
+                    # loop over invest periods (values are decomm_periods)
+                    for invest_p, decomm_p in enumerate(decomm_periods):
+                        # Add constraint of iteration before
+                        # (skipped in first iteration by last_decomm_p = nan)
+                        if (decomm_p != last_decomm_p) and (
+                            last_decomm_p is not np.nan
+                        ):
+                            expr = self.old_end[g, last_decomm_p] == expr
+                            self.old_dsm_rule_end.add((g, last_decomm_p), expr)
+
+                        # no decommissioning if decomm_p is zero
+                        if decomm_p == 0:
+                            # overwrite decomm_p with zero to avoid
+                            # chaining invest periods in next iteration
+                            last_decomm_p = 0
+
+                        # if decomm_p is the same as the last one chain invest
+                        # period
+                        elif decomm_p == last_decomm_p:
+                            expr += self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                        # if decomm_p is not zero, not the same as the last one
+                        # and it's not the first period
                         else:
-                            expr = self.old_end[g, p] == 0
-                            self.old_dsm_rule_end.add((g, p), expr)
+                            expr = self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                    # Add constraint of very last iteration
+                    if last_decomm_p != 0:
+                        expr = self.old_end[g, last_decomm_p] == expr
+                        self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
                 group, m.PERIODS, noruleinit=True
@@ -2283,28 +2354,98 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime
+                capacity to be decommissioned due to reaching its lifetime.
+                Investment and decommissioning periods are linked within
+                the constraint. The respective decommissioning period is
+                determined for every investment period based on the components
+                lifetime and a matrix describing its age of each endogenous
+                investment. Decommissioning can only occur at the beginning of
+                each period.
+
+                Note
+                ----
+                For further information on the implementation check
+                PR#957 https://github.com/oemof/oemof-solph/pull/957
                 """
                 for g in group:
                     lifetime = g.investment.lifetime
+                    if lifetime is None:
+                        msg = (
+                            "You have to specify a lifetime "
+                            "for a Flow with an associated "
+                            "investment object in "
+                            f"a multi-period model! Value for {g} "
+                            "is missing."
+                        )
+                        raise ValueError(msg)
+                    # get the period matrix describing the temporal distance
+                    # between all period combinations.
+                    periods_matrix = m.es.periods_matrix
+
+                    # get the index of the minimum value in each row greater
+                    # equal than the lifetime. This value equals the
+                    # decommissioning period if not zero. The index of this
+                    # value represents the investment period. If np.where
+                    # condition is not met in any row, min value will be zero
+                    decomm_periods = np.argmin(
+                        np.where(
+                            (periods_matrix >= lifetime),
+                            periods_matrix,
+                            np.inf,
+                        ),
+                        axis=1,
+                    )
+
+                    # no decommissioning in first period
+                    expr = self.old_end[g, 0] == 0
+                    self.old_dsm_rule_end.add((g, 0), expr)
+
+                    # all periods not in decomm_periods have no decommissioning
+                    # zero is excluded
                     for p in m.PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
+                        if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
-                        elif lifetime <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in enumerate(m.es.periods_years):
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            expr = self.old_end[g, p] == self.invest[g, comm_p]
-                            self.old_dsm_rule_end.add((g, p), expr)
+
+                    # multiple invests can be decommissioned in the same period
+                    # but only sequential ones, thus a bookkeeping is
+                    # introduced andconstraints are added to equation one
+                    # iteration later.
+                    last_decomm_p = np.nan
+                    # loop over invest periods (values are decomm_periods)
+                    for invest_p, decomm_p in enumerate(decomm_periods):
+                        # Add constraint of iteration before
+                        # (skipped in first iteration by last_decomm_p = nan)
+                        if (decomm_p != last_decomm_p) and (
+                            last_decomm_p is not np.nan
+                        ):
+                            expr = self.old_end[g, last_decomm_p] == expr
+                            self.old_dsm_rule_end.add((g, last_decomm_p), expr)
+
+                        # no decommissioning if decomm_p is zero
+                        if decomm_p == 0:
+                            # overwrite decomm_p with zero to avoid
+                            # chaining invest periods in next iteration
+                            last_decomm_p = 0
+
+                        # if decomm_p is the same as the last one chain invest
+                        # period
+                        elif decomm_p == last_decomm_p:
+                            expr += self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                        # if decomm_p is not zero, not the same as the last one
+                        # and it's not the first period
                         else:
-                            expr = self.old_end[g, p] == 0
-                            self.old_dsm_rule_end.add((g, p), expr)
+                            expr = self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                    # Add constraint of very last iteration
+                    if last_decomm_p != 0:
+                        expr = self.old_end[g, last_decomm_p] == expr
+                        self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
                 group, m.PERIODS, noruleinit=True
@@ -4378,28 +4519,99 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime
+                capacity to be decommissioned due to reaching its lifetime.
+                Investment and decommissioning periods are linked within
+                the constraint. The respective decommissioning period is
+                determined for every investment period based on the components
+                lifetime and a matrix describing its age of each endogenous
+                investment. Decommissioning can only occur at the beginning of
+                each period.
+
+                Note
+                ----
+                For further information on the implementation check
+                PR#957 https://github.com/oemof/oemof-solph/pull/957
                 """
                 for g in group:
                     lifetime = g.investment.lifetime
+                    if lifetime is None:
+                        msg = (
+                            "You have to specify a lifetime "
+                            "for a Flow with an associated "
+                            "investment object in "
+                            f"a multi-period model! Value for {(g)} "
+                            "is missing."
+                        )
+                        raise ValueError(msg)
+
+                    # get the period matrix describing the temporal distance
+                    # between all period combinations.
+                    periods_matrix = m.es.periods_matrix
+
+                    # get the index of the minimum value in each row greater
+                    # equal than the lifetime. This value equals the
+                    # decommissioning period if not zero. The index of this
+                    # value represents the investment period. If np.where
+                    # condition is not met in any row, min value will be zero
+                    decomm_periods = np.argmin(
+                        np.where(
+                            (periods_matrix >= lifetime),
+                            periods_matrix,
+                            np.inf,
+                        ),
+                        axis=1,
+                    )
+
+                    # no decommissioning in first period
+                    expr = self.old_end[g, 0] == 0
+                    self.old_dsm_rule_end.add((g, 0), expr)
+
+                    # all periods not in decomm_periods have no decommissioning
+                    # zero is excluded
                     for p in m.PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
+                        if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
-                        elif lifetime <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in enumerate(m.es.periods_years):
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            expr = self.old_end[g, p] == self.invest[g, comm_p]
-                            self.old_dsm_rule_end.add((g, p), expr)
+
+                    # multiple invests can be decommissioned in the same period
+                    # but only sequential ones, thus a bookkeeping is
+                    # introduced andconstraints are added to equation one
+                    # iteration later.
+                    last_decomm_p = np.nan
+                    # loop over invest periods (values are decomm_periods)
+                    for invest_p, decomm_p in enumerate(decomm_periods):
+                        # Add constraint of iteration before
+                        # (skipped in first iteration by last_decomm_p = nan)
+                        if (decomm_p != last_decomm_p) and (
+                            last_decomm_p is not np.nan
+                        ):
+                            expr = self.old_end[g, last_decomm_p] == expr
+                            self.old_dsm_rule_end.add((g, last_decomm_p), expr)
+
+                        # no decommissioning if decomm_p is zero
+                        if decomm_p == 0:
+                            # overwrite decomm_p with zero to avoid
+                            # chaining invest periods in next iteration
+                            last_decomm_p = 0
+
+                        # if decomm_p is the same as the last one chain invest
+                        # period
+                        elif decomm_p == last_decomm_p:
+                            expr += self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                        # if decomm_p is not zero, not the same as the last one
+                        # and it's not the first period
                         else:
-                            expr = self.old_end[g, p] == 0
-                            self.old_dsm_rule_end.add((g, p), expr)
+                            expr = self.invest[g, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                    # Add constraint of very last iteration
+                    if last_decomm_p != 0:
+                        expr = self.old_end[g, last_decomm_p] == expr
+                        self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
                 group, m.PERIODS, noruleinit=True

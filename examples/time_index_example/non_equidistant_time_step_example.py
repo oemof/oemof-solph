@@ -26,6 +26,7 @@ This example requires oemof.solph, install by:
     pip install oemof.solph
 """
 import pandas as pd
+
 from oemof import solph
 
 try:

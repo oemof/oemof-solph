@@ -1030,7 +1030,10 @@ First, you start by defining your energy system as you might have done before, b
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
 If you want to use a multi-period model you have define periods of your energy system explicitly. This way,
-you are forced to critically think, e.g. about handling leap years, and take some design decisions.
+you are forced to critically think, e.g. about handling leap years, and take some design decisions. It is possible to
+define periods with different lengths, but remember that decommissioning of components is possible only at the
+beginning of each period. This means that if the life of a component is just a little longer, it will remain for the
+entire next period. This can have a particularly large impact the longer your periods are.
 
 To assist you, here is a plain python snippet that includes leap years which you can just copy
 and adjust to your needs:
@@ -1268,18 +1271,18 @@ Besides the `invest` variable, new variables are introduced as well. These are:
 Modelling cellular energy systems and modularizing energy system models
 -----------------------------------------------------------------------
 
-The cellular approach is a concept proposed by the [VDE-ETG](https://shop.vde.com/en/vde-study-the-cellular-approach). It is 
-related to smart-grids and multi-microgrid systems but extends both. The idea is to group the components of an energy system 
-into a hierarchically aggregating structure of cells. For example, the sources, sinks, storages and converters of a household 
-could be a single cell. Then a group of physically neighboring households could form another cell, consisting of household-cells. 
-This behaviour can be scaled up. The real game-changer in the cellular approach is the way the cells are operated, which will 
+The cellular approach is a concept proposed by the [VDE-ETG](https://shop.vde.com/en/vde-study-the-cellular-approach). It is
+related to smart-grids and multi-microgrid systems but extends both. The idea is to group the components of an energy system
+into a hierarchically aggregating structure of cells. For example, the sources, sinks, storages and converters of a household
+could be a single cell. Then a group of physically neighboring households could form another cell, consisting of household-cells.
+This behaviour can be scaled up. The real game-changer in the cellular approach is the way the cells are operated, which will
 not be covered here. Here, we focus on the way such cellular energy systems can be modeled.
 
-So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. However, 
+So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. However,
 the implementation can also be regarded as a precursor for further functionality. Decomposition techniques such
-as [Benders](https://en.wikipedia.org/wiki/Benders_decomposition) or 
-[Dantzig-Wolfe](https://en.wikipedia.org/wiki/Dantzig%E2%80%93Wolfe_decomposition) could be implemented in solph. These methods 
-are dependent on a special constraint matrix structure, which the cellular modelling approach presented here is helping to obtain. 
+as [Benders](https://en.wikipedia.org/wiki/Benders_decomposition) or
+[Dantzig-Wolfe](https://en.wikipedia.org/wiki/Dantzig%E2%80%93Wolfe_decomposition) could be implemented in solph. These methods
+are dependent on a special constraint matrix structure, which the cellular modelling approach presented here is helping to obtain.
 
 Modelling procedure
 ^^^^^^^^^^^^^^^^^^^
@@ -1327,15 +1330,15 @@ Now we can go on and add components to the energy cells just like we do with reg
 
 .. note:: This is just an exemplary piece of code. A (little bit more interesting) working
     example can be found in the examples.
-    
-The next step would be to model the connections between cells. Here, we resort to the class 
-:py:class:`oemof.solph.components.Link`. Each connection Link has two inputs (from the 
-"parent cell" and the "child cell") and two outputs (to the "parent cell" and the "child 
-cell"). A connection between the "parent cell" `es` and the "child cell" `ec_1` could look 
+
+The next step would be to model the connections between cells. Here, we resort to the class
+:py:class:`oemof.solph.components.Link`. Each connection Link has two inputs (from the
+"parent cell" and the "child cell") and two outputs (to the "parent cell" and the "child
+cell"). A connection between the "parent cell" `es` and the "child cell" `ec_1` could look
 like this:
 
 .. code-block:: python
-    
+
     connector_el_ec_1 = solph.buses.Bus(
         label="connector_el_ec_1",
         inputs={
@@ -1353,25 +1356,25 @@ like this:
     )
     es.add(connector_el_ec_1)
 
-The `conversion_factors` can be used to model transmission losses. Here, a symmetrical 
+The `conversion_factors` can be used to model transmission losses. Here, a symmetrical
 loss of 15% is assumed.
 All connection Links are added to the upmost energy cell.
 
-.. note:: Note that we do not add the energy cells as components to their parent cells! 
+.. note:: Note that we do not add the energy cells as components to their parent cells!
     Instead, the hierarchical structure is flattened and all connections between the cells
     are created as depicted above.
 
-The last step is to create (and solve) the model. Again, this is fairly similar to the 
-regular model creation. However, instead of passing just one instance of 
+The last step is to create (and solve) the model. Again, this is fairly similar to the
+regular model creation. However, instead of passing just one instance of
 :py:class:`oemof.solph.EnergySystem`, a list of energy systems is passed.
 
 .. warning::
-    By convention the first element of the list is assumed to be the upmost energy cell. 
+    By convention the first element of the list is assumed to be the upmost energy cell.
     The ordering afterwards does not play a role.
 
 .. note:: The resulting model is monolithic. This means that all components of all energy
-    cells are actually grouped into one pyomo model. It would, therefore, also be possible 
-    to model all the components in one :py:class:`oemof.solph.EnergySystem` instance and 
+    cells are actually grouped into one pyomo model. It would, therefore, also be possible
+    to model all the components in one :py:class:`oemof.solph.EnergySystem` instance and
     the results would be identical.
 
 .. code-block:: python
@@ -1385,7 +1388,7 @@ As pointed out above, the resulting model is monolithic. Nonetheless, this model
 holds some benefits:
 
 * Better overview through segmentation of the energy system
-* (Facilitated) opportunity to model cellular energy systems where the energy exchanged between cells 
+* (Facilitated) opportunity to model cellular energy systems where the energy exchanged between cells
   is of interest
 * Segmentation of the energy system is a necessary precursor for distributed optimization via Dantzig-Wolfe
 
