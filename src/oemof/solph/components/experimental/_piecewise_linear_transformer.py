@@ -86,7 +86,7 @@ PiecewiseLinearTransformer'>
                 + "nominal value"
             )
 
-    def constraint_group(_):
+    def constraint_group(self):
         return PiecewiseLinearTransformerBlock
 
 

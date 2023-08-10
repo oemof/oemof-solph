@@ -132,7 +132,7 @@ class Transformer(on.Transformer):
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = sequence(1)
 
-    def constraint_group(_):
+    def constraint_group(self):
         return TransformerBlock
 
 

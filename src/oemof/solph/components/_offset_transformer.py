@@ -100,7 +100,7 @@ class OffsetTransformer(network.Transformer):
                 + "more than 1 input and 1 output!"
             )
 
-    def constraint_group(_):
+    def constraint_group(self):
         return OffsetTransformerBlock
 
 

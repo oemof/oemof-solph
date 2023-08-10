@@ -206,7 +206,7 @@ class GenericCHP(network.Transformer):
             self._calculate_alphas()
         return self._alphas
 
-    def constraint_group(_):
+    def constraint_group(self):
         return GenericCHPBlock
 
 
