@@ -122,7 +122,7 @@ class Link(on.Transformer):
         ):
             warn(msg, debugging.SuspiciousUsageWarning)
 
-    def constraint_group(self):
+    def constraint_group(_):
         return LinkBlock
 
 

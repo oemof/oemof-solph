@@ -93,7 +93,7 @@ class ElectricalLine(Flow):
         # to be used in grouping for all bidi flows
         self.bidirectional = True
 
-    def constraint_group(self):
+    def constraint_group(_):
         return ElectricalLineBlock
 
 
