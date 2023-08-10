@@ -242,7 +242,6 @@ def test_multi_period_investment_model(solver="cbc"):
                 )
             },
             loss_rate=0,
-            initial_storage_level=0,
             max_storage_level=1,
             min_storage_level=0,
             inflow_conversion_factor=1,

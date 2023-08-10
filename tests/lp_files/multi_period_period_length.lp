@@ -1917,6 +1917,10 @@ c_e_GenericInvestmentStorageBlock_old_rule(storage_7)_:
 -1 GenericInvestmentStorageBlock_old_exo(storage_7)
 = 0
 
+c_e_GenericInvestmentStorageBlock_initially_empty(storage_0)_:
+1 GenericInvestmentStorageBlock_storage_content(storage_0)
+= 0
+
 c_e_GenericInvestmentStorageBlock_balance(storage_0_1)_:
 +1 flow(storage_electricity_0_1)
 -1 flow(electricity_storage_0_1)
