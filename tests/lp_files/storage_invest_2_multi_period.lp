@@ -287,11 +287,15 @@ c_e_GenericInvestmentStorageBlock_old_rule(storage2_2)_:
 -1 GenericInvestmentStorageBlock_old_exo(storage2_2)
 = 0
 
+c_e_GenericInvestmentStorageBlock_initially_empty(storage2_0)_:
++1 GenericInvestmentStorageBlock_storage_content(storage2_0)
+= 0
+
 c_e_GenericInvestmentStorageBlock_balance(storage2_0_1)_:
 +1 flow(storage2_electricityBus_0_1)
 -1 flow(electricityBus_storage2_0_1)
-+1 GenericInvestmentStorageBlock_storage_content(storage2_1)
 -1 GenericInvestmentStorageBlock_storage_content(storage2_0)
++1 GenericInvestmentStorageBlock_storage_content(storage2_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage2_1_2)_:
@@ -410,8 +414,8 @@ bounds
    0 <= GenericInvestmentStorageBlock_old_exo(storage2_1) <= +inf
    0 <= GenericInvestmentStorageBlock_old_exo(storage2_2) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage2_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_storage_content(storage2_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage2_0) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage2_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage2_2) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage2_3) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage2_4) <= +inf
