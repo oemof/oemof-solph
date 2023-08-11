@@ -108,6 +108,8 @@ class GenericStorage(network.Component):
         investment variable instead of to the nominal_storage_capacity. The
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
+    storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
+        Cost (per energy) for having energy in the storage.
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -178,6 +180,7 @@ class GenericStorage(network.Component):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
         fixed_costs=0,
+        storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
         custom_attributes=None,
@@ -231,6 +234,7 @@ class GenericStorage(network.Component):
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
         self.fixed_costs = solph_sequence(fixed_costs)
+        self.storage_costs = solph_sequence(storage_costs)
         self.investment = investment
         self.invest_relation_input_output = invest_relation_input_output
         self.invest_relation_input_capacity = invest_relation_input_capacity
@@ -416,13 +420,19 @@ class GenericStorageBlock(ScalarBlock):
                                 :math:`\delta(t)` and
                                 timeincrement
                                 :math:`\tau(t)`
+    :math:`c_{storage}(t)`      costs of having         `storage_costs`
+                                energy stored
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
 
     *Standard model*
 
-    Nothing added to the objective function.
+    * :attr: `storage_costs` not 0
+
+        ..math::
+            \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
+
 
     *Multi-period model*
 
@@ -597,7 +607,22 @@ class GenericStorageBlock(ScalarBlock):
                             * ((1 + m.discount_rate) ** -p)
                         )
         self.fixed_costs = Expression(expr=fixed_costs)
-        return self.fixed_costs
+
+        storage_costs = 0
+
+        for n in self.STORAGES:
+            if n.storage_costs[0] is not None:
+                storage_costs += (
+                    self.storage_content[n, 0] * n.storage_costs[0]
+                )
+                for t in m.TIMESTEPS:
+                    storage_costs += (
+                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                    )
+
+        self.storage_costs = Expression(expr=storage_costs)
+
+        return self.fixed_costs + self.storage_costs
 
 
 class GenericInvestmentStorageBlock(ScalarBlock):
