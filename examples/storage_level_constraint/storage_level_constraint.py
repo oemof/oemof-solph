@@ -90,7 +90,6 @@ def storage_level_constraint_example():
     )
     es.add(out_1)
 
-
     model = Model(es)
 
     storage_level_constraint(
