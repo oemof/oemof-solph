@@ -69,6 +69,20 @@ Afterwards you can use `format` to define your own custom string.:
 >>> print('{0}+{1}-{2}'.format(pv_label.region, pv_label.tag2, pv_label.tag1))
 region_1+pv-renewable_source
 
+Code
+----
+Download source code: :download:`tuple_as_label.py </../examples/tuple_as_labels/tuple_as_label.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/tuple_as_labels/tuple_as_label.py
+        :language: python
+        :lines: 104-
+
+Data
+----
+Download data: :download:`tuple_as_label.csv </../examples/tuple_as_labels/tuple_as_label.csv>`
+
 Data
 ----
 basic_example.csv

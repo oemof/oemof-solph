@@ -5,6 +5,15 @@ General description
 -------------------
 Example that shows the parameter `balanced` of `GenericStorage`.
 
+Code
+----
+Download source code: :download:`storage.py </../examples/storage_balanced_unbalanced/storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_balanced_unbalanced/storage.py
+        :language: python
+        :lines: 30-
 
 Installation requirements
 -------------------------

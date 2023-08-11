@@ -43,6 +43,20 @@ renewable share than achieved in variation 2 is now required
 Have a look at different parameter settings. There are four variations
 of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v3_invest_optimize_only_storage_with_fossil_share.py </../examples/storage_investment/v3_invest_optimize_only_storage_with_fossil_share.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v3_invest_optimize_only_storage_with_fossil_share.py
+        :language: python
+        :lines: 74-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 Installation requirements
 -------------------------
 

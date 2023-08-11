@@ -40,9 +40,20 @@ the main setting for the optimization variation 1:
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v1_invest_optimize_all_technologies.py </../examples/storage_investment/v1_invest_optimize_all_technologies.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v1_invest_optimize_all_technologies.py
+        :language: python
+        :lines: 75-
+
 Data
 ----
-storage_investment.csv
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 
 Installation requirements
 -------------------------

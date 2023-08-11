@@ -43,6 +43,20 @@ the main setting for the optimization variation 2:
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v2_invest_optimize_only_gas_and_storage.py </../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py
+        :language: python
+        :lines: 75-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 Installation requirements
 -------------------------
 

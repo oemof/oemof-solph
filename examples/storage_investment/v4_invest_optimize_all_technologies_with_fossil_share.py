@@ -41,6 +41,20 @@ the main setting for the optimization variation 4:
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v4_invest_optimize_all_technologies_with_fossil_share.py </../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py
+        :language: python
+        :lines: 71-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:

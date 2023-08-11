@@ -18,6 +18,16 @@ A minimal example to show how time steps work.
     We have nominal_value=0.5, but the maximum change of the storage content
     of an ideal storage is 0.125.
 
+Code
+----
+Download source code: :download:`non_equidistant_time_step_example.py </../examples/time_index_example/simple_time_step_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/time_index_example/simple_time_step_example.py
+        :language: python
+        :lines: 42-120
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:

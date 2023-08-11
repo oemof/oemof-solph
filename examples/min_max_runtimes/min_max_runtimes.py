@@ -5,6 +5,16 @@ General description
 -------------------
 Example that illustrates how to model min and max runtimes.
 
+Code
+----
+Download source code: :download:`min_max_runtimes.py </../examples/min_max_runtimes/min_max_runtimes.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/min_max_runtimes/min_max_runtimes.py
+        :language: python
+        :lines: 31-
+
 Installation requirements
 -------------------------
 

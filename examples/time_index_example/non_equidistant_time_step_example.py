@@ -18,6 +18,16 @@ In addition to the comments in the simple example, note that:
     relative losses to the one with fixed losses to minimise total
     losses.
 
+Code
+----
+Download source code: :download:`non_equidistant_time_step_example.py </../examples/time_index_example/non_equidistant_time_step_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/time_index_example/non_equidistant_time_step_example.py
+        :language: python
+        :lines: 38-189
+
 Installation requirements
 -------------------------
 

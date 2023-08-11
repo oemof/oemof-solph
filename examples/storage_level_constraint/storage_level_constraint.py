@@ -1,3 +1,33 @@
+# -*- coding: utf-8 -*-
+
+"""
+General description
+-------------------
+Example that shows the `storage_level_constraint`.
+
+Code
+----
+Download source code: :download:`storage_level_constraint.py </../examples/storage_level_constraint/storage_level_constraint.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_level_constraint/storage_level_constraint.py
+        :language: python
+        :lines: 31-
+
+Installation requirements
+-------------------------
+This example requires oemof.solph (v0.5.x) and matplotlib, install by:
+
+    pip install oemof.solph[examples] matplotlib
+
+
+License
+-------
+`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+"""
+
+
 import pandas as pd
 from oemof.solph import Bus, EnergySystem, Flow, Model
 from oemof.solph.components import GenericStorage, Source, Sink
