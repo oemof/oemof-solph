@@ -42,13 +42,16 @@ This example requires the version v0.5.x of oemof.solph. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import numpy as np
 import os
-import pandas as pd
 import time
-from datetime import datetime, timedelta
-from oemof import solph
 import warnings
+from datetime import datetime
+from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+
+from oemof import solph
 
 try:
     import matplotlib.pyplot as plt
@@ -80,12 +83,7 @@ def main():
 
     # Import data.
     filename = os.path.join(os.getcwd(), "solar_generation.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    data = pd.read_csv(filename)
 
     # Change the index of data to be able to select data based on the time
     # range.
@@ -185,7 +183,7 @@ def main():
             )
         },
         outputs={b_el_dc: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_dc: 0.98,
         },
     )
@@ -204,7 +202,7 @@ def main():
             )
         },
         outputs={b_el_ac: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_ac: 0.98,
         },
     )

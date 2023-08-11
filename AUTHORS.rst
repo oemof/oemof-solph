@@ -28,7 +28,9 @@ Authors
 * Jonathan Amme
 * Julian Endres
 * Lluis Millet
+* Lennart Schürmann
 * Martin Soethe
+* Marie-Claire Gering
 * Patrik Schönfeldt
 * Pierre-François Duc
 * Saeed Sayadi

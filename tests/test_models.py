@@ -97,3 +97,75 @@ def test_multi_period_default_discount_rate():
     with warnings.catch_warnings(record=True) as w:
         solph.Model(es)
         assert msg in str(w[0].message)
+
+
+def test_cellular_structure_detection():
+    """Test flag creation if list is passed as energysystem to model"""
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    es = solph.EnergySystem(
+        label="es", timeindex=timeindex, infer_last_interval=True
+    )
+    ec_1 = solph.EnergySystem(
+        label="ec_1", timeindex=timeindex, infer_last_interval=True
+    )
+    ec_2 = solph.EnergySystem(
+        label="ec_2", timeindex=timeindex, infer_last_interval=True
+    )
+    m = solph.Model(energysystem=[es, ec_1, ec_2])
+    assert m.is_cellular
+
+
+def test_sub_cell_node_consideration():
+    """
+    Test if the nodes of sub-cells are considered for cellular
+    energysystems.
+    """
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    es = solph.EnergySystem(
+        label="es", timeindex=timeindex, infer_last_interval=True
+    )
+    ec_1 = solph.EnergySystem(
+        label="ec_1", timeindex=timeindex, infer_last_interval=True
+    )
+    bus_es = solph.buses.Bus(label="bus_es")
+    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
+    es.add(bus_es)
+    ec_1.add(bus_ec_1)
+    m = solph.Model(energysystem=[es, ec_1])
+    assert bus_ec_1 in m.nodes
+
+
+def test_sub_cell_flow_consideration():
+    """
+    Test if the flows of sub-cells are considered for cellular
+    energysystems.
+    """
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    es = solph.EnergySystem(
+        label="es", timeindex=timeindex, infer_last_interval=True
+    )
+    ec_1 = solph.EnergySystem(
+        label="ec_1", timeindex=timeindex, infer_last_interval=True
+    )
+    bus_es = solph.buses.Bus(label="bus_es")
+    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
+    es.add(bus_es)
+    ec_1.add(bus_ec_1)
+
+    connector_ec_1 = solph.buses.Bus(
+        label="connector_ec_1",
+        inputs={
+            bus_es: solph.flows.Flow(),
+            bus_ec_1: solph.flows.Flow(),
+        },
+        outputs={
+            bus_es: solph.flows.Flow(),
+            bus_ec_1: solph.flows.Flow(),
+        },
+    )
+    es.add(connector_ec_1)
+
+    test_flow = [io for io in ec_1.flows().keys()][0]
+
+    m = solph.Model(energysystem=[es, ec_1])
+    assert test_flow in m.FLOWS

@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import logging
 import re
-import warnings
 from os import path as ospath
 
 import pandas as pd
@@ -385,7 +384,6 @@ class TestsMultiPeriodConstraint:
             investment=solph.Investment(
                 ep_costs=145, lifetime=20, existing=20, age=19
             ),
-            initial_storage_level=0.5,
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_2_multi_period.lp")
@@ -612,7 +610,7 @@ class TestsMultiPeriodConstraint:
             self.get_om()
 
     def test_storage_invest_1_initial_storage_level(self):
-        """Test warning for initial storage level
+        """Test error for initial storage level
         with multi-period investments"""
         bel = solph.buses.Bus(label="electricityBus")
         storage = solph.components.GenericStorage(
@@ -642,14 +640,12 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, storage)
         msg = (
             "For a multi-period model, initial_storage_level is"
-            " not supported.\nIt is suggested to remove that"
-            " parameter since it has no effect.\nstorage_content"
-            " will be zero, until there is some usable storage "
-            " capacity installed."
+            " not supported.\nIt needs to be removed since it"
+            " has no effect.\nstorage_content will be zero,"
+            " until there is some usable storage capacity installed."
         )
-        with warnings.catch_warnings(record=True) as w:
+        with pytest.raises(ValueError, match=msg):
             self.get_om()
-            assert msg in str(w[1].message)
 
     def test_storage_invest_1_missing_lifetime(self):
         """Test error thrown if storage misses necessary lifetime"""
@@ -1987,3 +1983,167 @@ class TestsMultiPeriodConstraint:
         )
         self.energysystem.add(bel, source1, source2, source3)
         self.compare_lp_files("fixed_costs_sources.lp")
+
+    def test_multi_period_varying_period_length(self):
+        """Test multi period with varying period length"""
+
+        # Define starting years of investment periods
+        years = [2000, 2020, 2035, 2045, 2050, 2060, 2075, 2095]
+
+        # Create a list of timeindex for each period
+        periods = [
+            pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years
+        ]
+
+        # Create an overall timeindex
+        timeindex = pd.concat(
+            [pd.Series(index=i, dtype="float64") for i in periods]
+        ).index
+
+        # Create an energy system
+        es = solph.EnergySystem(
+            timeindex=timeindex,
+            timeincrement=[1] * len(timeindex),
+            periods=periods,
+            infer_last_interval=False,
+        )
+
+        # Create buses
+        bel = solph.Bus(label="electricity", balanced=True)
+
+        # Create a storage
+        storage = solph.components.GenericStorage(
+            label="storage",
+            inputs={
+                bel: solph.Flow(
+                    variable_costs=0,
+                    investment=solph.Investment(
+                        ep_costs=10,
+                        existing=0,
+                        lifetime=20,
+                        age=0,
+                        interest_rate=0.02,
+                    ),
+                )
+            },
+            outputs={
+                bel: solph.Flow(
+                    variable_costs=0,
+                    investment=solph.Investment(
+                        ep_costs=10,
+                        existing=0,
+                        lifetime=20,
+                        age=0,
+                        interest_rate=0.02,
+                    ),
+                )
+            },
+            loss_rate=0.00,
+            invest_relation_output_capacity=0.2,
+            invest_relation_input_output=1,
+            # inflow_conversion_factor=1,
+            # outflow_conversion_factor=0.8,
+            # nominal_storage_capacity=100,
+            investment=solph.Investment(
+                ep_costs=10,
+                maximum=float("+inf"),
+                existing=0,
+                lifetime=20,
+                age=0,
+                fixed_costs=None,
+                interest_rate=0.02,
+            ),
+        )
+        # Create a DSM sink with DIW approach
+        sinkdsm_diw = solph.components.experimental.SinkDSM(
+            label="demand_dsm_diw",
+            inputs={bel: solph.flows.Flow()},
+            demand=[1] * len(timeindex),
+            capacity_up=[0.5] * len(timeindex),
+            capacity_down=[0.5] * len(timeindex),
+            approach="DIW",
+            max_demand=[1] * len(timeindex),
+            delay_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=100,
+                minimum=33,
+                maximum=100,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+
+        # Create a DSM sink with DLR approach
+        sinkdsm_dlr = solph.components.experimental.SinkDSM(
+            label="demand_dsm_dlr",
+            inputs={bel: solph.flows.Flow()},
+            demand=[1] * len(timeindex),
+            capacity_up=[0.5] * len(timeindex),
+            capacity_down=[0.5] * len(timeindex),
+            approach="DLR",
+            max_demand=[1] * len(timeindex),
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            n_yearLimit_shed=50,
+            investment=solph.Investment(
+                ep_costs=100,
+                minimum=33,
+                maximum=100,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+
+        # Create a DSM sink with oemof approach
+        sinkdsm_oemof = solph.components.experimental.SinkDSM(
+            label="demand_dsm_oemof",
+            inputs={bel: solph.flows.Flow()},
+            demand=[1] * len(timeindex),
+            capacity_up=[0.5] * len(timeindex),
+            capacity_down=[0.5] * len(timeindex),
+            approach="oemof",
+            max_demand=[1] * len(timeindex),
+            shift_interval=2,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=100,
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+
+        # Add components to the energy system
+        es.add(bel, storage, sinkdsm_diw, sinkdsm_dlr, sinkdsm_oemof)
+
+        # Create an optimization problem
+        om = solph.Model(es)
+
+        # Compare the lp files
+        self.compare_lp_files("multi_period_period_length.lp", my_om=om)
