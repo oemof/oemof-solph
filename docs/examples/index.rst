@@ -16,6 +16,7 @@ Examples
     flow_gradient.rst
     variable_chp.rst
     unbalanced_storage.rst
+    storage_costs.rst
     emission_constraint.rst
     flow_count_limit.rst
     storage_level_constraint.rst

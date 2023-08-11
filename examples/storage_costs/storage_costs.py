@@ -9,12 +9,21 @@ For a battery without storage costs, it is beneficial to be empty
 the end of the time horizon of the optimisation. For a battery that
 assumes the average revenue, energy is kept at the end. 
 
+Code
+----
+Download source code: :download:`storage_costs.py </../examples/storage_costs/storage_costs.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_costs/storage_costs.py
+        :language: python
+        :lines: 34-
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (v0.5.x) and matplotlib, install by:
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph[examples] matplotlib
 
 
 License
