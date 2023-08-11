@@ -46,6 +46,7 @@ from oemof.solph.components import Source
 from oemof.solph.constraints import storage_level_constraint
 from oemof.solph.processing import results
 
+
 def storage_level_constraint_example():
     es = EnergySystem(
         timeindex=pd.date_range("2022-01-01", freq="1H", periods=24),
