@@ -6,7 +6,7 @@
 User's guide
 ~~~~~~~~~~~~
 
-Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`solph_examples_label` section.
+Solph is an oemof-package, designed to create and solve linear or mixed-integer linear optimization problems. The package is based on pyomo. To create an energy system model generic and specific components are available. To get started with solph, checkout the examples in the :ref:`examples_label` section.
 
 This User's guide provides a user-friendly introduction into oemof-solph,
 which includes small examples and nice illustrations.
@@ -25,7 +25,8 @@ How can I use solph?
 --------------------
 
 To use solph you have to install oemof.solph and at least one solver (see :ref:`installation_label`), which can be used together with pyomo (e.g. CBC, GLPK, Gurobi, Cplex). See the `pyomo installation guide <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ for all supported solvers.
-You can test it by executing one of the existing examples (see :ref:`solph_examples_label`, or directly `oemof's example repository <https://github.com/oemof/oemof-examples>`__). Be aware that the examples require the CBC solver but you can change the solver name in the example files to your solver.
+You can test it by executing one of the existing examples (see :ref:`examples_label`).
+Be aware that  the examples require the CBC solver but you can change the solver name in the example files to your solver.
 
 Once the examples work you are close to your first energy model.
 
@@ -433,8 +434,8 @@ of the two flows is the main flow. In the example above, the flow to the Bus
 *'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow.
 The following plot shows how the variable chp (right) schedules it's electrical
 and thermal power production in contrast to a fixed chp (left). The plot is the
-output of an example in the `example repository
-<https://github.com/oemof/oemof-examples>`_.
+output of an example in the `example directory
+<https://github.com/oemof/oemof-solph/tree/dev/examples>`_.
 
 .. 	image:: _files/variable_chp_plot.svg
    :scale: 10 %
@@ -609,7 +610,7 @@ By calling:
 you get the results of the scalar values of your storage, e.g. the initial
 storage content before time step zero (``init_content``).
 
-For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the `example repository of oemof <https://github.com/oemof/oemof-examples>`_.
+For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the :ref:`examples_label`.
 
 
 Using an investment object with the GenericStorage component
@@ -1520,8 +1521,8 @@ increases the computation time by more than 9 times compared to the
 Adding additional constraints
 -----------------------------
 
-You can add additional constraints to your :py:class:`~oemof.solph.models.Model`. See `flexible_modelling in the example repository
-<https://github.com/oemof/oemof-examples/blob/master/oemof_examples/oemof.solph/v0.3.x/flexible_modelling/add_constraints.py>`_ to learn how to do it.
+You can add additional constraints to your :py:class:`~oemof.solph.models.Model`.
+See :ref:`custom_constraints_label` to learn how to do it.
 
 Some predefined additional constraints can be found in the
 :py:mod:`~oemof.solph.constraints` module.
@@ -1577,7 +1578,7 @@ The idea is to create different sheets within one spreadsheet file for different
 
 Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
-See `oemof's example repository <https://github.com/oemof/oemof-examples>`_ for an excel reader example.
+See :ref:`excel_reader_example_label` for an excel reader example.
 
 
 .. _oemof_outputlib_label:

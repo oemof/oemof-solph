@@ -1,3 +1,5 @@
+.. _runtime_limit_example_label:
+
 Minimal and maximal runtime
 ---------------------------
 

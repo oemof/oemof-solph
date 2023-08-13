@@ -260,8 +260,7 @@ Examples
 
 The combination of specific modules (often including other packages) is called an
 application (app). For example, it can depict a concrete energy system model.
-You can find a large variety of helpful examples e.g. in the example directory,
-e.g. `for the latest development version at GitHub <https://github.com/oemof/oemof-solph/tree/dev/examples>`_.
+You can find a large variety of helpful examples in this documentstion at :ref:`examples_label`.
 The examples show optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.

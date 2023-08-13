@@ -1,3 +1,5 @@
+.. _custom_constraints_label:
+
 Custom constraints
 ------------------
 
