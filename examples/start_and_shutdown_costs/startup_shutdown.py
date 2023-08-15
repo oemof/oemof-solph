@@ -14,7 +14,7 @@ Download source code: :download:`startup_shutdown.py </../examples/start_and_shu
 
     .. literalinclude:: /../examples/start_and_shutdown_costs/startup_shutdown.py
         :language: python
-        :lines: 30-
+        :lines: 32-
 
 Installation requirements
 -------------------------

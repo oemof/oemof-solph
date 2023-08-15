@@ -10,7 +10,7 @@ Download source code: :download:`minimal_invest.py </../examples/investment_with
 
     .. literalinclude:: /../examples/investment_with_minimal_invest/minimal_invest.py
         :language: python
-        :lines: 29-
+        :lines: 31-
 
 Installation requirements
 -------------------------

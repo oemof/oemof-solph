@@ -53,7 +53,7 @@ Download source code: :download:`v3_invest_optimize_only_storage_with_fossil_sha
 
     .. literalinclude:: /../examples/storage_investment/v3_invest_optimize_only_storage_with_fossil_share.py
         :language: python
-        :lines: 78-
+        :lines: 82-
 
 Data
 ----

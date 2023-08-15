@@ -51,7 +51,7 @@ Download source code: :download:`v4_invest_optimize_all_technologies_with_fossil
 
     .. literalinclude:: /../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py
         :language: python
-        :lines: 75-
+        :lines: 79-
 
 Data
 ----

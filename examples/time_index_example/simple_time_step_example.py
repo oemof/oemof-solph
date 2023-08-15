@@ -25,7 +25,7 @@ Download source code: :download:`non_equidistant_time_step_example.py </../examp
 
     .. literalinclude:: /../examples/time_index_example/simple_time_step_example.py
         :language: python
-        :lines: 43-121
+        :lines: 43-
 
 Installation requirements
 -------------------------

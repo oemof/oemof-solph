@@ -50,7 +50,7 @@ Download source code: :download:`v1_invest_optimize_all_technologies.py </../exa
 
     .. literalinclude:: /../examples/storage_investment/v1_invest_optimize_all_technologies.py
         :language: python
-        :lines: 75-
+        :lines: 80-
 
 Data
 ----

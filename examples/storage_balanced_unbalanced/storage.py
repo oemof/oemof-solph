@@ -13,7 +13,7 @@ Download source code: :download:`storage.py </../examples/storage_balanced_unbal
 
     .. literalinclude:: /../examples/storage_balanced_unbalanced/storage.py
         :language: python
-        :lines: 30-
+        :lines: 32-
 
 Installation requirements
 -------------------------

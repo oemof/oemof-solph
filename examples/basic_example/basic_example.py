@@ -36,7 +36,7 @@ Download source code: :download:`basic_example.py </../examples/basic_example/ba
 
     .. literalinclude:: /../examples/basic_example/basic_example.py
         :language: python
-        :lines: 57-300
+        :lines: 61-
 
 Data
 ----

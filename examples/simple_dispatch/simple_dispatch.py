@@ -21,7 +21,7 @@ Download source code: :download:`simple_dispatch.py </../examples/simple_dispatc
 
     .. literalinclude:: /../examples/simple_dispatch/simple_dispatch.py
         :language: python
-        :lines: 43-
+        :lines: 45-
 
 Data
 ----

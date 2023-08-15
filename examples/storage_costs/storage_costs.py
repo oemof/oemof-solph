@@ -17,7 +17,7 @@ Download source code: :download:`storage_costs.py </../examples/storage_costs/st
 
     .. literalinclude:: /../examples/storage_costs/storage_costs.py
         :language: python
-        :lines: 34-
+        :lines: 36-
 
 Installation requirements
 -------------------------

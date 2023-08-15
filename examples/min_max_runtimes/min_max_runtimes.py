@@ -13,7 +13,7 @@ Download source code: :download:`min_max_runtimes.py </../examples/min_max_runti
 
     .. literalinclude:: /../examples/min_max_runtimes/min_max_runtimes.py
         :language: python
-        :lines: 31-
+        :lines: 33-
 
 Installation requirements
 -------------------------

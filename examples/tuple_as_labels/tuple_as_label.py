@@ -78,7 +78,7 @@ Download source code: :download:`tuple_as_label.py </../examples/tuple_as_labels
 
     .. literalinclude:: /../examples/tuple_as_labels/tuple_as_label.py
         :language: python
-        :lines: 105-
+        :lines: 106-
 
 Data
 ----

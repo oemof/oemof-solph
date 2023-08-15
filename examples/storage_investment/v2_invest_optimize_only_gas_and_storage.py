@@ -53,7 +53,7 @@ Download source code: :download:`v2_invest_optimize_only_gas_and_storage.py </..
 
     .. literalinclude:: /../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py
         :language: python
-        :lines: 75-
+        :lines: 83-
 
 Data
 ----
