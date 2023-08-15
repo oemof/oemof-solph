@@ -17,7 +17,7 @@ from oemof.tools.debugging import SuspiciousUsageWarning
 from oemof import solph
 
 
-class TestTransformerClass:
+class TestConverterClass:
     @classmethod
     def setup_class(cls):
         """Setup default values"""
@@ -28,7 +28,7 @@ class TestTransformerClass:
     def teardown_class(cls):
         warnings.filterwarnings("always", category=SuspiciousUsageWarning)
 
-    def test_empty_transformer(self):
+    def test_empty_converter(self):
         transf = solph.components.Converter()
         assert isinstance(transf.conversion_factors, dict)
         assert len(transf.conversion_factors.keys()) == 0
@@ -61,11 +61,11 @@ class TestTransformerClass:
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
-    def test_transformer_missing_output_create_empty_dict(self):
+    def test_converter_missing_output_create_empty_dict(self):
         trfr = solph.components.Converter(inputs={})
         assert trfr.outputs == {}
 
-    def test_transformer_missing_input_create_empty_dict(self):
+    def test_converter_missing_input_create_empty_dict(self):
         trfr = solph.components.Converter(outputs={})
         assert trfr.inputs == {}
 

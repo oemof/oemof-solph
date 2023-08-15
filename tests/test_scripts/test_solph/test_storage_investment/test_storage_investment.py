@@ -199,7 +199,7 @@ def test_results_with_actual_dump():
     assert round(meta["objective"]) == 423167578261115584
 
 
-def test_solph_transformer_attributes_before_dump_and_after_restore():
+def test_solph_converter_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
     of `solph.components.Converter`"""
     test_optimise_storage_size()

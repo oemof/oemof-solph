@@ -305,13 +305,13 @@ class TestParameterResult:
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
-        transformer_output = views.node_output_by_type(
+        converter_output = views.node_output_by_type(
             results, node_type=Converter
         )
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        assert int(transformer_output.sum()) == int(compare.sum())
+        assert int(converter_output.sum()) == int(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)

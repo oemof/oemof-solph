@@ -82,7 +82,7 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
         assert msg in str(w[-1].message)
 
 
-def test_that_the_transformer_warnings_actually_get_raised(warning_fixture):
+def test_that_the_converter_warnings_actually_get_raised(warning_fixture):
     """Converter doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
     msg = (

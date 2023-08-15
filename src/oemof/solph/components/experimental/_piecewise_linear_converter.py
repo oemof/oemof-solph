@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-In-development transformer with piecewise linear efficiencies.
+In-development Converter with piecewise linear efficiencies.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert

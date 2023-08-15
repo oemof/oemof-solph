@@ -272,7 +272,7 @@ def test_offsetconverter_too_many_coefficients():
         )
 
 
-def test_offsettransformer__too_many_input_flows():
+def test_offsetconverter__too_many_input_flows():
     """Too many Input Flows defined."""
     with pytest.raises(
         ValueError,

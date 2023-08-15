@@ -129,7 +129,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         )
     )
 
-    # create a fixed transformer to distribute to the heat and elec buses
+    # create a fixed converter to distribute to the heat and elec buses
     energysystem.add(
         solph.components.ExtractionTurbineCHP(
             label=("variable_chp", "gas"),

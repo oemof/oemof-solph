@@ -319,7 +319,7 @@ def node_output_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected,
-        e.g. solph.components.Transformer
+        e.g. solph.components.Converter
     droplevel: list
 
     Examples
@@ -333,7 +333,7 @@ def node_output_by_type(results, node_type, droplevel=None):
         # Then collect node weights
         views.node_output_by_type(
             m.results(),
-            node_type=solph.components.Transformer
+            node_type=solph.components.Converter
         )
     """
     if droplevel is None:
