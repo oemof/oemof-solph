@@ -4,7 +4,15 @@
 General description
 -------------------
 
-Something...
+Example that shows how to use "flow_count_limit".
+
+This example shows a case where only one out of two Flows can be
+active at a time. Another typical usage might be a connection to a
+grid where energy can only flow into one direction or a storage that
+cannot be charged and discharged at the same time.
+
+Note that binary variables are computationally expensive. Thus, you
+might want to avoid using this constraint if you do not really need it.
 
 Code
 ----
