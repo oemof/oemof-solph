@@ -13,11 +13,13 @@ Download source code: :download:`storage_level_constraint.py </../examples/stora
 
     .. literalinclude:: /../examples/storage_level_constraint/storage_level_constraint.py
         :language: python
-        :lines: 31-
+        :lines: 33-
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x) and matplotlib, install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples] matplotlib
 

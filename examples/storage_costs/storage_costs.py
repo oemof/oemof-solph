@@ -7,7 +7,7 @@ Example that shows the parameter `storage_costs` of `GenericStorage`.
 A battery is used to make profit from fluctuating electricity prices.
 For a battery without storage costs, it is beneficial to be empty
 the end of the time horizon of the optimisation. For a battery that
-assumes the average revenue, energy is kept at the end. 
+assumes the average revenue, energy is kept at the end.
 
 Code
 ----
@@ -22,6 +22,8 @@ Download source code: :download:`storage_costs.py </../examples/storage_costs/st
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x) and matplotlib, install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples] matplotlib
 

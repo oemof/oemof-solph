@@ -6,10 +6,22 @@ General description
 Example that shows the how to implement a `GenericStorage`
 that charges at reduced rates for high storage contents.
 
+Code
+----
+Download source code: :download:`saturating_storage.py </../examples/flexible_modelling/saturating_storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flexible_modelling/saturating_storage.py
+        :language: python
+        :lines: 34-140
+
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

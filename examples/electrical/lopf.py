@@ -18,15 +18,19 @@ Download source code: :download:`lopf.py </../examples/electrical/lopf.py>`
 
     .. literalinclude:: /../examples/electrical/lopf.py
         :language: python
-        :lines: 40-217
+        :lines: 44-221
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 

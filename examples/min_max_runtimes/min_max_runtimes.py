@@ -20,6 +20,8 @@ Installation requirements
 
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 

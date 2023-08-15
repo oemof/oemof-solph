@@ -19,7 +19,7 @@ Download source code: :download:`dispatch.py </../examples/excel_reader/dispatch
 
     .. literalinclude:: /../examples/excel_reader/dispatch.py
         :language: python
-        :lines: 54-434
+        :lines: 57-437
 
 Data
 ----
@@ -29,15 +29,18 @@ Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
-    pip install oemof.solph[examples]
+.. code:: bash
 
-    pip3 install openpyxl
+    pip install oemof.solph[examples]
+    pip install openpyxl
 
 
 If you want to plot the energy system's graph, you have to install pygraphviz
 using:
 
-    pip3 install pygraphviz
+.. code:: bash
+
+    pip install pygraphviz
 
 For pygraphviz under Windows, some hints are available in the oemof Wiki:
 https://github.com/oemof/oemof/wiki/Windows---general

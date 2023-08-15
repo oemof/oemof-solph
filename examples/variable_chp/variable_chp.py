@@ -19,7 +19,7 @@ Download source code: :download:`variable_chp.py </../examples/variable_chp/vari
 
     .. literalinclude:: /../examples/variable_chp/variable_chp.py
         :language: python
-        :lines: 45-
+        :lines: 53-
 
 Data
 ----
@@ -30,9 +30,13 @@ Installation requirements
 
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 Optional to see the i/o balance plot:
+
+.. code:: bash
 
     pip install git+https://github.com/oemof/oemof_visio.git
 

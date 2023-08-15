@@ -13,12 +13,14 @@ Download source code: :download:`emission_constraint.py </../examples/emission_c
 
     .. literalinclude:: /../examples/emission_constraint/emission_constraint.py
         :language: python
-        :lines: 30-127
+        :lines: 32-129
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

@@ -16,11 +16,13 @@ Download source code: :download:`gradient_example.py </../examples/gradient_exam
 
     .. literalinclude:: /../examples/gradient_example/gradient_example.py
         :language: python
-        :lines: 33-209
+        :lines: 35-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

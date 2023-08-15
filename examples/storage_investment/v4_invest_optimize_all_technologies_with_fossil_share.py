@@ -30,13 +30,15 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 4:
 
-    - optimize wind, pv, and storage
-    - set investment cost for wind, pv and storage
-    - set a fossil share
+- optimize wind, pv, and storage
+- set investment cost for wind, pv and storage
+- set a fossil share
 
-    Results show now the achievement of 80% renewable energy share
-    by solely installing a little more wind and pv (compared to
-    variation 2). Storage is not installed.
+Results show now the achievement of 80% renewable energy share
+by solely installing a little more wind and pv (compared to
+variation 2). Storage is not installed.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
@@ -49,7 +51,7 @@ Download source code: :download:`v4_invest_optimize_all_technologies_with_fossil
 
     .. literalinclude:: /../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py
         :language: python
-        :lines: 71-
+        :lines: 75-
 
 Data
 ----
@@ -58,6 +60,8 @@ Download data: :download:`storage_investment.csv </../examples/storage_investmen
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

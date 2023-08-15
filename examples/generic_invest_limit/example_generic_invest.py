@@ -42,11 +42,13 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
     .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
         :language: python
-        :lines: 60-217
+        :lines: 62-219
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

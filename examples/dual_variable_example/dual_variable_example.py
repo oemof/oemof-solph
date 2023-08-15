@@ -15,13 +15,15 @@ Download source code: :download:`dual_variable_example.py </../examples/dual_var
 
     .. literalinclude:: /../examples/dual_variable_example/dual_variable_example.py
         :language: python
-        :lines: 32-295
+        :lines: 34-297
 
 
 Installation requirements
 -------------------------
 
 This example requires the version v0.5.x of oemof.solph:
+
+.. code:: bash
 
     pip install 'oemof.solph[examples]>=0.5,<0.6'
 

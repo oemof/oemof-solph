@@ -16,15 +16,19 @@ Download source code: :download:`add_constraints.py </../examples/flexible_model
 
     .. literalinclude:: /../examples/flexible_modelling/add_constraints.py
         :language: python
-        :lines: 37-154
+        :lines: 41-158
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 

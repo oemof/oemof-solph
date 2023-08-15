@@ -14,15 +14,19 @@ Download source code: :download:`transshipment.py </../examples/electrical/trans
 
     .. literalinclude:: /../examples/electrical/transshipment.py
         :language: python
-        :lines: 35-207
+        :lines: 39-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 

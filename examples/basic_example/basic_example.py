@@ -36,7 +36,7 @@ Download source code: :download:`basic_example.py </../examples/basic_example/ba
 
     .. literalinclude:: /../examples/basic_example/basic_example.py
         :language: python
-        :lines: 55-298
+        :lines: 57-300
 
 Data
 ----
@@ -45,6 +45,8 @@ Download data: :download:`basic_example.csv </../examples/basic_example/basic_ex
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

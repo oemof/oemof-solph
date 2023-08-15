@@ -31,14 +31,16 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 2:
 
-    - optimize gas_resource and storage
-    - set installed capacities for wind and pv
-    - set investment cost for storage
-    - set gas price for kWh
+- optimize gas_resource and storage
+- set installed capacities for wind and pv
+- set investment cost for storage
+- set gas price for kWh
 
-    Results show a higher renewable energy share than in variation 1
-    (78% compared to 51%) due to preinstalled renewable capacities.
-    Storage is not installed as the gas resource is cheaper.
+Results show a higher renewable energy share than in variation 1
+(78% compared to 51%) due to preinstalled renewable capacities.
+Storage is not installed as the gas resource is cheaper.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
@@ -61,6 +63,8 @@ Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
