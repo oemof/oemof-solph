@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
+General description
+-------------------
 Example that shows how to use "Generic Investment Limit".
 
 There are two supply chains. The energy systems looks like that:
@@ -32,9 +34,21 @@ Transformer capacity unit, which might be installed, needs 2 space for
 And the total space is limited to 24.
 See what happens, have fun ;)
 
+Code
+----
+Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
+        :language: python
+        :lines: 62-219
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -43,8 +57,6 @@ License
 Johannes Röder <johannes.roeder@uni-bremen.de>
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
-
-
 """
 
 import logging

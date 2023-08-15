@@ -9,17 +9,25 @@ component of the energy system.
 
 There are the following components:
 
-    - demand_heat: heat demand (high in winter, low in summer)
-    - fireplace: wood firing, has a minimum heat and
-                 will burn for a minimum time if lit.
-    - boiler: gas firing, more flexible but still
-              with minimal load and also with
-              higher cost than wood firing
+- demand_heat: heat demand (high in winter, low in summer)
+- fireplace: wood firing, has a minimum heat and will burn for a minimum time if lit.
+- boiler: gas firing, more flexible but still with minimal load and also with higher cost than wood firing
 
+Code
+----
+Download source code: :download:`house_with_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/house_with_nonconvex_investment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/house_with_nonconvex_investment.py
+        :language: python
+        :lines: 37-
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 

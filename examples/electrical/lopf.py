@@ -10,13 +10,27 @@ simple lopf example.
 Note: As oemof currently does not support models with one timesteps, therefore
 there are two.
 
+Code
+----
+Download source code: :download:`lopf.py </../examples/electrical/lopf.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/electrical/lopf.py
+        :language: python
+        :lines: 44-221
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 

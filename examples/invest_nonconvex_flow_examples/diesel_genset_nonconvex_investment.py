@@ -8,21 +8,34 @@ applied to a diesel generator in a hybrid mini-grid system.
 
 There are the following components:
 
-    - pv: solar potential to generate electricity
-    - diesel_source: input diesel for the diesel genset
-    - diesel_genset: generates ac electricity
-    - rectifier: converts generated ac electricity from the diesel genset
-                 to dc electricity
-    - inverter: converts generated dc electricity from the pv to ac electricity
-    - battery: stores the generated dc electricity
-    - demand_el: ac electricity demand (given as a separate *.csv file)
-    - excess_el: allows for some electricity overproduction
+- pv: solar potential to generate electricity
+- diesel_source: input diesel for the diesel genset
+- diesel_genset: generates ac electricity
+- rectifier: converts generated ac electricity from the diesel genset to dc electricity
+- inverter: converts generated dc electricity from the pv to ac electricity
+- battery: stores the generated dc electricity
+- demand_el: ac electricity demand (given as a separate csv file)
+- excess_el: allows for some electricity overproduction
 
+Code
+----
+Download source code: :download:`diesel_genset_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py>`
 
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py
+        :language: python
+        :lines: 44-
+
+Data
+----
+Download data: :download:`solar_generation.csv </../examples/invest_nonconvex_flow_examples/solar_generation.csv>`
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 

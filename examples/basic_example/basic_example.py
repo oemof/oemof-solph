@@ -28,15 +28,25 @@ The following energy system is modeled:
      storage(Storage)    |<------------------|
                          |------------------>|
 
+Code
+----
+Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/basic_example/basic_example.py
+        :language: python
+        :lines: 61-
 
 Data
 ----
-basic_example.csv
-
+Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

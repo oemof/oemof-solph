@@ -6,9 +6,21 @@ General description
 Example that illustrates how to model startup and shutdown costs attributed
 to a binary flow.
 
+Code
+----
+Download source code: :download:`startup_shutdown.py </../examples/start_and_shutdown_costs/startup_shutdown.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/start_and_shutdown_costs/startup_shutdown.py
+        :language: python
+        :lines: 32-
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

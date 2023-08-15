@@ -2,9 +2,21 @@
 """
 Example that shows how to use "Offset-Invest".
 
+Code
+----
+Download source code: :download:`minimal_invest.py </../examples/investment_with_minimal_invest/minimal_invest.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/investment_with_minimal_invest/minimal_invest.py
+        :language: python
+        :lines: 31-
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

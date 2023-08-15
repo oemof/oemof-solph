@@ -6,14 +6,27 @@ General description:
 This script shows how use the custom component `solph.custom.Link` to build
 a simple transshipment model.
 
+Code
+----
+Download source code: :download:`transshipment.py </../examples/electrical/transshipment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/electrical/transshipment.py
+        :language: python
+        :lines: 39-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 

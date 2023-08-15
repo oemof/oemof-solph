@@ -9,23 +9,27 @@ components of the energy system.
 
 There are the following components:
 
-    - demand_heat: heat demand (high in winter, low in summer)
-    - fireplace: wood firing, has a minimum heat and
-                 will burn for a minimum time if lit
-    - boiler: gas firing, more flexible but with
-              higher (flexible) cost than wood firing
-    - thermal_collector: solar thermal collector,
-                         size is to be optimized in this example
-                         (high gain in summer, low in winter)
-    - excess_heat: allow for some heat overproduction
-                   (solution would be trivial without,
-                   as the collector size would be given
-                   by the demand in summer)
+- demand_heat: heat demand (high in winter, low in summer)
+- fireplace: wood firing, has a minimum heat and will burn for a minimum time if lit
+- boiler: gas firing, more flexible but with higher (flexible) cost than wood firing
+- thermal_collector: solar thermal collector, size is to be optimized in this example (high gain in summer, low in winter)
+- excess_heat: allow for some heat overproduction (solution would be trivial without, as the collector size would be given by the demand in summer)
 
+Code
+----
+Download source code: :download:`house_without_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/house_without_nonconvex_investment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/house_without_nonconvex_investment.py
+        :language: python
+        :lines: 43-
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 

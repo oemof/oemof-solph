@@ -8,13 +8,27 @@ OperationalModel.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
 
+Code
+----
+Download source code: :download:`add_constraints.py </../examples/flexible_modelling/add_constraints.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flexible_modelling/add_constraints.py
+        :language: python
+        :lines: 41-158
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 
@@ -24,10 +38,6 @@ Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
-
 import logging
 
 import pandas as pd
