@@ -3,4 +3,7 @@
 Spreadsheet (Excel) Reader
 --------------------------
 
+Generating a model from excel
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. automodule:: excel_reader.dispatch
