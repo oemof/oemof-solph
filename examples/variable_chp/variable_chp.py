@@ -11,14 +11,32 @@ and power demand. The i/o balance plot shows that the fixed chp plant produces
 heat and power excess and therefore needs more natural gas. The bar plot just
 shows the difference in the usage of natural gas.
 
+Code
+----
+Download source code: :download:`variable_chp.py </../examples/variable_chp/variable_chp.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/variable_chp/variable_chp.py
+        :language: python
+        :lines: 53-
+
+Data
+----
+Download data: :download:`variable_chp.csv </../examples/variable_chp/variable_chp.csv>`
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 Optional to see the i/o balance plot:
+
+.. code:: bash
 
     pip install git+https://github.com/oemof/oemof_visio.git
 

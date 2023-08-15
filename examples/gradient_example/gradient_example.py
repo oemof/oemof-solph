@@ -8,10 +8,21 @@ more flexible the power plant can be run the less the storage will be used.
 Change the GRADIENT variable in the example to see the effect on the usage of
 the storage.
 
+Code
+----
+Download source code: :download:`gradient_example.py </../examples/gradient_example/gradient_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/gradient_example/gradient_example.py
+        :language: python
+        :lines: 35-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

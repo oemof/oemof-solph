@@ -13,10 +13,22 @@ has two inputs (buses of the parent and child cell) and two outputs (buses of
 the parent and child cell). Losses can be modelled by using the
 `conversion_factors` of the Link class.
 
+Code
+----
+Download source code: :download:`cellular.py </../examples/cellular/cellular.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/cellular/cellular.py
+        :language: python
+        :lines: 45-346
+
 Installation requirements
 -------------------------
 
 This example requires at least oemof.solph (v0.5.1), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -30,14 +42,14 @@ Lennart Schürmann <lennart.schuermann@umsicht.fraunhofer.de>
 """
 
 
+from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
-from oemof.solph import EnergySystem
-
 from oemof.solph import create_time_index
 from oemof.solph import flows
-from oemof.solph import processing, views
+from oemof.solph import processing
+from oemof.solph import views
 
 
 def main():

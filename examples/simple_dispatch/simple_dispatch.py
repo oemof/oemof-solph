@@ -13,14 +13,26 @@ Some of the generators are renewable energies with marginal costs of zero.
 Additionally, it shows how combined heat and power units may be easily modelled
 as well.
 
+Code
+----
+Download source code: :download:`simple_dispatch.py </../examples/simple_dispatch/simple_dispatch.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/simple_dispatch/simple_dispatch.py
+        :language: python
+        :lines: 45-
+
 Data
 ----
-input_data.csv
+Download data: :download:`input_data.csv </../examples/simple_dispatch/input_data.csv>`
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

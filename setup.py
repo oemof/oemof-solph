@@ -87,12 +87,14 @@ setup(
     ],
     extras_require={
         "dev": [
+            "matplotlib",
+            "nbformat",
             "pytest",
             "sphinx",
             "sphinx_rtd_theme",
-            "nbformat",
+            "sphinx-copybutton",
+            "sphinx-design",
             "termcolor",
-            "matplotlib",
         ],
         "examples": ["matplotlib"],
         "dummy": ["oemof"],

@@ -22,6 +22,7 @@ SPDX-License-Identifier: MIT
 import numbers
 from warnings import warn
 
+import numpy as np
 from oemof.network import network
 from oemof.tools import debugging
 from oemof.tools import economics
@@ -107,6 +108,8 @@ class GenericStorage(network.Component):
         investment variable instead of to the nominal_storage_capacity. The
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
+    storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
+        Cost (per energy) for having energy in the storage.
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -177,6 +180,7 @@ class GenericStorage(network.Component):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
         fixed_costs=0,
+        storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
         custom_attributes=None,
@@ -230,6 +234,7 @@ class GenericStorage(network.Component):
         self.max_storage_level = solph_sequence(max_storage_level)
         self.min_storage_level = solph_sequence(min_storage_level)
         self.fixed_costs = solph_sequence(fixed_costs)
+        self.storage_costs = solph_sequence(storage_costs)
         self.investment = investment
         self.invest_relation_input_output = invest_relation_input_output
         self.invest_relation_input_capacity = invest_relation_input_capacity
@@ -415,13 +420,19 @@ class GenericStorageBlock(ScalarBlock):
                                 :math:`\delta(t)` and
                                 timeincrement
                                 :math:`\tau(t)`
+    :math:`c_{storage}(t)`      costs of having         `storage_costs`
+                                energy stored
     =========================== ======================= =========
 
     **The following parts of the objective function are created:**
 
     *Standard model*
 
-    Nothing added to the objective function.
+    * :attr: `storage_costs` not 0
+
+        ..math::
+            \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
+
 
     *Multi-period model*
 
@@ -596,7 +607,22 @@ class GenericStorageBlock(ScalarBlock):
                             * ((1 + m.discount_rate) ** -p)
                         )
         self.fixed_costs = Expression(expr=fixed_costs)
-        return self.fixed_costs
+
+        storage_costs = 0
+
+        for n in self.STORAGES:
+            if n.storage_costs[0] is not None:
+                storage_costs += (
+                    self.storage_content[n, 0] * n.storage_costs[0]
+                )
+                for t in m.TIMESTEPS:
+                    storage_costs += (
+                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                    )
+
+        self.storage_costs = Expression(expr=storage_costs)
+
+        return self.fixed_costs + self.storage_costs
 
 
 class GenericInvestmentStorageBlock(ScalarBlock):
@@ -1032,21 +1058,20 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         # ########################## CHECKS ###################################
         if m.es.periods is not None:
             for n in group:
-                error = (
+                error_fixed_absolute_losses = (
                     "For a multi-period investment model, fixed absolute"
                     " losses are not supported. Please remove parameter."
                 )
                 if n.fixed_losses_absolute.default != 0:
-                    raise ValueError(error)
-                warning = (
+                    raise ValueError(error_fixed_absolute_losses)
+                error_initial_storage_level = (
                     "For a multi-period model, initial_storage_level is"
-                    " not supported.\nIt is suggested to remove that"
-                    " parameter since it has no effect.\nstorage_content"
-                    " will be zero, until there is some usable storage "
-                    " capacity installed."
+                    " not supported.\nIt needs to be removed since it"
+                    " has no effect.\nstorage_content will be zero,"
+                    " until there is some usable storage capacity installed."
                 )
                 if n.initial_storage_level is not None:
-                    warn(warning, debugging.SuspiciousUsageWarning)
+                    raise ValueError(error_initial_storage_level)
 
         # ########################## SETS #####################################
 
@@ -1219,7 +1244,18 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _old_storage_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime
+                capacity to be decommissioned due to reaching its lifetime.
+                Investment and decommissioning periods are linked within
+                the constraint. The respective decommissioning period is
+                determined for every investment period based on the components
+                lifetime and a matrix describing its age of each endogenous
+                investment. Decommissioning can only occur at the beginning of
+                each period.
+
+                Note
+                ----
+                For further information on the implementation check
+                PR#957 https://github.com/oemof/oemof-solph/pull/957
                 """
                 for n in self.INVESTSTORAGES:
                     lifetime = n.investment.lifetime
@@ -1229,27 +1265,77 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                             "for a Flow going into or out of "
                             "a GenericStorage unit "
                             "in a multi-period model!"
-                            " Value for {} is missing.".format(n)
+                            f" Value for {n} is missing."
                         )
                         raise ValueError(msg)
+                    # get the period matrix describing the temporal distance
+                    # between all period combinations.
+                    periods_matrix = m.es.periods_matrix
+
+                    # get the index of the minimum value in each row greater
+                    # equal than the lifetime. This value equals the
+                    # decommissioning period if not zero. The index of this
+                    # value represents the investment period. If np.where
+                    # condition is not met in any row, min value will be zero
+                    decomm_periods = np.argmin(
+                        np.where(
+                            (periods_matrix >= lifetime),
+                            periods_matrix,
+                            np.inf,
+                        ),
+                        axis=1,
+                    )
+
+                    # no decommissioning in first period
+                    expr = self.old_end[n, 0] == 0
+                    self.old_rule_end.add((n, 0), expr)
+
+                    # all periods not in decomm_periods have no decommissioning
+                    # zero is excluded
                     for p in m.PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
+                        if p not in decomm_periods and p != 0:
                             expr = self.old_end[n, p] == 0
                             self.old_rule_end.add((n, p), expr)
-                        elif lifetime <= m.es.periods_years[p]:
-                            # Obtain commissioning period
-                            comm_p = 0
-                            for k, v in enumerate(m.es.periods_years):
-                                if m.es.periods_years[p] - lifetime - v < 0:
-                                    # change of sign is detected
-                                    comm_p = k - 1
-                                    break
-                            expr = self.old_end[n, p] == self.invest[n, comm_p]
-                            self.old_rule_end.add((n, p), expr)
+
+                    # multiple invests can be decommissioned in the same period
+                    # but only sequential ones, thus a bookkeeping is
+                    # introduced andconstraints are added to equation one
+                    # iteration later.
+                    last_decomm_p = np.nan
+                    # loop over invest periods (values are decomm_periods)
+                    for invest_p, decomm_p in enumerate(decomm_periods):
+                        # Add constraint of iteration before
+                        # (skipped in first iteration by last_decomm_p = nan)
+                        if (decomm_p != last_decomm_p) and (
+                            last_decomm_p is not np.nan
+                        ):
+                            expr = self.old_end[n, last_decomm_p] == expr
+                            self.old_rule_end.add((n, last_decomm_p), expr)
+
+                        # no decommissioning if decomm_p is zero
+                        if decomm_p == 0:
+                            # overwrite decomm_p with zero to avoid
+                            # chaining invest periods in next iteration
+                            last_decomm_p = 0
+
+                        # if decomm_p is the same as the last one chain invest
+                        # period
+                        elif decomm_p == last_decomm_p:
+                            expr += self.invest[n, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                        # if decomm_p is not zero, not the same as the last one
+                        # and it's not the first period
                         else:
-                            expr = self.old_end[n, p] == 0
-                            self.old_rule_end.add((n, p), expr)
+                            expr = self.invest[n, invest_p]
+                            # overwrite decomm_p
+                            last_decomm_p = decomm_p
+
+                    # Add constraint of very last iteration
+                    if last_decomm_p != 0:
+                        expr = self.old_end[n, last_decomm_p] == expr
+                        self.old_rule_end.add((n, last_decomm_p), expr)
 
             self.old_rule_end = Constraint(
                 self.INVESTSTORAGES, m.PERIODS, noruleinit=True
@@ -1311,6 +1397,20 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
+
+            def _initially_empty_rule(block):
+                """Ensure storage to be empty initially"""
+                for n in self.INVESTSTORAGES:
+                    expr = self.storage_content[n, 0] == 0
+                    self.initially_empty.add((n, 0), expr)
+
+            self.initially_empty = Constraint(
+                self.INVESTSTORAGES, m.TIMESTEPS, noruleinit=True
+            )
+
+            self.initially_empty_build = BuildAction(
+                rule=_initially_empty_rule
+            )
 
         # Standard storage implementation for discrete time points
         else:

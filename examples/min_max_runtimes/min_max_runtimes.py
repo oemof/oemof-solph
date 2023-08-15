@@ -5,10 +5,22 @@ General description
 -------------------
 Example that illustrates how to model min and max runtimes.
 
+Code
+----
+Download source code: :download:`min_max_runtimes.py </../examples/min_max_runtimes/min_max_runtimes.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/min_max_runtimes/min_max_runtimes.py
+        :language: python
+        :lines: 33-
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
