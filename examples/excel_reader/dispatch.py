@@ -91,7 +91,7 @@ def nodes_from_excel(filename):
     nodes_data = {
         "buses": xls.parse("buses"),
         "commodity_sources": xls.parse("commodity_sources"),
-        "transformers": xls.parse("transformers"),
+        "converters": xls.parse("converters"),
         "renewables": xls.parse("renewables"),
         "demand": xls.parse("demand"),
         "storages": xls.parse("storages"),
@@ -210,18 +210,18 @@ def create_nodes(nd=None):
                 )
             )
 
-    # Create Transformer objects from 'transformers' table
-    for i, t in nd["transformers"].iterrows():
+    # Create Converter objects from 'converters' table
+    for i, t in nd["converters"].iterrows():
         if t["active"]:
             # set static inflow values
             inflow_args = {"variable_costs": t["variable input costs"]}
-            # get time series for inflow of transformer
+            # get time series for inflow of converter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == t["label"]:
                     inflow_args[col.split(".")[1]] = nd["timeseries"][col]
             # create
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label=t["label"],
                     inputs={busd[t["from"]]: solph.Flow(**inflow_args)},
                     outputs={
@@ -263,7 +263,7 @@ def create_nodes(nd=None):
             bus1 = busd[p["bus_1"]]
             bus2 = busd[p["bus_2"]]
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label="powerline" + "_" + p["bus_1"] + "_" + p["bus_2"],
                     inputs={bus1: solph.Flow()},
                     outputs={bus2: solph.Flow()},
@@ -271,7 +271,7 @@ def create_nodes(nd=None):
                 )
             )
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label="powerline" + "_" + p["bus_2"] + "_" + p["bus_1"],
                     inputs={bus2: solph.Flow()},
                     outputs={bus1: solph.Flow()},

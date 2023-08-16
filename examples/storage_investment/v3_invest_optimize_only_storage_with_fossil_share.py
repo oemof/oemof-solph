@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -175,8 +175,8 @@ def main():
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},

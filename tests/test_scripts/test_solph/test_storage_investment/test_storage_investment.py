@@ -18,7 +18,7 @@ The example models the following energy system:
  demand(Sink)        |<------------------|       |
                      |          |        |       |
                      |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
+ pp_gas(Converter) |<---------|        |       |
                      |------------------>|       |
                      |          |        |       |
  storage(Storage)    |<------------------|       |
@@ -111,8 +111,8 @@ def test_optimise_storage_size(
         )
     )
 
-    # Transformer
-    PP_GAS = solph.components.Transformer(
+    # Converter
+    PP_GAS = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={
@@ -199,9 +199,9 @@ def test_results_with_actual_dump():
     assert round(meta["objective"]) == 423167578261115584
 
 
-def test_solph_transformer_attributes_before_dump_and_after_restore():
+def test_solph_converter_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
-    of `solph.components.Transformer`"""
+    of `solph.components.Converter`"""
     test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()

@@ -59,62 +59,62 @@ c_e_BusBlock_balance(thermalBus_0_2)_:
 +1 flow(powerplantGasBiomass_thermalBus_0_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_0)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_0)_:
 -0.1 flow(powerplantGasBiomass_electricityBus_0_0)
 +0.3 flow(biomassBus_powerplantGasBiomass_0_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_0)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_0)_:
 -0.4 flow(powerplantGasBiomass_electricityBus_0_0)
 +0.3 flow(gasBus_powerplantGasBiomass_0_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_0)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_0)_:
 -0.1 flow(powerplantGasBiomass_thermalBus_0_0)
 +0.5 flow(biomassBus_powerplantGasBiomass_0_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_0)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_0)_:
 -0.4 flow(powerplantGasBiomass_thermalBus_0_0)
 +0.5 flow(gasBus_powerplantGasBiomass_0_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_1)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_1)_:
 -0.1 flow(powerplantGasBiomass_electricityBus_0_1)
 +0.3 flow(biomassBus_powerplantGasBiomass_0_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_1)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_1)_:
 -0.4 flow(powerplantGasBiomass_electricityBus_0_1)
 +0.3 flow(gasBus_powerplantGasBiomass_0_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_1)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_1)_:
 -0.1 flow(powerplantGasBiomass_thermalBus_0_1)
 +0.5 flow(biomassBus_powerplantGasBiomass_0_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_1)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_1)_:
 -0.4 flow(powerplantGasBiomass_thermalBus_0_1)
 +0.5 flow(gasBus_powerplantGasBiomass_0_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_2)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_electricityBus_0_2)_:
 -0.1 flow(powerplantGasBiomass_electricityBus_0_2)
 +0.3 flow(biomassBus_powerplantGasBiomass_0_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_2)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_electricityBus_0_2)_:
 -0.4 flow(powerplantGasBiomass_electricityBus_0_2)
 +0.3 flow(gasBus_powerplantGasBiomass_0_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_2)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_biomassBus_thermalBus_0_2)_:
 -0.1 flow(powerplantGasBiomass_thermalBus_0_2)
 +0.5 flow(biomassBus_powerplantGasBiomass_0_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_2)_:
+c_e_ConverterBlock_relation(powerplantGasBiomass_gasBus_thermalBus_0_2)_:
 -0.4 flow(powerplantGasBiomass_thermalBus_0_2)
 +0.5 flow(gasBus_powerplantGasBiomass_0_2)
 = 0

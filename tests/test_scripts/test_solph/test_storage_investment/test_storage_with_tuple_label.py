@@ -18,7 +18,7 @@ The example models the following energy system:
  demand(Sink)        |<------------------|       |
                      |          |        |       |
                      |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
+ pp_gas(Converter) |<---------|        |       |
                      |------------------>|       |
                      |          |        |       |
  storage(Storage)    |<------------------|       |
@@ -124,9 +124,9 @@ def test_tuples_as_labels_example(
         )
     )
 
-    # Transformer
+    # Converter
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label=Label("pp", "electricity", "natural_gas"),
             inputs={bgas: solph.flows.Flow()},
             outputs={

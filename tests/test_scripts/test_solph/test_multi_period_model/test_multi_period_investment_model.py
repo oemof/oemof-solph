@@ -133,8 +133,8 @@ def test_multi_period_investment_model(solver="cbc"):
             },
         )
 
-        # Create transformers
-        pp_lignite = components.Transformer(
+        # Create converters
+        pp_lignite = components.Converter(
             label="DE_pp_lignite",
             inputs={bus_lignite: flows.Flow()},
             outputs={
@@ -153,7 +153,7 @@ def test_multi_period_investment_model(solver="cbc"):
             conversion_factors={bus_el: 0.38},
         )
 
-        pp_hardcoal = components.Transformer(
+        pp_hardcoal = components.Converter(
             label="DE_pp_hardcoal",
             inputs={bus_hardcoal: flows.Flow()},  # )},
             outputs={
@@ -172,7 +172,7 @@ def test_multi_period_investment_model(solver="cbc"):
             conversion_factors={bus_el: 0.45},
         )
 
-        pp_natgas_CCGT = components.Transformer(
+        pp_natgas_CCGT = components.Converter(
             label="DE_pp_natgas_CCGT",
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={
@@ -191,7 +191,7 @@ def test_multi_period_investment_model(solver="cbc"):
             conversion_factors={bus_el: 0.6},
         )
 
-        pp_natgas_GT = components.Transformer(
+        pp_natgas_GT = components.Converter(
             label="DE_pp_natgas_GT",
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={

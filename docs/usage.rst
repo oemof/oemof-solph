@@ -247,7 +247,7 @@ Solph components
 
  * :ref:`oemof_solph_components_sink_label`
  * :ref:`oemof_solph_components_source_label`
- * :ref:`oemof_solph_components_transformer_label`
+ * :ref:`oemof_solph_components_converter_label`
  * :ref:`oemof_solph_components_extraction_turbine_chp_label`
  * :ref:`oemof_solph_components_generic_caes_label`
  * :ref:`oemof_solph_components_generic_chp_label`
@@ -307,23 +307,23 @@ The *nominal_value* sets the installed capacity.
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
-.. _oemof_solph_components_transformer_label:
+.. _oemof_solph_components_converter_label:
 
-Transformer (basic)
-^^^^^^^^^^^^^^^^^^^
+Converter (basic)
+^^^^^^^^^^^^^^^^^
 
-An instance of the Transformer class can represent a node with multiple input and output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis, a cooling device or a heat pump.
+An instance of the Converter class can represent a node with multiple input and output flows such as a power plant, a transport line or any kind of a transforming process as electrolysis, a cooling device or a heat pump.
 The efficiency has to be constant within one time step to get a linear transformation.
 You can define a different efficiency for every time step (e.g. the thermal powerplant efficiency according to the ambient temperature) but this series has to be predefined and cannot be changed within the optimisation.
 
-A condensing power plant can be defined by a transformer with one input (fuel) and one output (electricity).
+A condensing power plant can be defined by a converter with one input (fuel) and one output (electricity).
 
 .. code-block:: python
 
     b_gas = solph.buses.Bus(label='natural_gas')
     b_el = solph.buses.Bus(label='electricity')
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={b_el: solph.flows.Flow(nominal_value=10e10)},
@@ -337,7 +337,7 @@ A CHP power plant would be defined in the same manner but with two outputs:
     b_el = solph.buses.Bus(label='electricity')
     b_th = solph.buses.Bus(label='heat')
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -353,7 +353,7 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     b_el = solph.buses.Bus(label='electricity')
     b_th = solph.buses.Bus(label='heat')
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
         outputs={b_el: Flow(nominal_value=30),
@@ -373,23 +373,26 @@ A heat pump would be defined in the same manner. New buses are defined to make t
     # a scalar or a sequence.
     cop = 3
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label='heat_pump',
         inputs={b_el: Flow(), b_th_low: Flow()},
         outputs={b_th_high: Flow()},
         conversion_factors={b_el: 1/cop,
                             b_th_low: (cop-1)/cop})
 
-If the low-temperature reservoir is nearly infinite (ambient air heat pump) the low temperature bus is not needed and, therefore, a Transformer with one input is sufficient.
+If the low-temperature reservoir is nearly infinite (ambient air heat pump) the
+low temperature bus is not needed and, therefore, a Converter with one input
+is sufficient.
 
-.. note:: See the :py:class:`~oemof.solph.network.transformer.Transformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components.converter.Converter` class for all parameters and the mathematical background.
 
 .. _oemof_solph_components_extraction_turbine_chp_label:
 
 ExtractionTurbineCHP (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` inherits from the :ref:`oemof_solph_components_transformer_label` class. Like the name indicates,
+The :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP`
+inherits from the :ref:`oemof_solph_components_converter_label` class. Like the name indicates,
 the application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
@@ -400,7 +403,7 @@ these flows, with the following constraints:
   :end-before: """
 
 These constraints are applied in addition to those of a standard
-:class:`~oemof.solph.network.transformer.Transformer`. The constraints limit the range of
+:class:`~oemof.solph.components.Converter`. The constraints limit the range of
 the possible operation points, like the following picture shows. For a certain
 flow of fuel, there is a line of operation points, whose slope is defined by
 the power loss factor :math:`\beta` (in some contexts also referred to as
@@ -416,7 +419,7 @@ For now, :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTu
 have one input and two output flows. The class allows the definition
 of a different efficiency for every time step that can be passed as a series
 of parameters that are fixed before the optimisation. In contrast to the
-:py:class:`~oemof.solph.network.transformer.Transformer`, a main flow and a tapped flow is
+:py:class:`~oemof.solph.components.Converter`, a main flow and a tapped flow is
 defined. For the main flow you can define a separate conversion factor that
 applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
@@ -448,7 +451,7 @@ output of an example in the `example directory
 .. _oemof_solph_components_generic_chp_label:
 
 GenericCHP (component)
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 With the GenericCHP class it is possible to model different types of CHP plants (combined cycle extraction turbines,
 back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
@@ -675,12 +678,12 @@ The `Link` allows to model connections between two busses, e.g. modeling the tra
 
 
 
-OffsetTransformer (component)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+OffsetConverter (component)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `OffsetTransformer` object makes it possible to create a Transformer with different efficiencies in part load condition.
+The `OffsetConverter` object makes it possible to create a Converter with different efficiencies in part load condition.
 For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
-The following example illustrates how to define an OffsetTransformer for given information for the output:
+The following example illustrates how to define an OffsetConverter for given information for the output:
 
 .. code-block:: python
 
@@ -697,8 +700,8 @@ The following example illustrates how to define an OffsetTransformer for given i
     c1 = (P_out_max-P_out_min)/(P_in_max-P_in_min)
     c0 = P_out_max - c1*P_in_max
 
-    # define OffsetTransformer
-    solph.custom.OffsetTransformer(
+    # define OffsetConverter
+    solph.components.OffsetConverter(
         label='boiler',
         inputs={bfuel: solph.flows.Flow(
             nominal_value=P_in_max,
@@ -712,21 +715,21 @@ This example represents a boiler, which is supplied by fuel and generates heat.
 It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
 The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
 Note that the nonconvex flow has to be defined for the input flow.
-By using the OffsetTransformer a linear relation of in- and output power with a power dependent efficiency is generated.
+By using the OffsetConverter a linear relation of in- and output power with a power dependent efficiency is generated.
 The following figures illustrate the relations:
 
-.. 	image:: _files/OffsetTransformer_power_relation.svg
+.. 	image:: _files/OffsetConverter_power_relation.svg
    :width: 70 %
-   :alt: OffsetTransformer_power_relation.svg
+   :alt: OffsetConverter_power_relation.svg
    :align: center
 
-Now, it becomes clear, why this object has been named `OffsetTransformer`. The
+Now, it becomes clear, why this object has been named `OffsetConverter`. The
 linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
 the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
-.. include:: ../src/oemof/solph/components/_offset_transformer.py
-  :start-after: _OffsetTransformer-equations:
+.. include:: ../src/oemof/solph/components/_offset_converter.py
+  :start-after: _OffsetConverter-equations:
   :end-before: """
 
 The following figures shows the efficiency dependent on the output power,
@@ -736,14 +739,14 @@ which results in a nonlinear relation:
 
     \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
 
-.. 	image:: _files/OffsetTransformer_efficiency.svg
+.. 	image:: _files/OffsetConverter_efficiency.svg
    :width: 70 %
-   :alt: OffsetTransformer_efficiency.svg
+   :alt: OffsetConverter_efficiency.svg
    :align: center
 
 The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 
-.. note:: See the :py:class:`~oemof.solph.components._offset_transformer.OffsetTransformer` class for all parameters and the mathematical background.
+.. note:: See the :py:class:`~oemof.solph.components._offset_converter.OffsetConverter` class for all parameters and the mathematical background.
 
 
 .. _oemof_solph_custom_electrical_line_label:
@@ -945,12 +948,12 @@ nominal power, or, the marginal costs of bigger plants
 decrease.
 Therefore, you can use the parameter *nonconvex* and *offset* of the
 investment class. Both, work with investment in flows and storages. Here is an
-example of an transformer:
+example of a converter:
 
 .. code-block:: python
 
-    trafo = solph.components.Transformer(
-        label='transformer_nonconvex',
+    trafo = solph.components.Converter(
+        label='converter_nonconvex',
         inputs={bus_0: solph.flows.Flow()},
         outputs={bus_1: solph.flows.Flow(
             investment=solph.Investment(
@@ -962,7 +965,7 @@ example of an transformer:
         conversion_factors={bus_1: 0.9})
 
 In this examples, it is assumed, that independent of the size of the
-transformer, there are always fix investment costs of 400 (€).
+converter, there are always fix investment costs of 400 (€).
 The minimum investment size is 20 (kW)
 and the costs per installed unit are 4 (€/kW). With this
 option, you could theoretically approximate every cost function you want. But
@@ -1135,7 +1138,7 @@ Here is an example
 
 .. code-block:: python
 
-    hydrogen_power_plant = solph.components.Transformer(
+    hydrogen_power_plant = solph.components.Converter(
         label="hydrogen_pp",
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
@@ -1169,7 +1172,7 @@ This would mean that for investments in the particular period, these values woul
 
 .. code-block:: python
 
-    hydrogen_power_plant = solph.components.Transformer(
+    hydrogen_power_plant = solph.components.Converter(
         label="hydrogen_pp",
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
@@ -1196,7 +1199,7 @@ For components that is not invested into, you also can specify some additional a
 
 .. code-block:: python
 
-    coal_power_plant = solph.components.Transformer(
+    coal_power_plant = solph.components.Converter(
         label="existing_coal_pp",
         inputs={coal_bus: solph.flows.Flow()},
         outputs={
@@ -1408,7 +1411,7 @@ but the optimal dispatch strategy must be obtained.
 For this purpose, the class :py:class:`~oemof.solph._options.NonConvex` should be used, as seen in the following example.
 
 Note that this flow class's usage is incompatible with the :py:mod:`~oemof.solph.options.Investment` option. This means that,
-as stated before, the optimal capacity of the transformer cannot be obtained using the :py:class:`~oemof.solph.flows.NonConvexFlow`
+as stated before, the optimal capacity of the converter cannot be obtained using the :py:class:`~oemof.solph.flows.NonConvexFlow`
 class, and only the optimal dispatch strategy of an existing asset with a given capacity can be optimized here.
 
 .. code-block:: python
@@ -1417,7 +1420,7 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
     b_el = solph.buses.Bus(label='electricity')
     b_th = solph.buses.Bus(label='heat')
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: solph.flows.Flow()},
         outputs={b_el: solph.flows.Flow(
@@ -1427,7 +1430,7 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
         b_th: solph.flows.Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
-The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created LinearTransformer (i.e., CHP)
+The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created Converter (i.e., CHP)
 will create a 'status' variable for the flow.
 This will be used to model, for example, minimal/maximal power production constraints if the
 attributes `min`/`max` of the flow are set. It will also be used to include start-up constraints and costs
@@ -1457,7 +1460,7 @@ This nonlinearity is linearised in the
     b_diesel = solph.buses.Bus(label='diesel')
     b_el = solph.buses.Bus(label='electricity')
 
-    solph.components.Transformer(
+    solph.components.Converter(
         label='diesel_genset',
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
@@ -1557,13 +1560,13 @@ returns a key for the group depending e.g. on node attributes:
     def constraint_grouping(node):
         if isinstance(node, Bus) and node.balanced:
             return blocks.Bus
-        if isinstance(node, Transformer):
-            return blocks.Transformer
+        if isinstance(node, Converter):
+            return blocks.Converter
    GROUPINGS = [constraint_grouping]
 
 This function can be passed in a list to `groupings` of
 :class:`oemof.solph.network.energy_system.EnergySystem`. So that we end up with two groups,
-one with all Transformers and one with all Buses that are balanced. These
+one with all Converters and one with all Buses that are balanced. These
 groups are simply stored in a dictionary. There are some advanced functionalities
 to group two connected nodes with their connecting flow and others
 (see for example: FlowsWithNodes class in the oemof.network package).
@@ -1669,7 +1672,7 @@ On the same way you can get a list of all nodes by applying:
 
 Probably you will just get storages as nodes, if you have some in your energy
 system. Note, that just nodes containing decision variables are listed, e.g. a
-Source or a Transformer object does not have decision variables. These are in
+Source or a Converter object does not have decision variables. These are in
 the flows from or to the nodes.
 
 All items within the results dictionary are dictionaries and have two items
@@ -1683,12 +1686,12 @@ with 'scalars' and 'sequences' as keys:
         print(results[flow]['sequences'])
 
 There many options of filtering the flows and nodes as you prefer.
-The following will give you all flows which are outputs of transformer:
+The following will give you all flows which are outputs of converter:
 
 .. code-block:: python
 
-    flows_from_transformer = [x for x in flows if isinstance(
-        x[0], solph.components.Transformer)]
+    flows_from_converter = [x for x in flows if isinstance(
+        x[0], solph.components.Converter)]
 
 You can filter your flows, if the label of in- or output contains a given
 string, e.g.:

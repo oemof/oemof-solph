@@ -23,13 +23,13 @@ There are two supply chains. The energy systems looks like that:
                                      |
 
 Everything is identical - the costs for the sources, the demand, the efficiency
-of the Transformer. And both Transformer have an investment at the output.
+of the Converter. And both Converter have an investment at the output.
 The source '\*_1' is in both cases very expensive, so that
-a investment is probably done in the transformer.
+a investment is probably done in the converter.
 Now, both investments share a third resource, which is called "space" in this
 example. (This could be anything, and you could use as many additional
 resources as you want.) And this resource is limited. In this case, every
-Transformer capacity unit, which might be installed, needs 2 space for
+converter capacity unit, which might be installed, needs 2 space for
 'trafo a', and 1 space per installed capacity for 'trafo b'.
 And the total space is limited to 24.
 See what happens, have fun ;)
@@ -134,9 +134,9 @@ def main():
         )
     )
 
-    # transformer a
+    # Converter a
     es.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="trafo_a",
             inputs={bus_a_0: solph.Flow()},
             outputs={
@@ -152,9 +152,9 @@ def main():
         )
     )
 
-    # transformer b
+    # Converter b
     es.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="trafo_b",
             inputs={bus_b_0: solph.Flow()},
             outputs={

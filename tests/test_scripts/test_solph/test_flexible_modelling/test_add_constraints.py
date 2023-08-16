@@ -45,15 +45,16 @@ def test_add_constraints_example(solver="cbc", nologg=False):
             inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
         )
     )
-    pp_oil = components.Transformer(
+    pp_oil = components.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
+
     es.add(pp_oil)
     es.add(
-        components.Transformer(
+        components.Converter(
             label="pp_lig",
             inputs={blig: Flow()},
             outputs={b_el: Flow(nominal_value=50, variable_costs=10)},

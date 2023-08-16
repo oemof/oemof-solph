@@ -24,10 +24,10 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
 from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.components._transformer import Transformer
+from oemof.solph.components._converter import Converter
 
 
-class ExtractionTurbineCHP(Transformer):
+class ExtractionTurbineCHP(Converter):
     r"""
     A CHP with an extraction turbine in a linear model. For a more
     detailled modelling approach providing more options, also see
@@ -208,7 +208,7 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
             (trsf) objects for which the linear relation of inputs
             and outputs is created e.g. group = [trsf1, trsf2, trsf3, ...].
             Note that the relation is created for all existing relations
-            of the inputs and all outputs of the transformer-like object.
+            of the inputs and all outputs of the converter-like object.
             The components inside the list need to hold all needed attributes.
         """
         if group is None:

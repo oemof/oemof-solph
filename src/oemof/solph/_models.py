@@ -25,7 +25,7 @@ from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
-from oemof.solph.components._transformer import TransformerBlock
+from oemof.solph.components._converter import ConverterBlock
 from oemof.solph.flows._invest_non_convex_flow_block import (
     InvestNonConvexFlowBlock,
 )
@@ -352,7 +352,7 @@ class Model(BaseModel):
 
     CONSTRAINT_GROUPS = [
         BusBlock,
-        TransformerBlock,
+        ConverterBlock,
         InvestmentFlowBlock,
         SimpleFlowBlock,
         NonConvexFlowBlock,

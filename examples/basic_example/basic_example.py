@@ -22,7 +22,7 @@ The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -166,9 +166,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bgas: flows.Flow()},
             outputs={bel: flows.Flow(nominal_value=10e10, variable_costs=50)},

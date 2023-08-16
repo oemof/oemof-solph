@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.Transformer including
+solph version of oemof.network.Converter including
 sets, variables, constraints and parts of the objective function
-for TransformerBlock objects.
+for ConverterBlock objects.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -21,6 +21,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from warnings import warn
+
 from oemof.network import network as on
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -30,8 +32,8 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
-class Transformer(on.Transformer):
-    """A linear converter object with n inputs and n outputs.
+class Converter(on.Transformer):
+    """A linear ConverterBlock object with n inputs and n outputs.
 
     Node object that relates any number of inflow and outflows with
     conversion factors. Inputs and outputs must be given as dictinaries.
@@ -54,7 +56,7 @@ class Transformer(on.Transformer):
 
     Examples
     --------
-    Defining an linear transformer:
+    Defining an linear converter:
 
     >>> from oemof import solph
     >>> bgas = solph.buses.Bus(label='natural_gas')
@@ -62,7 +64,7 @@ class Transformer(on.Transformer):
     >>> bel = solph.buses.Bus(label='electricity')
     >>> bheat = solph.buses.Bus(label='heat')
 
-    >>> trsf = solph.components.Transformer(
+    >>> trsf = solph.components.Converter(
     ...    label='pp_gas_1',
     ...    inputs={bgas: solph.flows.Flow(), bcoal: solph.flows.Flow()},
     ...    outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
@@ -72,12 +74,12 @@ class Transformer(on.Transformer):
     [0.2, 0.3, 0.5, 0.8]
 
     >>> type(trsf)
-    <class 'oemof.solph.components._transformer.Transformer'>
+    <class 'oemof.solph.components._converter.Converter'>
 
     >>> sorted([str(i) for i in trsf.inputs])
     ['hard_coal', 'natural_gas']
 
-    >>> trsf_new = solph.components.Transformer(
+    >>> trsf_new = solph.components.Converter(
     ...    label='pp_gas_2',
     ...    inputs={bgas: solph.flows.Flow()},
     ...    outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
@@ -88,7 +90,7 @@ class Transformer(on.Transformer):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._transformer.TransformerBlock`
+     * :py:class:`~oemof.solph.components._converter.ConverterBlock`
     """
 
     def __init__(
@@ -133,27 +135,56 @@ class Transformer(on.Transformer):
             self.conversion_factors[cf] = sequence(1)
 
     def constraint_group(self):
-        return TransformerBlock
+        return ConverterBlock
 
 
-class TransformerBlock(ScalarBlock):
+# --- BEGIN: To be removed for versions >= v0.6 ---
+class Transformer(Converter):
+    def __init__(
+        self,
+        label=None,
+        inputs=None,
+        outputs=None,
+        conversion_factors=None,
+        custom_attributes=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            outputs=outputs,
+            conversion_factors=conversion_factors,
+            custom_attributes=custom_attributes,
+        )
+        warn(
+            "solph.components.Transformer has been renamed to"
+            " solph.components.Converter. The transitional wrapper"
+            " will be deleted in the future.",
+            FutureWarning,
+        )
+
+
+# --- END ---
+
+
+class ConverterBlock(ScalarBlock):
     r"""Block for the linear relation of nodes with type
-    :class:`~oemof.solph.components._transformer.TransformerBlock`
+    :class:`~oemof.solph.components._converter.ConverterBlock`
 
     **The following sets are created:** (-> see basic sets at
     :class:`.Model` )
 
-    TRANSFORMERS
+    CONVERTERS
         A set with all
-        :class:`~oemof.solph.components._transformer.Transformer` objects.
+        :class:`~oemof.solph.components._converter.Converter` objects.
 
     **The following constraints are created:**
 
-    Linear relation `om.Transformer.relation[i,o,t]`
+    Linear relation :attr:`om.ConverterBlock.relation[i,o,t]`
         .. math::
             P_{i}(p, t) \cdot \eta_{o}(t) =
             P_{o}(p, t) \cdot \eta_{i}(t), \\
             \forall p, t \in \textrm{TIMEINDEX}, \\
+            \forall n \in \textrm{CONVERTERS}, \\
             \forall i \in \textrm{INPUTS}, \\
             \forall o \in \textrm{OUTPUTS}
 
@@ -171,9 +202,9 @@ class TransformerBlock(ScalarBlock):
     ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  ====================
-    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Transformer, inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Converter, inflow
 
-    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Transformer, outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Converter, outflow
 
     :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
@@ -187,18 +218,18 @@ class TransformerBlock(ScalarBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the linear constraint for the class:`TransformerBlock`
+        """Creates the linear constraint for the class:`ConverterBlock`
         block.
 
         Parameters
         ----------
 
         group : list
-            List of oemof.solph.components.Transformers objects for which
+            List of oemof.solph.components.Converters objects for which
             the linear relation of inputs and outputs is created
             e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the relation
             is created for all existing relations of all inputs and all outputs
-            of the transformer. The components inside the list need to hold
+            of the converter. The components inside the list need to hold
             an attribute `conversion_factors` of type dict containing the
             conversion factors for all inputs to outputs.
         """

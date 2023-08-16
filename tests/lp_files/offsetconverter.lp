@@ -75,19 +75,19 @@ c_u_NonConvexFlowBlock_max(gasBus_gasboiler_0_2)_:
 -1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
 <= 0
 
-c_e_OffsetTransformerBlock_relation(gasboiler_0_0)_:
+c_e_OffsetConverterBlock_relation(gasboiler_0_0)_:
 +0.9 flow(gasBus_gasboiler_0_0)
 -1 flow(gasboiler_thermalBus_0_0)
 -17 NonConvexFlowBlock_status(gasBus_gasboiler_0)
 = 0
 
-c_e_OffsetTransformerBlock_relation(gasboiler_0_1)_:
+c_e_OffsetConverterBlock_relation(gasboiler_0_1)_:
 +0.9 flow(gasBus_gasboiler_0_1)
 -1 flow(gasboiler_thermalBus_0_1)
 -17 NonConvexFlowBlock_status(gasBus_gasboiler_1)
 = 0
 
-c_e_OffsetTransformerBlock_relation(gasboiler_0_2)_:
+c_e_OffsetConverterBlock_relation(gasboiler_0_2)_:
 +0.9 flow(gasBus_gasboiler_0_2)
 -1 flow(gasboiler_thermalBus_0_2)
 -17 NonConvexFlowBlock_status(gasBus_gasboiler_2)

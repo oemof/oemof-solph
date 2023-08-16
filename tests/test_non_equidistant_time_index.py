@@ -34,7 +34,7 @@ class TestParameterResult:
         es.add(b_el1, b_diesel)
 
         # TEST DIESEL:
-        dg = cmp.Transformer(
+        dg = cmp.Converter(
             label="diesel_generator",
             inputs={b_diesel: flows.Flow(variable_costs=2)},
             outputs={

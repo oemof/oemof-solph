@@ -90,9 +90,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(nominal_value=200)},

@@ -122,22 +122,22 @@ def test_multi_period_dispatch_model(solver="cbc"):
         inputs={bus_el_fr: flows.Flow(variable_costs=1e3, nominal_value=1e10)},
     )
 
-    # Create transformers
-    pp_lignite = components.Transformer(
+    # Create converters
+    pp_lignite = components.Converter(
         label="DE_pp_lignite",
         inputs={bus_lignite: flows.Flow()},
         outputs={bus_el: flows.Flow(nominal_value=100, variable_costs=1)},
         conversion_factors={bus_el: 0.38},
     )
 
-    pp_hardcoal = components.Transformer(
+    pp_hardcoal = components.Converter(
         label="DE_pp_hardcoal",
         inputs={bus_hardcoal: flows.Flow()},
         outputs={bus_el: flows.Flow(nominal_value=100, variable_costs=2)},
         conversion_factors={bus_el: 0.45},
     )
 
-    pp_natgas_ccgt = components.Transformer(
+    pp_natgas_ccgt = components.Converter(
         label="DE_pp_natgas_CCGT",
         inputs={bus_natgas: flows.Flow()},
         outputs={
@@ -149,7 +149,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         conversion_factors={bus_el: 0.6},
     )
 
-    pp_natgas_gt = components.Transformer(
+    pp_natgas_gt = components.Converter(
         label="DE_pp_natgas_GT",
         inputs={bus_natgas: flows.Flow()},
         outputs={

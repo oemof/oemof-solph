@@ -3,39 +3,39 @@
 """
 General description
 -------------------
-This example illustrates the combination of Investment and NonConvex options
-applied to a diesel generator in a hybrid mini-grid system.
+This example focuses on the modelling of an OffsetConverters representing
+a diesel generator in a hybrid mini-grid system considering its real efficiency
+curve based on the min/max load and efficiency.
 
-There are the following components:
+The system consists of the following components:
+    - pv: solar potential to generate electricity
+    - diesel_source: input diesel for the diesel genset
+    - diesel_genset: generates ac electricity
+    - rectifier: converts generated ac electricity from the diesel genset
+                    to dc electricity
+    - inverter: converts generated dc electricity from the pv to ac electricity
+    - battery: stores the generated dc electricity
+    - demand_el: ac electricity demand (given as a separate csv file)
+    - excess_el: allows for some electricity overproduction
 
-- pv: solar potential to generate electricity
-- diesel_source: input diesel for the diesel genset
-- diesel_genset: generates ac electricity
-- rectifier: converts generated ac electricity from the diesel genset to dc electricity
-- inverter: converts generated dc electricity from the pv to ac electricity
-- battery: stores the generated dc electricity
-- demand_el: ac electricity demand (given as a separate csv file)
-- excess_el: allows for some electricity overproduction
-
+    
 Code
 ----
-Download source code: :download:`diesel_genset_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py>`
+Download source code: :download:`offset_diesel_genset_nonconvex_investment.py </../examples/offset_converter_example/offset_diesel_genset_nonconvex_investment.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py
+    .. literalinclude:: /../examples/offset_converter_example/offset_diesel_genset_nonconvex_investment.py
         :language: python
         :lines: 44-
 
 Data
 ----
-Download data: :download:`solar_generation.csv </../examples/invest_nonconvex_flow_examples/solar_generation.csv>`
+Download data: :download:`input_data.csv </../examples/offset_converter_example/diesel_genset_data.csv>`
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof.solph. Install by:
-
-.. code:: bash
+This example requires the version v0.5.x of oemof. Install by:
 
     pip install 'oemof.solph>=0.5,<0.6'
 
@@ -44,15 +44,11 @@ This example requires the version v0.5.x of oemof.solph. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import os
-import time
-import warnings
-from datetime import datetime
-from datetime import timedelta
-
 import numpy as np
+import os
 import pandas as pd
-
+import time
+from datetime import datetime, timedelta
 from oemof import solph
 
 try:
@@ -61,7 +57,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def offset_converter_example():
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -71,24 +67,25 @@ def main():
 
     start = "2022-01-01"
 
-    # The maximum number of days depends on the given *.csv file.
-    n_days = 10
+    # The maximum number of days depends on the given csv file.
+    n_days = 5
     n_days_in_year = 365
 
     # Create date and time objects.
     start_date_obj = datetime.strptime(start, "%Y-%m-%d")
     start_date = start_date_obj.date()
+    start_time = start_date_obj.time()
     start_datetime = datetime.combine(
         start_date_obj.date(), start_date_obj.time()
     )
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    filename = os.path.join(os.getcwd(), "solar_generation.csv")
-    data = pd.read_csv(filename)
+    current_directory = os.path.dirname(os.path.abspath(__file__))
+    filename = os.path.join(current_directory, "diesel_genset_data.csv")
+    data = pd.read_csv(filepath_or_buffer=filename)
 
-    # Change the index of data to be able to select data based on the time
-    # range.
+    # Change the index of data to be able to select data based on the time range.
     data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
 
     # Choose the range of the solar potential and demand
@@ -99,12 +96,10 @@ def main():
     peak_demand = hourly_demand.max()
 
     # Create the energy system.
-    date_time_index = solph.create_time_index(
-        number=n_days * 24, start=start_date
+    date_time_index = pd.date_range(
+        start=start_date, periods=n_days * 24, freq="H"
     )
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index, infer_last_interval=False
-    )
+    energy_system = solph.EnergySystem(timeindex=date_time_index)
 
     # -------------------- BUSES --------------------
     # Create electricity and diesel buses.
@@ -142,17 +137,33 @@ def main():
     )
 
     # -------------------- CONVERTERS --------------------
-    # The diesel genset assumed to have a fixed efficiency of 33%.
+    # The diesel genset does not have a fixed nominal capacity and will be
+    # optimized using the minimum and maximum loads and efficiencies.
+    # In this case, the `Investment` and `NonConvex` attributes must be used. The
+    # combination of these two attributes is utilized in the
+    # `InvestNonConvexFlowBlock`.
 
-    # The output power of the diesel genset can only vary between
-    # the given minimum and maximum loads, which represent the fraction
-    # of the optimal capacity obtained from the optimization.
+    # If the nominal capacity of the genset is already known, only the `NonConvex`
+    # attribute should be defined, and therefore, the `NonConvexFlowBlock` will
+    # be used.
+
+    # Specify the minimum and maximum loads and the corresponding efficiencies
+    # for the diesel genset.
+    min_load = 0.2
+    max_load = 1.0
+    min_efficiency = 0.20
+    max_efficiency = 0.33
+
+    # Calculate the two polynomial coefficients, i.e. the y-intersection and the
+    # slope of the linear equation.
+    c1 = (max_load / max_efficiency - min_load / min_efficiency) / (
+        max_load - min_load
+    )
+    c0 = min_load * (1 / min_efficiency - c1)
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh
-    min_load = 0.2
-    max_load = 1.0
-    diesel_genset = solph.components.Converter(
+    diesel_genset = solph.components.OffsetConverter(
         label="diesel_genset",
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
@@ -166,9 +177,9 @@ def main():
                     maximum=2 * peak_demand,
                 ),
                 nonconvex=solph.NonConvex(),
-            )
+            ),
         },
-        conversion_factors={b_el_ac: 0.33},
+        coefficients=(c0, c1),
     )
 
     # The rectifier assumed to have a fixed efficiency of 98%.
@@ -248,7 +259,7 @@ def main():
     )
 
     # Add all objects to the energy system.
-    energysystem.add(
+    energy_system.add(
         pv,
         diesel_source,
         b_el_dc,
@@ -271,7 +282,7 @@ def main():
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
     solver = "cbc"
 
-    model = solph.Model(energysystem)
+    model = solph.Model(energy_system)
     model.solve(
         solver=solver,
         solve_kwargs={"tee": True},
@@ -324,9 +335,23 @@ def main():
         / diesel_density
     )
 
-    # Hourly profiles for electricity production in the diesel genset.
+    # Hourly profile for the kWh of the diesel provided for the diesel genset
+    sequences_diesel_consumption_kwh = results_diesel_source["sequences"][
+        (("diesel_source", "diesel"), "flow")
+    ]
+
     sequences_diesel_genset = results_diesel_genset["sequences"][
         (("diesel_genset", "electricity_ac"), "flow")
+    ]
+
+    # Hourly profiles for inverted electricity from dc to ac.
+    sequences_inverter = results_inverter["sequences"][
+        (("inverter", "electricity_ac"), "flow")
+    ]
+
+    # Hourly profiles for inverted electricity from ac to dc.
+    sequences_rectifier = results_rectifier["sequences"][
+        (("rectifier", "electricity_dc"), "flow")
     ]
 
     # Hourly profiles for excess ac and dc electricity production.
@@ -341,8 +366,9 @@ def main():
 
     # Define a tolerance to force 'too close' numbers to the `min_load`
     # and to 0 to be the same as the `min_load` and 0.
+    # Load is defined here in percentage.
     tol = 1e-8
-    load_diesel_genset = sequences_diesel_genset / capacity_diesel_genset
+    load_diesel_genset = sequences_diesel_genset / capacity_diesel_genset * 100
     sequences_diesel_genset[np.abs(load_diesel_genset) < tol] = 0
     sequences_diesel_genset[np.abs(load_diesel_genset - min_load) < tol] = (
         min_load * capacity_diesel_genset
@@ -350,6 +376,18 @@ def main():
     sequences_diesel_genset[np.abs(load_diesel_genset - max_load) < tol] = (
         max_load * capacity_diesel_genset
     )
+
+    # Calculate the efficiency of the diesel genset.
+    # If the load is equal to 0, the efficiency will also be 0.
+    # Efficiency is defined here in percentage.
+    efficiency_diesel_genset = np.zeros(len(sequences_diesel_genset))
+    for i in range(len(sequences_diesel_genset)):
+        if sequences_diesel_consumption_kwh[i] != 0:
+            efficiency_diesel_genset[i] = (
+                sequences_diesel_genset[i]
+                / sequences_diesel_consumption_kwh[i]
+                * 100
+            )
 
     capacity_pv = results_pv["scalars"][(("pv", "electricity_dc"), "invest")]
     capacity_inverter = results_inverter["scalars"][
@@ -406,105 +444,165 @@ def main():
     # Print the results in the terminal
     ##########################################################################
 
-    print("\n" + 50 * "*")
-    print(
-        f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s"
-    )
-    print(50 * "*")
-    print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")
-    print(f"LCOE:\t\t {lcoe:.2f} cent/kWh")
-    print(f"RES:\t\t {res:.0f}%")
-    print(f"Excess:\t\t {excess_rate:.1f}% of the total production")
-    print(50 * "*")
-    print("Optimal Capacities:")
-    print("-------------------")
-    print(f"Diesel Genset:\t {capacity_diesel_genset:.0f} kW")
-    print(f"PV:\t\t {capacity_pv:.0f} kW")
-    print(f"Battery:\t {capacity_battery:.0f} kW")
-    print(f"Inverter:\t {capacity_inverter:.0f} kW")
-    print(f"Rectifier:\t {capacity_rectifier:.0f} kW")
-    print(50 * "*")
-
-    ##########################################################################
-    # Plot the duration curve for the diesel genset
-    ##########################################################################
-
-    if plt is not None:
-        # Create the duration curve for the diesel genset.
-        fig, ax = plt.subplots(figsize=(10, 5))
-
-        # Sort the power generated by the diesel genset in descending order.
-        diesel_genset_duration_curve = np.sort(sequences_diesel_genset)[::-1]
-
-        percentage = (
-            100
-            * np.arange(1, len(diesel_genset_duration_curve) + 1)
-            / len(diesel_genset_duration_curve)
+    if __name__ == "__main__":
+        print("\n" + 50 * "*")
+        print(
+            f"Simulation Time: {end_simulation_time-start_simulation_time:.2f} s"
         )
+        print(50 * "*")
+        print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")
+        print(f"LCOE:\t\t {lcoe:.2f} cent/kWh")
+        print(f"RES:\t\t {res:.0f}%")
+        print(f"Excess:\t\t {excess_rate:.1f}% of the total production")
+        print(50 * "*")
+        print("Optimal Capacities:")
+        print("-------------------")
+        print(f"Diesel Genset:\t {capacity_diesel_genset:.0f} kW")
+        print(f"PV:\t\t {capacity_pv:.0f} kW")
+        print(f"Battery:\t {capacity_battery:.0f} kW")
+        print(f"Inverter:\t {capacity_inverter:.0f} kW")
+        print(f"Rectifier:\t {capacity_rectifier:.0f} kW")
+        print(50 * "*")
 
-        ax.scatter(
-            percentage,
-            diesel_genset_duration_curve,
-            color="dodgerblue",
-            marker="+",
-        )
+        ##########################################################################
+        # Plot the duration curve for the diesel genset
+        ##########################################################################
 
-        # Plot a horizontal line representing the minimum load
-        ax.axhline(
-            y=min_load * capacity_diesel_genset,
-            color="crimson",
-            linestyle="--",
-        )
-        min_load_annotation_text = (
-            f"minimum load: {min_load * capacity_diesel_genset:0.2f} kW"
-        )
-        ax.annotate(
-            min_load_annotation_text,
-            xy=(100, min_load * capacity_diesel_genset),
-            xytext=(0, 5),
-            textcoords="offset pixels",
-            horizontalalignment="right",
-            verticalalignment="bottom",
-        )
+        if plt is not None:
+            # Create the duration curve for the diesel genset.
+            fig1, ax = plt.subplots(figsize=(10, 5))
 
-        # Plot a horizontal line representing the maximum load
-        ax.axhline(
-            y=max_load * capacity_diesel_genset,
-            color="crimson",
-            linestyle="--",
-        )
-        max_load_annotation_text = (
-            f"maximum load: {max_load * capacity_diesel_genset:0.2f} kW"
-        )
-        ax.annotate(
-            max_load_annotation_text,
-            xy=(100, max_load * capacity_diesel_genset),
-            xytext=(0, -5),
-            textcoords="offset pixels",
-            horizontalalignment="right",
-            verticalalignment="top",
-        )
+            # Sort the power generated by the diesel genset in a descending order.
+            diesel_genset_duration_curve = np.sort(sequences_diesel_genset)[
+                ::-1
+            ]
 
-        ax.set_title(
-            "Duration Curve for the Diesel Genset Electricity Production",
-            fontweight="bold",
-        )
-        ax.set_ylabel("diesel genset production [kW]")
-        ax.set_xlabel("percentage of annual operation [%]")
+            percentage = (
+                100
+                * np.arange(1, len(diesel_genset_duration_curve) + 1)
+                / len(diesel_genset_duration_curve)
+            )
 
-        # Create the second axis on the right side of the diagram
-        # representing the operation load of the diesel genset.
-        second_ax = ax.secondary_yaxis(
-            "right",
-            functions=(
-                lambda x: x / capacity_diesel_genset * 100,
-                lambda x: x * capacity_diesel_genset / 100,
-            ),
-        )
-        second_ax.set_ylabel("diesel genset operation load [%]")
+            ax.scatter(
+                percentage,
+                diesel_genset_duration_curve,
+                color="dodgerblue",
+                marker="+",
+            )
 
-        plt.show()
+            # Plot a horizontal line representing the minimum load
+            ax.axhline(
+                y=min_load * capacity_diesel_genset,
+                color="crimson",
+                linestyle="--",
+            )
+            min_load_annotation_text = (
+                f"minimum load: {min_load * capacity_diesel_genset:0.2f} kW"
+            )
+            ax.annotate(
+                min_load_annotation_text,
+                xy=(100, min_load * capacity_diesel_genset),
+                xytext=(0, 5),
+                textcoords="offset pixels",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+            )
+
+            # Plot a horizontal line representing the maximum load
+            ax.axhline(
+                y=max_load * capacity_diesel_genset,
+                color="crimson",
+                linestyle="--",
+            )
+            max_load_annotation_text = (
+                f"maximum load: {max_load * capacity_diesel_genset:0.2f} kW"
+            )
+            ax.annotate(
+                max_load_annotation_text,
+                xy=(100, max_load * capacity_diesel_genset),
+                xytext=(0, -5),
+                textcoords="offset pixels",
+                horizontalalignment="right",
+                verticalalignment="top",
+            )
+
+            ax.set_title(
+                "Duration Curve for the Diesel Genset Electricity Production",
+                fontweight="bold",
+            )
+            ax.set_ylabel("diesel genset production [kW]")
+            ax.set_xlabel("percentage of annual operation [%]")
+
+            # Create the second axis on the right side of the diagram
+            # representing the operation load of the diesel genset.
+            second_ax = ax.secondary_yaxis(
+                "right",
+                functions=(
+                    lambda x: x / capacity_diesel_genset * 100,
+                    lambda x: x * capacity_diesel_genset / 100,
+                ),
+            )
+            second_ax.set_ylabel("diesel genset operation load [%]")
+
+            #######################################################################
+            # Plot the efficiency curve for the diesel genset
+            #######################################################################
+
+            fig2, ax = plt.subplots(figsize=(10, 5))
+            ax.scatter(
+                load_diesel_genset,
+                efficiency_diesel_genset,
+                marker="+",
+            )
+
+            # Plot a horizontal line representing the minimum efficiency
+            ax.axhline(
+                y=min_efficiency * 100,
+                color="crimson",
+                linestyle="--",
+            )
+            min_efficiency_annotation_text = (
+                f"minimum efficiency: {min_efficiency*100:0.0f}%"
+            )
+            ax.annotate(
+                min_efficiency_annotation_text,
+                xy=(100, min_efficiency * 100),
+                xytext=(0, 10),
+                textcoords="offset pixels",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+            )
+
+            # Plot a horizontal line representing the maximum efficiency
+            ax.axhline(
+                y=max_efficiency * 100,
+                color="crimson",
+                linestyle="--",
+            )
+            max_efficiency_annotation_text = (
+                f"maximum efficiency: {max_efficiency*100:0.0f}%"
+            )
+            ax.annotate(
+                max_efficiency_annotation_text,
+                xy=(100, max_efficiency * 100),
+                xytext=(0, 10),
+                textcoords="offset pixels",
+                horizontalalignment="right",
+                verticalalignment="bottom",
+            )
+
+            ax.set_title(
+                "Efficiency Curve for Different Loads of the Diesel Genset",
+                fontweight="bold",
+            )
+            ax.set_ylabel("efficiency [%]")
+            ax.set_xlabel("diesel genset load [%]")
+
+            ax.set_xlim(min_load * 100 - 5, max_load * 100 + 5)
+            ax.set_ylim(min_efficiency * 100 - 2, max_efficiency * 100 + 2)
+
+            plt.show()
 
 
 if __name__ == "__main__":
-    main()
+    offset_converter_example()

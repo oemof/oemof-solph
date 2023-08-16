@@ -20,9 +20,9 @@ from oemof.solph import Model
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.buses import Bus
+from oemof.solph.components import Converter
 from oemof.solph.components import GenericStorage
 from oemof.solph.components import Sink
-from oemof.solph.components import Transformer
 from oemof.solph.flows import Flow
 
 
@@ -43,7 +43,7 @@ class TestParameterResult:
         cls.es.add(b_el1, b_el2, b_diesel)
 
         # TEST DIESEL:
-        dg = Transformer(
+        dg = Converter(
             label="diesel",
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
@@ -305,13 +305,13 @@ class TestParameterResult:
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
-        transformer_output = views.node_output_by_type(
-            results, node_type=Transformer
+        converter_output = views.node_output_by_type(
+            results, node_type=Converter
         )
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        assert int(transformer_output.sum()) == int(compare.sum())
+        assert int(converter_output.sum()) == int(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)

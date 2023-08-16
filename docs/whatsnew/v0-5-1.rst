@@ -5,6 +5,12 @@ v0.5.1 (?)
 API changes
 ###########
 
+* The component `Transformer` is renamed to `Converter`.
+  When people hear "transformer", they think of electrical devices.
+  However, the Transformer is neither meant to be (only) electrical
+  nor bidirectional (as electrical transformers typically are).
+  Thus, the more generic term "converter" is now used.
+  (Note that we always had the argument "conversion_factor".)
 * Unify API for constant sized objects and sizing of investment. For both, `Flow` and
   `GenericStorage`, the argument `investment` is now deprecated. Instead,
   `nominal_value` and `nominal_storage_capacity` accept an `Investment` object.

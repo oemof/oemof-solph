@@ -62,32 +62,32 @@ c_e_BusBlock_balance(electricity_2_5)_:
 +1 flow(powerplant_gas_electricity_2_5)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_0_0)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_0_0)_:
 -1 flow(powerplant_gas_electricity_0_0)
 +0.58 flow(gas_powerplant_gas_0_0)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_0_1)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_0_1)_:
 -1 flow(powerplant_gas_electricity_0_1)
 +0.58 flow(gas_powerplant_gas_0_1)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_1_2)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_1_2)_:
 -1 flow(powerplant_gas_electricity_1_2)
 +0.58 flow(gas_powerplant_gas_1_2)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_1_3)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_1_3)_:
 -1 flow(powerplant_gas_electricity_1_3)
 +0.58 flow(gas_powerplant_gas_1_3)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_2_4)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_2_4)_:
 -1 flow(powerplant_gas_electricity_2_4)
 +0.58 flow(gas_powerplant_gas_2_4)
 = 0
 
-c_e_TransformerBlock_relation(powerplant_gas_gas_electricity_2_5)_:
+c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_2_5)_:
 -1 flow(powerplant_gas_electricity_2_5)
 +0.58 flow(gas_powerplant_gas_2_5)
 = 0
