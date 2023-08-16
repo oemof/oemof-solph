@@ -31,7 +31,7 @@ def test_something_else():
     bel2 = solph.buses.Bus(label="electricity2")
     energysystem.add(bel1, bel2)
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerline_1_2",
             inputs={bel1: solph.flows.Flow()},
             outputs={
@@ -42,7 +42,7 @@ def test_something_else():
         )
     )
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="powerline_2_1",
             inputs={bel2: solph.flows.Flow()},
             outputs={
@@ -57,7 +57,7 @@ def test_something_else():
     line21 = energysystem.groups["powerline_2_1"]
     solph.constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.InvestmentFlowBlock.invest[line21, bel1, 0],
         name="my_name",
     )

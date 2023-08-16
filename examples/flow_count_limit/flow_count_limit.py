@@ -4,13 +4,31 @@
 General description
 -------------------
 
-Something...
+Example that shows how to use "flow_count_limit".
 
+This example shows a case where only one out of two Flows can be
+active at a time. Another typical usage might be a connection to a
+grid where energy can only flow into one direction or a storage that
+cannot be charged and discharged at the same time.
+
+Note that binary variables are computationally expensive. Thus, you
+might want to avoid using this constraint if you do not really need it.
+
+Code
+----
+Download source code: :download:`flow_count_limit.py </../examples/flow_count_limit/flow_count_limit.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flow_count_limit/flow_count_limit.py
+        :language: python
+        :lines: 39-159
 
 Installation requirements
 -------------------------
-
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

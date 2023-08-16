@@ -8,18 +8,29 @@ This example illustrates the effect of activity_costs.
 
 There are the following components:
 
-    - demand_heat: heat demand (constant, for the sake of simplicity)
-    - fireplace: wood firing, burns "for free" if somebody is around
-    - boiler: gas firing, consumes (paid) gas
+- demand_heat: heat demand (constant, for the sake of simplicity)
+- fireplace: wood firing, burns "for free" if somebody is around
+- boiler: gas firing, consumes (paid) gas
 
 Notice that activity_costs is an attribute to NonConvex.
 This is because it relies on the activity status of a component
 which is only available for nonconvex flows.
 
+Code
+----
+Download source code: :download:`activity_costs.py </../examples/activity_costs/activity_costs.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/activity_costs/activity_costs.py
+        :language: python
+        :lines: 43-118
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

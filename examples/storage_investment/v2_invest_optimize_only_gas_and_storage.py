@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -31,22 +31,40 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 2:
 
-    - optimize gas_resource and storage
-    - set installed capacities for wind and pv
-    - set investment cost for storage
-    - set gas price for kWh
+- optimize gas_resource and storage
+- set installed capacities for wind and pv
+- set investment cost for storage
+- set gas price for kWh
 
-    Results show a higher renewable energy share than in variation 1
-    (78% compared to 51%) due to preinstalled renewable capacities.
-    Storage is not installed as the gas resource is cheaper.
+Results show a higher renewable energy share than in variation 1
+(78% compared to 51%) due to preinstalled renewable capacities.
+Storage is not installed as the gas resource is cheaper.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
+
+Code
+----
+Download source code: :download:`v2_invest_optimize_only_gas_and_storage.py </../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py
+        :language: python
+        :lines: 83-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -68,8 +86,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -149,8 +165,8 @@ def main():
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},

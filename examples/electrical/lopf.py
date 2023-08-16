@@ -10,13 +10,27 @@ simple lopf example.
 Note: As oemof currently does not support models with one timesteps, therefore
 there are two.
 
+Code
+----
+Download source code: :download:`lopf.py </../examples/electrical/lopf.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/electrical/lopf.py
+        :language: python
+        :lines: 44-221
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 
@@ -31,11 +45,17 @@ import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
 from oemof.network.graph import create_nx_graph
-from oemof.solph import EnergySystem, Investment, Model, processing, views
-from oemof.solph.components import Sink, Source
+
+from oemof.solph import EnergySystem
+from oemof.solph import Investment
+from oemof.solph import Model
+from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.buses.experimental import ElectricalBus
-from oemof.solph.flows.experimental import ElectricalLine
+from oemof.solph.components import Sink
+from oemof.solph.components import Source
 from oemof.solph.flows import Flow
+from oemof.solph.flows.experimental import ElectricalLine
 
 try:
     import pygraphviz as pygz

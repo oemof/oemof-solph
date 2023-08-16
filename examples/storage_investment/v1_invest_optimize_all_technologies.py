@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -30,24 +30,39 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 1:
 
-    - optimize wind, pv, gas_resource and storage
-    - set investment cost for wind, pv and storage
-    - set gas price for kWh
+- optimize wind, pv, gas_resource and storage
+- set investment cost for wind, pv and storage
+- set gas price for kWh
 
-    Results show an installation of wind and the use of the gas resource.
-    A renewable energy share of 51% is achieved.
+Results show an installation of wind and the use of the gas resource.
+A renewable energy share of 51% is achieved.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v1_invest_optimize_all_technologies.py </../examples/storage_investment/v1_invest_optimize_all_technologies.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v1_invest_optimize_all_technologies.py
+        :language: python
+        :lines: 80-
+
 Data
 ----
-storage_investment.csv
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -68,8 +83,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -159,8 +172,8 @@ def main():
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},

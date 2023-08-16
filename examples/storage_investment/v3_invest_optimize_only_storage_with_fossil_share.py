@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -30,23 +30,41 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 3:
 
-    - calculate storage
-    - set installed capacities for wind and pv
-    - set investment cost for storage
-    - remove the gas price and set a fossil share
-    - now it becomes a calculation of storage capacity (no cost optimization)
+- calculate storage
+- set installed capacities for wind and pv
+- set investment cost for storage
+- remove the gas price and set a fossil share
+- now it becomes a calculation of storage capacity (no cost optimization)
 
 Results show now the installation of storage because a higher
 renewable share than achieved in variation 2 is now required
 (80% compared to 78%).
 
-Have a look at different parameter settings. There are four variations
-of this example in the same folder.
+.. tip::
+
+    Have a look at different parameter settings. There are four variations
+    of this example in the same folder.
+
+Code
+----
+Download source code: :download:`v3_invest_optimize_only_storage_with_fossil_share.py </../examples/storage_investment/v3_invest_optimize_only_storage_with_fossil_share.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v3_invest_optimize_only_storage_with_fossil_share.py
+        :language: python
+        :lines: 82-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -67,8 +85,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -159,8 +175,8 @@ def main():
         inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
         outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},

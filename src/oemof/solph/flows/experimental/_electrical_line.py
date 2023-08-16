@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -106,10 +107,10 @@ class ElectricalLineBlock(ScalarBlock):
 
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
-            flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
-            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
-            \forall t \\in \\textrm{TIMESTEPS}, \\
-            \forall n \\in \\textrm{ELECTRICAL\_LINES}.
+            flow(n, o, p, t) =  1 / reactance(n, t) \cdot
+            voltage\_angle(i(n), t) - voltage\_angle(o(n), t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
+            \forall n \in \textrm{ELECTRICAL\_LINES}.
 
     TODO: Add equate constraint of flows
 
@@ -169,13 +170,13 @@ class ElectricalLineBlock(ScalarBlock):
             bus.slack = True
 
         def _voltage_angle_relation(block):
-            for t in m.TIMESTEPS:
+            for p, t in m.TIMEINDEX:
                 for n in group:
                     if n.input.slack is True:
                         self.voltage_angle[n.output, t].value = 0
                         self.voltage_angle[n.output, t].fix()
                     try:
-                        lhs = m.flow[n.input, n.output, t]
+                        lhs = m.flow[n.input, n.output, p, t]
                         rhs = (
                             1
                             / n.reactance[t]
@@ -189,8 +190,8 @@ class ElectricalLineBlock(ScalarBlock):
                             "Error in constraint creation",
                             "of node {}".format(n.label),
                         )
-                    block.electrical_flow.add((n, t), (lhs == rhs))
+                    block.electrical_flow.add((n, p, t), (lhs == rhs))
 
-        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMEINDEX, noruleinit=True)
 
         self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)

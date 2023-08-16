@@ -63,7 +63,7 @@ default_context:
     test_runner:               'pytest'
     travis:                    'yes'
     travis_osx:                'yes'
-    version:                   '0.4.0.dev0'
+    version:                   '0.4.0.dev1'
     website:                   'https://oemof.org'
     year_from:                 '2014'
     year_to:                   '2020'

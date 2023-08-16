@@ -52,9 +52,9 @@ def test_regression_investment_storage(solver="cbc"):
         )
     )
 
-    # Transformer
+    # Converter
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow(nominal_value=300000)},

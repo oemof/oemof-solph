@@ -12,17 +12,21 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-FileCopyrightText: Saeed Sayadi
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 import math
+import numbers
 from collections.abc import Iterable
 from warnings import warn
 
 import numpy as np
 from oemof.network import network as on
+from oemof.tools import debugging
 
+from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
 
 
@@ -33,14 +37,16 @@ class Flow(on.Edge):
     which are handled specially are noted below.
     For the case where a parameter can be either a scalar or an iterable, a
     scalar value will be converted to a sequence containing the scalar value at
-    every index. This sequence is then stored under the paramter's key.
+    every index. This sequence is then stored under the parameter's key.
 
     Parameters
     ----------
-    nominal_value : numeric, :math:`P_{nom}`
-        The nominal value of the flow. If this value is set the corresponding
-        optimization variable of the flow object will be bounded by this value
-        multiplied with min(lower bound)/max(upper bound).
+    nominal_value : numeric, :math:`P_{nom}` or
+            :class:`Investment <oemof.solph.options.Investment>`
+        The nominal value of the flow, either fixed or as an investement
+        optimisation. If this value is set the corresponding optimization
+        variable of the flow object will be bounded by this value
+        multiplied by min(lower bound)/max(upper bound).
     variable_costs : numeric (iterable or scalar), default: 0, :math:`c`
         The costs associated with one unit of the flow per hour. The
         costs for each timestep (:math:`P_t \cdot c \cdot \delta(t)`)
@@ -59,7 +65,6 @@ class Flow(on.Edge):
     negative_gradient_limit : numeric (iterable, scalar or None)
             the normed *upper bound* on the negative difference
             (`flow[t-1] > flow[t]`) of two consecutive flow values.
-
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Upper bound on the summed flow expressed as the equivalent time that
         the flow would have to run at full capacity to yield the same sum. The
@@ -72,11 +77,6 @@ class Flow(on.Edge):
         limit.
     integer : boolean
         Set True to bound the flow values to integers.
-    investment : :class:`Investment <oemof.solph.options.Investment>`
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable rather than to the nominal_value. The nominal_value
-        should not be set (or set to None) if an investment object is used.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
         If a nonconvex flow object is added here, the flow constraints will
         be altered significantly as the mathematical model for the flow
@@ -84,6 +84,19 @@ class Flow(on.Edge):
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
+    fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
+        The fixed costs associated with a flow.
+        Note: These are only applicable for a multi-period model.
+    lifetime : int, :math:`l`
+        The lifetime of a flow (usually given in years);
+        once it reaches its lifetime (considering also
+        an initial age), the flow is forced to 0.
+        Note: Only applicable for a multi-period model.
+    age : int, :math:`a`
+        The initial age of a flow (usually given in years);
+        once it reaches its lifetime (considering also
+        an initial age), the flow is forced to 0.
+        Note: Only applicable for a multi-period model.
 
     Notes
     -----
@@ -121,9 +134,12 @@ class Flow(on.Edge):
         full_load_time_min=None,
         integer=False,
         bidirectional=False,
-        investment=None,
         nonconvex=None,
+        lifetime=None,
+        age=None,
+        fixed_costs=None,
         # --- BEGIN: To be removed for versions >= v0.6 ---
+        investment=None,
         summed_max=None,
         summed_min=None,
         # --- END ---
@@ -136,16 +152,28 @@ class Flow(on.Edge):
         # populate with information afterwards when creating objects.
 
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        if investment is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option investment overwrites the option nominal_value."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_value is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_value = investment
+
         msg = (
-            "\nThe parameter 'summed_{0}' is deprecated and will be removed "
-            "in version v0.6.\nRename the parameter to 'full_load_time_{0}', "
-            "to avoid this warning and future problems. "
+            "\nThe parameter '{0}' is deprecated and will be removed "
+            + "in version v0.6.\nUse the parameter '{1}', "
+            + "to avoid this warning and future problems. "
         )
         if summed_max is not None:
-            warn(msg.format("max"), FutureWarning)
+            warn(msg.format("summed_max", "full_load_time_max"), FutureWarning)
             full_load_time_max = summed_max
         if summed_min is not None:
-            warn(msg.format("min"), FutureWarning)
+            warn(msg.format("summed_min", "full_load_time_min"), FutureWarning)
             full_load_time_min = summed_min
         # --- END ---
 
@@ -155,35 +183,49 @@ class Flow(on.Edge):
             for attribute, value in custom_attributes.items():
                 setattr(self, attribute, value)
 
+        self.nominal_value = None
+        self.investment = None
+
         infinite_error_msg = (
             "{} must be a finite value. Passing an infinite "
             "value is not allowed."
         )
-        if nominal_value is not None and not math.isfinite(nominal_value):
-            raise ValueError(infinite_error_msg.format("nominal_value"))
-        self.nominal_value = nominal_value
+        if isinstance(nominal_value, numbers.Real):
+            if not math.isfinite(nominal_value):
+                raise ValueError(infinite_error_msg.format("nominal_value"))
+            self.nominal_value = nominal_value
+        elif isinstance(nominal_value, Investment):
+            self.investment = nominal_value
 
+        if fixed_costs is not None:
+            msg = (
+                "Be aware that the fixed costs attribute is only\n"
+                "meant to be used for multi-period models.\n"
+                "If you wish to set up a multi-period model, explicitly "
+                "set the `periods` attribute of your energy system.\n"
+                "It has been decided to remove the `fixed_costs` "
+                "attribute with v0.2 for regular uses.\n"
+                "If you specify `fixed_costs` for a regular model, "
+                "it will simply be ignored."
+            )
+            warn(msg, debugging.SuspiciousUsageWarning)
+
+        self.fixed_costs = sequence(fixed_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
 
         self.full_load_time_max = full_load_time_max
         self.full_load_time_min = full_load_time_min
         self.integer = integer
-        self.investment = investment
         self.nonconvex = nonconvex
         self.bidirectional = bidirectional
+        self.lifetime = lifetime
+        self.age = age
 
         # It is not allowed to define min or max if fix is defined.
         if fix is not None and (min is not None or max is not None):
             raise AttributeError(
                 "It is not allowed to define `min`/`max` if `fix` is defined."
-            )
-
-        # Checking for impossible attribute combinations
-        if self.investment and self.nominal_value is not None:
-            raise ValueError(
-                "Using the investment object the nominal_value"
-                " has to be set to None."
             )
 
         need_nominal_value = [
@@ -202,11 +244,11 @@ class Flow(on.Edge):
                     the_attr = eval(attr)
                 if the_attr is not None:
                     raise AttributeError(
-                        "If {} is set in a flow (except InvestmentFlow), "
+                        f"If {attr} is set in a flow (except InvestmentFlow), "
                         "nominal_value must be set as well.\n"
-                        "Otherwise, it won't have any effect.".format(attr)
+                        "Otherwise, it won't have any effect."
                     )
-        # minumum will be set even without nominal limit
+        # minimum will be set even without nominal limit
 
         # maximum and minimum (absolute values) should be always set,
         # as nominal_value or invest might be defined later
