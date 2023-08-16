@@ -43,6 +43,7 @@ Documentation
 
 * See extensive documentation in user guide and API reference for the new (experimental) multi-period feature.
 * Be more strict about about oemof (meta package) oemof.solph (this package).
+* Improved presentation of examples as part of the documentation.
 
 Bug fixes
 #########
