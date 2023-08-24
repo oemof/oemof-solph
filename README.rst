@@ -260,8 +260,8 @@ Examples
 
 The combination of specific modules (often including other packages) is called an
 application (app). For example, it can depict a concrete energy system model.
-You can find a large variety of helpful examples in the documentstion.
-The examples show optimisation of different energy systems and are supposed
+You can find a large variety of helpful examples in the documentation.
+The examples show the optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.
 The repository has sections for each major release.
