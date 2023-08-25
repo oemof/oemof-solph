@@ -1030,7 +1030,7 @@ First, you start by defining your energy system as you might have done before, b
     my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
     periods = {
         0: pd.date_range('1/1/2013', periods=8760, freq='H'),
-        1: pd.date_range('1/1/2013', periods=8760, freq='H'),
+        1: pd.date_range('1/1/2014', periods=8760, freq='H'),
     }
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
