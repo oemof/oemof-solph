@@ -61,7 +61,7 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.0/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.1/dev
     :alt: Commits since latest release
     :target: https://github.com/oemof/oemof-solph/compare/v0.5.1...dev
 
