@@ -1,5 +1,5 @@
-v0.5.1 (?)
-----------
+v0.5.1 (August 31st, 2023)
+--------------------------
 
 
 API changes
@@ -60,11 +60,6 @@ Testing
 
 * Add tests for experimental SinkDSM component.
 * Add tests for multi-period investment.
-
-Other changes
-#############
-
-
 
 Contributors
 ############
