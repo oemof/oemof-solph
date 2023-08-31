@@ -37,7 +37,8 @@ New features
       of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
 * Add `storage_level_constraint` that allows to set flows from/to storage (in)active based on storage content.
 * `Model` now accepts a list of `EnergySystem` objects, which allows for modelling of cellular energysystems.
-* Add `storage_costs` option for `GenericStorage`.
+* Add `storage_costs` option for `GenericStorage`. (Note: Differnt lengths of time steps are not considered.
+  If you use non-equidistant time steps, you need to scale costs accordingly.)
 
 Documentation
 #############
