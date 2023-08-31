@@ -22,21 +22,31 @@ The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
                          |------------------>|
 
+Code
+----
+Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/basic_example/basic_example.py
+        :language: python
+        :lines: 61-
 
 Data
 ----
-basic_example.csv
-
+Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -156,9 +166,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bgas: flows.Flow()},
             outputs={bel: flows.Flow(nominal_value=10e10, variable_costs=50)},

@@ -21,8 +21,11 @@ from oemof import solph
 def check_oemof_installation(silent=False):
     logging.disable(logging.CRITICAL)
 
-    date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    date_time_index = pd.date_range("1/1/2012", periods=6, freq="H")
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=False,
+    )
 
     bgas = solph.buses.Bus(label="natural_gas")
     bel = solph.buses.Bus(label="electricity")
@@ -34,7 +37,7 @@ def check_oemof_installation(silent=False):
             bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)
         },
     )
-    solph.components.Transformer(
+    solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={

@@ -7,11 +7,23 @@ General description
 A basic example to show how to get the dual variables from the system. Try
 to understand the plot.
 
+Code
+----
+Download source code: :download:`dual_variable_example.py </../examples/dual_variable_example/dual_variable_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/dual_variable_example/dual_variable_example.py
+        :language: python
+        :lines: 34-297
+
 
 Installation requirements
 -------------------------
 
 This example requires the version v0.5.x of oemof.solph:
+
+.. code:: bash
 
     pip install 'oemof.solph[examples]>=0.5,<0.6'
 
@@ -19,27 +31,26 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
+###########################################################################
+# imports
+###########################################################################
+
+import pandas as pd
+from matplotlib import pyplot as plt
+from oemof.tools import logger
+
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import flows
+from oemof.solph import processing
 
 
 def main():
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
-
-    ###########################################################################
-    # imports
-    ###########################################################################
-
-    import pandas as pd
-    from matplotlib import pyplot as plt
-    from oemof.tools import logger
-
-    from oemof.solph import EnergySystem
-    from oemof.solph import Model
-    from oemof.solph import buses
-    from oemof.solph import components as cmp
-    from oemof.solph import flows
-    from oemof.solph import processing
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 48
@@ -199,9 +210,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bus_gas: flows.Flow()},
             outputs={bus_elec: flows.Flow(nominal_value=400)},

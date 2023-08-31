@@ -5,10 +5,21 @@ General description
 -------------------
 Example that shows the parameter `balanced` of `GenericStorage`.
 
+Code
+----
+Download source code: :download:`storage.py </../examples/storage_balanced_unbalanced/storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_balanced_unbalanced/storage.py
+        :language: python
+        :lines: 32-
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 

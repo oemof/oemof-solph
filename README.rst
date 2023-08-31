@@ -100,25 +100,24 @@ Introduction
 
 The oemof.solph package is part of the
 `Open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
-This an organisational framework to bundle tools for energy (system) modelling.
+This is an organisational framework to bundle tools for energy (system) modelling.
 oemof-solph is a model generator for energy system modelling and optimisation.
 
-The ``oemof.solph`` package is very often called just ``oemof`` as it was part of the
-oemof meta package. Now you need to install ``oemof.solph`` instead of ``oemof``, but
-everything else is still the same.
-(Note: Since the oemof package refers to legacy versions before v0.4,
-it is not possible to install both, oemof and oemof.solph, at the same time.
-Just use ``pip install oemof.solph``.)
+The package ``oemof.solph`` is very often called just ``oemof``.
+This is because installing the ``oemof`` meta package was once the best way to get ``oemof.solph``.
+Notice that you should prefeably install ``oemof.solph`` instead of ``oemof``
+if you want to use ``solph``.
+
 
 Everybody is welcome to use and/or develop oemof.solph.
 Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
-If you want to support us that way please fork the oemof repository to your own
-github account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
+If you want to support us that way please fork the oemof-solph repository to your own
+GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
 
-If you have questions regarding the use of oemof you can visit the forum at `openmod-initiative.org <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ and open a new thread if your questions hasn't been already answered.
+If you have questions regarding the use of oemof including oemof.solph you can visit the openmod forum (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and open a new thread if your questions hasn't been already answered.
 
 Keep in touch! - You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 but this will bring you quite a few mails and might be more interesting for developers.
@@ -135,20 +134,26 @@ The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powere
 Installation
 ============
 
-If you have a working Python3 environment, use pypi to install the latest oemof version. Python >= 3.6 is recommended. Lower versions may work but are not tested.
 
+If you have a working Python installation, use pypi to install the latest version of oemof.solph.
+Python >= 3.8 is recommended. Lower versions may work but are not tested.
+
+We highly recommend to use virtual environments.
+Please refer to the documentation of your Python distribution (e.g. Anaconda,
+Micromamba, or the version of Python that came with your Linux installation)
+to learn how to set up and use virtual environments.
 
 ::
 
-    pip install oemof.solph
+    (venv) pip install oemof.solph
 
 If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
 
-    pip install https://github.com/oemof/oemof-solph/archive/dev.zip
+    (venv) pip install https://github.com/oemof/oemof-solph/archive/dev.zip
 
 
 For running an oemof-solph optimisation model, you need to install a solver.
-Following you will find guidelines for the installation process for different operation systems.
+Following you will find guidelines for the installation process for different operating systems.
 
 .. _windows_solver_label:
 .. _linux_solver_label:
@@ -156,10 +161,10 @@ Following you will find guidelines for the installation process for different op
 Installing a solver
 -------------------
 
-There are various commercial and open-source solvers that can be used with oemof.
-There are two common OpenSource solvers available (CBC, GLPK), while oemof recommends CBC (Coin-or branch and cut).
-But sometimes its worth comparing the results of different solvers.
-Other commercial solvers like Gurobi or Cplex can be used as well.
+There are several solvers that can work with oemof, both open source and commercial.
+Two open source solvers are widely used (CBC and GLPK), but oemof suggests CBC (Coin-or branch and cut).
+It may be useful to compare results of different solvers to see which performs best.
+Other commercial solvers, like Gurobi or Cplex, are also options.
 Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
 
 Check the solver installation by executing the test_installation example below (see section Installation Test).
@@ -170,7 +175,7 @@ To install the solvers have a look at the package repository of your Linux distr
 
 **Windows**
 
- 1. Download CBC (`64 <https://ampl.com/dl/open/cbc/cbc-win64.zip>`_ or `32 <https://ampl.com/dl/open/cbc/cbc-win32.zip>`_ bit)
+ 1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
  4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
@@ -192,12 +197,12 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recomended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 
-    conda install -c conda-forge coincbc
-    pip install oemof.solph
+    (venv) conda install -c conda-forge coincbc
+    (venv) pip install oemof.solph
 
 
 .. _check_installation_label:
@@ -210,7 +215,7 @@ in your virtual environment:
 
 .. code:: console
 
-  oemof_installation_test
+  (venv) oemof_installation_test
 
 If the installation was successful, you will receive something like this:
 
@@ -253,20 +258,21 @@ To allow citing specific versions, we use the zenodo project to get a DOI for ea
 Examples
 ========
 
-The linkage of specific modules of the various packages is called an
-application (app) and depicts for example a concrete energy system model.
-You can find a large variety of helpful examples in `oemof's example repository <https://github.com/oemof/oemof-examples>`_ on github to download or clone.
-The examples show optimisations of different energy systems and are supposed
+The combination of specific modules (often including other packages) is called an
+application (app). For example, it can depict a concrete energy system model.
+You can find a large variety of helpful examples in the documentation.
+The examples show the optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
 There is some elaboration on the examples in the respective repository.
 The repository has sections for each major release.
 
-You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-examples/pulls>`_ or by sending us an e-mail (see `here <https://oemof.org/contact/>`_ for contact information).
+You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
+or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact information).
 
 License
 =======
 
-Copyright (c) 2022 oemof developer group
+Copyright (c) 2023 oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

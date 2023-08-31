@@ -18,7 +18,7 @@ The example models the following energy system:
  demand(Sink)        |<------------------|       |
                      |          |        |       |
                      |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
+ pp_gas(Converter) |<---------|        |       |
                      |------------------>|       |
                      |          |        |       |
  storage(Storage)    |<------------------|       |
@@ -124,9 +124,9 @@ def test_tuples_as_labels_example(
         )
     )
 
-    # Transformer
+    # Converter
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label=Label("pp", "electricity", "natural_gas"),
             inputs={bgas: solph.flows.Flow()},
             outputs={
@@ -211,8 +211,8 @@ def test_tuples_as_labels_example(
     # Problem results
     assert int(meta["problem"]["Lower bound"]) == 37819254
     assert int(meta["problem"]["Upper bound"]) == 37819254
-    assert meta["problem"]["Number of variables"] == 281
-    assert meta["problem"]["Number of constraints"] == 163
+    assert meta["problem"]["Number of variables"] == 280
+    assert meta["problem"]["Number of constraints"] == 162
     assert meta["problem"]["Number of nonzeros"] == 116
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"

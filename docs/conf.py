@@ -27,14 +27,16 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
 ]
 source_suffix = ".rst"
 master_doc = "index"
 project = "oemof.solph"
-year = "2014-2022"
+year = "2014-2023"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.5.0"
+version = release = "0.5.1"
 
 pygments_style = "trac"
 templates_path = ["."]

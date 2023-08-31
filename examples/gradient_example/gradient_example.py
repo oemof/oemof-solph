@@ -8,10 +8,21 @@ more flexible the power plant can be run the less the storage will be used.
 Change the GRADIENT variable in the example to see the effect on the usage of
 the storage.
 
+Code
+----
+Download source code: :download:`gradient_example.py </../examples/gradient_example/gradient_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/gradient_example/gradient_example.py
+        :language: python
+        :lines: 35-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -122,9 +133,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple Converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bgas: flows.Flow()},
             outputs={

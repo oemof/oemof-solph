@@ -8,13 +8,27 @@ OperationalModel.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
 
+Code
+----
+Download source code: :download:`add_constraints.py </../examples/flexible_modelling/add_constraints.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flexible_modelling/add_constraints.py
+        :language: python
+        :lines: 41-158
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 
@@ -24,10 +38,6 @@ Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
-
 import logging
 
 import pandas as pd
@@ -61,13 +71,13 @@ def run_add_constraints_example(solver="cbc", nologg=False):
         label="Sink",
         inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
     )
-    pp_oil = cmp.Transformer(
+    pp_oil = cmp.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    pp_lig = cmp.Transformer(
+    pp_lig = cmp.Converter(
         label="pp_lig",
         inputs={blig: Flow()},
         outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
@@ -113,26 +123,26 @@ def run_add_constraints_example(solver="cbc", nologg=False):
     # add the sub-model to the oemof Model instance
     om.add_component("MyBlock", myblock)
 
-    def _inflow_share_rule(m, s, e, t):
+    def _inflow_share_rule(m, s, e, p, t):
         """pyomo rule definition: Here we can use all objects from the block or
         the om object, in this case we don't need anything from the block
         except the newly defined set MYFLOWS.
         """
-        expr = om.flow[s, e, t] >= om.flows[s, e].outflow_share[t] * sum(
-            om.flow[i, o, t] for (i, o) in om.FLOWS if o == e
+        expr = om.flow[s, e, p, t] >= om.flows[s, e].outflow_share[t] * sum(
+            om.flow[i, o, p, t] for (i, o) in om.FLOWS if o == e
         )
         return expr
 
     myblock.inflow_share = po.Constraint(
-        myblock.MYFLOWS, om.TIMESTEPS, rule=_inflow_share_rule
+        myblock.MYFLOWS, om.TIMEINDEX, rule=_inflow_share_rule
     )
     # add emission constraint
     myblock.emission_constr = po.Constraint(
         expr=(
             sum(
-                om.flow[i, o, t]
+                om.flow[i, o, p, t]
                 for (i, o) in myblock.COMMODITYFLOWS
-                for t in om.TIMESTEPS
+                for p, t in om.TIMEINDEX
             )
             <= emission_limit
         )

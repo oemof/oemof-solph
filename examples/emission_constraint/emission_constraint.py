@@ -5,10 +5,22 @@ General description
 -------------------
 Example that shows how to add an emission constraint in a model.
 
+Code
+----
+Download source code: :download:`emission_constraint.py </../examples/emission_constraint/emission_constraint.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/emission_constraint/emission_constraint.py
+        :language: python
+        :lines: 32-129
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -78,9 +90,9 @@ def main():
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.Flow()},
             outputs={bel: solph.Flow(nominal_value=200)},

@@ -8,21 +8,34 @@ applied to a diesel generator in a hybrid mini-grid system.
 
 There are the following components:
 
-    - pv: solar potential to generate electricity
-    - diesel_source: input diesel for the diesel genset
-    - diesel_genset: generates ac electricity
-    - rectifier: converts generated ac electricity from the diesel genset
-                 to dc electricity
-    - inverter: converts generated dc electricity from the pv to ac electricity
-    - battery: stores the generated dc electricity
-    - demand_el: ac electricity demand (given as a separate *.csv file)
-    - excess_el: allows for some electricity overproduction
+- pv: solar potential to generate electricity
+- diesel_source: input diesel for the diesel genset
+- diesel_genset: generates ac electricity
+- rectifier: converts generated ac electricity from the diesel genset to dc electricity
+- inverter: converts generated dc electricity from the pv to ac electricity
+- battery: stores the generated dc electricity
+- demand_el: ac electricity demand (given as a separate csv file)
+- excess_el: allows for some electricity overproduction
 
+Code
+----
+Download source code: :download:`diesel_genset_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py>`
 
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/diesel_genset_nonconvex_investment.py
+        :language: python
+        :lines: 44-
+
+Data
+----
+Download data: :download:`solar_generation.csv </../examples/invest_nonconvex_flow_examples/solar_generation.csv>`
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 
@@ -31,13 +44,16 @@ This example requires the version v0.5.x of oemof.solph. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import numpy as np
 import os
-import pandas as pd
 import time
-from datetime import datetime, timedelta
-from oemof import solph
 import warnings
+from datetime import datetime
+from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+
+from oemof import solph
 
 try:
     import matplotlib.pyplot as plt
@@ -69,12 +85,7 @@ def main():
 
     # Import data.
     filename = os.path.join(os.getcwd(), "solar_generation.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    data = pd.read_csv(filename)
 
     # Change the index of data to be able to select data based on the time
     # range.
@@ -130,7 +141,7 @@ def main():
         },
     )
 
-    # -------------------- TRANSFORMERS --------------------
+    # -------------------- CONVERTERS --------------------
     # The diesel genset assumed to have a fixed efficiency of 33%.
 
     # The output power of the diesel genset can only vary between
@@ -141,7 +152,7 @@ def main():
     variable_cost_diesel_genset = 0.045  # currency/kWh
     min_load = 0.2
     max_load = 1.0
-    diesel_genset = solph.components.Transformer(
+    diesel_genset = solph.components.Converter(
         label="diesel_genset",
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
@@ -162,7 +173,7 @@ def main():
 
     # The rectifier assumed to have a fixed efficiency of 98%.
     epc_rectifier = 62.35  # currency/kW/year
-    rectifier = solph.components.Transformer(
+    rectifier = solph.components.Converter(
         label="rectifier",
         inputs={
             b_el_ac: solph.flows.Flow(
@@ -174,14 +185,14 @@ def main():
             )
         },
         outputs={b_el_dc: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_dc: 0.98,
         },
     )
 
     # The inverter assumed to have a fixed efficiency of 98%.
     epc_inverter = 62.35  # currency/kW/year
-    inverter = solph.components.Transformer(
+    inverter = solph.components.Converter(
         label="inverter",
         inputs={
             b_el_dc: solph.flows.Flow(
@@ -193,7 +204,7 @@ def main():
             )
         },
         outputs={b_el_ac: solph.flows.Flow()},
-        conversion_factor={
+        conversion_factors={
             b_el_ac: 0.98,
         },
     )

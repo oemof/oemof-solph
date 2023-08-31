@@ -17,10 +17,10 @@ Source
     :undoc-members:
     :show-inheritance:
 
-Transformer
------------
+Converter
+---------
 
-.. automodule:: oemof.solph.components._transformer
+.. automodule:: oemof.solph.components._converter
     :members:
     :undoc-members:
     :show-inheritance:
@@ -49,10 +49,18 @@ GenericStorage
     :undoc-members:
     :show-inheritance:
 
-OffsetTransformer
------------------
+OffsetConverter
+---------------
 
-.. automodule:: oemof.solph.components._offset_transformer
+.. automodule:: oemof.solph.components._offset_converter
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+Link
+----
+
+.. automodule:: oemof.solph.components._link
     :members:
     :undoc-members:
     :show-inheritance:
@@ -73,18 +81,9 @@ experimental.GenericCAES
     :undoc-members:
     :show-inheritance:
 
-experimental.Link
------------------
-
-.. automodule:: oemof.solph.components.experimental._link
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-experimental.PiecewiseLinearTransformer
----------------------------------------
-
-.. automodule:: oemof.solph.components.experimental._piecewise_linear_transformer
+experimental.PiecewiseLinearConverter
+-------------------------------------
+.. automodule:: oemof.solph.components.experimental._piecewise_linear_converter
     :members:
     :undoc-members:
     :show-inheritance:

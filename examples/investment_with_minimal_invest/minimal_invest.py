@@ -2,9 +2,21 @@
 """
 Example that shows how to use "Offset-Invest".
 
+Code
+----
+Download source code: :download:`minimal_invest.py </../examples/investment_with_minimal_invest/minimal_invest.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/investment_with_minimal_invest/minimal_invest.py
+        :language: python
+        :lines: 31-
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -69,8 +81,8 @@ def main():
     eta = 0.8
 
     # non offset invest
-    trafo = solph.components.Transformer(
-        label="transformer",
+    trafo = solph.components.Converter(
+        label="converter",
         inputs={bus_0: solph.Flow()},
         outputs={
             bus_1: solph.Flow(
@@ -117,11 +129,11 @@ def main():
 
     # Nachvollziehen der Berechnung
     # Kosten Invest
-    p_invest = solph.views.node(results, "transformer")["scalars"][
-        (("transformer", "bus_1"), "invest")
+    p_invest = solph.views.node(results, "converter")["scalars"][
+        (("converter", "bus_1"), "invest")
     ]
-    invest_binary = solph.views.node(results, "transformer")["scalars"][
-        (("transformer", "bus_1"), "invest_status")
+    invest_binary = solph.views.node(results, "converter")["scalars"][
+        (("converter", "bus_1"), "invest_status")
     ]
     c_invest = p_invest * c_var + c_fix * invest_binary
 
@@ -157,8 +169,8 @@ def main():
     )
     print(
         "Maximale Leistung im Einsatz",
-        solph.views.node(results, "transformer")["sequences"][
-            (("transformer", "bus_1"), "flow")
+        solph.views.node(results, "converter")["sequences"][
+            (("converter", "bus_1"), "flow")
         ].max(),
     )
     if p_invest > max(data):

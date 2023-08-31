@@ -11,14 +11,32 @@ and power demand. The i/o balance plot shows that the fixed chp plant produces
 heat and power excess and therefore needs more natural gas. The bar plot just
 shows the difference in the usage of natural gas.
 
+Code
+----
+Download source code: :download:`variable_chp.py </../examples/variable_chp/variable_chp.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/variable_chp/variable_chp.py
+        :language: python
+        :lines: 53-
+
+Data
+----
+Download data: :download:`variable_chp.csv </../examples/variable_chp/variable_chp.csv>`
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 Optional to see the i/o balance plot:
+
+.. code:: bash
 
     pip install git+https://github.com/oemof/oemof_visio.git
 
@@ -186,23 +204,23 @@ def main():
         },
     )
 
-    # This is just a dummy transformer with a nominal input of zero
-    noded["fixed_chp_gas"] = solph.components.Transformer(
+    # This is just a dummy Converter with a nominal input of zero
+    noded["fixed_chp_gas"] = solph.components.Converter(
         label="fixed_chp_gas",
         inputs={noded["bgas"]: solph.Flow(nominal_value=0)},
         outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
         conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
     )
 
-    # create a fixed transformer to distribute to the heat_2 and elec_2 buses
-    noded["fixed_chp_gas_2"] = solph.components.Transformer(
+    # create a fixed Converter to distribute to the heat_2 and elec_2 buses
+    noded["fixed_chp_gas_2"] = solph.components.Converter(
         label="fixed_chp_gas_2",
         inputs={noded["bgas"]: solph.Flow(nominal_value=10e10)},
         outputs={noded["bel2"]: solph.Flow(), noded["bth2"]: solph.Flow()},
         conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
     )
 
-    # create a fixed transformer to distribute to the heat and elec buses
+    # create a fixed Converter to distribute to the heat and elec buses
     noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
         label="variable_chp_gas",
         inputs={noded["bgas"]: solph.Flow(nominal_value=10e10)},
@@ -242,7 +260,7 @@ def main():
     plt.show()
 
     # Create a plot with 6 tiles that shows the difference between the
-    # Transformer and the ExtractionTurbineCHP used for chp plants.
+    # Converter and the ExtractionTurbineCHP used for chp plants.
     smooth_plot = True
 
     if oeplot:
