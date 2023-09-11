@@ -252,19 +252,14 @@ The core ideas of oemof as a whole are described in
 (preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
 To allow citing specific versions, we use the zenodo project to get a DOI for each version.
 
-
-.. _solph_examples_label:
-
-Examples
-========
+Example Applications
+====================
 
 The combination of specific modules (often including other packages) is called an
 application (app). For example, it can depict a concrete energy system model.
 You can find a large variety of helpful examples in the documentation.
 The examples show the optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
-There is some elaboration on the examples in the respective repository.
-The repository has sections for each major release.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
 or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact information).
