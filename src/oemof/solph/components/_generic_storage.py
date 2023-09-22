@@ -359,6 +359,11 @@ class GenericStorageBlock(ScalarBlock):
         The variable of storage s and timestep t can be accessed by:
         `om.GenericStorageBlock.storage_content[s, t]`
 
+    storage_content_intra
+        Storage content for every storage and timestep of typical periods
+        (only used in TSAM-mode). The variable of storage s and timestep t can
+        be accessed by: `om.GenericStorageBlock.storage_content_intra[s, k, t]`
+
     **The following constraints are created:**
 
     Set storage_content of last time step to one at t=0 if balanced == True
@@ -487,6 +492,14 @@ class GenericStorageBlock(ScalarBlock):
             ]
         )
 
+        def get_timeindex(p, ik, g):
+            t = (
+                p * len(m.TIMESTEPS_IN_PERIOD[p])
+                + ik * m.es.tsa_parameters[p]["timesteps_per_period"]
+                + g
+            )
+            return t
+
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -500,20 +513,84 @@ class GenericStorageBlock(ScalarBlock):
             )
             return bounds
 
-        self.storage_content = Var(
-            self.STORAGES, m.TIMEPOINTS, bounds=_storage_content_bound_rule
-        )
+        if not m.TSAM_MODE:
+            self.storage_content = Var(
+                self.STORAGES, m.TIMEPOINTS, bounds=_storage_content_bound_rule
+            )
 
-        # set the initial storage content
-        # ToDo: More elegant code possible?
-        for n in group:
-            if n.initial_storage_level is not None:
-                self.storage_content[n, 0] = (
-                    n.initial_storage_level * n.nominal_storage_capacity
-                )
-                self.storage_content[n, 0].fix()
+            # set the initial storage content
+            # ToDo: More elegant code possible?
+            for n in group:
+                if n.initial_storage_level is not None:
+                    self.storage_content[n, 0] = (
+                        n.initial_storage_level * n.nominal_storage_capacity
+                    )
+                    self.storage_content[n, 0].fix()
+        else:
+            self.storage_content_inter = Var(self.STORAGES, m.CLUSTERS)
+            self.storage_content_intra = Var(
+                self.STORAGES, m.TIMEINDEX_TYPICAL_CLUSTER
+            )
+            # set the initial intra storage content
+            # first timestep in intra storage is always zero
+            for n in group:
+                for p, k in m.TYPICAL_CLUSTERS:
+                    self.storage_content_intra[n, p, k, 0] = 0
+                    self.storage_content_intra[n, p, k, 0].fix()
 
         #  ************* Constraints ***************************
+
+        def _storage_inter_minimum_level_rule(block):
+            # See FINE implementation at https://github.com/FZJ-IEK3-VSA/FINE/blob/57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
+            for n in self.STORAGES:
+                for p, i, g in m.TIMEINDEX_CLUSTER:
+                    t = get_timeindex(p, i, g)
+                    lhs = n.nominal_storage_capacity * n.min_storage_level[t]
+                    k = m.es.tsa_parameters[p]["order"][i]
+                    rhs = (
+                        self.storage_content_inter[n, p, i]
+                        * (1 - n.loss_rate[t])
+                        ** (g * m.es.tsa_parameters[p]["timesteps_per_period"])
+                        + self.storage_content_intra[n, p, k, g]
+                    )
+                    self.storage_inter_minimum_level.add(
+                        (n, p, i, g), lhs <= rhs
+                    )
+
+        if m.TSAM_MODE:
+            self.storage_inter_minimum_level = Constraint(
+                self.STORAGES, m.TIMEINDEX_CLUSTER, noruleinit=True
+            )
+
+            self.storage_inter_minimum_level_build = BuildAction(
+                rule=_storage_inter_minimum_level_rule
+            )
+
+        def _storage_inter_maximum_level_rule(block):
+            # See FINE implementation at https://github.com/FZJ-IEK3-VSA/FINE/blob/57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
+            for n in self.STORAGES:
+                for p, i, g in m.TIMEINDEX_CLUSTER:
+                    t = get_timeindex(p, i, g)
+                    k = m.es.tsa_parameters[p]["order"][i]
+                    lhs = (
+                        self.storage_content_inter[n, p, i]
+                        * (1 - n.loss_rate[t])
+                        ** (g * m.es.tsa_parameters[p]["timesteps_per_period"])
+                        + self.storage_content_intra[n, p, k, g]
+                    )
+                    rhs = n.nominal_storage_capacity * n.max_storage_level[t]
+                    self.storage_inter_minimum_level.add(
+                        (n, p, i, g), lhs <= rhs
+                    )
+
+        if m.TSAM_MODE:
+            self.storage_inter_maximum_level = Constraint(
+                self.STORAGES, m.TIMEINDEX_CLUSTER, noruleinit=True
+            )
+
+            self.storage_inter_maximum_level_build = BuildAction(
+                rule=_storage_inter_maximum_level_rule
+            )
 
         def _storage_balance_rule(block, n, p, t):
             """
@@ -540,9 +617,44 @@ class GenericStorageBlock(ScalarBlock):
             ) * m.timeincrement[t]
             return expr == 0
 
-        self.balance = Constraint(
-            self.STORAGES, m.TIMEINDEX, rule=_storage_balance_rule
-        )
+        def _intra_storage_balance_rule(block, n, p, k, g):
+            """
+            Rule definition for the storage balance of every storage n and
+            every timestep.
+            """
+            t = get_timeindex(p, k, g)
+            expr = 0
+            if g + 1 >= m.es.tsa_parameters[p]["timesteps_per_period"]:
+                return Constraint.Feasible
+            expr += block.storage_content_intra[n, p, k, g + 1]
+            expr += (
+                -block.storage_content_intra[n, p, k, g]
+                * (1 - n.loss_rate[t]) ** m.timeincrement[t]
+            )
+            expr += (
+                n.fixed_losses_relative[t]
+                * n.nominal_storage_capacity
+                * m.timeincrement[t]
+            )
+            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
+            expr += (
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
+            expr += (
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
+            return expr == 0
+
+        if not m.TSAM_MODE:
+            self.balance = Constraint(
+                self.STORAGES, m.TIMEINDEX, rule=_storage_balance_rule
+            )
+        else:
+            self.balance = Constraint(
+                self.STORAGES,
+                m.TIMEINDEX_TYPICAL_CLUSTER,
+                rule=_intra_storage_balance_rule,
+            )
 
         def _balanced_storage_rule(block, n):
             """
@@ -554,9 +666,24 @@ class GenericStorageBlock(ScalarBlock):
                 == block.storage_content[n, m.TIMEPOINTS.at(1)]
             )
 
-        self.balanced_cstr = Constraint(
-            self.STORAGES_BALANCED, rule=_balanced_storage_rule
-        )
+        def _balanced_inter_storage_rule(block, n):
+            """
+            Storage content of last time step == initial storage content
+            if balanced.
+            """
+            return (
+                block.storage_content_inter[n, m.CLUSTERS.at(-1)]
+                == block.storage_content_inter[n, m.CLUSTERS.at(1)]
+            )
+
+        if not m.TSAM_MODE:
+            self.balanced_cstr = Constraint(
+                self.STORAGES_BALANCED, rule=_balanced_storage_rule
+            )
+        else:
+            self.balanced_cstr = Constraint(
+                self.STORAGES_BALANCED, rule=_balanced_inter_storage_rule
+            )
 
         def _power_coupled(block):
             """
@@ -614,10 +741,18 @@ class GenericStorageBlock(ScalarBlock):
                 storage_costs += (
                     self.storage_content[n, 0] * n.storage_costs[0]
                 )
-                for t in m.TIMESTEPS:
-                    storage_costs += (
-                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
-                    )
+                if not m.TSAM_MODE:
+                    for t in m.TIMESTEPS:
+                        storage_costs += (
+                            self.storage_content[n, t + 1]
+                            * n.storage_costs[t + 1]
+                        )
+                else:
+                    for t in m.TIMESTEPS_ORIGINAL:
+                        storage_costs += (
+                            self.storage_content[n, t + 1]
+                            * n.storage_costs[t + 1]
+                        )
 
         self.storage_costs = Expression(expr=storage_costs)
         self.costs = Expression(expr=storage_costs + fixed_costs)
