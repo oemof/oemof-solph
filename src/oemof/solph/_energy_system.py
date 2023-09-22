@@ -62,6 +62,20 @@ class EnergySystem(es.EnergySystem):
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
 
+    tsa_parameters : list of dicts, dict or None
+        Parameter can be set in order to use aggregated timeseries from TSAM.
+        If multi-period model is used, one dict per period has to be set.
+        If no multi-period (aka single period) approach is selected, a single
+        dict can be provided.
+        If parameter is None, model is set up as usual.
+
+        Dict must contain keys `timesteps_per_period`
+        (from TSAMs `hoursPerPeriod`), `order` (from TSAMs `clusterOrder`) and
+        `occurrences` (from TSAMs `clusterPeriodNoOccur`).
+        When activated, storage equations and flow rules for full_load_time
+        will be adapted. Note that timeseries for components have to
+        be set up as already aggregated timeseries.
+
     kwargs
     """
 
@@ -71,6 +85,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        tsa_parameters=None,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -174,6 +189,22 @@ class EnergySystem(es.EnergySystem):
         self.periods = periods
         self._extract_periods_years()
         self._extract_periods_matrix()
+
+        if tsa_parameters is not None:
+            msg = (
+                "CAUTION! You specified the 'tsa_parameters' attribute for your "
+                "energy system.\n This will lead to setting up energysystem with aggregated timeseries. "
+                "Storages and flows will be adapted accordingly.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+
+            if isinstance(tsa_parameters, dict):
+                # Set up tsa_parameters for single period:
+                tsa_parameters = [tsa_parameters]
+        self.tsa_parameters = tsa_parameters
 
     def _extract_periods_years(self):
         """Map simulation years to the respective period based on time indices
