@@ -17,6 +17,8 @@ SPDX-License-Identifier: MIT
 import logging
 import warnings
 from logging import getLogger
+import itertools
+from collections import defaultdict
 
 from oemof.tools import debugging
 from pyomo import environ as po
@@ -459,6 +461,215 @@ class Model(BaseModel):
         for p, t in self.TIMEINDEX:
             timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
+
+        # Set up disaggregated timesteps from original timeseries
+        self.TSAM_MODE = False
+        if self.es.tsa_parameters is not None:
+            self.TSAM_MODE = True
+            self.CLUSTERS = po.Set(
+                initialize=list(
+                    zip(
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    p,
+                                    len(self.es.tsa_parameters[p]["order"]),
+                                )
+                                for p in self.PERIODS
+                            )
+                        ),
+                        list(
+                            itertools.chain.from_iterable(
+                                range(len(self.es.tsa_parameters[p]["order"]))
+                                for p in self.PERIODS
+                            )
+                        ),
+                    )
+                )
+            )
+            self.TYPICAL_CLUSTERS = po.Set(
+                initialize=list(
+                    zip(
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    p,
+                                    len(
+                                        self.es.tsa_parameters[p][
+                                            "occurrences"
+                                        ]
+                                    ),
+                                )
+                                for p in self.PERIODS
+                            )
+                        ),
+                        list(
+                            itertools.chain.from_iterable(
+                                range(
+                                    len(
+                                        self.es.tsa_parameters[p]["occurences"]
+                                    )
+                                )
+                                for p in self.PERIODS
+                            )
+                        ),
+                    )
+                )
+            )
+
+            typical_clusters_in_period = defaultdict(list)
+            for p, k in self.TYPICAL_CLUSTERS:
+                typical_clusters_in_period[p].append(k)
+            self.TYPICAL_CLUSTERS_IN_PERIOD = typical_clusters_in_period
+
+            timesteps_in_typical_cluster = defaultdict(list)
+            for p, tc in self.TYPICAL_CLUSTERS_IN_PERIOD.items():
+                for ki, k in enumerate(tc):
+                    start = (
+                        p * len(self.TIMESTEPS_IN_PERIOD[p])
+                        + ki
+                        * self.es.tsa_parameters[p]["timesteps_per_period"]
+                    )
+                    timesteps_in_typical_cluster[k] = list(
+                        range(
+                            start,
+                            start
+                            + self.es.tsa_parameters[p][
+                                "timesteps_per_period"
+                            ],
+                        )
+                    )
+            self.TIMESTEPS_IN_TYPICAL_CLUSTER = timesteps_in_typical_cluster
+
+            self.TIMESTEPS_ORIGINAL = po.Set(
+                initialize=list(
+                    range(
+                        sum(
+                            len(self.es.tsa_parameters[p]["order"])
+                            * self.es.tsa_parameters[p]["timesteps_per_period"]
+                            for p in self.PERIODS
+                        )
+                    )
+                ),
+                ordered=True,
+            )
+            self.TIMEPOINTS_ORIGINAL = po.Set(
+                initialize=list(range(len(self.TIMESTEPS_ORIGINAL) + 1))
+            )
+
+            self.TIMEINDEX_TYPICAL_CLUSTER = po.Set(
+                initialize=list(
+                    zip(
+                        # periods
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    p,
+                                    self.es.tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ]
+                                    * len(
+                                        self.es.tsa_parameters[p][
+                                            "occurrences"
+                                        ]
+                                    ),
+                                )
+                                for p in self.PERIODS
+                            )
+                        ),
+                        # cluster periods in original timeseries (from TSAM)
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    p
+                                    * len(
+                                        self.es.tsa_parameters[p][
+                                            "occurrences"
+                                        ]
+                                    )
+                                    + k,
+                                    self.es.tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ],
+                                )
+                                for p in self.PERIODS
+                                for k in range(
+                                    len(
+                                        self.es.tsa_parameters[p][
+                                            "occurrences"
+                                        ]
+                                    )
+                                )
+                            )
+                        ),
+                        # total timesteps
+                        list(
+                            range(
+                                sum(
+                                    len(
+                                        self.es.tsa_parameters[p][
+                                            "occurrences"
+                                        ]
+                                    )
+                                    * self.es.tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ]
+                                    for p in self.PERIODS
+                                )
+                            )
+                        ),
+                    )
+                )
+            )
+
+            self.TIMEINDEX_CLUSTER = po.Set(
+                initialize=list(
+                    zip(
+                        # periods
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    p,
+                                    self.es.tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ]
+                                    * len(self.es.tsa_parameters[p]["order"]),
+                                )
+                                for p in self.PERIODS
+                            )
+                        ),
+                        # cluster periods in original timeseries (from TSAM)
+                        list(
+                            itertools.chain.from_iterable(
+                                itertools.repeat(
+                                    i,
+                                    self.es.tsa_parameters[0][
+                                        "timesteps_per_period"
+                                    ],
+                                )
+                                for i in range(
+                                    sum(
+                                        len(self.es.tsa_parameters[p]["order"])
+                                        for p in self.PERIODS
+                                    )
+                                )
+                            )
+                        ),
+                        # total timesteps
+                        list(
+                            range(
+                                sum(
+                                    len(self.es.tsa_parameters[p]["order"])
+                                    * self.es.tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ]
+                                    for p in self.PERIODS
+                                )
+                            )
+                        ),
+                    )
+                )
+            )
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
