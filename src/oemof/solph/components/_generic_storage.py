@@ -683,12 +683,14 @@ class GenericStorageBlock(ScalarBlock):
                     break
 
             k = m.es.tsa_parameters[p]["order"][ii]
+            t = get_timeindex(p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1)
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
-            expr += (
-                -block.storage_content_inter[n, i]
-                * (1 - n.loss_rate[0] * m.timeincrement[0])
-                ** m.es.tsa_parameters[p]["timesteps_per_period"]
+            expr += -block.storage_content_inter[n, i] * (
+                1 - n.loss_rate[t]
+            ) ** (
+                m.timeincrement[t]
+                * m.es.tsa_parameters[p]["timesteps_per_period"]
             )
             expr += -self.storage_content_intra[
                 n, p, k, m.es.tsa_parameters[p]["timesteps_per_period"]
