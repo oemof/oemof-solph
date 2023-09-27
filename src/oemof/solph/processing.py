@@ -492,7 +492,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
             for i, k in enumerate(tsa_parameters[p]["order"]):
                 inter_value = soc["inter"].iloc[p_offset + i]["value"]
                 intra_series = soc["intra"][(p, k)].iloc[
-                    1 : tsa_parameters[p]["timesteps_per_period"] + 1
+                    0 : tsa_parameters[p]["timesteps_per_period"]
                 ]
                 intra_series["value"] = intra_series["value"] + inter_value
                 soc_frames.append(intra_series)
@@ -509,12 +509,15 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
         for p in range(len(tsa_parameters)):
             for k in tsa_parameters[p]["order"]:
                 flow_k = flow_dict[flow].iloc[
-                        period_offset + k
-                        * tsa_parameters[p]["timesteps_per_period"] : period_offset + (k + 1)
-                        * tsa_parameters[p]["timesteps_per_period"]
-                    ]
+                    period_offset
+                    + k
+                    * tsa_parameters[p]["timesteps_per_period"] : period_offset
+                    + (k + 1) * tsa_parameters[p]["timesteps_per_period"]
+                ]
                 disaggregated_flow_frames.append(flow_k)
-            period_offset += tsa_parameters[p]["timesteps_per_period"] * len(tsa_parameters[p]["occurrences"])
+            period_offset += tsa_parameters[p]["timesteps_per_period"] * len(
+                tsa_parameters[p]["occurrences"]
+            )
         ts = pd.concat(disaggregated_flow_frames)
         ts.timestep = range(len(ts))
         flow_dict[flow] = ts
