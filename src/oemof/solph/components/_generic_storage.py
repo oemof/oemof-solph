@@ -548,6 +548,7 @@ class GenericStorageBlock(ScalarBlock):
                     t = get_timeindex(p, i, g)
                     lhs = n.nominal_storage_capacity * n.min_storage_level[t]
                     k = m.es.tsa_parameters[p]["order"][i]
+                    tk = get_timeindex(p, k, g)
                     inter_i = (
                         sum(
                             len(m.es.tsa_parameters[ip]["order"])
@@ -558,7 +559,7 @@ class GenericStorageBlock(ScalarBlock):
                     rhs = (
                         self.storage_content_inter[n, inter_i]
                         * (1 - n.loss_rate[t])
-                        ** (g * m.es.tsa_parameters[p]["timesteps_per_period"])
+                        ** (g * m.timeincrement[tk])
                         + self.storage_content_intra[n, p, k, g]
                     )
                     self.storage_inter_minimum_level.add(
@@ -580,6 +581,7 @@ class GenericStorageBlock(ScalarBlock):
                 for p, i, g in m.TIMEINDEX_CLUSTER:
                     t = get_timeindex(p, i, g)
                     k = m.es.tsa_parameters[p]["order"][i]
+                    tk = get_timeindex(p, k, g)
                     inter_i = (
                         sum(
                             len(m.es.tsa_parameters[ip]["order"])
@@ -590,7 +592,7 @@ class GenericStorageBlock(ScalarBlock):
                     lhs = (
                         self.storage_content_inter[n, inter_i]
                         * (1 - n.loss_rate[t])
-                        ** (g * m.es.tsa_parameters[p]["timesteps_per_period"])
+                        ** (g * m.timeincrement[tk])
                         + self.storage_content_intra[n, p, k, g]
                     )
                     rhs = n.nominal_storage_capacity * n.max_storage_level[t]
