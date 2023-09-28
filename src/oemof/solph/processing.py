@@ -15,9 +15,9 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 
 """
-
 import sys
-from itertools import groupby
+from itertools import groupby, accumulate
+import operator
 
 import numpy as np
 import pandas as pd
@@ -452,8 +452,6 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     -------
     dict: Disaggregated sequences
     """
-
-    # TODO: Filter period scalars first!
     periodic_dict = {}
     flow_dict = {}
     for key, data in df_dict.items():
@@ -470,7 +468,9 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
             continue  # Skip components other than Storage
         if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
             continue  # Skip storage output flows
-        # This should be either inter or intra storage index
+
+        # Here we have either inter or intra storage index,
+        # depending on oemof tuple length
         storage_keys.append(oemof_tuple)
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
@@ -487,16 +487,41 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     # Disaggregate storages
     for storage, soc in storages.items():
         soc_frames = []
-        p_offset = 0
+        i_offset = 0
+        t_offset = 0
         for p in range(len(tsa_parameters)):
             for i, k in enumerate(tsa_parameters[p]["order"]):
-                inter_value = soc["inter"].iloc[p_offset + i]["value"]
+                inter_value = soc["inter"].iloc[i_offset + i]["value"]
+                # Self-discharge has to be taken into account for calculating
+                # inter SOC for each timestep in cluster
+                t0 = t_offset + i * tsa_parameters[p]["timesteps_per_period"]
+                inter_series = (
+                    pd.Series(
+                        accumulate(
+                            (
+                                (1 - storage.loss_rate[t])
+                                for t in range(
+                                    t0,
+                                    t0
+                                    + tsa_parameters[p][
+                                        "timesteps_per_period"
+                                    ],
+                                )
+                            ),
+                            operator.mul,
+                        )
+                    )
+                    * inter_value
+                )
                 intra_series = soc["intra"][(p, k)].iloc[
                     0 : tsa_parameters[p]["timesteps_per_period"]
                 ]
-                intra_series["value"] = intra_series["value"] + inter_value
+                intra_series["value"] = (
+                    intra_series["value"].values + inter_series.values
+                )  # Neglect indexes, otherwise none
                 soc_frames.append(intra_series)
-            p_offset += len(tsa_parameters[p]["order"])
+            i_offset += len(tsa_parameters[p]["order"])
+            t_offset += i_offset * tsa_parameters[p]["timesteps_per_period"]
         soc_ts = pd.concat(soc_frames)
         soc_ts["variable_name"] = "soc"
         soc_ts["timestep"] = range(len(soc_ts))
