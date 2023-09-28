@@ -18,7 +18,6 @@ import logging
 import warnings
 from logging import getLogger
 import itertools
-from collections import defaultdict
 
 from oemof.tools import debugging
 from pyomo import environ as po
