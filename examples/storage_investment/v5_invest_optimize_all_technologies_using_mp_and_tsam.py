@@ -309,6 +309,11 @@ def main():
     results = solph.processing.results(om)
     print(results)
 
+    # Concatenate flows:
+    flows = pd.concat([flow["sequences"] for flow in results.values()], axis=1)
+    flows.columns = [f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()]
+    print(flows)
+
     electricity_bus = solph.views.node(results, "electricity")
 
     meta_results = solph.processing.meta_results(om)
