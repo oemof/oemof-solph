@@ -103,6 +103,10 @@ def main():
         )
 
     data = pd.concat([data, data], ignore_index=True)
+    data["wind"].iloc[8760 - 24:8760] = 0
+    data["wind"].iloc[8760*2 - 24:8760] = 0
+    data["pv"].iloc[8760 - 24:8760] = 0
+    data["pv"].iloc[8760 * 2 - 24:8760] = 0
 
     ##########################################################################
     # Initialize the energy system and read/calculate necessary parameters
@@ -128,6 +132,8 @@ def main():
         clusterMethod="k_means",
         sortValues=False,
         rescaleClusterPeriods=False,
+        extremePeriodMethod="replace_cluster_center",
+        addPeakMin=["wind", "pv"],
         representationMethod="durationRepresentation",
     )
     aggregation1.createTypicalPeriods()
@@ -138,7 +144,8 @@ def main():
         clusterMethod="hierarchical",
         sortValues=False,
         rescaleClusterPeriods=False,
-        extremePeriodMethod="new_cluster_center",
+        extremePeriodMethod="replace_cluster_center",
+        addPeakMin=["wind", "pv"],
         representationMethod="durationRepresentation",
     )
     aggregation2.createTypicalPeriods()
