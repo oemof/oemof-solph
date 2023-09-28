@@ -277,7 +277,7 @@ def main():
         nominal_storage_capacity=5000,
         inputs={bel: solph.Flow(variable_costs=0.0001)},
         outputs={bel: solph.Flow()},
-        loss_rate=0.00,
+        loss_rate=0.01,
         lifetime_inflow=10,
         lifetime_outflow=10,
         invest_relation_input_capacity=1 / 6,
