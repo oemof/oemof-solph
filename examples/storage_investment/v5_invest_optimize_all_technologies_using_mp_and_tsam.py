@@ -103,10 +103,10 @@ def main():
         )
 
     data = pd.concat([data, data], ignore_index=True)
-    data["wind"].iloc[8760 - 24:8760] = 0
-    data["wind"].iloc[8760*2 - 24:8760] = 0
-    data["pv"].iloc[8760 - 24:8760] = 0
-    data["pv"].iloc[8760 * 2 - 24:8760] = 0
+    data["wind"].iloc[8760 - 24 : 8760] = 0
+    data["wind"].iloc[8760 * 2 - 24 : 8760] = 0
+    data["pv"].iloc[8760 - 24 : 8760] = 0
+    data["pv"].iloc[8760 * 2 - 24 : 8760] = 0
 
     ##########################################################################
     # Initialize the energy system and read/calculate necessary parameters
@@ -167,14 +167,14 @@ def main():
                 "timesteps_per_period": aggregation1.hoursPerPeriod,
                 "order": aggregation1.clusterOrder,
                 "occurrences": aggregation1.clusterPeriodNoOccur,
-                "timeindex": aggregation1.timeIndex
+                "timeindex": aggregation1.timeIndex,
             },
             {
                 "timesteps_per_period": aggregation2.hoursPerPeriod,
                 "order": aggregation2.clusterOrder,
                 "occurrences": aggregation2.clusterPeriodNoOccur,
-                "timeindex": aggregation2.timeIndex
-            }
+                "timeindex": aggregation2.timeIndex,
+            },
         ],
         infer_last_interval=False,
     )
@@ -318,7 +318,9 @@ def main():
 
     # Concatenate flows:
     flows = pd.concat([flow["sequences"] for flow in results.values()], axis=1)
-    flows.columns = [f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()]
+    flows.columns = [
+        f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()
+    ]
     print(flows)
 
     electricity_bus = solph.views.node(results, "electricity")

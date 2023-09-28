@@ -541,7 +541,9 @@ class GenericStorageBlock(ScalarBlock):
         #  ************* Constraints ***************************
 
         def _storage_inter_minimum_level_rule(block):
-            # See FINE implementation at https://github.com/FZJ-IEK3-VSA/FINE/blob/57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
+            # See FINE implementation at
+            # https://github.com/FZJ-IEK3-VSA/FINE/blob/
+            # 57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
             for n in self.STORAGES:
                 for p, i, g in m.TIMEINDEX_CLUSTER:
                     t = get_timeindex(p, i, g)
@@ -557,8 +559,7 @@ class GenericStorageBlock(ScalarBlock):
                     )
                     rhs = (
                         self.storage_content_inter[n, inter_i]
-                        * (1 - n.loss_rate[t])
-                        ** (g * m.timeincrement[tk])
+                        * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
                         + self.storage_content_intra[n, p, k, g]
                     )
                     self.storage_inter_minimum_level.add(
@@ -575,7 +576,6 @@ class GenericStorageBlock(ScalarBlock):
             )
 
         def _storage_inter_maximum_level_rule(block):
-            # See FINE implementation at https://github.com/FZJ-IEK3-VSA/FINE/blob/57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
             for n in self.STORAGES:
                 for p, i, g in m.TIMEINDEX_CLUSTER:
                     t = get_timeindex(p, i, g)
@@ -590,8 +590,7 @@ class GenericStorageBlock(ScalarBlock):
                     )
                     lhs = (
                         self.storage_content_inter[n, inter_i]
-                        * (1 - n.loss_rate[t])
-                        ** (g * m.timeincrement[tk])
+                        * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
                         + self.storage_content_intra[n, p, k, g]
                     )
                     rhs = n.nominal_storage_capacity * n.max_storage_level[t]
@@ -684,7 +683,9 @@ class GenericStorageBlock(ScalarBlock):
                     break
 
             k = m.es.tsa_parameters[p]["order"][ii]
-            t = get_timeindex(p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1)
+            t = get_timeindex(
+                p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1
+            )
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
             expr += -block.storage_content_inter[n, i] * (
