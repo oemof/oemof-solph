@@ -192,8 +192,9 @@ class EnergySystem(es.EnergySystem):
 
         if tsa_parameters is not None:
             msg = (
-                "CAUTION! You specified the 'tsa_parameters' attribute for your "
-                "energy system.\n This will lead to setting up energysystem with aggregated timeseries. "
+                "CAUTION! You specified the 'tsa_parameters' attribute for "
+                "your energy system.\n This will lead to setting up "
+                "energysystem with aggregated timeseries. "
                 "Storages and flows will be adapted accordingly.\n"
                 "Please be aware that the feature is experimental as of "
                 "now. If you find anything suspicious or any bugs, "

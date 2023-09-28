@@ -474,7 +474,8 @@ class Model(BaseModel):
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
                             for p in self.PERIODS
-                        ) + 1
+                        )
+                        + 1
                     )
                 )
             )
@@ -536,7 +537,8 @@ class Model(BaseModel):
                                             for p in self.PERIODS
                                         )
                                     ),
-                                    # cluster periods in original timeseries (from TSAM)
+                                    # cluster periods in original timeseries
+                                    # (from TSAM)
                                     list(
                                         itertools.chain.from_iterable(
                                             itertools.repeat(
