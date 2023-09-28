@@ -14,10 +14,10 @@ SPDX-FileCopyrightText: Lennart Schürmann
 SPDX-License-Identifier: MIT
 
 """
+import itertools
 import logging
 import warnings
 from logging import getLogger
-import itertools
 
 from oemof.tools import debugging
 from pyomo import environ as po

@@ -15,9 +15,10 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 
 """
-import sys
-from itertools import groupby, accumulate
 import operator
+import sys
+from itertools import accumulate
+from itertools import groupby
 
 import numpy as np
 import pandas as pd
@@ -25,10 +26,9 @@ from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
-from .helpers import flatten
-
 from oemof.solph.components._generic_storage import GenericStorage
 
+from .helpers import flatten
 
 PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
 
