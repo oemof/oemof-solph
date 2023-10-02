@@ -1735,6 +1735,24 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         * lifetime
                         * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     )
+                    remaining_value = 0
+                    if lifetime > m.es.periods_matrix[p, -1]:
+                        remaining_lifetime = (
+                            lifetime - m.es.periods_matrix[p, -1]
+                        )
+                        remaining_annuity = economics.annuity(
+                            capex=n.investment.ep_costs[-1],
+                            n=lifetime,
+                            wacc=interest,
+                        )
+                        remaining_value = (
+                            self.invest[n, p]
+                            * remaining_annuity
+                            * remaining_lifetime
+                        ) * (
+                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
+                        )
+                    investment_costs_increment -= remaining_value
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1757,6 +1775,26 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         self.invest[n, p] * annuity * lifetime
                         + self.invest_status[n, p] * n.investment.offset[p]
                     ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    remaining_value = 0
+                    if lifetime > m.es.periods_matrix[p, -1]:
+                        remaining_lifetime = (
+                            lifetime - m.es.periods_matrix[p, -1]
+                        )
+                        remaining_annuity = economics.annuity(
+                            capex=n.investment.ep_costs[-1],
+                            n=lifetime,
+                            wacc=interest,
+                        )
+                        remaining_value = (
+                            self.invest[n, p]
+                            * remaining_annuity
+                            * remaining_lifetime
+                            + self.invest_status[n, p]
+                            * n.investment.offset[-1]
+                        ) * (
+                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
+                        )
+                    investment_costs_increment -= remaining_value
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1773,16 +1811,32 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                                 m.es.periods_years[p] + lifetime,
                             )
                         ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                        if lifetime > m.es.periods_matrix[p, -1]:
+                            fixed_costs -= sum(
+                                self.invest[n, p]
+                                * n.investment.fixed_costs[pp]
+                                * ((1 + m.discount_rate) ** (-pp))
+                                for pp in range(
+                                    m.es.periods_years[-1],
+                                    m.es.periods_years[p] + lifetime,
+                                )
+                            ) * (
+                                (1 + m.discount_rate)
+                                ** (-m.es.periods_years[-1])
+                            )
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
+                    range_limit = max(
+                        m.es.periods_matrix[0, -1], lifetime - age
+                    )
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, lifetime - age)
+                        for pp in range(0, range_limit)
                     )
 
         self.investment_costs = Expression(expr=investment_costs)
