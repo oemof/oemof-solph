@@ -176,12 +176,12 @@ class EnergySystem(es.EnergySystem):
         self._extract_periods_matrix()
 
     def _extract_periods_years(self):
-        """Map simulation years to the respective period based on time indices
+        """Map years in optimization to respective period based on time indices
 
         Returns
         -------
         periods_years: dict
-            the simulation year of the start of each a period,
+            year of the start of each period,
             relative to the start of the optimization run and starting with 0
         """
         periods_years = [0]
