@@ -1829,7 +1829,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
-                    range_limit = max(
+                    range_limit = min(
                         m.es.periods_matrix[0, -1], lifetime - age
                     )
                     fixed_costs += sum(

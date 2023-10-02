@@ -982,7 +982,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
-                    range_limit = max(
+                    range_limit = min(
                         m.es.periods_matrix[0, -1], lifetime - age
                     )
                     fixed_costs += sum(
