@@ -52,7 +52,9 @@ import logging
 import os
 import pprint as pp
 import warnings
+from datetime import datetime
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from oemof.tools import logger
 
@@ -60,13 +62,15 @@ from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
+from oemof.solph import create_time_index
 from oemof.solph import flows
 from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph._helpers import aggregate_time_series
-
-def main():
+from oemof.solph._helpers import plotTS
+from oemof.solph._helpers import determine_aggregation_parameters
+def main(number_of_typical_periods:int):
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
@@ -95,7 +99,7 @@ def main():
 
     number_of_time_steps_per_periods =24
     number_of_segments_per_period = 24*4
-    number_of_typical_periods = 12
+    aggregation_ratio = ( number_of_typical_periods * number_of_time_steps_per_periods ) / 8760
     segmentation = False
     if False:
         determine_aggregation_parameters(data_dict_to_aggregate = data_dict_to_aggregate,
@@ -263,7 +267,6 @@ def main():
 
     # print the sums of the flows around the electricity bus
     print("********* Main results *********")
-    print(electricity_bus["sequences"].sum(axis=0))
 
 if __name__ == "__main__":
     main()
