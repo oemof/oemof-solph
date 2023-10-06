@@ -929,41 +929,32 @@ class InvestmentFlowBlock(ScalarBlock):
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            end_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
                         ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            fixed_costs -= sum(
-                                self.invest[i, o, p]
-                                * m.flows[i, o].investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[-1],
-                                    m.es.periods_years[p] + lifetime,
-                                )
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
 
             for i, o in self.EXISTING_INVESTFLOWS:
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
                     range_limit = min(
-                        m.es.periods_matrix[0, -1], lifetime - age
+                        end_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, range_limit)
+                        for pp in range(range_limit)
                     )
 
         self.investment_costs = Expression(expr=investment_costs)
