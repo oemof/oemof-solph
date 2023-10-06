@@ -779,8 +779,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
                 .. math::
                     &
-                    P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
-                    \cdot DF^{-p}\\
+                    P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
+                    \cdot \frac {1}{ANF(d, dr)} \cdot DF^{-p}\\
                     &\\
                     &
                     \forall p \in \textrm{PERIODS}
@@ -789,8 +789,10 @@ class InvestmentFlowBlock(ScalarBlock):
 
                 .. math::
                     &
-                    (P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
-                    +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p} \\
+                    (P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
+                    \cdot \frac {1}{ANF(d, dr)}\\
+                    &
+                    +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p}\\
                     &\\
                     &
                     \forall p \in \textrm{PERIODS}
@@ -799,7 +801,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
                 .. math::
                     &
-                    (\sum_{pp=year(p)}^{year(p)+l}
+                    (\sum_{pp=year(p)}^{limit_{end}}
                     P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
                     \cdot DF^{-p}\\
                     &\\
@@ -809,28 +811,45 @@ class InvestmentFlowBlock(ScalarBlock):
             * :attr:`fixed_costs` not None for existing capacity
 
                 .. math::
-                    \sum_{pp=0}^{l-a} P_{exist} \cdot c_{fixed}(pp)
+                    \sum_{pp=0}^{limit_{exo}} P_{exist} \cdot c_{fixed}(pp)
                     \cdot DF^{-pp}
 
 
             whereby:
 
             * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-              investment expenses :math:`c_{invest,var}(p)` lifetime :math:`l`
-              and interest rate :math:`ir`
-            * :math:`DF=(1+dr)` is the discount factor with discount rate
-              :math:`dr`
+              investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
+              and interest rate :math:`ir`.
+            * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
+              and discount rate :math:`dr`.
+            * :math:`d=min\{year_{max} - year(p), l\}` defines the
+              number of years within the optimization horizon that investment
+              annuities are accounted for.
+            * :math:`year(p)` denotes the start year of period :math:`p`.
+            * :math:`year_{max}` denotes the last year of the optimization
+              horizon, i.e. at the end of the last period.
+            * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
+              upper bound to ensure fixed costs for endogenous investments
+              to occur within the optimization horizon.
+            * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
+              upper bound to ensure fixed costs for existing capacities to occur
+              within the optimization horizon. :math:`a` is the initial age
+              of an asset.
+            * :math:`DF=(1+dr)` is the discount factor.
 
-        The annuity hereby is:
+        The annuity / annuity factor hereby is:
 
             .. math::
-
+                &
                 A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                    \frac {(1+i)^l \cdot i} {(1+i)^l - 1} \cdot
+                    \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                &\\
+                &
+                ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
-        It is retrieved, using oemof.tools.economics annuity function. The
-        interest rate is defined as a weighted average costs of capital (wacc)
-        and assumed constant over time.
+        They are retrieved, using oemof.tools.economics annuity function. The
+        interest rate :math:`i` for the annuity is defined as weighted
+        average costs of capital (wacc) and assumed constant over time.
         """
         if not hasattr(self, "INVESTFLOWS"):
             return 0
