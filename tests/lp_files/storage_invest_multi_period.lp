@@ -3,9 +3,9 @@
 min 
 objective:
 +250.0 ONE_VAR_CONSTANT
-+351.53628135238 GenericInvestmentStorageBlock_invest(storage1_0)
-+341.9615033610845 GenericInvestmentStorageBlock_invest(storage1_1)
-+332.6786079381219 GenericInvestmentStorageBlock_invest(storage1_2)
++29.99406858132935 GenericInvestmentStorageBlock_invest(storage1_0)
++19.60706904757886 GenericInvestmentStorageBlock_invest(storage1_1)
++9.614085282931445 GenericInvestmentStorageBlock_invest(storage1_2)
 
 s.t.
 

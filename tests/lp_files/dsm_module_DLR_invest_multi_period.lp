@@ -2,7 +2,7 @@
 
 min 
 objective:
-+15992.031251718836 ONE_VAR_CONSTANT
++2941.5609381007307 ONE_VAR_CONSTANT
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_1_0)
 +1 SinkDSMDLRInvestmentBlock_balance_dsm_do(demand_dsm_1_0)
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_2_0)
@@ -57,9 +57,9 @@ objective:
 +0.9611687812379853 SinkDSMDLRInvestmentBlock_dsm_do_shift(demand_dsm_2_5)
 +0.9611687812379853 SinkDSMDLRInvestmentBlock_balance_dsm_up(demand_dsm_2_5)
 +96.11687812379853 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_5)
-+455.88267648036174 SinkDSMDLRInvestmentBlock_invest(demand_dsm_0)
-+440.53147366914004 SinkDSMDLRInvestmentBlock_invest(demand_dsm_1)
-+425.7302732994234 SinkDSMDLRInvestmentBlock_invest(demand_dsm_2)
++76.46810240317063 SinkDSMDLRInvestmentBlock_invest(demand_dsm_0)
++49.710949277906536 SinkDSMDLRInvestmentBlock_invest(demand_dsm_1)
++24.239842660236203 SinkDSMDLRInvestmentBlock_invest(demand_dsm_2)
 
 s.t.
 
@@ -623,13 +623,13 @@ c_u_SinkDSMDLRInvestmentBlock_dr_storage_limit_inc(demand_dsm_2_5)_:
 c_u_SinkDSMDLRInvestmentBlock_dr_yearly_limit_shed(demand_dsm_0)_:
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_0)
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_1)
--50 SinkDSMDLRInvestmentBlock_total(demand_dsm_0)
+-50.0 SinkDSMDLRInvestmentBlock_total(demand_dsm_0)
 <= 0
 
 c_u_SinkDSMDLRInvestmentBlock_dr_yearly_limit_shed(demand_dsm_1)_:
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_2)
 +1 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_3)
--50 SinkDSMDLRInvestmentBlock_total(demand_dsm_1)
+-50.0 SinkDSMDLRInvestmentBlock_total(demand_dsm_1)
 <= 0
 
 c_u_SinkDSMDLRInvestmentBlock_dr_yearly_limit_shed(demand_dsm_2)_:
