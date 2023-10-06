@@ -213,8 +213,19 @@ class EnergySystem(es.EnergySystem):
                 periods_matrix.append(row)
             self.periods_matrix = np.array(periods_matrix)
 
-    def get_period_duration(self, period: int):
-        """Get duration of a period in full years"""
+    def get_period_duration(self, period):
+        """Get duration of a period in full years
+
+        Parameters
+        ----------
+        period : int
+            Period for which the duration in years shall be obtained
+
+        Returns
+        -------
+        int
+            Duration of the period
+        """
         return (
             self.periods[period].max().year
             - self.periods[period].min().year
