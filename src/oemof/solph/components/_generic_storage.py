@@ -1740,7 +1740,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
-                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1768,7 +1768,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
                         + self.invest_status[n, p] * n.investment.offset[p]
-                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1783,24 +1783,22 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[n, p]
                             * n.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
-                    range_limit = min(
-                        end_of_optimization, lifetime - age
-                    )
+                    range_limit = min(end_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 

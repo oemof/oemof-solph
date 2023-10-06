@@ -936,24 +936,22 @@ class InvestmentFlowBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for i, o in self.EXISTING_INVESTFLOWS:
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
-                    range_limit = min(
-                        end_of_optimization, lifetime - age
-                    )
+                    range_limit = min(end_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 
