@@ -866,6 +866,11 @@ class InvestmentFlowBlock(ScalarBlock):
                 "microeconomic interest requirements."
             )
 
+            duration_last_period = m.es.get_period_duration(-1)
+            end_of_optimization = (
+                m.es.periods_years[-1] + duration_last_period
+            )
+
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
                 interest = m.flows[i, o].investment.interest_rate
@@ -881,30 +886,15 @@ class InvestmentFlowBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
-                    investment_costs_increment = (
-                        self.invest[i, o, p]
-                        * annuity
-                        * lifetime
-                        * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    duration = min(
+                        end_of_optimization - m.es.periods_years[p], lifetime
                     )
-                    remaining_value = 0
-                    if lifetime > m.es.periods_matrix[p, -1]:
-                        remaining_lifetime = (
-                            lifetime - m.es.periods_matrix[p, -1]
-                        )
-                        remaining_annuity = economics.annuity(
-                            capex=m.flows[i, o].investment.ep_costs[-1],
-                            n=lifetime,
-                            wacc=interest,
-                        )
-                        remaining_value = (
-                            self.invest[i, o, p]
-                            * remaining_annuity
-                            * remaining_lifetime
-                        ) * (
-                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
-                        )
-                    investment_costs_increment -= remaining_value
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=m.discount_rate
+                    )
+                    investment_costs_increment = (
+                        self.invest[i, o, p] * annuity * present_value_factor
+                    )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -923,31 +913,18 @@ class InvestmentFlowBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
+                    duration = min(
+                        end_of_optimization - m.es.periods_years[p], lifetime
+                    )
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=m.discount_rate
+                    )
                     investment_costs_increment = (
-                        self.invest[i, o, p] * annuity * lifetime
+                        self.invest[i, o, p] * annuity * present_value_factor
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
-                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
-                    remaining_value = 0
-                    if lifetime > m.es.periods_matrix[p, -1]:
-                        remaining_lifetime = (
-                            lifetime - m.es.periods_matrix[p, -1]
-                        )
-                        remaining_annuity = economics.annuity(
-                            capex=m.flows[i, o].investment.ep_costs[-1],
-                            n=lifetime,
-                            wacc=interest,
-                        )
-                        remaining_value = (
-                            self.invest[i, o, p]
-                            * remaining_annuity
-                            * remaining_lifetime
-                            + self.invest_status[i, o, p]
-                            * m.flows[i, o].investment.offset[-1]
-                        ) * (
-                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
-                        )
-                    investment_costs_increment -= remaining_value
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
