@@ -1714,6 +1714,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 "microeconomic interest requirements."
             )
 
+            duration_last_period = m.es.get_period_duration(-1)
+            end_of_optimization = m.es.periods_years[-1] + duration_last_period
+
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
                 interest = n.investment.interest_rate
@@ -1729,30 +1732,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
-                    investment_costs_increment = (
-                        self.invest[n, p]
-                        * annuity
-                        * lifetime
-                        * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    duration = min(
+                        end_of_optimization - m.es.periods_years[p], lifetime
                     )
-                    remaining_value = 0
-                    if lifetime > m.es.periods_matrix[p, -1]:
-                        remaining_lifetime = (
-                            lifetime - m.es.periods_matrix[p, -1]
-                        )
-                        remaining_annuity = economics.annuity(
-                            capex=n.investment.ep_costs[-1],
-                            n=lifetime,
-                            wacc=interest,
-                        )
-                        remaining_value = (
-                            self.invest[n, p]
-                            * remaining_annuity
-                            * remaining_lifetime
-                        ) * (
-                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
-                        )
-                    investment_costs_increment -= remaining_value
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=m.discount_rate
+                    )
+                    investment_costs_increment = (
+                        self.invest[n, p] * annuity * present_value_factor
+                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1771,30 +1759,16 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
+                    duration = min(
+                        end_of_optimization - m.es.periods_years[p], lifetime
+                    )
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=m.discount_rate
+                    )
                     investment_costs_increment = (
-                        self.invest[n, p] * annuity * lifetime
+                        self.invest[n, p] * annuity * present_value_factor
                         + self.invest_status[n, p] * n.investment.offset[p]
                     ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
-                    remaining_value = 0
-                    if lifetime > m.es.periods_matrix[p, -1]:
-                        remaining_lifetime = (
-                            lifetime - m.es.periods_matrix[p, -1]
-                        )
-                        remaining_annuity = economics.annuity(
-                            capex=n.investment.ep_costs[-1],
-                            n=lifetime,
-                            wacc=interest,
-                        )
-                        remaining_value = (
-                            self.invest[n, p]
-                            * remaining_annuity
-                            * remaining_lifetime
-                            + self.invest_status[n, p]
-                            * n.investment.offset[-1]
-                        ) * (
-                            (1 + m.discount_rate) ** (-m.es.periods_years[-1])
-                        )
-                    investment_costs_increment -= remaining_value
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -1802,41 +1776,32 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            end_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[n, p]
                             * n.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
                         ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            fixed_costs -= sum(
-                                self.invest[n, p]
-                                * n.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[-1],
-                                    m.es.periods_years[p] + lifetime,
-                                )
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     range_limit = min(
-                        m.es.periods_matrix[0, -1], lifetime - age
+                        end_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, range_limit)
+                        for pp in range(range_limit)
                     )
 
         self.investment_costs = Expression(expr=investment_costs)
