@@ -815,27 +815,27 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot DF^{-pp}
 
 
-            whereby:
+        whereby:
 
-            * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-              investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
-              and interest rate :math:`ir`.
-            * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
-              and discount rate :math:`dr`.
-            * :math:`d=min\{year_{max} - year(p), l\}` defines the
-              number of years within the optimization horizon that investment
-              annuities are accounted for.
-            * :math:`year(p)` denotes the start year of period :math:`p`.
-            * :math:`year_{max}` denotes the last year of the optimization
-              horizon, i.e. at the end of the last period.
-            * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
-              upper bound to ensure fixed costs for endogenous investments
-              to occur within the optimization horizon.
-            * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
-              upper bound to ensure fixed costs for existing capacities to occur
-              within the optimization horizon. :math:`a` is the initial age
-              of an asset.
-            * :math:`DF=(1+dr)` is the discount factor.
+        * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+          investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
+          and interest rate :math:`ir`.
+        * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
+          and discount rate :math:`dr`.
+        * :math:`d=min\{year_{max} - year(p), l\}` defines the
+          number of years within the optimization horizon that investment
+          annuities are accounted for.
+        * :math:`year(p)` denotes the start year of period :math:`p`.
+        * :math:`year_{max}` denotes the last year of the optimization
+          horizon, i.e. at the end of the last period.
+        * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
+          upper bound to ensure fixed costs for endogenous investments
+          to occur within the optimization horizon.
+        * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
+          upper bound to ensure fixed costs for existing capacities to occur
+          within the optimization horizon. :math:`a` is the initial age
+          of an asset.
+        * :math:`DF=(1+dr)` is the discount factor.
 
         The annuity / annuity factor hereby is:
 
@@ -847,8 +847,8 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
-        They are retrieved, using oemof.tools.economics annuity function. The
-        interest rate :math:`i` for the annuity is defined as weighted
+        They are retrieved, using oemof.tools.economics annuity function.
+        The interest rate :math:`i` for the annuity is defined as weighted
         average costs of capital (wacc) and assumed constant over time.
         """
         if not hasattr(self, "INVESTFLOWS"):
