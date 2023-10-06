@@ -1322,6 +1322,10 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
+
+            duration_last_period = m.es.get_period_duration(-1)
+            end_of_optimization = m.es.periods_years[-1] + duration_last_period
+
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -1338,31 +1342,16 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             n=lifetime,
                             wacc=interest,
                         )
-                        investment_costs_increment = (
-                            self.invest[g, p]
-                            * annuity
-                            * lifetime
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        duration = min(
+                            end_of_optimization - m.es.periods_years[p],
+                            lifetime,
                         )
-                        remaining_value = 0
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            remaining_lifetime = (
-                                lifetime - m.es.periods_matrix[p, -1]
-                            )
-                            remaining_annuity = economics.annuity(
-                                capex=g.investment.ep_costs[-1],
-                                n=lifetime,
-                                wacc=interest,
-                            )
-                            remaining_value = (
-                                self.invest[g, p]
-                                * remaining_annuity
-                                * remaining_lifetime
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
-                        investment_costs_increment -= remaining_value
+                        present_value_factor = 1 / economics.annuity(
+                            capex=1, n=duration, wacc=m.discount_rate
+                        )
+                        investment_costs_increment = (
+                            self.invest[g, p] * annuity * present_value_factor
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                         investment_costs += investment_costs_increment
                         period_investment_costs[
                             p
@@ -1375,7 +1364,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -1383,47 +1372,36 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            end_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[g, p]
                             * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            fixed_costs -= sum(
-                                self.invest[g, p]
-                                * g.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[-1],
-                                    m.es.periods_years[p] + lifetime,
-                                )
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(
-                        m.es.periods_matrix[0, -1], lifetime - age
-                    )
+                    range_limit = min(end_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, range_limit)
+                        * (1 + m.discount_rate) ** (-pp)
+                        for pp in range(range_limit)
                     )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -3073,6 +3051,10 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
+
+            duration_last_period = m.es.get_period_duration(-1)
+            end_of_optimization = m.es.periods_years[-1] + duration_last_period
+
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -3089,31 +3071,16 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             n=lifetime,
                             wacc=interest,
                         )
-                        investment_costs_increment = (
-                            self.invest[g, p]
-                            * annuity
-                            * lifetime
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        duration = min(
+                            end_of_optimization - m.es.periods_years[p],
+                            lifetime,
                         )
-                        remaining_value = 0
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            remaining_lifetime = (
-                                lifetime - m.es.periods_matrix[p, -1]
-                            )
-                            remaining_annuity = economics.annuity(
-                                capex=g.investment.ep_costs[-1],
-                                n=lifetime,
-                                wacc=interest,
-                            )
-                            remaining_value = (
-                                self.invest[g, p]
-                                * remaining_annuity
-                                * remaining_lifetime
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
-                        investment_costs_increment -= remaining_value
+                        present_value_factor = 1 / economics.annuity(
+                            capex=1, n=duration, wacc=m.discount_rate
+                        )
+                        investment_costs_increment = (
+                            self.invest[g, p] * annuity * present_value_factor
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                         investment_costs += investment_costs_increment
                         period_investment_costs[
                             p
@@ -3126,7 +3093,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -3138,47 +3105,36 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            end_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[g, p]
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            fixed_costs -= sum(
-                                self.invest[g, p]
-                                * g.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[-1],
-                                    m.es.periods_years[p] + lifetime,
-                                )
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(
-                        m.es.periods_matrix[0, -1], lifetime - age
-                    )
+                    range_limit = min(end_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, range_limit)
+                        * (1 + m.discount_rate) ** (-pp)
+                        for pp in range(range_limit)
                     )
 
         self.variable_costs = Expression(expr=variable_costs)
@@ -5466,6 +5422,10 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
+
+            duration_last_period = m.es.get_period_duration(-1)
+            end_of_optimization = m.es.periods_years[-1] + duration_last_period
+
             for g in self.INVESTDR:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -5482,31 +5442,16 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             n=lifetime,
                             wacc=interest,
                         )
-                        investment_costs_increment = (
-                            self.invest[g, p]
-                            * annuity
-                            * lifetime
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        duration = min(
+                            end_of_optimization - m.es.periods_years[p],
+                            lifetime,
                         )
-                        remaining_value = 0
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            remaining_lifetime = (
-                                lifetime - m.es.periods_matrix[p, -1]
-                            )
-                            remaining_annuity = economics.annuity(
-                                capex=g.investment.ep_costs[-1],
-                                n=lifetime,
-                                wacc=interest,
-                            )
-                            remaining_value = (
-                                self.invest[g, p]
-                                * remaining_annuity
-                                * remaining_lifetime
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
-                        investment_costs_increment -= remaining_value
+                        present_value_factor = 1 / economics.annuity(
+                            capex=1, n=duration, wacc=m.discount_rate
+                        )
+                        investment_costs_increment = (
+                            self.invest[g, p] * annuity * present_value_factor
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                         investment_costs += investment_costs_increment
                         period_investment_costs[
                             p
@@ -5525,7 +5470,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -5538,47 +5483,36 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            end_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[g, p]
                             * g.investment.fixed_costs[pp]
                             * ((1 + m.discount_rate) ** (-pp))
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        if lifetime > m.es.periods_matrix[p, -1]:
-                            fixed_costs -= sum(
-                                self.invest[g, p]
-                                * g.investment.fixed_costs[pp]
-                                * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(
-                                    m.es.periods_years[-1],
-                                    m.es.periods_years[p] + lifetime,
-                                )
-                            ) * (
-                                (1 + m.discount_rate)
-                                ** (-m.es.periods_years[-1])
-                            )
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(
-                        m.es.periods_matrix[0, -1], lifetime - age
-                    )
+                    range_limit = min(end_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, range_limit)
+                        for pp in range(range_limit)
                     )
 
         self.variable_costs = Expression(expr=variable_costs)
