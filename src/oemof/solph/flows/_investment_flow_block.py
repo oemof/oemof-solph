@@ -867,9 +867,7 @@ class InvestmentFlowBlock(ScalarBlock):
             )
 
             duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = (
-                m.es.periods_years[-1] + duration_last_period
-            )
+            end_of_optimization = m.es.periods_years[-1] + duration_last_period
 
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
@@ -894,7 +892,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     )
                     investment_costs_increment = (
                         self.invest[i, o, p] * annuity * present_value_factor
-                    )
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
@@ -923,8 +921,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.invest[i, o, p] * annuity * present_value_factor
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
