@@ -785,6 +785,20 @@ class InvestmentFlowBlock(ScalarBlock):
                     &
                     \forall p \in \textrm{PERIODS}
 
+            In case, the remaining lifetime of an asset is greater than 0,
+            the difference in value for the investment period compared to the
+            last period of the optimization horizon is accounted for
+            as an adder to the investment costs:
+
+                .. math::
+                    &
+                    P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                    A(c_{invest,var}(|P|), l_{r}, ir)\\
+                    & \cdot \frac {1}{ANF(l_{r}, dr)} \cdot DF^{-|P|}\\
+                    &\\
+                    &
+                    \forall p \in \textrm{PERIODS}
+
             * :attr:`nonconvex = True`
 
                 .. math::
@@ -793,6 +807,23 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot \frac {1}{ANF(d, ir)}\\
                     &
                     +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p}\\
+                    &\\
+                    &
+                    \forall p \in \textrm{PERIODS}
+
+            In case, the remaining lifetime of an asset is greater than 0,
+            the difference in value for the investment period compared to the
+            last period of the optimization horizon is accounted for
+            as an adder to the investment costs:
+
+                .. math::
+                    &
+                    (P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                    A(c_{invest,var}(|P|), l_{r}, ir)\\
+                    & \cdot \frac {1}{ANF(l_{r}, dr)} \cdot DF^{-|P|}\\
+                    &
+                    +  (c_{invest,fix}(p) - c_{invest,fix}(|P|))
+                    \cdot b_{invest}(p)) \cdot DF^{-p}\\
                     &\\
                     &
                     \forall p \in \textrm{PERIODS}
@@ -820,6 +851,9 @@ class InvestmentFlowBlock(ScalarBlock):
         * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
           investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
           and interest rate :math:`ir`.
+        * :math:`l_{r}` is the remaining lifetime at the end of the optimization
+          horizon (in case it is greater than 0 and smaller than the actual
+          lifetime).
         * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
           and interest rate :math:`ir`.
         * :math:`d=min\{year_{max} - year(p), l\}` defines the
@@ -903,13 +937,22 @@ class InvestmentFlowBlock(ScalarBlock):
                         m.es.end_year_of_optimization - m.es.periods_years[p],
                         lifetime,
                     )
-                    present_value_factor = 1 / economics.annuity(
+                    present_value_factor_remaining = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
                     )
                     investment_costs_increment = (
-                        self.invest[i, o, p] * annuity * present_value_factor
+                        self.invest[i, o, p]
+                        * annuity
+                        * present_value_factor_remaining
                     ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    investment_costs += investment_costs_increment
+                    remaining_value_difference = (
+                        self._evaluate_remaining_value_difference(
+                            m, p, i, o, end_of_optimization, lifetime, interest
+                        )
+                    )
+                    investment_costs += (
+                        investment_costs_increment + remaining_value_difference
+                    )
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
@@ -931,15 +974,31 @@ class InvestmentFlowBlock(ScalarBlock):
                         m.es.end_year_of_optimization - m.es.periods_years[p],
                         lifetime,
                     )
-                    present_value_factor = 1 / economics.annuity(
+                    present_value_factor_remaining = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
                     )
                     investment_costs_increment = (
-                        self.invest[i, o, p] * annuity * present_value_factor
+                        self.invest[i, o, p]
+                        * annuity
+                        * present_value_factor_remaining
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
                     ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    investment_costs += investment_costs_increment
+                    remaining_value_difference = (
+                        self._evaluate_remaining_value_difference(
+                            m,
+                            p,
+                            i,
+                            o,
+                            end_of_optimization,
+                            lifetime,
+                            interest,
+                            nonconvex=True,
+                        )
+                    )
+                    investment_costs += (
+                        investment_costs_increment + remaining_value_difference
+                    )
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.INVESTFLOWS:
@@ -980,6 +1039,85 @@ class InvestmentFlowBlock(ScalarBlock):
         self.costs = Expression(expr=investment_costs + fixed_costs)
 
         return self.costs
+
+    def _evaluate_remaining_value_difference(
+        self,
+        m,
+        p,
+        i,
+        o,
+        end_of_optimization,
+        lifetime,
+        interest,
+        nonconvex=False,
+    ):
+        """Evaluate and return the remaining value difference of an investment
+
+        The remaining value difference in the net present values if the asset
+        was to be liquidated at the end of the optimization horizon and the
+        net present value using the original investment expenses.
+
+        Parameters
+        ----------
+        m : oemof.solph.models.Model
+            Optimization model
+
+        p : int
+            Period in which investment occurs
+
+        # How to reference any type of module?
+        i : oemof.solph.components.__all__
+            start node of flow
+
+        o : oemof.solph.components.__all__
+            end node of flow
+
+        end_of_optimization : int
+            Last year of the optimization horizon
+
+        lifetime : int
+            lifetime of investment considered
+
+        interest : float
+            Demanded interest rate for investment
+
+        nonconvex : bool
+            Indicating whether considered flow is nonconvex.
+        """
+        if end_of_optimization - m.es.periods_years[p] < lifetime:
+            remaining_lifetime = end_of_optimization - m.es.periods_years[p]
+            remaining_annuity = economics.annuity(
+                capex=m.flows[i, o].investment.ep_costs[-1],
+                n=remaining_lifetime,
+                wacc=interest,
+            )
+            original_annuity = economics.annuity(
+                capex=m.flows[i, o].investment.ep_costs[p],
+                n=remaining_lifetime,
+                wacc=interest,
+            )
+            present_value_factor_remaining = 1 / economics.annuity(
+                capex=1, n=remaining_lifetime, wacc=m.discount_rate
+            )
+            if nonconvex:
+                return (
+                    self.invest[i, o, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                    + self.invest_status[i, o, p]
+                    * (
+                        m.flows[i, o].investment.offset[-1]
+                        - m.flows[i, o].investment.offset[p]
+                    )
+                ) * (1 + m.discount_rate) ** (-end_of_optimization)
+            else:
+                return (
+                    self.invest[i, o, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_of_optimization)
+        else:
+            return 0
 
     def _minimum_investment_constraint(self):
         """Constraint factory for a minimum investment"""
