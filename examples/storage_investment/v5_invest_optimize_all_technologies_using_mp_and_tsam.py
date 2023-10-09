@@ -88,7 +88,50 @@ from oemof.tools import economics
 from oemof.tools import logger
 
 from oemof import solph
+def check_equal_timesteps_after_aggregation(hours_per_period : int,
+                                            hours_of_input_time_series: int,
+                                            periods_total_occurrence: list):
 
+    if not sum(periods_total_occurrence) * hours_per_period == 8760:
+        #todo: prints can be deleted in future
+        print("aggregated timeseries has: " + str(int(sum(periods_total_occurrence) * hours_per_period)) + " timesteps")
+        print("unaggregated timeseries has: " + str(hours_of_input_time_series) + " timesteps")
+        print("therefore the occurrence of the typical periods for the objective weighting will be customized")
+        customize_factor = hours_of_input_time_series / int(sum(periods_total_occurrence) * hours_per_period)
+        result_list = [float(occurrence) * customize_factor for occurrence in periods_total_occurrence]
+        periods_total_occurrence = result_list
+        return periods_total_occurrence
+    else:
+        return periods_total_occurrence
+
+def set_aggregated_timeseries_and_objective_weighting(segmentation,
+                                                      periods_total_occurrence,
+                                                      aggregated_period_dict,
+                                                      first_time_stamp):
+    previous_period = 0
+    objective_weighting = []
+    aggregated_time_series = []
+    current_timestamp=first_time_stamp
+    if segmentation:
+        for period, timestep, segmented_timestep in aggregated_period_dict.index:
+            if previous_period == period:
+                aggregated_time_series.append(current_timestamp)
+            else:
+                aggregated_time_series.append(current_timestamp)
+                previous_period = period
+            objective_weighting.append(periods_total_occurrence[period] * segmented_timestep)
+            current_timestamp += pd.Timedelta(minutes=60 * segmented_timestep)
+    else:
+        for period, timestep in aggregated_period_dict.index:
+            if previous_period == period:
+                aggregated_time_series.append(current_timestamp)
+            else:
+                aggregated_time_series.append(current_timestamp)
+                previous_period = period
+            objective_weighting.append(periods_total_occurrence[period])
+            current_timestamp += pd.Timedelta(minutes=60)
+    aggregated_time_series = pd.DatetimeIndex(aggregated_time_series)
+    return aggregated_time_series, objective_weighting
 
 def main():
     # Read data file
@@ -124,38 +167,65 @@ def main():
 
     typical_periods = 40
     hours_per_period = 24
+    segmentation = False
+    if segmentation:
+        print("segmentation hasn't been added so far")
 
-    aggregation1 = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[:8760],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="k_means",
-        sortValues=False,
-        rescaleClusterPeriods=False,
-        extremePeriodMethod="replace_cluster_center",
-        addPeakMin=["wind", "pv"],
-        representationMethod="durationRepresentation",
-    )
+
+    else:
+        aggregation1 = tsam.TimeSeriesAggregation(
+            timeSeries=data.iloc[:8760],
+            noTypicalPeriods=typical_periods,
+            hoursPerPeriod=hours_per_period,
+            clusterMethod="k_means",
+            sortValues=False,
+            rescaleClusterPeriods=False,
+            extremePeriodMethod="replace_cluster_center",
+            addPeakMin=["wind", "pv"],
+            representationMethod="durationRepresentation",
+        )
+
+        aggregation2 = tsam.TimeSeriesAggregation(
+            timeSeries=data.iloc[8760:],
+            noTypicalPeriods=typical_periods,
+            hoursPerPeriod=hours_per_period,
+            clusterMethod="hierarchical",
+            sortValues=False,
+            rescaleClusterPeriods=False,
+            extremePeriodMethod="replace_cluster_center",
+            addPeakMin=["wind", "pv"],
+            representationMethod="durationRepresentation",
+        )
+
     aggregation1.createTypicalPeriods()
-    aggregation2 = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[8760:],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="hierarchical",
-        sortValues=False,
-        rescaleClusterPeriods=False,
-        extremePeriodMethod="replace_cluster_center",
-        addPeakMin=["wind", "pv"],
-        representationMethod="durationRepresentation",
-    )
     aggregation2.createTypicalPeriods()
 
-    t1_agg = pd.date_range(
-        "2022-01-01", periods=typical_periods * hours_per_period, freq="H"
-    )
-    t2_agg = pd.date_range(
-        "2033-01-01", periods=typical_periods * hours_per_period, freq="H"
-    )
+    periods_total_occurrence1 = [
+        (aggregation1.clusterOrder == typical_period_name).sum() for typical_period_name in
+        aggregation1.clusterPeriodIdx]
+    periods_total_occurrence2 = [
+        (aggregation2.clusterOrder == typical_period_name).sum() for typical_period_name in
+        aggregation2.clusterPeriodIdx]
+    periods_total_occurrence1 = check_equal_timesteps_after_aggregation(hours_per_period=hours_per_period,
+                                            hours_of_input_time_series=t1.__len__(),
+                                            periods_total_occurrence=periods_total_occurrence1
+                                                                        )
+    periods_total_occurrence2 = check_equal_timesteps_after_aggregation(hours_per_period = hours_per_period,
+                                            hours_of_input_time_series = t2.__len__(),
+                                            periods_total_occurrence=periods_total_occurrence2
+                                                                        )
+    #before timeseries generation was based on freq="H" (hourly), now you have to set the number of minutes of one timestep
+    t1_agg, objective_weighting1 = set_aggregated_timeseries_and_objective_weighting(segmentation=segmentation,
+                                                      periods_total_occurrence = periods_total_occurrence1,
+                                                      aggregated_period_dict=pd.DataFrame.from_dict(aggregation1.clusterPeriodDict),
+                                                      first_time_stamp=pd.to_datetime(t1[0])
+                                                                                     )
+    t2_agg, objective_weighting2 = set_aggregated_timeseries_and_objective_weighting(segmentation=segmentation,
+                                                      periods_total_occurrence = periods_total_occurrence2,
+                                                      aggregated_period_dict=pd.DataFrame.from_dict(aggregation2.clusterPeriodDict),
+                                                      first_time_stamp=pd.to_datetime(t1[0])
+                                                                                     )
+
     tindex_agg = t1_agg.append(t2_agg)
 
     energysystem = solph.EnergySystem(
