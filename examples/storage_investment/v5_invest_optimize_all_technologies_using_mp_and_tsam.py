@@ -225,6 +225,7 @@ def main():
                                                       aggregated_period_dict=pd.DataFrame.from_dict(aggregation2.clusterPeriodDict),
                                                       first_time_stamp=pd.to_datetime(t1[0])
                                                                                      )
+    objective_weighting = objective_weighting1 + objective_weighting2
 
     tindex_agg = t1_agg.append(t2_agg)
 
@@ -372,7 +373,7 @@ def main():
     logging.info("Optimise the energy system")
 
     # initialise the operational model
-    om = solph.Model(energysystem)
+    om = solph.Model(energysystem,objective_weighting= objective_weighting)
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
