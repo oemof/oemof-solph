@@ -82,10 +82,12 @@ import os
 import pprint as pp
 import warnings
 import tsam.timeseriesaggregation as tsam
+import matplotlib.pyplot as plt
 
 import pandas as pd
 from oemof.tools import economics
 from oemof.tools import logger
+from oemof.solph import views
 
 from oemof import solph
 def check_equal_timesteps_after_aggregation(hours_per_period : int,
@@ -373,7 +375,9 @@ def main():
     logging.info("Optimise the energy system")
 
     # initialise the operational model
-    om = solph.Model(energysystem,objective_weighting= objective_weighting)
+    om = solph.Model(energysystem,
+                     objective_weighting= objective_weighting
+                     )
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
@@ -398,6 +402,13 @@ def main():
 
     meta_results = solph.processing.meta_results(om)
     pp.pprint(meta_results)
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    storage_results = results[(storage, None)]["sequences"] / storage.nominal_storage_capacity
+    storage_results .plot(
+        ax=ax, kind="line", drawstyle="steps-post"
+    )
+    plt.show()
 
     my_results = electricity_bus["period_scalars"]
 
