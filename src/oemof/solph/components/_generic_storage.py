@@ -695,7 +695,7 @@ class GenericStorageBlock(ScalarBlock):
                 m.timeincrement[t]
                 * m.es.tsa_parameters[p]["timesteps_per_period"]
             )
-            expr += self.storage_content_intra[
+            expr += -self.storage_content_intra[
                 n, p, k, m.es.tsa_parameters[p]["timesteps_per_period"]
             ]
             return expr == 0
