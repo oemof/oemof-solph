@@ -10,6 +10,7 @@ import datetime
 import random
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -84,7 +85,7 @@ class TestParameterResult:
             for k, v in self.comp.items()
             if k[0].label == "storage"
         ][0]
-        assert storage_content[0] == storage_content[-1]
+        assert storage_content.iloc[0] == storage_content.iloc[-1]
 
         charge = [
             v["sequences"]["flow"]
@@ -96,9 +97,9 @@ class TestParameterResult:
         # Charging - timestep (ts) with its timeincrement (ti)
         time = [(23, 1), (24, 0.5)]
         for ts, ti in time:
-            assert round(storage_content[ts] + charge[ts] * ti, 5) == round(
-                storage_content[ts + 1], 5
-            )
+            assert storage_content.iloc[ts] + charge.iloc[
+                ts
+            ] * ti == pytest.approx(storage_content.iloc[ts + 1])
             assert self.es.timeincrement[ts] == ti
         assert charge.isnull().any()
 
@@ -110,7 +111,7 @@ class TestParameterResult:
         ][0]
         # Storage content at the last time point is equal to the content of
         # the first time point because the storage is balanced.
-        assert storage_content[0] == storage_content[-1]
+        assert storage_content.iloc[0] == storage_content.iloc[-1]
 
         discharge = [
             v["sequences"]["flow"]
@@ -123,11 +124,10 @@ class TestParameterResult:
         # Discharging - timestep (ts) with its timeincrement (ti)
         time = [(7, 1), (40, 0.5)]
         for ts, ti in time:
-            assert round(
-                storage_content[ts]
-                - (discharge[ts] + (discharge[ts] * 1 / 9)) * ti,
-                5,
-            ) == round(storage_content[ts + 1], 5)
+            assert (
+                storage_content.iloc[ts]
+                - (discharge.iloc[ts] + (discharge.iloc[ts] * 1 / 9)) * ti
+            ) == pytest.approx(storage_content.iloc[ts + 1])
             assert self.es.timeincrement[ts] == ti
 
     def test_timeincrements(self):
@@ -150,8 +150,11 @@ class TestParameterResult:
         # The first and the last value are not the same because the last value
         # of the storage is missing. Adding the charging of the last time step
         # will result the final storage content, which is equal to the first
-        assert storage_content[0] != storage_content[-1]
-        assert storage_content[0] == storage_content[-1] + charge[-1] / 2
+        assert storage_content.iloc[0] != storage_content.iloc[-1]
+        assert (
+            storage_content.iloc[0]
+            == storage_content.iloc[-1] + charge.iloc[-1] / 2
+        )
         assert not charge.isnull().any()
         assert storage_content.index[0] == datetime.datetime(
             2012, 1, 1, 0, 0, 0
@@ -168,7 +171,7 @@ class TestParameterResult:
             for k, v in self.comp.items()
             if k[0].label == "storage"
         ][0]
-        assert storage_content[0] == storage_content[-1]
+        assert storage_content.iloc[0] == storage_content.iloc[-1]
 
         charge = [
             v["sequences"]["flow"]
@@ -205,7 +208,7 @@ class TestParameterResult:
             for k, v in self.comp.items()
             if k[0].label == "storage"
         ][0]
-        assert storage_content[0] == storage_content[-1]
+        assert storage_content.iloc[0] == storage_content.iloc[-1]
 
         charge = [
             v["sequences"]["flow"]
@@ -217,8 +220,8 @@ class TestParameterResult:
         # Charging - timestep (ts) with its timeincrement (ti)
         time = [(23, 1), (24, 0.5)]
         for ts, ti in time:
-            assert round(storage_content[ts] + charge[ts] * ti, 5) == round(
-                storage_content[ts + 1], 5
-            )
+            assert (
+                storage_content.iloc[ts] + charge.iloc[ts] * ti
+            ) == pytest.approx(storage_content.iloc[ts + 1])
             assert self.es.timeincrement[ts] == ti
         assert charge.isnull().any()

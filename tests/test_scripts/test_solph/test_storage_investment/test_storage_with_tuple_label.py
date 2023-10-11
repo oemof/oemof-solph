@@ -221,4 +221,4 @@ def test_tuples_as_labels_example(
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert round(meta["objective"]) == 37819254
+    assert meta["objective"] == pytest.approx(37819254, abs=0.5)

@@ -130,19 +130,27 @@ def test_lopf(solver="cbc"):
         )
 
     assert (
-        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"][0]
+        results[es.groups["b_2"], es.groups["b_0"]]["sequences"]["flow"].iloc[
+            0
+        ]
         == -40
     )
 
     assert (
-        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"][0]
+        results[es.groups["b_1"], es.groups["b_2"]]["sequences"]["flow"].iloc[
+            0
+        ]
         == 60
     )
 
     assert (
-        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"][0]
+        results[es.groups["b_0"], es.groups["b_1"]]["sequences"]["flow"].iloc[
+            0
+        ]
         == -20
     )
 
     # objective function
-    assert round(processing.meta_results(om)["objective"]) == 3200
+    assert processing.meta_results(om)["objective"] == pytest.approx(
+        3200, abs=0.5
+    )
