@@ -1860,8 +1860,8 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_min=3,
-                    summed_max=100,
+                    full_load_time_min=3,
+                    full_load_time_max=100,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=10,
