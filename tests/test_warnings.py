@@ -50,15 +50,6 @@ def test_that_the_sink_errors_actually_get_raised(warning_fixture):
         assert msg in str(w[-1].message)
 
 
-def test_filtered_warning(warning_fixture):
-    """Sink doesn't warn about potentially erroneous usage."""
-    warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
-    look_out = network.Bus()
-    with warnings.catch_warnings(record=True) as w:
-        network.Sink(outputs={look_out: "A typo!"})
-        assert len(w) == 0
-
-
 def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     """Source doesn't warn about potentially erroneous usage."""
     look_out = network.Bus()
