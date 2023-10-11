@@ -13,7 +13,6 @@ import warnings
 
 import pandas as pd
 import pytest
-from oemof.network import network
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
@@ -31,7 +30,7 @@ def warning_fixture():
 
 def test_that_the_sink_errors_actually_get_raised(warning_fixture):
     """Sink doesn't warn about potentially erroneous usage."""
-    look_out = network.Bus()
+    look_out = solph.Bus()
     with pytest.raises(
         TypeError, match="got an unexpected keyword argument 'outputs'"
     ):
@@ -52,7 +51,7 @@ def test_that_the_sink_errors_actually_get_raised(warning_fixture):
 
 def test_that_the_source_warnings_actually_get_raised(warning_fixture):
     """Source doesn't warn about potentially erroneous usage."""
-    look_out = network.Bus()
+    look_out = solph.Bus()
     with pytest.raises(
         TypeError, match="got an unexpected keyword argument 'inputs'"
     ):
@@ -75,7 +74,7 @@ def test_that_the_source_warnings_actually_get_raised(warning_fixture):
 
 def test_that_the_converter_warnings_actually_get_raised(warning_fixture):
     """Converter doesn't warn about potentially erroneous usage."""
-    look_out = network.Bus()
+    look_out = solph.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <no input> of <class"
         " 'oemof.solph.components._converter.Converter'>."
@@ -100,7 +99,7 @@ def test_that_the_converter_warnings_actually_get_raised(warning_fixture):
 
 def test_storage_without_outputs(warning_fixture):
     """GenericStorage doesn't warn correctly about missing outputs."""
-    look_out = network.Bus()
+    look_out = solph.Bus()
     msg = (
         "Attribute <outputs> is missing in Node <storage without outputs>"
         " of <class 'oemof.solph.components._generic_storage.GenericStorage'>."
@@ -115,7 +114,7 @@ def test_storage_without_outputs(warning_fixture):
 
 def test_storage_without_inputs(warning_fixture):
     """GenericStorage doesn't warn correctly about missing inputs."""
-    look_out = network.Bus()
+    look_out = solph.Bus()
     msg = (
         "Attribute <inputs> is missing in Node <storage without inputs>"
         " of <class 'oemof.solph.components._generic_storage.GenericStorage'>."
