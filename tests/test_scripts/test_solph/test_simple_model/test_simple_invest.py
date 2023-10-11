@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
+import pytest
 from oemof.tools import economics
 
 from oemof.solph import EnergySystem
@@ -208,4 +209,4 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     }
 
     for key in test_results.keys():
-        assert int(round(comp_results[key])) == int(round(test_results[key]))
+        assert comp_results[key] == pytest.approx(test_results[key], abs=0.5)

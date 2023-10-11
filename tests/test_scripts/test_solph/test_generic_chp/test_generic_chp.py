@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -124,4 +125,4 @@ def test_gen_chp():
     }
 
     for key in test_dict.keys():
-        assert int(round(data[key])) == int(round(test_dict[key]))
+        assert data[key] == pytest.approx(test_dict[key])

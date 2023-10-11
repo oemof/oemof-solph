@@ -16,6 +16,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 
 from oemof import solph
 from oemof.solph import views
@@ -172,14 +173,14 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        assert int(round(maxresults[[key]])) == int(
-            round(variable_chp_dict_max[key])
+        assert maxresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_max[key]
         )
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        assert int(round(sumresults[[key]])) == int(
-            round(variable_chp_dict_sum[key])
+        assert sumresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_sum[key]
         )
 
     assert (

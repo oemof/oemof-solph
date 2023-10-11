@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
+import pytest
 
 import pandas as pd
 
@@ -131,11 +132,11 @@ def test_connect_invest():
     stor_res = views.node(results, "storage")["scalars"]
     my_results["storage_in"] = stor_res[
         [(("electricity1", "storage"), "invest")]
-    ]
-    my_results["storage"] = stor_res[[(("storage", "None"), "invest")]]
+    ].iloc[0]
+    my_results["storage"] = stor_res[[(("storage", "None"), "invest")]].iloc[0]
     my_results["storage_out"] = stor_res[
         [(("storage", "electricity1"), "invest")]
-    ]
+    ].iloc[0]
 
     connect_invest_dict = {
         "line12": 814705,
@@ -146,6 +147,6 @@ def test_connect_invest():
     }
 
     for key in connect_invest_dict.keys():
-        assert int(round(my_results[key])) == int(
-            round(connect_invest_dict[key])
+        assert my_results[key] == pytest.approx(
+            connect_invest_dict[key], abs=0.5
         )

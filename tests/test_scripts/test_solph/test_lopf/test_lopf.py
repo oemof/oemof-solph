@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -124,8 +125,8 @@ def test_lopf(solver="cbc"):
 
     for key in generators_test_results.keys():
         logging.debug("Test genertor production of {0}".format(key))
-        assert int(round(generators[key])) == int(
-            round(generators_test_results[key])
+        assert generators[key].iloc[0] == pytest.approx(
+            generators_test_results[key]
         )
 
     assert (

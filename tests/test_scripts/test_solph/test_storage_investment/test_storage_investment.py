@@ -38,6 +38,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 from oemof.tools import economics
 
 from oemof import solph
@@ -179,7 +180,7 @@ def test_results_with_actual_dump():
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"

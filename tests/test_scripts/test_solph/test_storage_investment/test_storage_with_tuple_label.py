@@ -36,6 +36,7 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
+import pytest
 from collections import namedtuple
 
 import pandas as pd
@@ -171,9 +172,11 @@ def test_tuples_as_labels_example(
     my_results = electricity_bus["sequences"].sum(axis=0).to_dict()
     storage = es.groups["storage_electricity_battery"]
     storage_node = views.node(results, storage)
-    my_results["max_load"] = storage_node["sequences"].max()[
-        [((storage, None), "storage_content")]
-    ]
+    my_results["max_load"] = (
+        storage_node["sequences"]
+        .max()[[((storage, None), "storage_content")]]
+        .iloc[0]
+    )
     commodity_bus = views.node(results, "bus_natural_gas_None")
 
     gas_usage = commodity_bus["sequences"][
@@ -201,7 +204,7 @@ def test_tuples_as_labels_example(
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
