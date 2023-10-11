@@ -19,5 +19,9 @@ Testing
 Other changes
 #############
 
+* Improved compatibility with upcoming oemof.network
+
 Contributors
 ############
+
+* Patrik Schönfeldt
