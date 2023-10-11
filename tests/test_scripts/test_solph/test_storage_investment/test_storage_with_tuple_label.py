@@ -36,10 +36,10 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
-import pytest
 from collections import namedtuple
 
 import pandas as pd
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing

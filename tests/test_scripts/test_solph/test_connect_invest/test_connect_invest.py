@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
-import pytest
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
