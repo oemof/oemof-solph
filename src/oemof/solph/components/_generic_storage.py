@@ -528,6 +528,10 @@ class GenericStorageBlock(ScalarBlock):
             # set the initial intra storage content
             # first timestep in intra storage is always zero
             for n in group:
+                # todo: Discussion, should the storage level of every period be zero
+                self.storage_content_inter[n, 0] = 0
+                self.storage_content_inter[n, 0].fix()
+
                 for p, k in m.TYPICAL_CLUSTERS:
                     self.storage_content_intra[n, p, k, 0] = 0
                     self.storage_content_intra[n, p, k, 0].fix()
