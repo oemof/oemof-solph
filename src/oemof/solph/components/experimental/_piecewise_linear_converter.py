@@ -17,7 +17,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
@@ -26,7 +26,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class PiecewiseLinearConverter(on.Transformer):
+class PiecewiseLinearConverter(Node):
     """Component to model an energy converter with one input and one output
     and an arbitrary piecewise linear conversion function.
 

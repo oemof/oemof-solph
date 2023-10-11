@@ -17,7 +17,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -26,7 +26,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class GenericCAES(on.Transformer):
+class GenericCAES(Node):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 

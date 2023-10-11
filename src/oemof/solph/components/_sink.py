@@ -15,11 +15,11 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-from oemof.network import network as on
+from oemof.network import Node
 from oemof.tools import debugging
 
 
-class Sink(on.Sink):
+class Sink(Node):
     """A component which is designed for one input flow.
 
     Parameters

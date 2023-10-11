@@ -23,7 +23,7 @@ import numbers
 from warnings import warn
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
@@ -40,7 +40,7 @@ from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class GenericStorage(network.Component):
+class GenericStorage(Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 

@@ -23,7 +23,7 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
@@ -32,7 +32,7 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
-class Converter(on.Transformer):
+class Converter(Node):
     """A linear ConverterBlock object with n inputs and n outputs.
 
     Node object that relates any number of inflow and outflows with
