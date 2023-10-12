@@ -201,7 +201,8 @@ class GenericStorage(network.Component):
         if investment is not None:
             msg = (
                 "For backward compatibility,"
-                " the option investment overwrites the option nominal_value."
+                " the option investment overwrites the option"
+                + " nominal_storage_capacity."
                 + " Both options cannot be set at the same time."
             )
             if nominal_storage_capacity is not None:
