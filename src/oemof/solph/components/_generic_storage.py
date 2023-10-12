@@ -217,7 +217,7 @@ class GenericStorage(Node):
         if isinstance(nominal_storage_capacity, numbers.Real):
             self.nominal_storage_capacity = nominal_storage_capacity
         elif isinstance(nominal_storage_capacity, Investment):
-            self.investment = investment
+            self.investment = nominal_storage_capacity
             self._invest_group = True
 
         self.initial_storage_level = initial_storage_level
@@ -235,11 +235,9 @@ class GenericStorage(Node):
         self.min_storage_level = solph_sequence(min_storage_level)
         self.fixed_costs = solph_sequence(fixed_costs)
         self.storage_costs = solph_sequence(storage_costs)
-        self.investment = investment
         self.invest_relation_input_output = invest_relation_input_output
         self.invest_relation_input_capacity = invest_relation_input_capacity
         self.invest_relation_output_capacity = invest_relation_output_capacity
-        self._invest_group = isinstance(self.investment, Investment)
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
