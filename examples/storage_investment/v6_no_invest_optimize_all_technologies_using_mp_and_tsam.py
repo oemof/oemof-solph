@@ -153,6 +153,12 @@ def main():
     data["pv"].iloc[8760 - 24 : 8760] = 0
     data["pv"].iloc[8760 * 2 - 24 : 8760] = 0
 
+    # add a season without electricity production to simulate the possible advantage using a seasonal storages
+    data["wind"].iloc[2920 * 4:5 * 2920 + 1] = 0
+    data["wind"].iloc[2920: 2 * 2920 + 1] = 0
+    data["pv"].iloc[2920:2 * 2920 + 1] = 0
+    data["pv"].iloc[2920 * 4:5 * 2920 + 1] = 0
+
     ##########################################################################
     # Initialize the energy system and read/calculate necessary parameters
     ##########################################################################
@@ -167,8 +173,8 @@ def main():
     data.index = tindex
     del data["timestep"]
 
-    typical_periods = 2
-    hours_per_period = 24*30
+    typical_periods = 60
+    hours_per_period = 24
     segmentation = False
     if segmentation:
         print("segmentation hasn't been added so far")
@@ -179,8 +185,8 @@ def main():
             timeSeries=data.iloc[:8760],
             noTypicalPeriods=typical_periods,
             hoursPerPeriod=hours_per_period,
-            clusterMethod="k_means",
-            sortValues=False,
+            clusterMethod="hierarchical",
+            sortValues=True,
             rescaleClusterPeriods=False,
             extremePeriodMethod="replace_cluster_center",
             addPeakMin=["wind", "pv"],
@@ -192,22 +198,26 @@ def main():
             noTypicalPeriods=typical_periods,
             hoursPerPeriod=hours_per_period,
             clusterMethod="hierarchical",
-            sortValues=False,
+            sortValues=True,
             rescaleClusterPeriods=False,
             extremePeriodMethod="replace_cluster_center",
             addPeakMin=["wind", "pv"],
             representationMethod="durationRepresentation",
         )
 
+
     aggregation1.createTypicalPeriods()
     aggregation2.createTypicalPeriods()
-
-    periods_total_occurrence1 = [
-        (aggregation1.clusterOrder == typical_period_name).sum() for typical_period_name in
-        aggregation1.clusterPeriodIdx]
-    periods_total_occurrence2 = [
-        (aggregation2.clusterOrder == typical_period_name).sum() for typical_period_name in
-        aggregation2.clusterPeriodIdx]
+    if False:
+        periods_total_occurrence1 = [
+            (aggregation1.clusterOrder == typical_period_name).sum() for typical_period_name in
+            aggregation1.clusterPeriodIdx]
+        periods_total_occurrence2 = [
+            (aggregation2.clusterOrder == typical_period_name).sum() for typical_period_name in
+            aggregation2.clusterPeriodIdx]
+    else:
+        periods_total_occurrence1 = aggregation1.clusterPeriodNoOccur
+        periods_total_occurrence2 = aggregation1.clusterPeriodNoOccur
     periods_total_occurrence1 = check_equal_timesteps_after_aggregation(hours_per_period=hours_per_period,
                                             hours_of_input_time_series=t1.__len__(),
                                             periods_total_occurrence=periods_total_occurrence1
@@ -227,45 +237,43 @@ def main():
                                                       aggregated_period_dict=pd.DataFrame.from_dict(aggregation2.clusterPeriodDict),
                                                       first_time_stamp=pd.to_datetime(t1[0])
                                                                                      )
-    objective_weighting = objective_weighting1 + objective_weighting2
+    #objective_weighting = objective_weighting1 + objective_weighting2
+    objective_weighting = objective_weighting1
 
-    tindex_agg = t1_agg.append(t2_agg)
+    #tindex_agg = t1_agg.append(t2_agg)
+    tindex_agg = t1_agg
 
+    #todo aggregation1.clusterPeriodNoOccur besser zum objective weighting nutzen
     energysystem = solph.EnergySystem(
         timeindex=tindex_agg,
-        timeincrement=[1] * len(tindex_agg),
-        periods=[t1_agg, t2_agg],
+        #timeincrement=[1] * len(tindex_agg),
+        periods=[t1_agg,
+                 #t2_agg
+                 ],
         tsa_parameters=[
             {
                 "timesteps_per_period": aggregation1.hoursPerPeriod,
                 "order": aggregation1.clusterOrder,
                 "occurrences": aggregation1.clusterPeriodNoOccur,
                 "timeindex": aggregation1.timeIndex,
-            },
-            {
-                "timesteps_per_period": aggregation2.hoursPerPeriod,
-                "order": aggregation2.clusterOrder,
-                "occurrences": aggregation2.clusterPeriodNoOccur,
-                "timeindex": aggregation2.timeIndex,
-            },
+            }
         ],
         infer_last_interval=False,
     )
 
-    price_gas = 5
+    electricity_price = 100
 
     ##########################################################################
     # Create oemof objects
     ##########################################################################
 
     logging.info("Create oemof objects")
-    # create natural gas bus
-    bgas = solph.Bus(label="natural_gas")
+
 
     # create electricity bus
     bel = solph.Bus(label="electricity")
 
-    energysystem.add(bgas, bel)
+    energysystem.add( bel)
 
     # create excess component for the electricity bus to allow overproduction
     excess = solph.components.Sink(
@@ -273,14 +281,14 @@ def main():
     )
 
     # create source object representing the gas commodity (annual limit)
-    gas_resource = solph.components.Source(
-        label="rgas", outputs={bgas: solph.Flow(variable_costs=price_gas)}
+    elect_resource = solph.components.Source(
+        label="electricity_source", outputs={bel: solph.Flow(variable_costs=electricity_price)}
     )
 
     wind_profile = pd.concat(
         [
             aggregation1.typicalPeriods["wind"],
-            aggregation2.typicalPeriods["wind"],
+            #aggregation2.typicalPeriods["wind"],
         ],
         ignore_index=True,
     )
@@ -292,13 +300,15 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=wind_profile,
-                nominal_value=300000
+                nominal_value=1500000
             )
         },
     )
 
     pv_profile = pd.concat(
-        [aggregation1.typicalPeriods["pv"], aggregation2.typicalPeriods["pv"]],
+        [aggregation1.typicalPeriods["pv"],
+         #aggregation2.typicalPeriods["pv"]
+         ],
         ignore_index=True,
     )
     pv_profile.iloc[-24:] = 0
@@ -311,11 +321,11 @@ def main():
                 fix=pd.concat(
                     [
                         aggregation1.typicalPeriods["pv"],
-                        aggregation2.typicalPeriods["pv"],
+                        #aggregation2.typicalPeriods["pv"],
                     ],
                     ignore_index=True,
                 ),
-                nominal_value=100000
+                nominal_value=900000
             )
         },
     )
@@ -328,34 +338,28 @@ def main():
                 fix=pd.concat(
                     [
                         aggregation1.typicalPeriods["demand_el"],
-                        aggregation2.typicalPeriods["demand_el"],
+                        #aggregation2.typicalPeriods["demand_el"],
                     ],
                     ignore_index=True,
                 ),
-                nominal_value=1,
+                nominal_value=0.05,
             )
         },
-    )
-    # create simple Converter object representing a gas power plant
-    pp_gas = solph.components.Converter(
-        label="pp_gas",
-        inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
-        conversion_factors={bel: 0.58},
     )
 
     # create storage object representing a battery
     storage = solph.components.GenericStorage(
         label="storage",
-        nominal_storage_capacity=5000,
-        inputs={bel: solph.Flow(variable_costs=0.0001, nominal_value=200)},
-        outputs={bel: solph.Flow(nominal_value=200)},
-        loss_rate=0.01,
+        nominal_storage_capacity=3000000,
+        initial_storage_level=0,
+        inputs={bel: solph.Flow(variable_costs=0.0, nominal_value=2000)},
+        outputs={bel: solph.Flow(nominal_value=2000)},
+        loss_rate=0.000,
         inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
+        outflow_conversion_factor=1,
     )
 
-    energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)
+    energysystem.add(excess, elect_resource, wind, pv, demand, storage)
 
     ##########################################################################
     # Optimise the energy system
@@ -398,7 +402,24 @@ def main():
         ax=ax, kind="line", drawstyle="steps-post"
     )
     plt.show()
-
+    fig, ax = plt.subplots(figsize=(10, 5))
+    storage_results = results[(wind, bel)]["sequences"]
+    storage_results .plot(
+        ax=ax, kind="line", drawstyle="steps-post"
+    )
+    plt.show()
+    fig, ax = plt.subplots(figsize=(10, 5))
+    storage_results = results[(pv, bel)]["sequences"]
+    storage_results .plot(
+        ax=ax, kind="line", drawstyle="steps-post"
+    )
+    plt.show()
+    fig, ax = plt.subplots(figsize=(10, 5))
+    storage_results = results[(bel, demand)]["sequences"]
+    storage_results .plot(
+        ax=ax, kind="line", drawstyle="steps-post"
+    )
+    plt.show()
     my_results = electricity_bus["period_scalars"]
 
     # installed capacity of storage in GWh
