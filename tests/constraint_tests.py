@@ -367,7 +367,9 @@ class TestsConstraint:
             label="storage4",
             inputs={bel: solph.flows.Flow(nominal_value=80)},
             outputs={bel: solph.flows.Flow(nominal_value=100)},
-            nominal_storage_capacity=solph.Investment(ep_costs=145, maximum=500),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, maximum=500
+            ),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_4.lp")
