@@ -406,7 +406,7 @@ def net_storage_flow(results, node_type):
     dataframes = []
 
     for lb in labels:
-        subset = df.groupby(
+        subset = df.T.groupby(
             lambda x1: (
                 lambda fr, to, ty: "output"
                 if (fr == lb and ty == "flow")
@@ -415,9 +415,8 @@ def net_storage_flow(results, node_type):
                 else "level"
                 if (fr == lb and ty != "flow")
                 else None
-            )(*x1),
-            axis=1,
-        ).sum()
+            )(*x1)
+        ).sum().T
 
         subset["net_flow"] = subset["output"] - subset["input"]
 
