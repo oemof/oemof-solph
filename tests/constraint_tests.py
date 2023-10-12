@@ -367,7 +367,7 @@ class TestsConstraint:
             label="storage4",
             inputs={bel: solph.flows.Flow(nominal_value=80)},
             outputs={bel: solph.flows.Flow(nominal_value=100)},
-            nominal_value=solph.Investment(ep_costs=145, maximum=500),
+            nominal_storage_capacity=solph.Investment(ep_costs=145, maximum=500),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_4.lp")
@@ -434,7 +434,7 @@ class TestsConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow()},
-            nominal_value=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, minimum=100, maximum=200
             ),
         )
@@ -470,7 +470,7 @@ class TestsConstraint:
             balanced=False,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
-            nominal_value=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_unbalanced.lp")
