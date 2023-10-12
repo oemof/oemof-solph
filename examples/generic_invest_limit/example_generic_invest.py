@@ -42,7 +42,7 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
     .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
         :language: python
-        :lines: 62-219
+        :lines: 62-
 
 Installation requirements
 -------------------------
