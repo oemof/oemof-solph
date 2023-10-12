@@ -39,7 +39,7 @@ def main():
     solver_verbose = False  # show/hide solver output
     number_of_time_steps = 8760
     mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-
+    building_example = None
     # Generates 5RC Building-Model
     building_status = "no_refurbishment"
     if building_status == "no_refurbishment":

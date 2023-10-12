@@ -23,7 +23,7 @@ __status__ = "production"
 def sunPositionReader(SunPosition_path):
     sun_labels = ["altitude", "azimuth"]  # 'HOY',
     result = pd.read_csv(SunPosition_path, skiprows=1, names=sun_labels)
-    return
+    return result
 
 
 class Location(
