@@ -11,6 +11,7 @@ from tabula_reader import Building
 import oemof.solph as solph
 from oemof.solph import views
 from oemof.tools import logger
+
 """
 General description
 -------------------
@@ -31,37 +32,59 @@ This example requires the version v0.5.x of oemof.solph. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
+
 def main():
     #  create solver
     solver = "cbc"  # 'glpk', 'gurobi',....
-    debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
     solver_verbose = False  # show/hide solver output
     number_of_time_steps = 8760
-    mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-    #Generates 5RC Building-Model
+    # Generates 5RC Building-Model
     building_status = "no_refurbishment"
     if building_status == "no_refurbishment":
-        building_example = Building (tabula_building_code ='DE.N.SFH.04.Gen.ReEx.001.001',
-                                     class_building = "average",
-                                     number_of_time_steps=number_of_time_steps)
+        building_example = Building(
+            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.001",
+            class_building="average",
+            number_of_time_steps=number_of_time_steps,
+        )
     elif building_status == "usual_refurbishment":
-        building_example = Building (tabula_building_code ='DE.N.SFH.04.Gen.ReEx.001.002',
-                                     class_building = "average",
-                                     number_of_time_steps=number_of_time_steps)
+        building_example = Building(
+            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.002",
+            class_building="average",
+            number_of_time_steps=number_of_time_steps,
+        )
     elif building_status == "advanced_refurbishment":
-        building_example = Building (tabula_building_code ='DE.N.SFH.04.Gen.ReEx.001.003',
-                                     class_building = "average",
-                                     number_of_time_steps=number_of_time_steps)
+        building_example = Building(
+            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.003",
+            class_building="average",
+            number_of_time_steps=number_of_time_steps,
+        )
     building_example.calculate_all_parameters()
 
     # Pre-Calculation of solar gains with weather_data and building_data
-    Mannheim = calculate_gain_by_Sun.Location(mannheim=True, epwfile_path=os.path.join(mainPath, 'thermal_building_model', 'DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv'))
-    solar_gains = building_example.calc_solar_gaings_through_windows(object_location_of_building = Mannheim)
-    t_outside = pd.read_csv(os.path.join(mainPath, 'thermal_building_model', 'DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv') ,header=None)[1].tolist()
+    Mannheim = calculate_gain_by_Sun.Location(
+        mannheim=True,
+        epwfile_path=os.path.join(
+            mainPath,
+            "thermal_building_model",
+            "DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv",
+        ),
+    )
+    solar_gains = building_example.calc_solar_gaings_through_windows(
+        object_location_of_building=Mannheim
+    )
+    t_outside = pd.read_csv(
+        os.path.join(
+            mainPath,
+            "thermal_building_model",
+            "DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv",
+        ),
+        header=None,
+    )[1].tolist()
 
     # Internal gains of residents, machines (f.e. fridge, computer,...) and lights have to be added manually
-    internal_gains=[]
+    internal_gains = []
     for _ in range(number_of_time_steps):
         internal_gains.append(0)
     # initiate the logger (see the API docs for more information)
@@ -72,11 +95,12 @@ def main():
     )
 
     logging.info("Initialize the energy system")
-    date_time_index = solph.create_time_index(2012,
-                                              number=number_of_time_steps)
-    es = solph.EnergySystem(timeindex=date_time_index,
-                            infer_last_interval=False)
-
+    date_time_index = solph.create_time_index(
+        2012, number=number_of_time_steps
+    )
+    es = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=False
+    )
 
     b_heat = solph.buses.Bus(label="b_heat")
     es.add(b_heat)
@@ -90,13 +114,15 @@ def main():
     building_temp = solph.buses.Bus(label="building_temp")
     es.add(building_temp)
 
-    es.add(solph.components.Source(
+    es.add(
+        solph.components.Source(
             label="elect_from_grid",
             outputs={b_elect: solph.flows.Flow(variable_costs=30)},
         )
     )
 
-    es.add(solph.components.Sink(
+    es.add(
+        solph.components.Sink(
             label="elect_into_grid",
             inputs={b_elect: solph.flows.Flow(variable_costs=10)},
         )
@@ -107,7 +133,7 @@ def main():
             label="ElectricalHeater",
             inputs={b_elect: solph.flows.Flow()},
             outputs={b_heat: solph.flows.Flow(nominal_value=65000)},
-            conversion_factors={b_elect: 1}
+            conversion_factors={b_elect: 1},
         )
     )
     es.add(
@@ -115,20 +141,20 @@ def main():
             label="ElectricalCooler",
             inputs={b_cool: solph.flows.Flow()},
             outputs={b_elect: solph.flows.Flow(nominal_value=65000)},
-            conversion_factors={b_elect: 1}
+            conversion_factors={b_elect: 1},
         )
     )
 
     es.add(
         solph.components.experimental.GenericBuilding(
             label="GenericBuilding",
-            inputs={b_heat: solph.flows.Flow(variable_costs=0) },
-            outputs={b_cool: solph.flows.Flow(variable_costs=0) },
+            inputs={b_heat: solph.flows.Flow(variable_costs=0)},
+            outputs={b_cool: solph.flows.Flow(variable_costs=0)},
             solar_gains=solar_gains,
             t_outside=t_outside,
             internal_gains=internal_gains,
             t_set_heating=20,
-            t_set_cooling = 30,
+            t_set_cooling=30,
             building_config=building_example.building_config,
             t_inital=20,
         )
@@ -142,17 +168,6 @@ def main():
 
     # initialise the operational model
     model = solph.Model(es)
-
-    # This is for debugging only. It is not(!) necessary to solve the problem
-    # and should be set to False to save time and disc space in normal use. For
-    # debugging the timesteps should be set to 3, to increase the readability
-    # of the lp-file.
-    if debug:
-        filename = os.path.join(
-            solph.helpers.extend_basic_path("lp_files"), "basic_example.lp"
-        )
-        logging.info("Store lp-file in {0}.".format(filename))
-        model.write(filename, io_options={"symbolic_solver_labels": True})
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
@@ -170,7 +185,7 @@ def main():
     custom_building = views.node(results, "GenericBuilding")
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    custom_building['sequences'][(('GenericBuilding', 'None'), 't_air')].plot(
+    custom_building["sequences"][(("GenericBuilding", "None"), "t_air")].plot(
         ax=ax, kind="line", drawstyle="steps-post"
     )
 
@@ -179,14 +194,14 @@ def main():
 
     fig, ax = plt.subplots(figsize=(10, 5))
     custom_building = views.node(results, "GenericBuilding")
-    custom_building['sequences'][(('b_heat', 'GenericBuilding'), 'flow')].plot(
+    custom_building["sequences"][(("b_heat", "GenericBuilding"), "flow")].plot(
         ax=ax, kind="line", drawstyle="steps-post"
     )
     ax.set_ylabel("heat demand in Watt")
 
     fig, ax = plt.subplots(figsize=(10, 5))
     custom_building = views.node(results, "GenericBuilding")
-    custom_building['sequences'][(('GenericBuilding', 'b_cool'), 'flow')].plot(
+    custom_building["sequences"][(("GenericBuilding", "b_cool"), "flow")].plot(
         ax=ax, kind="line", drawstyle="steps-post"
     )
     ax.set_ylabel("cooling demand in Watt")
@@ -196,6 +211,7 @@ def main():
     print("********* Meta results *********")
     pp.pprint(es.results["meta"])
     print("")
+
 
 if __name__ == "__main__":
     main()
