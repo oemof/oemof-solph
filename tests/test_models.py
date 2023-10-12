@@ -72,7 +72,9 @@ def test_multi_period_default_discount_rate():
     """Test error being thrown for default multi-period discount rate"""
     warnings.filterwarnings("ignore", category=FutureWarning)
     timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
-    es = solph.EnergySystem(timeindex=timeindex, periods={0: timeindex})
+    es = solph.EnergySystem(
+        timeindex=timeindex, periods={0: timeindex}, infer_last_interval=True
+    )
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
     es.add(

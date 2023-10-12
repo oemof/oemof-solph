@@ -34,7 +34,7 @@ def test_lopf(solver="cbc"):
 
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=1, freq="H")
-    es = EnergySystem(timeindex=date_time_index)
+    es = EnergySystem(timeindex=date_time_index, infer_last_interval=True)
 
     ##########################################################################
     # Create oemof.solph objects
@@ -55,7 +55,7 @@ def test_lopf(solver="cbc"):
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
-            investment=Investment(ep_costs=10),
+            nominal_value=Investment(ep_costs=10),
             min=-1,
             max=1,
         )

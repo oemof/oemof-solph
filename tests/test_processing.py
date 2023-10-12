@@ -32,8 +32,11 @@ class TestParameterResult:
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
-                "2016-01-01", periods=cls.period, freq="H"
-            )
+                "2016-01-01",
+                periods=cls.period,
+                freq="H",
+            ),
+            infer_last_interval=True,
         )
 
         # BUSSES
@@ -48,7 +51,7 @@ class TestParameterResult:
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
                 b_el1: Flow(
-                    variable_costs=1, investment=Investment(ep_costs=0.5)
+                    variable_costs=1, nominal_value=Investment(ep_costs=0.5)
                 )
             },
             conversion_factors={b_el1: 2},
@@ -64,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            investment=Investment(ep_costs=0.4),
+            nominal_storage_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23

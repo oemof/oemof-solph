@@ -61,7 +61,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
         outputs={
             bel: Flow(
                 fix=data["wind"],
-                investment=Investment(ep_costs=ep_wind, existing=100),
+                nominal_value=Investment(ep_costs=ep_wind, existing=100),
             )
         },
     )
@@ -72,7 +72,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
         outputs={
             bel: Flow(
                 fix=data["pv"],
-                investment=Investment(ep_costs=ep_pv, existing=80),
+                nominal_value=Investment(ep_costs=ep_pv, existing=80),
             )
         },
     )
@@ -142,7 +142,9 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     )
 
     datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(
+        timeindex=datetimeindex, infer_last_interval=True
+    )
     energysystem.add(
         bcoal,
         bgas,

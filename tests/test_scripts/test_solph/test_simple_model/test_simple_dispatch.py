@@ -126,7 +126,9 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     )
 
     datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(
+        timeindex=datetimeindex, infer_last_interval=True
+    )
     energysystem.add(
         bcoal,
         bgas,

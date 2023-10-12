@@ -178,13 +178,13 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     ...     solph.flows.Flow(nominal_value=10, fix=[10, 20, 30, 40, 50])})
     >>> src1 = solph.components.Source(
     ...     label='source_0', outputs={bus: solph.flows.Flow(
-    ...         investment=solph.Investment(
+    ...         nominal_value=solph.Investment(
     ...             ep_costs=50, custom_attributes={"space": 4},
     ...         ))
     ...     })
     >>> src2 = solph.components.Source(
     ...     label='source_1', outputs={bus: solph.flows.Flow(
-    ...         investment=solph.Investment(
+    ...         nominal_value=solph.Investment(
     ...              ep_costs=100, custom_attributes={"space": 1},
     ...         ))
     ...     })

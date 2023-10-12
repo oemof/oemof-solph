@@ -149,7 +149,7 @@ class GenericStorage(Node):
 
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
-    ...     investment=solph.Investment(ep_costs=50),
+    ...     nominal_storage_capacity=solph.Investment(ep_costs=50),
     ...     inputs={my_bus: solph.flows.Flow()},
     ...     outputs={my_bus: solph.flows.Flow()},
     ...     loss_rate=0.02,

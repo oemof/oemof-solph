@@ -30,7 +30,7 @@ from oemof.solph.flows import Flow
 def test_connect_invest():
     date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
 
-    es = EnergySystem(timeindex=date_time_index)
+    es = EnergySystem(timeindex=date_time_index, infer_last_interval=True)
 
     # Read data file
     full_filename = os.path.join(
@@ -79,21 +79,21 @@ def test_connect_invest():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=Investment(ep_costs=0.2),
+        nominal_storage_capacity=Investment(ep_costs=0.2),
     )
     es.add(storage)
 
     line12 = components.Converter(
         label="line12",
         inputs={bel1: Flow()},
-        outputs={bel2: Flow(investment=Investment(ep_costs=20))},
+        outputs={bel2: Flow(nominal_value=Investment(ep_costs=20))},
     )
     es.add(line12)
 
     line21 = components.Converter(
         label="line21",
         inputs={bel2: Flow()},
-        outputs={bel1: Flow(investment=Investment(ep_costs=20))},
+        outputs={bel1: Flow(nominal_value=Investment(ep_costs=20))},
     )
     es.add(line21)
 
@@ -119,16 +119,18 @@ def test_connect_invest():
     results = processing.results(om)
 
     my_results = dict()
-    my_results["line12"] = float(
-        views.node(results, "line12")["scalars"].loc[
-            [(("line12", "electricity2"), "invest")]
-        ]
+    my_results["line12"] = (
+        views.node(results, "line12")["scalars"]
+        .loc[[(("line12", "electricity2"), "invest")]]
+        .iloc[0]
     )
-    my_results["line21"] = float(
-        views.node(results, "line21")["scalars"].loc[
-            [(("line21", "electricity1"), "invest")]
-        ]
+
+    my_results["line21"] = (
+        views.node(results, "line21")["scalars"]
+        .loc[[(("line21", "electricity1"), "invest")]]
+        .iloc[0]
     )
+
     stor_res = views.node(results, "storage")["scalars"]
     my_results["storage_in"] = stor_res[
         [(("electricity1", "storage"), "invest")]

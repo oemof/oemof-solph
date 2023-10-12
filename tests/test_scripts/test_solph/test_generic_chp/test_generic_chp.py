@@ -32,7 +32,7 @@ def test_gen_chp():
 
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="H")
-    es = solph.EnergySystem(timeindex=idx)
+    es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
 
     # resources
     bgas = solph.buses.Bus(label="bgas")

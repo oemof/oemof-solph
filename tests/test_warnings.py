@@ -135,11 +135,10 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
 
     with pytest.raises(AttributeError):
         solph.flows.Flow(
-            nominal_value=None,
             variable_costs=25,
             min=0.2,
             max=0.8,
-            investment=solph.Investment(
+            nominal_value=solph.Investment(
                 ep_costs=500,  # no maximum is provided here
             ),
             nonconvex=solph.NonConvex(),

@@ -65,7 +65,10 @@ def test_tuples_as_labels_example(
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")

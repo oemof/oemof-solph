@@ -131,7 +131,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         existing=50,
                         maximum=1000,
                         overall_maximum=10000,
@@ -160,7 +160,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         existing=50,
                         maximum=1000,
                         overall_maximum=10000,
@@ -252,7 +252,7 @@ class TestsMultiPeriodConstraint:
                     summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500, maximum=1e6, existing=50, lifetime=20
                     ),
                 )
@@ -270,7 +270,7 @@ class TestsMultiPeriodConstraint:
             inputs={
                 bel: solph.flows.Flow(
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500, maximum=1e6, existing=50
                     ),
                 )
@@ -296,7 +296,7 @@ class TestsMultiPeriodConstraint:
                 bel: solph.flows.Flow(
                     max=[45, 83, 65, 67, 33, 96],
                     variable_costs=13,
-                    investment=solph.Investment(ep_costs=123, lifetime=25),
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=25),
                 )
             },
         )
@@ -343,7 +343,6 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -353,7 +352,7 @@ class TestsMultiPeriodConstraint:
             lifetime_outflow=20,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 maximum=234,
                 lifetime=20,
@@ -373,15 +372,15 @@ class TestsMultiPeriodConstraint:
             label="storage2",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=99, lifetime=20)
+                    nominal_value=solph.Investment(ep_costs=99, lifetime=20)
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=9, lifetime=20)
+                    nominal_value=solph.Investment(ep_costs=9, lifetime=20)
                 )
             },
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, lifetime=20, existing=20, age=19
             ),
         )
@@ -399,7 +398,7 @@ class TestsMultiPeriodConstraint:
             label="storage3",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=99,
                         lifetime=2,
                         age=1,
@@ -409,7 +408,7 @@ class TestsMultiPeriodConstraint:
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=9, lifetime=20)
+                    nominal_value=solph.Investment(ep_costs=9, lifetime=20)
                 )
             },
             nominal_storage_capacity=5000,
@@ -425,7 +424,7 @@ class TestsMultiPeriodConstraint:
             label="storage4",
             inputs={bel: solph.flows.Flow(nominal_value=80)},
             outputs={bel: solph.flows.Flow(nominal_value=100)},
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, maximum=500, lifetime=2, age=1, existing=100
             ),
         )
@@ -444,14 +443,14 @@ class TestsMultiPeriodConstraint:
             label="storage5",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=99, existing=110, lifetime=20
                     )
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(existing=100, lifetime=20)
+                    nominal_value=solph.Investment(existing=100, lifetime=20)
                 )
             },
             invest_relation_input_output=1.1,
@@ -470,18 +469,18 @@ class TestsMultiPeriodConstraint:
             label="storage6",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=99, existing=110, lifetime=20
                     )
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(existing=100, lifetime=20)
+                    nominal_value=solph.Investment(existing=100, lifetime=20)
                 )
             },
             invest_relation_input_output=1.1,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, existing=1000, lifetime=20, age=17
             ),
         )
@@ -498,7 +497,7 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow()},
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, minimum=100, maximum=200, lifetime=40
             ),
             lifetime_inflow=40,
@@ -515,7 +514,7 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow()},
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 minimum=100,
                 maximum=200,
@@ -580,7 +579,6 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             fixed_losses_relative=0.01,
             fixed_losses_absolute=3,
@@ -592,7 +590,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=40,
             lifetime_outflow=40,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 maximum=234,
                 lifetime=20,
@@ -617,7 +615,6 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -628,7 +625,7 @@ class TestsMultiPeriodConstraint:
             lifetime_inflow=40,
             lifetime_outflow=40,
             initial_storage_level=0.5,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 maximum=234,
                 lifetime=20,
@@ -655,7 +652,6 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -665,7 +661,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=40,
             lifetime_outflow=40,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 maximum=234,
                 interest_rate=0.05,
@@ -714,7 +710,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         maximum=1000,
                         ep_costs=20,
                         lifetime=20,
@@ -740,7 +736,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         maximum=1000,
                         ep_costs=20,
                         existing=200,
@@ -785,7 +781,7 @@ class TestsMultiPeriodConstraint:
             inputs={
                 bgas: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         maximum=1000, ep_costs=20, lifetime=50
                     ),
                 )
@@ -1031,13 +1027,15 @@ class TestsMultiPeriodConstraint:
             outputs={bus1: solph.flows.Flow()},
             lifetime_inflow=3,
             lifetime_outflow=3,
-            investment=solph.Investment(ep_costs=145, lifetime=3),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, lifetime=3
+            ),
         )
         sink = solph.components.Sink(
             label="Sink",
             inputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=500, lifetime=3)
+                    nominal_value=solph.Investment(ep_costs=500, lifetime=3)
                 )
             },
         )
@@ -1045,7 +1043,7 @@ class TestsMultiPeriodConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=3)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=3)
                 )
             },
         )
@@ -1114,13 +1112,15 @@ class TestsMultiPeriodConstraint:
             outputs={bus1: solph.flows.Flow()},
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(ep_costs=145, lifetime=30),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, lifetime=30
+            ),
         )
         source = solph.components.Source(
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=100)
                 )
             },
         )
@@ -1139,7 +1139,7 @@ class TestsMultiPeriodConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=100)
                 )
             },
         )
@@ -1183,7 +1183,7 @@ class TestsMultiPeriodConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=100)
                 )
             },
         )
@@ -1228,7 +1228,7 @@ class TestsMultiPeriodConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=100)
                 )
             },
         )
@@ -1277,13 +1277,15 @@ class TestsMultiPeriodConstraint:
             outputs={bus1: solph.flows.Flow()},
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(ep_costs=145, lifetime=30),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, lifetime=30
+            ),
         )
         source = solph.components.Source(
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123, lifetime=100)
+                    nominal_value=solph.Investment(ep_costs=123, lifetime=100)
                 )
             },
         )
@@ -1711,7 +1713,6 @@ class TestsMultiPeriodConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -1721,7 +1722,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=141,
                 maximum=244,
                 minimum=12,
@@ -1742,7 +1743,6 @@ class TestsMultiPeriodConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -1752,7 +1752,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 minimum=19,
                 offset=5,
@@ -1772,7 +1772,7 @@ class TestsMultiPeriodConstraint:
             label="storage_all_nonconvex",
             inputs={
                 b1: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         nonconvex=True,
                         minimum=5,
                         offset=10,
@@ -1784,7 +1784,7 @@ class TestsMultiPeriodConstraint:
             },
             outputs={
                 b1: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         nonconvex=True,
                         minimum=8,
                         offset=15,
@@ -1794,7 +1794,7 @@ class TestsMultiPeriodConstraint:
                     )
                 )
             },
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 nonconvex=True,
                 ep_costs=20,
                 offset=30,
@@ -1817,7 +1817,7 @@ class TestsMultiPeriodConstraint:
                     summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         minimum=15,
                         nonconvex=True,
@@ -1841,7 +1841,7 @@ class TestsMultiPeriodConstraint:
                     summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         minimum=15,
                         maximum=20,
@@ -1866,7 +1866,7 @@ class TestsMultiPeriodConstraint:
                     summed_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         maximum=1234,
                         offset=34,
@@ -2009,7 +2009,7 @@ class TestsMultiPeriodConstraint:
             inputs={
                 bel: solph.Flow(
                     variable_costs=0,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=10,
                         existing=0,
                         lifetime=20,
@@ -2021,7 +2021,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.Flow(
                     variable_costs=0,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=10,
                         existing=0,
                         lifetime=20,
@@ -2036,7 +2036,7 @@ class TestsMultiPeriodConstraint:
             # inflow_conversion_factor=1,
             # outflow_conversion_factor=0.8,
             # nominal_storage_capacity=100,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=10,
                 maximum=float("+inf"),
                 existing=0,
