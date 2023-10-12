@@ -225,7 +225,9 @@ def offset_converter_example():
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
         outputs={
-            b_el_dc: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=0))
+            b_el_dc: solph.flows.Flow(
+                nominal_value=solph.Investment(ep_costs=0)
+            )
         },
         initial_storage_level=0.0,
         min_storage_level=0.0,
