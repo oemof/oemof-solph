@@ -1270,6 +1270,11 @@ Besides the `invest` variable, new variables are introduced as well. These are:
       has not yet been tested.
     * For now, both, the `timeindex` as well as the `timeincrement` of an energy system have to be defined since they
       have to be of the same length for a multi-period model.
+    * You can choose whether or not to re-evaluate assets at the end of the optimization horizon. If you set attribute
+      `use_remaining_value` of the energy system to True (defaults to False), this leads to the model evaluating the
+      different in value at the end of the optimization horizon vs. at the time the investment was made. The difference
+      in value is added to or subtracted from the respective investment costs increment, assuming assets are to be
+      liquidated / re-evaluated at the end of the optimization horizon.
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
