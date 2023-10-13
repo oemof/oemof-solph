@@ -2,7 +2,7 @@
 
 min 
 objective:
-+648.0124531935758 ONE_VAR_CONSTANT
++235.90542099192615 ONE_VAR_CONSTANT
 +25 flow(pv_forever_electricityBus_0_0)
 +25 flow(pv_forever_electricityBus_0_1)
 +24.509803921568626 flow(pv_forever_electricityBus_1_2)
