@@ -61,6 +61,11 @@ class EnergySystem(es.EnergySystem):
 
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
+    use_representative_years : bool
+        If True, the timeseries passed are interpreted as representative year
+        for each period. This feature can be used to model long-term investment
+        problems. If False, the timeseries passed are interpreted as the full
+        timeseries for each period.
 
     kwargs
     """
@@ -71,6 +76,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        use_representative_years=False,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -172,6 +178,7 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.periods = periods
+        self.representative_years = use_representative_years
         self._extract_periods_years()
         self._extract_periods_matrix()
 
