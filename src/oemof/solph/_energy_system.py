@@ -169,13 +169,11 @@ class EnergySystem(es.EnergySystem):
         self._extract_periods_matrix()
 
     def _extract_periods_years(self):
-        """Map simulation years to the respective period based on time indices
+        """Map years in optimization to respective period based on time indices
 
-        Returns
-        -------
-        periods_years: dict
-            the simulation year of the start of each a period,
-            relative to the start of the optimization run and starting with 0
+        Attribute `periods_years` of type list is set. It contains
+        the year of the start of each period, relative to the
+        start of the optimization run and starting with 0.
         """
         periods_years = [0]
         if self.periods is not None:
@@ -188,14 +186,11 @@ class EnergySystem(es.EnergySystem):
 
     def _extract_periods_matrix(self):
         """Determines a matrix describing the temporal distance to each period.
+
+        Attribute `periods_matrix` of type list np.array is set.
         Rows represent investment/commissioning periods, columns represent
         decommissioning periods. The values describe the temporal distance
         between each investment period to each decommissioning period.
-
-        Returns
-        -------
-        period_distance_matrix: np.array
-
         """
         periods_matrix = []
         if self.periods is not None:

@@ -1004,8 +1004,8 @@ mathematical background, like variables and constraints, which are used.
 
 .. _multi_period_mode_label:
 
-Using the multi-period (investment) mode (experimental)
--------------------------------------------------------
+Multi-period (investment) mode (experimental)
+---------------------------------------------
 Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
@@ -1020,7 +1020,7 @@ only unfolds if you look at long-term investments. Let's see how.
 First, you start by defining your energy system as you might have done before, but you
 
 * choose a longer-term time horizon (spanning multiple years, i.e. multiple periods) and
-* explicitly define the `periods` attribute of your energy system which maps time steps to the simulated period.
+* explicitly define the `periods` attribute of your energy system which lists the time steps for each period.
 
 .. code-block:: python
 
@@ -1028,10 +1028,10 @@ First, you start by defining your energy system as you might have done before, b
     import oemof.solph as solph
 
     my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
-    periods = {
-        0: pd.date_range('1/1/2013', periods=8760, freq='H'),
-        1: pd.date_range('1/1/2014', periods=8760, freq='H'),
-    }
+    periods = [
+        pd.date_range('1/1/2013', periods=8760, freq='H'),
+        pd.date_range('1/1/2014', periods=8760, freq='H'),
+    ]
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
 If you want to use a multi-period model you have define periods of your energy system explicitly. This way,
@@ -1057,17 +1057,16 @@ and adjust to your needs:
 
         Returns
         -------
-        periods : dict
-            pd.date_ranges defining the time stamps for the respective period,
-            starting with period 0
+        periods : list
+            periods for the optimization run
         """
         years = sorted(list(set(getattr(datetimeindex, "year"))))
-        periods = {}
+        periods = []
         filter_series = datetimeindex.to_series()
         for number, year in enumerate(years):
             start = filter_series.loc[filter_series.index.year == year].min()
             end = filter_series.loc[filter_series.index.year == year].max()
-            periods[number] = pd.date_range(start, end, freq=datetimeindex.freq)
+            periods.append(pd.date_range(start, end, freq=datetimeindex.freq))
 
         return periods
 
@@ -1269,6 +1268,8 @@ Besides the `invest` variable, new variables are introduced as well. These are:
     * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
       you could use the `timeincrement` attribute of the energy system to model different weightings. Be aware that this
       has not yet been tested.
+    * For now, both, the `timeindex` as well as the `timeincrement` of an energy system have to be defined since they
+      have to be of the same length for a multi-period model.
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
