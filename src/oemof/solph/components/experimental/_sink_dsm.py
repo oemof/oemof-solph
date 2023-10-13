@@ -794,6 +794,21 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 &
                 \forall p \in \mathbb{P}
 
+        In case, the remaining lifetime of a DSM unit is greater than 0 and
+        attribute `use_remaining_value` of the energy system is True,
+        the difference in value for the investment period compared to the
+        last period of the optimization horizon is accounted for
+        as an adder to the investment costs:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                A(c_{invest,var}(|P|), l_{r}, ir)\\
+                & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
+                &\\
+                &
+                \forall p \in \textrm{PERIODS}
+
         * :attr:`fixed_costs` not None for investments
 
             .. math::
@@ -1381,7 +1396,20 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
                         ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                        investment_costs += investment_costs_increment
+                        remaining_value_difference = (
+                            self._evaluate_remaining_value_difference(
+                                m,
+                                p,
+                                g,
+                                m.es.end_year_of_optimization,
+                                lifetime,
+                                interest,
+                            )
+                        )
+                        investment_costs += (
+                            investment_costs_increment
+                            + remaining_value_difference
+                        )
                         period_investment_costs[
                             p
                         ] += investment_costs_increment
@@ -1444,6 +1472,69 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         )
 
         return self.costs
+
+    def _evaluate_remaining_value_difference(
+        self,
+        m,
+        p,
+        g,
+        end_year_of_optimization,
+        lifetime,
+        interest,
+    ):
+        """Evaluate and return the remaining value difference of an investment
+
+        The remaining value difference in the net present values if the asset
+        was to be liquidated at the end of the optimization horizon and the
+        net present value using the original investment expenses.
+
+        Parameters
+        ----------
+        m : oemof.solph.models.Model
+            Optimization model
+
+        p : int
+            Period in which investment occurs
+
+        g : oemof.solph.components.experimental.SinkDSM
+            storage unit
+
+        end_year_of_optimization : int
+            Last year of the optimization horizon
+
+        lifetime : int
+            lifetime of investment considered
+
+        interest : float
+            Demanded interest rate for investment
+        """
+        if m.es.use_remaining_value:
+            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+                remaining_lifetime = lifetime - (
+                    end_year_of_optimization - m.es.periods_years[p]
+                )
+                remaining_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[-1],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                original_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[p],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                present_value_factor_remaining = 1 / economics.annuity(
+                    capex=1, n=remaining_lifetime, wacc=interest
+                )
+                return (
+                    self.invest[g, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+            else:
+                return 0
+        else:
+            return 0
 
 
 class SinkDSMDIWBlock(ScalarBlock):
@@ -2223,6 +2314,21 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 \frac {1}{ANF(d, ir)} \cdot DF^{-p} \\
                 &\\
                 & \quad \quad \quad \quad \forall p \in \mathbb{P}
+
+        In case, the remaining lifetime of a DSM unit is greater than 0 and
+        attribute `use_remaining_value` of the energy system is True,
+        the difference in value for the investment period compared to the
+        last period of the optimization horizon is accounted for
+        as an adder to the investment costs:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                A(c_{invest,var}(|P|), l_{r}, ir)\\
+                & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
+                &\\
+                &
+                \forall p \in \textrm{PERIODS}
 
         * :attr:`fixed_costs` not None for investments
 
@@ -3140,7 +3246,20 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
                         ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                        investment_costs += investment_costs_increment
+                        remaining_value_difference = (
+                            self._evaluate_remaining_value_difference(
+                                m,
+                                p,
+                                g,
+                                m.es.end_year_of_optimization,
+                                lifetime,
+                                interest,
+                            )
+                        )
+                        investment_costs += (
+                            investment_costs_increment
+                            + remaining_value_difference
+                        )
                         period_investment_costs[
                             p
                         ] += investment_costs_increment
@@ -3207,6 +3326,69 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         )
 
         return self.costs
+
+    def _evaluate_remaining_value_difference(
+        self,
+        m,
+        p,
+        g,
+        end_year_of_optimization,
+        lifetime,
+        interest,
+    ):
+        """Evaluate and return the remaining value difference of an investment
+
+        The remaining value difference in the net present values if the asset
+        was to be liquidated at the end of the optimization horizon and the
+        net present value using the original investment expenses.
+
+        Parameters
+        ----------
+        m : oemof.solph.models.Model
+            Optimization model
+
+        p : int
+            Period in which investment occurs
+
+        g : oemof.solph.components.experimental.SinkDSM
+            storage unit
+
+        end_year_of_optimization : int
+            Last year of the optimization horizon
+
+        lifetime : int
+            lifetime of investment considered
+
+        interest : float
+            Demanded interest rate for investment
+        """
+        if m.es.use_remaining_value:
+            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+                remaining_lifetime = lifetime - (
+                    end_year_of_optimization - m.es.periods_years[p]
+                )
+                remaining_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[-1],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                original_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[p],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                present_value_factor_remaining = 1 / economics.annuity(
+                    capex=1, n=remaining_lifetime, wacc=interest
+                )
+                return (
+                    self.invest[g, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+            else:
+                return 0
+        else:
+            return 0
 
 
 class SinkDSMDLRBlock(ScalarBlock):
@@ -4399,6 +4581,21 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 &
                 \forall p \in \mathbb{P}
 
+        In case, the remaining lifetime of a DSM unit is greater than 0 and
+        attribute `use_remaining_value` of the energy system is True,
+        the difference in value for the investment period compared to the
+        last period of the optimization horizon is accounted for
+        as an adder to the investment costs:
+
+            .. math::
+                &
+                P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                A(c_{invest,var}(|P|), l_{r}, ir)\\
+                & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
+                &\\
+                &
+                \forall p \in \textrm{PERIODS}
+
         * :attr:`fixed_costs` not None for investments
 
             .. math::
@@ -5541,7 +5738,20 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
                         ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                        investment_costs += investment_costs_increment
+                        remaining_value_difference = (
+                            self._evaluate_remaining_value_difference(
+                                m,
+                                p,
+                                g,
+                                m.es.end_year_of_optimization,
+                                lifetime,
+                                interest,
+                            )
+                        )
+                        investment_costs += (
+                            investment_costs_increment
+                            + remaining_value_difference
+                        )
                         period_investment_costs[
                             p
                         ] += investment_costs_increment
@@ -5615,3 +5825,66 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         )
 
         return self.costs
+
+    def _evaluate_remaining_value_difference(
+        self,
+        m,
+        p,
+        g,
+        end_year_of_optimization,
+        lifetime,
+        interest,
+    ):
+        """Evaluate and return the remaining value difference of an investment
+
+        The remaining value difference in the net present values if the asset
+        was to be liquidated at the end of the optimization horizon and the
+        net present value using the original investment expenses.
+
+        Parameters
+        ----------
+        m : oemof.solph.models.Model
+            Optimization model
+
+        p : int
+            Period in which investment occurs
+
+        g : oemof.solph.components.experimental.SinkDSM
+            storage unit
+
+        end_year_of_optimization : int
+            Last year of the optimization horizon
+
+        lifetime : int
+            lifetime of investment considered
+
+        interest : float
+            Demanded interest rate for investment
+        """
+        if m.es.use_remaining_value:
+            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+                remaining_lifetime = lifetime - (
+                    end_year_of_optimization - m.es.periods_years[p]
+                )
+                remaining_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[-1],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                original_annuity = economics.annuity(
+                    capex=g.investment.ep_costs[p],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                present_value_factor_remaining = 1 / economics.annuity(
+                    capex=1, n=remaining_lifetime, wacc=interest
+                )
+                return (
+                    self.invest[g, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+            else:
+                return 0
+        else:
+            return 0
