@@ -884,10 +884,6 @@ class InvestmentFlowBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
-            duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = m.es.periods_years[-1] + duration_last_period
-
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
                 interest = m.flows[i, o].investment.interest_rate
@@ -904,7 +900,8 @@ class InvestmentFlowBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        end_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -931,7 +928,8 @@ class InvestmentFlowBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        end_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -949,7 +947,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
-                            end_of_optimization,
+                            m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
@@ -966,7 +964,9 @@ class InvestmentFlowBlock(ScalarBlock):
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
-                    range_limit = min(end_of_optimization, lifetime - age)
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]

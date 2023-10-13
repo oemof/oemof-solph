@@ -1735,10 +1735,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
-            duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = m.es.periods_years[-1] + duration_last_period
-
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
                 interest = n.investment.interest_rate
@@ -1755,7 +1751,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        end_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p], lifetime
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -1782,7 +1778,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        end_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p], lifetime
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -1799,7 +1795,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
-                            end_of_optimization,
+                            m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
@@ -1816,7 +1812,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
-                    range_limit = min(end_of_optimization, lifetime - age)
+                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]

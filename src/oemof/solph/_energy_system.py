@@ -172,8 +172,10 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
         self.periods = periods
-        self._extract_periods_years()
-        self._extract_periods_matrix()
+        if self.periods is not None:
+            self._extract_periods_years()
+            self._extract_periods_matrix()
+            self._extract_end_year_of_optimization()
 
     def _extract_periods_years(self):
         """Map simulation years to the respective period based on time indices
@@ -185,13 +187,12 @@ class EnergySystem(es.EnergySystem):
             relative to the start of the optimization run and starting with 0
         """
         periods_years = [0]
-        if self.periods is not None:
-            start_year = self.periods[0].min().year
-            for k, v in enumerate(self.periods):
-                if k >= 1:
-                    periods_years.append(v.min().year - start_year)
+        start_year = self.periods[0].min().year
+        for k, v in enumerate(self.periods):
+            if k >= 1:
+                periods_years.append(v.min().year - start_year)
 
-            self.periods_years = periods_years
+        self.periods_years = periods_years
 
     def _extract_periods_matrix(self):
         """Determines a matrix describing the temporal distance to each period.
@@ -205,13 +206,17 @@ class EnergySystem(es.EnergySystem):
 
         """
         periods_matrix = []
-        if self.periods is not None:
-            period_years = np.array(self.periods_years)
-            for v in period_years:
-                row = period_years - v
-                row = np.where(row < 0, 0, row)
-                periods_matrix.append(row)
-            self.periods_matrix = np.array(periods_matrix)
+        period_years = np.array(self.periods_years)
+        for v in period_years:
+            row = period_years - v
+            row = np.where(row < 0, 0, row)
+            periods_matrix.append(row)
+        self.periods_matrix = np.array(periods_matrix)
+
+    def _extract_end_year_of_optimization(self):
+        """Extract the end of the optimization in years"""
+        duration_last_period = self.get_period_duration(-1)
+        self.end_year_of_optimization = self.periods_years[-1] + duration_last_period
 
     def get_period_duration(self, period):
         """Get duration of a period in full years

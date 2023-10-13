@@ -1346,10 +1346,6 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
-            duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = m.es.periods_years[-1] + duration_last_period
-
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -1367,7 +1363,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            end_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -1403,7 +1399,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
-                            end_of_optimization,
+                            m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
@@ -1420,7 +1416,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(end_of_optimization, lifetime - age)
+                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
@@ -3099,10 +3095,6 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
-            duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = m.es.periods_years[-1] + duration_last_period
-
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -3120,7 +3112,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            end_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -3160,7 +3152,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
-                            end_of_optimization,
+                            m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
@@ -3177,7 +3169,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(end_of_optimization, lifetime - age)
+                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
@@ -5494,10 +5486,6 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
-            duration_last_period = m.es.get_period_duration(-1)
-            end_of_optimization = m.es.periods_years[-1] + duration_last_period
-
             for g in self.INVESTDR:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
@@ -5515,7 +5503,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            end_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -5562,7 +5550,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
-                            end_of_optimization,
+                            m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
@@ -5579,7 +5567,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(end_of_optimization, lifetime - age)
+                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
