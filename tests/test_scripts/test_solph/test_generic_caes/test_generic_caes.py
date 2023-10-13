@@ -97,7 +97,6 @@ def test_gen_caes():
             fuel_input={bgas: Flow()},
             electrical_output={bel_sink: Flow()},
             params=concept,
-            fixed_costs=0,
         )
     )
 
