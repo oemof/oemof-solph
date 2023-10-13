@@ -1371,7 +1371,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
-                            capex=1, n=duration, wacc=m.discount_rate
+                            capex=1, n=duration, wacc=interest
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
@@ -3124,7 +3124,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
-                            capex=1, n=duration, wacc=m.discount_rate
+                            capex=1, n=duration, wacc=interest
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
@@ -5519,7 +5519,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
-                            capex=1, n=duration, wacc=m.discount_rate
+                            capex=1, n=duration, wacc=interest
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor

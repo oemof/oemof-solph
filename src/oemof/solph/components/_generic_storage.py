@@ -1758,7 +1758,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         end_of_optimization - m.es.periods_years[p], lifetime
                     )
                     present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=m.discount_rate
+                        capex=1, n=duration, wacc=interest
                     )
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
@@ -1785,7 +1785,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         end_of_optimization - m.es.periods_years[p], lifetime
                     )
                     present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=m.discount_rate
+                        capex=1, n=duration, wacc=interest
                     )
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
