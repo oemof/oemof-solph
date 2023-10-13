@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 SPDX-FileCopyrightText: Johannes Kochems
 SPDX-FileCopyrightText: Johannes Giehl
+SPDX-FileCopyrightText: Raul Ciria Aylagas
 
 SPDX-License-Identifier: MIT
 
