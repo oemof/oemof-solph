@@ -87,6 +87,12 @@ def test_wrong_combination_invest_and_nominal_value():
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
 
 
+def test_invest_attribute_warning():
+    msg = "For backward compatibility, the option investment overwrites"
+    with pytest.warns(FutureWarning, match=msg):
+        solph.flows.Flow(investment=solph.Investment())
+
+
 def test_fixed_costs_warning():
     msg = (
         "Be aware that the fixed costs attribute is only\n"
