@@ -212,7 +212,7 @@ class SinkDSM(Sink):
         Boolean parameter indicating whether unit is eligible for
         load shifting
     fixed_costs : numeric
-        Nominal value of fixed costs (per period)
+        Nominal value of fixed costs (per year)
 
     Note
     ----
@@ -695,12 +695,12 @@ class SinkDSMOemofBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            max(g.max_capacity_up, g.max_capacity_down)
-                            * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
+                    fixed_costs += (
+                        max(g.max_capacity_up, g.max_capacity_down)
+                        * g.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -2090,12 +2090,12 @@ class SinkDSMDIWBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            max(g.max_capacity_up, g.max_capacity_down)
-                            * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
+                    fixed_costs += (
+                        max(g.max_capacity_up, g.max_capacity_down)
+                        * g.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -4183,12 +4183,12 @@ class SinkDSMDLRBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            max(g.max_capacity_up, g.max_capacity_down)
-                            * g.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
+                    fixed_costs += (
+                        max(g.max_capacity_up, g.max_capacity_down)
+                        * g.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.fixed_costs = Expression(expr=fixed_costs)

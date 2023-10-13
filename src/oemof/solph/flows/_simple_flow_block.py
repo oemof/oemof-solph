@@ -473,39 +473,45 @@ class SimpleFlowBlock(ScalarBlock):
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
-                # Include fixed costs of units operating "forever"
+                # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None
                     and m.flows[i, o].nominal_value is not None
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
                 ):
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            m.flows[i, o].nominal_value
-                            * m.flows[i, o].fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
+                    fixed_costs += (
+                        m.flows[i, o].nominal_value
+                        * m.flows[i, o].fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
 
             # Fixed costs for units with limited lifetime
             for i, o in self.LIFETIME_FLOWS:
                 if m.flows[i, o].fixed_costs[0] is not None:
+                    range_limit = min(
+                        m.es.end_year_of_optimization,
+                        m.flows[i, o].lifetime,
+                    )
                     fixed_costs += sum(
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, m.flows[i, o].lifetime)
+                        for pp in range(range_limit)
                     )
 
             for i, o in self.LIFETIME_AGE_FLOWS:
                 if m.flows[i, o].fixed_costs[0] is not None:
+                    range_limit = min(
+                        m.es.end_year_of_optimization,
+                        m.flows[i, o].lifetime - m.flows[i, o].age,
+                    )
                     fixed_costs += sum(
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(
-                            0, m.flows[i, o].lifetime - m.flows[i, o].age
-                        )
+                        for pp in range(range_limit)
                     )
 
         self.variable_costs = Expression(expr=variable_costs)

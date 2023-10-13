@@ -599,12 +599,12 @@ class GenericStorageBlock(ScalarBlock):
         if m.es.periods is not None:
             for n in self.STORAGES:
                 if n.fixed_costs[0] is not None:
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            n.nominal_storage_capacity
-                            * n.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -p)
-                        )
+                    fixed_costs += (
+                        n.nominal_storage_capacity
+                        * n.fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
         self.fixed_costs = Expression(expr=fixed_costs)
 
         storage_costs = 0
@@ -620,8 +620,9 @@ class GenericStorageBlock(ScalarBlock):
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
+        self.costs = Expression(expr=storage_costs + fixed_costs)
 
-        return self.fixed_costs + self.storage_costs
+        return self.costs
 
 
 class GenericInvestmentStorageBlock(ScalarBlock):
