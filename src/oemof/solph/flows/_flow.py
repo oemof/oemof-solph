@@ -86,7 +86,8 @@ class Flow(on.Edge):
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
     fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
         The fixed costs associated with a flow.
-        Note: These are only applicable for a multi-period model.
+        Note: These are only applicable for a multi-period model
+        and given on a yearly basis.
     lifetime : int, :math:`l`
         The lifetime of a flow (usually given in years);
         once it reaches its lifetime (considering also

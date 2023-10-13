@@ -209,7 +209,10 @@ class EnergySystem(es.EnergySystem):
         self.periods_matrix = np.array(periods_matrix)
 
     def _extract_end_year_of_optimization(self):
-        """Extract the end of the optimization in years"""
+        """Extract the end of the optimization in years
+
+        Attribute `end_year_of_optimization` of int is set.
+        """
         duration_last_period = self.get_period_duration(-1)
         self.end_year_of_optimization = (
             self.periods_years[-1] + duration_last_period

@@ -842,13 +842,13 @@ class InvestmentFlowBlock(ScalarBlock):
             .. math::
                 &
                 A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                    \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                    \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
                 &\\
                 &
                 ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
 
         They are retrieved, using oemof.tools.economics annuity function.
-        The interest rate :math:`i` for the annuity is defined as weighted
+        The interest rate :math:`ir` for the annuity is defined as weighted
         average costs of capital (wacc) and assumed constant over time.
         """
         if not hasattr(self, "INVESTFLOWS"):

@@ -444,7 +444,7 @@ class GenericStorageBlock(ScalarBlock):
 
     whereby:
 
-    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
+    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`.
     * :math:`year_{max}` denotes the last year of the optimization
       horizon, i.e. at the end of the last period.
 
@@ -606,7 +606,7 @@ class GenericStorageBlock(ScalarBlock):
                     fixed_costs += sum(
                         n.nominal_storage_capacity
                         * n.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
         self.fixed_costs = Expression(expr=fixed_costs)
@@ -957,13 +957,13 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         .. math::
             &
             A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
             &\\
             &
             ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
-    interest rate :math:`i` for the annuity is defined as weighted
+    interest rate :math:`ir` for the annuity is defined as weighted
     average costs of capital (wacc) and assumed constant over time.
 
     The overall summed cost expressions for all *InvestmentFlowBlock* objects

@@ -691,7 +691,7 @@ class SinkDSMOemofBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -699,14 +699,14 @@ class SinkDSMOemofBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -840,13 +840,13 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         .. math::
             &
             A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
             &\\
             &
             ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
-    interest rate :math:`i` for the annuity is defined as weighted
+    interest rate :math:`ir` for the annuity is defined as weighted
     average costs of capital (wacc) and assumed constant over time.
 
     See remarks in
@@ -2089,7 +2089,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -2101,14 +2101,14 @@ class SinkDSMDIWBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -2269,13 +2269,13 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         .. math::
             &
             A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
             &\\
             &
             ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
-    interest rate :math:`i` for the annuity is defined as weighted
+    interest rate :math:`ir` for the annuity is defined as weighted
     average costs of capital (wacc) and assumed constant over time.
 
     See remarks in
@@ -3177,7 +3177,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[g, p]
                             * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
@@ -4188,7 +4188,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                             * g.cost_dsm_up[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
                         (
@@ -4201,14 +4201,14 @@ class SinkDSMDLRBlock(ScalarBlock):
                             + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                         )
                         * m.objective_weighting[t]
-                        * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
                 if g.fixed_costs[0] is not None:
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -4446,13 +4446,13 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         .. math::
             &
             A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
+                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
             &\\
             &
             ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
-    interest rate :math:`i` for the annuity is defined as weighted
+    interest rate :math:`ir` for the annuity is defined as weighted
     average costs of capital (wacc) and assumed constant over time.
 
     See remarks in
@@ -5585,7 +5585,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[g, p]
                             * g.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
@@ -5602,7 +5602,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
+                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 
