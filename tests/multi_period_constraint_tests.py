@@ -147,6 +147,39 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bgas, bel, converter)
         self.compare_lp_files("linear_converter_invest_multi_period.lp")
 
+    def test_linear_converter_invest_remaining_value(self):
+        """Constraint test of a Converter with Investment."""
+
+        bgas = solph.buses.Bus(label="gas")
+
+        bel = solph.buses.Bus(label="electricity")
+
+        converter = solph.components.Converter(
+            label="powerplant_gas",
+            inputs={bgas: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=50,
+                    investment=solph.Investment(
+                        existing=50,
+                        maximum=1000,
+                        overall_maximum=10000,
+                        overall_minimum=200,
+                        ep_costs=[20, 19, 18],
+                        age=5,
+                        lifetime=40,
+                    ),
+                )
+            },
+            conversion_factors={bel: 0.58},
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bgas, bel, converter)
+        self.compare_lp_files(
+            "linear_converter_invest_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
+
     def test_linear_converter_invest_old_capacity(self):
         """Constraint test of a Converter with Investment."""
 
@@ -364,6 +397,42 @@ class TestsMultiPeriodConstraint:
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_1_multi_period.lp")
+
+    def test_storage_invest_1_remaining_value(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        storage = solph.components.GenericStorage(
+            label="storage1",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            investment=solph.Investment(
+                ep_costs=[145, 130, 115],
+                maximum=234,
+                lifetime=20,
+                interest_rate=0.05,
+                overall_maximum=1000,
+                overall_minimum=2,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bel, storage)
+        self.compare_lp_files(
+            "storage_invest_1_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
 
     def test_storage_invest_2(self):
         """All can be free extended to their own cost."""
@@ -1631,6 +1700,44 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(b_elec, sinkdsm)
         self.compare_lp_files("dsm_module_DIW_invest_multi_period.lp")
 
+    def test_dsm_module_DIW_invest_remaining_value(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        sinkdsm = solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DIW",
+            max_demand=[1, 2, 3],
+            delay_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=[100, 90, 80],
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(b_elec, sinkdsm)
+        self.compare_lp_files(
+            "dsm_module_DIW_invest_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
+
     def test_dsm_module_DLR_invest(self):
         """Constraint test of SinkDSM with approach=DLR and investments"""
 
@@ -1667,6 +1774,46 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(b_elec, sinkdsm)
         self.compare_lp_files("dsm_module_DLR_invest_multi_period.lp")
 
+    def test_dsm_module_DLR_invest_remaining_value(self):
+        """Constraint test of SinkDSM with approach=DLR and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        sinkdsm = solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5] * 6,
+            capacity_down=[0.5] * 6,
+            approach="DLR",
+            max_demand=[1, 2, 3],
+            delay_time=2,
+            shift_time=1,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            n_yearLimit_shed=50,
+            investment=solph.Investment(
+                ep_costs=[100, 90, 80],
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(b_elec, sinkdsm)
+        self.compare_lp_files(
+            "dsm_module_DLR_invest_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
+
     def test_dsm_module_oemof_invest(self):
         """Constraint test of SinkDSM with approach=oemof and investments"""
 
@@ -1700,6 +1847,44 @@ class TestsMultiPeriodConstraint:
         )
         self.energysystem.add(b_elec, sinkdsm)
         self.compare_lp_files("dsm_module_oemof_invest_multi_period.lp")
+
+    def test_dsm_module_oemof_invest_remaining_value(self):
+        """Constraint test of SinkDSM with approach=oemof and investments"""
+
+        b_elec = solph.buses.Bus(label="bus_elec")
+        sinkdsm = solph.components.experimental.SinkDSM(
+            label="demand_dsm",
+            inputs={b_elec: solph.flows.Flow()},
+            demand=[1] * 6,
+            capacity_up=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            capacity_down=[0.5, 0.4, 0.5, 0.3, 0.3, 0.3],
+            approach="oemof",
+            max_demand=[1, 2, 3],
+            shift_interval=2,
+            cost_dsm_down_shift=1,
+            cost_dsm_up=1,
+            cost_dsm_down_shed=100,
+            shed_eligibility=True,
+            recovery_time_shed=2,
+            shed_time=2,
+            investment=solph.Investment(
+                ep_costs=[100, 90, 80],
+                existing=50,
+                minimum=33,
+                maximum=100,
+                age=1,
+                lifetime=20,
+                fixed_costs=20,
+                overall_maximum=1000,
+                overall_minimum=5,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(b_elec, sinkdsm)
+        self.compare_lp_files(
+            "dsm_module_oemof_invest_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
 
     def test_nonconvex_investment_storage_without_offset(self):
         """All invest variables are coupled. The invest variables of the Flows

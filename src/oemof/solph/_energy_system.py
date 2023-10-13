@@ -62,6 +62,10 @@ class EnergySystem(es.EnergySystem):
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
 
+    use_remaining_value : bool
+        If True, compare the remaining value of an investment to the
+        original value (only applicable for multi-period models)
+
     kwargs
     """
 
@@ -71,6 +75,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        use_remaining_value=False,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -160,7 +165,8 @@ class EnergySystem(es.EnergySystem):
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
 
-        if periods is not None:
+        self.periods = periods
+        if self.periods is not None:
             msg = (
                 "CAUTION! You specified the 'periods' attribute for your "
                 "energy system.\n This will lead to creating "
@@ -171,11 +177,10 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        self.periods = periods
-        if self.periods is not None:
             self._extract_periods_years()
             self._extract_periods_matrix()
             self._extract_end_year_of_optimization()
+            self.use_remaining_value = use_remaining_value
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices

@@ -4,8 +4,13 @@ v0.5.2 (????)
 API changes
 ###########
 
+* New bool attribute `use_remaining_value` of `oemof.solph.EnergySystem`
+
 New features
 ############
+
+* Allow for evaluating differences in the remaining vs. the original value
+  for multi-period investments.
 
 Documentation
 #############
