@@ -316,7 +316,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 else:\\
                 &
-                P_{old,end}(p)\\
+                P_{old,end}(p) = 0\\
                 &\\
                 &
                 if \quad p=0:\\
@@ -529,7 +529,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
                     # multiple invests can be decommissioned in the same period
                     # but only sequential ones, thus a bookkeeping is
-                    # introduced andconstraints are added to equation one
+                    # introduced and constraints are added to equation one
                     # iteration later.
                     last_decomm_p = np.nan
                     # loop over invest periods (values are decomm_periods)

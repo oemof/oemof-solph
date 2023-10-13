@@ -62,7 +62,7 @@ class Investment:
         Units lifetime, given in years; only applicable for multi-period
         models
     age : int, :math:`a`
-        Units start age, given in years at the beginning of the simulation;
+        Units start age, given in years at the beginning of the optimization;
         only applicable for multi-period models
     interest_rate : float, :math:`ir`
         Interest rate for calculating annuities when investing in a particular
