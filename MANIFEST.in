@@ -17,7 +17,6 @@ include *.md
 include VERSION
 
 include tox.ini
-include pytest.ini
 include *.yml
 include *.yaml
 
