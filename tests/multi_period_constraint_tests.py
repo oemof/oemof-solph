@@ -1917,6 +1917,41 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_without_offset_multi_period.lp")
 
+    def test_nonconvex_investment_storage_without_offset_remaining_value(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        storage = solph.components.GenericStorage(
+            label="storage_non_convex",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            investment=solph.Investment(
+                ep_costs=141,
+                maximum=244,
+                minimum=12,
+                nonconvex=True,
+                lifetime=20,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bel, storage)
+        self.compare_lp_files(
+            "storage_invest_without_offset_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
+
     def test_nonconvex_investment_storage_with_offset(self):
         """All invest variables are coupled. The invest variables of the Flows
         will be created during the initialisation of the storage e.g. battery
@@ -1948,6 +1983,42 @@ class TestsMultiPeriodConstraint:
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_with_offset_multi_period.lp")
+
+    def test_nonconvex_investment_storage_with_offset_remaining_value(self):
+        """All invest variables are coupled. The invest variables of the Flows
+        will be created during the initialisation of the storage e.g. battery
+        """
+        bel = solph.buses.Bus(label="electricityBus")
+
+        storage = solph.components.GenericStorage(
+            label="storage_non_convex",
+            inputs={bel: solph.flows.Flow(variable_costs=56)},
+            outputs={bel: solph.flows.Flow(variable_costs=24)},
+            nominal_storage_capacity=None,
+            loss_rate=0.13,
+            max_storage_level=0.9,
+            min_storage_level=0.1,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=0.97,
+            outflow_conversion_factor=0.86,
+            lifetime_inflow=20,
+            lifetime_outflow=20,
+            investment=solph.Investment(
+                ep_costs=145,
+                minimum=19,
+                offset=5,
+                nonconvex=True,
+                maximum=1454,
+                lifetime=20,
+            ),
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bel, storage)
+        self.compare_lp_files(
+            "storage_invest_with_offset_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
 
     def test_nonconvex_invest_storage_all_nonconvex(self):
         """All invest variables are free and nonconvex."""
@@ -2015,6 +2086,34 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, sink)
         self.compare_lp_files("flow_invest_without_offset_multi_period.lp")
 
+    def test_nonconvex_invest_sink_without_offset_remaining_value(self):
+        """Non convex invest flow without offset, with minimum."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        sink = solph.components.Sink(
+            label="sink_nonconvex_invest",
+            inputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        minimum=15,
+                        nonconvex=True,
+                        maximum=172,
+                        lifetime=20,
+                    ),
+                )
+            },
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bel, sink)
+        self.compare_lp_files(
+            "flow_invest_without_offset_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
+
     def test_nonconvex_invest_source_with_offset(self):
         """Non convex invest flow with offset, with minimum."""
         bel = solph.buses.Bus(label="electricityBus")
@@ -2039,6 +2138,35 @@ class TestsMultiPeriodConstraint:
         )
         self.energysystem.add(bel, source)
         self.compare_lp_files("flow_invest_with_offset_multi_period.lp")
+
+    def test_nonconvex_invest_source_with_offset_remaining_value(self):
+        """Non convex invest flow with offset, with minimum."""
+        bel = solph.buses.Bus(label="electricityBus")
+
+        source = solph.components.Source(
+            label="source_nonconvex_invest",
+            outputs={
+                bel: solph.flows.Flow(
+                    summed_max=2.3,
+                    variable_costs=25,
+                    max=0.8,
+                    investment=solph.Investment(
+                        ep_costs=500,
+                        minimum=15,
+                        maximum=20,
+                        offset=34,
+                        nonconvex=True,
+                        lifetime=20,
+                    ),
+                )
+            },
+        )
+        self.energysystem.use_remaining_value = True
+        self.energysystem.add(bel, source)
+        self.compare_lp_files(
+            "flow_invest_with_offset_multi_period_remaining_value.lp"
+        )
+        self.energysystem.use_remaining_value = False
 
     def test_nonconvex_invest_source_with_offset_no_minimum(self):
         """Non convex invest flow with offset, without minimum."""
