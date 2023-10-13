@@ -781,7 +781,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 P_{invest}(p) \cdot A(c_{invest}(p), l, ir)
-                \cdot \frac {1}{ANF(d, dr)} \cdot DF^{-p} \\
+                \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p} \\
                 &\\
                 &
                 \forall p \in \mathbb{P}
@@ -814,8 +814,8 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
       and interest rate :math:`ir`.
-    * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
-      and discount rate :math:`dr`.
+    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
+      and interest rate :math:`ir`.
     * :math:`d=min\{year_{max} - year(p), l\}` defines the
       number of years within the optimization horizon that investment
       annuities are accounted for.
@@ -835,7 +835,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
             &\\
             &
-            ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
+            ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
     interest rate :math:`i` for the annuity is defined as weighted
@@ -2205,7 +2205,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 P_{invest}(p) \cdot A(c_{invest}(p), l, ir)
-                \frac {1}{ANF(d, dr)} \cdot DF^{-p} \\
+                \frac {1}{ANF(d, ir)} \cdot DF^{-p} \\
                 &\\
                 & \quad \quad \quad \quad \forall p \in \mathbb{P}
 
@@ -2236,8 +2236,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
       and interest rate :math:`ir`.
-    * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
-      and discount rate :math:`dr`.
+    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
+      and interest rate :math:`ir`.
     * :math:`d=min\{year_{max} - year(p), l\}` defines the
       number of years within the optimization horizon that investment
       annuities are accounted for.
@@ -2257,7 +2257,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
             &\\
             &
-            ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
+            ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
     interest rate :math:`i` for the annuity is defined as weighted
@@ -4372,7 +4372,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             .. math::
                 &
                 P_{invest}(p) \cdot A(c_{invest}(p), l, ir)
-                \cdot \frac {1}{ANF(d, dr)} \cdot DF^{-p} \\
+                \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p} \\
                 &\\
                 &
                 \forall p \in \mathbb{P}
@@ -4406,8 +4406,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
       and interest rate :math:`ir`.
-    * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
-      and discount rate :math:`dr`.
+    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
+      and interest rate :math:`ir`.
     * :math:`d=min\{year_{max} - year(p), l\}` defines the
       number of years within the optimization horizon that investment
       annuities are accounted for.
@@ -4427,7 +4427,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
             &\\
             &
-            ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
+            ANF(d, ir)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
     interest rate :math:`i` for the annuity is defined as weighted

@@ -893,7 +893,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             .. math::
                 &
                 E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
-                \cdot \frac {1}{ANF(d, dr)} \cdot DF^{-p}\\
+                \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p}\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -902,7 +902,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             .. math::
                 &
                 (E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
-                \cdot \frac {1}{ANF(d, dr)}\\
+                \cdot \frac {1}{ANF(d, ir)}\\
                 &
                 +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p} \\
                 &
@@ -930,8 +930,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
       and interest rate :math:`ir`.
-    * :math:`ANF(d, dr)` is the annuity factor for duration :math:`d`
-      and discount rate :math:`dr`.
+    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
+      and interest rate :math:`ir`.
     * :math:`d=min\{year_{max} - year(p), l\}` defines the
       number of years within the optimization horizon that investment
       annuities are accounted for.
@@ -955,7 +955,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 \frac {(1+i)^l \cdot i} {(1+i)^l - 1}\\
             &\\
             &
-            ANF(d, dr)=\frac {(1+dr)^d \cdot dr} {(1+dr)^d - 1}
+            ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
 
     They are retrieved, using oemof.tools.economics annuity function. The
     interest rate :math:`i` for the annuity is defined as weighted
