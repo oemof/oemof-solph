@@ -225,15 +225,15 @@ def main():
     t2_agg, objective_weighting2 = set_aggregated_timeseries_and_objective_weighting(segmentation=segmentation,
                                                       periods_total_occurrence = periods_total_occurrence2,
                                                       aggregated_period_dict=pd.DataFrame.from_dict(aggregation2.clusterPeriodDict),
-                                                      first_time_stamp=pd.to_datetime(t1[0])
+                                                      first_time_stamp=pd.to_datetime(t2[0])
                                                                                      )
     objective_weighting = objective_weighting1 + objective_weighting2
 
+    t2_agg = t2_agg.append(pd.DatetimeIndex([t2_agg[-1] + pd.DateOffset(hours=1)]))
     tindex_agg = t1_agg.append(t2_agg)
 
     energysystem = solph.EnergySystem(
         timeindex=tindex_agg,
-        timeincrement=[1] * len(tindex_agg),
         periods=[t1_agg, t2_agg],
         tsa_parameters=[
             {
