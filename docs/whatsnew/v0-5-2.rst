@@ -24,10 +24,12 @@ Testing
 Other changes
 #############
 
+* Improved compatibility with upcoming oemof.network
+
 Contributors
 ############
 
 * Patrik Schönfeldt
 * Johannes Kochems
 * Julian Endres
-* Hendrik Huysgens
+* Hendrik Huyskens
