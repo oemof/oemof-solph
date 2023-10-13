@@ -703,7 +703,7 @@ class SinkDSMOemofBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    fixed_costs += (
+                    fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
@@ -2105,7 +2105,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    fixed_costs += (
+                    fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
@@ -4205,7 +4205,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     )
 
                 if g.fixed_costs[0] is not None:
-                    fixed_costs += (
+                    fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))

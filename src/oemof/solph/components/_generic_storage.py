@@ -602,7 +602,7 @@ class GenericStorageBlock(ScalarBlock):
         if m.es.periods is not None:
             for n in self.STORAGES:
                 if n.fixed_costs[0] is not None:
-                    fixed_costs += (
+                    fixed_costs += sum(
                         n.nominal_storage_capacity
                         * n.fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))

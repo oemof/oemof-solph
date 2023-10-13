@@ -487,7 +487,7 @@ class SimpleFlowBlock(ScalarBlock):
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
                 ):
-                    fixed_costs += (
+                    fixed_costs += sum(
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
