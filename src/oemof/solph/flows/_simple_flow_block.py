@@ -427,25 +427,32 @@ class SimpleFlowBlock(ScalarBlock):
 
         * `Flow.fixed_costs` is not `None` and flow has no lifetime limit
             .. math::
-              \sum_{(i,o)} \sum_p P_{nominal} \cdot c_{fixed}(i, o, p)
-              \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{year_{max}}
+              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
            but not an initial age
             .. math::
-              \sum_{(i,o)} \sum_{p}^{p+n} P_{nominal} \cdot c_{fixed}(i, o, p)
-              \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}}
+              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
            and an initial age
             .. math::
-              \sum_{(i,o)} \sum_{p}^{p+n-a} P_{nominal}
-              \cdot c_{fixed}(i, o, p) \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}} P_{nominal}
+              \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         Hereby
+
         * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`
-        and :math:`dr` is the discount rate.
+          and :math:`dr` is the discount rate.
         * :math:`n` is the unit lifetime and :math:`a` is the initial age.
+        * :math:`year_{max}` denotes the last year of the optimization
+          horizon, i.e. at the end of the last period.
+        * :math:`limit_{exo}=min\{year_{max}, n - a\}` is used as an
+          upper bound to ensure fixed costs for existing capacities to occur
+          within the optimization horizon. :math:`a` is the initial age
+          of an asset (or 0 if not specified).
         """
         m = self.parent_block()
 

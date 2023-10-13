@@ -438,11 +438,14 @@ class GenericStorageBlock(ScalarBlock):
     * :attr:`fixed_costs` not None
 
         .. math::
-            \sum_{p \in \textrm{PERIODS}} E_{nom}
-            \cdot c_{fixed}(p) \cdot DF^{-p}
+            \displaystyle \sum_{pp=0}^{year_{max}} E_{nom}
+            \cdot c_{fixed}(pp) \cdot DF^{-pp}
 
     whereby:
-    :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
+
+    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
+    * :math:`year_{max}` denotes the last year of the optimization
+      horizon, i.e. at the end of the last period.
 
     """  # noqa: E501
 

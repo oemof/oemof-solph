@@ -446,10 +446,17 @@ class SinkDSMOemofBlock(ScalarBlock):
     .. math::
         &
         (DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}
+        + DSM_{t}^{do, shift} \cdot cost_{t}^{dsm, do, shift}\\
+        &
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
         \cdot \omega_{t} \\
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+
+    * :attr:`fixed_costs` not None
+
+    .. math::
+        \displaystyle \sum_{pp=0}^{year_{max}} max\{E_{up, max}, E_{do, max}\}
+        \cdot c_{fixed}(pp) \cdot DF^{-pp}
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -483,6 +490,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         :math:`cost_{t}^{dsm, do, shift}` `cost_dsm_down_shift[t]` P    Variable costs for a downwards shift (load shifting)
         :math:`cost_{t}^{dsm, do, shed}`  `cost_dsm_down_shift[t]` P    Variable costs for shedding load
         :math:`\omega_{t}`                                         P    Objective weighting of the model for timestep t
+        :math:`year_{max}`                                         P    Last year of the optimization horizon
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
@@ -1509,11 +1517,17 @@ class SinkDSMDIWBlock(ScalarBlock):
     .. math::
         &
         DSM_{t}^{up} \cdot cost_{t}^{dsm, up}
-        + \sum_{tt=0}^{|T|} DSM_{tt, t}^{do, shift} \cdot
+        + (\sum_{tt=0}^{|T|} DSM_{tt, t}^{do, shift} \cdot
         cost_{t}^{dsm, do, shift}
         + DSM_{t}^{do, shed} \cdot cost_{t}^{dsm, do, shed})
         \cdot \omega_{t} \\
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
+
+    * :attr:`fixed_costs` not None
+
+    .. math::
+        \displaystyle \sum_{pp=0}^{year_{max}} max\{E_{up, max}, E_{do, max}\}
+        \cdot c_{fixed}(pp) \cdot DF^{-pp}
 
     **Table: Symbols and attribute names of variables and parameters**
 
@@ -1557,6 +1571,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                                                                         | and the start of another
         :math:`\Delta t`                                           P    The time increment of the model
         :math:`\omega_{t}`                                         P    Objective weighting of the model for timestep t
+        :math:`year_{max}`                                         P    Last year of the optimization horizon
         ================================= ======================== ==== =======================================
 
     """  # noqa E:501
@@ -3346,6 +3361,12 @@ class SinkDSMDLRBlock(ScalarBlock):
         \cdot \omega_{t} \\
         & \quad \quad \quad \quad \forall t \in \mathbb{T} \\
 
+    * :attr:`fixed_costs` not None
+
+    .. math::
+        \displaystyle \sum_{pp=0}^{year_{max}} max\{E_{up, max}, E_{do, max}\}
+        \cdot c_{fixed}(pp) \cdot DF^{-pp}
+
     **Table: Symbols and attribute names of variables and parameters**
 
         .. table:: Variables (V), Parameters (P) and (additional) Sets (S)
@@ -3403,6 +3424,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                                                                                                | in the optimization timeframe
             :math:`t_{dayLimit}`                        `t_dayLimit`                      P    | Maximum duration of load shifts at full capacity per day
                                                                                                | resp. in the last hours before the current"
+            :math:`year_{max}`                                                            P    Last year of the optimization horizon
             =========================================== ================================= ==== =======================================
 
     """  # noqa: E501
