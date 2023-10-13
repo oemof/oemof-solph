@@ -643,8 +643,8 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
     solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.flows.Flow(nominal_value= solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.flows.Flow(nominal_value= solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
