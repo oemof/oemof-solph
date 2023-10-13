@@ -1363,7 +1363,8 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            m.es.end_year_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization
+                            - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -1416,7 +1417,9 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
@@ -3112,7 +3115,8 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            m.es.end_year_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization
+                            - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -3169,7 +3173,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]
@@ -5503,7 +5509,8 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             wacc=interest,
                         )
                         duration = min(
-                            m.es.end_year_of_optimization - m.es.periods_years[p],
+                            m.es.end_year_of_optimization
+                            - m.es.periods_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -5567,7 +5574,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 if g.investment.fixed_costs[0] is not None:
                     lifetime = g.investment.lifetime
                     age = g.investment.age
-                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         g.investment.existing
                         * g.investment.fixed_costs[pp]

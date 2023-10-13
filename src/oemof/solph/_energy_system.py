@@ -216,7 +216,9 @@ class EnergySystem(es.EnergySystem):
     def _extract_end_year_of_optimization(self):
         """Extract the end of the optimization in years"""
         duration_last_period = self.get_period_duration(-1)
-        self.end_year_of_optimization = self.periods_years[-1] + duration_last_period
+        self.end_year_of_optimization = (
+            self.periods_years[-1] + duration_last_period
+        )
 
     def get_period_duration(self, period):
         """Get duration of a period in full years

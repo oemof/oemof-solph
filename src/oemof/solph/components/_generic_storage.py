@@ -1751,7 +1751,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -1778,7 +1779,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p], lifetime
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
@@ -1812,7 +1814,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
-                    range_limit = min(m.es.end_year_of_optimization, lifetime - age)
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]

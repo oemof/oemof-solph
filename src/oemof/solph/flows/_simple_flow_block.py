@@ -417,7 +417,7 @@ class SimpleFlowBlock(ScalarBlock):
 
         whereby :math:`w(t)` is the objective weighting.
 
-        In a multi-period model, in contrast, the following following parts of
+        In a multi-period model, in contrast, the following parts of
         the objective function are created:
 
         * `Flow.variable_costs` is not `None`:
