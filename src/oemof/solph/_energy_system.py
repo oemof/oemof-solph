@@ -130,6 +130,13 @@ class EnergySystem(es.EnergySystem):
                     "conflicting to each other."
                 )
                 raise AttributeError(msg)
+            else:
+                msg = (
+                    "Ensure that your timeindex and timeincrement are "
+                    "consistent.\nIf you are not considering non-equidistant "
+                    "timeindices, consider only specifying a timeindex."
+                )
+                warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
