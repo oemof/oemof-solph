@@ -133,8 +133,7 @@ class EnergySystem(es.EnergySystem):
             else:
                 msg = (
                     "Ensure that your timeindex and timeincrement are "
-                    "consistent.\nIf you are not considering non-equidistant "
-                    "timeindices, consider only specifying a timeindex."
+                    "consistent."
                 )
                 warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
