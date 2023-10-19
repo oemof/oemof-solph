@@ -492,14 +492,6 @@ class GenericStorageBlock(ScalarBlock):
             ]
         )
 
-        def get_timeindex(p, ik, g):
-            t = (
-                p * len(m.TIMESTEPS_IN_PERIOD[p])
-                + ik * m.es.tsa_parameters[p]["timesteps_per_period"]
-                + g
-            )
-            return t
-
         #  ************* VARIABLES *****************************
 
         def _storage_content_bound_rule(block, n, t):
@@ -546,10 +538,10 @@ class GenericStorageBlock(ScalarBlock):
             # 57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
             for n in self.STORAGES:
                 for p, i, g in m.TIMEINDEX_CLUSTER:
-                    t = get_timeindex(p, i, g)
+                    t = m.get_timestep_from_tsam_timestep(p, i, g)
                     lhs = n.nominal_storage_capacity * n.min_storage_level[t]
                     k = m.es.tsa_parameters[p]["order"][i]
-                    tk = get_timeindex(p, k, g)
+                    tk = m.get_timestep_from_tsam_timestep(p, k, g)
                     inter_i = (
                         sum(
                             len(m.es.tsa_parameters[ip]["order"])
@@ -578,9 +570,9 @@ class GenericStorageBlock(ScalarBlock):
         def _storage_inter_maximum_level_rule(block):
             for n in self.STORAGES:
                 for p, i, g in m.TIMEINDEX_CLUSTER:
-                    t = get_timeindex(p, i, g)
+                    t = m.get_timestep_from_tsam_timestep(p, i, g)
                     k = m.es.tsa_parameters[p]["order"][i]
-                    tk = get_timeindex(p, k, g)
+                    tk = m.get_timestep_from_tsam_timestep(p, k, g)
                     inter_i = (
                         sum(
                             len(m.es.tsa_parameters[ip]["order"])
@@ -637,7 +629,7 @@ class GenericStorageBlock(ScalarBlock):
             Rule definition for the storage balance of every storage n and
             every timestep.
             """
-            t = get_timeindex(p, k, g)
+            t = m.get_timestep_from_tsam_timestep(p, k, g)
             expr = 0
             expr += block.storage_content_intra[n, p, k, g + 1]
             expr += (
@@ -683,7 +675,7 @@ class GenericStorageBlock(ScalarBlock):
                     break
 
             k = m.es.tsa_parameters[p]["order"][ii]
-            t = get_timeindex(
+            t = m.get_timestep_from_tsam_timestep(
                 p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1
             )
             expr = 0

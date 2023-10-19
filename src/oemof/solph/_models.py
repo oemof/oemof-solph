@@ -654,3 +654,12 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
+
+    def get_timestep_from_tsam_timestep(self, p, ik, g):
+        """Return original timestep from cluster-based timestep"""
+        t = (
+            p * len(self.TIMESTEPS_IN_PERIOD[p])
+            + ik * self.es.tsa_parameters[p]["timesteps_per_period"]
+            + g
+        )
+        return t
