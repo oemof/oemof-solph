@@ -503,12 +503,12 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
                                 for t in range(
                                     t0,
                                     t0
-                                    + tsa_parameters[p][
-                                        "timesteps_per_period"
-                                    ],
+                                    + tsa_parameters[p]["timesteps_per_period"]
+                                    - 1,
                                 )
                             ),
                             operator.mul,
+                            initial=1,
                         )
                     )
                     * inter_value
