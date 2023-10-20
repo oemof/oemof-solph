@@ -2,9 +2,9 @@
 
 min 
 objective:
-+157.5028481334886 InvestmentFlowBlock_invest(pv_electricityBus_0)
-+154.4145569936163 InvestmentFlowBlock_invest(pv_electricityBus_1)
-+151.38682058197674 InvestmentFlowBlock_invest(pv_electricityBus_2)
++18.16879316506207 InvestmentFlowBlock_invest(pv_electricityBus_0)
++11.99221088531737 InvestmentFlowBlock_invest(pv_electricityBus_1)
++5.93673806203831 InvestmentFlowBlock_invest(pv_electricityBus_2)
 +13 flow(pv_electricityBus_0_0)
 +13 flow(pv_electricityBus_0_1)
 +12.745098039215685 flow(pv_electricityBus_1_2)

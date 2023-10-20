@@ -86,7 +86,8 @@ class Flow(Edge):
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
     fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
         The fixed costs associated with a flow.
-        Note: These are only applicable for a multi-period model.
+        Note: These are only applicable for a multi-period model
+        and given on a yearly basis.
     lifetime : int, :math:`l`
         The lifetime of a flow (usually given in years);
         once it reaches its lifetime (considering also
@@ -200,13 +201,14 @@ class Flow(Edge):
         if fixed_costs is not None:
             msg = (
                 "Be aware that the fixed costs attribute is only\n"
-                "meant to be used for multi-period models.\n"
+                "meant to be used for multi-period models to depict "
+                "fixed costs that occur on a yearly basis.\n"
                 "If you wish to set up a multi-period model, explicitly "
                 "set the `periods` attribute of your energy system.\n"
                 "It has been decided to remove the `fixed_costs` "
                 "attribute with v0.2 for regular uses.\n"
                 "If you specify `fixed_costs` for a regular model, "
-                "it will simply be ignored."
+                "this will simply be silently ignored."
             )
             warn(msg, debugging.SuspiciousUsageWarning)
 

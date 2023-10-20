@@ -96,13 +96,14 @@ def test_invest_attribute_warning():
 def test_fixed_costs_warning():
     msg = (
         "Be aware that the fixed costs attribute is only\n"
-        "meant to be used for multi-period models.\n"
+        "meant to be used for multi-period models to depict "
+        "fixed costs that occur on a yearly basis.\n"
         "If you wish to set up a multi-period model, explicitly "
         "set the `periods` attribute of your energy system.\n"
         "It has been decided to remove the `fixed_costs` "
         "attribute with v0.2 for regular uses.\n"
         "If you specify `fixed_costs` for a regular model, "
-        "it will simply be ignored."
+        "this will simply be silently ignored."
     )
     with warnings.catch_warnings(record=True) as w:
         solph.flows.Flow(fixed_costs=34)
