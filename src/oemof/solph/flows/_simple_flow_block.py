@@ -472,18 +472,18 @@ class SimpleFlowBlock(ScalarBlock):
                                 m.flow[i, o, p, t]
                                 * m.objective_weighting[t]
                                 * m.flows[i, o].variable_costs[t]
-                                * (
-                                    (1 + m.discount_rate)
-                                    ** -m.es.periods_years[p]
-                                )
                                 for t in timesteps
                             )
 
-                            # add variable costs of all years
+                            # discount & add costs for all years within period
                             variable_costs += sum(
                                 variable_costs_increment
                                 * ((1 + m.discount_rate) ** (-pp))
-                                for pp in range(0, m.es.get_period_duration(p))
+                                for pp in range(
+                                    m.es.periods_years[p],
+                                    m.es.periods_years[p]
+                                    + m.es.get_period_duration(p),
+                                )
                             )
                     else:
                         for p, t in m.TIMEINDEX:
