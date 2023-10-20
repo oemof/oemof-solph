@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
-from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
 
@@ -22,12 +21,8 @@ class TestConverterClass:
     def setup_class(cls):
         """Setup default values"""
         cls.bus = solph.buses.Bus()
-        warnings.filterwarnings("ignore", category=SuspiciousUsageWarning)
 
-    @classmethod
-    def teardown_class(cls):
-        warnings.filterwarnings("always", category=SuspiciousUsageWarning)
-
+    @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_empty_converter(self):
         transf = solph.components.Converter()
         assert isinstance(transf.conversion_factors, dict)
@@ -35,13 +30,15 @@ class TestConverterClass:
 
     def test_default_conversion_factor(self):
         transf = solph.components.Converter(
-            inputs={self.bus: solph.flows.Flow()}
+            inputs={self.bus: solph.flows.Flow()},
+            outputs={self.bus: solph.flows.Flow()},
         )
         assert transf.conversion_factors[self.bus][2] == 1
 
     def test_sequence_conversion_factor_from_scalar(self):
         transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
+            outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: 2},
         )
         assert transf.conversion_factors[self.bus][6] == 2
@@ -49,6 +46,7 @@ class TestConverterClass:
     def test_sequence_conversion_factor_from_list_correct_length(self):
         transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
+            outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )
         assert len(transf.conversion_factors[self.bus]) == 1
@@ -56,15 +54,18 @@ class TestConverterClass:
     def test_sequence_conversion_factor_from_list_wrong_length(self):
         transf = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
+            outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
+    @pytest.mark.filterwarnings("ignore:Attribute <outputs>:UserWarning")
     def test_converter_missing_output_create_empty_dict(self):
         trfr = solph.components.Converter(inputs={})
         assert trfr.outputs == {}
 
+    @pytest.mark.filterwarnings("ignore:Attribute <inputs>:UserWarning")
     def test_converter_missing_input_create_empty_dict(self):
         trfr = solph.components.Converter(outputs={})
         assert trfr.inputs == {}
@@ -84,6 +85,12 @@ def test_wrong_combination_invest_and_nominal_value():
     msg = "For backward compatibility, the option investment overwrites"
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
+
+
+def test_invest_attribute_warning():
+    msg = "For backward compatibility, the option investment overwrites"
+    with pytest.warns(FutureWarning, match=msg):
+        solph.flows.Flow(investment=solph.Investment())
 
 
 def test_fixed_costs_warning():

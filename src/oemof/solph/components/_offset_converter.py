@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.network import network
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
@@ -30,7 +30,7 @@ from pyomo.environ import Set
 from oemof.solph._plumbing import sequence
 
 
-class OffsetConverter(network.Transformer):
+class OffsetConverter(Node):
     """An object with one input and one output and two coefficients to model
     part load behaviour.
 

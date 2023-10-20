@@ -23,14 +23,14 @@ from collections.abc import Iterable
 from warnings import warn
 
 import numpy as np
-from oemof.network import network as on
+from oemof.network import Edge
 from oemof.tools import debugging
 
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
 
 
-class Flow(on.Edge):
+class Flow(Edge):
     r"""Defines a flow between two nodes.
 
     Keyword arguments are used to set the attributes of this flow. Parameters

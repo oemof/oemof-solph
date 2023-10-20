@@ -39,6 +39,7 @@ import os
 from collections import namedtuple
 
 import pandas as pd
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -64,7 +65,10 @@ def test_tuples_as_labels_example(
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -171,9 +175,11 @@ def test_tuples_as_labels_example(
     my_results = electricity_bus["sequences"].sum(axis=0).to_dict()
     storage = es.groups["storage_electricity_battery"]
     storage_node = views.node(results, storage)
-    my_results["max_load"] = storage_node["sequences"].max()[
-        [((storage, None), "storage_content")]
-    ]
+    my_results["max_load"] = (
+        storage_node["sequences"]
+        .max()[[((storage, None), "storage_content")]]
+        .iloc[0]
+    )
     commodity_bus = views.node(results, "bus_natural_gas_None")
 
     gas_usage = commodity_bus["sequences"][
@@ -201,7 +207,7 @@ def test_tuples_as_labels_example(
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
@@ -218,4 +224,4 @@ def test_tuples_as_labels_example(
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert round(meta["objective"]) == 37819254
+    assert meta["objective"] == pytest.approx(37819254, abs=0.5)

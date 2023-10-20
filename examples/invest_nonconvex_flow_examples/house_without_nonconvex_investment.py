@@ -117,7 +117,7 @@ def main():
         outputs={
             b_heat: solph.flows.Flow(
                 fix=[solar_thermal(day) for day in range(0, periods)],
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=epc, minimum=1.0, maximum=5.0
                 ),
             )

@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-from oemof.network import network as on
+from oemof.network import Node
 from oemof.tools import debugging
 from pyomo.core import Set
 from pyomo.core.base.block import ScalarBlock
@@ -29,7 +29,7 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
-class Link(on.Transformer):
+class Link(Node):
     """A Link object with 2 inputs and 2 outputs.
 
     Parameters

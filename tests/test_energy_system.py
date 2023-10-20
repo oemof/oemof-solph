@@ -19,7 +19,9 @@ def test_add_periods():
         pd.date_range(start="2012-01-01", periods=8784, freq="H"),
         pd.date_range(start="2013-01-01", periods=1217, freq="H"),
     ]
-    es = EnergySystem(timeindex=timeindex, periods=periods)
+    es = EnergySystem(
+        timeindex=timeindex, periods=periods, infer_last_interval=True
+    )
     assert len(es.periods) == 2
     assert es.periods[0].equals(
         pd.date_range(start="2012-01-01", periods=8784, freq="H")
