@@ -2,9 +2,9 @@
 
 min 
 objective:
-+149.3643564356436 GenericInvestmentStorageBlock_invest(storage4_0)
-+146.43564356435647 GenericInvestmentStorageBlock_invest(storage4_1)
-+143.5643564356436 GenericInvestmentStorageBlock_invest(storage4_2)
++145.0 GenericInvestmentStorageBlock_invest(storage4_0)
++142.15686274509804 GenericInvestmentStorageBlock_invest(storage4_1)
++70.37468452727633 GenericInvestmentStorageBlock_invest(storage4_2)
 
 s.t.
 

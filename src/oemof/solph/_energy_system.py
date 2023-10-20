@@ -62,6 +62,10 @@ class EnergySystem(es.EnergySystem):
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
 
+    use_remaining_value : bool
+        If True, compare the remaining value of an investment to the
+        original value (only applicable for multi-period models)
+
     kwargs
     """
 
@@ -71,6 +75,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        use_remaining_value=False,
         **kwargs,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -160,7 +165,8 @@ class EnergySystem(es.EnergySystem):
             timeindex=timeindex, timeincrement=timeincrement, **kwargs
         )
 
-        if periods is not None:
+        self.periods = periods
+        if self.periods is not None:
             msg = (
                 "CAUTION! You specified the 'periods' attribute for your "
                 "energy system.\n This will lead to creating "
@@ -171,9 +177,10 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.SuspiciousUsageWarning)
-        self.periods = periods
-        self._extract_periods_years()
-        self._extract_periods_matrix()
+            self._extract_periods_years()
+            self._extract_periods_matrix()
+            self._extract_end_year_of_optimization()
+            self.use_remaining_value = use_remaining_value
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices
@@ -183,13 +190,12 @@ class EnergySystem(es.EnergySystem):
         start of the optimization run and starting with 0.
         """
         periods_years = [0]
-        if self.periods is not None:
-            start_year = self.periods[0].min().year
-            for k, v in enumerate(self.periods):
-                if k >= 1:
-                    periods_years.append(v.min().year - start_year)
+        start_year = self.periods[0].min().year
+        for k, v in enumerate(self.periods):
+            if k >= 1:
+                periods_years.append(v.min().year - start_year)
 
-            self.periods_years = periods_years
+        self.periods_years = periods_years
 
     def _extract_periods_matrix(self):
         """Determines a matrix describing the temporal distance to each period.
@@ -200,13 +206,41 @@ class EnergySystem(es.EnergySystem):
         between each investment period to each decommissioning period.
         """
         periods_matrix = []
-        if self.periods is not None:
-            period_years = np.array(self.periods_years)
-            for v in period_years:
-                row = period_years - v
-                row = np.where(row < 0, 0, row)
-                periods_matrix.append(row)
-            self.periods_matrix = np.array(periods_matrix)
+        period_years = np.array(self.periods_years)
+        for v in period_years:
+            row = period_years - v
+            row = np.where(row < 0, 0, row)
+            periods_matrix.append(row)
+        self.periods_matrix = np.array(periods_matrix)
+
+    def _extract_end_year_of_optimization(self):
+        """Extract the end of the optimization in years
+
+        Attribute `end_year_of_optimization` of int is set.
+        """
+        duration_last_period = self.get_period_duration(-1)
+        self.end_year_of_optimization = (
+            self.periods_years[-1] + duration_last_period
+        )
+
+    def get_period_duration(self, period):
+        """Get duration of a period in full years
+
+        Parameters
+        ----------
+        period : int
+            Period for which the duration in years shall be obtained
+
+        Returns
+        -------
+        int
+            Duration of the period
+        """
+        return (
+            self.periods[period].max().year
+            - self.periods[period].min().year
+            + 1
+        )
 
 
 def create_time_index(
