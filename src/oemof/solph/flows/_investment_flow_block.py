@@ -1110,23 +1110,20 @@ class InvestmentFlowBlock(ScalarBlock):
                 present_value_factor_remaining = 1 / economics.annuity(
                     capex=1, n=remaining_lifetime, wacc=interest
                 )
+                convex_investment_costs = (
+                    self.invest[i, o, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
                 if nonconvex:
-                    return (
-                        self.invest[i, o, p]
-                        * (remaining_annuity - original_annuity)
-                        * present_value_factor_remaining
-                        + self.invest_status[i, o, p]
-                        * (
-                            m.flows[i, o].investment.offset[-1]
-                            - m.flows[i, o].investment.offset[p]
-                        )
+                    return convex_investment_costs + self.invest_status[
+                        i, o, p
+                    ] * (
+                        m.flows[i, o].investment.offset[-1]
+                        - m.flows[i, o].investment.offset[p]
                     ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
                 else:
-                    return (
-                        self.invest[i, o, p]
-                        * (remaining_annuity - original_annuity)
-                        * present_value_factor_remaining
-                    ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                    return convex_investment_costs
             else:
                 return 0
         else:
