@@ -442,7 +442,7 @@ class GenericStorageBlock(ScalarBlock):
             \displaystyle \sum_{pp=0}^{year_{max}} E_{nom}
             \cdot c_{fixed}(pp) \cdot DF^{-pp}
 
-    whereby:
+    where:
 
     * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`.
     * :math:`year_{max}` denotes the last year of the optimization
@@ -756,7 +756,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             &
             \forall p \in \textrm{PERIODS}
 
-        whereby:
+        where:
 
         * (*) is only performed for the first period the condition is True.
           A decommissioning flag is then set to True to prevent having falsely
@@ -888,7 +888,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 E_{invest}(0) \cdot c_{invest,var}(0)
                 + c_{invest,fix}(0) \cdot b_{invest}(0)\\
 
-    Whereby 0 denotes the 0th (investment) period since
+    Where 0 denotes the 0th (investment) period since
     in a standard model, there is only this one period.
 
     *Multi-period model*
@@ -962,7 +962,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 \sum_{pp=0}^{limit_{exo}} E_{exist} \cdot c_{fixed}(pp)
                 \cdot DF^{-pp}
 
-    whereby:
+    where:
 
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
@@ -1040,7 +1040,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         | Old (nominal) capacity of the storage
         | to be decommissioned in period p
         | which was endogenously determined by :math:`E_{invest}(p_{comm})`
-        | whereby :math:`p_{comm}` is the commissioning period"
+        | where :math:`p_{comm}` is the commissioning period"
         ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity
         (before timestep 0)"
         ":math:`b_{invest}(p)`", ":attr:`invest_status[i, o, p]`", "Binary

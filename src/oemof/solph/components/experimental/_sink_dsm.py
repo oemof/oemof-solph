@@ -832,7 +832,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 & \quad \quad \quad \quad
                 \forall p, t \in \textrm{TIMEINDEX} \\
 
-    whereby:
+    where:
 
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
@@ -2352,7 +2352,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 & \quad \quad \quad \quad
                 \forall p, t \in \textrm{TIMEINDEX} \\
 
-    whereby:
+    where:
 
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
@@ -4620,7 +4620,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 \cdot \omega_{t} \cdot DF^{-p} \\
                 & \quad \quad \quad \quad \forall p, t \in \textrm{TIMEINDEX} \\
 
-    whereby:
+    where:
 
     * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
       investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`

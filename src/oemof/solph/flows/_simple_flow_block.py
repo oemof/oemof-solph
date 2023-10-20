@@ -415,7 +415,7 @@ class SimpleFlowBlock(ScalarBlock):
             .. math::
               \sum_{(i,o)} \sum_t P(t) \cdot w(t) \cdot c_{var}(i, o, t)
 
-        whereby :math:`w(t)` is the objective weighting.
+        where :math:`w(t)` is the objective weighting.
 
         In a multi-period model, in contrast, the following parts of
         the objective function are created:

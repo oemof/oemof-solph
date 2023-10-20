@@ -336,7 +336,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 \forall p \in \textrm{PERIODS}
 
-            whereby:
+            where:
 
             * (*) is only performed for the first period the condition
               is True. A decommissioning flag is then set to True
@@ -770,7 +770,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     P_{invest}(0) \cdot c_{invest,var}(0)
                     + c_{invest,fix}(0) \cdot Y_{invest}(0) \\
 
-        Whereby 0 denotes the 0th (investment) period since
+        Where 0 denotes the 0th (investment) period since
         in a standard model, there is only this one period.
 
         *Multi-period model*
@@ -848,7 +848,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot DF^{-pp}
 
 
-        whereby:
+        where:
 
         * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
           investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
@@ -883,7 +883,8 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
 
-        They are retrieved, using oemof.tools.economics annuity function.
+        They are derived using the reciprocal of the oemof.tools.economics
+        annuity function with a capex of 1.
         The interest rate :math:`ir` for the annuity is defined as weighted
         average costs of capital (wacc) and assumed constant over time.
         """
