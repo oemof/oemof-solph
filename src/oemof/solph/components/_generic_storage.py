@@ -1961,10 +1961,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 if nonconvex:
                     return convex_investment_costs + self.invest_status[
                         n, p
-                    ] * (
-                        n.investment.offset[-1] -
-                        n.investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                    ] * (n.investment.offset[-1] - n.investment.offset[p]) * (
+                        1 + m.discount_rate
+                    ) ** (
+                        -end_year_of_optimization
+                    )
                 else:
                     return convex_investment_costs
             else:

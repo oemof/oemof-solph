@@ -1121,7 +1121,11 @@ class InvestmentFlowBlock(ScalarBlock):
                     ] * (
                         m.flows[i, o].investment.offset[-1]
                         - m.flows[i, o].investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                    ) * (
+                        1 + m.discount_rate
+                    ) ** (
+                        -end_year_of_optimization
+                    )
                 else:
                     return convex_investment_costs
             else:
