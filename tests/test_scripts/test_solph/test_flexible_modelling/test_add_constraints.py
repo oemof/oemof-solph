@@ -31,7 +31,10 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
-    es = EnergySystem(timeindex=pd.date_range("1/1/2012", periods=4, freq="H"))
+    es = EnergySystem(
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="H"),
+        infer_last_interval=True,
+    )
 
     # add some nodes
     boil = Bus(label="oil", balanced=False)

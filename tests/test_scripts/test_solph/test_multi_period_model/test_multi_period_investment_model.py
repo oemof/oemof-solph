@@ -139,7 +139,7 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_lignite: flows.Flow()},
             outputs={
                 bus_el: flows.Flow(
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=1000,
                         ep_costs=2e6,
                         existing=0,
@@ -158,7 +158,7 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_hardcoal: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=1000,
                         ep_costs=1.6e6,
                         existing=0,
@@ -177,7 +177,7 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=1000,
                         ep_costs=1e6,
                         existing=0,
@@ -196,7 +196,7 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=1000,
                         ep_costs=[0.6e6, 0.5e6, 0.8e6, 0.4e6],
                         existing=0,
@@ -217,7 +217,7 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el: flows.Flow(
                     variable_costs=0,
                     max=1,
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=20,
                         ep_costs=1000,
                         existing=10,
@@ -231,7 +231,7 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el: flows.Flow(
                     variable_costs=0,
                     max=1,
-                    investment=_options.Investment(
+                    nominal_value=_options.Investment(
                         maximum=20,
                         ep_costs=1000,
                         existing=10,
@@ -251,7 +251,7 @@ def test_multi_period_investment_model(solver="cbc"):
             invest_relation_input_capacity=None,
             invest_relation_output_capacity=None,
             fixed_costs=10,
-            investment=_options.Investment(
+            nominal_storage_capacity=_options.Investment(
                 maximum=20,
                 ep_costs=1000,
                 existing=10,

@@ -151,7 +151,7 @@ def main():
             input=b_el0,
             output=b_el1,
             reactance=0.0001,
-            investment=Investment(ep_costs=10),
+            nominal_value=Investment(ep_costs=10),
             min=-1,
             max=1,
         )

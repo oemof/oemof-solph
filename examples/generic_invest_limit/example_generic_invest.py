@@ -42,7 +42,7 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
     .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
         :language: python
-        :lines: 62-219
+        :lines: 62-
 
 Installation requirements
 -------------------------
@@ -141,8 +141,7 @@ def main():
             inputs={bus_a_0: solph.Flow()},
             outputs={
                 bus_a_1: solph.Flow(
-                    nominal_value=None,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 2},
                     ),
@@ -159,8 +158,7 @@ def main():
             inputs={bus_b_0: solph.Flow()},
             outputs={
                 bus_b_1: solph.Flow(
-                    nominal_value=None,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 1},
                     ),

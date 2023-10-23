@@ -24,7 +24,7 @@ import numbers
 from warnings import warn
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
@@ -41,7 +41,7 @@ from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class GenericStorage(network.Component):
+class GenericStorage(Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
@@ -80,7 +80,7 @@ class GenericStorage(network.Component):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per time unit (e.g. hour).
+        The relative loss of the storage content per hour.
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
         Losses per hour that are independent of the storage content but
         proportional to nominal storage capacity.
@@ -150,7 +150,7 @@ class GenericStorage(network.Component):
 
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
-    ...     investment=solph.Investment(ep_costs=50),
+    ...     nominal_storage_capacity=solph.Investment(ep_costs=50),
     ...     inputs={my_bus: solph.flows.Flow()},
     ...     outputs={my_bus: solph.flows.Flow()},
     ...     loss_rate=0.02,
@@ -395,16 +395,12 @@ class GenericStorageBlock(ScalarBlock):
     :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
     :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
                                 as share of
-                                :math:`E(t)`
-                                per time unit
-                                (e.g. hour)
+                                :math:`E(t)` per hour
     :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
-                                relative to
-                                :math:`E_{nom}` per
-                                time unit (e.g. hour)
+                                per hour relative to
+                                :math:`E_{nom}`
     :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
-                                of energy per
-                                time unit (e.g. hour)
+                                of energy per hour
     :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
     :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
@@ -1079,11 +1075,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "
         Relation of nominal in- and outflow"
         ":math:`\beta(t)`", "`loss_rate[t]`", "Fraction of lost energy
-        as share of :math:`E(t)` per time unit"
+        as share of :math:`E(t)` per hour"
         ":math:`\gamma(t)`", "`fixed_losses_relative[t]`", "Fixed loss
-        of energy relative to :math:`E_{invest} + E_{exist}` per time unit"
+        of energy relative to :math:`E_{invest} + E_{exist}` per hour"
         ":math:`\delta(t)`", "`fixed_losses_absolute[t]`", "Absolute
-        fixed loss of energy per time unit"
+        fixed loss of energy per hour"
         ":math:`\eta_i(t)`", "`inflow_conversion_factor[t]`", "
         Conversion factor (i.e. efficiency) when storing energy"
         ":math:`\eta_o(t)`", "`outflow_conversion_factor[t]`", "

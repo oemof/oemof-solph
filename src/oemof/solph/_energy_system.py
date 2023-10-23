@@ -138,10 +138,9 @@ class EnergySystem(es.EnergySystem):
             else:
                 msg = (
                     "Ensure that your timeindex and timeincrement are "
-                    "consistent.\nIf you are not considering non-equidistant "
-                    "timeindices, consider only specifying a timeindex."
+                    "consistent."
                 )
-                warnings.warn(msg, debugging.SuspiciousUsageWarning)
+                warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
         elif timeindex is not None and timeincrement is None:
             df = pd.DataFrame(timeindex)
@@ -156,7 +155,7 @@ class EnergySystem(es.EnergySystem):
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
                 "The time increment is inconsistent. Negative values and zero "
-                "is not allowed.\nThis is caused by a inconsistent "
+                "are not allowed.\nThis is caused by a inconsistent "
                 "timeincrement parameter or an incorrect timeindex."
             )
             raise TypeError(msg)
@@ -176,7 +175,7 @@ class EnergySystem(es.EnergySystem):
                 "now. If you find anything suspicious or any bugs, "
                 "please report them."
             )
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+            warnings.warn(msg, debugging.ExperimentalFeatureWarning)
             self._extract_periods_years()
             self._extract_periods_matrix()
             self._extract_end_year_of_optimization()

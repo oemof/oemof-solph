@@ -144,8 +144,8 @@ def main():
             label="line_0",
             inputs={b_0: Flow(), b_1: Flow()},
             outputs={
-                b_1: Flow(investment=Investment()),
-                b_0: Flow(investment=Investment()),
+                b_1: Flow(nominal_value=Investment()),
+                b_0: Flow(nominal_value=Investment()),
             },
             conversion_factors={(b_0, b_1): 0.95, (b_1, b_0): 0.9},
         )

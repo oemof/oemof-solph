@@ -643,8 +643,8 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
     solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
@@ -912,7 +912,7 @@ turbines.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	investment=solph.Investment(ep_costs=epc, maximum=50000))})
+	nominal_value=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
 capacity of 20,000 kW. We're still expecting the total wind power capacity, thus we
@@ -922,7 +922,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	    investment=solph.Investment(ep_costs=epc,
+	    nominal_value=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
 
@@ -957,7 +957,7 @@ example of a converter:
         label='converter_nonconvex',
         inputs={bus_0: solph.flows.Flow()},
         outputs={bus_1: solph.flows.Flow(
-            investment=solph.Investment(
+            nominal_value=solph.Investment(
                 ep_costs=4,
                 maximum=100,
                 minimum=20,
@@ -1143,7 +1143,7 @@ Here is an example
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
@@ -1177,7 +1177,7 @@ This would mean that for investments in the particular period, these values woul
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
@@ -1472,12 +1472,11 @@ This nonlinearity is linearised in the
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
             b_el: solph.flows.Flow(
-                nominal_value=None,
                 variable_costs=0.04,
                 min=0.2,
                 max=1,
                 nonconvex=solph.NonConvex(),
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=90,
                     maximum=150, # required for the linearization
                 ),

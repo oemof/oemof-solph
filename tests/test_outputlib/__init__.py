@@ -123,7 +123,7 @@ heat_pump = Converter(
 )
 
 datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
-energysystem = EnergySystem(timeindex=datetimeindex)
+energysystem = EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
 energysystem.add(
     bcoal,
     bgas,

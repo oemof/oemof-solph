@@ -31,7 +31,9 @@ def test_pwltf():
     demand = np.arange(0, step * periods, step)
 
     # Set up EnergySystem, buses and sink
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(
+        timeindex=datetimeindex, infer_last_interval=True
+    )
     b_gas = Bus(label="biogas", balanced=False)
     b_el = Bus(label="electricity")
     demand_el = Sink(

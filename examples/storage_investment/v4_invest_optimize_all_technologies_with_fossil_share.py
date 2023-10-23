@@ -162,7 +162,7 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=data["wind"],
-                investment=solph.Investment(ep_costs=epc_wind),
+                nominal_value=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
@@ -172,7 +172,7 @@ def main():
         label="pv",
         outputs={
             bel: solph.Flow(
-                fix=data["pv"], investment=solph.Investment(ep_costs=epc_pv)
+                fix=data["pv"], nominal_value=solph.Investment(ep_costs=epc_pv)
             )
         },
     )

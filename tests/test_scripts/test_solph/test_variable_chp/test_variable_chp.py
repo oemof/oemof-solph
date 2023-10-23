@@ -16,6 +16,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 
 from oemof import solph
 from oemof.solph import views
@@ -26,7 +27,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     # create time index for 192 hours in May.
     date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=True
+    )
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -172,14 +175,14 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        assert int(round(maxresults[[key]])) == int(
-            round(variable_chp_dict_max[key])
+        assert maxresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_max[key]
         )
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        assert int(round(sumresults[[key]])) == int(
-            round(variable_chp_dict_sum[key])
+        assert sumresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_sum[key]
         )
 
     assert (
@@ -196,4 +199,6 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     )
 
     # objective function
-    assert round(solph.processing.meta_results(om)["objective"]) == 326661590
+    assert solph.processing.meta_results(om)["objective"] == pytest.approx(
+        326661590, abs=0.5
+    )
