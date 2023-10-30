@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 import itertools
 import logging
 import warnings
+import pandas as pd
 from logging import getLogger
 
 from oemof.tools import debugging
@@ -126,8 +127,12 @@ class BaseModel(po.ConcreteModel):
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
-            "objective_weighting", self.timeincrement
+            "objective_weighting", pd.Series(1.0, index=self.timeincrement.index)
         )
+        if self.es.tsam_weighting is None:
+            self.tsam_weighting = pd.Series(1.0, index=self.timeincrement.index)
+        else:
+            self.tsam_weighting = self.es.tsam_weighting
 
         self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
             "constraint_groups", []
