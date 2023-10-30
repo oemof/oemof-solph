@@ -90,6 +90,8 @@ class EnergySystem(es.EnergySystem):
         infer_last_interval=None,
         periods=None,
         tsa_parameters=None,
+        tsam_aggregations=None,
+        tsam_weighting=None,
         use_remaining_value=False,
         **kwargs,
     ):
@@ -100,6 +102,47 @@ class EnergySystem(es.EnergySystem):
 
         kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
 
+        if tsam_aggregations is not None:
+            aggregated_time_series, tsam_weighting, tsa_parameters = [], [], []
+            first_time_stamp = None
+            if len(tsam_aggregations) > 1:
+                periods = []
+            for aggregation in tsam_aggregations:
+                if aggregation.segmentation:
+                    print("segmentation hasn't been added so far")
+                aggregation.clusterPeriodNoOccur # without, no aggregation.timeIndex exists
+                if first_time_stamp is None:
+                    first_time_stamp = pd.to_datetime(aggregation.timeIndex[0])
+                timeseries, weighting, current_timestamp = self._set_aggregated_timeseries_and_weighting(
+                    segmentation=aggregation.segmentation,
+                    periods_total_occurrence=aggregation.clusterPeriodNoOccur,
+                    aggregated_period_dict=pd.DataFrame.from_dict(aggregation.clusterPeriodDict),
+                    first_time_stamp=first_time_stamp
+                )
+                first_time_stamp = current_timestamp
+                #todo: this function can be deleted in future. It just serves as a control mechanism.
+                self._check_equal_timesteps_after_aggregation(
+                    hours_per_period=aggregation.hoursPerPeriod,
+                    hours_of_input_time_series=aggregation.timeSeries.__len__(),
+                    periods_total_occurrence=aggregation.clusterPeriodNoOccur
+                )
+                aggregated_time_series.extend(timeseries)
+                tsam_weighting.extend(weighting)
+                tsa_parameters.append(
+                    {
+                        "timesteps_per_period": aggregation.hoursPerPeriod,
+                        "order": aggregation.clusterOrder,
+                        "occurrences": aggregation.clusterPeriodNoOccur,
+                        "timeindex": aggregation.timeIndex,
+                    })
+                if periods is not None:
+                    periods.append(timeseries)
+            #todo does the two periods need to be floating?
+            timeindex = pd.DatetimeIndex(aggregated_time_series)
+
+            timeindex = timeindex.append(pd.to_datetime([current_timestamp]))
+            del aggregated_time_series, weighting
+        self.tsam_weighting = tsam_weighting
         if not (
             isinstance(timeindex, pd.DatetimeIndex)
             or isinstance(timeindex, type(None))
@@ -273,6 +316,54 @@ class EnergySystem(es.EnergySystem):
             + 1
         )
 
+    def _set_aggregated_timeseries_and_weighting(self,
+                                                           segmentation,
+                                                           periods_total_occurrence,
+                                                           aggregated_period_dict,
+                                                           first_time_stamp):
+        previous_period = 0
+        weighting = []
+        aggregated_time_series = []
+        current_timestamp = first_time_stamp
+        if segmentation:
+            for period, timestep, segmented_timestep in aggregated_period_dict.index:
+                if previous_period == period:
+                    aggregated_time_series.append(current_timestamp)
+                else:
+                    aggregated_time_series.append(current_timestamp)
+                    previous_period = period
+                weighting.append(periods_total_occurrence[period] * segmented_timestep)
+                current_timestamp += pd.Timedelta(minutes=60 * segmented_timestep)
+        else:
+            for period, timestep in aggregated_period_dict.index:
+                if previous_period == period:
+                    aggregated_time_series.append(current_timestamp)
+                else:
+                    aggregated_time_series.append(current_timestamp)
+                    previous_period = period
+                weighting.append(periods_total_occurrence[period])
+                current_timestamp += pd.Timedelta(minutes=60)
+        aggregated_time_series = pd.DatetimeIndex(aggregated_time_series)
+        return aggregated_time_series, weighting, current_timestamp
+
+    def _check_equal_timesteps_after_aggregation(self,
+                                                 hours_per_period,
+                                                 hours_of_input_time_series,
+                                                 periods_total_occurrence):
+        if not sum(periods_total_occurrence.values()) * hours_per_period == hours_of_input_time_series:
+            # todo: prints can be deleted in future
+            print("aggregated timeseries has: " + str(
+                int( sum(periods_total_occurrence.values()) * hours_per_period)) + " timesteps")
+            print("unaggregated timeseries has: " + str(hours_of_input_time_series) + " timesteps")
+            print("therefore the occurrence of the typical periods for the objective weighting will be customized")
+
+            customize_factor = hours_of_input_time_series / int(sum(periods_total_occurrence.values()) * hours_per_period)
+            print("customize factor is: "+(str(customize_factor)))
+            result_list = [float(occurrence) * customize_factor for occurrence in periods_total_occurrence]
+            periods_total_occurrence = result_list
+            return periods_total_occurrence
+        else:
+            return periods_total_occurrence
 
 def create_time_index(
     year: int = None,
