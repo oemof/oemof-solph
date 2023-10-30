@@ -90,52 +90,7 @@ from oemof.tools import logger
 from oemof.solph import views
 
 from oemof import solph
-def check_equal_timesteps_after_aggregation(hours_per_period : int,
-                                            hours_of_input_time_series: int,
-                                            periods_total_occurrence: list):
 
-    if not sum(periods_total_occurrence) * hours_per_period == 8760:
-        #todo: prints can be deleted in future
-        print("aggregated timeseries has: " + str(int(sum(periods_total_occurrence) * hours_per_period)) + " timesteps")
-        print("unaggregated timeseries has: " + str(hours_of_input_time_series) + " timesteps")
-        print("therefore the occurrence of the typical periods for the objective weighting will be customized")
-        customize_factor = hours_of_input_time_series / int(sum(periods_total_occurrence) * hours_per_period)
-        result_list = [float(occurrence) * customize_factor for occurrence in periods_total_occurrence]
-        periods_total_occurrence = result_list
-        return periods_total_occurrence
-    else:
-        return periods_total_occurrence
-
-def set_aggregated_timeseries_and_objective_weighting(segmentation,
-                                                      periods_total_occurrence,
-                                                      aggregated_period_dict,
-                                                      first_time_stamp):
-    previous_period = 0
-    objective_weighting = []
-    aggregated_time_series = []
-    current_timestamp=first_time_stamp
-    if segmentation:
-        for period, timestep, segmented_timestep in aggregated_period_dict.index:
-            if previous_period == period:
-                aggregated_time_series.append(current_timestamp)
-            else:
-                aggregated_time_series.append(current_timestamp)
-                previous_period = period
-            objective_weighting.append(periods_total_occurrence[period] * segmented_timestep)
-            current_timestamp += pd.Timedelta(minutes=60 * segmented_timestep)
-    else:
-        for period, timestep in aggregated_period_dict.index:
-            if previous_period == period:
-                aggregated_time_series.append(current_timestamp)
-            else:
-                aggregated_time_series.append(current_timestamp)
-                previous_period = period
-            objective_weighting.append(periods_total_occurrence[period])
-            current_timestamp += pd.Timedelta(minutes=60)
-    #time series have to be extended by one, to fit into form of energysystem iput
-    aggregated_time_series.append(current_timestamp)
-    aggregated_time_series = pd.DatetimeIndex(aggregated_time_series)
-    return aggregated_time_series, objective_weighting
 
 def main():
     # Read data file
@@ -156,10 +111,9 @@ def main():
     data["pv"].iloc[8760 * 2 - 24 : 8760] = 0
 
     # add a season without electricity production to simulate the possible advantage using a seasonal storages
-    data["wind"].iloc[2920 * 4:5 * 2920 + 1] = 0
+    # for the first perido
     data["wind"].iloc[2920: 2 * 2920 + 1] = 0
     data["pv"].iloc[2920:2 * 2920 + 1] = 0
-    data["pv"].iloc[2920 * 4:5 * 2920 + 1] = 0
 
     ##########################################################################
     # Initialize the energy system and read/calculate necessary parameters
@@ -167,7 +121,10 @@ def main():
 
     logger.define_logging()
     logging.info("Initialize the energy system")
-
+    #todo: right now, tsam only determines the timeincrement right, when you pick the
+    #first periods last timestamp next to the second periods first timestep
+    #2022-31-12-23:00 --> 2023-01-01-00:00 , than timeincrement in between is equal to 1
+    #todo add initial storage level in new periods is equal to zero?
     t1 = pd.date_range("2022-01-01", periods=8760, freq="H")
     t2 = pd.date_range("2023-01-01", periods=8760, freq="H")
     tindex = t1.append(t2)
@@ -175,7 +132,7 @@ def main():
     data.index = tindex
     del data["timestep"]
 
-    typical_periods = 60
+    typical_periods = 10
     hours_per_period = 24
     segmentation = False
     if segmentation:
@@ -189,6 +146,7 @@ def main():
             hoursPerPeriod=hours_per_period,
             clusterMethod="hierarchical",
             sortValues=True,
+            segmentation=False,
             rescaleClusterPeriods=False,
             extremePeriodMethod="replace_cluster_center",
             addPeakMin=["wind", "pv"],
@@ -201,65 +159,15 @@ def main():
             hoursPerPeriod=hours_per_period,
             clusterMethod="hierarchical",
             sortValues=True,
+            segmentation=False,
             rescaleClusterPeriods=False,
             extremePeriodMethod="replace_cluster_center",
             addPeakMin=["wind", "pv"],
             representationMethod="durationRepresentation",
         )
 
-
-    aggregation1.createTypicalPeriods()
-    aggregation2.createTypicalPeriods()
-    if False:
-        periods_total_occurrence1 = [
-            (aggregation1.clusterOrder == typical_period_name).sum() for typical_period_name in
-            aggregation1.clusterPeriodIdx]
-        periods_total_occurrence2 = [
-            (aggregation2.clusterOrder == typical_period_name).sum() for typical_period_name in
-            aggregation2.clusterPeriodIdx]
-    else:
-        periods_total_occurrence1 = aggregation1.clusterPeriodNoOccur
-        periods_total_occurrence2 = aggregation1.clusterPeriodNoOccur
-    periods_total_occurrence1 = check_equal_timesteps_after_aggregation(hours_per_period=hours_per_period,
-                                            hours_of_input_time_series=t1.__len__(),
-                                            periods_total_occurrence=periods_total_occurrence1
-                                                                        )
-    periods_total_occurrence2 = check_equal_timesteps_after_aggregation(hours_per_period = hours_per_period,
-                                            hours_of_input_time_series = t2.__len__(),
-                                            periods_total_occurrence=periods_total_occurrence2
-                                                                        )
-    #before timeseries generation was based on freq="H" (hourly), now you have to set the number of minutes of one timestep
-    t1_agg, objective_weighting1 = set_aggregated_timeseries_and_objective_weighting(segmentation=segmentation,
-                                                      periods_total_occurrence = periods_total_occurrence1,
-                                                      aggregated_period_dict=pd.DataFrame.from_dict(aggregation1.clusterPeriodDict),
-                                                      first_time_stamp=pd.to_datetime(t1[0])
-                                                                                     )
-    t2_agg, objective_weighting2 = set_aggregated_timeseries_and_objective_weighting(segmentation=segmentation,
-                                                      periods_total_occurrence = periods_total_occurrence2,
-                                                      aggregated_period_dict=pd.DataFrame.from_dict(aggregation2.clusterPeriodDict),
-                                                      first_time_stamp=pd.to_datetime(t1[0])
-                                                                                     )
-    #objective_weighting = objective_weighting1 + objective_weighting2
-    objective_weighting = objective_weighting1
-
-    #tindex_agg = t1_agg.append(t2_agg)
-    tindex_agg = t1_agg
-
-    #todo aggregation1.clusterPeriodNoOccur besser zum objective weighting nutzen
     energysystem = solph.EnergySystem(
-        timeindex=tindex_agg,
-        #timeincrement=[1] * len(tindex_agg),
-        periods=[t1_agg,
-                 #t2_agg
-                 ],
-        tsa_parameters=[
-            {
-                "timesteps_per_period": aggregation1.hoursPerPeriod,
-                "order": aggregation1.clusterOrder,
-                "occurrences": aggregation1.clusterPeriodNoOccur,
-                "timeindex": aggregation1.timeIndex,
-            }
-        ],
+        tsam_aggregations=[aggregation1, aggregation2],
         infer_last_interval=False,
     )
 
@@ -290,7 +198,7 @@ def main():
     wind_profile = pd.concat(
         [
             aggregation1.typicalPeriods["wind"],
-            #aggregation2.typicalPeriods["wind"],
+            aggregation2.typicalPeriods["wind"],
         ],
         ignore_index=True,
     )
@@ -309,28 +217,29 @@ def main():
 
     pv_profile = pd.concat(
         [aggregation1.typicalPeriods["pv"],
-         #aggregation2.typicalPeriods["pv"]
+         aggregation2.typicalPeriods["pv"]
          ],
         ignore_index=True,
     )
     pv_profile.iloc[-24:] = 0
 
     # create fixed source object representing pv power plants
-    pv = solph.components.Source(
-        label="pv",
-        outputs={
-            bel: solph.Flow(
-                fix=pd.concat(
-                    [
-                        aggregation1.typicalPeriods["pv"],
-                        #aggregation2.typicalPeriods["pv"],
-                    ],
-                    ignore_index=True,
-                ),
-                nominal_value=900000
-            )
-        },
-    )
+    if False:
+        pv = solph.components.Source(
+            label="pv",
+            outputs={
+                bel: solph.Flow(
+                    fix=pd.concat(
+                        [
+                            aggregation1.typicalPeriods["pv"],
+                            aggregation2.typicalPeriods["pv"],
+                        ],
+                        ignore_index=True,
+                    ),
+                    nominal_value=900000
+                )
+            },
+        )
 
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
@@ -340,7 +249,7 @@ def main():
                 fix=pd.concat(
                     [
                         aggregation1.typicalPeriods["demand_el"],
-                        #aggregation2.typicalPeriods["demand_el"],
+                        aggregation2.typicalPeriods["demand_el"],
                     ],
                     ignore_index=True,
                 ),
@@ -356,12 +265,14 @@ def main():
         initial_storage_level=0,
         inputs={bel: solph.Flow(variable_costs=0.0, nominal_value=2000)},
         outputs={bel: solph.Flow(nominal_value=2000)},
-        loss_rate=0.000,
+        loss_rate=0.001,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
     )
-
-    energysystem.add(excess, elect_resource, wind, pv, demand, storage)
+    if False:
+        energysystem.add(excess, elect_resource, wind, pv, demand, storage)
+    else:
+        energysystem.add(excess, elect_resource, wind, demand, storage)
 
     ##########################################################################
     # Optimise the energy system
@@ -403,45 +314,40 @@ def main():
         ax=ax, kind="line", drawstyle="steps-post"
     )
     plt.show()
+
     fig, ax = plt.subplots(figsize=(10, 5))
     storage_results = results[(wind, bel)]["sequences"]
     storage_results .plot(
         ax=ax, kind="line", drawstyle="steps-post"
     )
+    ax.set_title("Elect. from Wind")
     plt.show()
-    fig, ax = plt.subplots(figsize=(10, 5))
-    storage_results = results[(pv, bel)]["sequences"]
-    storage_results .plot(
-        ax=ax, kind="line", drawstyle="steps-post"
-    )
-    plt.show()
+    if False:
+        fig, ax = plt.subplots(figsize=(10, 5))
+        storage_results = results[(pv, bel)]["sequences"]
+        storage_results .plot(
+            ax=ax, kind="line", drawstyle="steps-post"
+        )
+        ax.set_title("Elect. from PV")
+        plt.show()
+
     fig, ax = plt.subplots(figsize=(10, 5))
     storage_results = results[(bel, demand)]["sequences"]
     storage_results .plot(
         ax=ax, kind="line", drawstyle="steps-post"
     )
+    ax.set_title("Demand")
+    plt.show()
+
+    fig, ax = plt.subplots(figsize=(10, 5))
+    storage_results = results[(elect_resource, bel)]["sequences"]
+    storage_results .plot(
+        ax=ax, kind="line", drawstyle="steps-post"
+    )
+    ax.set_title("Elect. from Grid")
     plt.show()
     my_results = electricity_bus["period_scalars"]
 
-    # installed capacity of storage in GWh
-    my_results["storage_invest_GWh"] = (
-        results[(storage, None)]["period_scalars"]["invest"] / 1e6
-    )
-
-    # installed capacity of wind power plant in MW
-    my_results["wind_invest_MW"] = (
-        results[(wind, bel)]["period_scalars"]["invest"] / 1e3
-    )
-
-    # resulting renewable energy share
-    print(
-        "res_share:",
-        (
-            1
-            - results[(pp_gas, bel)]["sequences"].sum()
-            / results[(bel, demand)]["sequences"].sum()
-        ),
-    )
 
     pp.pprint(my_results)
 
