@@ -1389,7 +1389,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 self.INVESTSTORAGES, m.TIMESTEPS, within=NonNegativeReals
             )
         else:
-            self.storage_content_inter = Var(self.INVESTSTORAGES, m.CLUSTERS_OFFSET)
+            self.storage_content_inter = Var(
+                self.INVESTSTORAGES, m.CLUSTERS_OFFSET
+            )
             self.storage_content_intra = Var(
                 self.INVESTSTORAGES, m.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
             )
@@ -1734,11 +1736,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         def _intra_storage_balance_rule(block, n, p, k, g):
@@ -1760,11 +1762,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         if not m.TSAM_MODE:
