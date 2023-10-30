@@ -31,85 +31,47 @@ class Location(
 ):
     """Set the Location of the Simulation with an Energy Plus Weather File"""
 
-    def __init__(self, epwfile_path, mannheim: bool):
-        # Set EPW Labels and import epw file
-        if mannheim:
-            epw_labels = [
-                "hour",
-                "drybulb_C",
-                "dewpoint_C",
-                "relhum_percent",
-                "atmos_Pa",
-                "exthorrad_Whm2",
-                "extdirrad_Whm2",
-                "horirsky_Whm2",
-                "glohorrad_Whm2",
-                "dirnorrad_Whm2",
-                "difhorrad_Whm2",
-                "glohorillum_lux",
-                "dirnorillum_lux",
-                "difhorillum_lux",
-                "zenlum_lux",
-                "winddir_deg",
-                "windspd_ms",
-                "totskycvr_tenths",
-                "opaqskycvr_tenths",
-                "visibility_km",
-                "ceiling_hgt_m",
-                "presweathobs",
-                "presweathcodes",
-                "precip_wtr_mm",
-                "aerosol_opt_thousandths",
-                "snowdepth_cm",
-                "days_last_snow",
-                "Albedo",
-                "liq_precip_depth_mm",
-                "liq_precip_rate_Hour",
-            ]
-            self.weather_data = pd.read_csv(
-                epwfile_path, header=None, names=epw_labels
-            )
-        else:
-            epw_labels = [
-                "year",
-                "month",
-                "day",
-                "hour",
-                "minute",
-                "datasource",
-                "drybulb_C",
-                "dewpoint_C",
-                "relhum_percent",
-                "atmos_Pa",
-                "exthorrad_Whm2",
-                "extdirrad_Whm2",
-                "horirsky_Whm2",
-                "glohorrad_Whm2",
-                "dirnorrad_Whm2",
-                "difhorrad_Whm2",
-                "glohorillum_lux",
-                "dirnorillum_lux",
-                "difhorillum_lux",
-                "zenlum_lux",
-                "winddir_deg",
-                "windspd_ms",
-                "totskycvr_tenths",
-                "opaqskycvr_tenths",
-                "visibility_km",
-                "ceiling_hgt_m",
-                "presweathobs",
-                "presweathcodes",
-                "precip_wtr_mm",
-                "aerosol_opt_thousandths",
-                "snowdepth_cm",
-                "days_last_snow",
-                "Albedo",
-                "liq_precip_depth_mm",
-                "liq_precip_rate_Hour",
-            ]
-            self.weather_data = pd.read_csv(
-                epwfile_path, skiprows=8, header=None, names=epw_labels
-            ).drop("datasource", axis=1)
+    def __init__(self, epwfile_path):
+        epw_labels = [
+            "year",
+            "month",
+            "day",
+            "hour",
+            "minute",
+            "datasource",
+            "drybulb_C",
+            "dewpoint_C",
+            "relhum_percent",
+            "atmos_Pa",
+            "exthorrad_Whm2",
+            "extdirrad_Whm2",
+            "horirsky_Whm2",
+            "glohorrad_Whm2",
+            "dirnorrad_Whm2",
+            "difhorrad_Whm2",
+            "glohorillum_lux",
+            "dirnorillum_lux",
+            "difhorillum_lux",
+            "zenlum_lux",
+            "winddir_deg",
+            "windspd_ms",
+            "totskycvr_tenths",
+            "opaqskycvr_tenths",
+            "visibility_km",
+            "ceiling_hgt_m",
+            "presweathobs",
+            "presweathcodes",
+            "precip_wtr_mm",
+            "aerosol_opt_thousandths",
+            "snowdepth_cm",
+            "days_last_snow",
+            "Albedo",
+            "liq_precip_depth_mm",
+            "liq_precip_rate_Hour",
+        ]
+        self.weather_data = pd.read_csv(
+            epwfile_path, skiprows=8, header=None, names=epw_labels,
+            encoding='ISO-8859-1', engine='python').drop('datasource', axis=1)
 
     def calc_sun_position(self, latitude_deg, longitude_deg, year, hoy):
         """

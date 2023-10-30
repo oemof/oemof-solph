@@ -40,6 +40,7 @@ def main():
     number_of_time_steps = 8760
     mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     building_example = None
+
     # Generates 5RC Building-Model
     building_status = "no_refurbishment"
     if building_status == "no_refurbishment":
@@ -63,25 +64,18 @@ def main():
     building_example.calculate_all_parameters()
 
     # Pre-Calculation of solar gains with weather_data and building_data
-    Mannheim = calculate_gain_by_Sun.Location(
-        mannheim=True,
+    location = calculate_gain_by_Sun.Location(
         epwfile_path=os.path.join(
             mainPath,
             "thermal_building_model",
-            "DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv",
+            "weather_files",
+            "12_BW_Mannheim_TRY2035.csv",
         ),
     )
     solar_gains = building_example.calc_solar_gaings_through_windows(
-        object_location_of_building=Mannheim
+        object_location_of_building=location
     )
-    t_outside = pd.read_csv(
-        os.path.join(
-            mainPath,
-            "thermal_building_model",
-            "DEU_BW_Mannheim_107290_TRY2010_12_Jahr_BBSR.csv",
-        ),
-        header=None,
-    )[1].tolist()
+    t_outside = location.weather_data["drybulb_C"].to_list()
 
     # Internal gains of residents, machines (f.e. fridge, computer,...) and lights have to be added manually
     internal_gains = []
@@ -102,6 +96,7 @@ def main():
         timeindex=date_time_index, infer_last_interval=False
     )
 
+    # create heat and cooling flow
     b_heat = solph.buses.Bus(label="b_heat")
     es.add(b_heat)
     b_cool = solph.buses.Bus(label="b_cool")
@@ -111,8 +106,6 @@ def main():
     es.add(b_gas)
     b_elect = solph.buses.Bus(label="electricity_from_grid")
     es.add(b_elect)
-    building_temp = solph.buses.Bus(label="building_temp")
-    es.add(building_temp)
 
     es.add(
         solph.components.Source(
