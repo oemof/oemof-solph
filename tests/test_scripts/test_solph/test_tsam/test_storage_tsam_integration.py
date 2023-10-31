@@ -16,6 +16,13 @@ The example models the following energy system:
                      |--------->|
 
 
+
+An initial SOC of zero leads to infeasible solution, as last inter SOC has to match first inter SOC.
+Following equations have to be fulfilled:
+F_{el,st}[0] = F_{el,st}[6]
+SOC_{init} * discharge + F_{el,st}[0] = \sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i
+F_{el,st}[6] = (SOC_{init} + F_{el,st}[5]/eff_{out}) / (1 - discharge)
+
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
 available from its original location oemof/tests/test_scripts/test_solph/
@@ -120,36 +127,26 @@ om.solve(solver="cbc", solve_kwargs={"tee": True})
 
 # check if the new result object is working for custom components
 results = solph.processing.results(om)
-print(results)
 
 # Concatenate flows:
 flows = pd.concat([flow["sequences"] for flow in results.values()], axis=1)
 flows.columns = [
     f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()
 ]
-print(flows)
+
+# Solving equations from above, needed initial SOC is as follows:
+first_input = (
+    (100 * 1 / 0.8) / (1 - 0.01)
+    + (100 * 1 / 0.8) / (1 - 0.01) ** 2
+    + (50 * 1 / 0.8) / (1 - 0.01) ** 3
+    + (100 * 1 / 0.8) / (1 - 0.01) ** 4
+    + (50 * 1 / 0.8) / (1 - 0.01) ** 5
+)
+last_output = (100 * 1 / 0.8) / 0.99
+init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
 
 
-def test_soc_levels():
-    """
-    An initial SOC of zero leads to infeasible solution, as last inter SOC has to match first inter SOC.
-    Following equations have to be fulfilled:
-    F_{el,st}[0] = F_{el,st}[6]
-    SOC_{init} * discharge + F_{el,st}[0] = \sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i
-    F_{el,st}[6] = (SOC_{init} + F_{el,st}[5]/eff_{out}) / (1 - discharge)
-    """
-    # Solving equation gives following needed initial SOC:
-    first_input = (
-        (100 * 1 / 0.8) / (1 - 0.01)
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 2
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 3
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 4
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 5
-    )
-    last_output = (100 * 1 / 0.8) / 0.99
-    init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
-
-    # STORAGE INPUT CHECKS
+def test_storage_input():
     assert flows["electricity-storage"][0] == pytest.approx((first_input - 0.99 * init_soc) / 0.9)
     assert flows["electricity-storage"][1] == 0
     assert flows["electricity-storage"][2] == 0
@@ -159,7 +156,8 @@ def test_soc_levels():
     assert flows["electricity-storage"][6] == flows["electricity-storage"][0]
     assert flows["electricity-storage"][7] == 0
 
-    # STORAGE OUTPUT CHECKS
+
+def test_storage_output():
     assert flows["storage-electricity"][0] == 0
     assert flows["storage-electricity"][1] == 100
     assert flows["storage-electricity"][2] == 100
@@ -169,7 +167,8 @@ def test_soc_levels():
     assert flows["storage-electricity"][6] == 0
     assert flows["storage-electricity"][7] == 100
 
-    # SOC CHECKS
+
+def test_soc():
     assert flows["storage-None"][0] == pytest.approx(init_soc)
     assert flows["storage-None"][1] == pytest.approx(
         (100 * 1 / 0.8) / (1 - 0.01)
