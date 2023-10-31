@@ -368,7 +368,7 @@ class Model(BaseModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, discount_rate=None, **kwargs):
+    def __init__(self, energysystem, discount_rate=None, fix_investments=False, **kwargs):
         if discount_rate is not None:
             self.discount_rate = discount_rate
         elif (
@@ -383,6 +383,7 @@ class Model(BaseModel):
             self._set_discount_rate_with_warning()
         else:
             pass
+        self.fix_investments = fix_investments
         super().__init__(energysystem, **kwargs)
 
     def _set_discount_rate_with_warning(self):
