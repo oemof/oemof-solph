@@ -519,7 +519,9 @@ class GenericStorageBlock(ScalarBlock):
                     )
                     self.storage_content[n, 0].fix()
         else:
-            self.storage_content_inter = Var(self.STORAGES, m.CLUSTERS_OFFSET)
+            self.storage_content_inter = Var(
+                self.STORAGES, m.CLUSTERS_OFFSET, within=NonNegativeReals
+            )
             self.storage_content_intra = Var(
                 self.STORAGES, m.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
             )
@@ -1390,7 +1392,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
         else:
             self.storage_content_inter = Var(
-                self.INVESTSTORAGES, m.CLUSTERS_OFFSET
+                self.INVESTSTORAGES, m.CLUSTERS_OFFSET, within=NonNegativeReals
             )
             self.storage_content_intra = Var(
                 self.INVESTSTORAGES, m.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
