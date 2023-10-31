@@ -127,10 +127,10 @@ class BaseModel(po.ConcreteModel):
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
-            "objective_weighting", pd.Series(1.0, index=self.timeincrement.index)
+            "objective_weighting", [1] * len(self.timeincrement)
         )
         if self.es.tsam_weighting is None:
-            self.tsam_weighting = pd.Series(1.0, index=self.timeincrement.index)
+            self.tsam_weighting = [1] * len(self.timeincrement)
         else:
             self.tsam_weighting = self.es.tsam_weighting
 
