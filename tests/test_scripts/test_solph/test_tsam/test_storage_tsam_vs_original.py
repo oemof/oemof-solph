@@ -4,7 +4,7 @@
 General description:
 ---------------------
 
-The example models the the same setup as in test_storage_tsam_integration,
+The example models the same setup as in test_storage_tsam_integration,
 but instead of aggregating timeseries, timeseries are left untouched.
 Nevertheless, storage input/output and SOC should equal TSAM example.
 
