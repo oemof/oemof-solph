@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 import itertools
 import logging
 import warnings
-import pandas as pd
 from logging import getLogger
 
 from oemof.tools import debugging
@@ -129,10 +128,6 @@ class BaseModel(po.ConcreteModel):
         self.objective_weighting = kwargs.get(
             "objective_weighting", [1] * len(self.timeincrement)
         )
-        if self.es.tsam_weighting is None:
-            self.tsam_weighting = [1] * len(self.timeincrement)
-        else:
-            self.tsam_weighting = self.es.tsam_weighting
 
         self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
             "constraint_groups", []
@@ -468,8 +463,19 @@ class Model(BaseModel):
 
         # Set up disaggregated timesteps from original timeseries
         self.TSAM_MODE = False
-        if self.es.tsa_parameters is not None:
+        if self.es.tsa_parameters is None:
+            self.tsam_weighting = [1] * len(self.timeincrement)
+        else:
             self.TSAM_MODE = True
+            # Construct weighting from occurrences and order
+            self.tsam_weighting = list(
+                self.es.tsa_parameters[p]["occurrences"][k]
+                for p in self.PERIODS
+                for k in self.es.tsa_parameters[p]["order"]
+                for _ in range(
+                    self.es.tsa_parameters[p]["timesteps_per_period"]
+                )
+            )
             self.CLUSTERS = po.Set(
                 initialize=list(
                     range(
