@@ -112,7 +112,6 @@ om = solph.Model(energysystem)
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")
-om.write("my_model.lp", io_options={"symbolic_solver_labels": True})
 om.solve(solver="cbc", solve_kwargs={"tee": True})
 
 ##########################################################################
