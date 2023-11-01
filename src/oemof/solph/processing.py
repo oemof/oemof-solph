@@ -460,7 +460,89 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
             periodic_dict[key] = periodic_values
         flow_dict[key] = data[~data["variable_name"].isin(PERIOD_INDEXES)]
 
-    # Find storages:
+    # Find storages and remove related entries from flow dict:
+    storages, storage_keys = _get_storage_soc_flows_and_keys(flow_dict)
+    for key in storage_keys:
+        del flow_dict[key]
+
+    # Disaggregate flows
+    for flow in flow_dict:
+        disaggregated_flow_frames = []
+        period_offset = 0
+        for tsa_period in tsa_parameters:
+            for k in tsa_period["order"]:
+                flow_k = flow_dict[flow].iloc[
+                    period_offset
+                    + k * tsa_period["timesteps_per_period"] : period_offset
+                    + (k + 1) * tsa_period["timesteps_per_period"]
+                ]
+                disaggregated_flow_frames.append(flow_k)
+            period_offset += tsa_period["timesteps_per_period"] * len(
+                tsa_period["occurrences"]
+            )
+        ts = pd.concat(disaggregated_flow_frames)
+        ts.timestep = range(len(ts))
+        flow_dict[flow] = ts
+
+    # Add storage SOC flows:
+    for storage, soc in storages.items():
+        flow_dict[(storage, None)] = _calculate_soc_from_inter_and_intra_soc(
+            soc, storage, tsa_parameters
+        )
+
+    # Add periodic values (they get extracted in period extraction fct)
+    for key, data in periodic_dict.items():
+        flow_dict[key] = pd.concat([flow_dict[key], data])
+
+    return flow_dict
+
+
+def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
+    """Calculate resulting SOC from inter and intra SOC flows"""
+    soc_frames = []
+    i_offset = 0
+    t_offset = 0
+    for p, tsa_period in enumerate(tsa_parameters):
+        for i, k in enumerate(tsa_period["order"]):
+            inter_value = soc["inter"].iloc[i_offset + i]["value"]
+            # Self-discharge has to be taken into account for calculating
+            # inter SOC for each timestep in cluster
+            t0 = t_offset + i * tsa_period["timesteps_per_period"]
+            inter_series = (
+                pd.Series(
+                    accumulate(
+                        (
+                            (1 - storage.loss_rate[t])
+                            for t in range(
+                                t0,
+                                t0
+                                + tsa_period["timesteps_per_period"]
+                                - 1,
+                            )
+                        ),
+                        operator.mul,
+                        initial=1,
+                    )
+                )
+                * inter_value
+            )
+            intra_series = soc["intra"][(p, k)].iloc[
+                0 : tsa_period["timesteps_per_period"]
+            ]
+            intra_series["value"] = (
+                intra_series["value"].values + inter_series.values
+            )  # Neglect indexes, otherwise none
+            soc_frames.append(intra_series)
+        i_offset += len(tsa_period["order"])
+        t_offset += i_offset * tsa_period["timesteps_per_period"]
+    soc_ts = pd.concat(soc_frames)
+    soc_ts["variable_name"] = "soc"
+    soc_ts["timestep"] = range(len(soc_ts))
+    return soc_ts
+
+
+def _get_storage_soc_flows_and_keys(flow_dict):
+    """Detect storage flows in flow dict"""
     storages = {}
     storage_keys = []
     for oemof_tuple, data in flow_dict.items():
@@ -480,82 +562,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
             storages[oemof_tuple[0]]["intra"][
                 (oemof_tuple[1], oemof_tuple[2])
             ] = data
-
-    for key in storage_keys:
-        del flow_dict[key]
-
-    # Disaggregate storages
-    for storage, soc in storages.items():
-        soc_frames = []
-        i_offset = 0
-        t_offset = 0
-        for p in range(len(tsa_parameters)):
-            for i, k in enumerate(tsa_parameters[p]["order"]):
-                inter_value = soc["inter"].iloc[i_offset + i]["value"]
-                # Self-discharge has to be taken into account for calculating
-                # inter SOC for each timestep in cluster
-                t0 = t_offset + i * tsa_parameters[p]["timesteps_per_period"]
-                inter_series = (
-                    pd.Series(
-                        accumulate(
-                            (
-                                (1 - storage.loss_rate[t])
-                                for t in range(
-                                    t0,
-                                    t0
-                                    + tsa_parameters[p]["timesteps_per_period"]
-                                    - 1,
-                                )
-                            ),
-                            operator.mul,
-                            initial=1,
-                        )
-                    )
-                    * inter_value
-                )
-                intra_series = soc["intra"][(p, k)].iloc[
-                    0 : tsa_parameters[p]["timesteps_per_period"]
-                ]
-                intra_series["value"] = (
-                    intra_series["value"].values + inter_series.values
-                )  # Neglect indexes, otherwise none
-                soc_frames.append(intra_series)
-            i_offset += len(tsa_parameters[p]["order"])
-            t_offset += i_offset * tsa_parameters[p]["timesteps_per_period"]
-        soc_ts = pd.concat(soc_frames)
-        soc_ts["variable_name"] = "soc"
-        soc_ts["timestep"] = range(len(soc_ts))
-        soc["timeseries"] = soc_ts
-
-    # Disaggregate flows
-    for flow in flow_dict:
-        disaggregated_flow_frames = []
-        period_offset = 0
-        for p in range(len(tsa_parameters)):
-            for k in tsa_parameters[p]["order"]:
-                flow_k = flow_dict[flow].iloc[
-                    period_offset
-                    + k
-                    * tsa_parameters[p]["timesteps_per_period"] : period_offset
-                    + (k + 1) * tsa_parameters[p]["timesteps_per_period"]
-                ]
-                disaggregated_flow_frames.append(flow_k)
-            period_offset += tsa_parameters[p]["timesteps_per_period"] * len(
-                tsa_parameters[p]["occurrences"]
-            )
-        ts = pd.concat(disaggregated_flow_frames)
-        ts.timestep = range(len(ts))
-        flow_dict[flow] = ts
-
-    # Add storage SOC flows:
-    for storage, soc in storages.items():
-        flow_dict[(storage, None)] = soc["timeseries"]
-
-    # Add periodic values (they get extracted in period extraction fct)
-    for key, data in periodic_dict.items():
-        flow_dict[key] = pd.concat([flow_dict[key], data])
-
-    return flow_dict
+    return storages, storage_keys
 
 
 def convert_keys_to_strings(result, keep_none_type=False):
