@@ -1,4 +1,4 @@
-from test_multi_period_investment_model import (
+from test_investment_model import (
     set_up_multi_period_investment_model,
 )
 
