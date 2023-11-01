@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""
+r"""
 General description:
 ---------------------
 
@@ -20,10 +20,10 @@ The example models the following energy system:
 An initial SOC of zero leads to infeasible solution, as last inter SOC has to
 match first inter SOC.
 Following equations have to be fulfilled:
-F_{el,st}[0] = F_{el,st}[6]
-SOC_{init} * discharge + F_{el,st}[0] =
-\sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i
-F_{el,st}[6] = (SOC_{init} + F_{el,st}[5]/eff_{out}) / (1 - discharge)
+:math:`F_{el,st}[0] = F_{el,st}[6]`
+:math:`SOC_{init} * discharge + F_{el,st}[0] =`
+:math:`\sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i`
+:math:`F_{el,st}[6] = (SOC_{init} + F_{el,st}[5]/eff_{out}) / (1 - discharge)`
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
