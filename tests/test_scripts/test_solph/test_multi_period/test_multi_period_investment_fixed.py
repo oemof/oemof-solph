@@ -1,6 +1,4 @@
-from test_investment_model import (
-    set_up_multi_period_investment_model,
-)
+from test_investment_model import set_up_multi_period_investment_model
 
 
 def test_multi_period_investment_fixed(solver="cbc"):
