@@ -81,9 +81,9 @@ import logging
 import os
 import pprint as pp
 import warnings
-import tsam.timeseriesaggregation as tsam
 
 import pandas as pd
+import tsam.timeseriesaggregation as tsam
 from oemof.tools import economics
 from oemof.tools import logger
 

@@ -34,11 +34,12 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
+
 import pandas as pd
 import pytest
-
-from oemof.tools import logger
 from oemof.tools import economics
+from oemof.tools import logger
+
 from oemof import solph
 
 ##########################################################################
