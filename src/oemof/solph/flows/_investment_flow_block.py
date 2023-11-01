@@ -87,7 +87,6 @@ class InvestmentFlowBlock(ScalarBlock):
             attribute investment and the associated source (s) and target (t)
             of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
         """
-        m = self.parent_block()
         if group is None:
             return None
 

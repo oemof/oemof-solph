@@ -1,4 +1,3 @@
-from oemof.solph import processing
 from test_multi_period_investment_model import (
     set_up_multi_period_investment_model,
 )
