@@ -18,8 +18,9 @@ import pytest
 from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
-from tests.test_scripts.test_solph.test_multi_period_model.test_multi_period_investment_model import \
-    set_up_multi_period_investment_model
+from tests.test_scripts.test_solph.test_multi_period_model.test_multi_period_investment_model import (
+    set_up_multi_period_investment_model,
+)
 
 logging.disable(logging.INFO)
 
