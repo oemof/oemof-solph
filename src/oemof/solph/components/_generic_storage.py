@@ -1458,6 +1458,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
+        reduced_periods_timesteps = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
+
         # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
             """Rule definition for determining total installed
@@ -1720,27 +1722,27 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         def _storage_balance_rule(block, n, p, t):
             """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
+            Rule definition for the storage balance of every storage n
+            for every time step but the first.
             """
             expr = 0
-            expr += block.storage_content[n, t + 1]
+            expr += block.storage_content[n, t]
             expr += (
-                -block.storage_content[n, t]
+                -block.storage_content[n, t - 1]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
                 n.fixed_losses_relative[t]
-                * n.nominal_storage_capacity
+                * self.total[n, p]
                 * m.timeincrement[t]
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
+                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                    ) * m.timeincrement[t]
             return expr == 0
 
         def _intra_storage_balance_rule(block, n, p, k, g):
@@ -1771,7 +1773,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         if not m.TSAM_MODE:
             self.balance = Constraint(
-                self.INVESTSTORAGES, m.TIMEINDEX, rule=_storage_balance_rule
+                self.INVESTSTORAGES, reduced_periods_timesteps, rule=_storage_balance_rule
             )
         else:
             self.intra_balance = Constraint(
