@@ -1179,11 +1179,12 @@ class InvestmentFlowBlock(ScalarBlock):
     def fix_investments_results(self):
         """Fix investments if `_fix_investments` is set to True for model"""
         m = self.parent_block()
-        for i, o in self.INVESTFLOWS:
-            for p in m.PERIODS:
-                self.invest[i, o, p].fix()
-                self.total[i, o, p].fix()
-                if m.es.periods is not None:
-                    self.old[i, o, p].fix()
-                    self.old_end[i, o, p].fix()
-                    self.old_exo[i, o, p].fix()
+        if hasattr(self, "INVESTFLOWS"):
+            for i, o in self.INVESTFLOWS:
+                for p in m.PERIODS:
+                    self.invest[i, o, p].fix()
+                    self.total[i, o, p].fix()
+                    if m.es.periods is not None:
+                        self.old[i, o, p].fix()
+                        self.old_end[i, o, p].fix()
+                        self.old_exo[i, o, p].fix()
