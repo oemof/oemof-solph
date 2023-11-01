@@ -1458,8 +1458,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        reduced_periods_timesteps = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
-
         # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
             """Rule definition for determining total installed
@@ -1990,7 +1988,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_storage_inter_minimum_level_rule
             )
         else:
-            # Set the lower bound of the storage content if the attribute exists
+            # Set the lower bound of the storage content if the
+            # attribute exists
             self.min_storage_content = Constraint(
                 self.MIN_INVESTSTORAGES,
                 m.TIMEINDEX,

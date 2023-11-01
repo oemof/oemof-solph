@@ -3,7 +3,8 @@
 """
 General description:
 ---------------------
-This tests shall prove, that TSAM weighting is reflected in full load hours and variable costs.
+This tests shall prove, that TSAM weighting is reflected in full load hours and
+variable costs.
 
 The example models the following energy system:
 

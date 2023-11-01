@@ -17,10 +17,12 @@ The example models the following energy system:
 
 
 
-An initial SOC of zero leads to infeasible solution, as last inter SOC has to match first inter SOC.
+An initial SOC of zero leads to infeasible solution, as last inter SOC has to
+match first inter SOC.
 Following equations have to be fulfilled:
 F_{el,st}[0] = F_{el,st}[6]
-SOC_{init} * discharge + F_{el,st}[0] = \sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i
+SOC_{init} * discharge + F_{el,st}[0] =
+\sum_{i=1}^{n=5}F_{st,el}[i]/eff_{out}/(1 - discharge)^i
 F_{el,st}[6] = (SOC_{init} + F_{el,st}[5]/eff_{out}) / (1 - discharge)
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
@@ -147,7 +149,9 @@ init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
 
 
 def test_storage_input():
-    assert flows["electricity-storage"][0] == pytest.approx((first_input - 0.99 * init_soc) / 0.9)
+    assert flows["electricity-storage"][0] == pytest.approx(
+        (first_input - 0.99 * init_soc) / 0.9
+    )
     assert flows["electricity-storage"][1] == 0
     assert flows["electricity-storage"][2] == 0
     assert flows["electricity-storage"][3] == 0
