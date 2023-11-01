@@ -126,7 +126,10 @@ class BaseModel(po.ConcreteModel):
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
-            "objective_weighting", [1] * len(self.timeincrement)
+            "objective_weighting",
+            [1] * len(self.timeincrement)
+            if self.timeincrement is not None
+            else [1],
         )
 
         self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
