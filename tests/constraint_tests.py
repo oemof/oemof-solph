@@ -1995,3 +1995,37 @@ class TestsConstraint:
             output_levels={out_0: 1 / 8, out_1: 1 / 2},
         )
         self.compare_lp_files("storage_level_constraint.lp", my_om=om)
+
+    def test_investment_fixed(self):
+        """test a repeated solve with fixed investments"""
+        bgas = solph.buses.Bus(label="gas")
+        bel = solph.buses.Bus(label="electricity")
+
+        source = solph.components.Source(
+            label="gas_source",
+            outputs={bgas: solph.flows.Flow()},
+        )
+        converter = solph.components.Converter(
+            label="powerplant_gas",
+            inputs={bgas: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=50,
+                    nominal_value=solph.Investment(maximum=1000, ep_costs=20),
+                )
+            },
+            conversion_factors={bel: 0.58},
+        )
+        sink = solph.components.Sink(
+            label="electricity_consumption",
+            inputs={
+                bel: solph.flows.Flow(nominal_value=100, fix=[0.8, 0.9, 1.0])
+            },
+        )
+        self.energysystem.add(bgas, bel, source, converter, sink)
+        om = solph.Model(self.energysystem)
+        self.compare_lp_files("investment_before_fixing.lp", my_om=om)
+        om.solve()
+        om.fix_investments()
+        om.solve()
+        self.compare_lp_files("investment_after_fixing.lp", my_om=om)
