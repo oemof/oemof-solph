@@ -174,3 +174,14 @@ def test_sub_cell_flow_consideration():
 
     m = solph.Model(energysystem=[es, ec_1])
     assert test_flow in m.FLOWS
+
+
+def test_fix_investments_for_unsolved_model():
+    """test error message for unsolved model"""
+    es = solph.EnergySystem(timeincrement=[1])
+    om = solph.Model(es)
+    with pytest.raises(
+        ValueError,
+        match="Cannot fix investments as model has not yet been solved!",
+    ):
+        om.fix_investments()
