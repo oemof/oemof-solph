@@ -534,3 +534,11 @@ class Model(BaseModel):
         self._fix_investments = True
         if hasattr(self, "InvestmentFlowBlock"):
             self.InvestmentFlowBlock.fix_investments_results()
+        if hasattr(self, "GenericInvestmentStorageBlock"):
+            self.GenericInvestmentStorageBlock.fix_investments_results()
+        if hasattr(self, "SinkDSMOemofInvestmentBlock"):
+            self.SinkDSMOemofInvestmentBlock.fix_investments_results()
+        if hasattr(self, "SinkDSMDIWInvestmentBlock"):
+            self.SinkDSMDIWInvestmentBlock.fix_investments_results()
+        if hasattr(self, "SinkDSMDLRInvestmentBlock"):
+            self.SinkDSMDLRInvestmentBlock.fix_investments_results()

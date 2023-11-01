@@ -1536,6 +1536,18 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         else:
             return 0
 
+    def fix_investments_results(self):
+        """Fix investments if `_fix_investments` is set to True for model"""
+        m = self.parent_block()
+        for g in self.investdsm:
+            for p in m.PERIODS:
+                self.invest[g, p].fix()
+                self.total[g, p].fix()
+                if m.es.periods is not None:
+                    self.old[g, p].fix()
+                    self.old_end[g, p].fix()
+                    self.old_exo[g, p].fix()
+
 
 class SinkDSMDIWBlock(ScalarBlock):
     r"""Constraints for SinkDSM with "DIW" approach
@@ -3389,6 +3401,18 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 return 0
         else:
             return 0
+
+    def fix_investments_results(self):
+        """Fix investments if `_fix_investments` is set to True for model"""
+        m = self.parent_block()
+        for g in self.investdsm:
+            for p in m.PERIODS:
+                self.invest[g, p].fix()
+                self.total[g, p].fix()
+                if m.es.periods is not None:
+                    self.old[g, p].fix()
+                    self.old_end[g, p].fix()
+                    self.old_exo[g, p].fix()
 
 
 class SinkDSMDLRBlock(ScalarBlock):
@@ -5888,3 +5912,15 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 return 0
         else:
             return 0
+
+    def fix_investments_results(self):
+        """Fix investments if `_fix_investments` is set to True for model"""
+        m = self.parent_block()
+        for g in self.INVESTDR:
+            for p in m.PERIODS:
+                self.invest[g, p].fix()
+                self.total[g, p].fix()
+                if m.es.periods is not None:
+                    self.old[g, p].fix()
+                    self.old_end[g, p].fix()
+                    self.old_exo[g, p].fix()
