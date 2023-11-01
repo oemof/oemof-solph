@@ -471,7 +471,7 @@ class Model(BaseModel):
             self.tsam_weighting = list(
                 self.es.tsa_parameters[p]["occurrences"][k]
                 for p in self.PERIODS
-                for k in self.es.tsa_parameters[p]["order"]
+                for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
                 for _ in range(
                     self.es.tsa_parameters[p]["timesteps_per_period"]
                 )
