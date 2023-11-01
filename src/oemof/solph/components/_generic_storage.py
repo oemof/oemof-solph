@@ -1738,11 +1738,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                        -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             expr += (
-                        m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
-                    ) * m.timeincrement[t]
+                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            ) * m.timeincrement[t]
             return expr == 0
 
         def _intra_storage_balance_rule(block, n, p, k, g):
@@ -1773,7 +1773,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         if not m.TSAM_MODE:
             self.balance = Constraint(
-                self.INVESTSTORAGES, reduced_periods_timesteps, rule=_storage_balance_rule
+                self.INVESTSTORAGES,
+                reduced_periods_timesteps,
+                rule=_storage_balance_rule,
             )
         else:
             self.intra_balance = Constraint(
