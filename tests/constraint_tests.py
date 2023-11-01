@@ -1997,7 +1997,7 @@ class TestsConstraint:
         self.compare_lp_files("storage_level_constraint.lp", my_om=om)
 
     def test_investment_fixed(self):
-        """test a repeated solve with fixed investments"""
+        """test a repeated solve with fixed investments for a converter"""
         bgas = solph.buses.Bus(label="gas")
         bel = solph.buses.Bus(label="electricity")
 
@@ -2031,7 +2031,7 @@ class TestsConstraint:
         self.compare_lp_files("investment_after_fixing.lp", my_om=om)
 
     def test_storage_investment_fixed(self):
-        """test a repeated solve with fixed investments"""
+        """test a repeated solve with fixed investments for a storage"""
         bgas = solph.buses.Bus(label="gas")
         bel = solph.buses.Bus(label="electricity")
 
@@ -2071,3 +2071,92 @@ class TestsConstraint:
         om.fix_investments()
         om.solve()
         self.compare_lp_files("investment_storage_after_fixing.lp", my_om=om)
+
+    def test_dsm_investment_fixed(self):
+        """test a repeated solve with fixed investments for a dsm unit"""
+        for approach in ["oemof", "DIW", "DLR"]:
+            energysystem = solph.EnergySystem(
+                timeindex=pd.date_range("1/1/2012", periods=3, freq="H")
+            )
+            bgas = solph.buses.Bus(label="gas")
+            bel = solph.buses.Bus(label="electricity")
+
+            source = solph.components.Source(
+                label="gas_source",
+                outputs={bgas: solph.flows.Flow()},
+            )
+            converter = solph.components.Converter(
+                label="powerplant_gas",
+                inputs={bgas: solph.flows.Flow()},
+                outputs={
+                    bel: solph.flows.Flow(
+                        variable_costs=50,
+                        nominal_value=110,
+                    )
+                },
+                conversion_factors={bel: 0.58},
+            )
+            kwargs_all = {
+                "label": "demand_dsm",
+                "inputs": {
+                    bel: solph.flows.Flow(
+                        variable_costs=0,
+                    )
+                },
+                "demand": [20] * 3,
+                "capacity_up": [10] * 3,
+                "capacity_down": [10] * 3,
+                "delay_time": 1,
+                "max_demand": [1] * 3,
+                "recovery_time_shift": 0,
+                "cost_dsm_up": 0.01,
+                "cost_dsm_down_shift": 0.01,
+                "efficiency": 1.0,
+                "shed_eligibility": False,
+                "shift_eligibility": True,
+                "shift_time": 1,
+            }
+
+            kwargs_dict = {
+                "oemof": {"shift_interval": 24},
+                "DIW": {},
+                "DLR": {
+                    "ActivateYearLimit": False,
+                    "ActivateDayLimit": False,
+                    "n_yearLimit_shift": 2,
+                    "n_yearLimit_shed": 10,
+                    "t_dayLimit": 2,
+                    "addition": True,
+                    "fixes": True,
+                },
+            }
+
+            dsm_unit = solph.components.experimental.SinkDSM(
+                **kwargs_all,
+                approach=approach,
+                **kwargs_dict[approach],
+                investment=solph.Investment(
+                    maximum=20,
+                    ep_costs=10,
+                ),
+            )
+
+            sink = solph.components.Sink(
+                label="electricity_consumption",
+                inputs={
+                    bel: solph.flows.Flow(
+                        nominal_value=100, fix=[0.9, 1.0, 0.8]
+                    )
+                },
+            )
+            energysystem.add(bgas, bel, source, converter, dsm_unit, sink)
+            om = solph.Model(energysystem)
+            self.compare_lp_files(
+                f"investment_dsm_{approach}_before_fixing.lp", my_om=om
+            )
+            om.solve()
+            om.fix_investments()
+            om.solve()
+            self.compare_lp_files(
+                f"investment_dsm_{approach}_after_fixing.lp", my_om=om
+            )
