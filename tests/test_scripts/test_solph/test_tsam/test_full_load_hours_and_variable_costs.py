@@ -74,7 +74,7 @@ source = solph.components.Source(
             full_load_time_min=0.8,
             full_load_time_max=0.8,
             nominal_value=100,
-            variable_costs=[0.1, 0.2, 0.3, 0.4]
+            variable_costs=[0.1, 0.2, 0.3, 0.4],
         )
     },
 )

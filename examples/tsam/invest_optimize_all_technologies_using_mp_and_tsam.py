@@ -92,7 +92,9 @@ from oemof import solph
 
 def main():
     # Read data file
-    filename = os.path.join(os.getcwd(), "../storage_investment/storage_investment.csv")
+    filename = os.path.join(
+        os.getcwd(), "../storage_investment/storage_investment.csv"
+    )
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
@@ -306,7 +308,7 @@ def main():
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.write('my_model.lp', io_options={'symbolic_solver_labels': True})
+    om.write("my_model.lp", io_options={"symbolic_solver_labels": True})
     om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     ##########################################################################
