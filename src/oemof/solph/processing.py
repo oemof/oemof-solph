@@ -515,9 +515,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                             (1 - storage.loss_rate[t])
                             for t in range(
                                 t0,
-                                t0
-                                + tsa_period["timesteps_per_period"]
-                                - 1,
+                                t0 + tsa_period["timesteps_per_period"] - 1,
                             )
                         ),
                         operator.mul,
