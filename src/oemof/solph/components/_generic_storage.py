@@ -1968,3 +1968,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 return 0
         else:
             return 0
+
+    def fix_investments_results(self):
+        """Fix investments if `_fix_investments` is set to True for model"""
+        m = self.parent_block()
+        for n in self.INVESTSTORAGES:
+            for p in m.PERIODS:
+                self.invest[n, p].fix()
+                self.total[n, p].fix()
+                if m.es.periods is not None:
+                    self.old[n, p].fix()
+                    self.old_end[n, p].fix()
+                    self.old_exo[n, p].fix()
