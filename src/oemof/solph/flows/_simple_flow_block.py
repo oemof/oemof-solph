@@ -215,7 +215,9 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, p, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for p, ts in m.TIMEINDEX
                 )
                 rhs = (
@@ -235,7 +237,9 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, p, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for p, ts in m.TIMEINDEX
                 )
                 rhs = (
