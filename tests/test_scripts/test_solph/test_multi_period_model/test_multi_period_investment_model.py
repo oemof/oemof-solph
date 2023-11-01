@@ -92,9 +92,7 @@ def set_up_multi_period_investment_model(approach):
     )
     source_shortage = components.Source(
         label="DE_source_shortage",
-        outputs={
-            bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)
-        },
+        outputs={bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)},
     )
     source_wind_FR = components.Source(
         label="FR_source_wind",
@@ -122,23 +120,17 @@ def set_up_multi_period_investment_model(approach):
     )
     sink_excess = components.Sink(
         label="DE_sink_excess",
-        inputs={
-            bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)
-        },
+        inputs={bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)},
     )
     sink_el_FR = components.Sink(
         label="FR_sink_el",
         inputs={
-            bus_el_FR: flows.Flow(
-                fix=[50] * len(timeindex), nominal_value=1
-            )
+            bus_el_FR: flows.Flow(fix=[50] * len(timeindex), nominal_value=1)
         },
     )
     sink_excess_FR = components.Sink(
         label="FR_sink_excess",
-        inputs={
-            bus_el_FR: flows.Flow(variable_costs=1e3, nominal_value=1e10)
-        },
+        inputs={bus_el_FR: flows.Flow(variable_costs=1e3, nominal_value=1e10)},
     )
 
     # Create converters
