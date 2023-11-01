@@ -369,7 +369,7 @@ class Model(BaseModel):
     ]
 
     def __init__(
-        self, energysystem, discount_rate=None, fix_investments=False, **kwargs
+        self, energysystem, discount_rate=None, **kwargs
     ):
         if discount_rate is not None:
             self.discount_rate = discount_rate
@@ -385,7 +385,7 @@ class Model(BaseModel):
             self._set_discount_rate_with_warning()
         else:
             pass
-        self.fix_investments = fix_investments
+        self._fix_investments = False
         super().__init__(energysystem, **kwargs)
 
     def _set_discount_rate_with_warning(self):
@@ -523,3 +523,16 @@ class Model(BaseModel):
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
+
+    def fix_investments(self):
+        """Fix investment results of an already solved model"""
+        if self.solver_results is None:
+            msg = (
+                "Cannot fix investments as model has not yet been solved!\n"
+                "You have to first solve your model and then call method "
+                "`fix_investments()` on your model instance."
+            )
+            raise ValueError(msg)
+        self._fix_investments = True
+        if hasattr(self, "InvestmentFlowBlock"):
+            self.InvestmentFlowBlock.fix_investments_results()

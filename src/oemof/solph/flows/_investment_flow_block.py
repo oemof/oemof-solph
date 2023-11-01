@@ -94,8 +94,6 @@ class InvestmentFlowBlock(ScalarBlock):
         self._create_sets(group)
         self._create_variables(group)
         self._create_constraints()
-        if m.fix_investments:
-            self._fix_investments()
 
     def _create_sets(self, group):
         """
@@ -1176,21 +1174,14 @@ class InvestmentFlowBlock(ScalarBlock):
 
         return self.maximum_rule
 
-    def _fix_investments(self):
-        """Fix investments in case boolean flag `fix_investments` is True"""
+    def fix_investments_results(self):
+        """Fix investments if `_fix_investments` is set to True for model"""
         m = self.parent_block()
-        if m.solver_results is not None:
+        for (i, o) in self.INVESTFLOWS:
             for p in m.PERIODS:
-                self.invest[p].fix()
-                self.total[p].fix()
+                self.invest[i, o, p].fix()
+                self.total[i, o, p].fix()
                 if m.es.periods is not None:
-                    self.old[p].fix()
-                    self.old_end[p].fix()
-                    self.old_exo[p].fix()
-        else:
-            msg = (
-                "Cannot fix investments as model has not yet been solved!\n"
-                "You have to first solve your model and then set "
-                "`fix_investments=True` for your model instance."
-            )
-            raise ValueError(msg)
+                    self.old[i, o, p].fix()
+                    self.old_end[i, o, p].fix()
+                    self.old_exo[i, o, p].fix()
