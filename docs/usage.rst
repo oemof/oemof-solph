@@ -1279,6 +1279,33 @@ Besides the `invest` variable, new variables are introduced as well. These are:
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
 
+Repeated solving with fixed investment results
+----------------------------------------------
+
+You can rerun a given optimization model with fixed investments.
+Let's assume you have set up a model instance called ``model``
+containing investments and solved it by calling:
+
+.. code-block:: python
+
+    model = solph.Model(energysystem)
+    model.solve()
+
+You can now fix the investment results from the previous solving and
+only solve the dispatch-related part via a call of the method
+``fix_investments`` as well as a second solving of your model:
+
+.. code-block:: python
+
+    model.fix_investments()
+    model.solve()
+
+This will now take the investment variables as parameters. Thus, their
+values from the previous solving are parameters in the second solving. Only
+the dispatch-related variables will be optimized. This two-stage approach
+for instance may allow you to interpret dual values of balancing constraints
+which you cannot sensibly interpret in the presence of investment variables.
+
 Modelling cellular energy systems and modularizing energy system models
 -----------------------------------------------------------------------
 

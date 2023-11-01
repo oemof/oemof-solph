@@ -5,12 +5,15 @@ API changes
 ###########
 
 * New bool attribute `use_remaining_value` of `oemof.solph.EnergySystem`
+* New method `fix_investments` of `oemof.solph.Model`
 
 New features
 ############
 
 * Allow for evaluating differences in the remaining vs. the original value
   for multi-period investments.
+* Allow for fixing investment variables to the values of a previous
+  optimization run, enabling a repeated solve with fixed investments.
 
 Documentation
 #############
