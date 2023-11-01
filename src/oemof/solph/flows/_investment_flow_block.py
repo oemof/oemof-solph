@@ -1179,7 +1179,7 @@ class InvestmentFlowBlock(ScalarBlock):
     def fix_investments_results(self):
         """Fix investments if `_fix_investments` is set to True for model"""
         m = self.parent_block()
-        for (i, o) in self.INVESTFLOWS:
+        for i, o in self.INVESTFLOWS:
             for p in m.PERIODS:
                 self.invest[i, o, p].fix()
                 self.total[i, o, p].fix()

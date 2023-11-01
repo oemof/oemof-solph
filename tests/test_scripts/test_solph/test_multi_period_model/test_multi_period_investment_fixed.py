@@ -12,7 +12,7 @@ def test_multi_period_investment_fixed(solver="cbc"):
     assert om.solver_results is not None
     om.fix_investments()
     om.solve(solver=solver)
-    for (i, o) in om.InvestmentFlowBlock.INVESTFLOWS:
+    for i, o in om.InvestmentFlowBlock.INVESTFLOWS:
         for p in om.PERIODS:
             assert om.InvestmentFlowBlock.invest[i, o, p].fixed
             assert om.InvestmentFlowBlock.total[i, o, p].fixed
