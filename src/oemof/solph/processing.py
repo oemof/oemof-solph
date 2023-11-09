@@ -611,9 +611,9 @@ def __separate_attrs(
 
     # Check if system is es or om:
     if system.__class__.__name__ == "EnergySystem":
-        components = system.flows() if get_flows else system.nodes.values()
+        components = system.flows() if get_flows else system.nodes
     else:
-        components = system.flows if get_flows else system.es.nodes.values()
+        components = system.flows if get_flows else system.es.nodes
 
     data = {}
     for com_key in components:

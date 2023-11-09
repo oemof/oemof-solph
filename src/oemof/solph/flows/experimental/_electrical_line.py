@@ -148,7 +148,7 @@ class ElectricalLineBlock(ScalarBlock):
 
         # create voltage angle variables
         self.ELECTRICAL_BUSES = Set(
-            initialize=[n for n in m.es.nodes.values() if isinstance(n, ElectricalBus)]
+            initialize=[n for n in m.es.nodes if isinstance(n, ElectricalBus)]
         )
 
         def _voltage_angle_bounds(block, b, t):

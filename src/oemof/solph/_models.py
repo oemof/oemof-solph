@@ -402,13 +402,13 @@ class Model(BaseModel):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
-        self.nodes = self.es.nodes
+        self.node = self.es.node
         if self.is_cellular:
             # collect all nodes from the child cells
             for cell in self.ec:
-                    self.nodes.update(cell.nodes)
+                    self.node.update(cell.node)
         # create set with all nodes
-        self.NODES = po.Set(initialize=[n for n in self.nodes])
+        self.NODES = po.Set(initialize=[n for n in self.node])
 
         if self.es.timeincrement is None:
             msg = (
