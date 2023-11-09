@@ -406,7 +406,7 @@ class Model(BaseModel):
         if self.is_cellular:
             # collect all nodes from the child cells
             for cell in self.ec:
-                    self.node.update(cell.node)
+                self.node.update(cell.node)
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.node])
 
