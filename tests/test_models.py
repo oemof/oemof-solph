@@ -137,7 +137,7 @@ def test_sub_cell_node_consideration():
     es.add(bus_es)
     ec_1.add(bus_ec_1)
     m = solph.Model(energysystem=[es, ec_1])
-    assert bus_ec_1 in m.nodes
+    assert bus_ec_1 in m.nodes.values()
 
 
 def test_sub_cell_flow_consideration():
