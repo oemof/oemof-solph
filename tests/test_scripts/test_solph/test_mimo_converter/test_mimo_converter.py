@@ -25,24 +25,27 @@ def test_mimo_converter():
     # resources
     b_gas = Bus(label="gas")
     es.add(b_gas)
+    es.add(Source(label="gas_station", outputs={b_gas: Flow(fix=[120, 0], nominal_value=1, variable_costs=20)}))
 
-    es.add(Source(label="methane", outputs={b_gas: Flow(variable_costs=20)}))
+    b_hydro = Bus(label="hydro")
+    es.add(b_hydro)
+    es.add(Source(label="hydro_station", outputs={b_hydro: Flow(fix=[0, 130], nominal_value=1, variable_costs=20)}))
 
     b_electricity = Bus(label="electricity")
     es.add(b_electricity)
     es.add(
         Sink(
             label="demand",
-            inputs={b_electricity: Flow(fix=[100, 200], nominal_value=1)},
+            inputs={b_electricity: Flow(fix=[100, 100], nominal_value=1)},
         )
     )
 
     es.add(
         MultiInputMultiOutputConverter(
             label="mimo",
-            inputs={"in": {b_gas: Flow()}},
+            inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
             outputs={b_electricity: Flow()},
-            conversion_factors={b_electricity: 0.8}
+            conversion_factors={b_gas: 1.2, b_hydro: 1.3}
         )
     )
 
