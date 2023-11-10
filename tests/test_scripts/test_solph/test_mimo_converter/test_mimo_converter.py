@@ -40,7 +40,7 @@ def test_mimo_converter():
     es.add(
         MultiInputMultiOutputConverter(
             label="mimo",
-            inputs={b_gas: Flow()},
+            inputs={"in": {b_gas: Flow()}},
             outputs={b_electricity: Flow()},
             conversion_factors={b_electricity: 0.8}
         )

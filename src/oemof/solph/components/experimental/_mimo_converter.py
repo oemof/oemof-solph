@@ -22,17 +22,22 @@ SPDX-License-Identifier: MIT
 
 """
 
+import operator
+from functools import reduce
+from typing import Dict
+from typing import Union
+
 from oemof.network import Node
-from oemof.solph.buses import Bus
-from oemof.solph.flows import Flow
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
-from pyomo.environ import Var, Set, NonNegativeReals
-
-from typing import Dict, Union
+from pyomo.environ import NonNegativeReals
+from pyomo.environ import Set
+from pyomo.environ import Var
 
 from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
+from oemof.solph.buses import Bus
+from oemof.solph.flows import Flow
 
 
 class MultiInputMultiOutputConverter(Node):
@@ -120,7 +125,7 @@ class MultiInputMultiOutputConverter(Node):
 
         super().__init__(
             label=label,
-            inputs=inputs,
+            inputs=reduce(operator.ior, self.input_groups.values(), {}),
             outputs=outputs,
             **custom_attributes,
         )
@@ -296,22 +301,21 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                 (n, g, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
-                for g in n.input_groups
+                for g in n.output_groups
             ],
             rule=_output_group_relation,
         )
 
-        def _input_output_group_relation(block, n, g, p, t):
-            lhs = block.INPUT_GROUP_FLOW[n, g, p, t]
-            rhs = block.OUTPUT_GROUP_FLOW[n, g, p, t]
+        def _input_output_group_relation(block, n, p, t):
+            lhs = sum(block.INPUT_GROUP_FLOW[n, i, p, t] for i in n.input_groups)
+            rhs = sum(block.OUTPUT_GROUP_FLOW[n, o, p, t] for o in n.output_groups)
             return lhs == rhs
 
         self.input_output_relation = Constraint(
             [
-                (n, g, p, t)
+                (n, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
-                for g in n.input_groups
             ],
             rule=_input_output_group_relation,
         )
