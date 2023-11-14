@@ -23,11 +23,25 @@ def test_multiple_inputs():
     # resources
     b_gas = Bus(label="gas")
     es.add(b_gas)
-    es.add(Source(label="gas_station", outputs={b_gas: Flow(fix=[120, 0], nominal_value=1, variable_costs=20)}))
+    es.add(
+        Source(
+            label="gas_station",
+            outputs={
+                b_gas: Flow(fix=[120, 0], nominal_value=1, variable_costs=20)
+            },
+        )
+    )
 
     b_hydro = Bus(label="hydro")
     es.add(b_hydro)
-    es.add(Source(label="hydro_station", outputs={b_hydro: Flow(fix=[0, 130], nominal_value=1, variable_costs=20)}))
+    es.add(
+        Source(
+            label="hydro_station",
+            outputs={
+                b_hydro: Flow(fix=[0, 130], nominal_value=1, variable_costs=20)
+            },
+        )
+    )
 
     b_electricity = Bus(label="electricity")
     es.add(b_electricity)
@@ -43,7 +57,7 @@ def test_multiple_inputs():
             label="mimo",
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
             outputs={b_electricity: Flow()},
-            conversion_factors={b_gas: 1.2, b_hydro: 1.3}
+            conversion_factors={b_gas: 1.2, b_hydro: 1.3},
         )
     )
 
@@ -56,8 +70,14 @@ def test_multiple_inputs():
     # create result object
     results = processing.convert_keys_to_strings(processing.results(om))
 
-    assert all(results[("gas", "mimo")]["sequences"]["flow"].values[:-1] == [120.0, 0.0])
-    assert all(results[("hydro", "mimo")]["sequences"]["flow"].values[:-1] == [0.0, 130.0])
+    assert all(
+        results[("gas", "mimo")]["sequences"]["flow"].values[:-1]
+        == [120.0, 0.0]
+    )
+    assert all(
+        results[("hydro", "mimo")]["sequences"]["flow"].values[:-1]
+        == [0.0, 130.0]
+    )
 
 
 def test_flow_shares():
@@ -67,11 +87,17 @@ def test_flow_shares():
     # resources
     b_gas = Bus(label="gas")
     es.add(b_gas)
-    es.add(Source(label="gas_station", outputs={b_gas: Flow(variable_costs=20)}))
+    es.add(
+        Source(label="gas_station", outputs={b_gas: Flow(variable_costs=20)})
+    )
 
     b_hydro = Bus(label="hydro")
     es.add(b_hydro)
-    es.add(Source(label="hydro_station", outputs={b_hydro: Flow(variable_costs=20)}))
+    es.add(
+        Source(
+            label="hydro_station", outputs={b_hydro: Flow(variable_costs=20)}
+        )
+    )
 
     b_electricity = Bus(label="electricity")
     es.add(b_electricity)
@@ -97,7 +123,7 @@ def test_flow_shares():
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
             outputs={b_electricity: Flow(), b_heat: Flow()},
             conversion_factors={b_gas: 1.2, b_hydro: 1.3},
-            input_flow_shares={b_gas: [0.8, 0.3]}
+            input_flow_shares={b_gas: [0.8, 0.3]},
         )
     )
 
@@ -110,5 +136,11 @@ def test_flow_shares():
     # create result object
     results = processing.convert_keys_to_strings(processing.results(om))
 
-    assert all(results[("gas", "mimo")]["sequences"]["flow"].values[:-1] == [100 * 0.8 * 1.2, 100 * 0.3 * 1.2])
-    assert all(results[("hydro", "mimo")]["sequences"]["flow"].values[:-1] == [100 * 0.2 * 1.3, 100 * 0.7 * 1.3])
+    assert all(
+        results[("gas", "mimo")]["sequences"]["flow"].values[:-1]
+        == [100 * 0.8 * 1.2, 100 * 0.3 * 1.2]
+    )
+    assert all(
+        results[("hydro", "mimo")]["sequences"]["flow"].values[:-1]
+        == [100 * 0.2 * 1.3, 100 * 0.7 * 1.3]
+    )

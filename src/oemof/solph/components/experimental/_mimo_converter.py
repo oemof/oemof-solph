@@ -29,7 +29,8 @@ from typing import Iterable
 from typing import Union
 
 from oemof.network import Node
-from pyomo.core import BuildAction, Constraint
+from pyomo.core import BuildAction
+from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
@@ -63,17 +64,17 @@ class MultiInputMultiOutputConverter(Node):
         Default: 1. If no conversion_factor is given for an in- or outflow, the
         conversion_factor is set to 1.
     input_flow_shares : dict
-        Dictionary containing flow shares which shall be hold within related input group.
-        Keys must be connected input nodes (typically Buses).
+        Dictionary containing flow shares which shall be hold within related
+        input group. Keys must be connected input nodes (typically Buses).
         The dictionary values can either be a scalar or an iterable with
-        individual flow shares for each time step.
-        If no flow share is given for an input flow, no share is set for this flow.
+        individual flow shares for each time step. If no flow share is given
+        for an input flow, no share is set for this flow.
     output_flow_shares : dict
-        Dictionary containing flow shares which shall be hold within related input group.
-        Keys must be connected input nodes (typically Buses).
+        Dictionary containing flow shares which shall be hold within related
+        input group. Keys must be connected input nodes (typically Buses).
         The dictionary values can either be a scalar or an iterable with
-        individual flow shares for each time step.
-        If no flow share is given for an input flow, no share is set for this flow.
+        individual flow shares for each time step. If no flow share is given
+        for an input flow, no share is set for this flow.
 
     Examples
     --------
@@ -111,7 +112,8 @@ class MultiInputMultiOutputConverter(Node):
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components.experimental._mimo_converter.MultiInputMultiOutputConverterBlock`
+     * :py:class:`~oemof.solph.components.experimental._mimo_converter.
+     MultiInputMultiOutputConverterBlock`
     """
 
     def __init__(
@@ -164,7 +166,8 @@ class MultiInputMultiOutputConverter(Node):
         Returns
         -------
         Dict[Bus, Iterable]
-            Conversion factors for each connected node. Defaults to sequence(1).
+            Conversion factors for each connected node.
+            Defaults to sequence(1).
         """
         if conversion_factors is None:
             conversion_factors = {}
@@ -379,7 +382,9 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for n in group:
                     # Connect input groups
-                    for i, ii in zip(list(n.input_groups)[:-1], list(n.input_groups)[1:]):
+                    for i, ii in zip(
+                        list(n.input_groups)[:-1], list(n.input_groups)[1:]
+                    ):
                         block.input_output_relation.add(
                             (n, i, p, t),
                             (
@@ -388,7 +393,9 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                             ),
                         )
                     # Connect output groups
-                    for o, oo in zip(list(n.output_groups)[:-1], list(n.output_groups)[1:]):
+                    for o, oo in zip(
+                        list(n.output_groups)[:-1], list(n.output_groups)[1:]
+                    ):
                         block.input_output_relation.add(
                             (n, o, p, t),
                             (
