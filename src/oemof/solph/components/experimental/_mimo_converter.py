@@ -25,10 +25,11 @@ SPDX-License-Identifier: MIT
 import operator
 from functools import reduce
 from typing import Dict
+from typing import Iterable
 from typing import Union
 
 from oemof.network import Node
-from pyomo.core import Constraint
+from pyomo.core import BuildAction, Constraint
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
@@ -61,6 +62,18 @@ class MultiInputMultiOutputConverter(Node):
         individual conversion factors for each time step.
         Default: 1. If no conversion_factor is given for an in- or outflow, the
         conversion_factor is set to 1.
+    input_flow_shares : dict
+        Dictionary containing flow shares which shall be hold within related input group.
+        Keys must be connected input nodes (typically Buses).
+        The dictionary values can either be a scalar or an iterable with
+        individual flow shares for each time step.
+        If no flow share is given for an input flow, no share is set for this flow.
+    output_flow_shares : dict
+        Dictionary containing flow shares which shall be hold within related input group.
+        Keys must be connected input nodes (typically Buses).
+        The dictionary values can either be a scalar or an iterable with
+        individual flow shares for each time step.
+        If no flow share is given for an input flow, no share is set for this flow.
 
     Examples
     --------
@@ -107,6 +120,8 @@ class MultiInputMultiOutputConverter(Node):
         inputs=None,
         outputs=None,
         conversion_factors=None,
+        input_flow_shares=None,
+        output_flow_shares=None,
         custom_attributes=None,
     ):
         self.label = label
@@ -117,8 +132,8 @@ class MultiInputMultiOutputConverter(Node):
         if outputs is None:
             warn_if_missing_attribute(self, "outputs")
             outputs = {}
-        self.input_groups = self._prepare_group_dict(inputs)
-        self.output_groups = self._prepare_group_dict(outputs)
+        self.input_groups = self._init_group_dict(inputs)
+        self.output_groups = self._init_group_dict(outputs)
 
         if custom_attributes is None:
             custom_attributes = {}
@@ -126,29 +141,67 @@ class MultiInputMultiOutputConverter(Node):
         super().__init__(
             label=label,
             inputs=reduce(operator.ior, self.input_groups.values(), {}),
-            outputs=outputs,
+            outputs=reduce(operator.ior, self.output_groups.values(), {}),
             **custom_attributes,
         )
 
+        self.conversion_factors = self._init_conversion_factors(
+            conversion_factors
+        )
+        self.input_flow_shares = self._init_flow_shares(input_flow_shares)
+        self.output_flow_shares = self._init_flow_shares(output_flow_shares)
+
+    def _init_conversion_factors(
+        self, conversion_factors: Dict[Bus, Union[float, Iterable]]
+    ) -> Dict[Bus, Iterable]:
+        """
+        Set up the conversion_factors for each connected node.
+        Parameters
+        ----------
+        conversion_factors : Dict[Bus, Union[float, Iterable]]
+            Conversion factors set up by the user.
+
+        Returns
+        -------
+        Dict[Bus, Iterable]
+            Conversion factors for each connected node. Defaults to sequence(1).
+        """
         if conversion_factors is None:
             conversion_factors = {}
-
-        self.conversion_factors = {
+        conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
         }
-
         missing_conversion_factor_keys = (
             set(self.outputs) | set(self.inputs)
-        ) - set(self.conversion_factors)
-
+        ) - set(conversion_factors)
         for cf in missing_conversion_factor_keys:
-            self.conversion_factors[cf] = sequence(1)
-
-    def constraint_group(self):
-        return MultiInputMultiOutputConverterBlock
+            conversion_factors[cf] = sequence(1)
+        return conversion_factors
 
     @staticmethod
-    def _prepare_group_dict(
+    def _init_flow_shares(
+        flow_shares: Dict[Bus, Union[float, Iterable]]
+    ) -> Dict[Bus, Iterable]:
+        """
+        Init flow shares. Set up empty dict, if flow shares are not set.
+        For each given flow share, turn value into sequence if necessary.
+
+        Parameters
+        ----------
+        flow_shares : Dict[Bus, Union[float, Iterable]]
+            flow shares set up by the user.
+
+        Returns
+        -------
+        Dict[Bus, Iterable]
+            Flow shares as sequences
+        """
+        if flow_shares is None:
+            return {}
+        return {k: sequence(v) for k, v in flow_shares.items()}
+
+    @staticmethod
+    def _init_group_dict(
         flows: Union[Dict[Bus, Flow], Dict[str, Dict[Bus, Flow]]]
     ) -> Dict[str, Dict[Bus, Flow]]:
         """
@@ -179,6 +232,10 @@ class MultiInputMultiOutputConverter(Node):
             else:
                 group_dict[key] = flow
         return group_dict
+
+    @staticmethod
+    def constraint_group():
+        return MultiInputMultiOutputConverterBlock
 
 
 class MultiInputMultiOutputConverterBlock(ScalarBlock):
@@ -264,7 +321,9 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
         )
 
         self.INPUT_GROUP_FLOW = Var(
-            self.INPUT_GROUPS, m.TIMEINDEX, within=NonNegativeReals,
+            self.INPUT_GROUPS,
+            m.TIMEINDEX,
+            within=NonNegativeReals,
         )
         self.OUTPUT_GROUP_FLOW = Var(
             self.OUTPUT_GROUPS, m.TIMEINDEX, within=NonNegativeReals
@@ -306,16 +365,113 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
             rule=_output_group_relation,
         )
 
-        def _input_output_group_relation(block, n, p, t):
-            lhs = sum(block.INPUT_GROUP_FLOW[n, i, p, t] for i in n.input_groups)
-            rhs = sum(block.OUTPUT_GROUP_FLOW[n, o, p, t] for o in n.output_groups)
-            return lhs == rhs
-
         self.input_output_relation = Constraint(
             [
-                (n, p, t)
+                (n, g, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
+                for g in list(n.input_groups) + list(n.output_groups)
             ],
-            rule=_input_output_group_relation,
+            noruleinit=True,
+        )
+
+        def _input_output_group_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n in group:
+                    # Connect input groups
+                    for i, ii in zip(list(n.input_groups)[:-1], list(n.input_groups)[1:]):
+                        block.input_output_relation.add(
+                            (n, i, p, t),
+                            (
+                                block.INPUT_GROUP_FLOW[n, i, p, t]
+                                == block.INPUT_GROUP_FLOW[n, ii, p, t]
+                            ),
+                        )
+                    # Connect output groups
+                    for o, oo in zip(list(n.output_groups)[:-1], list(n.output_groups)[1:]):
+                        block.input_output_relation.add(
+                            (n, o, p, t),
+                            (
+                                block.OUTPUT_GROUP_FLOW[n, o, p, t]
+                                == block.OUTPUT_GROUP_FLOW[n, oo, p, t]
+                            ),
+                        )
+                    # Connect input with output group:
+                    # Use last input item as index
+                    last_input = list(n.input_groups)[-1]
+                    last_output = list(n.output_groups)[-1]
+                    block.input_output_relation.add(
+                        (n, last_input, p, t),
+                        (
+                            block.INPUT_GROUP_FLOW[n, last_input, p, t]
+                            == block.OUTPUT_GROUP_FLOW[n, last_output, p, t]
+                        ),
+                    )
+
+        self.input_flow_share_relation_build = BuildAction(
+            rule=_input_output_group_relation
+        )
+
+        self.input_flow_share_relation = Constraint(
+            [
+                (n, g, p, t)
+                for p, t in m.TIMEINDEX
+                for n in group
+                for g in n.input_groups
+            ],
+            noruleinit=True,
+        )
+
+        def _input_flow_share_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n in group:
+                    for i, flow_share in n.input_flow_shares.items():
+                        # Find related input group for given input node:
+                        g = next(
+                            g
+                            for g, inputs in n.input_groups.items()
+                            if i in inputs
+                        )
+                        lhs = m.flow[i, n, p, t] / n.conversion_factors[i][t]
+                        rhs = (
+                            block.INPUT_GROUP_FLOW[n, g, p, t] * flow_share[t]
+                        )
+                        block.input_flow_share_relation.add(
+                            (n, g, p, t), (lhs == rhs)
+                        )
+
+        self.input_flow_share_relation_build = BuildAction(
+            rule=_input_flow_share_relation
+        )
+
+        self.output_flow_share_relation = Constraint(
+            [
+                (n, g, p, t)
+                for p, t in m.TIMEINDEX
+                for n in group
+                for g in n.output_groups
+            ],
+            noruleinit=True,
+        )
+
+        def _output_flow_share_relation(block):
+            for p, t in m.TIMEINDEX:
+                for n in group:
+                    for o, flow_share in n.output_flow_shares.items():
+                        # Find related output group for given input node:
+                        g = next(
+                            g
+                            for g, outputs in n.output_groups.items()
+                            if o in outputs
+                        )
+                        lhs = m.flow[n, o, p, t] / n.conversion_factors[o][t]
+                        rhs = (
+                            block.OUTPUT_GROUP_FLOW[n, g, p, t] * flow_share[t]
+                        )
+                        block.input_flow_share_relation.add(
+                            (n, g, p, t), (lhs == rhs)
+                        )
+
+        self.output_flow_share_relation_build = BuildAction(
+            rule=_output_flow_share_relation
         )
