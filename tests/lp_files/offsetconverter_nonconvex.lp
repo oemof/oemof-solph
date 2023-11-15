@@ -72,7 +72,7 @@ c_u_NonConvexFlowBlock_max(diesel_genset_bus_electricity_0_1)_:
 
 c_u_NonConvexFlowBlock_max(diesel_genset_bus_electricity_0_2)_:
 1 flow(diesel_genset_bus_electricity_0_2)
--1 NonConvexFlowBlock_status(diesel_genset_bus_electricity_2)
+-1 NonConvexFlowBlock_status_nominal(diesel_genset_bus_electricity_2)
 <= 0
 
 c_e_OffsetConverterBlock_relation(diesel_genset_bus_diesel_bus_electricity_0_0)_:
