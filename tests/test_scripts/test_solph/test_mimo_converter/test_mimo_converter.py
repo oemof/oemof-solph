@@ -113,7 +113,7 @@ def test_flow_shares():
     es.add(
         Sink(
             label="heat_demand",
-            inputs={b_heat: Flow(fix=[100, 100], nominal_value=1)},
+            inputs={b_heat: Flow()},
         )
     )
 
@@ -136,11 +136,11 @@ def test_flow_shares():
     # create result object
     results = processing.convert_keys_to_strings(processing.results(om))
 
-    assert all(
-        results[("gas", "mimo")]["sequences"]["flow"].values[:-1]
-        == [100 * 0.8 * 1.2, 100 * 0.3 * 1.2]
-    )
-    assert all(
-        results[("hydro", "mimo")]["sequences"]["flow"].values[:-1]
-        == [100 * 0.2 * 1.3, 100 * 0.7 * 1.3]
-    )
+    assert results[("gas", "mimo")]["sequences"]["flow"].values[0] == 100 * 0.8 * 1.2
+    assert results[("gas", "mimo")]["sequences"]["flow"].values[1] == 100 * 0.3 * 1.2
+    assert results[("hydro", "mimo")]["sequences"]["flow"].values[0] == 100 * 0.2 * 1.3
+    assert results[("hydro", "mimo")]["sequences"]["flow"].values[1] == 100 * 0.7 * 1.3
+    assert results[("mimo", "electricity")]["sequences"]["flow"].values[0] == 100
+    assert results[("mimo", "electricity")]["sequences"]["flow"].values[1] == 100
+    assert results[("mimo", "heat")]["sequences"]["flow"].values[0] == 100
+    assert results[("mimo", "heat")]["sequences"]["flow"].values[1] == 100
