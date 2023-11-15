@@ -41,7 +41,6 @@ from oemof.solph._plumbing import sequence
 from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
 
-
 FLOW_SHARE_TYPES = ("min", "max", "fix")
 
 
