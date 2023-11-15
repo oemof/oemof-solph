@@ -5,6 +5,7 @@ Example that illustrates how to use component `MultiInputMultiOutputConverter`.
 SPDX-License-Identifier: MIT
 """
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -14,6 +15,49 @@ from oemof.solph.components import Sink
 from oemof.solph.components import Source
 from oemof.solph.components.experimental import MultiInputMultiOutputConverter
 from oemof.solph.flows import Flow
+
+
+def test_invalid_flow_shares():
+    with pytest.raises(
+        ValueError, match="Invalid flow share types found: {'maxx'}"
+    ):
+        b_gas = Bus(label="gas")
+        b_hydro = Bus(label="gas")
+        b_electricity = Bus(label="gas")
+        MultiInputMultiOutputConverter(
+            label="mimo",
+            inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
+            outputs={b_electricity: Flow()},
+            input_flow_shares={"maxx": {b_gas: 0.4}},
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="Cannot combine 'fix' and 'min' flow share for same node.",
+    ):
+        b_gas = Bus(label="gas")
+        b_hydro = Bus(label="gas")
+        b_electricity = Bus(label="gas")
+        MultiInputMultiOutputConverter(
+            label="mimo",
+            inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
+            outputs={b_electricity: Flow()},
+            input_flow_shares={"min": {b_gas: 0.4}, "fix": {b_gas: 0.4}},
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="Cannot combine 'fix' and 'max' flow share for same node.",
+    ):
+        b_gas = Bus(label="gas")
+        b_hydro = Bus(label="gas")
+        b_electricity = Bus(label="gas")
+        MultiInputMultiOutputConverter(
+            label="mimo",
+            inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
+            outputs={b_electricity: Flow()},
+            input_flow_shares={"max": {b_gas: 0.4}, "fix": {b_gas: 0.4}},
+        )
 
 
 def test_multiple_inputs():
@@ -123,7 +167,7 @@ def test_flow_shares():
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
             outputs={b_electricity: Flow(), b_heat: Flow()},
             conversion_factors={b_gas: 1.2, b_hydro: 1.3},
-            input_flow_shares={b_gas: [0.8, 0.3]},
+            input_flow_shares={"fix": {b_gas: [0.8, 0.3]}},
         )
     )
 
@@ -136,11 +180,27 @@ def test_flow_shares():
     # create result object
     results = processing.convert_keys_to_strings(processing.results(om))
 
-    assert results[("gas", "mimo")]["sequences"]["flow"].values[0] == 100 * 0.8 * 1.2
-    assert results[("gas", "mimo")]["sequences"]["flow"].values[1] == 100 * 0.3 * 1.2
-    assert results[("hydro", "mimo")]["sequences"]["flow"].values[0] == 100 * 0.2 * 1.3
-    assert results[("hydro", "mimo")]["sequences"]["flow"].values[1] == 100 * 0.7 * 1.3
-    assert results[("mimo", "electricity")]["sequences"]["flow"].values[0] == 100
-    assert results[("mimo", "electricity")]["sequences"]["flow"].values[1] == 100
+    assert (
+        results[("gas", "mimo")]["sequences"]["flow"].values[0]
+        == 100 * 0.8 * 1.2
+    )
+    assert (
+        results[("gas", "mimo")]["sequences"]["flow"].values[1]
+        == 100 * 0.3 * 1.2
+    )
+    assert (
+        results[("hydro", "mimo")]["sequences"]["flow"].values[0]
+        == 100 * 0.2 * 1.3
+    )
+    assert (
+        results[("hydro", "mimo")]["sequences"]["flow"].values[1]
+        == 100 * 0.7 * 1.3
+    )
+    assert (
+        results[("mimo", "electricity")]["sequences"]["flow"].values[0] == 100
+    )
+    assert (
+        results[("mimo", "electricity")]["sequences"]["flow"].values[1] == 100
+    )
     assert results[("mimo", "heat")]["sequences"]["flow"].values[0] == 100
     assert results[("mimo", "heat")]["sequences"]["flow"].values[1] == 100

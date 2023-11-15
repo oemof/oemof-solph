@@ -42,6 +42,9 @@ from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
 
 
+FLOW_SHARE_TYPES = ("min", "max", "fix")
+
+
 class MultiInputMultiOutputConverter(Node):
     """A linear ConverterBlock object with n inputs and n outputs.
 
@@ -150,6 +153,9 @@ class MultiInputMultiOutputConverter(Node):
         self.conversion_factors = self._init_conversion_factors(
             conversion_factors
         )
+
+        self._check_flow_shares(input_flow_shares)
+        self._check_flow_shares(output_flow_shares)
         self.input_flow_shares = self._init_flow_shares(input_flow_shares)
         self.output_flow_shares = self._init_flow_shares(output_flow_shares)
 
@@ -182,26 +188,61 @@ class MultiInputMultiOutputConverter(Node):
         return conversion_factors
 
     @staticmethod
+    def _check_flow_shares(flow_shares):
+        if flow_shares is None:
+            return
+
+        # Check for invalid share types
+        invalid_flow_share_types = set(flow_shares) - set(FLOW_SHARE_TYPES)
+        if invalid_flow_share_types:
+            raise ValueError(
+                f"Invalid flow share types found: {invalid_flow_share_types}. "
+                "Must be one of 'min', 'max' or 'fix'."
+            )
+
+        # Check if fix flow share is combined with min or max flow share
+        if "fix" in flow_shares:
+            for node in flow_shares["fix"]:
+                if "min" in flow_shares and node in flow_shares["min"]:
+                    raise ValueError(
+                        "Cannot combine 'fix' and 'min' flow share for same "
+                        "node."
+                    )
+                if "max" in flow_shares and node in flow_shares["max"]:
+                    raise ValueError(
+                        "Cannot combine 'fix' and 'max' flow share for same "
+                        "node."
+                    )
+
+    @staticmethod
     def _init_flow_shares(
-        flow_shares: Dict[Bus, Union[float, Iterable]]
-    ) -> Dict[Bus, Iterable]:
+        flow_shares: Dict[str, Dict[Bus, Union[float, Iterable]]]
+    ) -> Dict[str, Dict[Bus, Iterable]]:
         """
-        Init flow shares. Set up empty dict, if flow shares are not set.
-        For each given flow share, turn value into sequence if necessary.
+        Init minimum, maximum and fix flow shares. Set up empty dict, if flow
+        shares are not set. For each given flow share, turn value into sequence
+        if necessary.
 
         Parameters
         ----------
-        flow_shares : Dict[Bus, Union[float, Iterable]]
+        flow_shares : Dict[str, Dict[Bus, Union[float, Iterable]]]
             flow shares set up by the user.
 
         Returns
         -------
-        Dict[Bus, Iterable]
+        Dict[str, Dict[Bus, Iterable]]
             Flow shares as sequences
         """
         if flow_shares is None:
             return {}
-        return {k: sequence(v) for k, v in flow_shares.items()}
+
+        # Turn flow shares into sequences
+        return {
+            share_type: {
+                node: sequence(value) for node, value in shares.items()
+            }
+            for share_type, shares in flow_shares.items()
+        }
 
     @staticmethod
     def _init_group_dict(
@@ -368,7 +409,7 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
             rule=_output_group_relation,
         )
 
-        self.input_output_relation = Constraint(
+        self.input_output_group_relation = Constraint(
             [
                 (n, g, p, t)
                 for p, t in m.TIMEINDEX
@@ -385,7 +426,7 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                     for i, ii in zip(
                         list(n.input_groups)[:-1], list(n.input_groups)[1:]
                     ):
-                        block.input_output_relation.add(
+                        block.input_output_group_relation.add(
                             (n, i, p, t),
                             (
                                 block.INPUT_GROUP_FLOW[n, i, p, t]
@@ -396,7 +437,7 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                     for o, oo in zip(
                         list(n.output_groups)[:-1], list(n.output_groups)[1:]
                     ):
-                        block.input_output_relation.add(
+                        block.input_output_group_relation.add(
                             (n, o, p, t),
                             (
                                 block.OUTPUT_GROUP_FLOW[n, o, p, t]
@@ -407,7 +448,7 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                     # Use last input item as index
                     last_input = list(n.input_groups)[-1]
                     last_output = list(n.output_groups)[-1]
-                    block.input_output_relation.add(
+                    block.input_output_group_relation.add(
                         (n, last_input, p, t),
                         (
                             block.INPUT_GROUP_FLOW[n, last_input, p, t]
@@ -415,16 +456,26 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                         ),
                     )
 
-        self.input_flow_share_relation_build = BuildAction(
+        self.input_output_group_relation_build = BuildAction(
             rule=_input_output_group_relation
         )
 
+        def _get_operator_from_flow_share_type(flow_share_type):
+            if flow_share_type == "min":
+                return operator.gt
+            if flow_share_type == "max":
+                return operator.lt
+            if flow_share_type == "fix":
+                return operator.eq
+            raise ValueError(f"Unknown flow share type: {flow_share_type}")
+
         self.input_flow_share_relation = Constraint(
             [
-                (n, g, p, t)
+                (n, g, s, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
                 for g in n.input_groups
+                for s in FLOW_SHARE_TYPES
             ],
             noruleinit=True,
         )
@@ -432,20 +483,28 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
         def _input_flow_share_relation(block):
             for p, t in m.TIMEINDEX:
                 for n in group:
-                    for i, flow_share in n.input_flow_shares.items():
-                        # Find related input group for given input node:
-                        g = next(
-                            g
-                            for g, inputs in n.input_groups.items()
-                            if i in inputs
+                    for flow_share_type, shares in n.input_flow_shares.items():
+                        op = _get_operator_from_flow_share_type(
+                            flow_share_type
                         )
-                        lhs = m.flow[i, n, p, t] / n.conversion_factors[i][t]
-                        rhs = (
-                            block.INPUT_GROUP_FLOW[n, g, p, t] * flow_share[t]
-                        )
-                        block.input_flow_share_relation.add(
-                            (n, g, p, t), (lhs == rhs)
-                        )
+                        for i, flow_share in shares.items():
+                            # Find related input group for given input node:
+                            g = next(
+                                g
+                                for g, inputs in n.input_groups.items()
+                                if i in inputs
+                            )
+                            lhs = (
+                                m.flow[i, n, p, t] / n.conversion_factors[i][t]
+                            )
+                            rhs = (
+                                block.INPUT_GROUP_FLOW[n, g, p, t]
+                                * flow_share[t]
+                            )
+                            block.input_flow_share_relation.add(
+                                (n, g, flow_share_type, p, t),
+                                op(lhs, rhs),
+                            )
 
         self.input_flow_share_relation_build = BuildAction(
             rule=_input_flow_share_relation
@@ -457,6 +516,7 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX
                 for n in group
                 for g in n.output_groups
+                for s in FLOW_SHARE_TYPES
             ],
             noruleinit=True,
         )
@@ -464,20 +524,30 @@ class MultiInputMultiOutputConverterBlock(ScalarBlock):
         def _output_flow_share_relation(block):
             for p, t in m.TIMEINDEX:
                 for n in group:
-                    for o, flow_share in n.output_flow_shares.items():
-                        # Find related output group for given input node:
-                        g = next(
-                            g
-                            for g, outputs in n.output_groups.items()
-                            if o in outputs
+                    for (
+                        flow_share_type,
+                        shares,
+                    ) in n.output_flow_shares.items():
+                        op = _get_operator_from_flow_share_type(
+                            flow_share_type
                         )
-                        lhs = m.flow[n, o, p, t] / n.conversion_factors[o][t]
-                        rhs = (
-                            block.OUTPUT_GROUP_FLOW[n, g, p, t] * flow_share[t]
-                        )
-                        block.input_flow_share_relation.add(
-                            (n, g, p, t), (lhs == rhs)
-                        )
+                        for o, flow_share in shares.items():
+                            # Find related output group for given input node:
+                            g = next(
+                                g
+                                for g, outputs in n.output_groups.items()
+                                if o in outputs
+                            )
+                            lhs = (
+                                m.flow[n, o, p, t] / n.conversion_factors[o][t]
+                            )
+                            rhs = (
+                                block.OUTPUT_GROUP_FLOW[n, g, p, t]
+                                * flow_share[t]
+                            )
+                            block.input_flow_share_relation.add(
+                                (n, g, flow_share_type, p, t), op(lhs, rhs)
+                            )
 
         self.output_flow_share_relation_build = BuildAction(
             rule=_output_flow_share_relation
