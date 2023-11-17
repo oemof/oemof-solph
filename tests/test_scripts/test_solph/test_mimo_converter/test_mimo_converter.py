@@ -22,8 +22,8 @@ def test_invalid_flow_shares():
         ValueError, match="Invalid flow share types found: {'maxx'}"
     ):
         b_gas = Bus(label="gas")
-        b_hydro = Bus(label="gas")
-        b_electricity = Bus(label="gas")
+        b_hydro = Bus(label="hydro")
+        b_electricity = Bus(label="electricity")
         MultiInputMultiOutputConverter(
             label="mimo",
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
@@ -36,8 +36,8 @@ def test_invalid_flow_shares():
         match="Cannot combine 'fix' and 'min' flow share for same node.",
     ):
         b_gas = Bus(label="gas")
-        b_hydro = Bus(label="gas")
-        b_electricity = Bus(label="gas")
+        b_hydro = Bus(label="hydro")
+        b_electricity = Bus(label="electricity")
         MultiInputMultiOutputConverter(
             label="mimo",
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
@@ -50,8 +50,8 @@ def test_invalid_flow_shares():
         match="Cannot combine 'fix' and 'max' flow share for same node.",
     ):
         b_gas = Bus(label="gas")
-        b_hydro = Bus(label="gas")
-        b_electricity = Bus(label="gas")
+        b_hydro = Bus(label="hydro")
+        b_electricity = Bus(label="electricity")
         MultiInputMultiOutputConverter(
             label="mimo",
             inputs={"in": {b_gas: Flow(), b_hydro: Flow()}},
