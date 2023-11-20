@@ -27,20 +27,25 @@ an energy system with storage. The following energy system is modeled:
      storage(Storage)    |<------------------|
                          |------------------>|
 
-The example exists in four variations. The following parameters describe
-the main setting for the optimization variation 1:
+The example describes the use of time series aggregation
+methods for seasonal storages in oemof. For this the package tsam is used
+for this purpose, which is developed by Forschungszentrum Jülich. For a more detailed
+explanation we refer to the paper "Time series aggregation for energy
+system design: Modeling seasonal storage" by Kotzur et. al.
+https://www.sciencedirect.com/science/article/pii/S0306261918300242
 
-- optimize wind, pv, gas_resource and storage
+
+The optimization aim is:
+- optimize wind, pv, gas_resource and seasonal storage
 - set investment cost for wind, pv and storage
 - set gas price for kWh
 
-Results show an installation of wind and the use of the gas resource.
-A renewable energy share of 51% is achieved.
-
 .. tip::
 
-    Have a look at different parameter settings. There are four variations
-    of this example in the same folder.
+    Have a look at the Generic Storage class, to understand better
+    the idea of the implementation of inter and intra storage contents.
+    For this purpose a function to get timesteps from
+    tsam_timesteps is added in _models.
 
 Code
 ----
