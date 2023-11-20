@@ -11,19 +11,19 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-License-Identifier: MIT
 
 """
-
+from typing import List
+from oemof.network import network
+from oemof.solph._helpers import check_node_object_for_missing_attribute
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
-from typing import List
 from pyomo.environ import Set
 from pyomo.environ import Var
-from oemof.solph._helpers import check_node_object_for_missing_attribute
-from oemof.network import network
+
 
 class GenericBuilding(network.Node):
     r"""
     Component `GenericBuilding` to model with basic characteristics of buildings.
-    A 5RC-model is chosen to abstract buildings in a one zone model and make them linear-optimizable.
+    A 5RC-model is chosen to abstract buildings as a one zone model and make them linear-optimizable.
 
     The full explanation of the 5RC building model can be found in ISO 13790:2008
     “Energy performance of buildings –Calculation of energy use for space heating and cooling“.
@@ -214,6 +214,70 @@ class GenericBuilding(network.Node):
 
 
 class GenericBuildingBlock(ScalarBlock):
+    r"""GenericBuildingBlock without an :class:`.Investment` object.
+
+    **The following sets are created:** (-> see basic sets at
+    :class:`.Model` )
+
+    BUILDING
+        A set with all :py:class:`~.GenericBuilding` objects, which do not have an
+        :attr:`investment` of type :class:`.Investment`.
+
+    **The following variables are created:**
+
+    t_air
+        Internal building air temperature  for every storage and timestep.
+        temperature at the beginning is set by the parameter `t_inital`.
+        The variable of storage s and timestep t can be accessed by:
+        `om.GenericBuildingBlock.t_air[s, t]`
+
+    t_m_ts
+        Temperature  of the knot, which represents the mass of
+        the building zone. This temperature is calculated based on
+        the value of the last timestep.
+        The variable of storage s and timestep t can be accessed by:
+        `om.GenericBuildingBlock.t_m_ts[s, t]`
+
+    **The following constraints are created:**
+
+    Building balance ts :attr:`om.Building.balance_rule_ts[n, t]`
+        .. math:: \phi_{m\_tot}(t) = \phi_m(t) + h_{tr\_em} \cdot t_e(t) +
+        \frac{h_{tr\_3}}{h_{tr\_2}} \cdot \left( \phi_{st}(t) +
+        h_{tr\_w} \cdot t_e(t) + h_{tr\_1} \cdot
+        \left( \frac{\phi_{ia}(t) +\phi_{i}(p, t) -
+        \phi_{o}(p, t)}{h_{ve}} + t_e(t) \right) \right)
+
+        .. math:: t_{m\_t} =  &t_{m\_t}(t-1) \cdot
+        \left(\frac{c_m}{3600} - 0.5 \cdot
+        (h_{tr\_3} + h_{tr\_em})\right) + \phi_{m\_tot}(t)}} \cdot
+        {{\frac{c_m}{3600} + 0.5 \cdot (h_{tr\_3} + h_{tr\_em})}}
+
+    Building balance t_air :attr:`om.Building.balance_rule_t_air[n, t]`
+        :math::`t_s(t) = \frac{h_{tr\_ms} \cdot \frac{t_{m}(t-1) +
+        t_{m}(t)}{2} + \phi_{st}(t) + h_{tr\_w} \cdot t_e(t) +
+        h_{tr\_1} \cdot \left(t_e(t) + \frac{\phi_{ia}(t) +
+        \phi_{hc\_nd}}{h_{ve}}\right)}{h_{tr\_ms} +
+        h_{tr\_w} + h_{tr\_1}}
+
+        :math: t_{air}(t) = \frac{h_{tr\_is} \cdot t_s(t) +
+        h_{ve} \cdot t_e(t) + \phi_{ia}(t)] + \phi_{i}(p, t) -
+        \phi_{o}(p, t)}{h_{tr\_is} + h_{ve}}
+
+
+    =========================== ======================= =========
+    symbol                      explanation             attribute
+    =========================== ======================= =========
+    :math:`t_{air}(t)`          internal temperature    `t_air`
+    :math:`t_s(t)`              temperature knot s      `No attribute`
+    :math:`t_{m}(t)`            temperature knot m      `t_m_ts`
+    :math:`phi_{m\_tot}(t)`     temperature knot mtot   `No attribute`
+    =========================== ======================= =========
+
+    **The following parts of the objective function are created:**
+    whereby:
+    :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
+
+    """  # noqa: E501
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -269,21 +333,12 @@ class GenericBuildingBlock(ScalarBlock):
                 self.phi_m_tot[n, 0] = 0
                 self.phi_m_tot[n, 0].fix()
 
-        def _storage_balance_rule_ts(block, n, p, t):
+        def _storage_balance_rule_tm(block, n, p, t):
+            """
+            Rule definition for the building temperature t_m
+            of every storage n and every timestep.
+            """
             t_m_last_ts = block.t_m_ts[n, t]
-            phi_m_tot = block.phi_m_tot[n, t + 1]
-            t_m_current_ts = (
-                t_m_last_ts * ((n.c_m / 3600) - 0.5 * (n.h_tr_3 + n.h_tr_em))
-                + phi_m_tot
-            ) / ((n.c_m / 3600) + 0.5 * (n.h_tr_3 + n.h_tr_em))
-
-            return block.t_m_ts[n, t + 1] == t_m_current_ts
-
-        self.balance_t_m_current_t_s = Constraint(
-            self.BUILDING, m.TIMEINDEX, rule=_storage_balance_rule_ts
-        )
-
-        def _storage_balance_rule_phi_m_tot(block, n, p, t):
             phi_hc_heat = m.flow[i[n], n, p, t]
             phi_hc_cool = m.flow[n, o[n], p, t]
             phi_hc_nd = phi_hc_heat - phi_hc_cool
@@ -299,13 +354,23 @@ class GenericBuildingBlock(ScalarBlock):
                     * (((n.phi_ia[t] + phi_hc_nd) / n.h_ve) + n.t_e[t])
                 )
             )
-            return block.phi_m_tot[n, t + 1] == phi_m_tot
 
-        self.balance_phi_m_tot = Constraint(
-            self.BUILDING, m.TIMEINDEX, rule=_storage_balance_rule_phi_m_tot
+            t_m_current_ts = (
+                t_m_last_ts * ((n.c_m / 3600) - 0.5 * (n.h_tr_3 + n.h_tr_em))
+                + phi_m_tot
+            ) / ((n.c_m / 3600) + 0.5 * (n.h_tr_3 + n.h_tr_em))
+
+            return block.t_m_ts[n, t + 1] == t_m_current_ts
+
+        self.balance_t_m_current_t_s = Constraint(
+            self.BUILDING, m.TIMEINDEX, rule=_storage_balance_rule_tm
         )
 
         def _storage_balance_rule_t_air(block, n, p, t):
+            """
+            Rule definition for the building temperature t_air
+            of every storage n and every timestep.
+            """
             phi_hc_heat = m.flow[i[n], n, p, t]
             phi_hc_cool = m.flow[n, o[n], p, t]
             phi_hc_nd = phi_hc_heat - phi_hc_cool

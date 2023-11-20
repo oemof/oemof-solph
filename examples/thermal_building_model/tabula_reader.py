@@ -188,13 +188,12 @@ class Building:
             "u_window_1": float(row["U_" + str(t_b) + "Window_1"].values[0]),
             "u_window_2": float(row["U_" + str(t_b) + "Window_2"].values[0]),
         }
-
         self.g_gl_n_window = {
             "g_gl_n_window_1": float(
-                row["g_gl_n_" + str(t_b) + "Window_1"].values[0]
+                row["g_gl_n_Window_1"].values[0]
             ),
             "g_gl_n_window_2": float(
-                row["g_gl_n_" + str(t_b) + "Window_2"].values[0]
+                row["g_gl_n_Window_2"].values[0]
             ),
         }
 

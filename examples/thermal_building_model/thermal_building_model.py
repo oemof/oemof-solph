@@ -101,9 +101,6 @@ def main():
     es.add(b_heat)
     b_cool = solph.buses.Bus(label="b_cool")
     es.add(b_cool)
-    # create natural gas bus
-    b_gas = solph.buses.Bus(label="natural_gas")
-    es.add(b_gas)
     b_elect = solph.buses.Bus(label="electricity_from_grid")
     es.add(b_elect)
 
