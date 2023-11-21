@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 import calendar
 import datetime
+import itertools
 import warnings
 
 import numpy as np
@@ -141,33 +142,10 @@ class EnergySystem(es.EnergySystem):
                 )
             )
 
-        # catch wrong combinations and infer timeincrement from timeindex.
-        if timeincrement is not None and timeindex is not None:
-            if periods is None:
-                msg = (
-                    "Specifying the timeincrement and the timeindex parameter "
-                    "at the same time is not allowed since these might be "
-                    "conflicting to each other."
-                )
-                raise AttributeError(msg)
-            else:
-                msg = (
-                    "Ensure that your timeindex and timeincrement are "
-                    "consistent."
-                )
-                warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-
-        elif timeindex is not None and timeincrement is None:
-            df = pd.DataFrame(timeindex)
-            timedelta = df.diff()
-            timeincrement = timedelta / np.timedelta64(1, "h")
-
-            # we want a series (squeeze)
-            # without the first item (no delta defined for first entry)
-            # but starting with index 0 (reset)
-            timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
-
-        if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
+        timeincrement = self._init_timeincrement(
+            timeincrement, timeindex, periods, tsa_parameters
+        )
+        if (pd.Series(timeincrement) <= 0).any():
             msg = (
                 "The time increment is inconsistent. Negative values and zero "
                 "are not allowed.\nThis is caused by a inconsistent "
@@ -212,6 +190,70 @@ class EnergySystem(es.EnergySystem):
                 # Set up tsa_parameters for single period:
                 tsa_parameters = [tsa_parameters]
         self.tsa_parameters = tsa_parameters
+
+    @staticmethod
+    def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
+        """Check and initialize timeincrement"""
+
+        # Timeincrement in TSAM mode
+        if (
+            timeincrement is not None
+            and tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You must not specify timeincrement in TSAM mode. "
+                "TSAM will define timeincrement itself."
+            )
+            raise AttributeError(msg)
+        if (
+            tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+            and not all("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "If have to set up segmentation in all periods, "
+                "if you want to use segmentation in TSAM mode"
+            )
+            raise AttributeError(msg)
+        if tsa_parameters is not None and all(
+            "segments" in params for params in tsa_parameters
+        ):
+            # Concatenate segments from TSAM parameters to get timeincrement
+            return list(
+                itertools.chain(
+                    *[params["segments"].values() for params in tsa_parameters]
+                )
+            )
+
+        # catch wrong combinations and infer timeincrement from timeindex.
+        if timeincrement is not None and timeindex is not None:
+            if periods is None:
+                msg = (
+                    "Specifying the timeincrement and the timeindex parameter "
+                    "at the same time is not allowed since these might be "
+                    "conflicting to each other."
+                )
+                raise AttributeError(msg)
+            else:
+                msg = (
+                    "Ensure that your timeindex and timeincrement are "
+                    "consistent."
+                )
+                warnings.warn(msg, debugging.ExperimentalFeatureWarning)
+                return timeincrement
+
+        elif timeindex is not None and timeincrement is None:
+            df = pd.DataFrame(timeindex)
+            timedelta = df.diff()
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            return timeincrement.squeeze()[1:].reset_index(drop=True)
+
+        return timeincrement
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices

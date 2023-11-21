@@ -20,6 +20,7 @@ SPDX-FileCopyrightText: Raul Ciria Aylagas
 SPDX-License-Identifier: MIT
 
 """
+import math
 import numbers
 from warnings import warn
 
@@ -677,17 +678,20 @@ class GenericStorageBlock(ScalarBlock):
                     break
 
             k = m.es.tsa_parameters[p]["order"][ii]
-            t = m.get_timestep_from_tsam_timestep(
-                p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1
+
+            # Calculate inter losses over whole typical period
+            t0 = m.get_timestep_from_tsam_timestep(p, k, 0)
+            losses = math.prod(
+                (1 - n.loss_rate[t0 + s])
+                ** m.es.tsa_parameters[p]["segments"][(k, s)]
+                if "segments" in m.es.tsa_parameters[p]
+                else 1 - n.loss_rate[t0 + s]
+                for s in range(m.es.tsa_parameters[p]["timesteps_per_period"])
             )
+
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
-            expr += -block.storage_content_inter[n, i] * (
-                1 - n.loss_rate[t]
-            ) ** (
-                m.timeincrement[t]
-                * m.es.tsa_parameters[p]["timesteps_per_period"]
-            )
+            expr += -block.storage_content_inter[n, i] * losses
             expr += -self.storage_content_intra[
                 n, p, k, m.es.tsa_parameters[p]["timesteps_per_period"]
             ]

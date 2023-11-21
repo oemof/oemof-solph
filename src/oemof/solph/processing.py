@@ -17,8 +17,9 @@ SPDX-License-Identifier: MIT
 """
 import operator
 import sys
-from itertools import accumulate
-from itertools import groupby
+import itertools
+from typing import Dict
+from typing import Tuple
 
 import numpy as np
 import pandas as pd
@@ -284,7 +285,7 @@ def results(model, remove_last_time_point=False):
 
     # add dual variables for bus constraints
     if model.dual is not None:
-        grouped = groupby(
+        grouped = itertools.groupby(
             sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
         )
         for bus, timeindex in grouped:
@@ -476,13 +477,18 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
                     + k * tsa_period["timesteps_per_period"] : period_offset
                     + (k + 1) * tsa_period["timesteps_per_period"]
                 ]
+                # Disaggregate segmentation
+                if "segments" in tsa_period:
+                    flow_k = _disaggregate_segmentation(
+                        flow_k, tsa_period["segments"], k
+                    )
                 disaggregated_flow_frames.append(flow_k)
             period_offset += tsa_period["timesteps_per_period"] * len(
                 tsa_period["occurrences"]
             )
         ts = pd.concat(disaggregated_flow_frames)
         ts.timestep = range(len(ts))
-        flow_dict[flow] = ts
+        flow_dict[flow] = ts.interpolate(method="pad")
 
     # Add storage SOC flows:
     for storage, soc in storages.items():
@@ -497,6 +503,45 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     return flow_dict
 
 
+def _disaggregate_segmentation(
+    df: pd.DataFrame,
+    segments: Dict[Tuple[int, int], int],
+    current_period: int,
+) -> pd.DataFrame:
+    """Disaggregate segmentation
+
+    For each segment values are reindex by segment length holding None values,
+    which are interpolated in a later step (as storages need linear
+    interpolation while flows need padded interpolation).
+
+    Parameters
+    ----------
+    df : pd.Dataframe
+        holding values for each segment
+    segments : Dict[Tuple[int, int], int]
+        Segmentation dict from TSAM, holding segmentation length for each
+        timestep in each typical period
+    current_period: int
+        Typical period the data belongs to, needed to extract related segments
+
+    Returns
+    -------
+    pd.Dataframe
+        holding values for each timestep instead of each segment.
+        Added timesteps contain None values and are interpolated later.
+    """
+    current_segments = list(
+        v for ((k, s), v) in segments.items() if k == current_period
+    )
+    df.index = range(len(current_segments))
+    segmented_index = itertools.chain.from_iterable(
+        [i] + list(itertools.repeat(None, s - 1))
+        for i, s in enumerate(current_segments)
+    )
+    disaggregated_data = df.reindex(segmented_index)
+    return disaggregated_data
+
+
 def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     """Calculate resulting SOC from inter and intra SOC flows"""
     soc_frames = []
@@ -508,14 +553,28 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
             # Self-discharge has to be taken into account for calculating
             # inter SOC for each timestep in cluster
             t0 = t_offset + i * tsa_period["timesteps_per_period"]
+            # Add last timesteps of simulation in order to interpolate SOC for
+            # last segment correctly:
+            is_last_timestep = (
+                p == len(tsa_parameters) - 1
+                and i == len(tsa_period["order"]) - 1
+            )
+            timesteps = (
+                tsa_period["timesteps_per_period"] + 1
+                if is_last_timestep
+                else tsa_period["timesteps_per_period"]
+            )
             inter_series = (
                 pd.Series(
-                    accumulate(
+                    itertools.accumulate(
                         (
                             (1 - storage.loss_rate[t])
+                            ** tsa_period["segments"][(k, t - t0)]
+                            if "segments" in tsa_period
+                            else 1 - storage.loss_rate[t]
                             for t in range(
                                 t0,
-                                t0 + tsa_period["timesteps_per_period"] - 1,
+                                t0 + timesteps - 1,
                             )
                         ),
                         operator.mul,
@@ -524,19 +583,37 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                 )
                 * inter_value
             )
-            intra_series = soc["intra"][(p, k)].iloc[
-                0 : tsa_period["timesteps_per_period"]
-            ]
-            intra_series["value"] = (
-                intra_series["value"].values + inter_series.values
-            )  # Neglect indexes, otherwise none
-            soc_frames.append(intra_series)
+            intra_series = soc["intra"][(p, k)].iloc[0:timesteps]
+            soc_frame = pd.DataFrame(
+                intra_series["value"].values
+                + inter_series.values,  # Neglect indexes, otherwise none
+                columns=["value"],
+            )
+
+            # Disaggregate segmentation
+            if "segments" in tsa_period:
+                soc_disaggregated = _disaggregate_segmentation(
+                    soc_frame[:-1] if is_last_timestep else soc_frame,
+                    tsa_period["segments"],
+                    k,
+                )
+                if is_last_timestep:
+                    soc_disaggregated.loc[
+                        len(soc_disaggregated)
+                    ] = soc_frame.iloc[-1]
+                soc_frame = soc_disaggregated
+
+            soc_frames.append(soc_frame)
         i_offset += len(tsa_period["order"])
         t_offset += i_offset * tsa_period["timesteps_per_period"]
     soc_ts = pd.concat(soc_frames)
     soc_ts["variable_name"] = "soc"
     soc_ts["timestep"] = range(len(soc_ts))
-    return soc_ts
+
+    # Disaggregate segments by linear interpolation and remove
+    # last timestep afterwards (only needed for interpolation)
+    interpolated_soc = soc_ts.interpolate()
+    return interpolated_soc.iloc[:-1]
 
 
 def _get_storage_soc_flows_and_keys(flow_dict):
