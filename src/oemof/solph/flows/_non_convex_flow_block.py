@@ -85,6 +85,12 @@ class NonConvexFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
+        for o, i in self.NONCONVEX_FLOWS:
+            if m.flows[o, i].nonconvex.initial_status is not None:
+                self.status[o, i, m.TIMESTEPS.at(1)] = m.flows[
+                    o, i
+                ].nonconvex.initial_status
+                self.status[o, i, m.TIMESTEPS.at(1)].fix()
 
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
@@ -469,24 +475,22 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-downtime constraints of non-convex flows.
             """
-            if self._time_step_allows_flexibility(
-                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS.at(-1)
-            ):
-                expr = 0
-                expr += (
-                    self.status[i, o, t - 1] - self.status[i, o, t]
-                ) * m.flows[i, o].nonconvex.minimum_downtime
-                expr += -m.flows[i, o].nonconvex.minimum_downtime
-                expr += sum(
-                    self.status[i, o, t + d]
-                    for d in range(0, m.flows[i, o].nonconvex.minimum_downtime)
+            expr = 0
+            expr += (
+                self.status[i, o, t] - self.status[i, o, t + 1]
+            ) * m.flows[i, o].nonconvex.minimum_downtime
+            expr += -m.flows[i, o].nonconvex.minimum_downtime
+            expr += sum(
+                self.status[i, o, d]
+                for d in range(
+                    t,
+                    min(
+                        t + m.flows[i, o].nonconvex.minimum_downtime,
+                        m.TIMESTEPS.at(-1),
+                    ),
                 )
-                return expr <= 0
-            else:
-                expr = 0
-                expr += self.status[i, o, t]
-                expr += -m.flows[i, o].nonconvex.initial_status
-                return expr == 0
+            )
+            return expr <= 0
 
         return Constraint(
             self.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=min_downtime_rule
