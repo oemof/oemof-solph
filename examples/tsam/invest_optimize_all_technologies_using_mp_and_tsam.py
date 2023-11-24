@@ -173,13 +173,11 @@ def main():
             {
                 "timesteps_per_period": aggregation1.hoursPerPeriod,
                 "order": aggregation1.clusterOrder,
-                "occurrences": aggregation1.clusterPeriodNoOccur,
                 "timeindex": aggregation1.timeIndex,
             },
             {
                 "timesteps_per_period": aggregation2.hoursPerPeriod,
                 "order": aggregation2.clusterOrder,
-                "occurrences": aggregation2.clusterPeriodNoOccur,
                 "timeindex": aggregation2.timeIndex,
             },
         ],

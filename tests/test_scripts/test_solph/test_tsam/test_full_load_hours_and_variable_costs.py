@@ -50,7 +50,6 @@ energysystem = solph.EnergySystem(
         {
             "timesteps_per_period": 2,
             "order": [1, 1, 1, 0],
-            "occurrences": {0: 1, 1: 3},
             "timeindex": tindex_original,
         },
     ],
