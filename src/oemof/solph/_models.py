@@ -475,19 +475,26 @@ class Model(BaseModel):
             # If segmentation is used, timesteps_per_period is set to number of
             # segmentations per period.
             # Otherwise, default timesteps_per_period is used.
-            if any(
-                "segments" in params for params in self.es.tsa_parameters
-            ):
+            if any("segments" in params for params in self.es.tsa_parameters):
                 for params in self.es.tsa_parameters:
-                    params["timesteps_per_period"] = int(len(params["segments"]) / len(params["occurrences"]))
+                    params["timesteps_per_period"] = int(
+                        len(params["segments"]) / len(params["occurrences"])
+                    )
 
             # Construct occurrences of typical periods
             for p in self.PERIODS:
                 self.es.tsa_parameters[p]["occurrences"] = {}
-                for typ_period in range(max(self.es.tsa_parameters[p]['order'])+1):
-                    np.count_nonzero(self.es.tsa_parameters[0]['order'] == typ_period)
-                    self.es.tsa_parameters[p]["occurrences"][typ_period] = np.count_nonzero(
-                        self.es.tsa_parameters[p]['order'] == typ_period)
+                for typ_period in range(
+                    max(self.es.tsa_parameters[p]["order"]) + 1
+                ):
+                    np.count_nonzero(
+                        self.es.tsa_parameters[0]["order"] == typ_period
+                    )
+                    self.es.tsa_parameters[p]["occurrences"][
+                        typ_period
+                    ] = np.count_nonzero(
+                        self.es.tsa_parameters[p]["order"] == typ_period
+                    )
 
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(
