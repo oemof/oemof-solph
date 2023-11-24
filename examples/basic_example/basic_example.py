@@ -90,7 +90,7 @@ def main():
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
-        msg = "Data file not found: {0}. Values for only one timestep created for usage!"
+        msg = "Data file not found: {0}. Values for one timestep created!"
         warnings.warn(msg.format(filename), UserWarning)
         data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
@@ -160,7 +160,7 @@ def main():
     )
 
     # create simple sink object representing the electrical demand
-    # nominal_value is here set to 1 because demand_el is not a normalised series
+    # nominal_value is set to 1 because demand_el is not a normalised series
     energysystem.add(
         cmp.Sink(
             label="demand",
