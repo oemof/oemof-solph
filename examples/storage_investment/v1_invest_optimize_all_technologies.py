@@ -122,7 +122,7 @@ def main():
     epc_pv = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     # It is assumed that the investment object in storage capacity entails the
-    # costs for investment into input and output capacity
+    # costs for investment into both input and output capacity
     epc_storage = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     ##########################################################################
