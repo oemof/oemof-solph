@@ -122,6 +122,8 @@ def main():
 
     # If the period is one year the equivalent periodical costs (epc) of an
     # investment are equal to the annuity. Use oemof's economic tools.
+    # It is assumed that the investment object in storage capacity entails the
+    # costs for investment into both input and output capacity
     epc_storage = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     ##########################################################################
