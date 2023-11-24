@@ -447,10 +447,6 @@ class NonConvexFlowBlock(ScalarBlock):
 
         return inactivity_costs
 
-    @staticmethod
-    def _time_step_allows_flexibility(t, max_up_down, last_step):
-        return max_up_down <= t <= last_step - max_up_down
-
     def _min_downtime_constraint(self):
         r"""
         .. math::
