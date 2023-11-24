@@ -475,22 +475,25 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-downtime constraints of non-convex flows.
             """
-            expr = 0
-            expr += (
-                self.status[i, o, t] - self.status[i, o, t + 1]
-            ) * m.flows[i, o].nonconvex.minimum_downtime
-            expr += -m.flows[i, o].nonconvex.minimum_downtime
-            expr += sum(
-                self.status[i, o, d]
-                for d in range(
-                    t,
-                    min(
-                        t + m.flows[i, o].nonconvex.minimum_downtime,
-                        m.TIMESTEPS.at(-1),
-                    ),
+            if t < m.TIMESTEPS.at(-1):
+                expr = 0
+                expr += (
+                    self.status[i, o, t] - self.status[i, o, t + 1]
+                ) * m.flows[i, o].nonconvex.minimum_downtime
+                expr += -m.flows[i, o].nonconvex.minimum_downtime
+                expr += sum(
+                    self.status[i, o, d]
+                    for d in range(
+                        t,
+                        min(
+                            t + m.flows[i, o].nonconvex.minimum_downtime,
+                            m.TIMESTEPS.at(-1),
+                        ),
+                    )
                 )
-            )
-            return expr <= 0
+                return expr <= 0
+            else:
+                return Constraint.Skip
 
         return Constraint(
             self.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=min_downtime_rule
@@ -518,23 +521,18 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-uptime constraints of non-convex flows.
             """
-            if self._time_step_allows_flexibility(
-                t, m.flows[i, o].nonconvex.max_up_down, m.TIMESTEPS.at(-1)
-            ):
+            if  t < m.TIMESTEPS.at(-1):
                 expr = 0
                 expr += (
-                    self.status[i, o, t] - self.status[i, o, t - 1]
+                    self.status[i, o, t +1] - self.status[i, o, t]
                 ) * m.flows[i, o].nonconvex.minimum_uptime
                 expr += -sum(
-                    self.status[i, o, t + u]
-                    for u in range(0, m.flows[i, o].nonconvex.minimum_uptime)
+                    self.status[i, o, u]
+                    for u in range(t, min(t+ m.flows[i, o].nonconvex.minimum_uptime, m.TIMESTEPS.at(-1)))
                 )
                 return expr <= 0
             else:
-                expr = 0
-                expr += self.status[i, o, t]
-                expr += -m.flows[i, o].nonconvex.initial_status
-                return expr == 0
+                return Constraint.Skip
 
         return Constraint(
             self.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule
