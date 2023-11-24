@@ -521,14 +521,20 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-uptime constraints of non-convex flows.
             """
-            if  t < m.TIMESTEPS.at(-1):
+            if t < m.TIMESTEPS.at(-1):
                 expr = 0
                 expr += (
-                    self.status[i, o, t +1] - self.status[i, o, t]
+                    self.status[i, o, t + 1] - self.status[i, o, t]
                 ) * m.flows[i, o].nonconvex.minimum_uptime
                 expr += -sum(
                     self.status[i, o, u]
-                    for u in range(t, min(t+ m.flows[i, o].nonconvex.minimum_uptime, m.TIMESTEPS.at(-1)))
+                    for u in range(
+                        t,
+                        min(
+                            t + m.flows[i, o].nonconvex.minimum_uptime,
+                            m.TIMESTEPS.at(-1),
+                        ),
+                    )
                 )
                 return expr <= 0
             else:
