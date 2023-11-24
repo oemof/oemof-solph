@@ -120,6 +120,9 @@ def main():
     # investment are equal to the annuity. Use oemof's economic tools.
     epc_wind = economics.annuity(capex=1000, n=20, wacc=0.05)
     epc_pv = economics.annuity(capex=1000, n=20, wacc=0.05)
+
+    # It is assumed that the investment object in storage capacity entails the
+    # costs for investment into input and output capacity
     epc_storage = economics.annuity(capex=1000, n=20, wacc=0.05)
 
     ##########################################################################
