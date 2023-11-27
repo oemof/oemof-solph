@@ -87,8 +87,12 @@ class NonConvexFlowBlock(ScalarBlock):
         self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
         for o, i in self.NONCONVEX_FLOWS:
             if m.flows[o, i].nonconvex.initial_status is not None:
-                for t in range(0, m.flows[o, i].nonconvex.first_flexible_timestep):
-                    self.status[o, i, t] = m.flows[o, i].nonconvex.initial_status
+                for t in range(
+                    0, m.flows[o, i].nonconvex.first_flexible_timestep
+                ):
+                    self.status[o, i, t] = m.flows[
+                        o, i
+                    ].nonconvex.initial_status
                     self.status[o, i, t].fix()
 
         # `status_nominal` is a parameter which represents the
@@ -470,7 +474,11 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-downtime constraints of non-convex flows.
             """
-            if m.flows[i, o].nonconvex.first_flexible_timestep < t < m.TIMESTEPS.at(-1):
+            if (
+                m.flows[i, o].nonconvex.first_flexible_timestep
+                < t
+                < m.TIMESTEPS.at(-1)
+            ):
                 expr = 0
                 expr += (
                     self.status[i, o, t - 1] - self.status[i, o, t]
@@ -516,7 +524,11 @@ class NonConvexFlowBlock(ScalarBlock):
             """
             Rule definition for min-uptime constraints of non-convex flows.
             """
-            if m.flows[i, o].nonconvex.first_flexible_timestep < t < m.TIMESTEPS.at(-1):
+            if (
+                m.flows[i, o].nonconvex.first_flexible_timestep
+                < t
+                < m.TIMESTEPS.at(-1)
+            ):
                 expr = 0
                 expr += (
                     self.status[i, o, t] - self.status[i, o, t - 1]
