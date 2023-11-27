@@ -7,17 +7,7 @@ import pandas as pd
 from calculate_gain_by_Sun import Window
 from dataclasses import dataclass
 import os
-
-mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-tabula_df = pd.DataFrame(
-    pd.read_csv(
-        os.path.join(
-            mainPath, "thermal_building_model", "tabula_data_sorted.csv"
-        ),
-        low_memory=False,
-    )
-)
-
+import warnings
 
 @dataclass
 class BuildingConfig:
@@ -67,13 +57,44 @@ class BuildingConfig:
 class Building:
     def __init__(
         self,
-        tabula_building_code: str,
-        class_building: str,
         number_of_time_steps: float,
+        tabula_building_code: str = None,
+        country: str = None,
+        class_building: str = "average",
+        building_type:str = None,
+        refurbishment_status = "no_refurbishment",
+        construction_year: int = None,
+        floor_area: float = None,
     ):
-        self.tabula_building_code = tabula_building_code
+        mainPath = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+        self.tabula_df = pd.DataFrame(
+            pd.read_csv(
+                os.path.join(
+                    mainPath, "thermal_building_model", "tabula_data_sorted.csv"
+                ),
+                low_memory=False,
+            )
+        )
+        if tabula_building_code is not None:
+            print("You entered the Expert mode, by using a specific building"
+                  "code name")
+            self.tabula_building_code = tabula_building_code
+        else:
+            self.tabula_building_code = self.define_tabula_building_code(
+                country = country,
+                building_type = building_type,
+                construction_year = construction_year,
+                refurbishment_status = refurbishment_status
+            )
+
         self.class_building = class_building
         self.number_of_time_steps = number_of_time_steps
+        if floor_area is not None:
+            print("You initialized a floor area, which can deviate from"
+                  "the floor area of the tabula buildings")
+            self.floor_area = floor_area
+        else:
+            self.floor_area = None
         # DIN 13790: 12.3.1.2
         self.list_class_buildig = {
             "very light": {"a_m_var": 2.5, "c_m_var": 80000},
@@ -83,6 +104,28 @@ class Building:
             "very heavy": {"a_m_var": 3.0, "c_m_var": 370000},
         }
         self.building_config = {}
+
+    def define_tabula_building_code(self,
+                                    country : str,
+                                    construction_year :int,
+                                    building_type : str,
+                                    refurbishment_status : str,):
+        self.tabula_df = self.tabula_df[
+            (self.tabula_df["Code_Country"] == country) &
+            (self.tabula_df["Code_BuildingSizeClass"] == building_type) &
+            (self.tabula_df["Code_DataType_Building"] == "ReEx") &
+            (pd.to_numeric(self.tabula_df["Year1_Building"], errors='coerce').fillna(0) <= construction_year) &
+            (pd.to_numeric(self.tabula_df["Year2_Building"], errors='coerce').fillna(0) >= construction_year)
+            ]
+        if refurbishment_status in {"no_refurbishment", "usual_refurbishment", "advanced_refurbishment"}:
+            variant_mapping = {"no_refurbishment": 1, "usual_refurbishment": 2, "advanced_refurbishment": 3}
+            self.tabula_df = self.tabula_df[
+                self.tabula_df["Number_BuildingVariant"] == variant_mapping[refurbishment_status]]
+
+        assert len(self.tabula_df) <= 1, "More than one building is founded for " \
+                                        "the input parameters. Please write an " \
+                                        "issue in Github"
+        return  self.tabula_df["Code_BuildingVariant"]
 
     def calculate_all_parameters(self):
         self.get_building_parameters_from_csv()
@@ -114,17 +157,22 @@ class Building:
         return building_config
 
     def get_building_parameters_from_csv(self):
-        row = tabula_df.loc[
-            tabula_df["Code_BuildingVariant"] == self.tabula_building_code
+
+        row = self.tabula_df.loc[
+            self.tabula_df["Code_BuildingVariant"] == self.tabula_building_code
         ]
+
         list_type = ["", "Measure_", "Actual_"]
         t_b = list_type[1]
         self.opaque_elements = ["wall", "roof", "floor"]
 
+        self.floor_area_reference = float(row["A_C_Ref"].values[0])
+        self.calc_floor_area_ratio()
         self.a_roof = {
             "a_roof_1": float(row["A_Roof_1"].values[0]),
             "a_roof_2": float(row["A_Roof_2"].values[0]),
         }
+        self.a_roof = {key: value * self.floor_area_ratio for key, value in self.a_roof.items()}
         self.u_roof = {
             "u_roof_1": float(row["U_" + str(t_b) + "Roof_1"].values[0]),
             "u_roof_2": float(row["U_" + str(t_b) + "Roof_2"].values[0]),
@@ -133,11 +181,11 @@ class Building:
             "b_roof_1": float(row["b_Transmission_Roof_1"].values[0]),
             "b_roof_2": float(row["b_Transmission_Roof_2"].values[0]),
         }
-
         self.a_floor = {
             "a_floor_1": float(row["A_Floor_1"].values[0]),
             "a_floor_2": float(row["A_Floor_2"].values[0]),
         }
+        self.a_floor = {key: value * self.floor_area_ratio for key, value in self.a_floor.items()}
         self.u_floor = {
             "u_floor_1": float(row["U_" + str(t_b) + "Floor_1"].values[0]),
             "u_floor_2": float(row["U_" + str(t_b) + "Floor_2"].values[0]),
@@ -152,6 +200,7 @@ class Building:
             "a_wall_2": float(row["A_Wall_2"].values[0]),
             "a_wall_3": float(row["A_Wall_3"].values[0]),
         }
+        self.a_wall = {key: value * self.floor_area_ratio for key, value in self.a_wall.items()}
         self.u_wall = {
             "u_wall_1": float(row["U_" + str(t_b) + "Wall_1"].values[0]),
             "u_wall_2": float(row["U_" + str(t_b) + "Wall_2"].values[0]),
@@ -164,6 +213,8 @@ class Building:
         }
 
         self.a_door = {"a_door_1": float(row["A_Door_1"].values[0])}
+        self.a_door = {key: value * self.floor_area_ratio for key, value in self.a_door.items()}
+
         self.u_door = {
             "u_door_1": float(row["U_" + str(t_b) + "Door_1"].values[0])
         }
@@ -172,6 +223,7 @@ class Building:
             "a_window_1": float(row["A_Window_1"].values[0]),
             "a_window_2": float(row["A_Window_2"].values[0]),
         }
+        self.a_window = {key: value * self.floor_area_ratio for key, value in self.a_window.items()}
         self.a_window_specific = {
             "a_window_horizontal": float(row["A_Window_Horizontal"].values[0]),
             "a_window_east": float(row["A_Window_East"].values[0]),
@@ -179,6 +231,8 @@ class Building:
             "a_window_west": float(row["A_Window_West"].values[0]),
             "a_window_north": float(row["A_Window_North"].values[0]),
         }
+        self.a_window_specific = {key: value * self.floor_area_ratio for key, value in
+                                  self.a_window_specific.items()}
         self.delta_u_thermal_bridiging = {
             "delta_u_thermal_bridiging": float(
                 row["delta_U_ThermalBridging"].values[0]
@@ -197,7 +251,6 @@ class Building:
             ),
         }
 
-        self.floor_area = float(row["A_C_Ref"].values[0])
         self.heat_transfer_coefficient_ventilation = float(
             row["h_Ventilation"].values[0]
         )
@@ -235,6 +288,25 @@ class Building:
         self.h_ventilation = float(
             row["h_Ventilation"] * self.floor_area
         )  # [W/K]
+
+    def calc_floor_area_ratio(self):
+        if self.floor_area is None:
+            self.floor_area = self.floor_area_reference
+            self.floor_area_ratio = 1
+        else:
+            warnings.warn("Experimental mode: The floor area is unequeal"
+                          "to the tabula reference floor area", UserWarning)
+            self.floor_area_ratio = self.floor_area / self.floor_area_reference
+            if self.floor_area_ratio > 1:
+                print("The chosen floor is "+str(round((1-self.floor_area_ratio)*100,3))+" % "
+                      "bigger than the tabula reference floor area")
+            elif self.floor_area_ratio < 1:
+                print("The chosen floor is "+str(round((1-self.floor_area_ratio)*100,3))+" % "
+                      "smaller than the tabula reference floor area")
+            if 0.9 > self.floor_area_ratio or 1.1 < self.floor_area_ratio:
+                warnings.warn("The chosen floor area is more than 10 % different to the "
+                              "associated tabula building. It might influence "
+                              "the results strong and unpredictable", UserWarning)
 
     def calc_internal_area(self):
         # DIN 7.2.2.2

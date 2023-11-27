@@ -43,22 +43,34 @@ def main():
 
     # Generates 5RC Building-Model
     building_status = "no_refurbishment"
-    if building_status == "no_refurbishment":
+    expert_mode = None
+    if expert_mode:
+        if building_status == "no_refurbishment":
+            building_example = Building(
+                tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.001",
+                class_building="average",
+                number_of_time_steps=number_of_time_steps,
+            )
+        elif building_status == "usual_refurbishment":
+            building_example = Building(
+                tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.002",
+                class_building="average",
+                number_of_time_steps=number_of_time_steps,
+            )
+        elif building_status == "advanced_refurbishment":
+            building_example = Building(
+                tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.003",
+                class_building="average",
+                number_of_time_steps=number_of_time_steps,
+            )
+    else:
         building_example = Building(
-            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.001",
+            country = "DE",
+            construction_year = 1980,
+            floor_area = 200,
             class_building="average",
-            number_of_time_steps=number_of_time_steps,
-        )
-    elif building_status == "usual_refurbishment":
-        building_example = Building(
-            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.002",
-            class_building="average",
-            number_of_time_steps=number_of_time_steps,
-        )
-    elif building_status == "advanced_refurbishment":
-        building_example = Building(
-            tabula_building_code="DE.N.SFH.04.Gen.ReEx.001.003",
-            class_building="average",
+            building_type ="SFH",
+            refurbishment_status = "no_refurbishment",
             number_of_time_steps=number_of_time_steps,
         )
     building_example.calculate_all_parameters()
