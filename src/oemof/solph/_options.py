@@ -247,7 +247,10 @@ class NonConvex:
         for attribute, value in custom_attributes.items():
             setattr(self, attribute, value)
 
-        self.first_flexible_timestep = max(minimum_uptime, minimum_downtime)
+        if initial_status == 0:
+            self.first_flexible_timestep = minimum_downtime
+        else:
+            self.first_flexible_timestep = minimum_uptime
 
     @property
     def max_up_down(self):
