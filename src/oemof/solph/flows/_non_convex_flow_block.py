@@ -479,6 +479,9 @@ class NonConvexFlowBlock(ScalarBlock):
                 < t
                 < m.TIMESTEPS.at(-1)
             ):
+                # We have a 2D matrix of constraints,
+                # so testing is easier then just calling the rule for valid t.
+
                 expr = 0
                 expr += (
                     self.status[i, o, t - 1] - self.status[i, o, t]
@@ -529,6 +532,8 @@ class NonConvexFlowBlock(ScalarBlock):
                 < t
                 < m.TIMESTEPS.at(-1)
             ):
+                # We have a 2D matrix of constraints,
+                # so testing is easier then just calling the rule for valid t.
                 expr = 0
                 expr += (
                     self.status[i, o, t] - self.status[i, o, t - 1]
