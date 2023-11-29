@@ -23,6 +23,7 @@ Bug fixes
   bias towards investments happening earlier in the optimization horizon.
 * Fix bugs in multi-period documentation.
 * Fix y intersect of OffsetConverter
+* Fix minimum uptime being relevant for initial downtime (and vice versa).
 
 Testing
 #######
