@@ -1026,7 +1026,7 @@ class InvestmentFlowBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for i, o in self.EXISTING_INVESTFLOWS:
                 if m.flows[i, o].investment.fixed_costs[0] is not None:
