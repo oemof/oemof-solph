@@ -23,6 +23,7 @@ Bug fixes
   bias towards investments happening earlier in the optimization horizon.
 * Fix bugs in multi-period documentation.
 * Fix y intersect of OffsetConverter
+* Fix duplicated discounting of fixed costs for multi-period investment
 
 Testing
 #######
