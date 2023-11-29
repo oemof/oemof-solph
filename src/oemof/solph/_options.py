@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
 
 from oemof.solph._plumbing import sequence
 
@@ -259,4 +260,9 @@ class NonConvex:
         The maximum of both is used to set the initial status for this
         number of time steps within the edge regions.
         """
+        warn(
+            "Use of max_up_down is deprecated. "
+            "The attribute will be deleted in a future version.",
+            FutureWarning,
+        )
         return max(self.minimum_uptime, self.minimum_downtime)

@@ -9,6 +9,8 @@ available from its original location oemof/tests/test_components.py
 SPDX-License-Identifier: MIT
 """
 
+import pytest
+
 from oemof.solph import NonConvex
 
 
@@ -29,17 +31,22 @@ def test_max_up_down():
         minimum_uptime=5,
         minimum_downtime=4,
     )
-    assert non_convex_object1.max_up_down == 5
+
+    with pytest.warns(FutureWarning):
+        assert non_convex_object1.max_up_down == 5
 
     non_convex_object1 = NonConvex(
         minimum_downtime=4,
     )
-    assert non_convex_object1.max_up_down == 4
+    with pytest.warns(FutureWarning):
+        assert non_convex_object1.max_up_down == 4
 
     non_convex_object1 = NonConvex(
         minimum_uptime=5,
     )
-    assert non_convex_object1.max_up_down == 5
+    with pytest.warns(FutureWarning):
+        assert non_convex_object1.max_up_down == 5
 
     non_convex_object1 = NonConvex()
-    assert non_convex_object1.max_up_down == 0
+    with pytest.warns(FutureWarning):
+        assert non_convex_object1.max_up_down == 0
