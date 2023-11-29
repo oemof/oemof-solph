@@ -1869,7 +1869,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
