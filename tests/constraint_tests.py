@@ -1227,7 +1227,7 @@ class TestsConstraint:
                     nonconvex=solph.NonConvex(
                         minimum_downtime=4,
                         minimum_uptime=2,
-                        initial_status=2,
+                        initial_status=1,
                         startup_costs=5,
                         shutdown_costs=7,
                     ),
