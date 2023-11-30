@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 import itertools
 import logging
 import warnings
-import collections
 from logging import getLogger
 
 from oemof.tools import debugging
@@ -471,20 +470,6 @@ class Model(BaseModel):
             self.tsam_weighting = [1] * len(self.timeincrement)
         else:
             self.TSAM_MODE = True
-
-            # Construct occurrences of typical periods
-            for p in self.PERIODS:
-                self.es.tsa_parameters[p]["occurrences"] = collections.Counter(
-                    self.es.tsa_parameters[p]["order"])
-
-            # If segmentation is used, timesteps_per_period is set to number of
-            # segmentations per period.
-            # Otherwise, default timesteps_per_period is used.
-            if any("segments" in params for params in self.es.tsa_parameters):
-                for params in self.es.tsa_parameters:
-                    params["timesteps_per_period"] = int(
-                        len(params["segments"]) / len(params["occurrences"])
-                    )
 
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(

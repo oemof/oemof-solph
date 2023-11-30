@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 """
 
 import calendar
+import collections
 import datetime
 import itertools
 import warnings
@@ -175,6 +176,11 @@ class EnergySystem(es.EnergySystem):
             self.use_remaining_value = use_remaining_value
 
         if tsa_parameters is not None:
+            if periods is None:
+                raise AttributeError(
+                    "Currently, TSAM mode can only be used together with "
+                    "multi-period mode."
+                )
             msg = (
                 "CAUTION! You specified the 'tsa_parameters' attribute for "
                 "your energy system.\n This will lead to setting up "
@@ -189,6 +195,21 @@ class EnergySystem(es.EnergySystem):
             if isinstance(tsa_parameters, dict):
                 # Set up tsa_parameters for single period:
                 tsa_parameters = [tsa_parameters]
+
+            # Construct occurrences of typical periods
+            for p in range(len(periods)):
+                tsa_parameters[p]["occurrences"] = collections.Counter(
+                    tsa_parameters[p]["order"]
+                )
+
+            # If segmentation is used, timesteps_per_period is set to number of
+            # segmentations per period.
+            # Otherwise, default timesteps_per_period is used.
+            if any("segments" in params for params in tsa_parameters):
+                for params in tsa_parameters:
+                    params["timesteps_per_period"] = int(
+                        len(params["segments"]) / len(params["occurrences"])
+                    )
         self.tsa_parameters = tsa_parameters
 
     @staticmethod
