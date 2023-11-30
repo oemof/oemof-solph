@@ -233,8 +233,8 @@ class NonConvex:
             custom_attributes = {}
 
         self.initial_status = initial_status
-        self.minimum_uptime = minimum_uptime
-        self.minimum_downtime = minimum_downtime
+        self.minimum_uptime = sequence(minimum_uptime)
+        self.minimum_downtime = sequence(minimum_downtime)
         self.maximum_startups = maximum_startups
         self.maximum_shutdowns = maximum_shutdowns
 
@@ -249,20 +249,6 @@ class NonConvex:
             setattr(self, attribute, value)
 
         if initial_status == 0:
-            self.first_flexible_timestep = minimum_downtime
+            self.first_flexible_timestep = self.minimum_downtime[0]
         else:
-            self.first_flexible_timestep = minimum_uptime
-
-    @property
-    def max_up_down(self):
-        """Return maximum of minimum_uptime and minimum_downtime.
-
-        The maximum of both is used to set the initial status for this
-        number of time steps within the edge regions.
-        """
-        warn(
-            "Use of max_up_down is deprecated. "
-            "The attribute will be deleted in a future version.",
-            FutureWarning,
-        )
-        return max(self.minimum_uptime, self.minimum_downtime)
+            self.first_flexible_timestep = self.minimum_uptime[0]

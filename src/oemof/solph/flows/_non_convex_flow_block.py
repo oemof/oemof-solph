@@ -182,10 +182,10 @@ class NonConvexFlowBlock(ScalarBlock):
             `maximum_shutdowns` being not None.
         MINUPTIMEFLOWS
             A subset of set NONCONVEX_FLOWS with the attribute
-            `minimum_uptime` being not None.
+            `minimum_uptime` being > 0.
         MINDOWNTIMEFLOWS
             A subset of set NONCONVEX_FLOWS with the attribute
-            `minimum_downtime` being not None.
+            `minimum_downtime` being > 0.
         POSITIVE_GRADIENT_FLOWS
             A subset of set NONCONVEX_FLOWS with the attribute
             `positive_gradient` being not None.
@@ -230,14 +230,14 @@ class NonConvexFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].nonconvex.minimum_uptime > 0
+                if max(g[2].nonconvex.minimum_uptime) > 0
             ]
         )
         self.MINDOWNTIMEFLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].nonconvex.minimum_downtime > 0
+                if max(g[2].nonconvex.minimum_downtime) > 0
             ]
         )
         self.NEGATIVE_GRADIENT_FLOWS = Set(
@@ -485,14 +485,14 @@ class NonConvexFlowBlock(ScalarBlock):
                 expr = 0
                 expr += (
                     self.status[i, o, t - 1] - self.status[i, o, t]
-                ) * m.flows[i, o].nonconvex.minimum_downtime
-                expr += -m.flows[i, o].nonconvex.minimum_downtime
+                ) * m.flows[i, o].nonconvex.minimum_downtime[t]
+                expr += -m.flows[i, o].nonconvex.minimum_downtime[t]
                 expr += sum(
                     self.status[i, o, d]
                     for d in range(
                         t,
                         min(
-                            t + m.flows[i, o].nonconvex.minimum_downtime,
+                            t + m.flows[i, o].nonconvex.minimum_downtime[t],
                             m.TIMESTEPS.at(-1),
                         ),
                     )
@@ -537,13 +537,13 @@ class NonConvexFlowBlock(ScalarBlock):
                 expr = 0
                 expr += (
                     self.status[i, o, t] - self.status[i, o, t - 1]
-                ) * m.flows[i, o].nonconvex.minimum_uptime
+                ) * m.flows[i, o].nonconvex.minimum_uptime[t]
                 expr += -sum(
                     self.status[i, o, u]
                     for u in range(
                         t,
                         min(
-                            t + m.flows[i, o].nonconvex.minimum_uptime,
+                            t + m.flows[i, o].nonconvex.minimum_uptime[t],
                             m.TIMESTEPS.at(-1),
                         ),
                     )
