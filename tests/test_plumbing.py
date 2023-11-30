@@ -10,6 +10,7 @@ import pytest
 
 from oemof.solph._plumbing import sequence
 
+
 def test_sequence():
     seq0 = sequence(0)
     assert seq0[0] == 0
