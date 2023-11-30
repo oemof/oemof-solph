@@ -57,7 +57,6 @@ energysystem = solph.EnergySystem(
             "timesteps_per_period": 4,
             "order": [0, 1, 1, 0],
             "segments": {(0, 0): 1, (0, 1): 3, (1, 0): 2, (1, 1): 2},
-            "timeindex": tindex_original,
         },
     ],
     infer_last_interval=False,

@@ -202,14 +202,17 @@ class EnergySystem(es.EnergySystem):
                     tsa_parameters[p]["order"]
                 )
 
-            # If segmentation is used, timesteps_per_period is set to number of
+            # If segmentation is used, timesteps is set to number of
             # segmentations per period.
             # Otherwise, default timesteps_per_period is used.
-            if any("segments" in params for params in tsa_parameters):
-                for params in tsa_parameters:
-                    params["timesteps_per_period"] = int(
+            for params in tsa_parameters:
+                if "segments" in params:
+                    params["timesteps"] = int(
                         len(params["segments"]) / len(params["occurrences"])
                     )
+                else:
+                    params["timesteps"] = params["timesteps_per_period"]
+
         self.tsa_parameters = tsa_parameters
 
     @staticmethod

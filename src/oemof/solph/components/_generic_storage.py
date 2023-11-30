@@ -686,14 +686,14 @@ class GenericStorageBlock(ScalarBlock):
                 ** m.es.tsa_parameters[p]["segments"][(k, s)]
                 if "segments" in m.es.tsa_parameters[p]
                 else 1 - n.loss_rate[t0 + s]
-                for s in range(m.es.tsa_parameters[p]["timesteps_per_period"])
+                for s in range(m.es.tsa_parameters[p]["timesteps"])
             )
 
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
             expr += -block.storage_content_inter[n, i] * losses
             expr += -self.storage_content_intra[
-                n, p, k, m.es.tsa_parameters[p]["timesteps_per_period"]
+                n, p, k, m.es.tsa_parameters[p]["timesteps"]
             ]
             return expr == 0
 
@@ -1803,7 +1803,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             k = m.es.tsa_parameters[p]["order"][ii]
             t = m.get_timestep_from_tsam_timestep(
-                p, k, m.es.tsa_parameters[p]["timesteps_per_period"] - 1
+                p, k, m.es.tsa_parameters[p]["timesteps"] - 1
             )
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
@@ -1811,10 +1811,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 1 - n.loss_rate[t]
             ) ** (
                 m.timeincrement[t]
-                * m.es.tsa_parameters[p]["timesteps_per_period"]
+                * m.es.tsa_parameters[p]["timesteps"]
             )
             expr += -self.storage_content_intra[
-                n, p, k, m.es.tsa_parameters[p]["timesteps_per_period"]
+                n, p, k, m.es.tsa_parameters[p]["timesteps"]
             ]
             return expr == 0
 

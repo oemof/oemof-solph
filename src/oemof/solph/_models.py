@@ -477,7 +477,7 @@ class Model(BaseModel):
                 for p in self.PERIODS
                 for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
                 for _ in range(
-                    self.es.tsa_parameters[p]["timesteps_per_period"]
+                    self.es.tsa_parameters[p]["timesteps"]
                 )
             )
             self.CLUSTERS = po.Set(
@@ -584,7 +584,7 @@ class Model(BaseModel):
         """Return original timestep from cluster-based timestep"""
         t = (
             p * len(self.TIMESTEPS_IN_PERIOD[p])
-            + ik * self.es.tsa_parameters[p]["timesteps_per_period"]
+            + ik * self.es.tsa_parameters[p]["timesteps"]
             + g
         )
         return t
@@ -599,6 +599,6 @@ class Model(BaseModel):
             for p in range(len(self.es.tsa_parameters))
             for k in range(len(self.es.tsa_parameters[p][cluster_type]))
             for t in range(
-                self.es.tsa_parameters[p]["timesteps_per_period"] + offset
+                self.es.tsa_parameters[p]["timesteps"] + offset
             )
         ]

@@ -249,9 +249,15 @@ def results(model, remove_last_time_point=False):
     if model.es.tsa_parameters:
         for p, period_data in enumerate(model.es.tsa_parameters):
             if p == 0:
-                result_index = period_data["timeindex"]
+                result_index = _disaggregate_tsa_timeindex(
+                    model.es.periods[p], period_data
+                )
             else:
-                result_index = result_index.union(period_data["timeindex"])
+                result_index = result_index.union(
+                    _disaggregate_tsa_timeindex(
+                        model.es.periods[p], period_data
+                    )
+                )
     else:
         if model.es.timeindex is None:
             result_index = list(range(len(model.es.timeincrement) + 1))
@@ -474,8 +480,8 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
             for k in tsa_period["order"]:
                 flow_k = flow_dict[flow].iloc[
                     period_offset
-                    + k * tsa_period["timesteps_per_period"] : period_offset
-                    + (k + 1) * tsa_period["timesteps_per_period"]
+                    + k * tsa_period["timesteps"] : period_offset
+                    + (k + 1) * tsa_period["timesteps"]
                 ]
                 # Disaggregate segmentation
                 if "segments" in tsa_period:
@@ -483,7 +489,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
                         flow_k, tsa_period["segments"], k
                     )
                 disaggregated_flow_frames.append(flow_k)
-            period_offset += tsa_period["timesteps_per_period"] * len(
+            period_offset += tsa_period["timesteps"] * len(
                 tsa_period["occurrences"]
             )
         ts = pd.concat(disaggregated_flow_frames)
@@ -552,7 +558,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
             inter_value = soc["inter"].iloc[i_offset + i]["value"]
             # Self-discharge has to be taken into account for calculating
             # inter SOC for each timestep in cluster
-            t0 = t_offset + i * tsa_period["timesteps_per_period"]
+            t0 = t_offset + i * tsa_period["timesteps"]
             # Add last timesteps of simulation in order to interpolate SOC for
             # last segment correctly:
             is_last_timestep = (
@@ -560,9 +566,9 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                 and i == len(tsa_period["order"]) - 1
             )
             timesteps = (
-                tsa_period["timesteps_per_period"] + 1
+                tsa_period["timesteps"] + 1
                 if is_last_timestep
-                else tsa_period["timesteps_per_period"]
+                else tsa_period["timesteps"]
             )
             inter_series = (
                 pd.Series(
@@ -605,7 +611,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
 
             soc_frames.append(soc_frame)
         i_offset += len(tsa_period["order"])
-        t_offset += i_offset * tsa_period["timesteps_per_period"]
+        t_offset += i_offset * tsa_period["timesteps"]
     soc_ts = pd.concat(soc_frames)
     soc_ts["variable_name"] = "soc"
     soc_ts["timestep"] = range(len(soc_ts))
@@ -638,6 +644,16 @@ def _get_storage_soc_flows_and_keys(flow_dict):
                 (oemof_tuple[1], oemof_tuple[2])
             ] = data
     return storages, storage_keys
+
+
+def _disaggregate_tsa_timeindex(period_index, tsa_parameters):
+    """Disaggregate aggregated period timeindex by using TSA parameters"""
+    return pd.date_range(
+        start=period_index[0],
+        periods=tsa_parameters["timesteps_per_period"]
+        * len(tsa_parameters["order"]),
+        freq=period_index.freq,
+    )
 
 
 def convert_keys_to_strings(result, keep_none_type=False):
