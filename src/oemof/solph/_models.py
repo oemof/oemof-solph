@@ -474,14 +474,8 @@ class Model(BaseModel):
 
             # Construct occurrences of typical periods
             for p in self.PERIODS:
-                self.es.tsa_parameters[p]["occurrences"] = {}
-                for typ_period in range(
-                    max(self.es.tsa_parameters[p]["order"]) + 1
-                ):
-                    self.es.tsa_parameters[p]["occurrences"][
-                        typ_period
-                    ] = collections.Counter(
-                        self.es.tsa_parameters[p]["order"])[typ_period]
+                self.es.tsa_parameters[p]["occurrences"] = collections.Counter(
+                    self.es.tsa_parameters[p]["order"])
 
             # If segmentation is used, timesteps_per_period is set to number of
             # segmentations per period.
