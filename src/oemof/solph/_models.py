@@ -502,111 +502,22 @@ class Model(BaseModel):
                 )
             )
             self.TYPICAL_CLUSTERS = po.Set(
-                initialize=list(
-                    zip(
-                        list(
-                            itertools.chain.from_iterable(
-                                itertools.repeat(
-                                    p,
-                                    len(
-                                        self.es.tsa_parameters[p][
-                                            "occurrences"
-                                        ]
-                                    ),
-                                )
-                                for p in self.PERIODS
-                            )
-                        ),
-                        list(
-                            itertools.chain.from_iterable(
-                                range(
-                                    len(
-                                        self.es.tsa_parameters[p][
-                                            "occurrences"
-                                        ]
-                                    )
-                                )
-                                for p in self.PERIODS
-                            )
-                        ),
+                initialize=[
+                    (p, i)
+                    for p in self.PERIODS
+                    for i in range(
+                        len(self.es.tsa_parameters[p]["occurrences"])
                     )
-                )
+                ]
             )
-            timeindexes = []
-            for cluster_type in ("order", "occurrences"):
-                for offset in (0, 1):
-                    timeindexes.append(
-                        po.Set(
-                            initialize=list(
-                                zip(
-                                    # periods
-                                    list(
-                                        itertools.chain.from_iterable(
-                                            itertools.repeat(
-                                                p,
-                                                (
-                                                    self.es.tsa_parameters[p][
-                                                        "timesteps_per_period"
-                                                    ]
-                                                    + offset
-                                                )
-                                                * len(
-                                                    self.es.tsa_parameters[p][
-                                                        cluster_type
-                                                    ]
-                                                ),
-                                            )
-                                            for p in self.PERIODS
-                                        )
-                                    ),
-                                    # cluster periods in original timeseries
-                                    # (from TSAM)
-                                    list(
-                                        itertools.chain.from_iterable(
-                                            itertools.repeat(
-                                                k,
-                                                self.es.tsa_parameters[p][
-                                                    "timesteps_per_period"
-                                                ]
-                                                + offset,
-                                            )
-                                            for p in self.PERIODS
-                                            for k in range(
-                                                len(
-                                                    self.es.tsa_parameters[p][
-                                                        cluster_type
-                                                    ]
-                                                )
-                                            )
-                                        )
-                                    ),
-                                    # total timesteps
-                                    list(
-                                        itertools.chain.from_iterable(
-                                            range(
-                                                self.es.tsa_parameters[p][
-                                                    "timesteps_per_period"
-                                                ]
-                                                + offset
-                                            )
-                                            for p in self.PERIODS
-                                            for k in range(
-                                                len(
-                                                    self.es.tsa_parameters[p][
-                                                        cluster_type
-                                                    ]
-                                                )
-                                            )
-                                        )
-                                    ),
-                                )
-                            )
-                        )
-                    )
 
-            self.TIMEINDEX_CLUSTER = timeindexes[0]
-            self.TIMEINDEX_TYPICAL_CLUSTER = timeindexes[2]
-            self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET = timeindexes[3]
+            self.TIMEINDEX_CLUSTER = self.get_cluster_index("order", 0)
+            self.TIMEINDEX_TYPICAL_CLUSTER = self.get_cluster_index(
+                "occurrences", 0
+            )
+            self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET = self.get_cluster_index(
+                "occurrences", 1
+            )
 
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
@@ -677,3 +588,17 @@ class Model(BaseModel):
             + g
         )
         return t
+
+    def get_cluster_index(self, cluster_type, offset):
+        """
+        Return cluster index for original or typical periods with or
+        without offset
+        """
+        return [
+            (p, k, t)
+            for p in range(len(self.es.tsa_parameters))
+            for k in range(len(self.es.tsa_parameters[p][cluster_type]))
+            for t in range(
+                self.es.tsa_parameters[p]["timesteps_per_period"] + offset
+            )
+        ]
