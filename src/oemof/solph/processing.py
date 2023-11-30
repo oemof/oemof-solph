@@ -15,9 +15,9 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 
 """
+import itertools
 import operator
 import sys
-import itertools
 from typing import Dict
 from typing import Tuple
 
