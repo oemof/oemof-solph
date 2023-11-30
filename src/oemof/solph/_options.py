@@ -13,8 +13,6 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
-from warnings import warn
-
 from oemof.solph._plumbing import sequence
 
 
