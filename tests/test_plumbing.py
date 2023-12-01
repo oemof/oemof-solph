@@ -36,4 +36,4 @@ def test_sequence():
     assert seq12[1] == 3
 
     with pytest.raises(IndexError):
-        seq12[2]
+        _ = seq12[2]
