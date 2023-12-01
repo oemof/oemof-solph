@@ -199,10 +199,10 @@ class NonConvex:
         Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on). For minimum up and downtimes, the initial status
         is set for the respective values in the beginning e.g. if a
-        minimum uptime of four timesteps is defined and the initial status is 
-        set to one, the initial status is fixed for the four first timesteps 
-        of the optimization period. Otherwise if the initial status is set to 
-        zero and the first timesteps are fixed for the number of minimum 
+        minimum uptime of four timesteps is defined and the initial status is
+        set to one, the initial status is fixed for the four first timesteps
+        of the optimization period. Otherwise if the initial status is set to
+        zero and the first timesteps are fixed for the number of minimum
         downtime steps.
     negative_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the positive difference
