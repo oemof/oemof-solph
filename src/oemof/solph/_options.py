@@ -183,11 +183,11 @@ class NonConvex:
         from the actual output.
     inactivity_costs : numeric (iterable or scalar)
         Costs associated with not operating the flow.
-    minimum_uptime : numeric (1 or positive integer)
+    minimum_uptime : numeric or list of numeric (1 or positive integer)
         Minimum number of time steps that a flow must be greater then its
         minimum flow after startup. Be aware that minimum up and downtimes
         can contradict each other and may lead to infeasible problems.
-    minimum_downtime : numeric (1 or positive integer)
+    minimum_downtime : numeric or list of numeric (1 or positive integer)
         Minimum number of time steps a flow is forced to zero after
         shutting down. Be aware that minimum up and downtimes can
         contradict each other and may to infeasible problems.
@@ -198,12 +198,12 @@ class NonConvex:
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on). For minimum up and downtimes, the initial status
-        is set for the respective values in the edge regions e.g. if a
-        minimum uptime of four timesteps is defined, the initial status is
-        fixed for the four first and last timesteps of the optimization period.
-        If both, up and downtimes are defined, the initial status is set for
-        the maximum of both e.g. for six timesteps if a minimum downtime of
-        six timesteps is defined besides a four timestep minimum uptime.
+        is set for the respective values in the beginning e.g. if a
+        minimum uptime of four timesteps is defined and the initial status is 
+        set to one, the initial status is fixed for the four first timesteps 
+        of the optimization period. Otherwise if the initial status is set to 
+        zero and the first timesteps are fixed for the number of minimum 
+        downtime steps.
     negative_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
