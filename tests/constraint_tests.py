@@ -520,7 +520,7 @@ class TestsConstraint:
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             nominal_storage_capacity=solph.Investment(
-                ep_costs=145, maximum=234
+                ep_costs=145, minimum=1, maximum=234
             ),
         )
         self.energysystem.add(bel, storage)

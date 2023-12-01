@@ -661,6 +661,7 @@ class TestsMultiPeriodConstraint:
             lifetime_outflow=40,
             nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
+                minimum=1,
                 maximum=234,
                 lifetime=20,
                 interest_rate=0.05,
