@@ -493,7 +493,7 @@ class NonConvexFlowBlock(ScalarBlock):
                         t,
                         min(
                             t + m.flows[i, o].nonconvex.minimum_downtime[t],
-                            m.TIMESTEPS.at(-1),
+                            len(m.TIMESTEPS),
                         ),
                     )
                 )
