@@ -1024,8 +1024,7 @@ class InvestmentFlowBlock(ScalarBlock):
                             * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
-                                range_limit,
-                            )
+                                range_limit)
                         )
 
             for i, o in self.EXISTING_INVESTFLOWS:
