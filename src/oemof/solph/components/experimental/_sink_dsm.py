@@ -1447,7 +1447,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:
@@ -3301,7 +3301,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:
@@ -5800,7 +5800,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
                 if g.investment.fixed_costs[0] is not None:

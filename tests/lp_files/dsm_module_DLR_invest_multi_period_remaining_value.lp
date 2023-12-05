@@ -58,8 +58,8 @@ objective:
 +0.9611687812379853 SinkDSMDLRInvestmentBlock_balance_dsm_up(demand_dsm_2_5)
 +96.11687812379853 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_5)
 +57.62165571222974 SinkDSMDLRInvestmentBlock_invest(demand_dsm_0)
-+39.12361323621548 SinkDSMDLRInvestmentBlock_invest(demand_dsm_1)
-+23.087255832295018 SinkDSMDLRInvestmentBlock_invest(demand_dsm_2)
++39.8850096825295 SinkDSMDLRInvestmentBlock_invest(demand_dsm_1)
++23.833722936524442 SinkDSMDLRInvestmentBlock_invest(demand_dsm_2)
 
 s.t.
 
