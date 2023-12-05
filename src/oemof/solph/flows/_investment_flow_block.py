@@ -1022,9 +1022,7 @@ class InvestmentFlowBlock(ScalarBlock):
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
                             * (1 + m.discount_rate) ** (-pp)
-                            for pp in range(
-                                m.es.periods_years[p],
-                                range_limit)
+                            for pp in range(m.es.periods_years[p], range_limit)
                         )
 
             for i, o in self.EXISTING_INVESTFLOWS:
