@@ -24,6 +24,7 @@ Bug fixes
 * Fix bugs in multi-period documentation.
 * Fix y intersect of OffsetConverter
 * Fix minimum uptime being relevant for initial downtime (and vice versa).
+* Fix duplicated discounting of fixed costs for multi-period investment
 
 Testing
 #######

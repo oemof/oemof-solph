@@ -22,8 +22,8 @@ objective:
 +0.9611687812379853 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_5)
 +96.11687812379853 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_5)
 +57.62165571222974 SinkDSMOemofInvestmentBlock_invest(demand_dsm_0)
-+39.12361323621548 SinkDSMOemofInvestmentBlock_invest(demand_dsm_1)
-+23.087255832295018 SinkDSMOemofInvestmentBlock_invest(demand_dsm_2)
++39.8850096825295 SinkDSMOemofInvestmentBlock_invest(demand_dsm_1)
++23.833722936524442 SinkDSMOemofInvestmentBlock_invest(demand_dsm_2)
 
 s.t.
 

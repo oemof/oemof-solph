@@ -784,6 +784,7 @@ class TestsMultiPeriodConstraint:
                         maximum=1000,
                         ep_costs=20,
                         lifetime=20,
+                        fixed_costs=10,
                     ),
                 ),
                 bth: solph.flows.Flow(variable_costs=20),
