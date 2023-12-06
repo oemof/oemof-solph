@@ -206,17 +206,20 @@ c_u_NonConvexFlowBlock_min_uptime_constr(cheap_plant_min_down_constraints_Bus_T_
 c_u_NonConvexFlowBlock_min_uptime_constr(cheap_plant_min_down_constraints_Bus_T_4)_:
 -2 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_3)
 +1 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_4)
+-1 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_5)
 <= 0
 
 c_u_NonConvexFlowBlock_min_downtime_constr(cheap_plant_min_down_constraints_Bus_T_3)_:
 +4 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_2)
 -3 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_3)
 +1 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_4)
++1 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_5)
 <= 4
 
 c_u_NonConvexFlowBlock_min_downtime_constr(cheap_plant_min_down_constraints_Bus_T_4)_:
 +4 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_3)
 -3 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_4)
++1 NonConvexFlowBlock_status(cheap_plant_min_down_constraints_Bus_T_5)
 <= 4
 
 bounds
