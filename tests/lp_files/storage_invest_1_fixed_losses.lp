@@ -153,7 +153,7 @@ bounds
    0 <= flow(storage1_electricityBus_0_0) <= +inf
    0 <= flow(storage1_electricityBus_0_1) <= +inf
    0 <= flow(storage1_electricityBus_0_2) <= +inf
-   0 <= GenericInvestmentStorageBlock_invest(storage1_0) <= 234
+   1 <= GenericInvestmentStorageBlock_invest(storage1_0) <= 234
    0 <= InvestmentFlowBlock_total(electricityBus_storage1_0) <= +inf
    0 <= InvestmentFlowBlock_invest(electricityBus_storage1_0) <= +inf
    0 <= InvestmentFlowBlock_total(storage1_electricityBus_0) <= +inf
