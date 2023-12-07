@@ -11,6 +11,7 @@ New features
 
 * Allow for evaluating differences in the remaining vs. the original value
   for multi-period investments.
+* Allow to define minimum up- and down-time per time step
 
 Documentation
 #############
