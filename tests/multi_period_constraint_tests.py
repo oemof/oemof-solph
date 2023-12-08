@@ -16,11 +16,11 @@ from os import path as ospath
 import pandas as pd
 import pytest
 from pyomo.repn.tests.lp_diff import lp_diff
-
-from oemof import solph
 from test_scripts.test_solph.test_multi_period.test_investment_model import (
     set_up_multi_period_investment_model,
 )
+
+from oemof import solph
 
 logging.disable(logging.INFO)
 
