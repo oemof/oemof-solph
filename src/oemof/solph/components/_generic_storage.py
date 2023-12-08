@@ -35,6 +35,7 @@ from pyomo.environ import Expression
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
+from pyomo.environ import value
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
@@ -1974,9 +1975,60 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         m = self.parent_block()
         for n in self.INVESTSTORAGES:
             for p in m.PERIODS:
+                if m.rounding_precision is not None:
+                    self.invest[n, p] = self._round_and_ensure_bounds(
+                        self.invest[n, p],
+                        lb=n.investment.minimum[p],
+                        ub=n.investment.maximum[p],
+                    )
+                    ub_total = (
+                        n.investment.overall_maximum
+                        if n.investment.overall_maximum is not None
+                        else float("+inf")
+                    )
+                    self.total[n, p] = self._round_and_ensure_bounds(
+                        self.total[n, p],
+                        ub=ub_total,
+                    )
                 self.invest[n, p].fix()
                 self.total[n, p].fix()
                 if m.es.periods is not None:
+                    if m.rounding_precision is not None:
+                        self.old[n, p] = self._round_and_ensure_bounds(
+                            self.old[n, p],
+                        )
+                        self.old_end[n, p] = self._round_and_ensure_bounds(
+                            self.old_end[n, p],
+                        )
+                        self.old_exo[n, p] = self._round_and_ensure_bounds(
+                            self.old_exo[n, p],
+                        )
                     self.old[n, p].fix()
                     self.old_end[n, p].fix()
                     self.old_exo[n, p].fix()
+
+    def _round_and_ensure_bounds(self, var, lb=0, ub=float("+inf")):
+        """Round given investments and ensure within bounds
+
+        Parameters
+        ----------
+        var : pyomo.core.IndexedVar
+            variable to round
+
+        lb : float
+            Lower bound to be ensured
+
+        ub : float
+            Upper bound to be ensured
+        """
+        m = self.parent_block()
+        return min(
+            ub,
+            max(
+                lb,
+                round(
+                    value(var),
+                    m.rounding_precision,
+                ),
+            ),
+        )

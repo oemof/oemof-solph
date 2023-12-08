@@ -317,6 +317,9 @@ class Model(BaseModel):
     discount_rate : float or None
         The rate used for discounting in a multi-period model.
         A 2% discount rate needs to be defined as 0.02.
+    rounding_precision : int or None
+        Number of decimal digits to apply for rounding when fixing variables
+        in a repeated model solve.
 
     Note
     ----
@@ -384,6 +387,7 @@ class Model(BaseModel):
         else:
             pass
         self._fix_investments = False
+        self.rounding_precision = None
         super().__init__(energysystem, **kwargs)
 
     def _set_discount_rate_with_warning(self):
@@ -522,8 +526,14 @@ class Model(BaseModel):
                     for p, t in self.TIMEINDEX:
                         self.flow[o, i, p, t].setlb(0)
 
-    def fix_investments(self):
-        """Fix investment results of an already solved model"""
+    def fix_investments(self, rounding_precision=None):
+        """Fix investment results of an already solved model
+
+        Parameters
+        ----------
+        rounding_precision : int or None
+            If not None, round investments to given number of decimal digits
+        """
         if self.solver_results is None:
             msg = (
                 "Cannot fix investments as model has not yet been solved!\n"
@@ -532,6 +542,7 @@ class Model(BaseModel):
             )
             raise ValueError(msg)
         self._fix_investments = True
+        self.rounding_precision = rounding_precision
         if hasattr(self, "InvestmentFlowBlock"):
             self.InvestmentFlowBlock.fix_investments_results()
         if hasattr(self, "GenericInvestmentStorageBlock"):
