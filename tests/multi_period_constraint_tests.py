@@ -16,11 +16,11 @@ from os import path as ospath
 import pandas as pd
 import pytest
 from pyomo.repn.tests.lp_diff import lp_diff
+
+from oemof import solph
 from test_scripts.test_solph.test_multi_period.test_investment_model import (
     set_up_multi_period_investment_model,
 )
-
-from oemof import solph
 
 logging.disable(logging.INFO)
 
@@ -2465,3 +2465,33 @@ class TestsMultiPeriodConstraint:
         om.fix_investments()
         om.solve()
         self.compare_lp_files("multi_period_fixed_investments.lp", my_om=om)
+
+    def test_multi_period_fixed_investment_rounding(self):
+        """test a repeated solve with fixed investments and rounding"""
+        om = set_up_multi_period_investment_model(
+            approach="DLR", demand_value=80.123456
+        )
+        om.solve()
+        results = solph.processing.results(om)
+        unrounded = {
+            "Flows": solph.views.node(results, "DE_bus_el")["period_scalars"],
+            "Storage": solph.views.node(results, "DE_storage_el")[
+                "period_scalars"
+            ],
+            "DSM": solph.views.node(results, "demand_dsm")["period_scalars"],
+        }
+        om.fix_investments(rounding_precision=3)
+        om.solve()
+        results = solph.processing.results(om)
+        rounded = {
+            "Flows": solph.views.node(results, "DE_bus_el")["period_scalars"],
+            "Storage": solph.views.node(results, "DE_storage_el")[
+                "period_scalars"
+            ],
+            "DSM": solph.views.node(results, "demand_dsm")["period_scalars"],
+        }
+        for k in rounded.keys():
+            assert (rounded[k] == unrounded[k].round(3)).all().all()
+        self.compare_lp_files(
+            "multi_period_fixed_investments_rounding.lp", my_om=om
+        )

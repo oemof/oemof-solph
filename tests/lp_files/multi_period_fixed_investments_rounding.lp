@@ -2,7 +2,7 @@
 
 min 
 objective:
-+10720.256985589453 ONE_VAR_CONSTANT
++10262.465380775504 ONE_VAR_CONSTANT
 +5 flow(DE_source_lignite_DE_bus_lignite_0_0)
 +5 flow(DE_source_lignite_DE_bus_lignite_0_1)
 +5 flow(DE_source_lignite_DE_bus_lignite_0_2)
@@ -369,7 +369,7 @@ c_e_BusBlock_balance(DE_bus_el_0_0)_:
 -1 flow(DE_bus_el_DE_storage_el_0_0)
 -1 flow(DE_bus_el_link_DE_FR_0_0)
 -1 flow(DE_bus_el_demand_dsm_0_0)
-= -30
+= -29.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_0_1)_:
 +1 flow(DE_source_shortage_DE_bus_el_0_1)
@@ -383,7 +383,7 @@ c_e_BusBlock_balance(DE_bus_el_0_1)_:
 -1 flow(DE_bus_el_DE_storage_el_0_1)
 -1 flow(DE_bus_el_link_DE_FR_0_1)
 -1 flow(DE_bus_el_demand_dsm_0_1)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_0_2)_:
 +1 flow(DE_source_shortage_DE_bus_el_0_2)
@@ -397,7 +397,7 @@ c_e_BusBlock_balance(DE_bus_el_0_2)_:
 -1 flow(DE_bus_el_DE_storage_el_0_2)
 -1 flow(DE_bus_el_link_DE_FR_0_2)
 -1 flow(DE_bus_el_demand_dsm_0_2)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_1_3)_:
 +1 flow(DE_source_shortage_DE_bus_el_1_3)
@@ -411,7 +411,7 @@ c_e_BusBlock_balance(DE_bus_el_1_3)_:
 -1 flow(DE_bus_el_DE_storage_el_1_3)
 -1 flow(DE_bus_el_link_DE_FR_1_3)
 -1 flow(DE_bus_el_demand_dsm_1_3)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_1_4)_:
 +1 flow(DE_source_shortage_DE_bus_el_1_4)
@@ -425,7 +425,7 @@ c_e_BusBlock_balance(DE_bus_el_1_4)_:
 -1 flow(DE_bus_el_DE_storage_el_1_4)
 -1 flow(DE_bus_el_link_DE_FR_1_4)
 -1 flow(DE_bus_el_demand_dsm_1_4)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_1_5)_:
 +1 flow(DE_source_shortage_DE_bus_el_1_5)
@@ -439,7 +439,7 @@ c_e_BusBlock_balance(DE_bus_el_1_5)_:
 -1 flow(DE_bus_el_DE_storage_el_1_5)
 -1 flow(DE_bus_el_link_DE_FR_1_5)
 -1 flow(DE_bus_el_demand_dsm_1_5)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_2_6)_:
 +1 flow(DE_source_shortage_DE_bus_el_2_6)
@@ -453,7 +453,7 @@ c_e_BusBlock_balance(DE_bus_el_2_6)_:
 -1 flow(DE_bus_el_DE_storage_el_2_6)
 -1 flow(DE_bus_el_link_DE_FR_2_6)
 -1 flow(DE_bus_el_demand_dsm_2_6)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_2_7)_:
 +1 flow(DE_source_shortage_DE_bus_el_2_7)
@@ -467,7 +467,7 @@ c_e_BusBlock_balance(DE_bus_el_2_7)_:
 -1 flow(DE_bus_el_DE_storage_el_2_7)
 -1 flow(DE_bus_el_link_DE_FR_2_7)
 -1 flow(DE_bus_el_demand_dsm_2_7)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(DE_bus_el_2_8)_:
 +1 flow(DE_source_shortage_DE_bus_el_2_8)
@@ -481,7 +481,7 @@ c_e_BusBlock_balance(DE_bus_el_2_8)_:
 -1 flow(DE_bus_el_DE_storage_el_2_8)
 -1 flow(DE_bus_el_link_DE_FR_2_8)
 -1 flow(DE_bus_el_demand_dsm_2_8)
-= -10
+= -9.876543999999996
 
 c_e_BusBlock_balance(FR_bus_el_0_0)_:
 +1 flow(FR_source_shortage_FR_bus_el_0_0)
@@ -773,39 +773,39 @@ c_e_ConverterBlock_relation(DE_pp_lignite_DE_bus_lignite_DE_bus_el_2_8)_:
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_hardcoal_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_hardcoal_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_hardcoal_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_lignite_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_lignite_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_lignite_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_GT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_GT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_GT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_storage_el_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
@@ -821,15 +821,15 @@ c_e_InvestmentFlowBlock_total_rule(DE_storage_el_DE_bus_el_2)_:
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_CCGT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_CCGT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_pp_natgas_CCGT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_total_rule(DE_bus_el_DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
@@ -845,43 +845,43 @@ c_e_InvestmentFlowBlock_total_rule(DE_bus_el_DE_storage_el_2)_:
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_hardcoal_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_hardcoal_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_hardcoal_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_lignite_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_lignite_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_lignite_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_GT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_GT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_GT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_storage_el_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_storage_el_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -889,23 +889,23 @@ c_e_InvestmentFlowBlock_old_rule_end(DE_storage_el_DE_bus_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_storage_el_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_CCGT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_CCGT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_pp_natgas_CCGT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_bus_el_DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_bus_el_DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -913,47 +913,47 @@ c_e_InvestmentFlowBlock_old_rule_end(DE_bus_el_DE_storage_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule_end(DE_bus_el_DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_hardcoal_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_hardcoal_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_hardcoal_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_lignite_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_lignite_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_lignite_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_GT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_GT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_GT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_storage_el_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_storage_el_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -961,23 +961,23 @@ c_e_InvestmentFlowBlock_old_rule_exo(DE_storage_el_DE_bus_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_storage_el_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_CCGT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_CCGT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_pp_natgas_CCGT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_bus_el_DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_bus_el_DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -985,47 +985,47 @@ c_e_InvestmentFlowBlock_old_rule_exo(DE_bus_el_DE_storage_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule_exo(DE_bus_el_DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_hardcoal_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_hardcoal_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_hardcoal_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_lignite_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_lignite_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_lignite_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_GT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_GT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_GT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_storage_el_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_storage_el_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -1033,23 +1033,23 @@ c_e_InvestmentFlowBlock_old_rule(DE_storage_el_DE_bus_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule(DE_storage_el_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_CCGT_DE_bus_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_CCGT_DE_bus_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_pp_natgas_CCGT_DE_bus_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_bus_el_DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_InvestmentFlowBlock_old_rule(DE_bus_el_DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -1057,223 +1057,223 @@ c_e_InvestmentFlowBlock_old_rule(DE_bus_el_DE_storage_el_1)_:
 
 c_e_InvestmentFlowBlock_old_rule(DE_bus_el_DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_0_0)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_0_0)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_0_1)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_0_1)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_0_2)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_0_2)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_1_3)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_1_4)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_1_5)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_2_6)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_2_6)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_2_7)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_2_7)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_hardcoal_DE_bus_el_2_8)_:
 +1 flow(DE_pp_hardcoal_DE_bus_el_2_8)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_0_0)_:
 +1 flow(DE_pp_lignite_DE_bus_el_0_0)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_0_1)_:
 +1 flow(DE_pp_lignite_DE_bus_el_0_1)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_0_2)_:
 +1 flow(DE_pp_lignite_DE_bus_el_0_2)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_1_3)_:
 +1 flow(DE_pp_lignite_DE_bus_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_1_4)_:
 +1 flow(DE_pp_lignite_DE_bus_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_1_5)_:
 +1 flow(DE_pp_lignite_DE_bus_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_2_6)_:
 +1 flow(DE_pp_lignite_DE_bus_el_2_6)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_2_7)_:
 +1 flow(DE_pp_lignite_DE_bus_el_2_7)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_lignite_DE_bus_el_2_8)_:
 +1 flow(DE_pp_lignite_DE_bus_el_2_8)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_0_0)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_0_0)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_0_1)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_0_1)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_0_2)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_0_2)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_1_3)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_1_4)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_1_5)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_2_6)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_2_6)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_2_7)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_2_7)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_GT_DE_bus_el_2_8)_:
 +1 flow(DE_pp_natgas_GT_DE_bus_el_2_8)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_0_0)_:
 +1 flow(DE_storage_el_DE_bus_el_0_0)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_0_1)_:
 +1 flow(DE_storage_el_DE_bus_el_0_1)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_0_2)_:
 +1 flow(DE_storage_el_DE_bus_el_0_2)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_1_3)_:
 +1 flow(DE_storage_el_DE_bus_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_1_4)_:
 +1 flow(DE_storage_el_DE_bus_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_1_5)_:
 +1 flow(DE_storage_el_DE_bus_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_2_6)_:
 +1 flow(DE_storage_el_DE_bus_el_2_6)
-<= 4.999985
+<= 4.877
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_2_7)_:
 +1 flow(DE_storage_el_DE_bus_el_2_7)
-<= 4.999985
+<= 4.877
 
 c_u_InvestmentFlowBlock_max(DE_storage_el_DE_bus_el_2_8)_:
 +1 flow(DE_storage_el_DE_bus_el_2_8)
-<= 4.999985
+<= 4.877
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_0_0)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_0_0)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_0_1)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_0_1)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_0_2)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_0_2)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_1_3)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_1_4)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_1_5)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_2_6)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_2_6)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_2_7)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_2_7)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_pp_natgas_CCGT_DE_bus_el_2_8)_:
 +1 flow(DE_pp_natgas_CCGT_DE_bus_el_2_8)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_0_0)_:
 +1 flow(DE_bus_el_DE_storage_el_0_0)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_0_1)_:
 +1 flow(DE_bus_el_DE_storage_el_0_1)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_0_2)_:
 +1 flow(DE_bus_el_DE_storage_el_0_2)
-<= 11.0
+<= 10.877
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_1_3)_:
 +1 flow(DE_bus_el_DE_storage_el_1_3)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_1_4)_:
 +1 flow(DE_bus_el_DE_storage_el_1_4)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_1_5)_:
 +1 flow(DE_bus_el_DE_storage_el_1_5)
-<= 0.0
+<= 0
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_2_6)_:
 +1 flow(DE_bus_el_DE_storage_el_2_6)
-<= 4.999985
+<= 4.877
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_2_7)_:
 +1 flow(DE_bus_el_DE_storage_el_2_7)
-<= 4.999985
+<= 4.877
 
 c_u_InvestmentFlowBlock_max(DE_bus_el_DE_storage_el_2_8)_:
 +1 flow(DE_bus_el_DE_storage_el_2_8)
-<= 4.999985
+<= 4.877
 
 c_e_GenericInvestmentStorageBlock_total_storage_rule(DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
@@ -1289,19 +1289,19 @@ c_e_GenericInvestmentStorageBlock_total_storage_rule(DE_storage_el_2)_:
 
 c_e_GenericInvestmentStorageBlock_old_rule_end(DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule_end(DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule_end(DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule_exo(DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule_exo(DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -1309,11 +1309,11 @@ c_e_GenericInvestmentStorageBlock_old_rule_exo(DE_storage_el_1)_:
 
 c_e_GenericInvestmentStorageBlock_old_rule_exo(DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule(DE_storage_el_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_old_rule(DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
@@ -1321,7 +1321,7 @@ c_e_GenericInvestmentStorageBlock_old_rule(DE_storage_el_1)_:
 
 c_e_GenericInvestmentStorageBlock_old_rule(DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_initially_empty(DE_storage_el_0)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_0)
@@ -1389,7 +1389,7 @@ c_e_GenericInvestmentStorageBlock_power_coupled(DE_storage_el_0)_:
 
 c_e_GenericInvestmentStorageBlock_power_coupled(DE_storage_el_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(DE_storage_el_2)_:
 +0 ONE_VAR_CONSTANT
@@ -1409,27 +1409,27 @@ c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_0_2)_:
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_1_3)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_3)
-<= 0.0
+<= 0
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_1_4)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_4)
-<= 0.0
+<= 0
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_1_5)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_5)
-<= 0.0
+<= 0
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_2_6)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_6)
-<= 14.999955
+<= 14.63
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_2_7)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_7)
-<= 14.999955
+<= 14.63
 
 c_u_GenericInvestmentStorageBlock_max_storage_content(DE_storage_el_2_8)_:
 +1 GenericInvestmentStorageBlock_storage_content(DE_storage_el_8)
-<= 14.999955
+<= 14.63
 
 c_e_LinkBlock_relation(link_DE_FR_DE_bus_el_FR_bus_el_0_0)_:
 -0.999999 flow(DE_bus_el_link_DE_FR_0_0)
@@ -1535,11 +1535,11 @@ c_e_SinkDSMDLRInvestmentBlock_total_dsm_rule(demand_dsm_2)_:
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_end(demand_dsm_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_end(demand_dsm_1)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_end(demand_dsm_2)_:
 +0 ONE_VAR_CONSTANT
@@ -1547,7 +1547,7 @@ c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_end(demand_dsm_2)_:
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_exo(demand_dsm_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_exo(demand_dsm_1)_:
 +0 ONE_VAR_CONSTANT
@@ -1555,11 +1555,11 @@ c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_exo(demand_dsm_1)_:
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule_exo(demand_dsm_2)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule(demand_dsm_0)_:
 +0 ONE_VAR_CONSTANT
-= 0.0
+= 0
 
 c_e_SinkDSMDLRInvestmentBlock_old_dsm_rule(demand_dsm_1)_:
 +0 ONE_VAR_CONSTANT

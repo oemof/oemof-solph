@@ -26,13 +26,16 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def set_up_multi_period_investment_model(approach):
+def set_up_multi_period_investment_model(approach, demand_value=80):
     """Set up a simple multi_period investment model
 
     Parameters
     ----------
     approach : str
         DSM modelling approach to use; one of 'oemof', 'DLR' and 'DIW'
+
+    demand_value : float
+        Value to be imposed to flat demand
 
     Returns
     -------
@@ -115,7 +118,9 @@ def set_up_multi_period_investment_model(approach):
     sink_el = components.Sink(
         label="DE_sink_el",
         inputs={
-            bus_el: flows.Flow(fix=[80] * len(timeindex), nominal_value=1)
+            bus_el: flows.Flow(
+                fix=[demand_value] * len(timeindex), nominal_value=1
+            )
         },
     )
     sink_excess = components.Sink(
