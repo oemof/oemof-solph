@@ -202,7 +202,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc_storage),
+        nominal_storage_capacity=solph.Investment(ep_costs=epc_storage),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

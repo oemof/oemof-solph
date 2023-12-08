@@ -403,12 +403,11 @@ class Model(BaseModel):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
-        self.nodes = self.es.nodes
+        self.nodes = list(self.es.nodes)
         if self.is_cellular:
             # collect all nodes from the child cells
             for cell in self.ec:
-                for node in cell.nodes:
-                    self.nodes.append(node)
+                self.nodes.extend(cell.nodes)
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.nodes])
 

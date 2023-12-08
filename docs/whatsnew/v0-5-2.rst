@@ -12,6 +12,7 @@ New features
 
 * Allow for evaluating differences in the remaining vs. the original value
   for multi-period investments.
+* Allow to define minimum up- and down-time per time step
 * Allow for fixing investment variables to the values of a previous
   optimization run, enabling a repeated solve with fixed investments.
 
@@ -25,6 +26,9 @@ Bug fixes
   Limit to costs that occur within the optimization horizon to prevent a
   bias towards investments happening earlier in the optimization horizon.
 * Fix bugs in multi-period documentation.
+* Fix y intersect of OffsetConverter
+* Fix minimum uptime being relevant for initial downtime (and vice versa).
+* Fix duplicated discounting of fixed costs for multi-period investment
 
 Testing
 #######

@@ -79,7 +79,7 @@ c_e_SinkDSMOemofBlock_dsm_sum_constraint(demand_dsm_0)_:
 +0.99 SinkDSMOemofBlock_dsm_up(demand_dsm_0)
 +0.99 SinkDSMOemofBlock_dsm_up(demand_dsm_1)
 -1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_1)
-= 0.0
+= 0
 
 bounds
    0 <= SinkDSMOemofBlock_dsm_do_shift(demand_dsm_0) <= +inf
