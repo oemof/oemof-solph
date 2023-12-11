@@ -90,7 +90,7 @@ def main():
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
+        msg = "Data file not found: {0}. Values for one timestep created!"
         warnings.warn(msg.format(filename), UserWarning)
         data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
@@ -109,12 +109,13 @@ def main():
     logging.info("Initialize the energy system")
     date_time_index = create_time_index(2012, number=number_of_time_steps)
 
+    # create the energysystem and assign the time index
     energysystem = EnergySystem(
         timeindex=date_time_index, infer_last_interval=False
     )
 
     ##########################################################################
-    # Create oemof object
+    # Create oemof objects
     ##########################################################################
 
     logging.info("Create oemof objects")
@@ -134,7 +135,7 @@ def main():
     # create excess component for the electricity bus to allow overproduction
     energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
 
-    # create source object representing the gas commodity (annual limit)
+    # create source object representing the gas commodity
     energysystem.add(
         cmp.Source(
             label="rgas",
@@ -159,6 +160,7 @@ def main():
     )
 
     # create simple sink object representing the electrical demand
+    # nominal_value is set to 1 because demand_el is not a normalised series
     energysystem.add(
         cmp.Sink(
             label="demand",
