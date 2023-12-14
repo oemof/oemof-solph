@@ -146,7 +146,7 @@ def main():
         label="excess_bel", inputs={bel: solph.Flow()}
     )
 
-    # create source object representing the natural gas commodity (with annual limit)
+    # create source representing the natural gas commodity (with annual limit)
     gas_resource = solph.components.Source(
         label="rgas",
         outputs={

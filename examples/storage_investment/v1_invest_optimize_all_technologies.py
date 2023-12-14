@@ -150,7 +150,7 @@ def main():
         label="rgas", outputs={bgas: solph.Flow(variable_costs=price_gas)}
     )
 
-    # create fixed source object representing wind power plants, allow for investment
+    # create fixed source object representing wind power plants
     wind = solph.components.Source(
         label="wind",
         outputs={
@@ -161,7 +161,7 @@ def main():
         },
     )
 
-    # create fixed source object representing pv power plants, allow for investment
+    # create fixed source object representing pv power plants
     pv = solph.components.Source(
         label="pv",
         outputs={
