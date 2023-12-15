@@ -86,6 +86,12 @@ class Link(Node):
         conversion_factors=None,
         custom_attributes=None,
     ):
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_attributes,
+        )
         if inputs is None:
             warn_if_missing_attribute(self, "inputs")
             inputs = {}
@@ -97,12 +103,6 @@ class Link(Node):
             conversion_factors = {}
         if custom_attributes is None:
             custom_attributes = {}
-        super().__init__(
-            label=label,
-            inputs=inputs,
-            outputs=outputs,
-            **custom_attributes,
-        )
         self.conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
         }
