@@ -117,7 +117,7 @@ class Converter(Node):
             label=label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
 
         if conversion_factors is None:
