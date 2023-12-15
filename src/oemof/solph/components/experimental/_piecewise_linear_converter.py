@@ -66,8 +66,23 @@ class PiecewiseLinearConverter(Node):
 PiecewiseLinearConverter'>
     """
 
-    def __init__(self, label, *, inputs, outputs, conversion_function, in_breakpoints, pw_repn, custom_properties=None):
-        super().__init__(label, inputs=inputs, outputs=outputs, custom_properties=custom_properties)
+    def __init__(
+        self,
+        label,
+        *,
+        inputs,
+        outputs,
+        conversion_function,
+        in_breakpoints,
+        pw_repn,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
 
         self.in_breakpoints = list(in_breakpoints)
         self.conversion_function = conversion_function

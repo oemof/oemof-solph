@@ -98,7 +98,9 @@ class GenericCAES(Node):
     """
 
     def __init__(
-        self,label, *,
+        self,
+        label,
+        *,
         electrical_input,
         fuel_input,
         electrical_output,

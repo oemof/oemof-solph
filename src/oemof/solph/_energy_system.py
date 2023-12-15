@@ -76,7 +76,7 @@ class EnergySystem(es.EnergySystem):
         infer_last_interval=None,
         periods=None,
         use_remaining_value=False,
-        groupings = None,
+        groupings=None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping

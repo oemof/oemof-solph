@@ -40,12 +40,20 @@ class Bus(Node):
 
     """
 
-    def __init__(self, label=None, *, inputs=None, outputs=None, balanced=True, custom_properties=None):
+    def __init__(
+        self,
+        label=None,
+        *,
+        inputs=None,
+        outputs=None,
+        balanced=True,
+        custom_properties=None,
+    ):
         super().__init__(
             label,
             inputs=inputs,
             outputs=outputs,
-            custom_properties=custom_properties
+            custom_properties=custom_properties,
         )
         self.balanced = balanced
 
