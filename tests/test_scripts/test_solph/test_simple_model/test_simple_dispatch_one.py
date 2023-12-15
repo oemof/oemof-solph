@@ -76,7 +76,7 @@ def test_dispatch_one_time_step(solver="cbc"):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1], timemode="explicit")
+    energysystem = EnergySystem(timeincrement=[1])
     energysystem.add(
         bgas,
         bel,
