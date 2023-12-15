@@ -108,13 +108,13 @@ def test_cellular_structure_detection():
     """Test flag creation if list is passed as energysystem to model"""
     timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
     es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     ec_2 = solph.EnergySystem(
-        label="ec_2", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     m = solph.Model(energysystem=[es, ec_1, ec_2])
     assert m.is_cellular
@@ -127,10 +127,10 @@ def test_sub_cell_node_consideration():
     """
     timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
     es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     bus_es = solph.buses.Bus(label="bus_es")
     bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
@@ -147,10 +147,10 @@ def test_sub_cell_flow_consideration():
     """
     timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
     es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
+        timeindex=timeindex, infer_last_interval=True
     )
     bus_es = solph.buses.Bus(label="bus_es")
     bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
