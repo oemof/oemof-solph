@@ -193,10 +193,10 @@ class GenericStorage(Node):
         if custom_attributes is None:
             custom_attributes = {}
         super().__init__(
-            label=label,
+            label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
         if investment is not None:
