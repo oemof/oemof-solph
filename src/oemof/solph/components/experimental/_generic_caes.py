@@ -109,8 +109,8 @@ class GenericCAES(Node):
     ):
         super().__init__(
             label=label,
-            inputs=None,
-            outputs=None,
+            inputs={},
+            outputs={},
             custom_properties=custom_properties,
         )
 

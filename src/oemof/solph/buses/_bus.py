@@ -49,6 +49,10 @@ class Bus(Node):
         balanced=True,
         custom_properties=None,
     ):
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
         super().__init__(
             label,
             inputs=inputs,
