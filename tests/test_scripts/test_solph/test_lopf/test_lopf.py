@@ -52,30 +52,30 @@ def test_lopf(solver="cbc"):
     es.add(b_el0, b_el1, b_el2)
 
     b_el1.inputs[b_el0] = exp_flow.ElectricalLine(
-            input=b_el0,
-            output=b_el1,
-            reactance=0.0001,
-            nominal_value=Investment(ep_costs=10),
-            min=-1,
-            max=1,
-        )
+        input=b_el0,
+        output=b_el1,
+        reactance=0.0001,
+        nominal_value=Investment(ep_costs=10),
+        min=-1,
+        max=1,
+    )
 
     b_el2.inputs[b_el1] = exp_flow.ElectricalLine(
-            input=b_el1,
-            output=b_el2,
-            reactance=0.0001,
-            nominal_value=60,
-            min=-1,
-            max=1,
-        )
+        input=b_el1,
+        output=b_el2,
+        reactance=0.0001,
+        nominal_value=60,
+        min=-1,
+        max=1,
+    )
 
     b_el0.inputs[b_el2] = exp_flow.ElectricalLine(
-            input=b_el2,
-            output=b_el0,
-            reactance=0.0001,
-            nominal_value=60,
-            min=-1,
-            max=1,
+        input=b_el2,
+        output=b_el0,
+        reactance=0.0001,
+        nominal_value=60,
+        min=-1,
+        max=1,
     )
 
     es.add(
