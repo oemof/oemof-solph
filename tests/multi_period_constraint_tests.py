@@ -22,6 +22,8 @@ from oemof import solph
 logging.disable(logging.INFO)
 
 
+@pytest.mark.filterwarnings("ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning")
+@pytest.mark.filterwarnings("ignore:CAUTION! You specified the 'periods' attribute:UserWarning")
 class TestsMultiPeriodConstraint:
     @classmethod
     def setup_class(cls):
