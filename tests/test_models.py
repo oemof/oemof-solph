@@ -69,7 +69,8 @@ def test_infeasible_model():
 
 
 @pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning"
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
 )
 @pytest.mark.filterwarnings(
     "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"

@@ -24,7 +24,8 @@ logging.disable(logging.INFO)
 
 # Warnings about the fature being experimental:
 @pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning"
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
 )
 @pytest.mark.filterwarnings(
     "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
@@ -34,7 +35,8 @@ logging.disable(logging.INFO)
     "ignore:You did not specify an interest rate.:UserWarning"
 )
 @pytest.mark.filterwarnings(
-    "ignore:By default, a discount_rate of 0.02 is used for a multi-period model.:UserWarning"
+    "ignore:By default, a discount_rate of 0.02 is used for a multi-period"
+    " model.:UserWarning"
 )
 class TestsMultiPeriodConstraint:
     @classmethod
