@@ -266,7 +266,8 @@ class TestsMultiPeriodConstraint:
         self.compare_lp_files("nominal_value_to_zero_multi_period.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Constraints test for fixed source + invest sink w. `full_load_time_max`"""
+        """Constraints test for fixed source + invest sink w.
+        `full_load_time_max`"""
         bel = solph.buses.Bus(label="electricityBus")
 
         source = solph.components.Source(
@@ -2194,7 +2195,7 @@ class TestsMultiPeriodConstraint:
         )
 
     def test_summed_min_max_source(self):
-        """Test sink with full_load_time_min and full_load_time_max attribute"""
+        """Test sink with full_load_time_min and _max attribute"""
         bel = solph.buses.Bus(label="electricityBus")
 
         sink = solph.components.Sink(

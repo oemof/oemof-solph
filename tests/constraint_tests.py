@@ -1865,7 +1865,7 @@ class TestsConstraint:
             )
 
     def test_full_load_time_min_max_source(self):
-        """Constraints test full_load_time_min and full_load_time_max attribute of flow"""
+        """Constraints test full_load_time_min and _max attribute of flow"""
 
         bel = solph.buses.Bus(label="electricityBus")
 
