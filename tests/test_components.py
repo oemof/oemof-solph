@@ -148,6 +148,17 @@ def test_generic_storage_with_convex_invest_offset():
         )
 
 
+def test_generic_storage_invest_warning():
+    with pytest.warns(FutureWarning):
+        bel = Bus()
+        components.GenericStorage(
+            label="storage7",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            investment=Investment(),
+        )
+
+
 def test_generic_storage_with_invest_and_fixed_losses_absolute():
     """
     Storage with fixed losses in the investment mode but no minimum or existing

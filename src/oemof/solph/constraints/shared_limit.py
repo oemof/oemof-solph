@@ -60,8 +60,11 @@ def shared_limit(
 
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
-    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> energysystem = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
     >>> b1 = solph.buses.Bus(label="Party1Bus")
     >>> b2 = solph.buses.Bus(label="Party2Bus")
     >>> storage1 = solph.components.GenericStorage(

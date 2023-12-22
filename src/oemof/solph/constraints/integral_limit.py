@@ -102,8 +102,11 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     --------
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
-    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> energysystem = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
     >>> bel = solph.buses.Bus(label='electricityBus')
     >>> flow1 = solph.flows.Flow(
     ...     nominal_value=100,

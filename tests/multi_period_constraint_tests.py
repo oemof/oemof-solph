@@ -22,6 +22,22 @@ from oemof import solph
 logging.disable(logging.INFO)
 
 
+# Warnings about the fature being experimental:
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
+# Warnings about default parameters beaing used:
+@pytest.mark.filterwarnings(
+    "ignore:You did not specify an interest rate.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:By default, a discount_rate of 0.02 is used for a multi-period"
+    " model.:UserWarning"
+)
 class TestsMultiPeriodConstraint:
     @classmethod
     def setup_class(cls):
@@ -160,7 +176,7 @@ class TestsMultiPeriodConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         existing=50,
                         maximum=1000,
                         overall_maximum=10000,
@@ -266,7 +282,8 @@ class TestsMultiPeriodConstraint:
         self.compare_lp_files("nominal_value_to_zero_multi_period.lp")
 
     def test_fixed_source_invest_sink(self):
-        """Constraints test for fixed source + invest sink w. `summed_max`"""
+        """Constraints test for fixed source + invest sink w.
+        `full_load_time_max`"""
         bel = solph.buses.Bus(label="electricityBus")
 
         source = solph.components.Source(
@@ -282,7 +299,7 @@ class TestsMultiPeriodConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=solph.Investment(
@@ -407,7 +424,6 @@ class TestsMultiPeriodConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -417,7 +433,7 @@ class TestsMultiPeriodConstraint:
             lifetime_outflow=20,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=[145, 130, 115],
                 maximum=234,
                 lifetime=20,
@@ -1930,7 +1946,6 @@ class TestsMultiPeriodConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -1940,7 +1955,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=141,
                 maximum=244,
                 minimum=12,
@@ -1996,7 +2011,6 @@ class TestsMultiPeriodConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -2006,7 +2020,7 @@ class TestsMultiPeriodConstraint:
             outflow_conversion_factor=0.86,
             lifetime_inflow=20,
             lifetime_outflow=20,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 minimum=19,
                 offset=5,
@@ -2072,7 +2086,7 @@ class TestsMultiPeriodConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=solph.Investment(
@@ -2096,10 +2110,10 @@ class TestsMultiPeriodConstraint:
             label="sink_nonconvex_invest",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         minimum=15,
                         nonconvex=True,
@@ -2124,7 +2138,7 @@ class TestsMultiPeriodConstraint:
             label="source_nonconvex_invest",
             outputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=solph.Investment(
@@ -2149,10 +2163,10 @@ class TestsMultiPeriodConstraint:
             label="source_nonconvex_invest",
             outputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         minimum=15,
                         maximum=20,
@@ -2178,7 +2192,7 @@ class TestsMultiPeriodConstraint:
             label="source_nonconvex_invest",
             outputs={
                 bel: solph.flows.Flow(
-                    summed_max=2.3,
+                    full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=solph.Investment(
@@ -2197,15 +2211,15 @@ class TestsMultiPeriodConstraint:
         )
 
     def test_summed_min_max_source(self):
-        """Test sink with summed_min and summed_max attribute"""
+        """Test sink with full_load_time_min and _max attribute"""
         bel = solph.buses.Bus(label="electricityBus")
 
         sink = solph.components.Sink(
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_min=3,
-                    summed_max=100,
+                    full_load_time_min=3,
+                    full_load_time_max=100,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=10,
@@ -2249,6 +2263,9 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, sink)
         self.compare_lp_files("flow_reaching_lifetime_initial_age.lp")
 
+    @pytest.mark.filterwarnings(
+        "ignore:Be aware that the fixed costs attribute is only:UserWarning"
+    )
     def test_fixed_costs(self):
         """Test fixed_cost attribute for different kinds of flows"""
         bel = solph.buses.Bus(label="electricityBus")
