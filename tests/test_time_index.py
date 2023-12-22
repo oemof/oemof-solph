@@ -29,7 +29,7 @@ def test_energysystem_with_datetimeindex():
     assert es.timeincrement.sum() == 23
 
 
-def test_energysystem_with_datetimeindex():
+def test_energysystem_interval_inference_warning():
     datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
     with pytest.warns(FutureWarning):
         _ = solph.EnergySystem(timeindex=datetimeindex)
