@@ -68,9 +68,15 @@ def test_infeasible_model():
             solph.processing.meta_results(m)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_multi_period_default_discount_rate():
     """Test error being thrown for default multi-period discount rate"""
-    warnings.filterwarnings("ignore", category=FutureWarning)
     timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
     es = solph.EnergySystem(
         timeindex=timeindex,
