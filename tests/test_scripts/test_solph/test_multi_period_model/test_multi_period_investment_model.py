@@ -27,8 +27,12 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-@pytest.mark.filterwarnings("ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning")
-@pytest.mark.filterwarnings("ignore:CAUTION! You specified the 'periods' attribute:UserWarning")
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_multi_period_investment_model(solver="cbc"):
     """Test a simple multi_period investment model
     for multiple SinkDSM approaches"""

@@ -21,12 +21,21 @@ from oemof import solph
 
 logging.disable(logging.INFO)
 
+
 # Warnings about the fature being experimental:
-@pytest.mark.filterwarnings("ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning")
-@pytest.mark.filterwarnings("ignore:CAUTION! You specified the 'periods' attribute:UserWarning")
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 # Warnings about default parameters beaing used:
-@pytest.mark.filterwarnings("ignore:You did not specify an interest rate.:UserWarning")
-@pytest.mark.filterwarnings("ignore:By default, a discount_rate of 0.02 is used for a multi-period model.:UserWarning")
+@pytest.mark.filterwarnings(
+    "ignore:You did not specify an interest rate.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:By default, a discount_rate of 0.02 is used for a multi-period model.:UserWarning"
+)
 class TestsMultiPeriodConstraint:
     @classmethod
     def setup_class(cls):
@@ -2252,7 +2261,9 @@ class TestsMultiPeriodConstraint:
         self.energysystem.add(bel, sink)
         self.compare_lp_files("flow_reaching_lifetime_initial_age.lp")
 
-    @pytest.mark.filterwarnings("ignore:Be aware that the fixed costs attribute is only:UserWarning")
+    @pytest.mark.filterwarnings(
+        "ignore:Be aware that the fixed costs attribute is only:UserWarning"
+    )
     def test_fixed_costs(self):
         """Test fixed_cost attribute for different kinds of flows"""
         bel = solph.buses.Bus(label="electricityBus")
