@@ -28,6 +28,7 @@ from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.solph.components._generic_storage import GenericStorage
+from oemof.solph.components import Sink, Source
 
 from .helpers import flatten
 
@@ -472,6 +473,11 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     for key in storage_keys:
         del flow_dict[key]
 
+    # Find multiplexer and remove related entries from flow dict:
+    multiplexer, multiplexer_keys = _get_multiplexer_flows_and_keys(flow_dict)
+    for key in multiplexer_keys:
+        del flow_dict[key]
+
     # Disaggregate flows
     for flow in flow_dict:
         disaggregated_flow_frames = []
@@ -503,7 +509,11 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
         flow_dict[(storage, None)] = _calculate_soc_from_inter_and_intra_soc(
             soc, storage, tsa_parameters
         )
-
+    # Add multiplexer boolean actives values:
+    for multiplexer, values in multiplexer.items():
+        flow_dict[(multiplexer, None)] = _calculate_multiplexer_actives(
+            values, multiplexer, tsa_parameters
+        )
     # Add periodic values (they get extracted in period extraction fct)
     for key, data in periodic_dict.items():
         flow_dict[key] = pd.concat([flow_dict[key], data])
@@ -623,6 +633,20 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     interpolated_soc = soc_ts.interpolate()
     return interpolated_soc.iloc[:-1]
 
+def _calculate_multiplexer_actives(values, multiplexer, tsa_parameters):
+    """Calculate multiplexer actives"""
+    actives_frames = []
+    for p, tsa_period in enumerate(tsa_parameters):
+        for i, k in enumerate(tsa_period["order"]):
+            timesteps = tsa_period["timesteps"]
+            actives_frames.append(pd.DataFrame(
+                values[(p, k)].iloc[0:timesteps],
+                columns=["value"])
+                )
+    actives_frames_ts = pd.concat(actives_frames)
+    actives_frames_ts["variable_name"] = values[(p, k)]["variable_name"].values[0]
+    actives_frames_ts["timestep"] = range(len(actives_frames_ts))
+    return actives_frames_ts
 
 def _get_storage_soc_flows_and_keys(flow_dict):
     """Detect storage flows in flow dict"""
@@ -648,6 +672,18 @@ def _get_storage_soc_flows_and_keys(flow_dict):
     return storages, storage_keys
 
 
+def _get_multiplexer_flows_and_keys(flow_dict):
+    """Detect multiplexer flows in flow dict"""
+    multiplexer = {}
+    multiplexer_keys = []
+    for oemof_tuple, data in flow_dict.items():
+        if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
+            continue
+        if 'multiplexer_active' in data['variable_name'].values[0]:
+            multiplexer.setdefault(oemof_tuple[0],{})
+            multiplexer_keys.append(oemof_tuple)
+            multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = data
+    return multiplexer, multiplexer_keys
 def _disaggregate_tsa_timeindex(period_index, tsa_parameters):
     """Disaggregate aggregated period timeindex by using TSA parameters"""
     return pd.date_range(
