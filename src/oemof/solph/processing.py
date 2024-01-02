@@ -28,7 +28,6 @@ from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
 from oemof.solph.components._generic_storage import GenericStorage
-from oemof.solph.components import Sink, Source
 
 from .helpers import flatten
 
