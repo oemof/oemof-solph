@@ -532,7 +532,11 @@ class GenericStorageBlock(ScalarBlock):
                 for p, k in m.TYPICAL_CLUSTERS:
                     self.storage_content_intra[n, p, k, 0] = 0
                     self.storage_content_intra[n, p, k, 0].fix()
-
+                if n.initial_storage_level is not None:
+                    self.storage_content_inter[n, 0] = (
+                        n.initial_storage_level * n.nominal_storage_capacity
+                    )
+                    self.storage_content_inter[n, 0].fix()
         #  ************* Constraints ***************************
 
         def _storage_inter_minimum_level_rule(block):
