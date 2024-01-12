@@ -245,7 +245,9 @@ class OffsetConverterBlock(ScalarBlock):
                             # `NonConvexFlow`.
                             try:
                                 expr += (
-                                    m.InvestNonConvexFlowBlock.status[n, o, t]
+                                    m.InvestNonConvexFlowBlock.status_nominal[
+                                        n, o, t
+                                    ]
                                     * n.coefficients[0][t]
                                 )
                             # `KeyError` occurs when more than one
@@ -260,7 +262,9 @@ class OffsetConverterBlock(ScalarBlock):
                             # (inside the `try` block) does not exist.
                             except (KeyError, AttributeError):
                                 expr += (
-                                    m.NonConvexFlowBlock.status[n, o, t]
+                                    m.NonConvexFlowBlock.status_nominal[
+                                        n, o, t
+                                    ]
                                     * n.coefficients[0][t]
                                 )
                             block.relation.add((n, i, o, p, t), (expr == 0))

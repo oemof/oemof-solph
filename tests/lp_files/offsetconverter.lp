@@ -47,32 +47,32 @@ c_e_NonConvexFlowBlock_status_nominal_constraint(gasBus_gasboiler_2)_:
 
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_0_0)_:
 -1 flow(gasBus_gasboiler_0_0)
-+0.32 NonConvexFlowBlock_status(gasBus_gasboiler_0)
++0.32 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0)
 <= 0
 
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_0_1)_:
 -1 flow(gasBus_gasboiler_0_1)
-+0.32 NonConvexFlowBlock_status(gasBus_gasboiler_1)
++0.32 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1)
 <= 0
 
 c_u_NonConvexFlowBlock_min(gasBus_gasboiler_0_2)_:
 -1 flow(gasBus_gasboiler_0_2)
-+0.32 NonConvexFlowBlock_status(gasBus_gasboiler_2)
++0.32 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_0_0)_:
 +1 flow(gasBus_gasboiler_0_0)
--1 NonConvexFlowBlock_status(gasBus_gasboiler_0)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_0)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_0_1)_:
 +1 flow(gasBus_gasboiler_0_1)
--1 NonConvexFlowBlock_status(gasBus_gasboiler_1)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_1)
 <= 0
 
 c_u_NonConvexFlowBlock_max(gasBus_gasboiler_0_2)_:
 +1 flow(gasBus_gasboiler_0_2)
--1 NonConvexFlowBlock_status(gasBus_gasboiler_2)
+-1 NonConvexFlowBlock_status_nominal(gasBus_gasboiler_2)
 <= 0
 
 c_e_OffsetConverterBlock_relation(gasboiler_0_0)_:
