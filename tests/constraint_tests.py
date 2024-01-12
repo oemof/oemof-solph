@@ -36,7 +36,9 @@ class TestsConstraint:
 
     def setup_method(self):
         self.energysystem = solph.EnergySystem(
-            groupings=solph.GROUPINGS, timeindex=self.date_time_index
+            groupings=solph.GROUPINGS,
+            timeindex=self.date_time_index,
+            infer_last_interval=True,
         )
 
     def get_om(self):
@@ -520,7 +522,7 @@ class TestsConstraint:
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             nominal_storage_capacity=solph.Investment(
-                ep_costs=145, maximum=234
+                ep_costs=145, minimum=1, maximum=234
             ),
         )
         self.energysystem.add(bel, storage)
@@ -1227,7 +1229,7 @@ class TestsConstraint:
                     nonconvex=solph.NonConvex(
                         minimum_downtime=4,
                         minimum_uptime=2,
-                        initial_status=2,
+                        initial_status=1,
                         startup_costs=5,
                         shutdown_costs=7,
                     ),
@@ -1862,8 +1864,8 @@ class TestsConstraint:
                 om, keyword="space"
             )
 
-    def test_summed_min_max_source(self):
-        """Constraints test summed_min and summed_max attribute of flow"""
+    def test_full_load_time_min_max_source(self):
+        """Constraints test full_load_time_min and _max attribute of flow"""
 
         bel = solph.buses.Bus(label="electricityBus")
 

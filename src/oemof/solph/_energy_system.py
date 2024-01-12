@@ -76,14 +76,16 @@ class EnergySystem(es.EnergySystem):
         infer_last_interval=None,
         periods=None,
         use_remaining_value=False,
-        **kwargs,
+        groupings=None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
         # <oemof.solph.groupings.constraint_grouping>` for more information.
         from oemof.solph import GROUPINGS
 
-        kwargs["groupings"] = GROUPINGS + kwargs.get("groupings", [])
+        if groupings is None:
+            groupings = []
+        groupings = GROUPINGS + groupings
 
         if not (
             isinstance(timeindex, pd.DatetimeIndex)
@@ -161,7 +163,9 @@ class EnergySystem(es.EnergySystem):
             raise TypeError(msg)
 
         super().__init__(
-            timeindex=timeindex, timeincrement=timeincrement, **kwargs
+            groupings=groupings,
+            timeindex=timeindex,
+            timeincrement=timeincrement,
         )
 
         self.periods = periods

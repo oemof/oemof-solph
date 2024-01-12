@@ -193,10 +193,10 @@ class GenericStorage(Node):
         if custom_attributes is None:
             custom_attributes = {}
         super().__init__(
-            label=label,
+            label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.6 ---
         if investment is not None:
@@ -1869,7 +1869,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:

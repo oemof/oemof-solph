@@ -97,18 +97,32 @@ class GenericCAES(Node):
     <class 'oemof.solph.components.experimental._generic_caes.GenericCAES'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label,
+        *,
+        electrical_input,
+        fuel_input,
+        electrical_output,
+        params,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs={},
+            outputs={},
+            custom_properties=custom_properties,
+        )
 
-        self.electrical_input = kwargs.get("electrical_input")
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.params = kwargs.get("params")
+        self.electrical_input = electrical_input
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.params = params
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get("electrical_input"))
-        self.inputs.update(kwargs.get("fuel_input"))
-        self.outputs.update(kwargs.get("electrical_output"))
+        self.inputs.update(electrical_input)
+        self.inputs.update(fuel_input)
+        self.outputs.update(electrical_output)
 
     def constraint_group(self):
         return GenericCAESBlock
