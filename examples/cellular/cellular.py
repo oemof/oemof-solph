@@ -21,7 +21,7 @@ Download source code: :download:`cellular.py </../examples/cellular/cellular.py>
 
     .. literalinclude:: /../examples/cellular/cellular.py
         :language: python
-        :lines: 45-346
+        :lines: 45-
 
 Installation requirements
 -------------------------
