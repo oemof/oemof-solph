@@ -40,9 +40,26 @@ class Bus(Node):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.balanced = kwargs.get("balanced", True)
+    def __init__(
+        self,
+        label=None,
+        *,
+        inputs=None,
+        outputs=None,
+        balanced=True,
+        custom_properties=None,
+    ):
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
+        self.balanced = balanced
 
     def constraint_group(self):
         if self.balanced:

@@ -101,13 +101,9 @@ class Converter(Node):
         conversion_factors=None,
         custom_attributes=None,
     ):
-        self.label = label
-
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")
             outputs = {}
 
         if custom_attributes is None:
@@ -117,8 +113,12 @@ class Converter(Node):
             label=label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
+        if not inputs:
+            warn_if_missing_attribute(self, "inputs")
+        if not outputs:
+            warn_if_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
             conversion_factors = {}

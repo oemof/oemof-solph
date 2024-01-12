@@ -48,7 +48,6 @@ def test_pwltf():
         return 0.01 * x**2
 
     in_breakpoints = np.arange(0, 110, 25)
-    out_breakpoints = conv_func(in_breakpoints)
 
     # Create and add PiecewiseLinearConverter
     pwltf = solph.components.experimental.PiecewiseLinearConverter(
@@ -56,7 +55,6 @@ def test_pwltf():
         inputs={b_gas: solph.flows.Flow(nominal_value=100, variable_costs=1)},
         outputs={b_el: solph.flows.Flow()},
         in_breakpoints=in_breakpoints,
-        out_breakpoints=out_breakpoints,
         conversion_function=conv_func,
         pw_repn="CC",
     )
