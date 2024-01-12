@@ -101,8 +101,6 @@ class Converter(Node):
         conversion_factors=None,
         custom_attributes=None,
     ):
-        self.label = label
-
         if inputs is None:
             warn_if_missing_attribute(self, "inputs")
             inputs = {}
