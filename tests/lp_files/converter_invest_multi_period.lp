@@ -2,9 +2,9 @@
 
 min 
 objective:
-+24.462687250116133 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_0)
-+23.98302671580013 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_1)
-+23.512771290000128 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_2)
++32.94298610923851 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_0)
++21.74383477344849 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_1)
++10.764274640321037 InvestmentFlowBlock_invest(powerplant_gas_coal_electricityBus_2)
 +50 flow(powerplant_gas_coal_electricityBus_0_0)
 +50 flow(powerplant_gas_coal_electricityBus_0_1)
 +49.01960784313725 flow(powerplant_gas_coal_electricityBus_1_2)
@@ -19,54 +19,6 @@ objective:
 +19.223375624759708 flow(powerplant_gas_coal_thermalBus_2_5)
 
 s.t.
-
-c_e_BusBlock_balance(coalBus_0_0)_:
-+1 flow(coalBus_powerplant_gas_coal_0_0)
-= 0
-
-c_e_BusBlock_balance(coalBus_0_1)_:
-+1 flow(coalBus_powerplant_gas_coal_0_1)
-= 0
-
-c_e_BusBlock_balance(coalBus_1_2)_:
-+1 flow(coalBus_powerplant_gas_coal_1_2)
-= 0
-
-c_e_BusBlock_balance(coalBus_1_3)_:
-+1 flow(coalBus_powerplant_gas_coal_1_3)
-= 0
-
-c_e_BusBlock_balance(coalBus_2_4)_:
-+1 flow(coalBus_powerplant_gas_coal_2_4)
-= 0
-
-c_e_BusBlock_balance(coalBus_2_5)_:
-+1 flow(coalBus_powerplant_gas_coal_2_5)
-= 0
-
-c_e_BusBlock_balance(gasBus_0_0)_:
-+1 flow(gasBus_powerplant_gas_coal_0_0)
-= 0
-
-c_e_BusBlock_balance(gasBus_0_1)_:
-+1 flow(gasBus_powerplant_gas_coal_0_1)
-= 0
-
-c_e_BusBlock_balance(gasBus_1_2)_:
-+1 flow(gasBus_powerplant_gas_coal_1_2)
-= 0
-
-c_e_BusBlock_balance(gasBus_1_3)_:
-+1 flow(gasBus_powerplant_gas_coal_1_3)
-= 0
-
-c_e_BusBlock_balance(gasBus_2_4)_:
-+1 flow(gasBus_powerplant_gas_coal_2_4)
-= 0
-
-c_e_BusBlock_balance(gasBus_2_5)_:
-+1 flow(gasBus_powerplant_gas_coal_2_5)
-= 0
 
 c_e_BusBlock_balance(electricityBus_0_0)_:
 +1 flow(powerplant_gas_coal_electricityBus_0_0)
@@ -92,6 +44,30 @@ c_e_BusBlock_balance(electricityBus_2_5)_:
 +1 flow(powerplant_gas_coal_electricityBus_2_5)
 = 0
 
+c_e_BusBlock_balance(coalBus_0_0)_:
++1 flow(coalBus_powerplant_gas_coal_0_0)
+= 0
+
+c_e_BusBlock_balance(coalBus_0_1)_:
++1 flow(coalBus_powerplant_gas_coal_0_1)
+= 0
+
+c_e_BusBlock_balance(coalBus_1_2)_:
++1 flow(coalBus_powerplant_gas_coal_1_2)
+= 0
+
+c_e_BusBlock_balance(coalBus_1_3)_:
++1 flow(coalBus_powerplant_gas_coal_1_3)
+= 0
+
+c_e_BusBlock_balance(coalBus_2_4)_:
++1 flow(coalBus_powerplant_gas_coal_2_4)
+= 0
+
+c_e_BusBlock_balance(coalBus_2_5)_:
++1 flow(coalBus_powerplant_gas_coal_2_5)
+= 0
+
 c_e_BusBlock_balance(thermalBus_0_0)_:
 +1 flow(powerplant_gas_coal_thermalBus_0_0)
 = 0
@@ -114,6 +90,30 @@ c_e_BusBlock_balance(thermalBus_2_4)_:
 
 c_e_BusBlock_balance(thermalBus_2_5)_:
 +1 flow(powerplant_gas_coal_thermalBus_2_5)
+= 0
+
+c_e_BusBlock_balance(gasBus_0_0)_:
++1 flow(gasBus_powerplant_gas_coal_0_0)
+= 0
+
+c_e_BusBlock_balance(gasBus_0_1)_:
++1 flow(gasBus_powerplant_gas_coal_0_1)
+= 0
+
+c_e_BusBlock_balance(gasBus_1_2)_:
++1 flow(gasBus_powerplant_gas_coal_1_2)
+= 0
+
+c_e_BusBlock_balance(gasBus_1_3)_:
++1 flow(gasBus_powerplant_gas_coal_1_3)
+= 0
+
+c_e_BusBlock_balance(gasBus_2_4)_:
++1 flow(gasBus_powerplant_gas_coal_2_4)
+= 0
+
+c_e_BusBlock_balance(gasBus_2_5)_:
++1 flow(gasBus_powerplant_gas_coal_2_5)
 = 0
 
 c_e_ConverterBlock_relation(powerplant_gas_coal_coalBus_electricityBus_0_0)_:

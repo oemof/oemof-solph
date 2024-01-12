@@ -10,6 +10,7 @@ SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: henhuy
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 
 SPDX-License-Identifier: MIT
 
@@ -528,7 +529,7 @@ def __separate_attrs(
         attrs = [
             i
             for i in dir(com)
-            if not (callable(getattr(com, i)) or i.startswith(exclusions))
+            if not (i.startswith(exclusions) or callable(getattr(com, i)))
         ]
 
         for a in attrs:

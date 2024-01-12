@@ -8,10 +8,18 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_add_periods():
     """test method _add_periods of energy system"""
     timeindex = pd.date_range(start="2012-01-01", periods=10000, freq="H")
@@ -19,7 +27,9 @@ def test_add_periods():
         pd.date_range(start="2012-01-01", periods=8784, freq="H"),
         pd.date_range(start="2013-01-01", periods=1217, freq="H"),
     ]
-    es = EnergySystem(timeindex=timeindex, periods=periods)
+    es = EnergySystem(
+        timeindex=timeindex, periods=periods, infer_last_interval=True
+    )
     assert len(es.periods) == 2
     assert es.periods[0].equals(
         pd.date_range(start="2012-01-01", periods=8784, freq="H")
@@ -29,6 +39,13 @@ def test_add_periods():
     )
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_extract_periods_years():
     """test method _extract_periods_years of energy system"""
     t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="H").to_series()

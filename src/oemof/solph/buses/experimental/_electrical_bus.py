@@ -47,8 +47,23 @@ class ElectricalBus(Bus):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.slack = kwargs.get("slack", False)
-        self.v_max = kwargs.get("v_max", 1000)
-        self.v_min = kwargs.get("v_min", -1000)
+    def __init__(
+        self,
+        label=None,
+        *,
+        v_max,
+        v_min,
+        inputs=None,
+        outputs=None,
+        custom_properties=None,
+        slack=False,
+    ):
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
+        self.slack = slack
+        self.v_max = v_max
+        self.v_min = v_min

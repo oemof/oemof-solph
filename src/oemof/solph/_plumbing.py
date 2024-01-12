@@ -61,7 +61,7 @@ class _Sequence(UserList):
     --------
     >>> s = _Sequence(default=42)
     >>> len(s)
-    0
+    1
     >>> s[1]
     42
     >>> s[2]
@@ -79,7 +79,7 @@ class _Sequence(UserList):
     def __init__(self, *args, **kwargs):
         self.default = kwargs["default"]
         self.default_changed = False
-        self.highest_index = -1
+        self.highest_index = 0
         super().__init__(*args)
 
     def __getitem__(self, key):

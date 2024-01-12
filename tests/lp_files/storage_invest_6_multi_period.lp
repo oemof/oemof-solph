@@ -2,12 +2,12 @@
 
 min 
 objective:
-+121.09030188807486 InvestmentFlowBlock_invest(electricityBus_storage6_0)
-+118.71598224321065 InvestmentFlowBlock_invest(electricityBus_storage6_1)
-+116.38821788550062 InvestmentFlowBlock_invest(electricityBus_storage6_2)
-+177.35448256334197 GenericInvestmentStorageBlock_invest(storage6_0)
-+173.87694368955096 GenericInvestmentStorageBlock_invest(storage6_1)
-+170.46759185250093 GenericInvestmentStorageBlock_invest(storage6_2)
++17.46051480474446 InvestmentFlowBlock_invest(electricityBus_storage6_0)
++11.524715692583884 InvestmentFlowBlock_invest(electricityBus_storage6_1)
++5.705304798308859 InvestmentFlowBlock_invest(electricityBus_storage6_2)
++25.57348127967623 GenericInvestmentStorageBlock_invest(storage6_0)
++16.879634095198618 GenericInvestmentStorageBlock_invest(storage6_1)
++8.35625450257358 GenericInvestmentStorageBlock_invest(storage6_2)
 
 s.t.
 

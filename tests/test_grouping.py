@@ -55,7 +55,7 @@ class TestsGrouping:
                         full_load_time_max=2.3,
                         variable_costs=25,
                         max=0.8,
-                        investment=Investment(ep_costs=500, maximum=10e5),
+                        nominal_value=Investment(ep_costs=500, maximum=10e5),
                     )
                 },
             )

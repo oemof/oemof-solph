@@ -23,7 +23,7 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
@@ -32,7 +32,7 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
-class Converter(on.Transformer):
+class Converter(Node):
     """A linear ConverterBlock object with n inputs and n outputs.
 
     Node object that relates any number of inflow and outflows with
@@ -101,13 +101,9 @@ class Converter(on.Transformer):
         conversion_factors=None,
         custom_attributes=None,
     ):
-        self.label = label
-
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")
             outputs = {}
 
         if custom_attributes is None:
@@ -117,8 +113,12 @@ class Converter(on.Transformer):
             label=label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
+        if not inputs:
+            warn_if_missing_attribute(self, "inputs")
+        if not outputs:
+            warn_if_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
             conversion_factors = {}

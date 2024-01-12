@@ -17,7 +17,7 @@ from oemof import solph
 def test_energysystem_with_datetimeindex_infer_last_interval():
     """Test EnergySystem with DatetimeIndex (equidistant)"""
     datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
-    es = solph.EnergySystem(timeindex=datetimeindex)
+    es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
     assert es.timeincrement[1] == 1.0
     assert es.timeincrement.sum() == 24
 
@@ -27,6 +27,12 @@ def test_energysystem_with_datetimeindex():
     es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
     assert es.timeincrement[1] == 1.0
     assert es.timeincrement.sum() == 23
+
+
+def test_energysystem_interval_inference_warning():
+    datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
+    with pytest.warns(FutureWarning):
+        _ = solph.EnergySystem(timeindex=datetimeindex)
 
 
 def test_energysystem_with_datetimeindex_non_equidistant_infer_last_interval():
@@ -39,7 +45,7 @@ def test_energysystem_with_datetimeindex_non_equidistant_infer_last_interval():
         "DatetimeIndex is None."
     )
     with pytest.raises(AttributeError, match=msg):
-        solph.EnergySystem(timeindex=dtindex)
+        solph.EnergySystem(timeindex=dtindex, infer_last_interval=True)
 
 
 def test_energysystem_with_datetimeindex_non_equidistant():
@@ -102,7 +108,7 @@ def test_energysystem_with_numeric_index_non_equidistant():
 
 def test_model_timeincrement_with_valid_timeindex():
     datetimeindex = pd.date_range("1/1/2012", periods=5, freq="H")
-    es = solph.EnergySystem(timeindex=datetimeindex)
+    es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
     m = solph._models.BaseModel(es)
     assert es.timeincrement.sum() == 5
     assert m.timeincrement.sum() == 5
@@ -125,6 +131,7 @@ def test_conflicting_time_index():
         solph.EnergySystem(
             timeindex=pd.date_range("1/1/2012", periods=2, freq="H"),
             timeincrement=[1, 2, 3, 4],
+            infer_last_interval=False,
         )
 
 
@@ -140,7 +147,8 @@ def test_missing_timeincrement():
 
 def test_overwrite_timeincrement():
     es = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=2, freq="H")
+        timeindex=pd.date_range("1/1/2012", periods=2, freq="H"),
+        infer_last_interval=True,
     )
     assert es.timeincrement[0] == 1
     m = solph._models.BaseModel(es, timeincrement=[3])

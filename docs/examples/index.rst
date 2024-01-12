@@ -29,5 +29,4 @@ Examples
     minimal_investment.rst
     invest_nonconvex.rst
     offset_converter.rst
-    electrical.lopf.rst
     custom_constraints.rst

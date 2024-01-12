@@ -2,9 +2,9 @@
 
 min 
 objective:
-+285.3937455128117 InvestmentFlowBlock_invest(Source_Bus1_0)
-+279.7977897184428 InvestmentFlowBlock_invest(Source_Bus1_1)
-+274.31155854749295 InvestmentFlowBlock_invest(Source_Bus1_2)
++8.230422488026955 InvestmentFlowBlock_invest(Source_Bus1_0)
++5.432444590842506 InvestmentFlowBlock_invest(Source_Bus1_1)
++2.6893290053675805 InvestmentFlowBlock_invest(Source_Bus1_2)
 +0.5 SinkDSMDLRInvestmentBlock_dsm_do_shift(sink_dsm_DLR_1_0)
 +0.5 SinkDSMDLRInvestmentBlock_balance_dsm_up(sink_dsm_DLR_1_0)
 +0.5 SinkDSMDLRInvestmentBlock_dsm_up(sink_dsm_DLR_1_0)
@@ -29,25 +29,25 @@ objective:
 +0.48058439061899266 SinkDSMDLRInvestmentBlock_balance_dsm_do(sink_dsm_DLR_1_5)
 +0.48058439061899266 SinkDSMDLRInvestmentBlock_dsm_do_shift(sink_dsm_DLR_1_5)
 +0.48058439061899266 SinkDSMDLRInvestmentBlock_balance_dsm_up(sink_dsm_DLR_1_5)
-+103.00990099009903 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_0)
-+100.990099009901 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_1)
-+99.00990099009901 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_2)
++99.99999999999999 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_0)
++98.03921568627449 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_1)
++48.534265191225046 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_2)
 
 s.t.
 
 c_u_investment_limit_per_period(0)_:
-+285.3937455128117 InvestmentFlowBlock_invest(Source_Bus1_0)
-+103.00990099009903 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_0)
++8.230422488026955 InvestmentFlowBlock_invest(Source_Bus1_0)
++99.99999999999999 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_0)
 <= 400
 
 c_u_investment_limit_per_period(1)_:
-+279.7977897184428 InvestmentFlowBlock_invest(Source_Bus1_1)
-+100.990099009901 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_1)
++5.432444590842506 InvestmentFlowBlock_invest(Source_Bus1_1)
++98.03921568627449 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_1)
 <= 300
 
 c_u_investment_limit_per_period(2)_:
-+274.31155854749295 InvestmentFlowBlock_invest(Source_Bus1_2)
-+99.00990099009901 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_2)
++2.6893290053675805 InvestmentFlowBlock_invest(Source_Bus1_2)
++48.534265191225046 SinkDSMDLRInvestmentBlock_invest(sink_dsm_DLR_2)
 <= 200
 
 c_e_BusBlock_balance(Bus1_0_0)_:
