@@ -52,7 +52,7 @@ def main():
 
     date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
     print(date_time_index)
-    energysystem = EnergySystem(timeindex=date_time_index, timemode="explicit")
+    energysystem = EnergySystem(timeindex=date_time_index, infer_last_interval=True)
 
     demand = [
         209643,
