@@ -15,13 +15,13 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
 
-class Bus(on.Bus):
+class Bus(Node):
     """A balance object. Every component has to be connected to buses.
 
     The sum of all inputs of a Bus object must equal the sum of all outputs
@@ -40,9 +40,26 @@ class Bus(on.Bus):
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.balanced = kwargs.get("balanced", True)
+    def __init__(
+        self,
+        label=None,
+        *,
+        inputs=None,
+        outputs=None,
+        balanced=True,
+        custom_properties=None,
+    ):
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
+        self.balanced = balanced
 
     def constraint_group(self):
         if self.balanced:

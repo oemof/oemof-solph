@@ -62,8 +62,11 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
 
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
-    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> energysystem = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
     >>> bel1 = solph.buses.Bus(label='electricity1')
     >>> bel2 = solph.buses.Bus(label='electricity2')
     >>> energysystem.add(bel1, bel2)
@@ -71,12 +74,12 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     ...    label='powerline_1_2',
     ...    inputs={bel1: solph.flows.Flow()},
     ...    outputs={bel2: solph.flows.Flow(
-    ...        investment=solph.Investment(ep_costs=20))}))
+    ...        nominal_value=solph.Investment(ep_costs=20))}))
     >>> energysystem.add(solph.components.Converter(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.flows.Flow()},
     ...    outputs={bel1: solph.flows.Flow(
-    ...        investment=solph.Investment(ep_costs=20))}))
+    ...        nominal_value=solph.Investment(ep_costs=20))}))
     >>> om = solph.Model(energysystem)
     >>> line12 = energysystem.groups['powerline_1_2']
     >>> line21 = energysystem.groups['powerline_2_1']

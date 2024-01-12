@@ -19,7 +19,7 @@ SPDX-License-Identifier: MIT
 """
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -30,7 +30,7 @@ from pyomo.environ import Var
 from oemof.solph._plumbing import sequence
 
 
-class GenericCHP(network.Transformer):
+class GenericCHP(Node):
     r"""
     Component `GenericCHP` to model combined heat and power plants.
 

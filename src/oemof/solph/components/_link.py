@@ -18,7 +18,7 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-from oemof.network import network as on
+from oemof.network import Node
 from oemof.tools import debugging
 from pyomo.core import Set
 from pyomo.core.base.block import ScalarBlock
@@ -29,7 +29,7 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import sequence
 
 
-class Link(on.Transformer):
+class Link(Node):
     """A Link object with 2 inputs and 2 outputs.
 
     Parameters
@@ -86,23 +86,26 @@ class Link(on.Transformer):
         conversion_factors=None,
         custom_attributes=None,
     ):
+        # compatibility with omeof.network w/o explicit named arguments
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")
             outputs = {}
-        if conversion_factors is None:
-            warn_if_missing_attribute(self, "conversion_factors")
-            conversion_factors = {}
         if custom_attributes is None:
             custom_attributes = {}
         super().__init__(
-            label=label,
+            label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
+        if not inputs:
+            warn_if_missing_attribute(self, "inputs")
+        if not outputs:
+            warn_if_missing_attribute(self, "outputs")
+        if conversion_factors is None:
+            warn_if_missing_attribute(self, "conversion_factors")
+            conversion_factors = {}
         self.conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
         }

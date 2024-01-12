@@ -61,7 +61,7 @@ The model time is defined by the number of intervals and the length of intervals
 The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
 
 One can use the function
-:py:func:`~oemof.solph._energy_system/create_year_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc.. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
+:py:func:`create_time_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
 
 It is also possible to define the datetime index using pandas. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
@@ -69,8 +69,8 @@ Both code blocks will create an hourly datetime index for 2011:
 
 .. code-block:: python
 
-    from oemof.solph import create_year_index
-    my_index = create_year_index(2011)
+    from oemof.solph import create_time_index
+    my_index = create_time_index(2011)
 
 .. code-block:: python
 
@@ -643,8 +643,8 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
     solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.flows.Flow(investment= solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
@@ -912,7 +912,7 @@ turbines.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	investment=solph.Investment(ep_costs=epc, maximum=50000))})
+	nominal_value=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
 capacity of 20,000 kW. We're still expecting the total wind power capacity, thus we
@@ -922,7 +922,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	    investment=solph.Investment(ep_costs=epc,
+	    nominal_value=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
 
@@ -957,7 +957,7 @@ example of a converter:
         label='converter_nonconvex',
         inputs={bus_0: solph.flows.Flow()},
         outputs={bus_1: solph.flows.Flow(
-            investment=solph.Investment(
+            nominal_value=solph.Investment(
                 ep_costs=4,
                 maximum=100,
                 minimum=20,
@@ -1004,8 +1004,8 @@ mathematical background, like variables and constraints, which are used.
 
 .. _multi_period_mode_label:
 
-Using the multi-period (investment) mode (experimental)
--------------------------------------------------------
+Multi-period (investment) mode (experimental)
+---------------------------------------------
 Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
@@ -1020,7 +1020,7 @@ only unfolds if you look at long-term investments. Let's see how.
 First, you start by defining your energy system as you might have done before, but you
 
 * choose a longer-term time horizon (spanning multiple years, i.e. multiple periods) and
-* explicitly define the `periods` attribute of your energy system which maps time steps to the simulated period.
+* explicitly define the `periods` attribute of your energy system which lists the time steps for each period.
 
 .. code-block:: python
 
@@ -1028,10 +1028,10 @@ First, you start by defining your energy system as you might have done before, b
     import oemof.solph as solph
 
     my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
-    periods = {
-        0: pd.date_range('1/1/2013', periods=8760, freq='H'),
-        1: pd.date_range('1/1/2014', periods=8760, freq='H'),
-    }
+    periods = [
+        pd.date_range('1/1/2013', periods=8760, freq='H'),
+        pd.date_range('1/1/2014', periods=8760, freq='H'),
+    ]
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
 If you want to use a multi-period model you have define periods of your energy system explicitly. This way,
@@ -1057,17 +1057,16 @@ and adjust to your needs:
 
         Returns
         -------
-        periods : dict
-            pd.date_ranges defining the time stamps for the respective period,
-            starting with period 0
+        periods : list
+            periods for the optimization run
         """
         years = sorted(list(set(getattr(datetimeindex, "year"))))
-        periods = {}
+        periods = []
         filter_series = datetimeindex.to_series()
         for number, year in enumerate(years):
             start = filter_series.loc[filter_series.index.year == year].min()
             end = filter_series.loc[filter_series.index.year == year].max()
-            periods[number] = pd.date_range(start, end, freq=datetimeindex.freq)
+            periods.append(pd.date_range(start, end, freq=datetimeindex.freq))
 
         return periods
 
@@ -1144,7 +1143,7 @@ Here is an example
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
@@ -1178,7 +1177,7 @@ This would mean that for investments in the particular period, these values woul
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
@@ -1269,6 +1268,13 @@ Besides the `invest` variable, new variables are introduced as well. These are:
     * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
       you could use the `timeincrement` attribute of the energy system to model different weightings. Be aware that this
       has not yet been tested.
+    * For now, both, the `timeindex` as well as the `timeincrement` of an energy system have to be defined since they
+      have to be of the same length for a multi-period model.
+    * You can choose whether to re-evaluate assets at the end of the optimization horizon. If you set attribute
+      `use_remaining_value` of the energy system to True (defaults to False), this leads to the model evaluating the
+      difference in the asset value at the end of the optimization horizon vs. at the time the investment was made.
+      The difference in value is added to or subtracted from the respective investment costs increment,
+      assuming assets are to be liquidated / re-evaluated at the end of the optimization horizon.
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
@@ -1466,12 +1472,11 @@ This nonlinearity is linearised in the
         inputs={b_diesel: solph.flows.Flow()},
         outputs={
             b_el: solph.flows.Flow(
-                nominal_value=None,
                 variable_costs=0.04,
                 min=0.2,
                 max=1,
                 nonconvex=solph.NonConvex(),
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=90,
                     maximum=150, # required for the linearization
                 ),

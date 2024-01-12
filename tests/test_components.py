@@ -36,7 +36,7 @@ def test_generic_storage_1():
             invest_relation_input_output=1,
             invest_relation_output_capacity=1,
             invest_relation_input_capacity=1,
-            investment=Investment(),
+            nominal_storage_capacity=Investment(),
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
         )
@@ -112,7 +112,7 @@ def test_generic_storage_with_non_convex_investment():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(nonconvex=True, existing=5, maximum=25),
+            nominal_value=Investment(nonconvex=True, existing=5, maximum=25),
         )
 
 
@@ -128,7 +128,7 @@ def test_generic_storage_with_non_convex_invest_maximum():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(nonconvex=True),
+            nominal_storage_capacity=Investment(nonconvex=True),
         )
 
 
@@ -144,7 +144,18 @@ def test_generic_storage_with_convex_invest_offset():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(offset=10),
+            nominal_storage_capacity=Investment(offset=10),
+        )
+
+
+def test_generic_storage_invest_warning():
+    with pytest.warns(FutureWarning):
+        bel = Bus()
+        components.GenericStorage(
+            label="storage7",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            investment=Investment(),
         )
 
 
@@ -164,13 +175,16 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
             label="storage4",
             inputs={bel: Flow()},
             outputs={bel: Flow()},
-            investment=Investment(ep_costs=23, minimum=0, existing=0),
+            nominal_storage_capacity=Investment(
+                ep_costs=23, minimum=0, existing=0
+            ),
             fixed_losses_absolute=[0, 0, 4],
         )
 
 
 def test_generic_storage_without_inputs():
-    components.GenericStorage(label="storage5")
+    with pytest.warns(SuspiciousUsageWarning):
+        components.GenericStorage(label="storage5")
 
 
 def test_generic_storage_too_many_inputs():
@@ -179,7 +193,9 @@ def test_generic_storage_too_many_inputs():
     bel2 = Bus()
     with pytest.raises(AttributeError, match=msg):
         components.GenericStorage(
-            label="storage6", inputs={bel1: Flow(), bel2: Flow()}
+            label="storage6",
+            inputs={bel1: Flow(), bel2: Flow()},
+            outputs={bel2: Flow()},
         )
 
 
@@ -189,7 +205,9 @@ def test_generic_storage_too_many_outputs():
     bel2 = Bus()
     with pytest.raises(AttributeError, match=msg):
         components.GenericStorage(
-            label="storage7", outputs={bel1: Flow(), bel2: Flow()}
+            label="storage7",
+            inputs={bel1: Flow()},
+            outputs={bel1: Flow(), bel2: Flow()},
         )
 
 
@@ -234,10 +252,10 @@ def test_offsetconverter_investment_on_inputs():
     ):
         b_diesel = Bus(label="bus_diesel")
         components.OffsetConverter(
-            inputs={b_diesel: Flow(investment=Investment())},
+            inputs={b_diesel: Flow(nominal_value=Investment())},
             outputs={
                 b_diesel: Flow(
-                    nonconvex=NonConvex(), investment=Investment(maximum=1)
+                    nonconvex=NonConvex(), nominal_value=Investment(maximum=1)
                 )
             },
             coefficients=(2.5, 0.5),

@@ -14,9 +14,9 @@ objective:
 +23.52941176470588 flow(storage1_electricityBus_1_3)
 +23.06805074971165 flow(storage1_electricityBus_2_4)
 +23.06805074971165 flow(storage1_electricityBus_2_5)
-+232.70350285300475 GenericInvestmentStorageBlock_invest(storage1_0)
-+228.14068907157326 GenericInvestmentStorageBlock_invest(storage1_1)
-+223.6673422270326 GenericInvestmentStorageBlock_invest(storage1_2)
++31.685467778602654 GenericInvestmentStorageBlock_invest(storage1_0)
++21.210358847924045 GenericInvestmentStorageBlock_invest(storage1_1)
++10.650825820334894 GenericInvestmentStorageBlock_invest(storage1_2)
 
 s.t.
 

@@ -11,6 +11,8 @@ oemof/tests/test_scripts/test_solph/test_simple_dispatch/test_simple_dispatch.py
 SPDX-License-Identifier: MIT
 """
 
+import pytest
+
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import processing
@@ -74,7 +76,7 @@ def test_dispatch_one_time_step(solver="cbc"):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1], timemode="explicit")
+    energysystem = EnergySystem(timeincrement=[1])
     energysystem.add(
         bgas,
         bel,
@@ -116,4 +118,4 @@ def test_dispatch_one_time_step(solver="cbc"):
     }
 
     for key in test_results.keys():
-        assert int(round(results[key])) == int(round(test_results[key]))
+        assert results[key] == pytest.approx(test_results[key], abs=0.5)

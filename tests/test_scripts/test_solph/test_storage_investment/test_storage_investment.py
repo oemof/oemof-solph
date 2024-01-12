@@ -38,6 +38,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 from oemof.tools import economics
 
 from oemof import solph
@@ -55,7 +56,10 @@ def test_optimise_storage_size(
     logging.info("Initialize the energy system")
     date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
 
-    es = solph.EnergySystem(timeindex=date_time_index)
+    es = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -135,7 +139,10 @@ def test_optimise_storage_size(
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            investment=solph.Investment(ep_costs=epc, existing=6851),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=epc,
+                existing=6851,
+            ),
         )
     )
 
@@ -179,7 +186,7 @@ def test_results_with_actual_dump():
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
@@ -196,7 +203,7 @@ def test_results_with_actual_dump():
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert round(meta["objective"]) == 423167578261115584
+    assert meta["objective"] == pytest.approx(423167578261115584, abs=0.5)
 
 
 def test_solph_converter_attributes_before_dump_and_after_restore():

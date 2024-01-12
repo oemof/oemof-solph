@@ -13,7 +13,6 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
-
 from oemof.solph._plumbing import sequence
 
 
@@ -62,7 +61,7 @@ class Investment:
         Units lifetime, given in years; only applicable for multi-period
         models
     age : int, :math:`a`
-        Units start age, given in years at the beginning of the simulation;
+        Units start age, given in years at the beginning of the optimization;
         only applicable for multi-period models
     interest_rate : float, :math:`ir`
         Interest rate for calculating annuities when investing in a particular
@@ -184,14 +183,14 @@ class NonConvex:
         from the actual output.
     inactivity_costs : numeric (iterable or scalar)
         Costs associated with not operating the flow.
-    minimum_uptime : numeric (1 or positive integer)
-        Minimum time that a flow must be greater then its minimum flow after
-        startup. Be aware that minimum up and downtimes can contradict each
-        other and may lead to infeasible problems.
-    minimum_downtime : numeric (1 or positive integer)
-        Minimum time a flow is forced to zero after shutting down.
-        Be aware that minimum up and downtimes can contradict each
-        other and may to infeasible problems.
+    minimum_uptime : numeric or list of numeric (1 or positive integer)
+        Minimum number of time steps that a flow must be greater then its
+        minimum flow after startup. Be aware that minimum up and downtimes
+        can contradict each other and may lead to infeasible problems.
+    minimum_downtime : numeric or list of numeric (1 or positive integer)
+        Minimum number of time steps a flow is forced to zero after
+        shutting down. Be aware that minimum up and downtimes can
+        contradict each other and may to infeasible problems.
     maximum_startups : numeric (0 or positive integer)
         Maximum number of start-ups in the optimization timeframe.
     maximum_shutdowns : numeric (0 or positive integer)
@@ -199,12 +198,12 @@ class NonConvex:
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
         (0 = off, 1 = on). For minimum up and downtimes, the initial status
-        is set for the respective values in the edge regions e.g. if a
-        minimum uptime of four timesteps is defined, the initial status is
-        fixed for the four first and last timesteps of the optimization period.
-        If both, up and downtimes are defined, the initial status is set for
-        the maximum of both e.g. for six timesteps if a minimum downtime of
-        six timesteps is defined besides a four timestep minimum uptime.
+        is set for the respective values in the beginning e.g. if a
+        minimum uptime of four timesteps is defined and the initial status is
+        set to one, the initial status is fixed for the four first timesteps
+        of the optimization period. Otherwise if the initial status is set to
+        zero and the first timesteps are fixed for the number of minimum
+        downtime steps.
     negative_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
@@ -232,8 +231,8 @@ class NonConvex:
             custom_attributes = {}
 
         self.initial_status = initial_status
-        self.minimum_uptime = minimum_uptime
-        self.minimum_downtime = minimum_downtime
+        self.minimum_uptime = sequence(minimum_uptime)
+        self.minimum_downtime = sequence(minimum_downtime)
         self.maximum_startups = maximum_startups
         self.maximum_shutdowns = maximum_shutdowns
 
@@ -247,11 +246,7 @@ class NonConvex:
         for attribute, value in custom_attributes.items():
             setattr(self, attribute, value)
 
-    @property
-    def max_up_down(self):
-        """Return maximum of minimum_uptime and minimum_downtime.
-
-        The maximum of both is used to set the initial status for this
-        number of time steps within the edge regions.
-        """
-        return max(self.minimum_uptime, self.minimum_downtime)
+        if initial_status == 0:
+            self.first_flexible_timestep = self.minimum_downtime[0]
+        else:
+            self.first_flexible_timestep = self.minimum_uptime[0]

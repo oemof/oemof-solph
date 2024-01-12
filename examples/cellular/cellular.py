@@ -21,7 +21,7 @@ Download source code: :download:`cellular.py </../examples/cellular/cellular.py>
 
     .. literalinclude:: /../examples/cellular/cellular.py
         :language: python
-        :lines: 45-346
+        :lines: 45-
 
 Installation requirements
 -------------------------
@@ -65,27 +65,13 @@ def main():
     mysolver = "cbc"
 
     # create the energy cells
-    es = EnergySystem(
-        label="es", timeindex=daterange, infer_last_interval=False
-    )
-    ec_1 = EnergySystem(
-        label="ec1", timeindex=daterange, infer_last_interval=False
-    )
-    ec_2 = EnergySystem(
-        label="ec2", timeindex=daterange, infer_last_interval=False
-    )
-    ec_1_1 = EnergySystem(
-        label="ec1_1", timeindex=daterange, infer_last_interval=False
-    )
-    ec_1_2 = EnergySystem(
-        label="ec1_2", timeindex=daterange, infer_last_interval=False
-    )
-    ec_2_1 = EnergySystem(
-        label="ec2_1", timeindex=daterange, infer_last_interval=False
-    )
-    ec_2_2 = EnergySystem(
-        label="ec2_2", timeindex=daterange, infer_last_interval=False
-    )
+    es = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_1 = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_2 = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_1_1 = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_1_2 = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_2_1 = EnergySystem(timeindex=daterange, infer_last_interval=False)
+    ec_2_2 = EnergySystem(timeindex=daterange, infer_last_interval=False)
 
     demand_1 = [10] * n_periods
     demand_2 = [10] * n_periods
