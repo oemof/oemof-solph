@@ -596,7 +596,6 @@ def offset_converter_example():
             ax.set_xlabel("diesel genset load [%]")
 
             ax.set_xlim(min_load * 100 - 5, max_load * 100 + 5)
-            ax.set_ylim(min_efficiency * 100 - 2, max_efficiency * 100 + 2)
 
             plt.show()
 
