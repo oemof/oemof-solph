@@ -3,14 +3,6 @@
 min 
 objective:
 +15992.031251718836 ONE_VAR_CONSTANT
-+9.999999999999998 InvestmentFlowBlock_invest(electricity_storage_0)
-+6.729713331080573 InvestmentFlowBlock_invest(electricity_storage_1)
-+5.000276133592968 InvestmentFlowBlock_invest(electricity_storage_2)
-+4.101968025099305 InvestmentFlowBlock_invest(electricity_storage_3)
-+3.7152788212696146 InvestmentFlowBlock_invest(electricity_storage_4)
-+3.0478226645906985 InvestmentFlowBlock_invest(electricity_storage_5)
-+2.264577134183746 InvestmentFlowBlock_invest(electricity_storage_6)
-+0.09137506155350818 InvestmentFlowBlock_invest(electricity_storage_7)
 +9.999999999999998 InvestmentFlowBlock_invest(storage_electricity_0)
 +6.729713331080573 InvestmentFlowBlock_invest(storage_electricity_1)
 +5.000276133592968 InvestmentFlowBlock_invest(storage_electricity_2)
@@ -19,6 +11,14 @@ objective:
 +3.0478226645906985 InvestmentFlowBlock_invest(storage_electricity_5)
 +2.264577134183746 InvestmentFlowBlock_invest(storage_electricity_6)
 +0.09137506155350818 InvestmentFlowBlock_invest(storage_electricity_7)
++9.999999999999998 InvestmentFlowBlock_invest(electricity_storage_0)
++6.729713331080573 InvestmentFlowBlock_invest(electricity_storage_1)
++5.000276133592968 InvestmentFlowBlock_invest(electricity_storage_2)
++4.101968025099305 InvestmentFlowBlock_invest(electricity_storage_3)
++3.7152788212696146 InvestmentFlowBlock_invest(electricity_storage_4)
++3.0478226645906985 InvestmentFlowBlock_invest(electricity_storage_5)
++2.264577134183746 InvestmentFlowBlock_invest(electricity_storage_6)
++0.09137506155350818 InvestmentFlowBlock_invest(electricity_storage_7)
 +9.999999999999998 GenericInvestmentStorageBlock_invest(storage_0)
 +6.729713331080573 GenericInvestmentStorageBlock_invest(storage_1)
 +5.000276133592968 GenericInvestmentStorageBlock_invest(storage_2)
@@ -1158,60 +1158,6 @@ c_e_BusBlock_balance(electricity_7_23)_:
 -1 flow(electricity_demand_dsm_oemof_7_23)
 = 0
 
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_0)_:
--1 InvestmentFlowBlock_invest(electricity_storage_0)
-+1 InvestmentFlowBlock_total(electricity_storage_0)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_1)_:
--1 InvestmentFlowBlock_invest(electricity_storage_1)
--1 InvestmentFlowBlock_total(electricity_storage_0)
-+1 InvestmentFlowBlock_total(electricity_storage_1)
-+1 InvestmentFlowBlock_old(electricity_storage_1)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_2)_:
--1 InvestmentFlowBlock_invest(electricity_storage_2)
--1 InvestmentFlowBlock_total(electricity_storage_1)
-+1 InvestmentFlowBlock_total(electricity_storage_2)
-+1 InvestmentFlowBlock_old(electricity_storage_2)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_3)_:
--1 InvestmentFlowBlock_invest(electricity_storage_3)
--1 InvestmentFlowBlock_total(electricity_storage_2)
-+1 InvestmentFlowBlock_total(electricity_storage_3)
-+1 InvestmentFlowBlock_old(electricity_storage_3)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_4)_:
--1 InvestmentFlowBlock_invest(electricity_storage_4)
--1 InvestmentFlowBlock_total(electricity_storage_3)
-+1 InvestmentFlowBlock_total(electricity_storage_4)
-+1 InvestmentFlowBlock_old(electricity_storage_4)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_5)_:
--1 InvestmentFlowBlock_invest(electricity_storage_5)
--1 InvestmentFlowBlock_total(electricity_storage_4)
-+1 InvestmentFlowBlock_total(electricity_storage_5)
-+1 InvestmentFlowBlock_old(electricity_storage_5)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_6)_:
--1 InvestmentFlowBlock_invest(electricity_storage_6)
--1 InvestmentFlowBlock_total(electricity_storage_5)
-+1 InvestmentFlowBlock_total(electricity_storage_6)
-+1 InvestmentFlowBlock_old(electricity_storage_6)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricity_storage_7)_:
--1 InvestmentFlowBlock_invest(electricity_storage_7)
--1 InvestmentFlowBlock_total(electricity_storage_6)
-+1 InvestmentFlowBlock_total(electricity_storage_7)
-+1 InvestmentFlowBlock_old(electricity_storage_7)
-= 0
-
 c_e_InvestmentFlowBlock_total_rule(storage_electricity_0)_:
 -1 InvestmentFlowBlock_invest(storage_electricity_0)
 +1 InvestmentFlowBlock_total(storage_electricity_0)
@@ -1266,43 +1212,58 @@ c_e_InvestmentFlowBlock_total_rule(storage_electricity_7)_:
 +1 InvestmentFlowBlock_old(storage_electricity_7)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_0)_:
-+1 InvestmentFlowBlock_old_end(electricity_storage_0)
-= 0
-
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_1)_:
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_0)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_0)
-+1 InvestmentFlowBlock_old_end(electricity_storage_1)
++1 InvestmentFlowBlock_total(electricity_storage_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_2)_:
-+1 InvestmentFlowBlock_old_end(electricity_storage_2)
-= 0
-
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_3)_:
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_1)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_1)
-+1 InvestmentFlowBlock_old_end(electricity_storage_3)
+-1 InvestmentFlowBlock_total(electricity_storage_0)
++1 InvestmentFlowBlock_total(electricity_storage_1)
++1 InvestmentFlowBlock_old(electricity_storage_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_4)_:
-+1 InvestmentFlowBlock_old_end(electricity_storage_4)
-= 0
-
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_5)_:
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_2)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_2)
-+1 InvestmentFlowBlock_old_end(electricity_storage_5)
+-1 InvestmentFlowBlock_total(electricity_storage_1)
++1 InvestmentFlowBlock_total(electricity_storage_2)
++1 InvestmentFlowBlock_old(electricity_storage_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_6)_:
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_3)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_3)
--1 InvestmentFlowBlock_invest(electricity_storage_4)
-+1 InvestmentFlowBlock_old_end(electricity_storage_6)
+-1 InvestmentFlowBlock_total(electricity_storage_2)
++1 InvestmentFlowBlock_total(electricity_storage_3)
++1 InvestmentFlowBlock_old(electricity_storage_3)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_7)_:
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_4)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_4)
+-1 InvestmentFlowBlock_total(electricity_storage_3)
++1 InvestmentFlowBlock_total(electricity_storage_4)
++1 InvestmentFlowBlock_old(electricity_storage_4)
+= 0
+
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_5)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_5)
+-1 InvestmentFlowBlock_total(electricity_storage_4)
++1 InvestmentFlowBlock_total(electricity_storage_5)
++1 InvestmentFlowBlock_old(electricity_storage_5)
+= 0
+
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_6)_:
 -1 InvestmentFlowBlock_invest(electricity_storage_6)
-+1 InvestmentFlowBlock_old_end(electricity_storage_7)
+-1 InvestmentFlowBlock_total(electricity_storage_5)
++1 InvestmentFlowBlock_total(electricity_storage_6)
++1 InvestmentFlowBlock_old(electricity_storage_6)
+= 0
+
+c_e_InvestmentFlowBlock_total_rule(electricity_storage_7)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_7)
+-1 InvestmentFlowBlock_total(electricity_storage_6)
++1 InvestmentFlowBlock_total(electricity_storage_7)
++1 InvestmentFlowBlock_old(electricity_storage_7)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule_end(storage_electricity_0)_:
@@ -1344,36 +1305,43 @@ c_e_InvestmentFlowBlock_old_rule_end(storage_electricity_7)_:
 +1 InvestmentFlowBlock_old_end(storage_electricity_7)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_0)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_0)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_0)_:
++1 InvestmentFlowBlock_old_end(electricity_storage_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_1)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_1)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_1)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_0)
++1 InvestmentFlowBlock_old_end(electricity_storage_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_2)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_2)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_2)_:
++1 InvestmentFlowBlock_old_end(electricity_storage_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_3)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_3)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_3)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_1)
++1 InvestmentFlowBlock_old_end(electricity_storage_3)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_4)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_4)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_4)_:
++1 InvestmentFlowBlock_old_end(electricity_storage_4)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_5)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_5)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_5)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_2)
++1 InvestmentFlowBlock_old_end(electricity_storage_5)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_6)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_6)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_6)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_3)
+-1 InvestmentFlowBlock_invest(electricity_storage_4)
++1 InvestmentFlowBlock_old_end(electricity_storage_6)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_7)_:
-+1 InvestmentFlowBlock_old_exo(electricity_storage_7)
+c_e_InvestmentFlowBlock_old_rule_end(electricity_storage_7)_:
+-1 InvestmentFlowBlock_invest(electricity_storage_5)
+-1 InvestmentFlowBlock_invest(electricity_storage_6)
++1 InvestmentFlowBlock_old_end(electricity_storage_7)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(storage_electricity_0)_:
@@ -1408,52 +1376,36 @@ c_e_InvestmentFlowBlock_old_rule_exo(storage_electricity_7)_:
 +1 InvestmentFlowBlock_old_exo(storage_electricity_7)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_0)_:
--1 InvestmentFlowBlock_old_end(electricity_storage_0)
--1 InvestmentFlowBlock_old_exo(electricity_storage_0)
-+1 InvestmentFlowBlock_old(electricity_storage_0)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_0)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_1)_:
-+1 InvestmentFlowBlock_old(electricity_storage_1)
--1 InvestmentFlowBlock_old_end(electricity_storage_1)
--1 InvestmentFlowBlock_old_exo(electricity_storage_1)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_1)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_2)_:
-+1 InvestmentFlowBlock_old(electricity_storage_2)
--1 InvestmentFlowBlock_old_end(electricity_storage_2)
--1 InvestmentFlowBlock_old_exo(electricity_storage_2)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_2)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_3)_:
-+1 InvestmentFlowBlock_old(electricity_storage_3)
--1 InvestmentFlowBlock_old_end(electricity_storage_3)
--1 InvestmentFlowBlock_old_exo(electricity_storage_3)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_3)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_3)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_4)_:
-+1 InvestmentFlowBlock_old(electricity_storage_4)
--1 InvestmentFlowBlock_old_end(electricity_storage_4)
--1 InvestmentFlowBlock_old_exo(electricity_storage_4)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_4)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_4)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_5)_:
-+1 InvestmentFlowBlock_old(electricity_storage_5)
--1 InvestmentFlowBlock_old_end(electricity_storage_5)
--1 InvestmentFlowBlock_old_exo(electricity_storage_5)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_5)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_5)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_6)_:
-+1 InvestmentFlowBlock_old(electricity_storage_6)
--1 InvestmentFlowBlock_old_end(electricity_storage_6)
--1 InvestmentFlowBlock_old_exo(electricity_storage_6)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_6)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_6)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricity_storage_7)_:
-+1 InvestmentFlowBlock_old(electricity_storage_7)
--1 InvestmentFlowBlock_old_end(electricity_storage_7)
--1 InvestmentFlowBlock_old_exo(electricity_storage_7)
+c_e_InvestmentFlowBlock_old_rule_exo(electricity_storage_7)_:
++1 InvestmentFlowBlock_old_exo(electricity_storage_7)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule(storage_electricity_0)_:
@@ -1504,125 +1456,53 @@ c_e_InvestmentFlowBlock_old_rule(storage_electricity_7)_:
 -1 InvestmentFlowBlock_old_exo(storage_electricity_7)
 = 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_0_0)_:
-+1 flow(electricity_storage_0_0)
--1 InvestmentFlowBlock_total(electricity_storage_0)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_0)_:
+-1 InvestmentFlowBlock_old_end(electricity_storage_0)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_0)
++1 InvestmentFlowBlock_old(electricity_storage_0)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_0_1)_:
-+1 flow(electricity_storage_0_1)
--1 InvestmentFlowBlock_total(electricity_storage_0)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_1)_:
++1 InvestmentFlowBlock_old(electricity_storage_1)
+-1 InvestmentFlowBlock_old_end(electricity_storage_1)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_1)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_0_2)_:
-+1 flow(electricity_storage_0_2)
--1 InvestmentFlowBlock_total(electricity_storage_0)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_2)_:
++1 InvestmentFlowBlock_old(electricity_storage_2)
+-1 InvestmentFlowBlock_old_end(electricity_storage_2)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_2)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_1_3)_:
-+1 flow(electricity_storage_1_3)
--1 InvestmentFlowBlock_total(electricity_storage_1)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_3)_:
++1 InvestmentFlowBlock_old(electricity_storage_3)
+-1 InvestmentFlowBlock_old_end(electricity_storage_3)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_3)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_1_4)_:
-+1 flow(electricity_storage_1_4)
--1 InvestmentFlowBlock_total(electricity_storage_1)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_4)_:
++1 InvestmentFlowBlock_old(electricity_storage_4)
+-1 InvestmentFlowBlock_old_end(electricity_storage_4)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_4)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_1_5)_:
-+1 flow(electricity_storage_1_5)
--1 InvestmentFlowBlock_total(electricity_storage_1)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_5)_:
++1 InvestmentFlowBlock_old(electricity_storage_5)
+-1 InvestmentFlowBlock_old_end(electricity_storage_5)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_5)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_2_6)_:
-+1 flow(electricity_storage_2_6)
--1 InvestmentFlowBlock_total(electricity_storage_2)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_6)_:
++1 InvestmentFlowBlock_old(electricity_storage_6)
+-1 InvestmentFlowBlock_old_end(electricity_storage_6)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_6)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricity_storage_2_7)_:
-+1 flow(electricity_storage_2_7)
--1 InvestmentFlowBlock_total(electricity_storage_2)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_2_8)_:
-+1 flow(electricity_storage_2_8)
--1 InvestmentFlowBlock_total(electricity_storage_2)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_3_9)_:
-+1 flow(electricity_storage_3_9)
--1 InvestmentFlowBlock_total(electricity_storage_3)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_3_10)_:
-+1 flow(electricity_storage_3_10)
--1 InvestmentFlowBlock_total(electricity_storage_3)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_3_11)_:
-+1 flow(electricity_storage_3_11)
--1 InvestmentFlowBlock_total(electricity_storage_3)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_4_12)_:
-+1 flow(electricity_storage_4_12)
--1 InvestmentFlowBlock_total(electricity_storage_4)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_4_13)_:
-+1 flow(electricity_storage_4_13)
--1 InvestmentFlowBlock_total(electricity_storage_4)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_4_14)_:
-+1 flow(electricity_storage_4_14)
--1 InvestmentFlowBlock_total(electricity_storage_4)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_5_15)_:
-+1 flow(electricity_storage_5_15)
--1 InvestmentFlowBlock_total(electricity_storage_5)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_5_16)_:
-+1 flow(electricity_storage_5_16)
--1 InvestmentFlowBlock_total(electricity_storage_5)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_5_17)_:
-+1 flow(electricity_storage_5_17)
--1 InvestmentFlowBlock_total(electricity_storage_5)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_6_18)_:
-+1 flow(electricity_storage_6_18)
--1 InvestmentFlowBlock_total(electricity_storage_6)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_6_19)_:
-+1 flow(electricity_storage_6_19)
--1 InvestmentFlowBlock_total(electricity_storage_6)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_6_20)_:
-+1 flow(electricity_storage_6_20)
--1 InvestmentFlowBlock_total(electricity_storage_6)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_7_21)_:
-+1 flow(electricity_storage_7_21)
--1 InvestmentFlowBlock_total(electricity_storage_7)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_7_22)_:
-+1 flow(electricity_storage_7_22)
--1 InvestmentFlowBlock_total(electricity_storage_7)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricity_storage_7_23)_:
-+1 flow(electricity_storage_7_23)
--1 InvestmentFlowBlock_total(electricity_storage_7)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricity_storage_7)_:
++1 InvestmentFlowBlock_old(electricity_storage_7)
+-1 InvestmentFlowBlock_old_end(electricity_storage_7)
+-1 InvestmentFlowBlock_old_exo(electricity_storage_7)
+= 0
 
 c_u_InvestmentFlowBlock_max(storage_electricity_0_0)_:
 +1 flow(storage_electricity_0_0)
@@ -1742,6 +1622,126 @@ c_u_InvestmentFlowBlock_max(storage_electricity_7_22)_:
 c_u_InvestmentFlowBlock_max(storage_electricity_7_23)_:
 +1 flow(storage_electricity_7_23)
 -1 InvestmentFlowBlock_total(storage_electricity_7)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_0_0)_:
++1 flow(electricity_storage_0_0)
+-1 InvestmentFlowBlock_total(electricity_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_0_1)_:
++1 flow(electricity_storage_0_1)
+-1 InvestmentFlowBlock_total(electricity_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_0_2)_:
++1 flow(electricity_storage_0_2)
+-1 InvestmentFlowBlock_total(electricity_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_1_3)_:
++1 flow(electricity_storage_1_3)
+-1 InvestmentFlowBlock_total(electricity_storage_1)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_1_4)_:
++1 flow(electricity_storage_1_4)
+-1 InvestmentFlowBlock_total(electricity_storage_1)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_1_5)_:
++1 flow(electricity_storage_1_5)
+-1 InvestmentFlowBlock_total(electricity_storage_1)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_2_6)_:
++1 flow(electricity_storage_2_6)
+-1 InvestmentFlowBlock_total(electricity_storage_2)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_2_7)_:
++1 flow(electricity_storage_2_7)
+-1 InvestmentFlowBlock_total(electricity_storage_2)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_2_8)_:
++1 flow(electricity_storage_2_8)
+-1 InvestmentFlowBlock_total(electricity_storage_2)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_3_9)_:
++1 flow(electricity_storage_3_9)
+-1 InvestmentFlowBlock_total(electricity_storage_3)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_3_10)_:
++1 flow(electricity_storage_3_10)
+-1 InvestmentFlowBlock_total(electricity_storage_3)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_3_11)_:
++1 flow(electricity_storage_3_11)
+-1 InvestmentFlowBlock_total(electricity_storage_3)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_4_12)_:
++1 flow(electricity_storage_4_12)
+-1 InvestmentFlowBlock_total(electricity_storage_4)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_4_13)_:
++1 flow(electricity_storage_4_13)
+-1 InvestmentFlowBlock_total(electricity_storage_4)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_4_14)_:
++1 flow(electricity_storage_4_14)
+-1 InvestmentFlowBlock_total(electricity_storage_4)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_5_15)_:
++1 flow(electricity_storage_5_15)
+-1 InvestmentFlowBlock_total(electricity_storage_5)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_5_16)_:
++1 flow(electricity_storage_5_16)
+-1 InvestmentFlowBlock_total(electricity_storage_5)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_5_17)_:
++1 flow(electricity_storage_5_17)
+-1 InvestmentFlowBlock_total(electricity_storage_5)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_6_18)_:
++1 flow(electricity_storage_6_18)
+-1 InvestmentFlowBlock_total(electricity_storage_6)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_6_19)_:
++1 flow(electricity_storage_6_19)
+-1 InvestmentFlowBlock_total(electricity_storage_6)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_6_20)_:
++1 flow(electricity_storage_6_20)
+-1 InvestmentFlowBlock_total(electricity_storage_6)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_7_21)_:
++1 flow(electricity_storage_7_21)
+-1 InvestmentFlowBlock_total(electricity_storage_7)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_7_22)_:
++1 flow(electricity_storage_7_22)
+-1 InvestmentFlowBlock_total(electricity_storage_7)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricity_storage_7_23)_:
++1 flow(electricity_storage_7_23)
+-1 InvestmentFlowBlock_total(electricity_storage_7)
 <= 0
 
 c_e_GenericInvestmentStorageBlock_total_storage_rule(storage_0)_:
@@ -1924,202 +1924,202 @@ c_e_GenericInvestmentStorageBlock_initially_empty(storage_0)_:
 c_e_GenericInvestmentStorageBlock_balance(storage_0_1)_:
 +1 flow(storage_electricity_0_1)
 -1 flow(electricity_storage_0_1)
--1 GenericInvestmentStorageBlock_storage_content(storage_0)
-+1 GenericInvestmentStorageBlock_storage_content(storage_1)
++1 GenericInvestmentStorageBlock_storage_content(storage_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_0_2)_:
 +1 flow(storage_electricity_0_2)
 -1 flow(electricity_storage_0_2)
--1 GenericInvestmentStorageBlock_storage_content(storage_1)
-+1 GenericInvestmentStorageBlock_storage_content(storage_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage_2)
++1 GenericInvestmentStorageBlock_storage_content(storage_3)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_1_3)_:
 +1 flow(storage_electricity_1_3)
 -1 flow(electricity_storage_1_3)
--1 GenericInvestmentStorageBlock_storage_content(storage_2)
-+1 GenericInvestmentStorageBlock_storage_content(storage_3)
+-1 GenericInvestmentStorageBlock_storage_content(storage_3)
++1 GenericInvestmentStorageBlock_storage_content(storage_4)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_1_4)_:
 +1 flow(storage_electricity_1_4)
 -1 flow(electricity_storage_1_4)
--1 GenericInvestmentStorageBlock_storage_content(storage_3)
-+1 GenericInvestmentStorageBlock_storage_content(storage_4)
+-1 GenericInvestmentStorageBlock_storage_content(storage_4)
++1 GenericInvestmentStorageBlock_storage_content(storage_5)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_1_5)_:
 +1 flow(storage_electricity_1_5)
 -1 flow(electricity_storage_1_5)
--1 GenericInvestmentStorageBlock_storage_content(storage_4)
-+1 GenericInvestmentStorageBlock_storage_content(storage_5)
+-1 GenericInvestmentStorageBlock_storage_content(storage_5)
++1 GenericInvestmentStorageBlock_storage_content(storage_6)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_2_6)_:
 +1 flow(storage_electricity_2_6)
 -1 flow(electricity_storage_2_6)
--1 GenericInvestmentStorageBlock_storage_content(storage_5)
-+1 GenericInvestmentStorageBlock_storage_content(storage_6)
+-1 GenericInvestmentStorageBlock_storage_content(storage_6)
++1 GenericInvestmentStorageBlock_storage_content(storage_7)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_2_7)_:
 +1 flow(storage_electricity_2_7)
 -1 flow(electricity_storage_2_7)
--1 GenericInvestmentStorageBlock_storage_content(storage_6)
-+1 GenericInvestmentStorageBlock_storage_content(storage_7)
+-1 GenericInvestmentStorageBlock_storage_content(storage_7)
++1 GenericInvestmentStorageBlock_storage_content(storage_8)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_2_8)_:
 +1 flow(storage_electricity_2_8)
 -1 flow(electricity_storage_2_8)
--1 GenericInvestmentStorageBlock_storage_content(storage_7)
-+1 GenericInvestmentStorageBlock_storage_content(storage_8)
+-1 GenericInvestmentStorageBlock_storage_content(storage_8)
++1 GenericInvestmentStorageBlock_storage_content(storage_9)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_3_9)_:
 +1 flow(storage_electricity_3_9)
 -1 flow(electricity_storage_3_9)
--1 GenericInvestmentStorageBlock_storage_content(storage_8)
-+1 GenericInvestmentStorageBlock_storage_content(storage_9)
+-1 GenericInvestmentStorageBlock_storage_content(storage_9)
++1 GenericInvestmentStorageBlock_storage_content(storage_10)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_3_10)_:
 +1 flow(storage_electricity_3_10)
 -1 flow(electricity_storage_3_10)
--1 GenericInvestmentStorageBlock_storage_content(storage_9)
-+1 GenericInvestmentStorageBlock_storage_content(storage_10)
+-1 GenericInvestmentStorageBlock_storage_content(storage_10)
++1 GenericInvestmentStorageBlock_storage_content(storage_11)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_3_11)_:
 +1 flow(storage_electricity_3_11)
 -1 flow(electricity_storage_3_11)
--1 GenericInvestmentStorageBlock_storage_content(storage_10)
-+1 GenericInvestmentStorageBlock_storage_content(storage_11)
+-1 GenericInvestmentStorageBlock_storage_content(storage_11)
++1 GenericInvestmentStorageBlock_storage_content(storage_12)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_4_12)_:
 +1 flow(storage_electricity_4_12)
 -1 flow(electricity_storage_4_12)
--1 GenericInvestmentStorageBlock_storage_content(storage_11)
-+1 GenericInvestmentStorageBlock_storage_content(storage_12)
+-1 GenericInvestmentStorageBlock_storage_content(storage_12)
++1 GenericInvestmentStorageBlock_storage_content(storage_13)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_4_13)_:
 +1 flow(storage_electricity_4_13)
 -1 flow(electricity_storage_4_13)
--1 GenericInvestmentStorageBlock_storage_content(storage_12)
-+1 GenericInvestmentStorageBlock_storage_content(storage_13)
+-1 GenericInvestmentStorageBlock_storage_content(storage_13)
++1 GenericInvestmentStorageBlock_storage_content(storage_14)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_4_14)_:
 +1 flow(storage_electricity_4_14)
 -1 flow(electricity_storage_4_14)
--1 GenericInvestmentStorageBlock_storage_content(storage_13)
-+1 GenericInvestmentStorageBlock_storage_content(storage_14)
+-1 GenericInvestmentStorageBlock_storage_content(storage_14)
++1 GenericInvestmentStorageBlock_storage_content(storage_15)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_5_15)_:
 +1 flow(storage_electricity_5_15)
 -1 flow(electricity_storage_5_15)
--1 GenericInvestmentStorageBlock_storage_content(storage_14)
-+1 GenericInvestmentStorageBlock_storage_content(storage_15)
+-1 GenericInvestmentStorageBlock_storage_content(storage_15)
++1 GenericInvestmentStorageBlock_storage_content(storage_16)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_5_16)_:
 +1 flow(storage_electricity_5_16)
 -1 flow(electricity_storage_5_16)
--1 GenericInvestmentStorageBlock_storage_content(storage_15)
-+1 GenericInvestmentStorageBlock_storage_content(storage_16)
+-1 GenericInvestmentStorageBlock_storage_content(storage_16)
++1 GenericInvestmentStorageBlock_storage_content(storage_17)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_5_17)_:
 +1 flow(storage_electricity_5_17)
 -1 flow(electricity_storage_5_17)
--1 GenericInvestmentStorageBlock_storage_content(storage_16)
-+1 GenericInvestmentStorageBlock_storage_content(storage_17)
+-1 GenericInvestmentStorageBlock_storage_content(storage_17)
++1 GenericInvestmentStorageBlock_storage_content(storage_18)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_6_18)_:
 +1 flow(storage_electricity_6_18)
 -1 flow(electricity_storage_6_18)
--1 GenericInvestmentStorageBlock_storage_content(storage_17)
-+1 GenericInvestmentStorageBlock_storage_content(storage_18)
+-1 GenericInvestmentStorageBlock_storage_content(storage_18)
++1 GenericInvestmentStorageBlock_storage_content(storage_19)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_6_19)_:
 +1 flow(storage_electricity_6_19)
 -1 flow(electricity_storage_6_19)
--1 GenericInvestmentStorageBlock_storage_content(storage_18)
-+1 GenericInvestmentStorageBlock_storage_content(storage_19)
+-1 GenericInvestmentStorageBlock_storage_content(storage_19)
++1 GenericInvestmentStorageBlock_storage_content(storage_20)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_6_20)_:
 +1 flow(storage_electricity_6_20)
 -1 flow(electricity_storage_6_20)
--1 GenericInvestmentStorageBlock_storage_content(storage_19)
-+1 GenericInvestmentStorageBlock_storage_content(storage_20)
+-1 GenericInvestmentStorageBlock_storage_content(storage_20)
++1 GenericInvestmentStorageBlock_storage_content(storage_21)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_7_21)_:
 +1 flow(storage_electricity_7_21)
 -1 flow(electricity_storage_7_21)
--1 GenericInvestmentStorageBlock_storage_content(storage_20)
-+1 GenericInvestmentStorageBlock_storage_content(storage_21)
+-1 GenericInvestmentStorageBlock_storage_content(storage_21)
++1 GenericInvestmentStorageBlock_storage_content(storage_22)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_7_22)_:
 +1 flow(storage_electricity_7_22)
 -1 flow(electricity_storage_7_22)
--1 GenericInvestmentStorageBlock_storage_content(storage_21)
-+1 GenericInvestmentStorageBlock_storage_content(storage_22)
+-1 GenericInvestmentStorageBlock_storage_content(storage_22)
++1 GenericInvestmentStorageBlock_storage_content(storage_23)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_7_23)_:
 +1 flow(storage_electricity_7_23)
 -1 flow(electricity_storage_7_23)
--1 GenericInvestmentStorageBlock_storage_content(storage_22)
-+1 GenericInvestmentStorageBlock_storage_content(storage_23)
+-1 GenericInvestmentStorageBlock_storage_content(storage_23)
++1 GenericInvestmentStorageBlock_storage_content(storage_24)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_0)_:
--1 InvestmentFlowBlock_total(electricity_storage_0)
 +1 InvestmentFlowBlock_total(storage_electricity_0)
+-1 InvestmentFlowBlock_total(electricity_storage_0)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_1)_:
--1 InvestmentFlowBlock_total(electricity_storage_1)
 +1 InvestmentFlowBlock_total(storage_electricity_1)
+-1 InvestmentFlowBlock_total(electricity_storage_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_2)_:
--1 InvestmentFlowBlock_total(electricity_storage_2)
 +1 InvestmentFlowBlock_total(storage_electricity_2)
+-1 InvestmentFlowBlock_total(electricity_storage_2)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_3)_:
--1 InvestmentFlowBlock_total(electricity_storage_3)
 +1 InvestmentFlowBlock_total(storage_electricity_3)
+-1 InvestmentFlowBlock_total(electricity_storage_3)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_4)_:
--1 InvestmentFlowBlock_total(electricity_storage_4)
 +1 InvestmentFlowBlock_total(storage_electricity_4)
+-1 InvestmentFlowBlock_total(electricity_storage_4)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_5)_:
--1 InvestmentFlowBlock_total(electricity_storage_5)
 +1 InvestmentFlowBlock_total(storage_electricity_5)
+-1 InvestmentFlowBlock_total(electricity_storage_5)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_6)_:
--1 InvestmentFlowBlock_total(electricity_storage_6)
 +1 InvestmentFlowBlock_total(storage_electricity_6)
+-1 InvestmentFlowBlock_total(electricity_storage_6)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage_7)_:
--1 InvestmentFlowBlock_total(electricity_storage_7)
 +1 InvestmentFlowBlock_total(storage_electricity_7)
+-1 InvestmentFlowBlock_total(electricity_storage_7)
 = 0
 
 c_e_GenericInvestmentStorageBlock_storage_capacity_outflow(storage_0)_:
@@ -6718,14 +6718,6 @@ c_l_SinkDSMOemofInvestmentBlock_overall_minimum(demand_dsm_oemof)_:
 
 bounds
    1 <= ONE_VAR_CONSTANT <= 1
-   0 <= InvestmentFlowBlock_invest(electricity_storage_0) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_1) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_2) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_3) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_4) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_5) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_6) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricity_storage_7) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_electricity_0) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_electricity_1) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_electricity_2) <= +inf
@@ -6734,6 +6726,14 @@ bounds
    0 <= InvestmentFlowBlock_invest(storage_electricity_5) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_electricity_6) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_electricity_7) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_0) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_1) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_2) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_3) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_4) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_5) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_6) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricity_storage_7) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_0) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_2) <= +inf
@@ -7798,21 +7798,6 @@ bounds
    0 <= flow(electricity_demand_dsm_diw_7_23) <= +inf
    0 <= flow(electricity_demand_dsm_dlr_7_23) <= +inf
    0 <= flow(electricity_demand_dsm_oemof_7_23) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_0) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_1) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_1) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_2) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_2) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_3) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_3) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_4) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_4) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_5) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_5) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_6) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_6) <= +inf
-   0 <= InvestmentFlowBlock_total(electricity_storage_7) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_7) <= +inf
    0 <= InvestmentFlowBlock_total(storage_electricity_0) <= +inf
    0 <= InvestmentFlowBlock_total(storage_electricity_1) <= +inf
    0 <= InvestmentFlowBlock_old(storage_electricity_1) <= +inf
@@ -7828,14 +7813,21 @@ bounds
    0 <= InvestmentFlowBlock_old(storage_electricity_6) <= +inf
    0 <= InvestmentFlowBlock_total(storage_electricity_7) <= +inf
    0 <= InvestmentFlowBlock_old(storage_electricity_7) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_0) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_1) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_2) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_3) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_4) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_5) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_6) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricity_storage_7) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_0) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_1) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_1) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_2) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_2) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_3) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_3) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_4) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_4) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_5) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_5) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_6) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_6) <= +inf
+   0 <= InvestmentFlowBlock_total(electricity_storage_7) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_7) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_electricity_0) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_electricity_1) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_electricity_2) <= +inf
@@ -7844,14 +7836,14 @@ bounds
    0 <= InvestmentFlowBlock_old_end(storage_electricity_5) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_electricity_6) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_electricity_7) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_0) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_1) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_2) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_3) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_4) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_5) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_6) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricity_storage_7) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_0) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_1) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_2) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_3) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_4) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_5) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_6) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricity_storage_7) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_0) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_1) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_2) <= +inf
@@ -7860,8 +7852,16 @@ bounds
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_5) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_6) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_electricity_7) <= +inf
-   0 <= InvestmentFlowBlock_old(electricity_storage_0) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_0) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_1) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_2) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_3) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_4) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_5) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_6) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricity_storage_7) <= +inf
    0 <= InvestmentFlowBlock_old(storage_electricity_0) <= +inf
+   0 <= InvestmentFlowBlock_old(electricity_storage_0) <= +inf
    0 <= GenericInvestmentStorageBlock_total(storage_0) <= +inf
    0 <= GenericInvestmentStorageBlock_total(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage_1) <= +inf
@@ -7895,8 +7895,8 @@ bounds
    0 <= GenericInvestmentStorageBlock_old_exo(storage_7) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage_0) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_storage_content(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_3) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_4) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_5) <= +inf
@@ -7918,6 +7918,7 @@ bounds
    0 <= GenericInvestmentStorageBlock_storage_content(storage_21) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_22) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_23) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_24) <= +inf
    0 <= SinkDSMDIWInvestmentBlock_total(demand_dsm_diw_0) <= +inf
    0 <= SinkDSMDIWInvestmentBlock_total(demand_dsm_diw_1) <= +inf
    0 <= SinkDSMDIWInvestmentBlock_old(demand_dsm_diw_1) <= +inf

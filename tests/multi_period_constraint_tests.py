@@ -81,11 +81,10 @@ class TestsMultiPeriodConstraint:
             om = self.get_om()
         else:
             om = my_om
-        tmp_filename = filename.replace(".lp", "") + "_tmp.lp"
-        new_filename = ospath.join(self.tmppath, tmp_filename)
+        new_filename = ospath.join(self.tmppath, filename)
         om.write(new_filename, io_options={"symbolic_solver_labels": True})
         logging.info("Comparing with file: {0}".format(filename))
-        with open(ospath.join(self.tmppath, tmp_filename)) as generated_file:
+        with open(new_filename) as generated_file:
             with open(
                 ospath.join(
                     ospath.dirname(ospath.realpath(__file__)),

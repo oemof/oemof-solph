@@ -41,15 +41,15 @@ c_e_GenericInvestmentStorageBlock_balance_first(storage4)_:
 c_e_GenericInvestmentStorageBlock_balance(storage4_0_1)_:
 +1 flow(storage4_electricityBus_0_1)
 -1 flow(electricityBus_storage4_0_1)
--1 GenericInvestmentStorageBlock_storage_content(storage4_0)
-+1 GenericInvestmentStorageBlock_storage_content(storage4_1)
++1 GenericInvestmentStorageBlock_storage_content(storage4_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage4_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage4_0_2)_:
 +1 flow(storage4_electricityBus_0_2)
 -1 flow(electricityBus_storage4_0_2)
--1 GenericInvestmentStorageBlock_storage_content(storage4_1)
-+1 GenericInvestmentStorageBlock_storage_content(storage4_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage4_2)
++1 GenericInvestmentStorageBlock_storage_content(storage4_3)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balanced_cstr(storage4)_:
@@ -83,6 +83,7 @@ bounds
    0 <= GenericInvestmentStorageBlock_total(storage4_0) <= +inf
    0 <= GenericInvestmentStorageBlock_init_content(storage4) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage4_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_storage_content(storage4_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage4_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage4_1) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage4_3) <= +inf
 end
