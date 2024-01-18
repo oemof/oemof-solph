@@ -291,36 +291,36 @@ c_e_GenericInvestmentStorageBlock_initially_empty(storage6_0)_:
 c_e_GenericInvestmentStorageBlock_balance(storage6_0_1)_:
 +1 flow(storage6_electricityBus_0_1)
 -1 flow(electricityBus_storage6_0_1)
--1 GenericInvestmentStorageBlock_storage_content(storage6_0)
-+1 GenericInvestmentStorageBlock_storage_content(storage6_1)
++1 GenericInvestmentStorageBlock_storage_content(storage6_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage6_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage6_1_2)_:
 +1 flow(storage6_electricityBus_1_2)
 -1 flow(electricityBus_storage6_1_2)
--1 GenericInvestmentStorageBlock_storage_content(storage6_1)
-+1 GenericInvestmentStorageBlock_storage_content(storage6_2)
+-1 GenericInvestmentStorageBlock_storage_content(storage6_2)
++1 GenericInvestmentStorageBlock_storage_content(storage6_3)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage6_1_3)_:
 +1 flow(storage6_electricityBus_1_3)
 -1 flow(electricityBus_storage6_1_3)
--1 GenericInvestmentStorageBlock_storage_content(storage6_2)
-+1 GenericInvestmentStorageBlock_storage_content(storage6_3)
+-1 GenericInvestmentStorageBlock_storage_content(storage6_3)
++1 GenericInvestmentStorageBlock_storage_content(storage6_4)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage6_2_4)_:
 +1 flow(storage6_electricityBus_2_4)
 -1 flow(electricityBus_storage6_2_4)
--1 GenericInvestmentStorageBlock_storage_content(storage6_3)
-+1 GenericInvestmentStorageBlock_storage_content(storage6_4)
+-1 GenericInvestmentStorageBlock_storage_content(storage6_4)
++1 GenericInvestmentStorageBlock_storage_content(storage6_5)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage6_2_5)_:
 +1 flow(storage6_electricityBus_2_5)
 -1 flow(electricityBus_storage6_2_5)
--1 GenericInvestmentStorageBlock_storage_content(storage6_4)
-+1 GenericInvestmentStorageBlock_storage_content(storage6_5)
+-1 GenericInvestmentStorageBlock_storage_content(storage6_5)
++1 GenericInvestmentStorageBlock_storage_content(storage6_6)
 = 0
 
 c_e_GenericInvestmentStorageBlock_power_coupled(storage6_0)_:
@@ -427,9 +427,10 @@ bounds
    0 <= GenericInvestmentStorageBlock_old_exo(storage6_2) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage6_0) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage6_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_storage_content(storage6_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage6_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage6_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage6_3) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage6_4) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage6_5) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage6_6) <= +inf
 end
