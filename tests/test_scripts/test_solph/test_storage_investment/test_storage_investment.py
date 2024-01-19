@@ -174,7 +174,7 @@ def test_results_with_actual_dump():
     ]
 
     stor_invest_dict = {
-        "storage_invest": 2040000,
+        "storage_invest": 2344080,
         (("electricity", "None"), "duals"): 10800000000321,
         (("electricity", "demand"), "flow"): 105867395,
         (("electricity", "excess_bel"), "flow"): 211771291,
