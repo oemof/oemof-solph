@@ -227,23 +227,32 @@ def main():
     energysystem.results["main"] = processing.results(model)
     energysystem.results["meta"] = processing.meta_results(model)
 
+    # For models that need a long time to optimise, saving and loading the
+    # EnergySystem might be advised. By default, we do not do this here.
+    dump_results = restore_results = False
+
     # The default path is the '.oemof' folder in your $HOME directory.
     # The default filename is 'es_dump.oemof'.
     # You can omit the attributes (as None is the default value) for testing
     # cases. You should use unique names/folders for valuable results to avoid
     # overwriting.
-
-    # store energy system with results
-    energysystem.dump(dpath=None, filename=None)
+    if dump_results:
+        energysystem.dump(dpath=None, filename=None)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************
     # *************************************************************************
 
-    logging.info("**** The script can be divided into two parts here.")
-    logging.info("Restore the energy system and the results.")
-    energysystem = EnergySystem()
-    energysystem.restore(dpath=None, filename=None)
+    # Saved data can be restored in a second script. So you can work on the
+    # data analysis without re-running the optimisation every time. If you do
+    # so, make sure that you really load the results you want. For example,
+    # if dumping fails, you might exidentially load outdated results.
+    if restore_results:
+        logging.info("**** The script can be divided into two parts here.")
+        logging.info("Restore the energy system and the results.")
+
+        energysystem = EnergySystem()
+        energysystem.restore(dpath=None, filename=None)
 
     # define an alias for shorter calls below (optional)
     results = energysystem.results["main"]
