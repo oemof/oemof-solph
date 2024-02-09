@@ -25,6 +25,8 @@ from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
+import re
+from pyomo.core.expr.numeric_expr import MonomialTermExpression as MonTerm,LinearExpression
 from .helpers import flatten
 
 
@@ -661,3 +663,4 @@ def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
 
     flow_data.update(node_data)
     return flow_data
+
