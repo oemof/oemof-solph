@@ -79,7 +79,7 @@ setup(
         "blinker",
         "dill",
         "numpy",
-        "pandas >= 1.5.3",
+        "pandas >= 2.0.0",
         "pyomo >= 6.6.0, < 7.0",
         "networkx",
         "oemof.tools >= 0.4.3",
