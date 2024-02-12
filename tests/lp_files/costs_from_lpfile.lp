@@ -439,140 +439,20 @@ c_e_ConverterBlock_relation(diesel_b_diesel_b_el1_0_23)_:
 -1 flow(diesel_b_el1_0_23)
 = 0
 
-c_e_InvestmentFlowBlock_total_rule(b_el1_storage_0)_:
--1 InvestmentFlowBlock_invest(b_el1_storage_0)
-+1 InvestmentFlowBlock_total(b_el1_storage_0)
-= 0
-
 c_e_InvestmentFlowBlock_total_rule(storage_b_el2_0)_:
 -1 InvestmentFlowBlock_invest(storage_b_el2_0)
 +1 InvestmentFlowBlock_total(storage_b_el2_0)
+= 0
+
+c_e_InvestmentFlowBlock_total_rule(b_el1_storage_0)_:
+-1 InvestmentFlowBlock_invest(b_el1_storage_0)
++1 InvestmentFlowBlock_total(b_el1_storage_0)
 = 0
 
 c_e_InvestmentFlowBlock_total_rule(diesel_b_el1_0)_:
 -1 InvestmentFlowBlock_invest(diesel_b_el1_0)
 +1 InvestmentFlowBlock_total(diesel_b_el1_0)
 = 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_0)_:
-+1 flow(b_el1_storage_0_0)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_1)_:
-+1 flow(b_el1_storage_0_1)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_2)_:
-+1 flow(b_el1_storage_0_2)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_3)_:
-+1 flow(b_el1_storage_0_3)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_4)_:
-+1 flow(b_el1_storage_0_4)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_5)_:
-+1 flow(b_el1_storage_0_5)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_6)_:
-+1 flow(b_el1_storage_0_6)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_7)_:
-+1 flow(b_el1_storage_0_7)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_8)_:
-+1 flow(b_el1_storage_0_8)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_9)_:
-+1 flow(b_el1_storage_0_9)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_10)_:
-+1 flow(b_el1_storage_0_10)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_11)_:
-+1 flow(b_el1_storage_0_11)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_12)_:
-+1 flow(b_el1_storage_0_12)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_13)_:
-+1 flow(b_el1_storage_0_13)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_14)_:
-+1 flow(b_el1_storage_0_14)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_15)_:
-+1 flow(b_el1_storage_0_15)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_16)_:
-+1 flow(b_el1_storage_0_16)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_17)_:
-+1 flow(b_el1_storage_0_17)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_18)_:
-+1 flow(b_el1_storage_0_18)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_19)_:
-+1 flow(b_el1_storage_0_19)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_20)_:
-+1 flow(b_el1_storage_0_20)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_21)_:
-+1 flow(b_el1_storage_0_21)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_22)_:
-+1 flow(b_el1_storage_0_22)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
-
-c_u_InvestmentFlowBlock_max(b_el1_storage_0_23)_:
-+1 flow(b_el1_storage_0_23)
--1 InvestmentFlowBlock_total(b_el1_storage_0)
-<= 0
 
 c_u_InvestmentFlowBlock_max(storage_b_el2_0_0)_:
 +1 flow(storage_b_el2_0_0)
@@ -692,6 +572,126 @@ c_u_InvestmentFlowBlock_max(storage_b_el2_0_22)_:
 c_u_InvestmentFlowBlock_max(storage_b_el2_0_23)_:
 +1 flow(storage_b_el2_0_23)
 -1 InvestmentFlowBlock_total(storage_b_el2_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_0)_:
++1 flow(b_el1_storage_0_0)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_1)_:
++1 flow(b_el1_storage_0_1)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_2)_:
++1 flow(b_el1_storage_0_2)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_3)_:
++1 flow(b_el1_storage_0_3)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_4)_:
++1 flow(b_el1_storage_0_4)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_5)_:
++1 flow(b_el1_storage_0_5)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_6)_:
++1 flow(b_el1_storage_0_6)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_7)_:
++1 flow(b_el1_storage_0_7)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_8)_:
++1 flow(b_el1_storage_0_8)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_9)_:
++1 flow(b_el1_storage_0_9)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_10)_:
++1 flow(b_el1_storage_0_10)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_11)_:
++1 flow(b_el1_storage_0_11)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_12)_:
++1 flow(b_el1_storage_0_12)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_13)_:
++1 flow(b_el1_storage_0_13)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_14)_:
++1 flow(b_el1_storage_0_14)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_15)_:
++1 flow(b_el1_storage_0_15)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_16)_:
++1 flow(b_el1_storage_0_16)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_17)_:
++1 flow(b_el1_storage_0_17)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_18)_:
++1 flow(b_el1_storage_0_18)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_19)_:
++1 flow(b_el1_storage_0_19)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_20)_:
++1 flow(b_el1_storage_0_20)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_21)_:
++1 flow(b_el1_storage_0_21)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_22)_:
++1 flow(b_el1_storage_0_22)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(b_el1_storage_0_23)_:
++1 flow(b_el1_storage_0_23)
+-1 InvestmentFlowBlock_total(b_el1_storage_0)
 <= 0
 
 c_u_InvestmentFlowBlock_max(diesel_b_el1_0_0)_:
@@ -1127,8 +1127,8 @@ c_u_GenericInvestmentStorageBlock_max_storage_content(storage_0_23)_:
 <= 0
 
 bounds
-   0 <= InvestmentFlowBlock_invest(b_el1_storage_0) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_b_el2_0) <= +inf
+   0 <= InvestmentFlowBlock_invest(b_el1_storage_0) <= +inf
    0 <= InvestmentFlowBlock_invest(diesel_b_el1_0) <= +inf
    0 <= flow(b_el1_storage_0_0) <= +inf
    0 <= flow(b_el1_storage_0_1) <= +inf
@@ -1227,8 +1227,8 @@ bounds
    0 <= flow(storage_b_el2_0_22) <= +inf
    0 <= flow(storage_b_el2_0_23) <= +inf
    0 <= GenericInvestmentStorageBlock_invest(storage_0) <= +inf
-   0 <= InvestmentFlowBlock_total(b_el1_storage_0) <= +inf
    0 <= InvestmentFlowBlock_total(storage_b_el2_0) <= +inf
+   0 <= InvestmentFlowBlock_total(b_el1_storage_0) <= +inf
    0 <= InvestmentFlowBlock_total(diesel_b_el1_0) <= +inf
    0 <= GenericInvestmentStorageBlock_total(storage_0) <= +inf
    0 <= GenericInvestmentStorageBlock_init_content(storage) <= +inf
