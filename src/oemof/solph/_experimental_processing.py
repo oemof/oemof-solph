@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+import re
 import sys
 from itertools import groupby
 
@@ -24,9 +25,9 @@ import pandas as pd
 from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
+from pyomo.core.expr.numeric_expr import LinearExpression
+from pyomo.core.expr.numeric_expr import MonomialTermExpression as MonTerm
 
-import re
-from pyomo.core.expr.numeric_expr import MonomialTermExpression as MonTerm,LinearExpression
 from .helpers import flatten
 
 
