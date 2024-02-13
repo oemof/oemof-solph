@@ -146,9 +146,8 @@ def main():
             outputs={
                 bus_a_1: solph.Flow(
                     nominal_value=solph.Investment(
-                        ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
-                    ),
+                        ep_costs=epc_invest, custom_attributes={"space": 2}
+                    )
                 )
             },
             conversion_factors={bus_a_1: 0.8},
@@ -163,9 +162,8 @@ def main():
             outputs={
                 bus_b_1: solph.Flow(
                     nominal_value=solph.Investment(
-                        ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
-                    ),
+                        ep_costs=epc_invest, custom_attributes={"space": 1}
+                    )
                 )
             },
             conversion_factors={bus_a_1: 0.8},
@@ -192,34 +190,38 @@ def main():
 
     # to get the set costs use the method get_set_costs_from_lpfile
 
-    set_tdc,set_tic = solph.processing.get_set_costs_from_lpfile(filename,om)
+    set_tdc, set_tic = solph.processing.get_set_costs_from_lpfile(filename, om)
 
     # create result object. The last timestep has to be removed
-    results = solph.processing.results(om,remove_last_time_point=True)
+    results = solph.processing.results(om, remove_last_time_point=True)
 
     # now get the timedependent  optimized values as dataframe
 
-    dataframe_tdv= solph.processing.time_dependent_values_as_dataframe(results)
-    
+    dataframe_tdv = solph.processing.time_dependent_values_as_dataframe(
+        results
+    )
+
     # now get the timeindependent  optimized values as dataframe
-    dataframe_tiv= solph.processing.time_independent_values_as_dataframe(results)
+    dataframe_tiv = solph.processing.time_independent_values_as_dataframe(
+        results
+    )
 
     #  filter values with costs
 
-    td_intersect= set_tdc.columns.intersection(dataframe_tdv.columns)
-    ti_intersect= set_tic.columns.intersection(dataframe_tiv.columns)
+    td_intersect = set_tdc.columns.intersection(dataframe_tdv.columns)
+    ti_intersect = set_tic.columns.intersection(dataframe_tiv.columns)
 
     # calculate costs
-    time_dependent_costs= dataframe_tdv[td_intersect] * set_tdc[td_intersect]
+    time_dependent_costs = dataframe_tdv[td_intersect] * set_tdc[td_intersect]
 
-    time_independent_costs= dataframe_tiv[ti_intersect] * set_tic[ti_intersect]
+    time_independent_costs = (
+        dataframe_tiv[ti_intersect] * set_tic[ti_intersect]
+    )
 
-    print( time_dependent_costs)
+    print(time_dependent_costs)
 
     print(time_independent_costs)
 
-
-    
 
 if __name__ == "__main__":
     main()

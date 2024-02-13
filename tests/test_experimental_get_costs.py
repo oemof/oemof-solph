@@ -18,7 +18,11 @@ from pandas.testing import assert_series_equal
 from oemof.solph import EnergySystem, processing
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph._experimental_processing import get_set_costs_from_lpfile, time_dependent_values_as_dataframe, time_independent_values_as_dataframe
+from oemof.solph._experimental_processing import (
+    get_set_costs_from_lpfile,
+    time_dependent_values_as_dataframe,
+    time_independent_values_as_dataframe,
+)
 from oemof.solph import views
 from oemof.solph.buses import Bus
 from oemof.solph.components import Converter
@@ -33,9 +37,7 @@ class TestParameterResult:
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
-                "2016-01-01",
-                periods=cls.period,
-                freq="H",
+                "2016-01-01", periods=cls.period, freq="H"
             ),
             infer_last_interval=True,
         )
@@ -74,12 +76,7 @@ class TestParameterResult:
         cls.demand_values = [0.0] + [100] * 23
         demand = Sink(
             label="demand_el",
-            inputs={
-                b_el2: Flow(
-                    nominal_value=1,
-                    fix=cls.demand_values,
-                )
-            },
+            inputs={b_el2: Flow(nominal_value=1, fix=cls.demand_values)},
         )
         cls.es.add(dg, batt, demand)
         cls.om = Model(cls.es)
@@ -89,34 +86,44 @@ class TestParameterResult:
         cls.mod.solve()
 
     def test_get_set_costs_from_lpfile(self):
-        self.om.write(os.path.join(os.getcwd(),'tests','lp_files','costs_from_lpfile.lp'), io_options={'symbolic_solver_labels':True})
+        self.om.write(
+            os.path.join(
+                os.getcwd(), "tests", "lp_files", "costs_from_lpfile.lp"
+            ),
+            io_options={"symbolic_solver_labels": True},
+        )
 
-        lp_file = os.path.join(os.getcwd(),'tests','lp_files','costs_from_lpfile.lp')
-        tdc,tic = get_set_costs_from_lpfile(lp_file,self.om)
+        lp_file = os.path.join(
+            os.getcwd(), "tests", "lp_files", "costs_from_lpfile.lp"
+        )
+        tdc, tic = get_set_costs_from_lpfile(lp_file, self.om)
 
-        expected_values_tdc =  {'b_diesel_diesel':2, 'diesel_b_el1':1, 'b_el1_storage': 3 ,'storage_b_el2':2.5 }
-        for name,val in expected_values_tdc.items():
-            assert all(tdc[name]== val)
+        expected_values_tdc = {
+            "b_diesel_diesel": 2,
+            "diesel_b_el1": 1,
+            "b_el1_storage": 3,
+            "storage_b_el2": 2.5,
+        }
+        for name, val in expected_values_tdc.items():
+            assert all(tdc[name] == val)
 
         period = 0
-        expected_values_tic = {'invest_diesel_b_el1_'+ str(period) :0.5, 'invest_storage_'+ str(period) :0.4}  
+        expected_values_tic = {
+            "invest_diesel_b_el1_" + str(period): 0.5,
+            "invest_storage_" + str(period): 0.4,
+        }
         for name, val in expected_values_tic.items():
             assert tic[name][0] == val
 
-
     def test_get_time_dependent_results_as_dataframe(self):
-        results = processing.results(self.om,remove_last_time_point=True)
+        results = processing.results(self.om, remove_last_time_point=True)
         results_dataframe = time_dependent_values_as_dataframe(results)
 
         assert isinstance(results_dataframe, pandas.DataFrame)
 
-
     def test_time_indepentden_results_as_dataframe(self):
-        
-        results = processing.results(self.om,remove_last_time_point=True)
+
+        results = processing.results(self.om, remove_last_time_point=True)
         results_dataframe = time_independent_values_as_dataframe(results)
 
-        
         assert isinstance(results_dataframe, pandas.DataFrame)
-        
-        

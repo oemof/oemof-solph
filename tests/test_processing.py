@@ -9,7 +9,6 @@ available from its original location oemof/tests/test_processing.py
 SPDX-License-Identifier: MIT
 """
 
-import os
 import pandas
 import pytest
 from pandas.testing import assert_frame_equal
@@ -370,6 +369,3 @@ class TestParameterResult:
         results = processing.results(self.om)
         view = views.node_weight_by_type(results, node_type=Flow)
         assert view is None
-
-
- 
