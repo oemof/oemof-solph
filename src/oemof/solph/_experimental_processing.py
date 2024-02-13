@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
-"""Modules for providing a convenient data structure for solph cost  and results.
+"""Modules for providing a convenient data structure
+ for solph cost  and results.
 
 Information about the possible usage is provided within the examples.
 
@@ -17,12 +18,8 @@ SPDX-License-Identifier: MIT
 """
 
 import re
-
 import numpy as np
 import pandas as pd
-
-
-from .helpers import flatten
 
 
 def get_set_costs_from_lpfile(filename, model, timeindex=[]):
@@ -35,8 +32,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
     model : solph.Model
         solved oemof model
     timeindex: datetime
-        regarded timeindex can be given as parameter, otherwise the timeindex will be tryed to be get from the model
-
+        regarded timeindex, otherwise timeindex get from the model
 
     Returns
     -------
@@ -81,7 +77,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
         data_frame_time_dependent["time"] = [
             tmindex[
                 int(
-                    re.search("(\(.+\))", i)
+                    re.search(r"(\(.+\))", i)
                     .group()
                     .split(")")[0]
                     .split("_")[-1]
@@ -100,17 +96,17 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
         data_frame_time_dependent.name.str.match("flow")
     ].copy()
     flow_costs["unique_name"] = [
-        re.sub("_\d+_\d+\)", "", re.search("\(.+\)", i).group()).replace(
+        re.sub(r"_\d+_\d+\)", "", re.search(r"\(.+\)", i).group()).replace(
             "(", ""
         )
         for i in flow_costs.name
     ]
 
     non_flow_costs = data_frame_time_dependent[
-        data_frame_time_dependent.name.str.match("flow") == False
+        data_frame_time_dependent.name.str.match("flow") is False
     ].copy()
     non_flow_costs["unique_name"] = [
-        re.sub("_\d+_\d+\)", "", name.split("(")[1])
+        re.sub(r"_\d+_\d+\)", "", name.split("(")[1])
         + "_"
         + name.split("(")[0].split("_", 1)[1]
         for name in non_flow_costs.name
@@ -136,7 +132,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
             [
                 nam
                 for nam in data_frame.name
-                if not re.findall("_+[0-9]+_", nam)
+                if not re.findall(r"_+[0-9]+_", nam) 
             ]
         )
     ].copy()
@@ -159,7 +155,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
 
     # renaming (remove unnecessary strings)
     invest_costs.loc[:, "name"] = [
-        re.sub("_\d+\)", "", re.search("invest+\(.+\)", i).group()).replace(
+        re.sub(r"_\d+\)", "", re.search(r"invest+\(.+\)", i).group()).replace(
             "(", "_"
         )
         for i in invest_costs.name
@@ -186,8 +182,9 @@ def time_dependent_values_as_dataframe(results, timeindex=[]):
     Parameters
     ----------
     results : results
-        results from oemof.solph.processing  method results(remove_last_time_point=True)
-        Note: remove_last_time_point must be set to True!
+        results from oemof.solph.processing 
+        method results(remove_last_time_point=True)
+        Note: remove_last_time_point must be set to True!        
     timeindex: datetime
         add timeindex manually, otherwise timeindex is numerated
 
