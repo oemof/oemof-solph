@@ -17,8 +17,6 @@ SPDX-License-Identifier: MIT
 """
 
 import re
-import sys
-from itertools import groupby
 
 import numpy as np
 import pandas as pd
@@ -48,7 +46,12 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
 
     with open(filename) as f:
         contents = f.read()
-    rows = contents.split("objective:")[1].split("s.t.")[0].replace("+", "").split("\n")
+    rows = (
+        contents.split("objective:")[1]
+        .split("s.t.")[0]
+        .replace("+", "")
+        .split("\n")
+    )
 
     data_frame = pd.DataFrame(i.split(" ") for i in rows).dropna()
     data_frame.columns = ["cost", "name"]
@@ -58,11 +61,14 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
     # filter time dependent values and drop invest values
     data_frame_time_dependent = data_frame[
         data_frame.name.isin(
-            [nam for nam in data_frame.name if re.findall("_+[0-9]+_", nam) and not re.findall("invest",nam)]
+            [
+                nam
+                for nam in data_frame.name
+                if re.findall("_+[0-9]+_", nam)
+                and not re.findall("invest", nam)
+            ]
         )
     ].copy()
-    
-    
 
     # get the timevalue
 
@@ -73,7 +79,14 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
         tmindex = model.es.timeindex[:-1]
     try:
         data_frame_time_dependent["time"] = [
-            tmindex[int(re.search("(\(.+\))", i).group().split(")")[0].split("_")[-1])]
+            tmindex[
+                int(
+                    re.search("(\(.+\))", i)
+                    .group()
+                    .split(")")[0]
+                    .split("_")[-1]
+                )
+            ]
             for i in data_frame_time_dependent.name
         ]
     except ValueError:
@@ -86,9 +99,10 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
     flow_costs = data_frame_time_dependent[
         data_frame_time_dependent.name.str.match("flow")
     ].copy()
-    flow_costs["unique_name"] =[
-        re.sub("_\d+_\d+\)", "", re.search("\(.+\)", i).group())
-        .replace("(", "")
+    flow_costs["unique_name"] = [
+        re.sub("_\d+_\d+\)", "", re.search("\(.+\)", i).group()).replace(
+            "(", ""
+        )
         for i in flow_costs.name
     ]
 
@@ -105,54 +119,68 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
     data_time_dependent = pd.concat([non_flow_costs, flow_costs])
 
     pivot_data = pd.pivot(
-        data_time_dependent, index=["time"], columns="unique_name", values="cost"
+        data_time_dependent,
+        index=["time"],
+        columns="unique_name",
+        values="cost",
     )
 
     time_dependent_costs_all_pivot = pivot_data.replace(np.nan, 0)
-    
+
     # calculation time independent costs
 
     # remove time independent  data
 
     time_independent_costs = data_frame[
         data_frame.name.isin(
-            [nam for nam in data_frame.name if not re.findall("_+[0-9]+_", nam) ]
+            [
+                nam
+                for nam in data_frame.name
+                if not re.findall("_+[0-9]+_", nam)
+            ]
         )
     ].copy()
 
     # renaming (remove unnecessary strings)
     time_independent_costs.loc[:, "name"] = [
-        name.split("_", 1)[1].split("(")[0] + "_" + name.split("(")[1].split(")")[0]
+        name.split("_", 1)[1].split("(")[0]
+        + "_"
+        + name.split("(")[1].split(")")[0]
         for name in time_independent_costs.name
     ]
 
-    #invest costs 
+    # invest costs
 
     invest_costs = data_frame[
         data_frame.name.isin(
-            [nam for nam in data_frame.name if re.findall("invest",nam)]
+            [nam for nam in data_frame.name if re.findall("invest", nam)]
         )
     ].copy()
 
     # renaming (remove unnecessary strings)
     invest_costs.loc[:, "name"] = [
-        re.sub("_\d+\)", "" ,re.search("invest+\(.+\)", i).group()).replace("(","_")
-        
+        re.sub("_\d+\)", "", re.search("invest+\(.+\)", i).group()).replace(
+            "(", "_"
+        )
         for i in invest_costs.name
     ]
-    
-    time_independent_costs = pd.concat([time_independent_costs,invest_costs])
-    time_independent_costs = time_independent_costs.reindex(columns=["cost", "name"])
+
+    time_independent_costs = pd.concat([time_independent_costs, invest_costs])
+    time_independent_costs = time_independent_costs.reindex(
+        columns=["cost", "name"]
+    )
 
     # transform to dataframe with name as columns
     trans_tic = time_independent_costs.T
     trans_tic.columns = trans_tic.loc["name"]
-    trans_tic = trans_tic.reset_index().rename_axis(None, axis=1).drop("index", axis=1)
+    trans_tic = (
+        trans_tic.reset_index().rename_axis(None, axis=1).drop("index", axis=1)
+    )
     trans_tic = trans_tic.drop([1])
-    return  time_dependent_costs_all_pivot, trans_tic
+    return time_dependent_costs_all_pivot, trans_tic
 
 
-def time_dependent_values_as_dataframe(results,timeindex=[]):
+def time_dependent_values_as_dataframe(results, timeindex=[]):
     """returns timedependent results as dataframe
 
     Parameters
@@ -169,7 +197,7 @@ def time_dependent_values_as_dataframe(results,timeindex=[]):
     """
 
     # get flows of energysystem
-    flows = [x for x in results.keys() if x[1] != None]
+    flows = [x for x in results.keys() if x[1] is not None]
     if len(timeindex) > 0:
         tmindex = timeindex
     else:
@@ -184,7 +212,7 @@ def time_dependent_values_as_dataframe(results,timeindex=[]):
             dataframe.update({str(name): list(tmp2)})
 
     # get nodes of energysystem
-    nodes = [x for x in results.keys() if x[1] == None]
+    nodes = [x for x in results.keys() if x[1] is None]
 
     for node in nodes:
         name = node[0].label
@@ -199,9 +227,7 @@ def time_dependent_values_as_dataframe(results,timeindex=[]):
     return dataframe
 
 
-
-
-def time_independent_values_as_dataframe(results,timeindex=[]):
+def time_independent_values_as_dataframe(results, timeindex=[]):
     """
 
     get scalar values of nodes as dataframe
@@ -219,24 +245,29 @@ def time_independent_values_as_dataframe(results,timeindex=[]):
     nodes = [x for x in results.keys() if x[1] is None]
 
     data_scalar = {}
-    
+
     for node in nodes:
         # get the scalars of the component
         scalar = results[node]["scalars"]
         for num, value in enumerate(scalar.axes[0].values):
-            data_scalar.update({value + "_" + str(node[0].label): [scalar.T[num]]})
-
+            data_scalar.update(
+                {value + "_" + str(node[0].label): [scalar.T[num]]}
+            )
 
     # get flows of energysystem
-    flows = [x for x in results.keys() if x[1] != None]
+    flows = [x for x in results.keys() if x[1] is not None]
 
-    for flow in flows:       
+    for flow in flows:
         # get the scalars of the component
         scalar = results[flow]["scalars"]
         for num, value in enumerate(scalar.axes[0].values):
-            name = str(value) +'_' + str(flow[0].label) + '_' + str(flow[1].label)
+            name = (
+                str(value)
+                + "_"
+                + str(flow[0].label)
+                + "_"
+                + str(flow[1].label)
+            )
             data_scalar.update({name: [scalar.T[num]]})
-
-
 
     return pd.DataFrame.from_dict(data_scalar)
