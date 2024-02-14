@@ -67,13 +67,7 @@ import logging
 import os
 
 from oemof import solph
-from oemof.solph._experimental_processing import get_set_costs_from_lpfile
-from oemof.solph._experimental_processing import (
-    time_dependent_values_as_dataframe,
-)
-from oemof.solph._experimental_processing import (
-    time_independent_values_as_dataframe,
-)
+from oemof.solph import _experimental_processing 
 
 
 def main():
@@ -192,19 +186,19 @@ def main():
 
     # to get the set costs use the method get_set_costs_from_lpfile
 
-    set_tdc, set_tic = get_set_costs_from_lpfile(filename, om)
+    set_tdc, set_tic = _experimental_processing.get_set_costs_from_lpfile(filename, om)
 
     # create result object. The last timestep has to be removed
     results = solph.processing.results(om, remove_last_time_point=True)
 
     # now get the timedependent  optimized values as dataframe
 
-    dataframe_tdv = time_dependent_values_as_dataframe(
+    dataframe_tdv = _experimental_processing.time_dependent_values_as_dataframe(
         results
     )
 
     # now get the timeindependent  optimized values as dataframe
-    dataframe_tiv = time_independent_values_as_dataframe(
+    dataframe_tiv = _experimental_processing.time_independent_values_as_dataframe(
         results
     )
 
