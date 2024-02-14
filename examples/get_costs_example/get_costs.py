@@ -186,23 +186,17 @@ def main():
 
     # to get the set costs use the method get_set_costs_from_lpfile
 
-    set_tdc, set_tic = exppro.get_set_costs_from_lpfile(
-        filename, om
-    )
+    set_tdc, set_tic = exppro.get_set_costs_from_lpfile(filename, om)
 
     # create result object. The last timestep has to be removed
     results = solph.processing.results(om, remove_last_time_point=True)
 
     # now get the timedependent  optimized values as dataframe
 
-    dataframe_tdv = (
-         exppro.time_dependent_values_as_dataframe(results)
-     )
+    dataframe_tdv = exppro.time_dependent_values_as_dataframe(results)
 
     # now get the timeindependent  optimized values as dataframe
-    dataframe_tiv = (
-        exppro.time_independent_values_as_dataframe(results)
-    )
+    dataframe_tiv = exppro.time_independent_values_as_dataframe(results)
 
     #  filter values with costs
 
