@@ -16,7 +16,7 @@ import pandas
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import _experimental_processing
+from oemof.solph import _experimental_processing as exppro
 from oemof.solph import processing
 from oemof.solph.buses import Bus
 from oemof.solph.components import Converter
@@ -90,7 +90,7 @@ class TestParameterResult:
         lp_file = os.path.join(
             os.getcwd(), "tests", "lp_files", "costs_from_lpfile.lp"
         )
-        tdc, tic = _experimental_processing.get_set_costs_from_lpfile(
+        tdc, tic = exppro.get_set_costs_from_lpfile(
             lp_file, self.om
         )
 
@@ -113,7 +113,7 @@ class TestParameterResult:
 
     def test_get_time_dependent_results_as_dataframe(self):
         results = processing.results(self.om, remove_last_time_point=True)
-        results_dataframe = _experimental_processing.time_dependent_values_as_dataframe(
+        results_dataframe = exppro.time_dependent_values_as_dataframe(
             results
         )
 
@@ -122,7 +122,7 @@ class TestParameterResult:
     def test_time_indepentden_results_as_dataframe(self):
 
         results = processing.results(self.om, remove_last_time_point=True)
-        results_dataframe = _experimental_processing.time_independent_values_as_dataframe(
+        results_dataframe = exppro.time_independent_values_as_dataframe(
             results
         )
 
