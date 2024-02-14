@@ -132,7 +132,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
             [
                 nam
                 for nam in data_frame.name
-                if not re.findall(r"_+[0-9]+_", nam) 
+                if not re.findall(r"_+[0-9]+_", nam)
             ]
         )
     ].copy()
@@ -182,9 +182,9 @@ def time_dependent_values_as_dataframe(results, timeindex=[]):
     Parameters
     ----------
     results : results
-        results from oemof.solph.processing 
+        results from oemof.solph.processing
         method results(remove_last_time_point=True)
-        Note: remove_last_time_point must be set to True!        
+        Note: remove_last_time_point must be set to True!
     timeindex: datetime
         add timeindex manually, otherwise timeindex is numerated
 
