@@ -104,7 +104,7 @@ def get_set_costs_from_lpfile(filename, model, timeindex=[]):
     ]
 
     non_flow_costs = data_frame_time_dependent[
-        data_frame_time_dependent.name.str.match("flow") is False
+        data_frame_time_dependent.name.str.match(r"^((?!flow).)*$")
     ].copy()
     non_flow_costs["unique_name"] = [
         re.sub(r"_\d+_\d+\)", "", name.split("(")[1])

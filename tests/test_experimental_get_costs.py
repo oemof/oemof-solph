@@ -17,12 +17,10 @@ from oemof.solph import EnergySystem
 from oemof.solph import Investment
 from oemof.solph import Model
 from oemof.solph import processing
-from oemof.solph._experimental_processing import get_set_costs_from_lpfile
 from oemof.solph._experimental_processing import (
+    get_set_costs_from_lpfile,
     time_dependent_values_as_dataframe,
-)
-from oemof.solph._experimental_processing import (
-    time_independent_values_as_dataframe,
+    time_independent_values_as_dataframe
 )
 from oemof.solph.buses import Bus
 from oemof.solph.components import Converter
