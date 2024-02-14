@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas
+
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
 from oemof.solph import Model
