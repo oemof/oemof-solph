@@ -44,29 +44,26 @@ class OffsetConverter(Node):
         :math:`C_0(t)` is the y-intercept devided by the `nominal_value` of the
         output flow (this is for internal purposes).
 
-        :math:`C_1 = (l_{max}-l_{min})/(l_{max}/eta_{max}-l_{min}/eta_{min})`
-        :math:`C_0 = l_{min} * (1-C_1/eta_{min})`
-
-        The symbols used are defined as follows(index (t) was previously omitted
-        for brevity):
-
-        +----------------------+--------------------------------------------------+
-        | symbol               | explanation                                      |
-        +======================+==================================================+
-        | :math:`l_{max}(t)`   | Maximum partload (value passed to `max`)         |
-        +----------------------+--------------------------------------------------+
-        | :math:`l_{min}(t)`   | Minimum partload (value passed to `min`)         |
-        +----------------------+--------------------------------------------------+
-        | :math:`eta_{max}(t)` | Efficiency/conversion factor at :math:`l_{max}(t)|
-        +----------------------+--------------------------------------------------+
-        | :math:`eta_{min}(t)` | Efficiency/conversion factor at :math:`l_{min}(t)|
-        +----------------------+--------------------------------------------------+
-
         The tuple values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
     Notes
     -----
+    **C_1 and C_0 can be calculated as follows:**
+
+    .. _OffsetConverterCoefficients-equations:
+
+    .. math::
+
+        C_1 = (l_{max}-l_{min})/(l_{max}/\eta_{max}-l_{min}/\eta_{min})
+
+        C_0 = l_{min} \cdot (1-C_1/\eta_{min})
+
+    Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
+    partload share (e.g. 1.0 and 0.3) and :math:`\eta_{max}` and
+    :math:`\eta_{min}` are the efficiencies/conversion factors at these
+    partloads.
+
     The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
 
