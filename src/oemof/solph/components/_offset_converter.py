@@ -112,15 +112,16 @@ class OffsetConverter(Node):
             if isinstance(coefficients, tuple):
                 # TODO: add the correct version in the message
                 msg = (
-                    "Passing a tuple to the keyword `coefficients` will be deprecated"
-                    " in a later version. Please use a dict to specify the"
-                    " corresponding output flow. The first output flow will be assumed"
-                    " as target by default."
+                    "Passing a tuple to the keyword `coefficients` will be"
+                    " deprecated in a later version. Please use a dict to"
+                    " specify the corresponding output flow. The first output"
+                    " flow will be assumed as target by default."
                 )
                 warn(msg, DeprecationWarning)
                 if len(coefficients) != 2:
                     raise ValueError(
-                        "Two coefficients or coefficient series have to be given."
+                        "Two coefficients or coefficient series have to be"
+                        " given."
                     )
                 self.coefficients.update(
                     {
@@ -133,14 +134,16 @@ class OffsetConverter(Node):
                 for k, v in coefficients.items():
                     if len(v) != 2:
                         raise ValueError(
-                            "Two coefficients or coefficient series have to be given."
+                            "Two coefficients or coefficient series have to be"
+                            " given."
                         )
                     self.coefficients.update(
                         {k: (sequence(v[0]), sequence(v[1]))}
                     )
             else:
                 raise TypeError(
-                    "`coefficiencts` needs to be either dict or tuple (deprecated)."
+                    "`coefficiencts` needs to be either dict or tuple"
+                    " (deprecated)."
                 )
 
         # `OffsetConverter` always needs the `NonConvex` attribute, but the
