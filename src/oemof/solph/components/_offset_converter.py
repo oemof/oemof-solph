@@ -31,14 +31,37 @@ from oemof.solph._plumbing import sequence
 
 
 class OffsetConverter(Node):
-    """An object with one input and one output and two coefficients to model
-    part load behaviour.
+    """An object with one input and multiple outputs and two coefficients
+    per output to model part load behaviour.
+    The output must contain a NonConvex object.
 
     Parameters
     ----------
-    coefficients : tuple, (:math:`C_0(t)`, :math:`C_1(t)`)
-        Tuple containing the first two polynomial coefficients
-        i.e. the y-intersection and slope of a linear equation.
+    coefficients : dict of tuples, (:math:`C_0(t)`, :math:`C_1(t)`)
+        Dict of tuples containing the respective output bus as key and
+        as value a tuple with the parameters :math:`C_0(t)` and :math:`C_1(t)`.
+        Here, :math:`C_1(t)` represents the slope of a linear equation and
+        :math:`C_0(t)` is the y-intercept devided by the `nominal_value` of the
+        output flow (this is for internal purposes).
+
+        :math:`C_1 = (l_{max}-l_{min})/(l_{max}/eta_{max}-l_{min}/eta_{min})`
+        :math:`C_0 = l_{min} \cdot (1-C_1/eta_{min})`
+
+        The symbols used are defined as follows(index (t) was previously omitted
+        for brevity):
+
+        +----------------------+--------------------------------------------------+
+        | symbol               | explanation                                      |
+        +======================+==================================================+
+        | :math:`l_{max}(t)`   | Maximum partload (value passed to `max`)         |
+        +----------------------+--------------------------------------------------+
+        | :math:`l_{min}(t)`   | Minimum partload (value passed to `min`)         |
+        +----------------------+--------------------------------------------------+
+        | :math:`eta_{max}(t)` | Efficiency/conversion factor at :math:`l_{max}(t)|
+        +----------------------+--------------------------------------------------+
+        | :math:`eta_{min}(t)` | Efficiency/conversion factor at :math:`l_{min}(t)|
+        +----------------------+--------------------------------------------------+
+
         The tuple values can either be a scalar or a sequence with length
         of time horizon for simulation.
 
@@ -52,13 +75,20 @@ class OffsetConverter(Node):
     >>> from oemof import solph
     >>> bel = solph.buses.Bus(label='bel')
     >>> bth = solph.buses.Bus(label='bth')
+    >>> l_max = 1
+    >>> l_min = 0.5
+    >>> eta_max = 0.5
+    >>> eta_min = 0.3
+    >>> c1 = (l_max-l_min)/(l_max/eta_max-l_min/eta_min)
+    >>> c0 = l_min*(1-c1/eta_min)
     >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_value=60, min=0.5, max=1.0,
+    ...         nominal_value=60, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
-    ...    coefficients=(20, 0.5))
+    ...    coefficients={bth: (c0, c1)}
+    ... )
     >>> type(ostf)
     <class 'oemof.solph.components._offset_converter.OffsetConverter'>
     """  # noqa: E501
@@ -81,10 +111,39 @@ class OffsetConverter(Node):
         )
 
         if coefficients is not None:
-            self.coefficients = tuple([sequence(i) for i in coefficients])
-            if len(self.coefficients) != 2:
-                raise ValueError(
-                    "Two coefficients or coefficient series have to be given."
+            self.coefficients = dict()
+            if isinstance(coefficients, tuple):
+                # TODO: add the correct version in the message
+                msg = (
+                    "Passing a tuple to the keyword `coefficients` will be deprecated"
+                    " starting from vX.X.X. Please use a dict to specify the"
+                    " corresponding output flow. The first output flow will be assumed"
+                    " as target by default."
+                )
+                warn(msg, DeprecationWarning)
+                if len(coefficients) != 2:
+                    raise ValueError(
+                        "Two coefficients or coefficient series have to be given."
+                    )
+                self.coefficients.update(
+                    {
+                        [k for k in self.outputs.keys()][0]: tuple(
+                            [sequence(i) for i in coefficients]
+                        )
+                    }
+                )
+            elif isinstance(coefficients, dict):
+                for k, v in coefficients.items():
+                    if len(v) != 2:
+                        raise ValueError(
+                            "Two coefficients or coefficient series have to be given."
+                        )
+                    self.coefficients.update(
+                        {k: (sequence(v[0]), sequence(v[1]))}
+                    )
+            else:
+                raise TypeError(
+                    "`coefficiencts` needs to be either dict or tuple (deprecated)."
                 )
 
         # `OffsetConverter` always needs the `NonConvex` attribute, but the
@@ -113,10 +172,9 @@ class OffsetConverter(Node):
                         + "output flow!"
                     )
 
-        if len(self.inputs) > 1 or len(self.outputs) > 1:
+        if len(self.inputs) > 1:
             raise ValueError(
-                "Component `OffsetConverter` must not have "
-                + "more than 1 input and 1 output!"
+                "Component `OffsetConverter` must not have more than 1 input!"
             )
 
     def constraint_group(self):
@@ -161,30 +219,31 @@ class OffsetConverterBlock(ScalarBlock):
 
     .. math::
         &
-        P_{in}(p, t) = C_1(t) \cdot P_{out}(p, t) + C_0(t) \cdot P_max(p) \cdot Y(t) \\
+        P_{out}(p, t) = P_{in}(p, t) \cdot C_1(t) + P_nom(p) \cdot Y(t) \cdot C_0(t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    +--------------------+------------------------+------+--------------------------------------------+
-    | symbol             | attribute              | type | explanation                                |
-    +====================+========================+======+============================================+
-    | :math:`P_{out}(t)` | `flow[n,o,p,t]`        | V    | Outflow of converter                       |
-    +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`        | V    | Inflow of converter                        |
-    +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`Y(t)`       |                        | V    | Binary status variable of nonconvex inflow |
-    +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`P_{max}(t)` |                        | V    | Maximum Outflow of converter               |
-    +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`C_1(t)`     | `coefficients[1][n,t]` | P    | Linear coefficient 1 (slope)               |
-    +--------------------+------------------------+------+--------------------------------------------+
-    | :math:`C_0(t)`     | `coefficients[0][n,t]` | P    | Linear coefficient 0 (y-intersection)      |
-    +--------------------+------------------------+------+--------------------------------------------+
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | symbol             | attribute                 | type | explanation                                      |
+    +====================+===========================+======+==================================================+
+    | :math:`P_{out}(t)` | `flow[n,o,p,t]`           | V    | Outflow of converter                             |
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`           | V    | Inflow of converter                              |
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | :math:`Y(t)`       |                           | V    | Binary status variable of nonconvex outflow      |
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | :math:`P_{nom}(t)` |                           | V    | Nominal value (max. capacity) of the outflow     |
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | :math:`C_1(t)`     | `coefficients[o][1][n,t]` | P    | Linear coefficient 1 (slope)                     |
+    +--------------------+---------------------------+------+--------------------------------------------------+
+    | :math:`C_0(t)`     | `coefficients[o][0][n,t]` | P    | Linear coefficient 0 (y-intersection)/P_{nom}(t) |
+    +--------------------+---------------------------+------+--------------------------------------------------+
 
-    Note that :math:`P_{max}(t) \cdot Y(t)` is merged into one variable,
+    Note that :math:`P_{nom}(t) \cdot Y(t)` is merged into one variable,
     called `status_nominal[n, o, p, t]`.
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -231,7 +290,9 @@ class OffsetConverterBlock(ScalarBlock):
                         for i in in_flows[n]:
                             expr = 0
                             expr += -m.flow[n, o, p, t]
-                            expr += m.flow[i, n, p, t] * n.coefficients[1][t]
+                            expr += (
+                                m.flow[i, n, p, t] * n.coefficients[o][1][t]
+                            )
                             # `Y(t)` in the last term of the constraint
                             # (":math:`C_0(t) \cdot Y(t)`") is different for
                             # different cases. If both `Investment` and
@@ -248,7 +309,7 @@ class OffsetConverterBlock(ScalarBlock):
                                     m.InvestNonConvexFlowBlock.status_nominal[
                                         n, o, t
                                     ]
-                                    * n.coefficients[0][t]
+                                    * n.coefficients[o][0][t]
                                 )
                             # `KeyError` occurs when more than one
                             # `OffsetConverter` is defined, and in some of
@@ -265,7 +326,7 @@ class OffsetConverterBlock(ScalarBlock):
                                     m.NonConvexFlowBlock.status_nominal[
                                         n, o, t
                                     ]
-                                    * n.coefficients[0][t]
+                                    * n.coefficients[o][0][t]
                                 )
                             block.relation.add((n, i, o, p, t), (expr == 0))
 
