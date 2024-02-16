@@ -224,7 +224,7 @@ def test_offsetconverter_without_nonconvex():
             label="diesel_genset",
             inputs={b_el: Flow()},
             outputs={b_el: Flow()},
-            coefficients=(2.5, 0.5),
+            coefficients={b_el: (2.5, 0.5)},
         )
 
 
@@ -239,7 +239,7 @@ def test_offsetconverter_nonconvex_on_inputs():
         components.OffsetConverter(
             inputs={b_diesel: Flow(nonconvex=NonConvex())},
             outputs={b_diesel: Flow(nonconvex=NonConvex())},
-            coefficients=(2.5, 0.5),
+            coefficients={b_diesel: (2.5, 0.5)},
         )
 
 
@@ -258,7 +258,7 @@ def test_offsetconverter_investment_on_inputs():
                     nonconvex=NonConvex(), nominal_value=Investment(maximum=1)
                 )
             },
-            coefficients=(2.5, 0.5),
+            coefficients={b_diesel: (2.5, 0.5)},
         )
 
 
@@ -272,7 +272,7 @@ def test_offsetconverter_not_enough_coefficients():
             label="of1",
             inputs={bus: Flow()},
             outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients=([1, 4, 7]),
+            coefficients={bus: ([1, 4, 7])},
         )
 
 
@@ -286,16 +286,15 @@ def test_offsetconverter_too_many_coefficients():
             label="of2",
             inputs={bus: Flow()},
             outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients=(1, 4, 7),
+            coefficients={bus: (1, 4, 7)},
         )
 
 
-def test_offsetconverter__too_many_input_flows():
+def test_offsetconverter_too_many_input_flows():
     """Too many Input Flows defined."""
     with pytest.raises(
         ValueError,
-        match="Component `OffsetConverter` must not have more than 1 input "
-        + "and 1 output!",
+        match="Component `OffsetConverter` must not have more than 1 input!",
     ):
         b_gas = Bus(label="bus_gas")
         b_coal = Bus(label="bus_coal")
@@ -305,28 +304,6 @@ def test_offsetconverter__too_many_input_flows():
                 b_coal: Flow(),
             },
             outputs={b_coal: Flow(nonconvex=NonConvex())},
-            coefficients=(20, 0.5),
-        )
-
-
-def test_offsetconverter_too_many_output_flows():
-    """Too many Output Flows defined."""
-    with pytest.raises(
-        ValueError,
-        match="Component `OffsetConverter` must not have more than 1 input "
-        + "and 1 output!",
-    ):
-        b_el = Bus(label="bus_electricity")
-        b_th = Bus(label="bus_thermal")
-
-        components.OffsetConverter(
-            inputs={
-                b_el: Flow(),
-            },
-            outputs={
-                b_el: Flow(nonconvex=NonConvex()),
-                b_th: Flow(nonconvex=NonConvex()),
-            },
             coefficients=(20, 0.5),
         )
 
