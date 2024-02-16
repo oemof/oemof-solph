@@ -4,8 +4,13 @@ v0.5.3
 API changes
 ###########
 
+* `coefficient` of `OffsetConverter` expects a dictionary similar to 
+  `Converter`s `conversion_factors`
+
 New features
 ############
+
+* `OffsetConverter` can now handle multiple outputs
 
 Documentation
 #############
@@ -16,8 +21,12 @@ Bug fixes
 Other changes
 #############
 
+* Unified (usage) documentation for `OffsetConverter`
+
 Known issues
 ############
 
 Contributors
 ############
+
+* Lennart Schürmann
