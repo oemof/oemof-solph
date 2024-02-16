@@ -116,7 +116,7 @@ class OffsetConverter(Node):
                 # TODO: add the correct version in the message
                 msg = (
                     "Passing a tuple to the keyword `coefficients` will be deprecated"
-                    " starting from vX.X.X. Please use a dict to specify the"
+                    " in a later version. Please use a dict to specify the"
                     " corresponding output flow. The first output flow will be assumed"
                     " as target by default."
                 )
