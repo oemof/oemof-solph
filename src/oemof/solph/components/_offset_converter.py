@@ -45,7 +45,7 @@ class OffsetConverter(Node):
         output flow (this is for internal purposes).
 
         :math:`C_1 = (l_{max}-l_{min})/(l_{max}/eta_{max}-l_{min}/eta_{min})`
-        :math:`C_0 = l_{min} \cdot (1-C_1/eta_{min})`
+        :math:`C_0 = l_{min} * (1-C_1/eta_{min})`
 
         The symbols used are defined as follows(index (t) was previously omitted
         for brevity):
