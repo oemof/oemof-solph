@@ -1368,7 +1368,7 @@ class TestsConstraint:
                     min=0.2,
                 )
             },
-            coefficients=[2.5, 0.5],
+            coefficients={b_el: (2.5, 0.5)},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
@@ -1393,7 +1393,7 @@ class TestsConstraint:
                     ),
                 )
             },
-            coefficients=[2.5, 0.5],
+            coefficients={b_el: (2.5, 0.5)},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
