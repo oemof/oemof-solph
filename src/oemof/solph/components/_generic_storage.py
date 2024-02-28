@@ -120,7 +120,9 @@ class GenericStorage(Node):
         Determine the lifetime of an outflow; only applicable for multi-period
         models which can invest in storage capacity and have an
         invest_relation_output_capacity defined
-
+    multiple_tsam_timegrid : boolean
+        Relevant in tsam mode.
+        If true, inter and intra storage content is considers.
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
