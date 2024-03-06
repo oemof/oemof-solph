@@ -77,7 +77,7 @@ class OffsetConverter(Node):
             inputs=inputs,
             outputs=outputs,
             label=label,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
 
         if coefficients is not None:

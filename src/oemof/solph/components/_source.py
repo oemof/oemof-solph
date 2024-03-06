@@ -73,7 +73,11 @@ class Source(Node):
                 debugging.SuspiciousUsageWarning,
             )
 
-        super().__init__(label=label, outputs=outputs, **custom_attributes)
+        super().__init__(
+            label=label,
+            outputs=outputs,
+            custom_properties=custom_attributes
+        )
 
     def constraint_group(self):
         pass
