@@ -86,7 +86,7 @@ setup(
         "pyomo >= 5.7.0, < 5.7.3",
         "networkx",
         "oemof.tools",
-        "oemof.network",
+        "oemof.network >= 0.4.0, < 0.5",
     ],
     extras_require={
         "dev": ["pytest", "sphinx", "sphinx_rtd_theme"],
