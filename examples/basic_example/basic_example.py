@@ -79,7 +79,12 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
-def main():
+def main(dump_and_restore=False):
+    # For models that need a long time to optimise, saving and loading the
+    # EnergySystem might be advised. By default, we do not do this here. Feel
+    # free to experiment with this once you understood the rest of the code.
+    dump_results = restore_results = dump_and_restore
+    
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
@@ -226,10 +231,6 @@ def main():
     # add results to the energy system to make it possible to store them.
     energysystem.results["main"] = processing.results(model)
     energysystem.results["meta"] = processing.meta_results(model)
-
-    # For models that need a long time to optimise, saving and loading the
-    # EnergySystem might be advised. By default, we do not do this here.
-    dump_results = restore_results = False
 
     # The default path is the '.oemof' folder in your $HOME directory.
     # The default filename is 'es_dump.oemof'.
