@@ -84,7 +84,7 @@ def main(dump_and_restore=False):
     # EnergySystem might be advised. By default, we do not do this here. Feel
     # free to experiment with this once you understood the rest of the code.
     dump_results = restore_results = dump_and_restore
-    
+
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
