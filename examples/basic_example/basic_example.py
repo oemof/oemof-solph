@@ -107,7 +107,7 @@ def plot_figures_for(element: dict) -> None:
 
 def main():
     # *************************************************************************
-    # ********** PART 1 - Define and optimize the energy system ***************
+    # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
 
     # Read data file
@@ -245,7 +245,7 @@ def main():
     # Optimise the energy system and plot the results
     ##########################################################################
 
-    logging.info("Optimize the energy system")
+    logging.info("Optimise the energy system")
 
     # initialise the operational model
     energysystem_model = Model(energysystem)
