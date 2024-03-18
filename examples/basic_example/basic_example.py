@@ -71,7 +71,7 @@ from oemof.tools import logger
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
-from oemof.solph import components as solver_components
+from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
 from oemof.solph import helpers
