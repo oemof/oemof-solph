@@ -78,7 +78,7 @@ from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
-BATTERY_STORAGE = "battery_storage"
+STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
