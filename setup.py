@@ -82,8 +82,8 @@ setup(
         "pandas >= 1.5.3",
         "pyomo >= 6.6.0, < 7.0",
         "networkx",
-        "oemof.tools >= 0.4.2",
-        "oemof.network >= 0.5.0a1",
+        "oemof.tools >= 0.4.3",
+        "oemof.network >= 0.5.0",
     ],
     extras_require={
         "dev": [
