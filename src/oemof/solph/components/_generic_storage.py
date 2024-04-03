@@ -237,9 +237,15 @@ class GenericStorage(Node):
         self.min_storage_level = solph_sequence(min_storage_level)
         self.fixed_costs = solph_sequence(fixed_costs)
         self.storage_costs = solph_sequence(storage_costs)
-        self.invest_relation_input_output = solph_sequence(invest_relation_input_output)
-        self.invest_relation_input_capacity = solph_sequence(invest_relation_input_capacity)
-        self.invest_relation_output_capacity = solph_sequence(invest_relation_output_capacity)
+        self.invest_relation_input_output = solph_sequence(
+            invest_relation_input_output
+        )
+        self.invest_relation_input_capacity = solph_sequence(
+            invest_relation_input_capacity
+        )
+        self.invest_relation_output_capacity = solph_sequence(
+            invest_relation_output_capacity
+        )
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
@@ -1620,7 +1626,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                        == self.total[n, p] * n.invest_relation_output_capacity[p]
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity[p]
                     )
                     self.storage_capacity_outflow.add((n, p), expr)
 
