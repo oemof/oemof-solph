@@ -37,6 +37,7 @@ import logging
 
 import pandas as pd
 import pytest
+from oemof.tools import economics
 from oemof.tools import logger
 
 from oemof import solph
@@ -90,11 +91,12 @@ demand = solph.components.Sink(
 )
 
 # create storage object representing a battery
+epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 storage = solph.components.GenericStorage(
     label="storage",
-    nominal_storage_capacity=2000,
-    inputs={bel: solph.Flow()},
-    outputs={bel: solph.Flow()},
+    inputs={bel: solph.Flow(lifetime=20)},
+    outputs={bel: solph.Flow(lifetime=20)},
+    investment=solph.Investment(ep_costs=epc, lifetime=20),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
     outflow_conversion_factor=0.8,
@@ -133,7 +135,6 @@ flows.columns = [
     f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()
 ]
 
-# Solving equations from above, needed initial SOC is as follows:
 first_input = (
     (100 * 1 / 0.8) / (1 - 0.01)
     + (100 * 1 / 0.8) / (1 - 0.01) ** 2
@@ -141,8 +142,14 @@ first_input = (
     + (100 * 1 / 0.8) / (1 - 0.01) ** 4
     + (50 * 1 / 0.8) / (1 - 0.01) ** 5
 )
-last_output = (100 * 1 / 0.8) / 0.99
-init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
+# In this example SOC can e zero, as last SOC does not have to be equal
+# to first SOC in investment mode (maybe this should be changed?)
+init_soc = 0
+
+
+def test_storage_investment():
+    """Make sure that max SOC investment equals max load"""
+    assert results[storage, None]["scalars"]["invest"] == pytest.approx(first_input)
 
 
 def test_storage_input():
@@ -200,6 +207,4 @@ def test_soc():
         (50 * 1 / 0.8) / (1 - 0.01), abs=1e-2
     )
     assert flows["storage-None"][6] == pytest.approx(0, abs=1e-2)
-    assert flows["storage-None"][7] == pytest.approx(
-        (init_soc + (100 * 1 / 0.8)) / 0.99
-    )
+    assert flows["storage-None"][7] == pytest.approx(first_input)

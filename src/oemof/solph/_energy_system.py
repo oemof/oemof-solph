@@ -143,21 +143,6 @@ class EnergySystem(es.EnergySystem):
                 )
             )
 
-        timeincrement = self._init_timeincrement(
-            timeincrement, timeindex, periods, tsa_parameters
-        )
-        if (pd.Series(timeincrement) <= 0).any():
-            msg = (
-                "The time increment is inconsistent. Negative values and zero "
-                "are not allowed.\nThis is caused by a inconsistent "
-                "timeincrement parameter or an incorrect timeindex."
-            )
-            raise TypeError(msg)
-
-        super().__init__(
-            timeindex=timeindex, timeincrement=timeincrement, **kwargs
-        )
-
         self.periods = periods
         if self.periods is not None:
             msg = (
@@ -176,11 +161,6 @@ class EnergySystem(es.EnergySystem):
             self.use_remaining_value = use_remaining_value
 
         if tsa_parameters is not None:
-            if periods is None:
-                raise AttributeError(
-                    "Currently, TSAM mode can only be used together with "
-                    "multi-period mode."
-                )
             msg = (
                 "CAUTION! You specified the 'tsa_parameters' attribute for "
                 "your energy system.\n This will lead to setting up "
@@ -197,9 +177,14 @@ class EnergySystem(es.EnergySystem):
                 tsa_parameters = [tsa_parameters]
 
             # Construct occurrences of typical periods
-            for p in range(len(periods)):
-                tsa_parameters[p]["occurrences"] = collections.Counter(
-                    tsa_parameters[p]["order"]
+            if periods is not None:
+                for p in range(len(periods)):
+                    tsa_parameters[p]["occurrences"] = collections.Counter(
+                        tsa_parameters[p]["order"]
+                    )
+            else:
+                tsa_parameters[0]["occurrences"] = collections.Counter(
+                    tsa_parameters[0]["order"]
                 )
 
             # If segmentation is used, timesteps is set to number of
@@ -214,6 +199,21 @@ class EnergySystem(es.EnergySystem):
                     params["timesteps"] = params["timesteps_per_period"]
 
         self.tsa_parameters = tsa_parameters
+
+        timeincrement = self._init_timeincrement(
+            timeincrement, timeindex, periods, tsa_parameters
+        )
+        if (pd.Series(timeincrement) <= 0).any():
+            msg = (
+                "The time increment is inconsistent. Negative values and zero "
+                "are not allowed.\nThis is caused by a inconsistent "
+                "timeincrement parameter or an incorrect timeindex."
+            )
+            raise TypeError(msg)
+
+        super().__init__(
+            timeindex=timeindex, timeincrement=timeincrement, **kwargs
+        )
 
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
@@ -236,7 +236,7 @@ class EnergySystem(es.EnergySystem):
             and not all("segments" in params for params in tsa_parameters)
         ):
             msg = (
-                "If have to set up segmentation in all periods, "
+                "You have to set up segmentation in all periods, "
                 "if you want to use segmentation in TSAM mode"
             )
             raise AttributeError(msg)

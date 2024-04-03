@@ -249,8 +249,12 @@ def results(model, remove_last_time_point=False):
     if model.es.tsa_parameters:
         for p, period_data in enumerate(model.es.tsa_parameters):
             if p == 0:
+                if model.es.periods is None:
+                    timeindex = model.es.timeindex
+                else:
+                    timeindex = model.es.periods[0]
                 result_index = _disaggregate_tsa_timeindex(
-                    model.es.periods[p], period_data
+                    timeindex, period_data
                 )
             else:
                 result_index = result_index.union(
@@ -663,7 +667,9 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
         if len(oemof_tuple) == 2:
-            storages[oemof_tuple[0]]["inter"] = data
+            # Must be filtered for variable name "storage_content_inter", otherwise "init_content" variable
+            # (in non-multi-period approach) interferes with SOC results
+            storages[oemof_tuple[0]]["inter"] = data[data["variable_name"] == "storage_content_inter"]
         if len(oemof_tuple) == 3:
             storages[oemof_tuple[0]]["intra"][
                 (oemof_tuple[1], oemof_tuple[2])
@@ -683,6 +689,8 @@ def _get_multiplexer_flows_and_keys(flow_dict):
             multiplexer_keys.append(oemof_tuple)
             multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = data
     return multiplexer, multiplexer_keys
+
+
 def _disaggregate_tsa_timeindex(period_index, tsa_parameters):
     """Disaggregate aggregated period timeindex by using TSA parameters"""
     return pd.date_range(

@@ -62,7 +62,7 @@ energysystem = solph.EnergySystem(
             "order": [0, 1, 1, 0],
         },
     ],
-    infer_last_interval=False,
+    infer_last_interval=True,
 )
 
 ##########################################################################

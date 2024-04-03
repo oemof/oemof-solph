@@ -1724,9 +1724,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 ) * m.timeincrement[0]
                 return expr == 0
 
-            self.balance_first = Constraint(
-                self.INVESTSTORAGES, rule=_storage_balance_first_rule
-            )
+            if not m.TSAM_MODE:
+                self.balance_first = Constraint(
+                    self.INVESTSTORAGES, rule=_storage_balance_first_rule
+                )
 
         def _storage_balance_rule(block, n, p, t):
             """
@@ -1829,8 +1830,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
 
-        if m.es.periods is None:
-
+        if m.es.periods is None and not m.TSAM_MODE:
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMESTEPS.at(-1)]

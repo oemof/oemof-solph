@@ -15,8 +15,6 @@ The example models the following energy system:
  storage(Storage)    |<---------|
                      |--------->|
 
-
-
 An initial SOC of zero leads to infeasible solution, as last inter SOC has to
 match first inter SOC.
 Following equations have to be fulfilled:
@@ -48,18 +46,17 @@ from oemof import solph
 logger.define_logging()
 logging.info("Initialize the energy system")
 
-tindex_original = pd.date_range("2022-01-01", periods=8, freq="H")
+tindex_original = pd.date_range("2022-01-01", periods=16, freq="H")
 tindex = pd.date_range("2022-01-01", periods=4, freq="H")
 
 energysystem = solph.EnergySystem(
     timeindex=tindex,
-    tsa_parameters=[
-        {
-            "timesteps_per_period": 2,
+    tsa_parameters={
+            "timesteps_per_period": 4,
             "order": [0, 1, 1, 0],
-        },
-    ],
-    infer_last_interval=True,
+            "segments": {(0, 0): 1, (0, 1): 3, (1, 0): 2, (1, 1): 2},
+    },
+    infer_last_interval=False,
 )
 
 ##########################################################################
@@ -115,6 +112,7 @@ logging.info("Optimise the energy system")
 
 # initialise the operational model
 om = solph.Model(energysystem)
+om.write("model.lp", io_options={"symbolic_solver_labels": True})
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")
@@ -135,14 +133,14 @@ flows.columns = [
 
 # Solving equations from above, needed initial SOC is as follows:
 first_input = (
-    (100 * 1 / 0.8) / (1 - 0.01)
-    + (100 * 1 / 0.8) / (1 - 0.01) ** 2
-    + (50 * 1 / 0.8) / (1 - 0.01) ** 3
-    + (100 * 1 / 0.8) / (1 - 0.01) ** 4
-    + (50 * 1 / 0.8) / (1 - 0.01) ** 5
+    (3 * 100 * 1 / 0.8) / ((1 - 0.01) ** 3)
+    + (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** (2 + 3))
+    + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 + 5))
+    + (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** (2 + 7))
+    + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 + 9))
 )
-last_output = (100 * 1 / 0.8) / 0.99
-init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
+last_output = (3 * 100 * 1 / 0.8) / 0.99**3
+init_soc = (first_input - last_output) / (1 / 0.99**3 + 0.99)
 
 
 def test_storage_input():
@@ -154,52 +152,69 @@ def test_storage_input():
     assert flows["electricity-storage"][3] == 0
     assert flows["electricity-storage"][4] == 0
     assert flows["electricity-storage"][5] == 0
-    assert flows["electricity-storage"][6] == flows["electricity-storage"][0]
+    assert flows["electricity-storage"][6] == 0
     assert flows["electricity-storage"][7] == 0
+    assert flows["electricity-storage"][8] == 0
+    assert flows["electricity-storage"][9] == 0
+    assert flows["electricity-storage"][10] == 0
+    assert flows["electricity-storage"][11] == 0
+    assert flows["electricity-storage"][12] == flows["electricity-storage"][0]
+    assert flows["electricity-storage"][13] == 0
+    assert flows["electricity-storage"][14] == 0
+    assert flows["electricity-storage"][15] == 0
 
 
 def test_storage_output():
     assert flows["storage-electricity"][0] == 0
     assert flows["storage-electricity"][1] == 100
     assert flows["storage-electricity"][2] == 100
-    assert flows["storage-electricity"][3] == 50
+    assert flows["storage-electricity"][3] == 100
     assert flows["storage-electricity"][4] == 100
-    assert flows["storage-electricity"][5] == 50
-    assert flows["storage-electricity"][6] == 0
-    assert flows["storage-electricity"][7] == 100
+    assert flows["storage-electricity"][5] == 100
+    assert flows["storage-electricity"][6] == 50
+    assert flows["storage-electricity"][7] == 50
+    assert flows["storage-electricity"][8] == 100
+    assert flows["storage-electricity"][9] == 100
+    assert flows["storage-electricity"][10] == 50
+    assert flows["storage-electricity"][11] == 50
+    assert flows["storage-electricity"][12] == 0
+    assert flows["storage-electricity"][13] == 100
+    assert flows["storage-electricity"][14] == 100
+    assert flows["storage-electricity"][15] == 100
 
 
 def test_soc():
     assert flows["storage-None"][0] == pytest.approx(init_soc)
     assert flows["storage-None"][1] == pytest.approx(
-        (100 * 1 / 0.8) / (1 - 0.01)
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 2
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 3
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 4
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 5,
-        abs=1e-2,
-    )
-    assert flows["storage-None"][2] == pytest.approx(
-        (100 * 1 / 0.8) / (1 - 0.01)
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 2
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 3
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 4,
-        abs=1e-2,
-    )
-    assert flows["storage-None"][3] == pytest.approx(
-        (50 * 1 / 0.8) / (1 - 0.01)
-        + (100 * 1 / 0.8) / (1 - 0.01) ** 2
-        + (50 * 1 / 0.8) / (1 - 0.01) ** 3,
+        first_input,
         abs=1e-2,
     )
     assert flows["storage-None"][4] == pytest.approx(
-        (100 * 1 / 0.8) / (1 - 0.01) + (50 * 1 / 0.8) / (1 - 0.01) ** 2,
+        (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** 2)
+        + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 + 2))
+        + (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** (2 + 4))
+        + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 + 6)),
         abs=1e-2,
     )
-    assert flows["storage-None"][5] == pytest.approx(
-        (50 * 1 / 0.8) / (1 - 0.01), abs=1e-2
+    assert flows["storage-None"][6] == pytest.approx(
+        (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** 2)
+        + (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** (2 + 2))
+        + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 + 4)),
+        abs=1e-2,
     )
-    assert flows["storage-None"][6] == pytest.approx(0, abs=1e-2)
-    assert flows["storage-None"][7] == pytest.approx(
-        (init_soc + (100 * 1 / 0.8)) / 0.99
+    assert flows["storage-None"][8] == pytest.approx(
+        (2 * 100 * 1 / 0.8) / ((1 - 0.01) ** 2)
+        + (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** (2 * 2)),
+        abs=1e-2,
+    )
+    assert flows["storage-None"][10] == pytest.approx(
+        (2 * 50 * 1 / 0.8) / ((1 - 0.01) ** 2), abs=1e-2
+    )
+    assert flows["storage-None"][12] == pytest.approx(0, abs=1e-2)
+    assert flows["storage-None"][13] == pytest.approx(
+        (init_soc + (3 * 100 * 1 / 0.8)) / 0.99**3
+    )
+    assert flows["storage-None"][15] == pytest.approx(
+        init_soc
+        + (flows["storage-None"][13] - init_soc) / 3  # linear interpolation
     )
