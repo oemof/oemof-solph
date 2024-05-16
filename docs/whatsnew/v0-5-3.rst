@@ -4,8 +4,13 @@ v0.5.3
 API changes
 ###########
 
+* `coefficient` of `OffsetConverter` expects a dictionary similar to 
+  `Converter`s `conversion_factors`
+
 New features
 ############
+
+* `OffsetConverter` can now handle multiple outputs
 
 Documentation
 #############
@@ -13,11 +18,19 @@ Documentation
 Bug fixes
 #########
 
+* Fix custom attributes of Sink, Source, GenericCHP and Converter components
+  not being properly passed to base Node class
+
 Other changes
 #############
+
+* Unified (usage) documentation for `OffsetConverter`
 
 Known issues
 ############
 
 Contributors
 ############
+
+* Lennart Schürmann
+* Richard Keil

@@ -63,7 +63,11 @@ class Sink(Node):
                 debugging.SuspiciousUsageWarning,
             )
 
-        super().__init__(label=label, inputs=inputs, **custom_attributes)
+        super().__init__(
+            label=label,
+            inputs=inputs,
+            custom_properties=custom_attributes
+        )
 
     def constraint_group(self):
         pass
