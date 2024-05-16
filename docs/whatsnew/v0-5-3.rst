@@ -18,6 +18,9 @@ Documentation
 Bug fixes
 #########
 
+* Fix custom attributes of Sink, Source, GenericCHP and Converter components
+  not being properly passed to base Node class
+
 Other changes
 #############
 
@@ -30,3 +33,4 @@ Contributors
 ############
 
 * Lennart Schürmann
+* Richard Keil
