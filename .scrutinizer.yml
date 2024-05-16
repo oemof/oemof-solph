@@ -3,4 +3,5 @@ filter:
         - src/
         - examples/
     excluded_paths:
-      - */experimental/*       # submodules marked experimental
+      - "*/experimental/*"       # submodules marked experimental
+
