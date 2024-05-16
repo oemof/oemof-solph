@@ -270,13 +270,6 @@ class GenericStorage(Node):
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
-        if self.investment and self.nominal_storage_capacity is not None:
-            e1 = (
-                "If an investment object is defined the invest variable "
-                "replaces the nominal_storage_capacity.\n Therefore the "
-                "nominal_storage_capacity should be 'None'.\n"
-            )
-            raise AttributeError(e1)
         if (
             self.invest_relation_input_output is not None
             and self.invest_relation_output_capacity is not None
