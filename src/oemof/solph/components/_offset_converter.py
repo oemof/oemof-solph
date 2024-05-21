@@ -37,17 +37,18 @@ class OffsetConverter(Node):
 
     Parameters
     ----------
-    coefficients : dict of tuples, (:math:`C_0(t)`, :math:`C_1(t)`)
-        Dict of tuples containing the respective output bus as key and
-        as value a tuple with the parameters :math:`C_0(t)` and :math:`C_1(t)`.
-        Here, :math:`C_1(t)` represents the slope of a linear equation and
-        :math:`C_0(t)` is the y-intercept divided by the `nominal_value` of the
-        `NonConvex` flow (this is for internal purposes).
+    conversion_factors : dict, (:math:`C_1(t)`)
+        Dict containing the respective bus as key and as value the parameter
+        :math:`C_1(t)`. It represents the slope of a linear equation with
+        respect to the `NonConvex` flow. The value can either be a scalar or a
+        sequence with length of time horizon for simulation.
 
-        Both values can either be a scalar or a sequence with length of time
-        horizon for simulation. They are provided to the `conversion_factors`
-        (:math:`C_1(t)`) and `normed_offsets` (:math:`C_0(t)`).
-
+    normed_offsets : dict, (:math:`C_0(t)`)
+        Dict containing the respective bus as key and as value the parameter
+        :math:`C_0(t)`. It represents the y-intercept with respect to the
+        `NonConvex` flow divided by the `nominal_value` of the `NonConvex` flow
+        (this is for internal purposes). The value can either be a scalar or a
+        sequence with length of time horizon for simulation.
     Notes
     -----
     **C_1 and C_0 can be calculated as follows:**
