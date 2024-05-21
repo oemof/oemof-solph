@@ -154,21 +154,23 @@ class OffsetConverter(Node):
             for v in self.outputs.values():
                 if v.nonconvex:
                     raise TypeError(
-                        "Output flow must not have the `NonConvex` attribute!"
+                        "`NonConvex` attribute must be defined only for the "
+                        "input flow!"
+                    )
+                if v.investment:
+                    raise TypeError(
+                        "`Investment` attribute must be defined only for the "
+                        "input flow!"
                     )
 
         # `Investment` and `NonConvex` attributes cannot be defined for the
         # input flow.
         if len(self.inputs):
             for v in self.inputs.values():
-                if v.investment:
-                    raise TypeError(
-                        "`Investment` attribute must be defined only for the "
-                        + "output flow!"
-                    )
                 if not v.nonconvex:
                     raise TypeError(
-                        "`NonConvex` attribute must be defined for the input flow!"
+                        "`NonConvex` attribute must be defined for the input "
+                        "flow!"
                     )
 
         if len(self.inputs) > 1:
