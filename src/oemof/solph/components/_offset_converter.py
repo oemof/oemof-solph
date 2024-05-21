@@ -185,6 +185,7 @@ class OffsetConverterBlock(ScalarBlock):
     Note that :math:`P_{max}(t) \cdot Y(t)` is merged into one variable,
     called `status_nominal[n, o, p, t]`.
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):

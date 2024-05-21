@@ -494,6 +494,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -894,6 +895,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1666,6 +1668,7 @@ class SinkDSMDIWBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa E:501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -2414,6 +2417,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -3610,6 +3614,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             =========================================== ================================= ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -4681,6 +4686,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):

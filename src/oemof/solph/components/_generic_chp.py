@@ -299,6 +299,7 @@ class GenericCHPBlock(ScalarBlock):
     =============================== ======================= ==== =============================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
