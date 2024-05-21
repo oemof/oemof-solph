@@ -95,11 +95,13 @@ class OffsetConverter(Node):
         inputs,
         outputs,
         label=None,
-        coefficients=None,
+        conversion_factors=None,
+        normed_offsets=None,
         custom_attributes=None,
     ):
         if custom_attributes is None:
             custom_attributes = {}
+
         super().__init__(
             inputs=inputs,
             outputs=outputs,
@@ -107,76 +109,46 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        if coefficients is not None:
-            self.coefficients = dict()
-            if isinstance(coefficients, tuple):
-                # TODO: add the correct version in the message
-                msg = (
-                    "Passing a tuple to the keyword `coefficients` will be"
-                    " deprecated in a later version. Please use a dict to"
-                    " specify the corresponding output flow. The first output"
-                    " flow will be assumed as target by default."
-                )
-                warn(msg, DeprecationWarning)
-                if len(coefficients) != 2:
-                    raise ValueError(
-                        "Two coefficients or coefficient series have to be"
-                        " given."
-                    )
-                self.coefficients.update(
-                    {
-                        [k for k in self.outputs.keys()][0]: tuple(
-                            [sequence(i) for i in coefficients]
-                        )
-                    }
-                )
-            elif isinstance(coefficients, dict):
-                for k, v in coefficients.items():
-                    if len(v) != 2:
-                        raise ValueError(
-                            "Two coefficients or coefficient series have to be"
-                            " given."
-                        )
-                    self.coefficients.update(
-                        {k: (sequence(v[0]), sequence(v[1]))}
-                    )
-            else:
-                raise TypeError(
-                    "`coefficiencts` needs to be either dict or tuple"
-                    " (deprecated)."
-                )
-
-        # `OffsetConverter` always needs the `NonConvex` attribute, but the
-        # `Investment` attribute is optional. If it is used, the
-        # `InvestNonConvexFlow` will be used in the definition of constraints,
-        # otherwise, the `NonConvexFlow` will be used.
-        if len(self.outputs):
-            for v in self.outputs.values():
-                if v.nonconvex:
-                    raise TypeError(
-                        "`NonConvex` attribute must be defined only for the "
-                        "input flow!"
-                    )
-                if v.investment:
-                    raise TypeError(
-                        "`Investment` attribute must be defined only for the "
-                        "input flow!"
-                    )
-
-        # `Investment` and `NonConvex` attributes cannot be defined for the
-        # input flow.
-        if len(self.inputs):
-            for v in self.inputs.values():
-                if not v.nonconvex:
-                    raise TypeError(
-                        "`NonConvex` attribute must be defined for the input "
-                        "flow!"
-                    )
-
-        if len(self.inputs) > 1:
+        self._reference_flow = [v.input for v in self.inputs.values() if v.nonconvex]
+        self._reference_flow += [v.output for v in self.outputs.values() if v.nonconvex]
+        if len(self._reference_flow) != 1:
             raise ValueError(
-                "Component `OffsetConverter` must not have more than 1 input!"
+                "Exactly one flow of the `OffsetConverter` must have the "
+                "`NonConvex` attribute."
             )
+        self._reference_flow = self._reference_flow[0]
+        if self._reference_flow in  [v.input for v in self.inputs.values()]:
+            self._reference_flow_at_input = True
+        else:
+            self._reference_flow_at_input = False
+
+        if conversion_factors is None:
+            conversion_factors = {}
+
+        self.conversion_factors = {
+            k: sequence(v) for k, v in conversion_factors.items()
+        }
+
+        missing_conversion_factor_keys = (
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.conversion_factors)
+
+        for cf in missing_conversion_factor_keys:
+            self.conversion_factors[cf] = sequence(1)
+
+        if normed_offsets is None:
+            normed_offsets = {}
+
+        self.normed_offsets = {
+            k: sequence(v) for k, v in normed_offsets.items()
+        }
+
+        missing_normed_offsets_keys = (
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.normed_offsets)
+
+        for cf in missing_normed_offsets_keys:
+            self.normed_offsets[cf] = sequence(1)
 
     def constraint_group(self):
         return OffsetConverterBlock
@@ -269,16 +241,17 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
-        in_flows = {n: [i for i in n.inputs.keys()] for n in group}
-        out_flows = {n: [o for o in n.outputs.keys()] for n in group}
+        reference_flows = {n: n._reference_flow for n in group}
+        reference_flows_at_input = {n: n._reference_flow_at_input for n in group}
+        in_flows = {n: [i for i in n.inputs.keys() if i != n._reference_flow] for n in group}
+        out_flows = {n: [o for o in n.outputs.keys() if o != n._reference_flow] for n in group}
 
         self.relation = Constraint(
             [
-                (n, i, o, p, t)
+                (n, reference_flows[n], f, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
-                for o in out_flows[n]
-                for i in in_flows[n]
+                for f in in_flows[n] + out_flows[n]
             ],
             noruleinit=True,
         )
@@ -287,48 +260,27 @@ class OffsetConverterBlock(ScalarBlock):
             """Link binary input and output flow to component outflow."""
             for p, t in m.TIMEINDEX:
                 for n in group:
-                    for o in out_flows[n]:
-                        for i in in_flows[n]:
-                            expr = 0
-                            expr += -m.flow[n, o, p, t]
-                            expr += (
-                                m.flow[i, n, p, t] * n.coefficients[o][1][t]
-                            )
-                            # `Y(t)` in the last term of the constraint
-                            # (":math:`C_0(t) \cdot Y(t)`") is different for
-                            # different cases. If both `Investment` and
-                            # `NonConvex` attributes are used for the
-                            # `OffsetConverter`, `Y(t)` would represent the
-                            # `status_nominal[n,o,t]` in the
-                            # `InvestNonConvexFlow`. But if only the
-                            # `NonConvex` attribute is defined for the
-                            # `OffsetConverter`, `Y(t)` would correspond to
-                            # the `status_nominal[n,o,t]` in the
-                            # `NonConvexFlow`.
-                            try:
-                                expr += (
-                                    m.InvestNonConvexFlowBlock.status_nominal[
-                                        i, n, t
-                                    ]
-                                    * n.coefficients[o][0][t]
-                                )
-                            # `KeyError` occurs when more than one
-                            # `OffsetConverter` is defined, and in some of
-                            # them only the `NonConvex` attribute is
-                            # considered, while in others both `NonConvex`
-                            # and `Investment` attributes are defined.
-                            # `AttributeError` only occurs when the
-                            # `OffsetConverter` has only the `NonConvex`
-                            # attribute, and therefore,
-                            # `m.InvestNonConvexFlowBlock.status_nominal`
-                            # (inside the `try` block) does not exist.
-                            except (KeyError, AttributeError):
-                                expr += (
-                                    m.NonConvexFlowBlock.status_nominal[
-                                        i, n, t
-                                    ]
-                                    * n.coefficients[o][0][t]
-                                )
-                            block.relation.add((n, i, o, p, t), (expr == 0))
+                    if reference_flows_at_input[n]:
+                        ref_flow = m.flow[reference_flows[n], n, p, t]
+                        ref_status_nominal = m.NonConvexFlowBlock.status_nominal[reference_flows[n], n, t]
+                    else:
+                        ref_flow = m.flow[n, reference_flows[n], p, t]
+                        ref_status_nominal = m.NonConvexFlowBlock.status_nominal[n, reference_flows[n], t]
+
+                    for f in in_flows[n] + out_flows[n]:
+                        rhs = 0
+                        if f in in_flows[n]:
+                            rhs += m.flow[f, n, p, t]
+                        else:
+                            rhs += m.flow[n, f, p, t]
+
+                        lhs = 0
+                        lhs += (
+                            ref_flow * n.conversion_factors[f][t]
+                        )
+                        lhs += (
+                            ref_status_nominal * n.normed_offsets[f][t]
+                        )
+                        block.relation.add((n, reference_flows[n], f, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_relation_rule)
