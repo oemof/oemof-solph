@@ -60,7 +60,7 @@ def main():
     logger.define_logging()
 
     date_time_index = pd.date_range(
-        "1/1/2012", periods=number_of_time_steps, freq="H"
+        "1/1/2012", periods=number_of_time_steps, freq="h"
     )
 
     energysystem = EnergySystem(

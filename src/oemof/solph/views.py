@@ -409,13 +409,19 @@ def net_storage_flow(results, node_type):
         subset = (
             df.T.groupby(
                 lambda x1: (
-                    lambda fr, to, ty: "output"
-                    if (fr == lb and ty == "flow")
-                    else "input"
-                    if (to == lb and ty == "flow")
-                    else "level"
-                    if (fr == lb and ty != "flow")
-                    else None
+                    lambda fr, to, ty: (
+                        "output"
+                        if (fr == lb and ty == "flow")
+                        else (
+                            "input"
+                            if (to == lb and ty == "flow")
+                            else (
+                                "level"
+                                if (fr == lb and ty != "flow")
+                                else None
+                            )
+                        )
+                    )
                 )(*x1)
             )
             .sum()

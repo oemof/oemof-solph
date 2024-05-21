@@ -6,6 +6,7 @@ available from its original location oemof/tests/test_components.py
 
 SPDX-License-Identifier: MIT
 """
+
 import pytest
 
 from oemof import solph

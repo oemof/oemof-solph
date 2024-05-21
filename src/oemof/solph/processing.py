@@ -233,9 +233,9 @@ def results(model, remove_last_time_point=False):
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
-        k
-        if len(k) > 1
-        else (k[0], None): v[["timestep", "variable_name", "value"]]
+        k if len(k) > 1 else (k[0], None): v[
+            ["timestep", "variable_name", "value"]
+        ]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -430,11 +430,11 @@ def convert_keys_to_strings(result, keep_none_type=False):
     """
     if keep_none_type:
         converted = {
-            tuple([str(e) if e is not None else None for e in k])
-            if isinstance(k, tuple)
-            else str(k)
-            if k is not None
-            else None: v
+            (
+                tuple([str(e) if e is not None else None for e in k])
+                if isinstance(k, tuple)
+                else str(k) if k is not None else None
+            ): v
             for k, v in result.items()
         }
     else:

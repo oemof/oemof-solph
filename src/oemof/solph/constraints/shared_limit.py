@@ -60,7 +60,7 @@ def shared_limit(
 
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='h')
     >>> energysystem = solph.EnergySystem(
     ...     timeindex=date_time_index,
     ...     infer_last_interval=False,
