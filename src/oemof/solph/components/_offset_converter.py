@@ -278,12 +278,20 @@ class OffsetConverterBlock(ScalarBlock):
             """Link binary input and output flow to component outflow."""
             for p, t in m.TIMEINDEX:
                 for n in group:
+
                     if reference_flows_at_input[n]:
                         ref_flow = m.flow[reference_flows[n], n, p, t]
-                        ref_status_nominal = m.NonConvexFlowBlock.status_nominal[reference_flows[n], n, t]
+                        idx = reference_flows[n], n, t
                     else:
                         ref_flow = m.flow[n, reference_flows[n], p, t]
-                        ref_status_nominal = m.NonConvexFlowBlock.status_nominal[n, reference_flows[n], t]
+                        idx = n, reference_flows[n], t
+
+                    status_nominal = m.NonConvexFlowBlock.status_nominal
+                    if hasattr(m, "InvestNonConvexFlowBlock"):
+                        if idx in m.InvestNonConvexFlowBlock:
+                            status_nominal = m.InvestNonConvexFlowBlock.status_nominal
+
+                    ref_status_nominal = status_nominal[idx]
 
                     for f in in_flows[n] + out_flows[n]:
                         rhs = 0
