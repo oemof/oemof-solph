@@ -41,11 +41,12 @@ class OffsetConverter(Node):
         Dict of tuples containing the respective output bus as key and
         as value a tuple with the parameters :math:`C_0(t)` and :math:`C_1(t)`.
         Here, :math:`C_1(t)` represents the slope of a linear equation and
-        :math:`C_0(t)` is the y-intercept devided by the `nominal_value` of the
-        output flow (this is for internal purposes).
+        :math:`C_0(t)` is the y-intercept divided by the `nominal_value` of the
+        `NonConvex` flow (this is for internal purposes).
 
-        The tuple values can either be a scalar or a sequence with length
-        of time horizon for simulation.
+        Both values can either be a scalar or a sequence with length of time
+        horizon for simulation. They are provided to the `conversion_factors`
+        (:math:`C_1(t)`) and `normed_offsets` (:math:`C_0(t)`).
 
     Notes
     -----
@@ -55,14 +56,14 @@ class OffsetConverter(Node):
 
     .. math::
 
-        C_1 = (l_{max}-l_{min})/(l_{max}/\\eta_{max}-l_{min}/\\eta_{min})
+        C_1 = \\frac{(l_{max}/\\eta_{max}-l_{min}/\\eta_{min}}{l_{max}-l_{min}}
 
-        C_0 = l_{min} \\cdot (1-C_1/\\eta_{min})
+        C_0 = \\frac{1}{\\eta_{max}} - C_1
 
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
-    partload share (e.g. 1.0 and 0.5) with reference to the output quantity in
-    this example and :math:`\\eta_{max}` and :math:`\\eta_{min}` are the
-    respective efficiencies/conversion factors at these partloads.
+    partload share (e.g. 1.0 and 0.5) with reference to the `NonConvex` flow
+    and :math:`\\eta_{max}` and :math:`\\eta_{min}` are the respective
+    efficiencies/conversion factors at these partloads.
 
     The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
