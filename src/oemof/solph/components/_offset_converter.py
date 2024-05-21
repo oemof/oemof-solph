@@ -60,9 +60,9 @@ class OffsetConverter(Node):
         C_0 = l_{min} \\cdot (1-C_1/\\eta_{min})
 
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
-    partload share (e.g. 1.0 and 0.3) and :math:`\\eta_{max}` and
-    :math:`\\eta_{min}` are the efficiencies/conversion factors at these
-    partloads.
+    partload share (e.g. 1.0 and 0.5) with reference to the output quantity in
+    this example and :math:`\\eta_{max}` and :math:`\\eta_{min}` are the
+    respective efficiencies/conversion factors at these partloads.
 
     The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
@@ -72,22 +72,38 @@ class OffsetConverter(Node):
     >>> from oemof import solph
     >>> bel = solph.buses.Bus(label='bel')
     >>> bth = solph.buses.Bus(label='bth')
+    >>> l_nominal = 60
     >>> l_max = 1
     >>> l_min = 0.5
     >>> eta_max = 0.5
     >>> eta_min = 0.3
-    >>> c1 = (l_max-l_min)/(l_max/eta_max-l_min/eta_min)
-    >>> c0 = l_min*(1-c1/eta_min)
+    >>> c1 = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
+    >>> c0 = 1 / eta_max - c1
     >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_value=60, min=l_min, max=l_max,
+    ...         nominal_value=l_nominal, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
-    ...    coefficients={bth: (c0, c1)}
+    ...    conversion_factors={bel: c1},
+    ...    normed_offsets={bel: c0},
     ... )
     >>> type(ostf)
     <class 'oemof.solph.components._offset_converter.OffsetConverter'>
+
+    The input required to operate at minimum load, can be computed from the
+    slope and offset:
+
+    >>> input_at_min = ostf.conversion_factors[bel][0] * l_min + ostf.normed_offsets[bel][0] * l_max
+    >>> input_at_min * l_nominal
+    100.0
+
+    The same can be done for the input at nominal load:
+
+    >>> input_at_max = l_max * (ostf.conversion_factors[bel][0] + ostf.normed_offsets[bel][0])
+    >>> input_at_max * l_nominal
+    120.0
+
     """  # noqa: E501
 
     def __init__(
