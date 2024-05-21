@@ -152,9 +152,9 @@ class OffsetConverter(Node):
         # otherwise, the `NonConvexFlow` will be used.
         if len(self.outputs):
             for v in self.outputs.values():
-                if not v.nonconvex:
+                if v.nonconvex:
                     raise TypeError(
-                        "Output flow must have the `NonConvex` attribute!"
+                        "Output flow must not have the `NonConvex` attribute!"
                     )
 
         # `Investment` and `NonConvex` attributes cannot be defined for the
@@ -166,10 +166,9 @@ class OffsetConverter(Node):
                         "`Investment` attribute must be defined only for the "
                         + "output flow!"
                     )
-                if v.nonconvex:
+                if not v.nonconvex:
                     raise TypeError(
-                        "`NonConvex` attribute must be defined only for the "
-                        + "output flow!"
+                        "`NonConvex` attribute must be defined for the input flow!"
                     )
 
         if len(self.inputs) > 1:
@@ -307,7 +306,7 @@ class OffsetConverterBlock(ScalarBlock):
                             try:
                                 expr += (
                                     m.InvestNonConvexFlowBlock.status_nominal[
-                                        n, o, t
+                                        i, n, t
                                     ]
                                     * n.coefficients[o][0][t]
                                 )
@@ -324,7 +323,7 @@ class OffsetConverterBlock(ScalarBlock):
                             except (KeyError, AttributeError):
                                 expr += (
                                     m.NonConvexFlowBlock.status_nominal[
-                                        n, o, t
+                                        i, n, t
                                     ]
                                     * n.coefficients[o][0][t]
                                 )
