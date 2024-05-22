@@ -263,13 +263,13 @@ class GenericStorage(Node):
         """
         for flow in self.inputs.values():
             if (
-                self.invest_relation_input_capacity is not None
+                self.invest_relation_input_capacity[0] is not None
                 and not isinstance(flow.investment, Investment)
             ):
                 flow.investment = Investment(lifetime=self.lifetime_inflow)
         for flow in self.outputs.values():
             if (
-                self.invest_relation_output_capacity is not None
+                self.invest_relation_output_capacity[0] is not None
                 and not isinstance(flow.investment, Investment)
             ):
                 flow.investment = Investment(lifetime=self.lifetime_outflow)
@@ -489,7 +489,7 @@ class GenericStorageBlock(ScalarBlock):
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n for n in group if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -1167,7 +1167,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_capacity is not None
+                if n.invest_relation_input_capacity[0] is not None
             ]
         )
 
@@ -1175,13 +1175,13 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_output_capacity is not None
+                if n.invest_relation_output_capacity[0] is not None
             ]
         )
 
         self.INVEST_REL_IN_OUT = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n for n in group if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -1604,7 +1604,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[i[n], n, p]
-                        == self.total[n, p] * n.invest_relation_input_capacity
+                        == self.total[n, p] * n.invest_relation_input_capacity[p]
                     )
                     self.storage_capacity_inflow.add((n, p), expr)
 
