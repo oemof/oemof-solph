@@ -290,8 +290,9 @@ class OffsetConverterBlock(ScalarBlock):
                         status_nominal = m.NonConvexFlowBlock.status_nominal
 
                     if hasattr(m, "InvestNonConvexFlowBlock"):
-                        if idx in m.InvestNonConvexFlowBlock.status_nominal:
-                            status_nominal = m.InvestNonConvexFlowBlock.status_nominal
+                        if hasattr(m.InvestNonConvexFlowBlock, "status_nominal"):
+                            if idx in m.InvestNonConvexFlowBlock.status_nominal:
+                                status_nominal = m.InvestNonConvexFlowBlock.status_nominal
 
                     ref_status_nominal = status_nominal[idx]
 
