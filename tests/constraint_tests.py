@@ -78,10 +78,10 @@ class TestsConstraint:
 
                 # sometimes, 0.0 is printed, sometimes 0, harmonise that
                 exp_diff = [
-                    line + " ".replace(" 0.0 ", " 0 ") for line in exp_diff
+                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0") for line in exp_diff
                 ]
                 gen_diff = [
-                    line + " ".replace(" 0.0 ", " 0 ") for line in gen_diff
+                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0") for line in exp_diff
                 ]
 
                 assert len(exp_diff) == len(gen_diff)
