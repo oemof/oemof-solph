@@ -41,7 +41,6 @@ Lennart Schürmann <lennart.schuermann@umsicht.fraunhofer.de>
 
 """
 
-
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
