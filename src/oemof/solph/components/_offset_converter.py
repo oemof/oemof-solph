@@ -166,7 +166,7 @@ class OffsetConverter(Node):
         ) - set(self.normed_offsets)
 
         for cf in missing_normed_offsets_keys:
-            self.normed_offsets[cf] = sequence(1)
+            self.normed_offsets[cf] = sequence(0)
 
     def constraint_group(self):
         return OffsetConverterBlock
