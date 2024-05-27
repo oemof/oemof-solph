@@ -99,13 +99,15 @@ def test_OffsetConverter_single_input_single_output_with_output_reference():
     add_OffsetConverter(es, es.groups["bus output 0"], nominal_value, minimal_value, eta_at_nom, eta_at_min)
 
     results = solve_and_extract_results(es)
-    efficiency = (
-        results["offset converter", "bus output 0"]["sequences"]["flow"]
-        / results["bus input 0", "offset converter"]["sequences"]["flow"]
-    )
 
-    checksum = 5.622
-    assert pytest.approx(efficiency.sum(), abs=0.001) == checksum
+    slope, offset = calculate_slope_and_offset_with_reference_to_output(nominal_value, minimal_value, 0.7, 0.5)
+    output_flow = results["offset converter", "bus output 0"]["sequences"]["flow"]
+    output_flow_status = results["offset converter", "bus output 0"]["sequences"]["status"]
+
+    input_flow_expected = offset * nominal_value * output_flow_status + slope * output_flow
+    input_flow_actual = results["bus input 0", "offset converter"]["sequences"]["flow"]
+
+    np.testing.assert_array_almost_equal(input_flow_actual, input_flow_expected)
 
 
 def test_OffsetConverter_single_input_single_output_with_output_reference_eta_decreasing():
@@ -122,13 +124,15 @@ def test_OffsetConverter_single_input_single_output_with_output_reference_eta_de
     add_OffsetConverter(es, es.groups["bus output 0"], nominal_value, minimal_value, eta_at_nom, eta_at_min)
 
     results = solve_and_extract_results(es)
-    efficiency = (
-        results["offset converter", "bus output 0"]["sequences"]["flow"]
-        / results["bus input 0", "offset converter"]["sequences"]["flow"]
-    )
 
-    checksum = 5.028
-    assert pytest.approx(efficiency.sum(), abs=0.001) == checksum
+    slope, offset = calculate_slope_and_offset_with_reference_to_output(nominal_value, minimal_value, 0.5, 0.7)
+    output_flow = results["offset converter", "bus output 0"]["sequences"]["flow"]
+    output_flow_status = results["offset converter", "bus output 0"]["sequences"]["status"]
+
+    input_flow_expected = offset * nominal_value * output_flow_status + slope * output_flow
+    input_flow_actual = results["bus input 0", "offset converter"]["sequences"]["flow"]
+
+    np.testing.assert_array_almost_equal(input_flow_actual, input_flow_expected)
 
 
 def test_OffsetConverter_single_input_single_output_with_input_reference():
@@ -145,13 +149,15 @@ def test_OffsetConverter_single_input_single_output_with_input_reference():
     add_OffsetConverter(es, es.groups["bus input 0"], nominal_value, minimal_value, eta_at_nom, eta_at_min)
 
     results = solve_and_extract_results(es)
-    efficiency = (
-        results["offset converter", "bus output 0"]["sequences"]["flow"]
-        / results["bus input 0", "offset converter"]["sequences"]["flow"]
-    )
 
-    checksum = 5.700
-    assert pytest.approx(efficiency.sum(), abs=0.001) == checksum
+    slope, offset = calculate_slope_and_offset_with_reference_to_input(nominal_value, minimal_value, 0.7, 0.5)
+    input_flow = results["bus input 0", "offset converter"]["sequences"]["flow"]
+    input_flow_status = results["bus input 0", "offset converter"]["sequences"]["status"]
+
+    output_flow_expected = offset * nominal_value * input_flow_status + slope * input_flow
+    output_flow_actual = results["offset converter", "bus output 0"]["sequences"]["flow"]
+
+    np.testing.assert_array_almost_equal(output_flow_actual, output_flow_expected)
 
 
 def test_OffsetConverter_single_input_single_output_with_input_reference_eta_decreasing():
@@ -168,10 +174,12 @@ def test_OffsetConverter_single_input_single_output_with_input_reference_eta_dec
     add_OffsetConverter(es, es.groups["bus input 0"], nominal_value, minimal_value, eta_at_nom, eta_at_min)
 
     results = solve_and_extract_results(es)
-    efficiency = (
-        results["offset converter", "bus output 0"]["sequences"]["flow"]
-        / results["bus input 0", "offset converter"]["sequences"]["flow"]
-    )
 
-    checksum = 5.099
-    assert pytest.approx(efficiency.sum(), abs=0.001) == checksum
+    slope, offset = calculate_slope_and_offset_with_reference_to_input(nominal_value, minimal_value, 0.5, 0.7)
+    input_flow = results["bus input 0", "offset converter"]["sequences"]["flow"]
+    input_flow_status = results["bus input 0", "offset converter"]["sequences"]["status"]
+
+    output_flow_expected = offset * nominal_value * input_flow_status + slope * input_flow
+    output_flow_actual = results["offset converter", "bus output 0"]["sequences"]["flow"]
+
+    np.testing.assert_array_almost_equal(output_flow_actual, output_flow_expected)
