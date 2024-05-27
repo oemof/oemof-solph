@@ -179,14 +179,16 @@ class OffsetTransformer(OffsetConverter):
         inputs,
         outputs,
         label=None,
-        coefficients=None,
+        conversion_factors=None,
+        normed_offsets=None,
         custom_attributes=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
-            coefficients=coefficients,
+            conversion_factors=conversion_factors,
+            normed_offsets=normed_offsets,
             custom_attributes=custom_attributes,
         )
         warn(

@@ -1529,7 +1529,8 @@ class TestsMultiPeriodConstraint:
                     nominal_value=100, min=0.32, nonconvex=solph.NonConvex()
                 )
             },
-            coefficients={bth: (-17, 0.9)},
+            conversion_factors={bth: 0.9},
+            normed_offsets={bth: -17},
         )
         self.energysystem.add(bgas, bth, otrf)
         self.compare_lp_files("offsetconverter_multi_period.lp")

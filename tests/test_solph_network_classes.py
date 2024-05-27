@@ -78,7 +78,11 @@ def test_transformer_wrapper():
 
 def test_offset_transformer_wrapper():
     with pytest.warns(FutureWarning):
-        solph.components.OffsetTransformer(inputs={}, outputs={})
+        solph.components.OffsetTransformer(
+            inputs={
+                solph.Bus("bus"): solph.Flow(nonconvex=solph.NonConvex())
+            }, outputs={}
+        )
 
 
 def test_wrong_combination_invest_and_nominal_value():
