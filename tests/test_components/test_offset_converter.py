@@ -34,8 +34,6 @@ def calculate_slope_and_offset_with_reference_to_output(P_max, P_min, eta_max, e
     offset = 1 / eta_max - slope
     return slope, offset
 
-
-
 def solve_and_extract_results(es):
     model = solph.Model(es)
     model.solve("gurobi")
