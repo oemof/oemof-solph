@@ -134,8 +134,19 @@ class OffsetConverter(Node):
                 "Exactly one flow of the `OffsetConverter` must have the "
                 "`NonConvex` attribute."
             )
+
         self._reference_flow = self._reference_flow[0]
-        if self._reference_flow in  [v.input for v in self.inputs.values()]:
+        self._investment_flow = [v.input for v in self.inputs.values() if v.investment]
+        self._investment_flow += [v.input for v in self.inputs.values() if v.investment]
+
+        if len(self._investment_flow) > 0:
+            if len(self._investment_flow) > 1 or self._reference_flow != self._investment_flow[0]:
+                raise TypeError(
+                    "`Investment` attribute must be defined only for the "
+                    "NonConvex flow!"
+                )
+
+        if self._reference_flow in [v.input for v in self.inputs.values()]:
             self._reference_flow_at_input = True
         else:
             self._reference_flow_at_input = False

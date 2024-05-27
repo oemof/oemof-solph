@@ -252,7 +252,7 @@ def test_offsetconverter_investment_on_inputs():
     """Investment attribute is defined for a not NonConvex flow."""
     with pytest.raises(
         TypeError,
-        match="`Investment` attribute must be defined only for the output "
+        match="`Investment` attribute must be defined only for the NonConvex "
         + "flow!",
     ):
         b_diesel = Bus(label="bus_diesel")
