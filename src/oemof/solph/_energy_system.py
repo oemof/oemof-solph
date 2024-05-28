@@ -244,13 +244,12 @@ class EnergySystem(es.EnergySystem):
         int
             Duration of the period
         """
-        period = self.period[period]
-        if period < len(self.periods):
+        if period < len(self.periods) - 1:
             duration = (
                 self.periods[period + 1].min().year
                 - self.periods[period].min().year
             )
-        elif period == len(self.periods):
+        elif period == len(self.periods) - 1:
             duration = (
                 self.periods[period].max().year
                 - self.periods[period].min().year
