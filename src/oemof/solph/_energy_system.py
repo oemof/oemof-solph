@@ -184,11 +184,11 @@ class EnergySystem(es.EnergySystem):
                 "please report them."
             )
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-        self._extract_periods_years()
-        self._extract_periods_matrix()
-        self._extract_end_year_of_optimization()
-	self.use_remaining_value = use_remaining_value
-	self.representative_years = use_representative_years
+            self._extract_periods_years()
+            self._extract_periods_matrix()
+            self._extract_end_year_of_optimization()
+            self.use_remaining_value = use_remaining_value
+            self.representative_years = use_representative_years
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices
