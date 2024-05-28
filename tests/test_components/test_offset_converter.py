@@ -36,7 +36,7 @@ def create_energysystem_stub(num_in, num_out):
 
 def solve_and_extract_results(es):
     model = solph.Model(es)
-    model.solve("gurobi")
+    model.solve("cbc")
     return solph.views.convert_keys_to_strings(model.results())
 
 

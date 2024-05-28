@@ -127,36 +127,36 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        self._reference_flow_bus = [
+        _reference_flow = [
             v for v in self.inputs.values() if v.nonconvex
         ]
-        self._reference_flow_bus += [
+        _reference_flow += [
             v for v in self.outputs.values() if v.nonconvex
         ]
-        if len(self._reference_flow_bus) != 1:
+        if len(_reference_flow) != 1:
             raise ValueError(
                 "Exactly one flow of the `OffsetConverter` must have the "
                 "`NonConvex` attribute."
             )
 
-        if self._reference_flow_bus in [v for v in self.inputs.values()]:
-            self._reference_flow_at_input = True
-            self._reference_flow = self._reference_flow_bus[0].input
+        if _reference_flow[0] in self.inputs.values():
+            self._reference_node_at_input = True
+            self._reference_node = _reference_flow[0].input
         else:
-            self._reference_flow_at_input = False
-            self._reference_flow = self._reference_flow_bus[0].output
+            self._reference_node_at_input = False
+            self._reference_node = _reference_flow[0].output
 
-        self._investment_flow = [
+        _investment_node = [
             v.input for v in self.inputs.values() if v.investment
         ]
-        self._investment_flow += [
+        _investment_node += [
             v.output for v in self.outputs.values() if v.investment
         ]
 
-        if len(self._investment_flow) > 0:
+        if len(_investment_node) > 0:
             if (
-                len(self._investment_flow) > 1
-                or self._reference_flow != self._investment_flow[0]
+                len(_investment_node) > 1
+                or self._reference_node != _investment_node[0]
             ):
                 raise TypeError(
                     "`Investment` attribute must be defined only for the "
@@ -166,7 +166,7 @@ class OffsetConverter(Node):
         if conversion_factors is None:
             conversion_factors = {}
 
-        if self._reference_flow in conversion_factors:
+        if self._reference_node in conversion_factors:
             raise ValueError(
                 "Conversion factors cannot be specified for the `NonConvex` "
                 "flow."
@@ -186,7 +186,7 @@ class OffsetConverter(Node):
         if normed_offsets is None:
             normed_offsets = {}
 
-        if self._reference_flow in normed_offsets:
+        if self._reference_node in normed_offsets:
             raise ValueError(
                 "Normed offsets cannot be specified for the `NonConvex` flow."
             )
@@ -295,22 +295,22 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
-        reference_flows = {n: n._reference_flow for n in group}
-        reference_flows_at_input = {
-            n: n._reference_flow_at_input for n in group
+        reference_node = {n: n._reference_node for n in group}
+        reference_node_at_input = {
+            n: n._reference_node_at_input for n in group
         }
         in_flows = {
-            n: [i for i in n.inputs.keys() if i != n._reference_flow]
+            n: [i for i in n.inputs.keys() if i != n._reference_node]
             for n in group
         }
         out_flows = {
-            n: [o for o in n.outputs.keys() if o != n._reference_flow]
+            n: [o for o in n.outputs.keys() if o != n._reference_node]
             for n in group
         }
 
         self.relation = Constraint(
             [
-                (n, reference_flows[n], f, p, t)
+                (n, reference_node[n], f, p, t)
                 for p, t in m.TIMEINDEX
                 for n in group
                 for f in in_flows[n] + out_flows[n]
@@ -323,12 +323,12 @@ class OffsetConverterBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for n in group:
 
-                    if reference_flows_at_input[n]:
-                        ref_flow = m.flow[reference_flows[n], n, p, t]
-                        idx = reference_flows[n], n, t
+                    if reference_node_at_input[n]:
+                        ref_flow = m.flow[reference_node[n], n, p, t]
+                        status_nominal_idx = reference_node[n], n, t
                     else:
-                        ref_flow = m.flow[n, reference_flows[n], p, t]
-                        idx = n, reference_flows[n], t
+                        ref_flow = m.flow[n, reference_node[n], p, t]
+                        status_nominal_idx = n, reference_node[n], t
 
                     if hasattr(m.NonConvexFlowBlock, "status_nominal"):
                         status_nominal = m.NonConvexFlowBlock.status_nominal
@@ -338,14 +338,14 @@ class OffsetConverterBlock(ScalarBlock):
                             m.InvestNonConvexFlowBlock, "status_nominal"
                         ):
                             if (
-                                idx
+                                status_nominal_idx
                                 in m.InvestNonConvexFlowBlock.status_nominal
                             ):
                                 status_nominal = (
                                     m.InvestNonConvexFlowBlock.status_nominal
                                 )
 
-                    ref_status_nominal = status_nominal[idx]
+                    ref_status_nominal = status_nominal[status_nominal_idx]
 
                     for f in in_flows[n] + out_flows[n]:
                         rhs = 0
@@ -358,7 +358,7 @@ class OffsetConverterBlock(ScalarBlock):
                         lhs += ref_flow * n.conversion_factors[f][t]
                         lhs += ref_status_nominal * n.normed_offsets[f][t]
                         block.relation.add(
-                            (n, reference_flows[n], f, p, t), (lhs == rhs)
+                            (n, reference_node[n], f, p, t), (lhs == rhs)
                         )
 
         self.relation_build = BuildAction(rule=_relation_rule)
