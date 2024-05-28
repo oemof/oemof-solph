@@ -1524,13 +1524,12 @@ class TestsMultiPeriodConstraint:
         bgas = solph.buses.Bus(label="gasBus")
         bth = solph.buses.Bus(label="thermalBus")
 
-        P_nom = 100
-        P_min = 32
+        min = 0.32
         eta_at_min = 0.7
         eta_at_nom = 0.9
 
         slope, offset = calculate_slope_and_offset_with_reference_to_output(
-            P_nom, P_min, eta_at_nom, eta_at_min
+            1, min, eta_at_nom, eta_at_min
         )
 
         otrf = solph.components.OffsetConverter(
@@ -1538,8 +1537,8 @@ class TestsMultiPeriodConstraint:
             inputs={bgas: solph.flows.Flow()},
             outputs={
                 bth: solph.flows.Flow(
-                    nominal_value=P_nom,
-                    min=P_min / P_nom,
+                    nominal_value=100,
+                    min=min,
                     nonconvex=solph.NonConvex(),
                 )
             },

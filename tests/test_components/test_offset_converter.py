@@ -88,7 +88,7 @@ def add_OffsetConverter(
         if bus == reference_bus:
             continue
         slope, offset = get_slope_and_offset(
-            nominal_value, minimal_value, eta_at_nom[bus], eta_at_min[bus]
+            1, minimal_value / nominal_value, eta_at_nom[bus], eta_at_min[bus]
         )
         slopes[bus] = slope
         offsets[bus] = offset
@@ -219,7 +219,7 @@ def test_OffsetConverter_single_input_single_output_with_input_reference():
     results = solve_and_extract_results(es)
 
     slope, offset = calculate_slope_and_offset_with_reference_to_input(
-        nominal_value, minimal_value, 0.7, 0.5
+        1, minimal_value / nominal_value, 0.7, 0.5
     )
     input_flow = results["bus input 0", "offset converter"]["sequences"][
         "flow"
@@ -263,7 +263,7 @@ def test_OffsetConverter_single_input_single_output_with_input_reference_eta_dec
     results = solve_and_extract_results(es)
 
     slope, offset = calculate_slope_and_offset_with_reference_to_input(
-        nominal_value, minimal_value, 0.5, 0.7
+        1, minimal_value / nominal_value, 0.5, 0.7
     )
     input_flow = results["bus input 0", "offset converter"]["sequences"][
         "flow"
