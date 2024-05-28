@@ -127,17 +127,23 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        self._reference_flow = [v.input for v in self.inputs.values() if v.nonconvex]
-        self._reference_flow += [v.output for v in self.outputs.values() if v.nonconvex]
-        if len(self._reference_flow) != 1:
+        self._reference_flow_bus = [v for v in self.inputs.values() if v.nonconvex]
+        self._reference_flow_bus += [v for v in self.outputs.values() if v.nonconvex]
+        if len(self._reference_flow_bus) != 1:
             raise ValueError(
                 "Exactly one flow of the `OffsetConverter` must have the "
                 "`NonConvex` attribute."
             )
 
-        self._reference_flow = self._reference_flow[0]
+        if self._reference_flow_bus in [v for v in self.inputs.values()]:
+            self._reference_flow_at_input = True
+            self._reference_flow = self._reference_flow_bus[0].input
+        else:
+            self._reference_flow_at_input = False
+            self._reference_flow = self._reference_flow_bus[0].output
+
         self._investment_flow = [v.input for v in self.inputs.values() if v.investment]
-        self._investment_flow += [v.input for v in self.inputs.values() if v.investment]
+        self._investment_flow += [v.output for v in self.outputs.values() if v.investment]
 
         if len(self._investment_flow) > 0:
             if len(self._investment_flow) > 1 or self._reference_flow != self._investment_flow[0]:
@@ -146,13 +152,14 @@ class OffsetConverter(Node):
                     "NonConvex flow!"
                 )
 
-        if self._reference_flow in [v.input for v in self.inputs.values()]:
-            self._reference_flow_at_input = True
-        else:
-            self._reference_flow_at_input = False
-
         if conversion_factors is None:
             conversion_factors = {}
+
+        if self._reference_flow in conversion_factors:
+            raise ValueError(
+                "Conversion factors cannot be specified for the `NonConvex` "
+                "flow."
+            )
 
         self.conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
@@ -167,6 +174,11 @@ class OffsetConverter(Node):
 
         if normed_offsets is None:
             normed_offsets = {}
+
+        if self._reference_flow in normed_offsets:
+            raise ValueError(
+                "Normed offsets cannot be specified for the `NonConvex` flow."
+            )
 
         self.normed_offsets = {
             k: sequence(v) for k, v in normed_offsets.items()
