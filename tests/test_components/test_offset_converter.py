@@ -2,12 +2,10 @@ import numpy as np
 
 from oemof import solph
 from oemof.solph._plumbing import sequence
-from oemof.solph.components._offset_converter import (
-    calculate_slope_and_offset_with_reference_to_input,
-)
-from oemof.solph.components._offset_converter import (
-    calculate_slope_and_offset_with_reference_to_output,
-)
+from oemof.solph.components._offset_converter import \
+    calculate_slope_and_offset_with_reference_to_input
+from oemof.solph.components._offset_converter import \
+    calculate_slope_and_offset_with_reference_to_output
 
 
 def create_energysystem_stub(num_in, num_out):

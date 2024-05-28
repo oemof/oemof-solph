@@ -127,12 +127,8 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        _reference_flow = [
-            v for v in self.inputs.values() if v.nonconvex
-        ]
-        _reference_flow += [
-            v for v in self.outputs.values() if v.nonconvex
-        ]
+        _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
+        _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
         if len(_reference_flow) != 1:
             raise ValueError(
                 "Exactly one flow of the `OffsetConverter` must have the "
