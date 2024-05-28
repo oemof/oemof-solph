@@ -1,7 +1,11 @@
+import numpy as np
+
 from oemof import solph
 from oemof.solph._plumbing import sequence
-import numpy as np
-import pytest
+from oemof.solph.components._offset_converter import \
+    calculate_slope_and_offset_with_reference_to_input
+from oemof.solph.components._offset_converter import \
+    calculate_slope_and_offset_with_reference_to_output
 
 
 def create_energysystem_stub(num_in, num_out):
@@ -22,17 +26,6 @@ def create_energysystem_stub(num_in, num_out):
 
     return es
 
-
-def calculate_slope_and_offset_with_reference_to_input(P_max, P_min, eta_max, eta_min):
-    slope = (P_max * eta_max - P_min * eta_min) / (P_max - P_min)
-    offset = eta_max - slope
-    return slope, offset
-
-
-def calculate_slope_and_offset_with_reference_to_output(P_max, P_min, eta_max, eta_min):
-    slope = (P_max / eta_max - P_min / eta_min) / (P_max - P_min)
-    offset = 1 / eta_max - slope
-    return slope, offset
 
 def solve_and_extract_results(es):
     model = solph.Model(es)

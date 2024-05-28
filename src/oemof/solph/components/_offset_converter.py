@@ -338,3 +338,15 @@ class OffsetConverterBlock(ScalarBlock):
                         block.relation.add((n, reference_flows[n], f, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_relation_rule)
+
+
+def calculate_slope_and_offset_with_reference_to_input(P_max, P_min, eta_max, eta_min):
+    slope = (P_max * eta_max - P_min * eta_min) / (P_max - P_min)
+    offset = eta_max - slope
+    return slope, offset
+
+
+def calculate_slope_and_offset_with_reference_to_output(P_max, P_min, eta_max, eta_min):
+    slope = (P_max / eta_max - P_min / eta_min) / (P_max - P_min)
+    offset = 1 / eta_max - slope
+    return slope, offset

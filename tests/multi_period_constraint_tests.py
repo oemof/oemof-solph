@@ -18,6 +18,8 @@ import pytest
 from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
+from oemof.solph.components._offset_converter import \
+    calculate_slope_and_offset_with_reference_to_output
 
 logging.disable(logging.INFO)
 
@@ -1521,16 +1523,23 @@ class TestsMultiPeriodConstraint:
         bgas = solph.buses.Bus(label="gasBus")
         bth = solph.buses.Bus(label="thermalBus")
 
+        P_nom = 100
+        P_min = 32
+        eta_at_min = 0.7
+        eta_at_nom = 0.9
+
+        slope, offset = calculate_slope_and_offset_with_reference_to_output(P_nom, P_min, eta_at_nom, eta_at_min)
+
         otrf = solph.components.OffsetConverter(
             label="gasboiler",
             inputs={bgas: solph.flows.Flow()},
             outputs={
                 bth: solph.flows.Flow(
-                    nominal_value=100, min=0.32, nonconvex=solph.NonConvex()
+                    nominal_value=P_nom, min=P_min / P_nom, nonconvex=solph.NonConvex()
                 )
             },
-            conversion_factors={bth: 0.9},
-            normed_offsets={bth: -17},
+            conversion_factors={bgas: slope},
+            normed_offsets={bgas: offset},
         )
         self.energysystem.add(bgas, bth, otrf)
         self.compare_lp_files("offsetconverter_multi_period.lp")
