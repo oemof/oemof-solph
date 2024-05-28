@@ -79,9 +79,8 @@ def test_transformer_wrapper():
 def test_offset_transformer_wrapper():
     with pytest.warns(FutureWarning):
         solph.components.OffsetTransformer(
-            inputs={
-                solph.Bus("bus"): solph.Flow(nonconvex=solph.NonConvex())
-            }, outputs={}
+            inputs={solph.Bus("bus"): solph.Flow(nonconvex=solph.NonConvex())},
+            outputs={},
         )
 
 

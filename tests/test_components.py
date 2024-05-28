@@ -221,7 +221,7 @@ def test_offsetconverter_without_nonconvex():
         match=(
             "Exactly one flow of the `OffsetConverter` must have the "
             "`NonConvex` attribute."
-        )
+        ),
     ):
         b_el = Bus(label="bus_electricity")
         components.OffsetConverter(
@@ -244,7 +244,7 @@ def test_offsetconverter_nonconvex_on_inputs():
         b_diesel = Bus(label="bus_diesel")
         components.OffsetConverter(
             inputs={b_diesel: Flow(nonconvex=NonConvex())},
-            outputs={b_diesel: Flow(nonconvex=NonConvex())}
+            outputs={b_diesel: Flow(nonconvex=NonConvex())},
         )
 
 
@@ -262,7 +262,7 @@ def test_offsetconverter_investment_on_inputs():
                 b_diesel: Flow(
                     nonconvex=NonConvex(), nominal_value=Investment(maximum=1)
                 )
-            }
+            },
         )
 
 

@@ -1360,7 +1360,11 @@ class TestsConstraint:
         eta_at_nom = 0.4
         eta_at_min = 0.35
 
-        slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(1, min, eta_at_nom, eta_at_min)
+        slope, offset = (
+            solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+                1, min, eta_at_nom, eta_at_min
+            )
+        )
 
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
@@ -1391,7 +1395,11 @@ class TestsConstraint:
         eta_at_nom = 0.4
         eta_at_min = 0.35
 
-        slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(1, min, eta_at_nom, eta_at_min)
+        slope, offset = (
+            solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+                1, min, eta_at_nom, eta_at_min
+            )
+        )
 
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
