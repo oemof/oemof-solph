@@ -15,13 +15,13 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
 
-class Bus(on.Bus):
+class Bus(Node):
     """A balance object. Every component has to be connected to buses.
 
     The sum of all inputs of a Bus object must equal the sum of all outputs

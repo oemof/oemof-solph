@@ -25,7 +25,7 @@ def test_version_metadata():
 
 def test_wrong_logging_level():
     datetimeindex = pd.date_range("1/1/2012", periods=12, freq="H")
-    es = solph.EnergySystem(timeindex=datetimeindex)
+    es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
     tools.logger.define_logging()
     my_logger = logging.getLogger()
     my_logger.setLevel("DEBUG")

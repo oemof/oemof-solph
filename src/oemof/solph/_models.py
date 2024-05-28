@@ -132,12 +132,21 @@ class BaseModel(po.ConcreteModel):
             "constraint_groups", []
         )
 
-        self._constraint_groups += [
-            i
-            for i in self.es.groups
-            if hasattr(i, "CONSTRAINT_GROUP")
-            and i not in self._constraint_groups
-        ]
+        if self.is_cellular:
+            for es in energysystem:
+                self._constraint_groups += [
+                    i
+                    for i in es.groups
+                    if hasattr(i, "CONSTRAINT_GROUP")
+                    and i not in self._constraint_groups
+                ]
+        else:
+            self._constraint_groups += [
+                i
+                for i in self.es.groups
+                if hasattr(i, "CONSTRAINT_GROUP")
+                and i not in self._constraint_groups
+            ]
 
         self.flows = self.es.flows()
         if self.is_cellular:

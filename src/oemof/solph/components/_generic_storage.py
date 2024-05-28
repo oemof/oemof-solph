@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 SPDX-FileCopyrightText: Johannes Kochems
 SPDX-FileCopyrightText: Johannes Giehl
+SPDX-FileCopyrightText: Raul Ciria Aylagas
 
 SPDX-License-Identifier: MIT
 
@@ -23,7 +24,7 @@ import numbers
 from warnings import warn
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
@@ -40,7 +41,7 @@ from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence as solph_sequence
 
 
-class GenericStorage(network.Component):
+class GenericStorage(Node):
     r"""
     Component `GenericStorage` to model with basic characteristics of storages.
 
@@ -79,7 +80,7 @@ class GenericStorage(network.Component):
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
     loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per time unit (e.g. hour).
+        The relative loss of the storage content per hour.
     fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
         Losses per hour that are independent of the storage content but
         proportional to nominal storage capacity.
@@ -149,7 +150,7 @@ class GenericStorage(network.Component):
 
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
-    ...     investment=solph.Investment(ep_costs=50),
+    ...     nominal_storage_capacity=solph.Investment(ep_costs=50),
     ...     inputs={my_bus: solph.flows.Flow()},
     ...     outputs={my_bus: solph.flows.Flow()},
     ...     loss_rate=0.02,
@@ -362,7 +363,7 @@ class GenericStorageBlock(ScalarBlock):
 
     Set storage_content of last time step to one at t=0 if balanced == True
         .. math::
-            E(t_{last}) = &E(-1)
+            E(t_{last}) = E(-1)
 
     Storage balance :attr:`om.Storage.balance[n, t]`
         .. math:: E(t) = &E(t-1) \cdot
@@ -375,8 +376,8 @@ class GenericStorageBlock(ScalarBlock):
     Connect the invest variables of the input and the output flow.
         .. math::
           InvestmentFlowBlock.invest(source(n), n, p) + existing = \\
-          (InvestmentFlowBlock.invest(n, target(n), p) + existing) * \\
-          invest\_relation\_input\_output(n) \\
+          (InvestmentFlowBlock.invest(n, target(n), p) + existing) \\
+          * invest\_relation\_input\_output(n) \\
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT} \\
           \forall p \in \textrm{PERIODS}
 
@@ -394,16 +395,12 @@ class GenericStorageBlock(ScalarBlock):
     :math:`c_{max}(t)`          maximum allowed storage `max_storage_level[t]`
     :math:`\beta(t)`            fraction of lost energy `loss_rate[t]`
                                 as share of
-                                :math:`E(t)`
-                                per time unit
-                                (e.g. hour)
+                                :math:`E(t)` per hour
     :math:`\gamma(t)`           fixed loss of energy    `fixed_losses_relative[t]`
-                                relative to
-                                :math:`E_{nom}` per
-                                time unit (e.g. hour)
+                                per hour relative to
+                                :math:`E_{nom}`
     :math:`\delta(t)`           absolute fixed loss     `fixed_losses_absolute[t]`
-                                of energy per
-                                time unit (e.g. hour)
+                                of energy per hour
     :math:`\dot{E}_i(t)`        energy flowing in       `inputs`
     :math:`\dot{E}_o(t)`        energy flowing out      `outputs`
     :math:`\eta_i(t)`           conversion factor       `inflow_conversion_factor[t]`
@@ -429,7 +426,7 @@ class GenericStorageBlock(ScalarBlock):
 
     * :attr: `storage_costs` not 0
 
-        ..math::
+        .. math::
             \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
 
 
@@ -438,11 +435,14 @@ class GenericStorageBlock(ScalarBlock):
     * :attr:`fixed_costs` not None
 
         .. math::
-            \sum_{p \in \textrm{PERIODS}} E_{nom}
-            \cdot c_{fixed}(p) \cdot DF^{-p}
+            \displaystyle \sum_{pp=0}^{year_{max}} E_{nom}
+            \cdot c_{fixed}(pp) \cdot DF^{-pp}
 
-    whereby:
-    :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`
+    where:
+
+    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`.
+    * :math:`year_{max}` denotes the last year of the optimization
+      horizon, i.e. at the end of the last period.
 
     """  # noqa: E501
 
@@ -599,12 +599,12 @@ class GenericStorageBlock(ScalarBlock):
         if m.es.periods is not None:
             for n in self.STORAGES:
                 if n.fixed_costs[0] is not None:
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            n.nominal_storage_capacity
-                            * n.fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -p)
-                        )
+                    fixed_costs += sum(
+                        n.nominal_storage_capacity
+                        * n.fixed_costs[pp]
+                        * (1 + m.discount_rate) ** (-pp)
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
         self.fixed_costs = Expression(expr=fixed_costs)
 
         storage_costs = 0
@@ -620,8 +620,9 @@ class GenericStorageBlock(ScalarBlock):
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
+        self.costs = Expression(expr=storage_costs + fixed_costs)
 
-        return self.fixed_costs + self.storage_costs
+        return self.costs
 
 
 class GenericInvestmentStorageBlock(ScalarBlock):
@@ -751,7 +752,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             &
             \forall p \in \textrm{PERIODS}
 
-        whereby:
+        where:
 
         * (*) is only performed for the first period the condition is True.
           A decommissioning flag is then set to True to prevent having falsely
@@ -883,14 +884,32 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 E_{invest}(0) \cdot c_{invest,var}(0)
                 + c_{invest,fix}(0) \cdot b_{invest}(0)\\
 
+    Where 0 denotes the 0th (investment) period since
+    in a standard model, there is only this one period.
+
     *Multi-period model*
 
         * :attr:`nonconvex = False`
 
             .. math::
                 &
-                E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
-                \cdot DF^{-p}\\
+                E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
+                \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p}\\
+                &
+                \forall p \in \textrm{PERIODS}
+
+        In case, the remaining lifetime of a storage is greater than 0 and
+        attribute `use_remaining_value` of the energy system is True,
+        the difference in value for the investment period compared to the
+        last period of the optimization horizon is accounted for
+        as an adder to the investment costs:
+
+            .. math::
+                &
+                E_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                A(c_{invest,var}(|P|), l_{r}, ir)\\
+                & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
+                &\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -898,8 +917,28 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             .. math::
                 &
-                E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir) \cdot l
-                \cdot DF^{-p} +  c_{invest,fix}(p) \cdot b_{invest}(p)\\
+                (E_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
+                \cdot \frac {1}{ANF(d, ir)}\\
+                &
+                +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p} \\
+                &
+                \forall p \in \textrm{PERIODS}
+
+        In case, the remaining lifetime of a storage is greater than 0 and
+        attribute `use_remaining_value` of the energy system is True,
+        the difference in value for the investment period compared to the
+        last period of the optimization horizon is accounted for
+        as an adder to the investment costs:
+
+            .. math::
+                &
+                (E_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
+                A(c_{invest,var}(|P|), l_{r}, ir)\\
+                & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
+                &
+                +  (c_{invest,fix}(p) - c_{invest,fix}(|P|))
+                \cdot b_{invest}(p)) \cdot DF^{-p}\\
+                &\\
                 &
                 \forall p \in \textrm{PERIODS}
 
@@ -907,7 +946,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             .. math::
                 &
-                \sum_{pp=year(p)}^{year(p)+l}
+                \sum_{pp=year(p)}^{limit_{end}}
                 E_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
                 \cdot DF^{-p}\\
                 &
@@ -916,27 +955,47 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         * :attr:`fixed_costs` not None for existing capacity
 
             .. math::
-                \sum_{pp=0}^{l-a} E_{exist} \cdot c_{fixed}(pp)
+                \sum_{pp=0}^{limit_{exo}} E_{exist} \cdot c_{fixed}(pp)
                 \cdot DF^{-pp}
 
+    where:
 
-        whereby:
+    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
+      investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
+      and interest rate :math:`ir`.
+    * :math:`l_{r}` is the remaining lifetime at the end of the
+      optimization horizon (in case it is greater than 0 and
+      smaller than the actual lifetime).
+    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
+      and interest rate :math:`ir`.
+    * :math:`d=min\{year_{max} - year(p), l\}` defines the
+      number of years within the optimization horizon that investment
+      annuities are accounted for.
+    * :math:`year(p)` denotes the start year of period :math:`p`.
+    * :math:`year_{max}` denotes the last year of the optimization
+      horizon, i.e. at the end of the last period.
+    * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
+      upper bound to ensure fixed costs for endogenous investments
+      to occur within the optimization horizon.
+    * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
+      upper bound to ensure fixed costs for existing capacities to occur
+      within the optimization horizon. :math:`a` is the initial age
+      of an asset.
+    * :math:`DF=(1+dr)` is the discount factor.
 
-        * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-          investment expenses :math:`c_{invest,var}(p)` lifetime :math:`l` and
-          interest rate :math:`ir`
-        * :math:`DF=(1+dr)` is the discount factor with discount rate math:`dr`
-
-    The annuity hereby is:
+    The annuity / annuity factor hereby is:
 
         .. math::
-
+            &
             A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+i)^l \cdot i} {(1+i)^l - 1} \cdot
+                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
+            &\\
+            &
+            ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
 
-    It is retrieved, using oemof.tools.economics annuity function. The
-    interest rate is defined as a weighted average costs of capital (wacc) and
-    assumed constant over time.
+    They are retrieved, using oemof.tools.economics annuity function. The
+    interest rate :math:`ir` for the annuity is defined as weighted
+    average costs of capital (wacc) and assumed constant over time.
 
     The overall summed cost expressions for all *InvestmentFlowBlock* objects
     can be accessed by
@@ -977,7 +1036,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         | Old (nominal) capacity of the storage
         | to be decommissioned in period p
         | which was endogenously determined by :math:`E_{invest}(p_{comm})`
-        | whereby :math:`p_{comm}` is the commissioning period"
+        | where :math:`p_{comm}` is the commissioning period"
         ":math:`E(-1)`", ":attr:`init_cap[n]`", "Initial storage capacity
         (before timestep 0)"
         ":math:`b_{invest}(p)`", ":attr:`invest_status[i, o, p]`", "Binary
@@ -1016,11 +1075,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         ":math:`r_{in,out}`", ":attr:`invest_relation_input_output`", "
         Relation of nominal in- and outflow"
         ":math:`\beta(t)`", "`loss_rate[t]`", "Fraction of lost energy
-        as share of :math:`E(t)` per time unit"
+        as share of :math:`E(t)` per hour"
         ":math:`\gamma(t)`", "`fixed_losses_relative[t]`", "Fixed loss
-        of energy relative to :math:`E_{invest} + E_{exist}` per time unit"
+        of energy relative to :math:`E_{invest} + E_{exist}` per hour"
         ":math:`\delta(t)`", "`fixed_losses_absolute[t]`", "Absolute
-        fixed loss of energy per time unit"
+        fixed loss of energy per hour"
         ":math:`\eta_i(t)`", "`inflow_conversion_factor[t]`", "
         Conversion factor (i.e. efficiency) when storing energy"
         ":math:`\eta_o(t)`", "`outflow_conversion_factor[t]`", "
@@ -1712,7 +1771,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 "social planner point of view and does not reflect "
                 "microeconomic interest requirements."
             )
-
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
                 interest = n.investment.interest_rate
@@ -1728,13 +1786,29 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
-                    investment_costs_increment = (
-                        self.invest[n, p]
-                        * annuity
-                        * lifetime
-                        * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                    duration = min(
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
                     )
-                    investment_costs += investment_costs_increment
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=interest
+                    )
+                    investment_costs_increment = (
+                        self.invest[n, p] * annuity * present_value_factor
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    remaining_value_difference = (
+                        self._evaluate_remaining_value_difference(
+                            m,
+                            p,
+                            n,
+                            m.es.end_year_of_optimization,
+                            lifetime,
+                            interest,
+                        )
+                    )
+                    investment_costs += (
+                        investment_costs_increment + remaining_value_difference
+                    )
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.NON_CONVEX_INVESTSTORAGES:
@@ -1752,36 +1826,63 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         n=lifetime,
                         wacc=interest,
                     )
+                    duration = min(
+                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        lifetime,
+                    )
+                    present_value_factor = 1 / economics.annuity(
+                        capex=1, n=duration, wacc=interest
+                    )
                     investment_costs_increment = (
-                        self.invest[n, p] * annuity * lifetime
+                        self.invest[n, p] * annuity * present_value_factor
                         + self.invest_status[n, p] * n.investment.offset[p]
-                    ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
-                    investment_costs += investment_costs_increment
+                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    remaining_value_difference = (
+                        self._evaluate_remaining_value_difference(
+                            m,
+                            p,
+                            n,
+                            m.es.end_year_of_optimization,
+                            lifetime,
+                            interest,
+                            nonconvex=True,
+                        )
+                    )
+                    investment_costs += (
+                        investment_costs_increment + remaining_value_difference
+                    )
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
+                        range_limit = min(
+                            m.es.end_year_of_optimization,
+                            m.es.periods_years[p] + lifetime,
+                        )
                         fixed_costs += sum(
                             self.invest[n, p]
                             * n.investment.fixed_costs[pp]
-                            * ((1 + m.discount_rate) ** (-pp))
+                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(
                                 m.es.periods_years[p],
-                                m.es.periods_years[p] + lifetime,
+                                range_limit,
                             )
-                        ) * ((1 + m.discount_rate) ** (-m.es.periods_years[p]))
+                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
 
             for n in self.EXISTING_INVESTSTORAGES:
                 if n.investment.fixed_costs[0] is not None:
                     lifetime = n.investment.lifetime
                     age = n.investment.age
+                    range_limit = min(
+                        m.es.end_year_of_optimization, lifetime - age
+                    )
                     fixed_costs += sum(
                         n.investment.existing
                         * n.investment.fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, lifetime - age)
+                        * (1 + m.discount_rate) ** (-pp)
+                        for pp in range(range_limit)
                     )
 
         self.investment_costs = Expression(expr=investment_costs)
@@ -1790,3 +1891,80 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         self.costs = Expression(expr=investment_costs + fixed_costs)
 
         return self.costs
+
+    def _evaluate_remaining_value_difference(
+        self,
+        m,
+        p,
+        n,
+        end_year_of_optimization,
+        lifetime,
+        interest,
+        nonconvex=False,
+    ):
+        """Evaluate and return the remaining value difference of an investment
+
+        The remaining value difference in the net present values if the asset
+        was to be liquidated at the end of the optimization horizon and the
+        net present value using the original investment expenses.
+
+        Parameters
+        ----------
+        m : oemof.solph.models.Model
+            Optimization model
+
+        p : int
+            Period in which investment occurs
+
+        n : oemof.solph.components.GenericStorage
+            storage unit
+
+        end_year_of_optimization : int
+            Last year of the optimization horizon
+
+        lifetime : int
+            lifetime of investment considered
+
+        interest : float
+            Demanded interest rate for investment
+
+        nonconvex : bool
+            Indicating whether considered flow is nonconvex.
+        """
+        if m.es.use_remaining_value:
+            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+                remaining_lifetime = lifetime - (
+                    end_year_of_optimization - m.es.periods_years[p]
+                )
+                remaining_annuity = economics.annuity(
+                    capex=n.investment.ep_costs[-1],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                original_annuity = economics.annuity(
+                    capex=n.investment.ep_costs[p],
+                    n=remaining_lifetime,
+                    wacc=interest,
+                )
+                present_value_factor_remaining = 1 / economics.annuity(
+                    capex=1, n=remaining_lifetime, wacc=interest
+                )
+                convex_investment_costs = (
+                    self.invest[n, p]
+                    * (remaining_annuity - original_annuity)
+                    * present_value_factor_remaining
+                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                if nonconvex:
+                    return convex_investment_costs + self.invest_status[
+                        n, p
+                    ] * (n.investment.offset[-1] - n.investment.offset[p]) * (
+                        1 + m.discount_rate
+                    ) ** (
+                        -end_year_of_optimization
+                    )
+                else:
+                    return convex_investment_costs
+            else:
+                return 0
+        else:
+            return 0

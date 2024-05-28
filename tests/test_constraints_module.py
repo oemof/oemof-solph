@@ -5,7 +5,10 @@ from oemof import solph
 
 def test_special():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
     bel = solph.buses.Bus(label="electricityBus")
     flow1 = solph.flows.Flow(
         nominal_value=100,
@@ -26,7 +29,9 @@ def test_special():
 
 def test_something_else():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=True
+    )
     bel1 = solph.buses.Bus(label="electricity1")
     bel2 = solph.buses.Bus(label="electricity2")
     energysystem.add(bel1, bel2)
@@ -36,7 +41,7 @@ def test_something_else():
             inputs={bel1: solph.flows.Flow()},
             outputs={
                 bel2: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=20)
+                    nominal_value=solph.Investment(ep_costs=20)
                 )
             },
         )
@@ -47,7 +52,7 @@ def test_something_else():
             inputs={bel2: solph.flows.Flow()},
             outputs={
                 bel1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=20)
+                    nominal_value=solph.Investment(ep_costs=20)
                 )
             },
         )

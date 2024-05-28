@@ -91,7 +91,7 @@ def main():
                     minimum_uptime=5,
                     initial_status=1,
                 ),
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=epc,
                     minimum=1.0,
                     maximum=10.0,

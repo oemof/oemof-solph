@@ -14,12 +14,9 @@ objective:
 +23.52941176470588 flow(storage_non_convex_electricityBus_1_3)
 +23.06805074971165 flow(storage_non_convex_electricityBus_2_4)
 +23.06805074971165 flow(storage_non_convex_electricityBus_2_5)
-+25.57348127967623 GenericInvestmentStorageBlock_invest(storage_non_convex_0)
-+5 GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
-+16.879634095198618 GenericInvestmentStorageBlock_invest(storage_non_convex_1)
-+4.901960784313725 GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
-+8.35625450257358 GenericInvestmentStorageBlock_invest(storage_non_convex_2)
-+4.805843906189927 GenericInvestmentStorageBlock_invest_status(storage_non_convex_2)
++24.868005934029988 GenericInvestmentStorageBlock_invest(storage_non_convex_0)
++16.413989016710378 GenericInvestmentStorageBlock_invest(storage_non_convex_1)
++8.125737136985347 GenericInvestmentStorageBlock_invest(storage_non_convex_2)
 
 s.t.
 
@@ -53,25 +50,6 @@ c_e_BusBlock_balance(electricityBus_2_5)_:
 +1 flow(storage_non_convex_electricityBus_2_5)
 = 0
 
-c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_0)_:
-+1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_0)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_1)_:
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
-+1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_1)
-+1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_1)
-= 0
-
-c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_2)_:
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
-+1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
--1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_2)
-+1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_2)
-= 0
-
 c_e_InvestmentFlowBlock_total_rule(storage_non_convex_electricityBus_0)_:
 +1 InvestmentFlowBlock_total(storage_non_convex_electricityBus_0)
 -1 InvestmentFlowBlock_invest(storage_non_convex_electricityBus_0)
@@ -91,16 +69,23 @@ c_e_InvestmentFlowBlock_total_rule(storage_non_convex_electricityBus_2)_:
 +1 InvestmentFlowBlock_old(storage_non_convex_electricityBus_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_0)_:
-+1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0)
+c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_0)_:
++1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
+-1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_1)_:
-+1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1)
+c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_1)_:
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
++1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
+-1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_1)
++1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_2)_:
-+1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2)
+c_e_InvestmentFlowBlock_total_rule(electricityBus_storage_non_convex_2)_:
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
++1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
+-1 InvestmentFlowBlock_invest(electricityBus_storage_non_convex_2)
++1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_2)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule_end(storage_non_convex_electricityBus_0)_:
@@ -115,16 +100,16 @@ c_e_InvestmentFlowBlock_old_rule_end(storage_non_convex_electricityBus_2)_:
 +1 InvestmentFlowBlock_old_end(storage_non_convex_electricityBus_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_0)_:
-+1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0)
+c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_0)_:
++1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_1)_:
-+1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1)
+c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_1)_:
++1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_2)_:
-+1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2)
+c_e_InvestmentFlowBlock_old_rule_end(electricityBus_storage_non_convex_2)_:
++1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule_exo(storage_non_convex_electricityBus_0)_:
@@ -139,22 +124,16 @@ c_e_InvestmentFlowBlock_old_rule_exo(storage_non_convex_electricityBus_2)_:
 +1 InvestmentFlowBlock_old_exo(storage_non_convex_electricityBus_2)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_0)_:
--1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0)
--1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0)
-+1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_0)
+c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_0)_:
++1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_1)_:
-+1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_1)
--1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1)
--1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1)
+c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_1)_:
++1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1)
 = 0
 
-c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_2)_:
-+1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_2)
--1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2)
--1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2)
+c_e_InvestmentFlowBlock_old_rule_exo(electricityBus_storage_non_convex_2)_:
++1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2)
 = 0
 
 c_e_InvestmentFlowBlock_old_rule(storage_non_convex_electricityBus_0)_:
@@ -175,35 +154,23 @@ c_e_InvestmentFlowBlock_old_rule(storage_non_convex_electricityBus_2)_:
 -1 InvestmentFlowBlock_old_exo(storage_non_convex_electricityBus_2)
 = 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_0_0)_:
-+1 flow(electricityBus_storage_non_convex_0_0)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_0)_:
+-1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0)
+-1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0)
++1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_0)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_0_1)_:
-+1 flow(electricityBus_storage_non_convex_0_1)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_1)_:
++1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_1)
+-1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1)
+-1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1)
+= 0
 
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_1_2)_:
-+1 flow(electricityBus_storage_non_convex_1_2)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_1_3)_:
-+1 flow(electricityBus_storage_non_convex_1_3)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_2_4)_:
-+1 flow(electricityBus_storage_non_convex_2_4)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
-<= 0
-
-c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_2_5)_:
-+1 flow(electricityBus_storage_non_convex_2_5)
--1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
-<= 0
+c_e_InvestmentFlowBlock_old_rule(electricityBus_storage_non_convex_2)_:
++1 InvestmentFlowBlock_old(electricityBus_storage_non_convex_2)
+-1 InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2)
+-1 InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2)
+= 0
 
 c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_0_0)_:
 +1 flow(storage_non_convex_electricityBus_0_0)
@@ -233,6 +200,36 @@ c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_2_4)_:
 c_u_InvestmentFlowBlock_max(storage_non_convex_electricityBus_2_5)_:
 +1 flow(storage_non_convex_electricityBus_2_5)
 -1 InvestmentFlowBlock_total(storage_non_convex_electricityBus_2)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_0_0)_:
++1 flow(electricityBus_storage_non_convex_0_0)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_0_1)_:
++1 flow(electricityBus_storage_non_convex_0_1)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_0)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_1_2)_:
++1 flow(electricityBus_storage_non_convex_1_2)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_1_3)_:
++1 flow(electricityBus_storage_non_convex_1_3)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_1)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_2_4)_:
++1 flow(electricityBus_storage_non_convex_2_4)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
+<= 0
+
+c_u_InvestmentFlowBlock_max(electricityBus_storage_non_convex_2_5)_:
++1 flow(electricityBus_storage_non_convex_2_5)
+-1 InvestmentFlowBlock_total(electricityBus_storage_non_convex_2)
 <= 0
 
 c_e_GenericInvestmentStorageBlock_total_storage_rule(storage_non_convex_0)_:
@@ -427,32 +424,32 @@ c_u_GenericInvestmentStorageBlock_min_storage_content(storage_non_convex_2_5)_:
 
 c_l_GenericInvestmentStorageBlock_limit_max(storage_non_convex_0)_:
 -1 GenericInvestmentStorageBlock_invest(storage_non_convex_0)
-+1454 GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
++244 GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_max(storage_non_convex_1)_:
 -1 GenericInvestmentStorageBlock_invest(storage_non_convex_1)
-+1454 GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
++244 GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_max(storage_non_convex_2)_:
 -1 GenericInvestmentStorageBlock_invest(storage_non_convex_2)
-+1454 GenericInvestmentStorageBlock_invest_status(storage_non_convex_2)
++244 GenericInvestmentStorageBlock_invest_status(storage_non_convex_2)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_min(storage_non_convex_0)_:
 +1 GenericInvestmentStorageBlock_invest(storage_non_convex_0)
--19 GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
+-12 GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_min(storage_non_convex_1)_:
 +1 GenericInvestmentStorageBlock_invest(storage_non_convex_1)
--19 GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
+-12 GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
 >= 0
 
 c_l_GenericInvestmentStorageBlock_limit_min(storage_non_convex_2)_:
 +1 GenericInvestmentStorageBlock_invest(storage_non_convex_2)
--19 GenericInvestmentStorageBlock_invest_status(storage_non_convex_2)
+-12 GenericInvestmentStorageBlock_invest_status(storage_non_convex_2)
 >= 0
 
 bounds
@@ -468,20 +465,9 @@ bounds
    0 <= flow(storage_non_convex_electricityBus_1_3) <= +inf
    0 <= flow(storage_non_convex_electricityBus_2_4) <= +inf
    0 <= flow(storage_non_convex_electricityBus_2_5) <= +inf
-   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_0) <= 1454
-   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_0) <= 1
-   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_1) <= 1454
-   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_1) <= 1
-   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_2) <= 1454
-   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_2) <= 1
-   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_0) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_0) <= +inf
-   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_1) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_1) <= +inf
-   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_1) <= +inf
-   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_2) <= +inf
-   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_2) <= +inf
-   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_2) <= +inf
+   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_0) <= 244
+   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_1) <= 244
+   0 <= GenericInvestmentStorageBlock_invest(storage_non_convex_2) <= 244
    0 <= InvestmentFlowBlock_total(storage_non_convex_electricityBus_0) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_non_convex_electricityBus_0) <= +inf
    0 <= InvestmentFlowBlock_total(storage_non_convex_electricityBus_1) <= +inf
@@ -490,20 +476,28 @@ bounds
    0 <= InvestmentFlowBlock_total(storage_non_convex_electricityBus_2) <= +inf
    0 <= InvestmentFlowBlock_invest(storage_non_convex_electricityBus_2) <= +inf
    0 <= InvestmentFlowBlock_old(storage_non_convex_electricityBus_2) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1) <= +inf
-   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2) <= +inf
+   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_0) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_0) <= +inf
+   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_1) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_1) <= +inf
+   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_1) <= +inf
+   0 <= InvestmentFlowBlock_total(electricityBus_storage_non_convex_2) <= +inf
+   0 <= InvestmentFlowBlock_invest(electricityBus_storage_non_convex_2) <= +inf
+   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_2) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_non_convex_electricityBus_0) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_non_convex_electricityBus_1) <= +inf
    0 <= InvestmentFlowBlock_old_end(storage_non_convex_electricityBus_2) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1) <= +inf
-   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_0) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_1) <= +inf
+   0 <= InvestmentFlowBlock_old_end(electricityBus_storage_non_convex_2) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_non_convex_electricityBus_0) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_non_convex_electricityBus_1) <= +inf
    0 <= InvestmentFlowBlock_old_exo(storage_non_convex_electricityBus_2) <= +inf
-   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_0) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_0) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_1) <= +inf
+   0 <= InvestmentFlowBlock_old_exo(electricityBus_storage_non_convex_2) <= +inf
    0 <= InvestmentFlowBlock_old(storage_non_convex_electricityBus_0) <= +inf
+   0 <= InvestmentFlowBlock_old(electricityBus_storage_non_convex_0) <= +inf
    0 <= GenericInvestmentStorageBlock_total(storage_non_convex_0) <= +inf
    0 <= GenericInvestmentStorageBlock_total(storage_non_convex_1) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage_non_convex_1) <= +inf
@@ -522,6 +516,9 @@ bounds
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_3) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_4) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_non_convex_5) <= +inf
+   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_0) <= 1
+   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_1) <= 1
+   0 <= GenericInvestmentStorageBlock_invest_status(storage_non_convex_2) <= 1
 binary
   GenericInvestmentStorageBlock_invest_status(storage_non_convex_0)
   GenericInvestmentStorageBlock_invest_status(storage_non_convex_1)
