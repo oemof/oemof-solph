@@ -127,8 +127,12 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        self._reference_flow_bus = [v for v in self.inputs.values() if v.nonconvex]
-        self._reference_flow_bus += [v for v in self.outputs.values() if v.nonconvex]
+        self._reference_flow_bus = [
+            v for v in self.inputs.values() if v.nonconvex
+        ]
+        self._reference_flow_bus += [
+            v for v in self.outputs.values() if v.nonconvex
+        ]
         if len(self._reference_flow_bus) != 1:
             raise ValueError(
                 "Exactly one flow of the `OffsetConverter` must have the "
@@ -142,11 +146,18 @@ class OffsetConverter(Node):
             self._reference_flow_at_input = False
             self._reference_flow = self._reference_flow_bus[0].output
 
-        self._investment_flow = [v.input for v in self.inputs.values() if v.investment]
-        self._investment_flow += [v.output for v in self.outputs.values() if v.investment]
+        self._investment_flow = [
+            v.input for v in self.inputs.values() if v.investment
+        ]
+        self._investment_flow += [
+            v.output for v in self.outputs.values() if v.investment
+        ]
 
         if len(self._investment_flow) > 0:
-            if len(self._investment_flow) > 1 or self._reference_flow != self._investment_flow[0]:
+            if (
+                len(self._investment_flow) > 1
+                or self._reference_flow != self._investment_flow[0]
+            ):
                 raise TypeError(
                     "`Investment` attribute must be defined only for the "
                     "NonConvex flow!"
@@ -285,9 +296,17 @@ class OffsetConverterBlock(ScalarBlock):
         self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
         reference_flows = {n: n._reference_flow for n in group}
-        reference_flows_at_input = {n: n._reference_flow_at_input for n in group}
-        in_flows = {n: [i for i in n.inputs.keys() if i != n._reference_flow] for n in group}
-        out_flows = {n: [o for o in n.outputs.keys() if o != n._reference_flow] for n in group}
+        reference_flows_at_input = {
+            n: n._reference_flow_at_input for n in group
+        }
+        in_flows = {
+            n: [i for i in n.inputs.keys() if i != n._reference_flow]
+            for n in group
+        }
+        out_flows = {
+            n: [o for o in n.outputs.keys() if o != n._reference_flow]
+            for n in group
+        }
 
         self.relation = Constraint(
             [
@@ -315,9 +334,16 @@ class OffsetConverterBlock(ScalarBlock):
                         status_nominal = m.NonConvexFlowBlock.status_nominal
 
                     if hasattr(m, "InvestNonConvexFlowBlock"):
-                        if hasattr(m.InvestNonConvexFlowBlock, "status_nominal"):
-                            if idx in m.InvestNonConvexFlowBlock.status_nominal:
-                                status_nominal = m.InvestNonConvexFlowBlock.status_nominal
+                        if hasattr(
+                            m.InvestNonConvexFlowBlock, "status_nominal"
+                        ):
+                            if (
+                                idx
+                                in m.InvestNonConvexFlowBlock.status_nominal
+                            ):
+                                status_nominal = (
+                                    m.InvestNonConvexFlowBlock.status_nominal
+                                )
 
                     ref_status_nominal = status_nominal[idx]
 
@@ -329,24 +355,26 @@ class OffsetConverterBlock(ScalarBlock):
                             rhs += m.flow[n, f, p, t]
 
                         lhs = 0
-                        lhs += (
-                            ref_flow * n.conversion_factors[f][t]
+                        lhs += ref_flow * n.conversion_factors[f][t]
+                        lhs += ref_status_nominal * n.normed_offsets[f][t]
+                        block.relation.add(
+                            (n, reference_flows[n], f, p, t), (lhs == rhs)
                         )
-                        lhs += (
-                            ref_status_nominal * n.normed_offsets[f][t]
-                        )
-                        block.relation.add((n, reference_flows[n], f, p, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_relation_rule)
 
 
-def calculate_slope_and_offset_with_reference_to_input(P_max, P_min, eta_max, eta_min):
+def calculate_slope_and_offset_with_reference_to_input(
+    P_max, P_min, eta_max, eta_min
+):
     slope = (P_max * eta_max - P_min * eta_min) / (P_max - P_min)
     offset = eta_max - slope
     return slope, offset
 
 
-def calculate_slope_and_offset_with_reference_to_output(P_max, P_min, eta_max, eta_min):
+def calculate_slope_and_offset_with_reference_to_output(
+    P_max, P_min, eta_max, eta_min
+):
     slope = (P_max / eta_max - P_min / eta_min) / (P_max - P_min)
     offset = 1 / eta_max - slope
     return slope, offset
