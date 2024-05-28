@@ -226,7 +226,7 @@ class EnergySystem(es.EnergySystem):
 
         Attribute `end_year_of_optimization` of int is set.
         """
-        duration_last_period = self.get_period_duration(-1)
+        duration_last_period = self.get_period_duration(len(self.periods) - 1)
         self.end_year_of_optimization = (
             self.periods_years[-1] + duration_last_period
         )
