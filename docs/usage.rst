@@ -688,31 +688,43 @@ The following example illustrates how to define an OffsetConverter for given inf
 
 .. code-block:: python
 
-    eta_min = 0.5                # efficiency at minimal operation point
-    eta_max = 0.8                # efficiency at nominal operation point
-    P_out_min = 20               # absolute minimal output power
-    P_out_max = 100              # absolute nominal output power
-    l_max = P_out_max/P_out_max  # upper part load limit
-    l_min = P_out_min/P_out_max  # lower part load limit
+    >>> from oemof import solph
 
-    # calculate coefficients of input-output line equation
-    c1 = (l_max-l_min)/(l_max/eta_max - l_min/eta_min)
-    c0 = l_min * (1-c1/eta_min)
+    >>> eta_min = 0.5                # efficiency at minimal operation point
+    >>> eta_max = 0.8                # efficiency at nominal operation point
+    >>> P_out_min = 20               # absolute minimal output power
+    >>> P_out_max = 100              # absolute nominal output power
+    >>> l_max = P_out_max/P_out_max  # upper part load limit
+    >>> l_min = P_out_min/P_out_max  # lower part load limit
+
+    # calculate slope and offset with respect to the output, since the
+    # output is the `NonConvex` flow.
+    >>> slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+    ...     l_max, l_min, eta_max, eta_min
+    ... )
+    >>> round(slope, 3)
+    1.062
+    >>> round(offset, 3)
+    0.188
+
+    >>> bfuel = solph.Bus("fuel")
+    >>> bth = solph.Bus("heat")
 
     # define OffsetConverter
-    solph.components.OffsetConverter(
-        label='boiler',
-        inputs={bfuel: solph.flows.Flow()},
-        outputs={
-            bth: solph.flows.Flow(
-                nominal_value=P_out_max,
-                max=l_max,
-                min=l_min,
-                nonconvex=solph.NonConvex()
-            ),
-        },
-        coefficients = {bth: (c0, c1)},
-    )
+    >>> diesel_genset = solph.components.OffsetConverter(
+    ...     label='boiler',
+    ...     inputs={bfuel: solph.flows.Flow()},
+    ...     outputs={
+    ...         bth: solph.flows.Flow(
+    ...             nominal_value=P_out_max,
+    ...             max=l_max,
+    ...             min=l_min,
+    ...             nonconvex=solph.NonConvex()
+    ...         ),
+    ...     },
+    ...     conversion_factors={bfuel: slope},
+    ...     normed_offsets={bfuel: offset},
+    ... )
 
 This example represents a boiler, which is supplied by fuel and generates heat.
 It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
