@@ -22,6 +22,7 @@ from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
+from pyomo.contrib import appsi
 
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
@@ -259,10 +260,13 @@ class BaseModel(po.ConcreteModel):
             \Gurobi solver takes numeric parameter values such as
             {"method": 2}
         """
+        if solver == "highs":
+            return self.solve_highs(**kwargs)
+
         solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
-
         opt = SolverFactory(solver, solver_io=solver_io)
+
         # set command line options
         options = opt.options
         for k in solver_cmdline_options:
@@ -289,6 +293,25 @@ class BaseModel(po.ConcreteModel):
         self.solver_results = solver_results
 
         return solver_results
+
+    def solve_highs(self, **kwargs):
+        msg = (
+            "Using the 'HiGHS'-solver is experimental in solph.\n Using "
+            "options and accessing the meta results might be different."
+        )
+        warnings.warn(msg)
+        opt = appsi.solvers.Highs()
+        results = opt.solve(self)
+        if results.termination_condition.value == 5:
+            logging.info("Optimization successful...")
+        else:
+            warnings.warn(
+                "Optimization ended with an unclear status "
+            )
+            print(results)
+        self.es.results = {}
+        self.solver_results = results
+        return results
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
