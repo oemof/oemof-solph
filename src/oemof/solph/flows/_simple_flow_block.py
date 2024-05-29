@@ -415,9 +415,9 @@ class SimpleFlowBlock(ScalarBlock):
             .. math::
               \sum_{(i,o)} \sum_t P(t) \cdot w(t) \cdot c_{var}(i, o, t)
 
-        whereby :math:`w(t)` is the objective weighting.
+        where :math:`w(t)` is the objective weighting.
 
-        In a multi-period model, in contrast, the following following parts of
+        In a multi-period model, in contrast, the following parts of
         the objective function are created:
 
         * `Flow.variable_costs` is not `None`:
@@ -427,25 +427,32 @@ class SimpleFlowBlock(ScalarBlock):
 
         * `Flow.fixed_costs` is not `None` and flow has no lifetime limit
             .. math::
-              \sum_{(i,o)} \sum_p P_{nominal} \cdot c_{fixed}(i, o, p)
-              \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{year_{max}}
+              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
            but not an initial age
             .. math::
-              \sum_{(i,o)} \sum_{p}^{p+n} P_{nominal} \cdot c_{fixed}(i, o, p)
-              \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}}
+              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
            and an initial age
             .. math::
-              \sum_{(i,o)} \sum_{p}^{p+n-a} P_{nominal}
-              \cdot c_{fixed}(i, o, p) \cdot DF^{-p}
+              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}} P_{nominal}
+              \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
 
         Hereby
+
         * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`
-        and :math:`dr` is the discount rate.
+          and :math:`dr` is the discount rate.
         * :math:`n` is the unit lifetime and :math:`a` is the initial age.
+        * :math:`year_{max}` denotes the last year of the optimization
+          horizon, i.e. at the end of the last period.
+        * :math:`limit_{exo}=min\{year_{max}, n - a\}` is used as an
+          upper bound to ensure fixed costs for existing capacities to occur
+          within the optimization horizon. :math:`a` is the initial age
+          of an asset (or 0 if not specified).
         """
         m = self.parent_block()
 
@@ -497,39 +504,45 @@ class SimpleFlowBlock(ScalarBlock):
                                 )
                             )
 
-                # Include fixed costs of units operating "forever"
+                # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None
                     and m.flows[i, o].nominal_value is not None
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
                 ):
-                    for p in m.PERIODS:
-                        fixed_costs += (
-                            m.flows[i, o].nominal_value
-                            * m.flows[i, o].fixed_costs[p]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
+                    fixed_costs += sum(
+                        m.flows[i, o].nominal_value
+                        * m.flows[i, o].fixed_costs[pp]
+                        * ((1 + m.discount_rate) ** (-pp))
+                        for pp in range(m.es.end_year_of_optimization)
+                    )
 
             # Fixed costs for units with limited lifetime
             for i, o in self.LIFETIME_FLOWS:
                 if m.flows[i, o].fixed_costs[0] is not None:
+                    range_limit = min(
+                        m.es.end_year_of_optimization,
+                        m.flows[i, o].lifetime,
+                    )
                     fixed_costs += sum(
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(0, m.flows[i, o].lifetime)
+                        for pp in range(range_limit)
                     )
 
             for i, o in self.LIFETIME_AGE_FLOWS:
                 if m.flows[i, o].fixed_costs[0] is not None:
+                    range_limit = min(
+                        m.es.end_year_of_optimization,
+                        m.flows[i, o].lifetime - m.flows[i, o].age,
+                    )
                     fixed_costs += sum(
                         m.flows[i, o].nominal_value
                         * m.flows[i, o].fixed_costs[pp]
                         * ((1 + m.discount_rate) ** (-pp))
-                        for pp in range(
-                            0, m.flows[i, o].lifetime - m.flows[i, o].age
-                        )
+                        for pp in range(range_limit)
                     )
 
         self.variable_costs = Expression(expr=variable_costs)

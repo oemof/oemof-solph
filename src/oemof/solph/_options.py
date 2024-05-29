@@ -62,7 +62,7 @@ class Investment:
         Units lifetime, given in years; only applicable for multi-period
         models
     age : int, :math:`a`
-        Units start age, given in years at the beginning of the simulation;
+        Units start age, given in years at the beginning of the optimization;
         only applicable for multi-period models
     interest_rate : float, :math:`ir`
         Interest rate for calculating annuities when investing in a particular
@@ -185,13 +185,13 @@ class NonConvex:
     inactivity_costs : numeric (iterable or scalar)
         Costs associated with not operating the flow.
     minimum_uptime : numeric (1 or positive integer)
-        Minimum time that a flow must be greater then its minimum flow after
-        startup. Be aware that minimum up and downtimes can contradict each
-        other and may lead to infeasible problems.
+        Minimum number of time steps that a flow must be greater then its
+        minimum flow after startup. Be aware that minimum up and downtimes
+        can contradict each other and may lead to infeasible problems.
     minimum_downtime : numeric (1 or positive integer)
-        Minimum time a flow is forced to zero after shutting down.
-        Be aware that minimum up and downtimes can contradict each
-        other and may to infeasible problems.
+        Minimum number of time steps a flow is forced to zero after
+        shutting down. Be aware that minimum up and downtimes can
+        contradict each other and may to infeasible problems.
     maximum_startups : numeric (0 or positive integer)
         Maximum number of start-ups in the optimization timeframe.
     maximum_shutdowns : numeric (0 or positive integer)

@@ -86,8 +86,7 @@ def main():
         inputs={bus_0: solph.Flow()},
         outputs={
             bus_1: solph.Flow(
-                nominal_value=None,
-                investment=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=c_var,
                     maximum=p_install_max,
                     minimum=p_install_min,

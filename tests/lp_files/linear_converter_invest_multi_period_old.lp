@@ -2,9 +2,9 @@
 
 min 
 objective:
-+20.601980198019806 InvestmentFlowBlock_invest(powerplant_gas_electricity_0)
-+20.1980198019802 InvestmentFlowBlock_invest(powerplant_gas_electricity_1)
-+19.801980198019805 InvestmentFlowBlock_invest(powerplant_gas_electricity_2)
++20.0 InvestmentFlowBlock_invest(powerplant_gas_electricity_0)
++19.6078431372549 InvestmentFlowBlock_invest(powerplant_gas_electricity_1)
++9.706853038245011 InvestmentFlowBlock_invest(powerplant_gas_electricity_2)
 +50 flow(powerplant_gas_electricity_0_0)
 +50 flow(powerplant_gas_electricity_0_1)
 +49.01960784313725 flow(powerplant_gas_electricity_1_2)
@@ -13,30 +13,6 @@ objective:
 +48.058439061899264 flow(powerplant_gas_electricity_2_5)
 
 s.t.
-
-c_e_BusBlock_balance(gas_0_0)_:
-+1 flow(gas_powerplant_gas_0_0)
-= 0
-
-c_e_BusBlock_balance(gas_0_1)_:
-+1 flow(gas_powerplant_gas_0_1)
-= 0
-
-c_e_BusBlock_balance(gas_1_2)_:
-+1 flow(gas_powerplant_gas_1_2)
-= 0
-
-c_e_BusBlock_balance(gas_1_3)_:
-+1 flow(gas_powerplant_gas_1_3)
-= 0
-
-c_e_BusBlock_balance(gas_2_4)_:
-+1 flow(gas_powerplant_gas_2_4)
-= 0
-
-c_e_BusBlock_balance(gas_2_5)_:
-+1 flow(gas_powerplant_gas_2_5)
-= 0
 
 c_e_BusBlock_balance(electricity_0_0)_:
 +1 flow(powerplant_gas_electricity_0_0)
@@ -60,6 +36,30 @@ c_e_BusBlock_balance(electricity_2_4)_:
 
 c_e_BusBlock_balance(electricity_2_5)_:
 +1 flow(powerplant_gas_electricity_2_5)
+= 0
+
+c_e_BusBlock_balance(gas_0_0)_:
++1 flow(gas_powerplant_gas_0_0)
+= 0
+
+c_e_BusBlock_balance(gas_0_1)_:
++1 flow(gas_powerplant_gas_0_1)
+= 0
+
+c_e_BusBlock_balance(gas_1_2)_:
++1 flow(gas_powerplant_gas_1_2)
+= 0
+
+c_e_BusBlock_balance(gas_1_3)_:
++1 flow(gas_powerplant_gas_1_3)
+= 0
+
+c_e_BusBlock_balance(gas_2_4)_:
++1 flow(gas_powerplant_gas_2_4)
+= 0
+
+c_e_BusBlock_balance(gas_2_5)_:
++1 flow(gas_powerplant_gas_2_5)
 = 0
 
 c_e_ConverterBlock_relation(powerplant_gas_gas_electricity_0_0)_:

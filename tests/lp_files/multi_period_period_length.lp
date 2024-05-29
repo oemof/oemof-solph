@@ -1,32 +1,32 @@
 \* Source Pyomo model name=Model *\
 
-min
+min 
 objective:
 +15992.031251718836 ONE_VAR_CONSTANT
-+12.231343625058066 InvestmentFlowBlock_invest(storage_electricity_0)
-+8.231343625058066 InvestmentFlowBlock_invest(storage_electricity_1)
-+6.116009561015236 InvestmentFlowBlock_invest(storage_electricity_2)
-+5.017258045399043 InvestmentFlowBlock_invest(storage_electricity_3)
-+4.544285192584936 InvestmentFlowBlock_invest(storage_electricity_4)
-+3.7278966318848936 InvestmentFlowBlock_invest(storage_electricity_5)
-+2.769882109365063 InvestmentFlowBlock_invest(storage_electricity_6)
-+1.864051255691565 InvestmentFlowBlock_invest(storage_electricity_7)
-+12.231343625058066 InvestmentFlowBlock_invest(electricity_storage_0)
-+8.231343625058066 InvestmentFlowBlock_invest(electricity_storage_1)
-+6.116009561015236 InvestmentFlowBlock_invest(electricity_storage_2)
-+5.017258045399043 InvestmentFlowBlock_invest(electricity_storage_3)
-+4.544285192584936 InvestmentFlowBlock_invest(electricity_storage_4)
-+3.7278966318848936 InvestmentFlowBlock_invest(electricity_storage_5)
-+2.769882109365063 InvestmentFlowBlock_invest(electricity_storage_6)
-+1.864051255691565 InvestmentFlowBlock_invest(electricity_storage_7)
-+12.231343625058066 GenericInvestmentStorageBlock_invest(storage_0)
-+8.231343625058066 GenericInvestmentStorageBlock_invest(storage_1)
-+6.116009561015236 GenericInvestmentStorageBlock_invest(storage_2)
-+5.017258045399043 GenericInvestmentStorageBlock_invest(storage_3)
-+4.544285192584936 GenericInvestmentStorageBlock_invest(storage_4)
-+3.7278966318848936 GenericInvestmentStorageBlock_invest(storage_5)
-+2.769882109365063 GenericInvestmentStorageBlock_invest(storage_6)
-+1.864051255691565 GenericInvestmentStorageBlock_invest(storage_7)
++9.999999999999998 InvestmentFlowBlock_invest(storage_electricity_0)
++6.729713331080573 InvestmentFlowBlock_invest(storage_electricity_1)
++5.000276133592968 InvestmentFlowBlock_invest(storage_electricity_2)
++4.101968025099305 InvestmentFlowBlock_invest(storage_electricity_3)
++3.7152788212696146 InvestmentFlowBlock_invest(storage_electricity_4)
++3.0478226645906985 InvestmentFlowBlock_invest(storage_electricity_5)
++2.264577134183746 InvestmentFlowBlock_invest(storage_electricity_6)
++0.09137506155350818 InvestmentFlowBlock_invest(storage_electricity_7)
++9.999999999999998 InvestmentFlowBlock_invest(electricity_storage_0)
++6.729713331080573 InvestmentFlowBlock_invest(electricity_storage_1)
++5.000276133592968 InvestmentFlowBlock_invest(electricity_storage_2)
++4.101968025099305 InvestmentFlowBlock_invest(electricity_storage_3)
++3.7152788212696146 InvestmentFlowBlock_invest(electricity_storage_4)
++3.0478226645906985 InvestmentFlowBlock_invest(electricity_storage_5)
++2.264577134183746 InvestmentFlowBlock_invest(electricity_storage_6)
++0.09137506155350818 InvestmentFlowBlock_invest(electricity_storage_7)
++9.999999999999998 GenericInvestmentStorageBlock_invest(storage_0)
++6.729713331080573 GenericInvestmentStorageBlock_invest(storage_1)
++5.000276133592968 GenericInvestmentStorageBlock_invest(storage_2)
++4.101968025099305 GenericInvestmentStorageBlock_invest(storage_3)
++3.7152788212696146 GenericInvestmentStorageBlock_invest(storage_4)
++3.0478226645906985 GenericInvestmentStorageBlock_invest(storage_5)
++2.264577134183746 GenericInvestmentStorageBlock_invest(storage_6)
++0.09137506155350818 GenericInvestmentStorageBlock_invest(storage_7)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_diw_0_0)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_diw_1_0)
 +1 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_diw_2_0)
@@ -651,14 +651,14 @@ objective:
 +0.15239954929176602 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_diw_22_23)
 +0.15239954929176602 SinkDSMDIWInvestmentBlock_dsm_do_shift(demand_dsm_diw_23_23)
 +15.239954929176601 SinkDSMDIWInvestmentBlock_dsm_do_shed(demand_dsm_diw_23)
-+455.88267648036174 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_0)
-+233.38374795126995 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_1)
-+144.56161688922427 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_2)
-+106.29941341240747 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_3)
-+91.48640392066359 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_4)
-+68.26495688582924 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_5)
-+44.80528445188661 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_6)
-+26.387865849578166 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_7)
++433.5692402297811 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_0)
++218.36744501149502 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_1)
++133.4042826150016 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_2)
++97.1465132094101 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_3)
++83.19634020751037 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_4)
++61.46421721288727 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_5)
++39.75223470007343 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_6)
++1.3782630680217502 SinkDSMDIWInvestmentBlock_invest(demand_dsm_diw_7)
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_dlr_1_0)
 +1 SinkDSMDLRInvestmentBlock_balance_dsm_do(demand_dsm_dlr_1_0)
 +1 SinkDSMDLRInvestmentBlock_dsm_up(demand_dsm_dlr_2_0)
@@ -875,14 +875,14 @@ objective:
 +0.15239954929176602 SinkDSMDLRInvestmentBlock_dsm_do_shift(demand_dsm_dlr_2_23)
 +0.15239954929176602 SinkDSMDLRInvestmentBlock_balance_dsm_up(demand_dsm_dlr_2_23)
 +15.239954929176601 SinkDSMDLRInvestmentBlock_dsm_do_shed(demand_dsm_dlr_23)
-+455.88267648036174 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_0)
-+233.38374795126995 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_1)
-+144.56161688922427 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_2)
-+106.29941341240747 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_3)
-+91.48640392066359 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_4)
-+68.26495688582924 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_5)
-+44.80528445188661 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_6)
-+26.387865849578166 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_7)
++433.5692402297811 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_0)
++218.36744501149502 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_1)
++133.4042826150016 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_2)
++97.1465132094101 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_3)
++83.19634020751037 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_4)
++61.46421721288727 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_5)
++39.75223470007343 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_6)
++1.3782630680217502 SinkDSMDLRInvestmentBlock_invest(demand_dsm_dlr_7)
 +1 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_oemof_0)
 +100 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_oemof_0)
 +1 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_oemof_0)
@@ -955,14 +955,14 @@ objective:
 +0.15239954929176602 SinkDSMOemofInvestmentBlock_dsm_up(demand_dsm_oemof_23)
 +0.15239954929176602 SinkDSMOemofInvestmentBlock_dsm_do_shift(demand_dsm_oemof_23)
 +15.239954929176601 SinkDSMOemofInvestmentBlock_dsm_do_shed(demand_dsm_oemof_23)
-+455.88267648036174 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_0)
-+233.38374795126995 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_1)
-+144.56161688922427 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_2)
-+106.29941341240747 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_3)
-+91.48640392066359 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_4)
-+68.26495688582924 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_5)
-+44.80528445188661 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_6)
-+26.387865849578166 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_7)
++433.5692402297811 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_0)
++218.36744501149502 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_1)
++133.4042826150016 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_2)
++97.1465132094101 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_3)
++83.19634020751037 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_4)
++61.46421721288727 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_5)
++39.75223470007343 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_6)
++1.3782630680217502 SinkDSMOemofInvestmentBlock_invest(demand_dsm_oemof_7)
 
 s.t.
 
@@ -1918,14 +1918,14 @@ c_e_GenericInvestmentStorageBlock_old_rule(storage_7)_:
 = 0
 
 c_e_GenericInvestmentStorageBlock_initially_empty(storage_0)_:
-1 GenericInvestmentStorageBlock_storage_content(storage_0)
++1 GenericInvestmentStorageBlock_storage_content(storage_0)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_0_1)_:
 +1 flow(storage_electricity_0_1)
 -1 flow(electricity_storage_0_1)
-+1 GenericInvestmentStorageBlock_storage_content(storage_1)
 -1 GenericInvestmentStorageBlock_storage_content(storage_0)
++1 GenericInvestmentStorageBlock_storage_content(storage_1)
 = 0
 
 c_e_GenericInvestmentStorageBlock_balance(storage_0_2)_:
@@ -7894,8 +7894,8 @@ bounds
    0 <= GenericInvestmentStorageBlock_old_exo(storage_6) <= +inf
    0 <= GenericInvestmentStorageBlock_old_exo(storage_7) <= +inf
    0 <= GenericInvestmentStorageBlock_old(storage_0) <= +inf
-   0 <= GenericInvestmentStorageBlock_storage_content(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_0) <= +inf
+   0 <= GenericInvestmentStorageBlock_storage_content(storage_1) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_2) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_3) <= +inf
    0 <= GenericInvestmentStorageBlock_storage_content(storage_4) <= +inf

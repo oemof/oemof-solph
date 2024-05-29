@@ -78,10 +78,12 @@ class TestsConstraint:
 
                 # sometimes, 0.0 is printed, sometimes 0, harmonise that
                 exp_diff = [
-                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0") for line in exp_diff
+                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0")
+                    for line in exp_diff
                 ]
                 gen_diff = [
-                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0") for line in exp_diff
+                    line.replace("0.0 ", "0 ").replace("= 0.0", "= 0")
+                    for line in exp_diff
                 ]
 
                 assert len(exp_diff) == len(gen_diff)
@@ -124,7 +126,7 @@ class TestsConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(maximum=1000, ep_costs=20),
+                    nominal_value=solph.Investment(maximum=1000, ep_costs=20),
                 )
             },
             conversion_factors={bel: 0.58},
@@ -143,11 +145,10 @@ class TestsConstraint:
             inputs={bfuel: solph.flows.Flow()},
             outputs={
                 bel: solph.flows.Flow(
-                    nominal_value=None,
                     variable_costs=25,
                     min=0.25,
                     max=0.5,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         maximum=1234,
                     ),
@@ -234,7 +235,7 @@ class TestsConstraint:
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500, maximum=1e6, existing=50
                     ),
                 )
@@ -254,7 +255,7 @@ class TestsConstraint:
                 bel: solph.flows.Flow(
                     max=[45, 83, 65],
                     variable_costs=13,
-                    investment=solph.Investment(ep_costs=123),
+                    nominal_value=solph.Investment(ep_costs=123),
                 )
             },
         )
@@ -300,7 +301,9 @@ class TestsConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, maximum=234
+            ),
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -308,7 +311,6 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(ep_costs=145, maximum=234),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_1.lp")
@@ -320,12 +322,16 @@ class TestsConstraint:
         storage = solph.components.GenericStorage(
             label="storage2",
             inputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=99))
+                bel: solph.flows.Flow(
+                    nominal_value=solph.Investment(ep_costs=99)
+                )
             },
             outputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=9))
+                bel: solph.flows.Flow(
+                    nominal_value=solph.Investment(ep_costs=9)
+                )
             },
-            investment=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
             initial_storage_level=0.5,
         )
         self.energysystem.add(bel, storage)
@@ -341,10 +347,14 @@ class TestsConstraint:
         storage = solph.components.GenericStorage(
             label="storage3",
             inputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=99))
+                bel: solph.flows.Flow(
+                    nominal_value=solph.Investment(ep_costs=99)
+                )
             },
             outputs={
-                bel: solph.flows.Flow(investment=solph.Investment(ep_costs=9))
+                bel: solph.flows.Flow(
+                    nominal_value=solph.Investment(ep_costs=9)
+                )
             },
             nominal_storage_capacity=5000,
         )
@@ -359,7 +369,9 @@ class TestsConstraint:
             label="storage4",
             inputs={bel: solph.flows.Flow(nominal_value=80)},
             outputs={bel: solph.flows.Flow(nominal_value=100)},
-            investment=solph.Investment(ep_costs=145, maximum=500),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, maximum=500
+            ),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_4.lp")
@@ -376,12 +388,12 @@ class TestsConstraint:
             label="storage5",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=99, existing=110)
+                    nominal_value=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(existing=100)
+                    nominal_value=solph.Investment(existing=100)
                 )
             },
             invest_relation_input_output=1.1,
@@ -400,16 +412,18 @@ class TestsConstraint:
             label="storage6",
             inputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=99, existing=110)
+                    nominal_value=solph.Investment(ep_costs=99, existing=110)
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    investment=solph.Investment(existing=100)
+                    nominal_value=solph.Investment(existing=100)
                 )
             },
             invest_relation_input_output=1.1,
-            investment=solph.Investment(ep_costs=145, existing=10000),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, existing=10000
+            ),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_6.lp")
@@ -424,7 +438,7 @@ class TestsConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow()},
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145, minimum=100, maximum=200
             ),
         )
@@ -456,12 +470,11 @@ class TestsConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow()},
             outputs={bel: solph.flows.Flow()},
-            nominal_storage_capacity=None,
             initial_storage_level=0.5,
             balanced=False,
             invest_relation_input_capacity=1,
             invest_relation_output_capacity=1,
-            investment=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_unbalanced.lp")
@@ -499,7 +512,6 @@ class TestsConstraint:
             label="storage1",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             fixed_losses_relative=0.01,
             fixed_losses_absolute=3,
@@ -509,7 +521,9 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(ep_costs=145, maximum=234),
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=145, maximum=234
+            ),
         )
         self.energysystem.add(bel, storage)
         self.compare_lp_files("storage_invest_1_fixed_losses.lp")
@@ -549,7 +563,7 @@ class TestsConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(maximum=1000, ep_costs=20),
+                    nominal_value=solph.Investment(maximum=1000, ep_costs=20),
                 ),
                 bth: solph.flows.Flow(variable_costs=20),
             },
@@ -573,7 +587,7 @@ class TestsConstraint:
             outputs={
                 bel: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         maximum=1000, ep_costs=20, existing=200
                     ),
                 ),
@@ -617,7 +631,7 @@ class TestsConstraint:
             inputs={
                 bgas: solph.flows.Flow(
                     variable_costs=50,
-                    investment=solph.Investment(maximum=1000, ep_costs=20),
+                    nominal_value=solph.Investment(maximum=1000, ep_costs=20),
                 )
             },
             outputs={bel: solph.flows.Flow(), bheat: solph.flows.Flow()},
@@ -682,7 +696,7 @@ class TestsConstraint:
             label="source_0",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=50,
                         custom_attributes={"space": 4},
                     )
@@ -694,7 +708,7 @@ class TestsConstraint:
             label="source_1",
             outputs={
                 bus: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=100, custom_attributes={"space": 1}
                     ),
                 )
@@ -704,7 +718,9 @@ class TestsConstraint:
         source_2 = solph.components.Source(
             label="source_2",
             outputs={
-                bus: solph.flows.Flow(investment=solph.Investment(ep_costs=75))
+                bus: solph.flows.Flow(
+                    nominal_value=solph.Investment(ep_costs=75)
+                )
             },
         )
 
@@ -897,13 +913,13 @@ class TestsConstraint:
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.flows.Flow()},
             outputs={bus1: solph.flows.Flow()},
-            investment=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
         )
         sink = solph.components.Sink(
             label="Sink",
             inputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=500)
+                    nominal_value=solph.Investment(ep_costs=500)
                 )
             },
         )
@@ -911,7 +927,7 @@ class TestsConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1053,13 +1069,13 @@ class TestsConstraint:
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.flows.Flow()},
             outputs={bus1: solph.flows.Flow()},
-            investment=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
         )
         source = solph.components.Source(
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1076,7 +1092,7 @@ class TestsConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1109,7 +1125,7 @@ class TestsConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1143,7 +1159,7 @@ class TestsConstraint:
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1179,13 +1195,13 @@ class TestsConstraint:
             invest_relation_output_capacity=0.2,
             inputs={bus1: solph.flows.Flow()},
             outputs={bus1: solph.flows.Flow()},
-            investment=solph.Investment(ep_costs=145),
+            nominal_storage_capacity=solph.Investment(ep_costs=145),
         )
         solph.components.Source(
             label="Source",
             outputs={
                 bus1: solph.flows.Flow(
-                    investment=solph.Investment(ep_costs=123)
+                    nominal_value=solph.Investment(ep_costs=123)
                 )
             },
         )
@@ -1371,7 +1387,7 @@ class TestsConstraint:
                 b_el: solph.flows.Flow(
                     min=0.2,
                     nonconvex=solph.NonConvex(),
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=100,
                         maximum=1234,
                     ),
@@ -1655,11 +1671,10 @@ class TestsConstraint:
             label="b2",
             inputs={
                 b1: solph.Flow(
-                    nominal_value=None,
                     variable_costs=8,
                     min=0.25,
                     max=0.5,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=0.75,
                         maximum=10,
                     ),
@@ -1681,7 +1696,6 @@ class TestsConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -1689,7 +1703,7 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=141, maximum=244, minimum=12, nonconvex=True
             ),
         )
@@ -1706,7 +1720,6 @@ class TestsConstraint:
             label="storage_non_convex",
             inputs={bel: solph.flows.Flow(variable_costs=56)},
             outputs={bel: solph.flows.Flow(variable_costs=24)},
-            nominal_storage_capacity=None,
             loss_rate=0.13,
             max_storage_level=0.9,
             min_storage_level=0.1,
@@ -1714,7 +1727,7 @@ class TestsConstraint:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 ep_costs=145,
                 minimum=19,
                 offset=5,
@@ -1733,7 +1746,7 @@ class TestsConstraint:
             label="storage_all_nonconvex",
             inputs={
                 b1: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         nonconvex=True,
                         minimum=5,
                         offset=10,
@@ -1744,7 +1757,7 @@ class TestsConstraint:
             },
             outputs={
                 b1: solph.flows.Flow(
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         nonconvex=True,
                         minimum=8,
                         offset=15,
@@ -1753,7 +1766,7 @@ class TestsConstraint:
                     )
                 )
             },
-            investment=solph.Investment(
+            nominal_storage_capacity=solph.Investment(
                 nonconvex=True, ep_costs=20, offset=30, minimum=20, maximum=100
             ),
         )
@@ -1771,7 +1784,7 @@ class TestsConstraint:
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500, minimum=15, nonconvex=True, maximum=172
                     ),
                 )
@@ -1791,7 +1804,7 @@ class TestsConstraint:
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500,
                         minimum=15,
                         maximum=20,
@@ -1815,7 +1828,7 @@ class TestsConstraint:
                     full_load_time_max=2.3,
                     variable_costs=25,
                     max=0.8,
-                    investment=solph.Investment(
+                    nominal_value=solph.Investment(
                         ep_costs=500, maximum=1234, offset=34, nonconvex=True
                     ),
                 )
@@ -1860,8 +1873,8 @@ class TestsConstraint:
             label="excess",
             inputs={
                 bel: solph.flows.Flow(
-                    summed_min=3,
-                    summed_max=100,
+                    full_load_time_min=3,
+                    full_load_time_max=100,
                     variable_costs=25,
                     max=0.8,
                     nominal_value=10,

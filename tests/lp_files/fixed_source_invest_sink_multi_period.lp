@@ -2,9 +2,9 @@
 
 min 
 objective:
-+611.5671812529034 InvestmentFlowBlock_invest(electricityBus_excess_0)
-+599.5756678950033 InvestmentFlowBlock_invest(electricityBus_excess_1)
-+587.8192822500032 InvestmentFlowBlock_invest(electricityBus_excess_2)
++88.1844182057801 InvestmentFlowBlock_invest(electricityBus_excess_0)
++58.20563481102971 InvestmentFlowBlock_invest(electricityBus_excess_1)
++28.814670698529593 InvestmentFlowBlock_invest(electricityBus_excess_2)
 +25 flow(electricityBus_excess_0_0)
 +25 flow(electricityBus_excess_0_1)
 +24.509803921568626 flow(electricityBus_excess_1_2)

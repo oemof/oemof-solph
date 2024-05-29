@@ -32,8 +32,11 @@ class TestParameterResult:
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
-                "2016-01-01", periods=cls.period, freq="H"
-            )
+                "2016-01-01",
+                periods=cls.period,
+                freq="H",
+            ),
+            infer_last_interval=True,
         )
 
         # BUSSES
@@ -48,7 +51,7 @@ class TestParameterResult:
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
                 b_el1: Flow(
-                    variable_costs=1, investment=Investment(ep_costs=0.5)
+                    variable_costs=1, nominal_value=Investment(ep_costs=0.5)
                 )
             },
             conversion_factors={b_el1: 2},
@@ -64,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            investment=Investment(ep_costs=0.4),
+            nominal_storage_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23
@@ -301,7 +304,9 @@ class TestParameterResult:
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        assert round(float(storage_content.sum()), 1) == 1437.5
+        assert (
+            storage_content.sum().iloc[0] == pytest.approx(1437.5, abs=0.1)
+        ).all()
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
@@ -311,13 +316,13 @@ class TestParameterResult:
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        assert int(converter_output.sum()) == int(compare.sum())
+        assert converter_output.sum().iloc[0] == pytest.approx(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)
         sink_input = views.node_input_by_type(results, node_type=Sink)
         compare = views.node(results, "demand_el", multiindex=True)
-        assert int(sink_input.sum()) == int(
+        assert sink_input.sum().iloc[0] == pytest.approx(
             compare["sequences"][("b_el2", "demand_el", "flow")].sum()
         )
 
@@ -331,13 +336,17 @@ class TestParameterResult:
 
         assert (
             (
-                compare[("storage", "b_el2", "flow")]
-                - compare[("b_el1", "storage", "flow")]
+                (
+                    compare[("storage", "b_el2", "flow")]
+                    - compare[("b_el1", "storage", "flow")]
+                )
+                .to_frame()
+                .fillna(0)
+                == storage_flow.values
             )
-            .to_frame()
-            .fillna(0)
-            == storage_flow.values
-        ).all()[0]
+            .all()
+            .iloc[0]
+        )
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)
