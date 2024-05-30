@@ -728,9 +728,23 @@ The following example illustrates how to define an OffsetConverter for given inf
 
 This example represents a boiler, which is supplied by fuel and generates heat.
 It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
-The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
-Note that the nonconvex flow has to be defined for the output flow.
-By using the OffsetConverter a linear relation of in- and output power with a power dependent efficiency is generated.
+The boiler cannot operate under 20 % of nominal thermal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
+By using the `OffsetConverter` a linear relation of in- and output power with a power dependent efficiency is generated.
+
+.. note::
+    One of the inputs and outputs has to be a `NonConvex` flow and this flow
+    will serve as the reference for the `conversion_factors` and the
+    `normed_offsets`. The `NonConvex` flow also holds
+
+    - the `nominal_value` (or `Investment` in case of investment optimization),
+    - the `min` and
+    - the `max` attributes.
+
+    The `conversion_factors` and `normed_offsets` are specified similar to the
+    `Converter` API with dictionaries referencing the respective input and
+    output buses. Note, that you cannot have the `conversion_factors` or
+    `normed_offsets` point to the `NonConvex` flow.
+
 The following figures illustrate the relations:
 
 .. 	image:: _files/OffsetConverter_power_relation.svg
@@ -740,14 +754,14 @@ The following figures illustrate the relations:
 
 Now, it becomes clear, why this object has been named `OffsetConverter`. The
 linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
-the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
+the offset :math:`C_{0}` with the binary status variable of the `NonConvex` flow, the origin (0, 0) becomes
 part of the solution space and the boiler is allowed to switch off:
 
 .. include:: ../src/oemof/solph/components/_offset_converter.py
   :start-after: _OffsetConverter-equations:
   :end-before: """
 
-The following figures shows the efficiency dependent on the output power,
+The following figure shows the efficiency dependent on the output power,
 which results in a nonlinear relation:
 
 .. math::
