@@ -127,7 +127,7 @@ addopts = """
     --ignore=ci
     --ignore=.eggs
     --doctest-modules
-    --doctest-glob=\*.rst
+    --doctest-glob=\\*.rst
     --tb=short
     --pyargs
 """
