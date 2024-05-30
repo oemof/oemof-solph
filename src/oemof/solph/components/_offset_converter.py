@@ -115,6 +115,7 @@ class OffsetConverter(Node):
         label=None,
         conversion_factors=None,
         normed_offsets=None,
+        coefficients=None,
         custom_attributes=None,
     ):
         if custom_attributes is None:
@@ -126,6 +127,22 @@ class OffsetConverter(Node):
             label=label,
             custom_properties=custom_attributes,
         )
+
+        # this part is used for the transition phase from the old OffsetConverter
+        # API to the new one. It calcualtes the conversion_factors and normed_offsets
+        # from the coefficients and the outputs information on min and max.
+        if coefficients is not None and conversion_factors is None and normed_offsets is None:
+            input_bus = list(inputs.values())[0].input
+            for flow in outputs.values():
+                max = flow.max[0]
+                min = flow.min[0]
+                eta_at_max = max * coefficients[1] / (max - coefficients[0])
+                eta_at_min = min * coefficients[1] / (min - coefficients[0])
+
+                slope, offset = calculate_slope_and_offset_with_reference_to_output(max, min, eta_at_max, eta_at_min)
+                conversion_factors = {input_bus: slope}
+                normed_offsets = {input_bus: offset}
+                msg = ""
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
         _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
