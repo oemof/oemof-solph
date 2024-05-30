@@ -147,13 +147,13 @@ addopts = """
 # the src/ directory by removing
 # --pyargs and oemof.solph from the options here.
 testpaths = [
-    src/oemof/solph/,
-    tests/,
-    docs/,
+    "src/oemof/solph/",
+    "tests/",
+    "docs/",
 ]
 
 [tool.isort]
-force_single_line = True
+force_single_line = true
 line_length = 79
 known_first_party = "oemof-solph"
 default_section = "THIRDPARTY"
@@ -161,4 +161,10 @@ forced_separate = "test_oemof-solph"
 skip = "migrations"
 
 [pydocstyle]
-ignore = [D200, D203, D213, D406, D407]
+ignore = [
+  "D200",
+  "D203",
+  "D213",
+  "D406",
+  "D407",
+]
