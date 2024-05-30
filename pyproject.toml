@@ -104,13 +104,13 @@ exclude = '''
 # so if you add a pytest config section elsewhere,
 # you will need to delete this section from setup.cfg.
 norecursedirs = [
-    .git,
-    .tox,
-    .env,
-    dist,
-    build,
-    migrations,
-    examples,
+    ".git",
+    ".tox",
+    ".env",
+    "dist",
+    "build",
+    "migrations",
+    "examples",
 ]
 
 python_files = [
