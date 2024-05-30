@@ -114,10 +114,10 @@ norecursedirs = [
 ]
 
 python_files = [
-    test_*.py,
-    *_test.py,
-    *_tests.py,
-    tests.py,
+    "test_*.py",
+    "*_test.py",
+    "*_tests.py",
+    "tests.py",
 ]
 addopts = """
     -ra
