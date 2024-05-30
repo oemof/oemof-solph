@@ -4,16 +4,26 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.sdist]
 include = [
+    "AUTHORS.rst",
+    "CITATION.cff",
     "CODE_OF_CONDUCT.md",
-    "CONTRIBUTING.md",
-    "MANIFEST.in",
+    "CONTRIBUTING.rst",
     "LICENSE",
     "README.rst",
     "VERSION",
     "tox.ini",
+    "ci/",
     "docs/",
-    "tests/",
     "examples/",
+    "src/",
+    "tests/",
+    ".bumpversion.cfg",
+    ".coveragerc",
+    ".editorconfig",
+    ".flake8",
+    ".pep8speaks.yml",
+    ".readthedocs.yaml",
+    ".scrutinizer.yml",
 ]
 exclude = ["docs/_build"]
 
@@ -73,6 +83,7 @@ dev = [
     "sphinx-copybutton",
     "sphinx-design",
     "termcolor",
+    "tox",
 ]
 
 [project.scripts]
