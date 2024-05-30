@@ -1,3 +1,83 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = [
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.md",
+    "MANIFEST.in",
+    "LICENSE",
+    "README.rst",
+    "VERSION",
+    "tox.ini",
+    "docs/",
+    "tests/",
+    "examples/",
+]
+exclude = ["docs/_build"]
+
+[project]
+name = "oemof.solph"
+dynamic = ["version"]
+description = "A model generator for energy system modelling and optimisation."
+readme = "README.rst"
+authors = [
+    {name = "oemof developer group", email = "contact@oemof.org"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "blinker",
+    "dill",
+    "numpy",
+    "pandas >= 1.5.3",
+    "pyomo >= 6.6.0, < 7.0",
+    "networkx",
+    "oemof.tools >= 0.4.3",
+    "oemof.network >= 0.5.0",
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/oemof/oemof-solph"
+Documentation = "https://oemof-solph.readthedocs.io/"
+Changelog = "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
+"Issue Tracker" = "https://github.com/oemof/oemof-solph/issues/"
+
+[project.optional-dependencies]
+dev = [
+    "flit",
+    "matplotlib",
+    "nbformat",
+    "pytest",
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "termcolor",
+]
+
+[project.scripts]
+oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation"
+
 [tool.black]
 line-length = 79
 target-version = ['py39', 'py310', 'py311']
@@ -18,6 +98,67 @@ exclude = '''
 )/
 '''
 
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.pytest.ini_options]
+# If a pytest section is found in one of the possible config files
+# (pytest.ini, tox.ini or setup.cfg), then pytest will not look for any others,
+# so if you add a pytest config section elsewhere,
+# you will need to delete this section from setup.cfg.
+norecursedirs = [
+    .git
+    .tox
+    .env
+    dist
+    build
+    migrations
+    examples
+]
+
+python_files = [
+    test_*.py
+    *_test.py
+    *_tests.py
+    tests.py
+]
+addopts = """
+    -ra
+    --strict-markers
+    --ignore=docs/conf.py
+    --ignore=setup.py
+    --ignore=ci
+    --ignore=.eggs
+    --doctest-modules
+    --doctest-glob=\*.rst
+    --tb=short
+    --pyargs
+"""
+# The order of these options matters. testpaths comes after addopts so that
+# oemof.solph in testpaths is interpreted as
+# --pyargs oemof.solph.
+# Any tests in the src/ directory (that is, tests installed with the package)
+# can be run by any user with pytest --pyargs oemof.solph.
+# Packages that are sensitive to the host machine, most famously NumPy,
+# include tests with the installed package so that any user can check
+# at any time that everything is working properly.
+# If you do choose to make installable tests, this will run the installed
+# tests as they are actually installed (same principle as when we ensure that
+# we always test the installed version of the package).
+# If you have no need for this (and your src/ directory is very large),
+# you can save a few milliseconds on testing by telling pytest not to search
+# the src/ directory by removing
+# --pyargs and oemof.solph from the options here.
+testpaths = [
+    src/oemof/solph/
+    tests/
+    docs/
+]
+
+[tool.isort]
+force_single_line = True
+line_length = 79
+known_first_party = "oemof-solph"
+default_section = "THIRDPARTY"
+forced_separate = "test_oemof-solph"
+skip = "migrations"
+
+[pydocstyle]
+ignore = [D200, D203, D213, D406, D407]
