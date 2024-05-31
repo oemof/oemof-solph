@@ -150,12 +150,3 @@ known_first_party = "oemof-solph"
 default_section = "THIRDPARTY"
 forced_separate = "test_oemof-solph"
 skip = "migrations"
-
-[pydocstyle]
-ignore = [
-  "D200",
-  "D203",
-  "D213",
-  "D406",
-  "D407",
-]
