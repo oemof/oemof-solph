@@ -303,8 +303,12 @@ def create_time_index(
     if start is None:
         start = f"1/1/{year}"
     try:
-        time_index = pd.date_range(start, periods=number + 1, freq=f"{interval}h")
+        time_index = pd.date_range(
+            start, periods=number + 1, freq=f"{interval}h"
+        )
     except ValueError:
         # Pandas <2.2 compatibility
-        time_index = pd.date_range(start, periods=number + 1, freq=f"{interval}H")
+        time_index = pd.date_range(
+            start, periods=number + 1, freq=f"{interval}H"
+        )
     return time_index
