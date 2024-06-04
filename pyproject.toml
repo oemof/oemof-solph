@@ -1,6 +1,97 @@
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.sdist]
+include = [
+    "AUTHORS.rst",
+    "CITATION.cff",
+    "CODE_OF_CONDUCT.md",
+    "CONTRIBUTING.rst",
+    "LICENSE",
+    "README.rst",
+    "VERSION",
+    "tox.ini",
+    "ci/",
+    "docs/",
+    "examples/",
+    "src/",
+    "tests/",
+    ".bumpversion.cfg",
+    ".coveragerc",
+    ".editorconfig",
+    ".flake8",
+    ".pep8speaks.yml",
+    ".readthedocs.yaml",
+    ".scrutinizer.yml",
+]
+exclude = ["docs/_build"]
+
+[project]
+name = "oemof.solph"
+dynamic = ["version"]
+description = "A model generator for energy system modelling and optimisation."
+readme = "README.rst"
+authors = [
+    {name = "oemof developer group", email = "contact@oemof.org"},
+]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Unix",
+    "Operating System :: POSIX",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: MacOS",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Utilities",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "blinker",
+    "dill",
+    "numpy",
+    "pandas >= 2.0.0",
+    "pyomo >= 6.6.0, < 7.0",
+    "networkx",
+    "oemof.tools >= 0.4.3",
+    "oemof.network >= 0.5.0",
+]
+license = {text = "MIT"}
+
+[project.urls]
+Homepage = "https://github.com/oemof/oemof-solph"
+Documentation = "https://oemof-solph.readthedocs.io/"
+Changelog = "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
+"Issue Tracker" = "https://github.com/oemof/oemof-solph/issues/"
+
+[project.optional-dependencies]
+dev = [
+    "flit",
+    "matplotlib",
+    "nbformat",
+    "pytest",
+    "sphinx",
+    "sphinx_rtd_theme",
+    "sphinx-copybutton",
+    "sphinx-design",
+    "termcolor",
+    "tox",
+]
+
+[project.scripts]
+oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation"
+
 [tool.black]
 line-length = 79
-target-version = ['py37', 'py38']
+target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -18,6 +109,44 @@ exclude = '''
 )/
 '''
 
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+[tool.pytest.ini_options]
+norecursedirs = [
+    ".git",
+    ".tox",
+    ".env",
+    "dist",
+    "build",
+    "migrations",
+    "examples",
+]
+python_files = [
+    "test_*.py",
+    "*_test.py",
+    "*_tests.py",
+    "tests.py",
+]
+addopts = """
+    -ra
+    --strict-markers
+    --ignore=docs/conf.py
+    --ignore=setup.py
+    --ignore=ci
+    --ignore=.eggs
+    --doctest-modules
+    --doctest-glob=\\*.rst
+    --tb=short
+    --pyargs
+"""
+testpaths = [
+    "src/oemof/solph/",
+    "tests/",
+    "docs/",
+]
+
+[tool.isort]
+force_single_line = true
+line_length = 79
+known_first_party = "oemof-solph"
+default_section = "THIRDPARTY"
+forced_separate = "test_oemof-solph"
+skip = "migrations"
