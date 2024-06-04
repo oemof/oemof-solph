@@ -36,9 +36,9 @@ from oemof.solph import views
 def test_multi_period_dispatch_model(solver="cbc"):
     """Test a simple multi_period dispatch model"""
 
-    t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="H")
-    t_idx_2 = pd.date_range("1/1/2030", periods=3, freq="H")
-    t_idx_3 = pd.date_range("1/1/2040", periods=3, freq="H")
+    t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h")
+    t_idx_2 = pd.date_range("1/1/2030", periods=3, freq="h")
+    t_idx_3 = pd.date_range("1/1/2040", periods=3, freq="h")
 
     # Create an overall timeindex
     t_idx_1_series = pd.Series(index=t_idx_1, dtype="float64")

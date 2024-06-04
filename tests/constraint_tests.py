@@ -29,7 +29,7 @@ class TestsConstraint:
             r"^objective.*(?=s\.t\.)", re.DOTALL | re.MULTILINE
         )
 
-        cls.date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+        cls.date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
 
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
@@ -1903,7 +1903,7 @@ class TestsConstraint:
         """Constraint test of an energy system
         with non-equidistant time index
         """
-        idxh = pd.date_range("1/1/2017", periods=3, freq="H")
+        idxh = pd.date_range("1/1/2017", periods=3, freq="h")
         idx2h = pd.date_range("1/1/2017 03:00:00", periods=2, freq="2H")
         idx30m = pd.date_range("1/1/2017 07:00:00", periods=4, freq="30min")
         timeindex = idxh.append([idx2h, idx30m])

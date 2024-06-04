@@ -39,7 +39,7 @@ from oemof.solph import constraints
 def main():
     # create energy system
     energysystem = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=3, freq="H")
+        timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
     )
 
     # create gas bus
