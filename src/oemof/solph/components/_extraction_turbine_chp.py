@@ -242,7 +242,7 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output."""
-            for t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g.inflow, g, t]
                     rhs = (
@@ -263,9 +263,9 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
             """Relation between main and tapped output in full chp mode."""
             for p, t in m.TIMEINDEX:
                 for g in group:
-                    lhs = m.flow[g, g.main_output, p, t]
+                    lhs = m.flow[g, g.main_output, t]
                     rhs = (
-                        m.flow[g, g.tapped_output, p, t]
+                        m.flow[g, g.tapped_output, t]
                         * g.flow_relation_index[t]
                     )
                     block.out_flow_relation.add((g, p, t), (lhs >= rhs))

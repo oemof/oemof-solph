@@ -80,7 +80,7 @@ class BusBlock(ScalarBlock):
        .. math::
          \sum_{i \in INPUTS(n)} P_{i}(t) =
          \sum_{o \in OUTPUTS(n)} P_{o}(t), \\
-         \forall t \in \textrm{TIMEINDEX}, \\
+         \forall t \in \textrm{TIMESTEPS}, \\
          \forall i \in \textrm{INPUTS}, \\
          \forall o \in \textrm{OUTPUTS}
 
@@ -126,7 +126,7 @@ class BusBlock(ScalarBlock):
             outs[n] = [o for o in n.outputs]
 
         def _busbalance_rule(block):
-            for t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
                     lhs = sum(m.flow[i, g, t] for i in ins[g])
                     rhs = sum(m.flow[g, o, t] for o in outs[g])
@@ -135,5 +135,5 @@ class BusBlock(ScalarBlock):
                     if expr is not True:
                         block.balance.add((g, t), expr)
 
-        self.balance = Constraint(group, m.TIMEINDEX, noruleinit=True)
+        self.balance = Constraint(group, m.TIMESTEPS, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)

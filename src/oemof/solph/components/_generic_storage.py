@@ -534,7 +534,7 @@ class GenericStorageBlock(ScalarBlock):
             return expr == 0
 
         self.balance = Constraint(
-            self.STORAGES, m.TIMEINDEX, rule=_storage_balance_rule
+            self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
         )
 
         def _balanced_storage_rule(block, n):
@@ -1258,7 +1258,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        reduced_periods_timesteps = [t for t in m.TIMEINDEX if t > 0]
+        reduced_periods_timesteps = [t for t in m.TIMESTEPS if t > 0]
 
         # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
@@ -1638,7 +1638,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         self.max_storage_content = Constraint(
             self.INVESTSTORAGES,
-            m.TIMEINDEX,
+            m.TIMESTEPS,
             rule=_max_storage_content_invest_rule,
         )
 

@@ -181,9 +181,9 @@ class ConverterBlock(ScalarBlock):
 
     Linear relation :attr:`om.ConverterBlock.relation[i,o,t]`
         .. math::
-            P_{i}(p, t) \cdot \eta_{o}(t) =
-            P_{o}(p, t) \cdot \eta_{i}(t), \\
-            \forall p, t \in \textrm{TIMEINDEX}, \\
+            P_{i}(t) \cdot \eta_{o}(t) =
+            P_{o}(t) \cdot \eta_{i}(t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{CONVERTERS}, \\
             \forall i \in \textrm{INPUTS}, \\
             \forall o \in \textrm{OUTPUTS}
@@ -244,7 +244,7 @@ class ConverterBlock(ScalarBlock):
         self.relation = Constraint(
             [
                 (n, i, o, t)
-                for t in m.TIMEINDEX
+                for t in m.TIMESTEPS
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -253,7 +253,7 @@ class ConverterBlock(ScalarBlock):
         )
 
         def _input_output_relation(block):
-            for t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:

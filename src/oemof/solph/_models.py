@@ -425,23 +425,39 @@ class Model(BaseModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        self.TIMEINDEX = po.Set(
-            initialize=list(
-                range(len(self.es.timeincrement)),
-            ),
-            ordered=True,
-        )
         if self.es.periods is None:
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip(
+                        [0] * len(self.es.timeincrement),
+                        range(len(self.es.timeincrement)),
+                    )
+                ),
+                ordered=True,
+            )
             self.PERIODS = po.Set(initialize=[0])
         else:
+            nested_list = [
+                [k] * len(self.es.periods[k])
+                for k in range(len(self.es.periods))
+            ]
+            flattened_list = [
+                item for sublist in nested_list for item in sublist
+            ]
+            self.TIMEINDEX = po.Set(
+                initialize=list(
+                    zip(flattened_list, range(len(self.es.timeincrement)))
+                ),
+                ordered=True,
+            )
             self.PERIODS = po.Set(
                 initialize=sorted(list(set(range(len(self.es.periods)))))
             )
 
         # (Re-)Map timesteps to periods
         timesteps_in_period = {p: [] for p in self.PERIODS}
-        for t in self.TIMEINDEX:
-            timesteps_in_period[0].append(t)
+        for p, t in self.TIMEINDEX:
+            timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
 
         # previous timesteps
@@ -474,33 +490,33 @@ class Model(BaseModel):
     def _add_parent_block_variables(self):
         """Add the parent block variables, which is the `flow` variable,
         indexed by FLOWS and TIMEINDEX."""
-        self.flow = po.Var(self.FLOWS, self.TIMEINDEX, within=po.Reals)
+        self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
-                    for t in self.TIMEINDEX:
+                    for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]
                             * self.flows[o, i].nominal_value
                         )
                         self.flow[o, i, t].fix()
                 else:
-                    for t in self.TIMEINDEX:
+                    for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
                     if not self.flows[o, i].nonconvex:
-                        for t in self.TIMEINDEX:
+                        for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMEINDEX:
+                        for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMEINDEX:
+                    for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
