@@ -196,15 +196,15 @@ class ConverterBlock(ScalarBlock):
     constraints.
 
     The index :math: n is the index for the Transformer node itself. Therefore,
-    a `flow[i, n, p, t]` is a flow from the Bus i to the Transformer n at
+    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
     time index p, t.
 
     ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  ====================
-    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Converter, inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, t]`               Converter, inflow
 
-    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Converter, outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, t]`               Converter, outflow
 
     :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
@@ -243,8 +243,8 @@ class ConverterBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, p, t)
-                for p, t in m.TIMEINDEX
+                (n, i, o, t)
+                for t in m.TIMEINDEX
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -253,17 +253,17 @@ class ConverterBlock(ScalarBlock):
         )
 
         def _input_output_relation(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMEINDEX:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
                                 lhs = (
-                                    m.flow[i, n, p, t]
+                                    m.flow[i, n, t]
                                     * n.conversion_factors[o][t]
                                 )
                                 rhs = (
-                                    m.flow[n, o, p, t]
+                                    m.flow[n, o, t]
                                     * n.conversion_factors[i][t]
                                 )
                             except ValueError:
@@ -273,6 +273,6 @@ class ConverterBlock(ScalarBlock):
                                         n.label, o.label
                                     ),
                                 )
-                            block.relation.add((n, i, o, p, t), (lhs == rhs))
+                            block.relation.add((n, i, o, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)

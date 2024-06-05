@@ -78,9 +78,9 @@ class BusBlock(ScalarBlock):
 
      Bus balance: `om.Bus.balance[i, o, t]`
        .. math::
-         \sum_{i \in INPUTS(n)} P_{i}(p, t) =
-         \sum_{o \in OUTPUTS(n)} P_{o}(p, t), \\
-         \forall p, t \in \textrm{TIMEINDEX}, \\
+         \sum_{i \in INPUTS(n)} P_{i}(t) =
+         \sum_{o \in OUTPUTS(n)} P_{o}(t), \\
+         \forall t \in \textrm{TIMEINDEX}, \\
          \forall i \in \textrm{INPUTS}, \\
          \forall o \in \textrm{OUTPUTS}
 
@@ -89,17 +89,17 @@ class BusBlock(ScalarBlock):
      output of the Bus object.
 
      The index :math:`n` is the index for the Bus node itself. Therefore,
-     a :math:`flow[i, n, p, t]` is a flow from the Component i to the Bus n at
+     a :math:`flow[i, n, t]` is a flow from the Component i to the Bus n at
      time index p, t.
 
-     ======================  ============================  ====================
-     symbol                  attribute                     explanation
-     ======================  ============================  ====================
-     :math:`P_{i}(p, t)`     `flow[i, n, p, t]`            Bus, inflow
+     ======================  =========================  ====================
+     symbol                  attribute                  explanation
+     ======================  =========================  ====================
+     :math:`P_{i}(p, t)`     `flow[i, n, t]`            Bus, inflow
 
-     :math:`P_{o}(p, t)`     `flow[n, o, p, t]`            Bus, outflow
+     :math:`P_{o}(p, t)`     `flow[n, o, t]`            Bus, outflow
 
-     ======================  ============================  ====================
+     ======================  =========================  ====================
      """
 
     def __init__(self, *args, **kwargs):
@@ -126,14 +126,14 @@ class BusBlock(ScalarBlock):
             outs[n] = [o for o in n.outputs]
 
         def _busbalance_rule(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMEINDEX:
                 for g in group:
-                    lhs = sum(m.flow[i, g, p, t] for i in ins[g])
-                    rhs = sum(m.flow[g, o, p, t] for o in outs[g])
+                    lhs = sum(m.flow[i, g, t] for i in ins[g])
+                    rhs = sum(m.flow[g, o, t] for o in outs[g])
                     expr = lhs == rhs
                     # no inflows no outflows yield: 0 == 0 which is True
                     if expr is not True:
-                        block.balance.add((g, p, t), expr)
+                        block.balance.add((g, t), expr)
 
         self.balance = Constraint(group, m.TIMEINDEX, noruleinit=True)
         self.balance_build = BuildAction(rule=_busbalance_rule)
