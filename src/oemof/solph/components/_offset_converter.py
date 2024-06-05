@@ -132,17 +132,11 @@ class OffsetConverter(Node):
         # API to the new one. It calcualtes the conversion_factors and normed_offsets
         # from the coefficients and the outputs information on min and max.
         if coefficients is not None and conversion_factors is None and normed_offsets is None:
-            input_bus = list(inputs.values())[0].input
-            for flow in outputs.values():
-                max = flow.max[0]
-                min = flow.min[0]
-                eta_at_max = max * coefficients[1] / (max - coefficients[0])
-                eta_at_min = min * coefficients[1] / (min - coefficients[0])
+            normed_offsets, conversion_factors = self.get_normed_offset_and_conversion_factors_from_old_style_coefficients(coefficients)
 
-                slope, offset = calculate_slope_and_offset_with_reference_to_output(max, min, eta_at_max, eta_at_min)
-                conversion_factors = {input_bus: slope}
-                normed_offsets = {input_bus: offset}
-                msg = ""
+        elif coefficients is not None and (conversion_factors is not None or normed_offsets is not None):
+            msg = ""
+            raise TypeError(msg)
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
         _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
@@ -217,6 +211,50 @@ class OffsetConverter(Node):
 
     def constraint_group(self):
         return OffsetConverterBlock
+
+    def get_normed_offset_and_conversion_factors_from_old_style_coefficients(self, coefficients):
+
+        coefficients = tuple([sequence(i) for i in coefficients])
+        if len(coefficients) != 2:
+            raise ValueError(
+                "Two coefficients or coefficient series have to be given."
+            )
+
+        input_bus = list(self.inputs.values())[0].input
+        for flow in self.outputs.values():
+
+            max_len = max(len(flow.max), len(flow.min), len(coefficients[0]), len(coefficients[1]))
+            flow.max[max_len - 1]
+            flow.min[max_len - 1]
+            coefficients[0][max_len - 1]
+            coefficients[1][max_len - 1]
+
+            # this could by vectorized, but since it is an API compatibility fix
+            # I will not do this here
+            eta_at_max = sequence(0)
+            eta_at_min = sequence(0)
+            slope = []
+            offset = []
+            for i in range(max_len):
+                eta_at_max = flow.max[i] * coefficients[1][i] / (flow.max[i] - coefficients[0][i])
+                eta_at_min = flow.min[i] * coefficients[1][i] / (flow.min[i] - coefficients[0][i])
+
+                c0, c1 = calculate_slope_and_offset_with_reference_to_output(flow.max[i], flow.min[i], eta_at_max, eta_at_min)
+                slope += [c0]
+                offset += [c1]
+
+            # apparently, when coefficients are given as a list, it is assumed,
+            # that the list identical in length to the timeindex
+            # There should be a general check, if lenghts match then!
+            if max_len == 1:
+                slope = sequence(slope[0])
+                offset = sequence(offset[0])
+
+            conversion_factors = {input_bus: slope}
+            normed_offsets = {input_bus: offset}
+            msg = ""
+
+        return normed_offsets, conversion_factors
 
 
 # --- BEGIN: To be removed for versions >= v0.6 ---
