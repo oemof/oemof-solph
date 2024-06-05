@@ -213,7 +213,21 @@ class OffsetConverter(Node):
         return OffsetConverterBlock
 
     def get_normed_offset_and_conversion_factors_from_old_style_coefficients(self, coefficients):
+        """
+        Calculate slope and offset for new API from the old API coefficients.
 
+        Parameters
+        ----------
+        coefficients : tuple
+            tuple holding the coefficients (offset, slope) for the old style
+            OffsetConverter.
+
+        Returns
+        -------
+        tuple
+            A tuple holding the slope and the offset for the new OffsetConverter
+            API.
+        """
         coefficients = tuple([sequence(i) for i in coefficients])
         if len(coefficients) != 2:
             raise ValueError(
@@ -420,16 +434,82 @@ class OffsetConverterBlock(ScalarBlock):
 
 
 def calculate_slope_and_offset_with_reference_to_input(
-    max, min, eta_max, eta_min
+    max, min, eta_at_max, eta_at_min
 ):
-    slope = (max * eta_max - min * eta_min) / (max - min)
-    offset = eta_max - slope
+    """Calculate the slope and the offset with max and min given for input
+
+    The reference is the input flow here. That means, the `NonConvex` flow
+    is specified at one of the input flows. Therefore the `max` and the `min`
+    both reference that flow. `eta_at_max` and `eta_at_min` are the efficiency
+    values at the referenced point.
+
+    .. math::
+
+        \text{slope} =
+        \frac{
+            \text{max} \cdot \eta_\text{at max}
+            - \text{min} \cdot \eta_\text{at min}
+        }{\text{max} - \text{min}}\\
+
+        \text{offset} = \eta_\text{at,max} - \text{slope}
+
+    Parameters
+    ----------
+    max : float
+        Maximum load value, e.g. 1
+    min : float
+        Minimum load value, e.g. 0.5
+    eta_at_max : float
+        Efficiency at maximum load.
+    eta_at_min : float
+        Efficiency at minimum load.
+
+    Returns
+    -------
+    tuple
+        slope and offset
+    """
+    slope = (max * eta_at_max - min * eta_at_min) / (max - min)
+    offset = eta_at_max - slope
     return slope, offset
 
 
 def calculate_slope_and_offset_with_reference_to_output(
-    max, min, eta_max, eta_min
+    max, min, eta_at_max, eta_at_min
 ):
-    slope = (max / eta_max - min / eta_min) / (max - min)
-    offset = 1 / eta_max - slope
+    r"""Calculate the slope and the offset with max and min given for output.
+
+    The reference is the output flow here. That means, the `NonConvex` flow
+    is specified at one of the output flows. Therefore the `max` and the `min`
+    both reference that flow. `eta_at_max` and `eta_at_min` are the efficiency
+    values at the referenced point.
+
+    .. math::
+
+        \text{slope} =
+        \frac{
+            \frac{\text{max}}{\eta_\text{at max}}
+            - \frac{\text{min}}{\eta_\text{at min}}
+        }{\text{max} - \text{min}}\\
+
+        \text{offset} = \frac{1}{\eta_\text{at,max}} - \text{slope}
+
+    Parameters
+    ----------
+    max : float
+        Maximum load value, e.g. 1
+    min : float
+        Minimum load value, e.g. 0.5
+    eta_at_max : float
+        Efficiency at maximum load.
+    eta_at_min : float
+        Efficiency at minimum load.
+
+    Returns
+    -------
+    tuple
+        slope and offset
+    """
+    slope = (max / eta_at_max - min / eta_at_min) / (max - min)
+    offset = 1 / eta_at_max - slope
     return slope, offset
