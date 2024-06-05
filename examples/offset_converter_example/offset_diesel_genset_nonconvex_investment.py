@@ -18,7 +18,7 @@ The system consists of the following components:
     - demand_el: ac electricity demand (given as a separate csv file)
     - excess_el: allows for some electricity overproduction
 
-    
+
 Code
 ----
 Download source code: :download:`offset_diesel_genset_nonconvex_investment.py </../examples/offset_converter_example/offset_diesel_genset_nonconvex_investment.py>`
@@ -157,11 +157,9 @@ def offset_converter_example():
     max_efficiency = 0.33
 
     # Calculate the two polynomial coefficients, i.e. the y-intersection and the
-    # slope of the linear equation.
-    c1 = (max_load - min_load) / (
-        max_load / max_efficiency - min_load / min_efficiency
-    )
-    c0 = min_load * (1 - c1 / min_efficiency)
+    # slope of the linear equation. There is a conveniece function for that
+    # in solph:
+    slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(max_load, min_load, max_efficiency, min_efficiency)
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh
@@ -180,7 +178,8 @@ def offset_converter_example():
                 nonconvex=solph.NonConvex(),
             ),
         },
-        coefficients=(c0, c1),
+        conversion_factors={b_diesel: slope},
+        normed_offsets={b_diesel: offset},
     )
 
     # The rectifier assumed to have a fixed efficiency of 98%.
