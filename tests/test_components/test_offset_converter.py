@@ -39,7 +39,10 @@ def solve_and_extract_results(es):
     model.solve("cbc")
     results = solph.views.convert_keys_to_strings(model.results())
 
-    assert model.solver_results["Solver"][0]["Termination condition"] != "infeasible"
+    assert (
+        model.solver_results["Solver"][0]["Termination condition"]
+        != "infeasible"
+    )
     return results
 
 
@@ -297,9 +300,8 @@ def test_OffsetConverter_05x_compatibility():
     eta_at_nom = 0.7
     eta_at_min = 0.5
 
-    slope = (
-        (nominal_value - minimal_value)
-        / (nominal_value / eta_at_nom - minimal_value / eta_at_min)
+    slope = (nominal_value - minimal_value) / (
+        nominal_value / eta_at_nom - minimal_value / eta_at_min
     )
     offset = minimal_value / nominal_value * (1 - slope / eta_at_min)
 
@@ -310,10 +312,10 @@ def test_OffsetConverter_05x_compatibility():
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
                 nominal_value=nominal_value,
-                min=minimal_value / nominal_value
+                min=minimal_value / nominal_value,
             )
         },
-        coefficients=(offset, slope)
+        coefficients=(offset, slope),
     )
 
     es.add(

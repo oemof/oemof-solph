@@ -128,13 +128,24 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        # this part is used for the transition phase from the old OffsetConverter
-        # API to the new one. It calcualtes the conversion_factors and normed_offsets
-        # from the coefficients and the outputs information on min and max.
-        if coefficients is not None and conversion_factors is None and normed_offsets is None:
-            normed_offsets, conversion_factors = self.get_normed_offset_and_conversion_factors_from_old_style_coefficients(coefficients)
+        # this part is used for the transition phase from the old
+        # OffsetConverter API to the new one. It calcualtes the
+        # conversion_factors and normed_offsets from the coefficients and the
+        # outputs information on min and max.
+        if (
+            coefficients is not None
+            and conversion_factors is None
+            and normed_offsets is None
+        ):
+            normed_offsets, conversion_factors = (
+                self.get_normed_offset_and_conversion_factors_from_old_style_coefficients(
+                    coefficients
+                )
+            )
 
-        elif coefficients is not None and (conversion_factors is not None or normed_offsets is not None):
+        elif coefficients is not None and (
+            conversion_factors is not None or normed_offsets is not None
+        ):
             msg = ""
             raise TypeError(msg)
 
@@ -212,7 +223,9 @@ class OffsetConverter(Node):
     def constraint_group(self):
         return OffsetConverterBlock
 
-    def get_normed_offset_and_conversion_factors_from_old_style_coefficients(self, coefficients):
+    def get_normed_offset_and_conversion_factors_from_old_style_coefficients(
+        self, coefficients
+    ):
         """
         Calculate slope and offset for new API from the old API coefficients.
 
@@ -225,8 +238,8 @@ class OffsetConverter(Node):
         Returns
         -------
         tuple
-            A tuple holding the slope and the offset for the new OffsetConverter
-            API.
+            A tuple holding the slope and the offset for the new
+            OffsetConverter API.
         """
         coefficients = tuple([sequence(i) for i in coefficients])
         if len(coefficients) != 2:
@@ -237,23 +250,38 @@ class OffsetConverter(Node):
         input_bus = list(self.inputs.values())[0].input
         for flow in self.outputs.values():
 
-            max_len = max(len(flow.max), len(flow.min), len(coefficients[0]), len(coefficients[1]))
+            max_len = max(
+                len(flow.max),
+                len(flow.min),
+                len(coefficients[0]),
+                len(coefficients[1]),
+            )
             flow.max[max_len - 1]
             flow.min[max_len - 1]
             coefficients[0][max_len - 1]
             coefficients[1][max_len - 1]
 
-            # this could by vectorized, but since it is an API compatibility fix
-            # I will not do this here
+            # this could by vectorized, but since it is an API compatibility
+            # fix I will not do this here
             eta_at_max = sequence(0)
             eta_at_min = sequence(0)
             slope = []
             offset = []
             for i in range(max_len):
-                eta_at_max = flow.max[i] * coefficients[1][i] / (flow.max[i] - coefficients[0][i])
-                eta_at_min = flow.min[i] * coefficients[1][i] / (flow.min[i] - coefficients[0][i])
+                eta_at_max = (
+                    flow.max[i]
+                    * coefficients[1][i]
+                    / (flow.max[i] - coefficients[0][i])
+                )
+                eta_at_min = (
+                    flow.min[i]
+                    * coefficients[1][i]
+                    / (flow.min[i] - coefficients[0][i])
+                )
 
-                c0, c1 = calculate_slope_and_offset_with_reference_to_output(flow.max[i], flow.min[i], eta_at_max, eta_at_min)
+                c0, c1 = calculate_slope_and_offset_with_reference_to_output(
+                    flow.max[i], flow.min[i], eta_at_max, eta_at_min
+                )
                 slope += [c0]
                 offset += [c1]
 
@@ -436,7 +464,7 @@ class OffsetConverterBlock(ScalarBlock):
 def calculate_slope_and_offset_with_reference_to_input(
     max, min, eta_at_max, eta_at_min
 ):
-    """Calculate the slope and the offset with max and min given for input
+    r"""Calculate the slope and the offset with max and min given for input
 
     The reference is the input flow here. That means, the `NonConvex` flow
     is specified at one of the input flows. Therefore the `max` and the `min`
