@@ -15,6 +15,8 @@ from collections import UserList
 from collections import abc
 from itertools import repeat
 
+import numpy as np
+
 
 def sequence(iterable_or_scalar):
     """Tests if an object is iterable (except string) or scalar and returns
@@ -43,7 +45,7 @@ def sequence(iterable_or_scalar):
     if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
         iterable_or_scalar, str
     ):
-        return iterable_or_scalar
+        return np.array(iterable_or_scalar)
     else:
         return _Sequence(default=iterable_or_scalar)
 
