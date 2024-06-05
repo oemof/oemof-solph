@@ -66,7 +66,7 @@ def storage_example():
     )
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=len(timeseries), freq="H")
+    idx = pd.date_range("1/1/2017", periods=len(timeseries), freq="h")
     es = solph.EnergySystem(timeindex=idx)
 
     for data_set in DATA:

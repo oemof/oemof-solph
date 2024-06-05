@@ -112,7 +112,7 @@ def test_multi_period_default_discount_rate():
 
 def test_cellular_structure_detection():
     """Test flag creation if list is passed as energysystem to model"""
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="h")
     es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     ec_1 = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     ec_2 = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
@@ -125,7 +125,7 @@ def test_sub_cell_node_consideration():
     Test if the nodes of sub-cells are considered for cellular
     energysystems.
     """
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="h")
     es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     ec_1 = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     bus_es = solph.buses.Bus(label="bus_es")
@@ -141,7 +141,7 @@ def test_sub_cell_flow_consideration():
     Test if the flows of sub-cells are considered for cellular
     energysystems.
     """
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
+    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="h")
     es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     ec_1 = solph.EnergySystem(timeindex=timeindex, infer_last_interval=True)
     bus_es = solph.buses.Bus(label="bus_es")

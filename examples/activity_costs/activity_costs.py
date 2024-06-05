@@ -52,7 +52,7 @@ def main():
     # Calculate parameters and initialize the energy system and
     ##########################################################################
     periods = 24
-    time = pd.date_range("1/1/2018", periods=periods, freq="H")
+    time = pd.date_range("1/1/2018", periods=periods, freq="h")
 
     demand_heat = np.full(periods, 5)
     demand_heat[:4] = 0
