@@ -60,7 +60,7 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
         inputs={bel: Flow(nominal_value=85, fix=data["demand_el"])},
     )
 
-    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
+    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="h")
 
     energysystem = EnergySystem(
         timeindex=datetimeindex, infer_last_interval=True

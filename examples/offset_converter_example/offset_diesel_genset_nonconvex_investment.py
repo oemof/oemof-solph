@@ -89,7 +89,7 @@ def offset_converter_example():
     data = pd.read_csv(filepath_or_buffer=filename)
 
     # Change the index of data to be able to select data based on the time range.
-    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
+    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
 
     # Choose the range of the solar potential and demand
     # based on the selected simulation period.
@@ -100,7 +100,7 @@ def offset_converter_example():
 
     # Create the energy system.
     date_time_index = pd.date_range(
-        start=start_date, periods=n_days * 24, freq="H"
+        start=start_date, periods=n_days * 24, freq="h"
     )
     energy_system = solph.EnergySystem(timeindex=date_time_index)
 

@@ -28,7 +28,7 @@ from oemof.solph.flows import Flow
 
 
 def test_connect_invest():
-    date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="h")
 
     es = EnergySystem(timeindex=date_time_index, infer_last_interval=True)
 

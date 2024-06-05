@@ -75,7 +75,7 @@ Both code blocks will create an hourly datetime index for 2011:
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='h')
 
 This index can be used to define the EnergySystem:
 
@@ -816,7 +816,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     data = pd.DataFrame.from_dict(data_dict)
 
     # Do timestamp stuff
-    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='H')
+    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='h')
     data['timestamp'] = datetimeindex
     data.set_index('timestamp', inplace=True)
 
@@ -1030,10 +1030,10 @@ First, you start by defining your energy system as you might have done before, b
     import pandas as pd
     import oemof.solph as solph
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = [
-        pd.date_range('1/1/2013', periods=8760, freq='H'),
-        pd.date_range('1/1/2014', periods=8760, freq='H'),
+        pd.date_range('1/1/2013', periods=8760, freq='h'),
+        pd.date_range('1/1/2014', periods=8760, freq='h'),
     ]
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
@@ -1084,7 +1084,7 @@ So if you want to use this, the above would simplify to:
     def determine_periods(datetimeindex):
         ...
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = determine_periods(my_index)  # Make use of method
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
