@@ -629,7 +629,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.FIXED_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         == self.total[i, o, p] * m.flows[i, o].fix[t]
                     )
                     self.fixed.add((i, o, p, t), expr)
@@ -646,7 +646,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.NON_FIXED_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         <= self.total[i, o, p] * m.flows[i, o].max[t]
                     )
                     self.max.add((i, o, p, t), expr)
@@ -663,7 +663,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.MIN_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         >= self.total[i, o, p] * m.flows[i, o].min[t]
                     )
                     self.min.add((i, o, p, t), expr)
@@ -678,7 +678,7 @@ class InvestmentFlowBlock(ScalarBlock):
             in investment case.
             """
             expr = sum(
-                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) <= (
                 m.flows[i, o].full_load_time_max
                 * sum(self.total[i, o, p] for p in m.PERIODS)
@@ -695,7 +695,7 @@ class InvestmentFlowBlock(ScalarBlock):
             in investment case.
             """
             expr = sum(
-                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
                 sum(self.total[i, o, p] for p in m.PERIODS)
                 * m.flows[i, o].full_load_time_min

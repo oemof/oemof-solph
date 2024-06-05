@@ -88,9 +88,9 @@ def storage_level_constraint(
         )
 
         # Define constraints on the output flows
-        def _constraint_output_rule(m, o, p, t):
+        def _constraint_output_rule(m, o, t):
             return (
-                m.flow[multiplexer_bus, o, p, t]
+                m.flow[multiplexer_bus, o, t]
                 / m.flows[multiplexer_bus, o].nominal_value
                 <= active_output[o, t]
             )
@@ -100,7 +100,7 @@ def storage_level_constraint(
             f"{name}_output_constraint",
             po.Constraint(
                 OUTPUTS,
-                model.TIMEINDEX,
+                model.TIMESTEPS,
                 rule=_constraint_output_rule,
             ),
         )

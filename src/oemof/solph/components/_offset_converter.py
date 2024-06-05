@@ -284,14 +284,14 @@ class OffsetConverterBlock(ScalarBlock):
 
         def _relation_rule(block):
             """Link binary input and output flow to component outflow."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             expr = 0
-                            expr += -m.flow[n, o, p, t]
+                            expr += -m.flow[n, o, t]
                             expr += (
-                                m.flow[i, n, p, t] * n.coefficients[o][1][t]
+                                m.flow[i, n, t] * n.coefficients[o][1][t]
                             )
                             # `Y(t)` in the last term of the constraint
                             # (":math:`C_0(t) \cdot Y(t)`") is different for
@@ -328,6 +328,6 @@ class OffsetConverterBlock(ScalarBlock):
                                     ]
                                     * n.coefficients[o][0][t]
                                 )
-                            block.relation.add((n, i, o, p, t), (expr == 0))
+                            block.relation.add((n, i, o, t), (expr == 0))
 
         self.relation_build = BuildAction(rule=_relation_rule)

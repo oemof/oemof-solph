@@ -338,37 +338,37 @@ class GenericCHPBlock(ScalarBlock):
         self.Y = Var(self.GENERICCHPS, m.TIMESTEPS, within=Binary)
 
         # constraint rules
-        def _H_flow_rule(block, n, p, t):
+        def _H_flow_rule(block, n, t):
             """Link fuel consumption to component inflow."""
             expr = 0
             expr += self.H_F[n, t]
-            expr += -m.flow[list(n.fuel_input.keys())[0], n, p, t]
+            expr += -m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
 
         self.H_flow = Constraint(
-            self.GENERICCHPS, m.TIMEINDEX, rule=_H_flow_rule
+            self.GENERICCHPS, m.TIMESTEPS, rule=_H_flow_rule
         )
 
-        def _Q_flow_rule(block, n, p, t):
+        def _Q_flow_rule(block, n, t):
             """Link heat flow to component outflow."""
             expr = 0
             expr += self.Q[n, t]
-            expr += -m.flow[n, list(n.heat_output.keys())[0], p, t]
+            expr += -m.flow[n, list(n.heat_output.keys())[0], t]
             return expr == 0
 
         self.Q_flow = Constraint(
-            self.GENERICCHPS, m.TIMEINDEX, rule=_Q_flow_rule
+            self.GENERICCHPS, m.TIMESTEPS, rule=_Q_flow_rule
         )
 
-        def _P_flow_rule(block, n, p, t):
+        def _P_flow_rule(block, n, t):
             """Link power flow to component outflow."""
             expr = 0
             expr += self.P[n, t]
-            expr += -m.flow[n, list(n.electrical_output.keys())[0], p, t]
+            expr += -m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
 
         self.P_flow = Constraint(
-            self.GENERICCHPS, m.TIMEINDEX, rule=_P_flow_rule
+            self.GENERICCHPS, m.TIMESTEPS, rule=_P_flow_rule
         )
 
         def _H_F_1_rule(block, n, t):

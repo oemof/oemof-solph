@@ -177,13 +177,13 @@ class LinkBlock(ScalarBlock):
         self.LINKS = Set(initialize=[g for g in group])
 
         def _input_output_relation(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
                             expr = (
-                                m.flow[n, cidx[1], p, t]
-                                == c[t] * m.flow[cidx[0], n, p, t]
+                                m.flow[n, cidx[1], t]
+                                == c[t] * m.flow[cidx[0], n, t]
                             )
                         except KeyError:
                             raise KeyError(
@@ -192,12 +192,12 @@ class LinkBlock(ScalarBlock):
                                 "Check if all connected buses match "
                                 "the conversion factors.",
                             )
-                        block.relation.add((n, cidx[0], cidx[1], p, t), expr)
+                        block.relation.add((n, cidx[0], cidx[1], t), expr)
 
         self.relation = Constraint(
             [
-                (n, cidx[0], cidx[1], p, t)
-                for p, t in m.TIMEINDEX
+                (n, cidx[0], cidx[1], t)
+                for t in m.TIMESTEPS
                 for n, conversion in all_conversions.items()
                 for cidx, c in conversion.items()
             ],

@@ -253,7 +253,7 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
                     block.input_output_relation.add((g, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -261,17 +261,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _out_flow_relation_rule(block):
             """Relation between main and tapped output in full chp mode."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
                     lhs = m.flow[g, g.main_output, t]
                     rhs = (
                         m.flow[g, g.tapped_output, t]
                         * g.flow_relation_index[t]
                     )
-                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
 
         self.out_flow_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule
