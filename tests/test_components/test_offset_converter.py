@@ -278,3 +278,72 @@ def test_OffsetConverter_single_input_single_output_with_input_reference_eta_dec
     np.testing.assert_array_almost_equal(
         output_flow_actual, output_flow_expected
     )
+
+
+def test_OffsetConverter_05x_compatibility():
+
+    num_in = 1
+    num_out = 1
+    es = create_energysystem_stub(num_in, num_out)
+
+    nominal_value = 10
+    minimal_value = 3
+
+    fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
+    fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
+    fix_flow.fix = fix
+    fix_flow.nominal_value = 1
+
+    eta_at_nom = 0.7
+    eta_at_min = 0.5
+
+    slope = (
+        (nominal_value - minimal_value)
+        / (nominal_value / eta_at_nom - minimal_value / eta_at_min)
+    )
+    offset = minimal_value / nominal_value * (1 - slope / eta_at_min)
+
+    oc = solph.components.OffsetConverter(
+        label="offset converter",
+        inputs={es.groups["bus input 0"]: solph.Flow()},
+        outputs={
+            es.groups["bus output 0"]: solph.Flow(
+                nonconvex=solph.NonConvex(),
+                nominal_value=nominal_value,
+                min=minimal_value / nominal_value
+            )
+        },
+        coefficients=(offset, slope)
+    )
+
+    es.add(
+        solph.components.Source(
+            "slack source",
+            outputs={es.node["bus output 0"]: solph.Flow(variable_costs=1000)},
+        )
+    )
+
+    es.add(oc)
+
+    results = solve_and_extract_results(es)
+
+    slope, offset = calculate_slope_and_offset_with_reference_to_output(
+        1, minimal_value / nominal_value, 0.7, 0.5
+    )
+    output_flow = results["offset converter", "bus output 0"]["sequences"][
+        "flow"
+    ]
+    output_flow_status = results["offset converter", "bus output 0"][
+        "sequences"
+    ]["status"]
+
+    input_flow_expected = (
+        offset * nominal_value * output_flow_status + slope * output_flow
+    )
+    input_flow_actual = results["bus input 0", "offset converter"][
+        "sequences"
+    ]["flow"]
+
+    np.testing.assert_array_almost_equal(
+        input_flow_actual, input_flow_expected
+    )
