@@ -252,7 +252,11 @@ class OffsetConverter(Node):
 
             conversion_factors = {input_bus: slope}
             normed_offsets = {input_bus: offset}
-            msg = ""
+            msg = (
+                "The usage of coefficients is depricated, use "
+                "conversion_factors and normed_offsets instead."
+            )
+            warn(msg, DeprecationWarning)
 
         return normed_offsets, conversion_factors
 
