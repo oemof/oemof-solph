@@ -272,22 +272,14 @@ class SimpleFlowBlock(ScalarBlock):
                             inp, out, m.TIMEINDEX.at(index)[1]
                         ]
                         self.positive_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)
-                            ),
+                            (inp, out, m.TIMEINDEX.at(index)),
                             lhs <= rhs,
                         )
                     else:
                         lhs = self.positive_gradient[inp, out, 0]
                         rhs = 0
                         self.positive_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)
-                            ),
+                            (inp, out, m.TIMEINDEX.at(index)),
                             lhs == rhs,
                         )
 
@@ -304,37 +296,21 @@ class SimpleFlowBlock(ScalarBlock):
                 for index in range(1, len(m.TIMEINDEX) + 1):
                     if m.TIMEINDEX.at(index)[1] > 0:
                         lhs = (
-                            m.flow[
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index - 1)
-                            ]
-                            - m.flow[
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)
-                            ]
+                            m.flow[inp, out, m.TIMEINDEX.at(index - 1)]
+                            - m.flow[inp, out, m.TIMEINDEX.at(index)]
                         )
                         rhs = self.negative_gradient[
                             inp, out, m.TIMEINDEX.at(index)[1]
                         ]
                         self.negative_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)
-                            ),
+                            (inp, out, m.TIMEINDEX.at(index)),
                             lhs <= rhs,
                         )
                     else:
                         lhs = self.negative_gradient[inp, out, 0]
                         rhs = 0
                         self.negative_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)
-                            ),
+                            (inp, out, m.TIMEINDEX.at(index)),
                             lhs == rhs,
                         )
 
