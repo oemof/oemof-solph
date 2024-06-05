@@ -61,7 +61,6 @@ License
 import logging
 import os
 import pprint as pp
-import warnings
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -82,13 +81,8 @@ STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    try:
-        data = pd.read_csv(file_path)
-    except FileNotFoundError:
-        warn_msg = f"Data file not found: {file_path}."
-        "Values for one timestep created!"
-        warnings.warn(warn_msg, UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    dir = os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(dir + "/" + file_path)
     return data
 
 
@@ -117,8 +111,7 @@ def main(dump_and_restore=False):
 
     # Read data file
     file_name = "basic_example.csv"
-    file_path = os.path.join(os.getcwd(), file_name)
-    data = get_data_from_file_path(file_path)
+    data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
@@ -160,7 +153,7 @@ def main(dump_and_restore=False):
 
     # create excess component for the electricity bus to allow overproduction
     energysystem.add(
-        solver_components.Sink(
+        components.Sink(
             label="excess_bus_electricity",
             inputs={bus_electricity: flows.Flow()},
         )
@@ -168,7 +161,7 @@ def main(dump_and_restore=False):
 
     # create source object representing the gas commodity
     energysystem.add(
-        solver_components.Source(
+        components.Source(
             label="rgas",
             outputs={bus_gas: flows.Flow()},
         )
@@ -176,7 +169,7 @@ def main(dump_and_restore=False):
 
     # create fixed source object representing wind power plants
     energysystem.add(
-        solver_components.Source(
+        components.Source(
             label="wind",
             outputs={
                 bus_electricity: flows.Flow(
@@ -188,7 +181,7 @@ def main(dump_and_restore=False):
 
     # create fixed source object representing pv power plants
     energysystem.add(
-        solver_components.Source(
+        components.Source(
             label="pv",
             outputs={
                 bus_electricity: flows.Flow(
@@ -201,7 +194,7 @@ def main(dump_and_restore=False):
     # create simple sink object representing the electrical demand
     # nominal_value is set to 1 because demand_el is not a normalised series
     energysystem.add(
-        solver_components.Sink(
+        components.Sink(
             label="demand",
             inputs={
                 bus_electricity: flows.Flow(
@@ -213,7 +206,7 @@ def main(dump_and_restore=False):
 
     # create simple converter object representing a gas power plant
     energysystem.add(
-        solver_components.Converter(
+        components.Converter(
             label="pp_gas",
             inputs={bus_gas: flows.Flow()},
             outputs={
@@ -229,9 +222,9 @@ def main(dump_and_restore=False):
     nominal_capacity = 10077997
     nominal_value = nominal_capacity / 6
 
-    battery_storage = solver_components.GenericStorage(
+    battery_storage = components.GenericStorage(
         nominal_storage_capacity=nominal_capacity,
-        label=BATTERY_STORAGE,
+        label=STORAGE_LABEL,
         inputs={bus_electricity: flows.Flow(nominal_value=nominal_value)},
         outputs={
             bus_electricity: flows.Flow(
@@ -307,7 +300,7 @@ def main(dump_and_restore=False):
 
     # define an alias for shorter calls below (optional)
     results = energysystem.results["main"]
-    storage = energysystem.groups[BATTERY_STORAGE]
+    storage = energysystem.groups[STORAGE_LABEL]
 
     # print a time slice of the state of charge
     start_time = datetime(2012, 2, 25, 8, 0, 0)
@@ -317,7 +310,7 @@ def main(dump_and_restore=False):
     print(f"{results[(storage, None)]['sequences'][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
-    custom_storage = views.node(results, BATTERY_STORAGE)
+    custom_storage = views.node(results, STORAGE_LABEL)
     electricity_bus = views.node(results, "electricity")
 
     # plot the time series (sequences) of a specific component/bus

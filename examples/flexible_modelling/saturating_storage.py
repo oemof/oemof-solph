@@ -40,7 +40,7 @@ from oemof import solph
 
 def saturating_storage_example():
     # create an energy system
-    idx = pd.date_range("1/1/2023", periods=100, freq="H")
+    idx = pd.date_range("1/1/2023", periods=100, freq="h")
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
     # power bus

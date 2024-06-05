@@ -64,9 +64,7 @@ class Sink(Node):
             )
 
         super().__init__(
-            label=label,
-            inputs=inputs,
-            custom_properties=custom_attributes
+            label=label, inputs=inputs, custom_properties=custom_attributes
         )
 
     def constraint_group(self):

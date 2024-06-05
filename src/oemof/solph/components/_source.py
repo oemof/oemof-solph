@@ -74,9 +74,7 @@ class Source(Node):
             )
 
         super().__init__(
-            label=label,
-            outputs=outputs,
-            custom_properties=custom_attributes
+            label=label, outputs=outputs, custom_properties=custom_attributes
         )
 
     def constraint_group(self):

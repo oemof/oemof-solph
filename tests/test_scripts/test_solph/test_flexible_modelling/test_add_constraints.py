@@ -32,7 +32,7 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=4, freq="H"),
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h"),
         infer_last_interval=True,
     )
 
