@@ -425,7 +425,6 @@ class Model(BaseModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-
         self.TIMEINDEX = po.Set(
             initialize=list(
                 range(len(self.es.timeincrement)),
