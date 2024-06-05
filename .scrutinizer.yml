@@ -1,0 +1,7 @@
+filter:
+    paths:
+        - src/
+        - examples/
+    excluded_paths:
+      - "*/experimental/*"       # submodules marked experimental
+

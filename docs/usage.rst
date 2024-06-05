@@ -75,7 +75,7 @@ Both code blocks will create an hourly datetime index for 2011:
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='h')
 
 This index can be used to define the EnergySystem:
 
@@ -682,40 +682,42 @@ The `Link` allows to model connections between two busses, e.g. modeling the tra
 OffsetConverter (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `OffsetConverter` object makes it possible to create a Converter with different efficiencies in part load condition.
-For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
+The `OffsetConverter` object makes it possible to create a Converter with efficiencies depending on the part load condition.
+For this object it is necessary to define the outflow as a nonconvex flow and to set a minimum load.
 The following example illustrates how to define an OffsetConverter for given information for the output:
 
 .. code-block:: python
 
-    eta_min = 0.5       # efficiency at minimal operation point
-    eta_max = 0.8       # efficiency at nominal operation point
-    P_out_min = 20      # absolute minimal output power
-    P_out_max = 100     # absolute nominal output power
-
-    # calculate limits of input power flow
-    P_in_min = P_out_min / eta_min
-    P_in_max = P_out_max / eta_max
+    eta_min = 0.5                # efficiency at minimal operation point
+    eta_max = 0.8                # efficiency at nominal operation point
+    P_out_min = 20               # absolute minimal output power
+    P_out_max = 100              # absolute nominal output power
+    l_max = P_out_max/P_out_max  # upper part load limit
+    l_min = P_out_min/P_out_max  # lower part load limit
 
     # calculate coefficients of input-output line equation
-    c1 = (P_out_max-P_out_min)/(P_in_max-P_in_min)
-    c0 = P_out_max - c1*P_in_max
+    c1 = (l_max-l_min)/(l_max/eta_max - l_min/eta_min)
+    c0 = l_min * (1-c1/eta_min)
 
     # define OffsetConverter
     solph.components.OffsetConverter(
         label='boiler',
-        inputs={bfuel: solph.flows.Flow(
-            nominal_value=P_in_max,
-            max=1,
-            min=P_in_min/P_in_max,
-            nonconvex=solph.NonConvex())},
-        outputs={bth: solph.flows.Flow()},
-        coefficients = [c0, c1])
+        inputs={bfuel: solph.flows.Flow()},
+        outputs={
+            bth: solph.flows.Flow(
+                nominal_value=P_out_max,
+                max=l_max,
+                min=l_min,
+                nonconvex=solph.NonConvex()
+            ),
+        },
+        coefficients = {bth: (c0, c1)},
+    )
 
 This example represents a boiler, which is supplied by fuel and generates heat.
 It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
 The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
-Note that the nonconvex flow has to be defined for the input flow.
+Note that the nonconvex flow has to be defined for the output flow.
 By using the OffsetConverter a linear relation of in- and output power with a power dependent efficiency is generated.
 The following figures illustrate the relations:
 
@@ -746,6 +748,7 @@ which results in a nonlinear relation:
    :align: center
 
 The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+It is also possible to define multiple outputs.
 
 .. note:: See the :py:class:`~oemof.solph.components._offset_converter.OffsetConverter` class for all parameters and the mathematical background.
 
@@ -813,7 +816,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     data = pd.DataFrame.from_dict(data_dict)
 
     # Do timestamp stuff
-    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='H')
+    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='h')
     data['timestamp'] = datetimeindex
     data.set_index('timestamp', inplace=True)
 
@@ -1027,10 +1030,10 @@ First, you start by defining your energy system as you might have done before, b
     import pandas as pd
     import oemof.solph as solph
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = [
-        pd.date_range('1/1/2013', periods=8760, freq='H'),
-        pd.date_range('1/1/2014', periods=8760, freq='H'),
+        pd.date_range('1/1/2013', periods=8760, freq='h'),
+        pd.date_range('1/1/2014', periods=8760, freq='h'),
     ]
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
@@ -1081,7 +1084,7 @@ So if you want to use this, the above would simplify to:
     def determine_periods(datetimeindex):
         ...
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = determine_periods(my_index)  # Make use of method
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 

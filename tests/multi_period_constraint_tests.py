@@ -45,9 +45,9 @@ class TestsMultiPeriodConstraint:
             r"^objective.*(?=s\.t\.)", re.DOTALL | re.MULTILINE
         )
 
-        timeindex1 = pd.date_range("1/1/2012", periods=2, freq="H")
-        timeindex2 = pd.date_range("1/1/2013", periods=2, freq="H")
-        timeindex3 = pd.date_range("1/1/2014", periods=2, freq="H")
+        timeindex1 = pd.date_range("1/1/2012", periods=2, freq="h")
+        timeindex2 = pd.date_range("1/1/2013", periods=2, freq="h")
+        timeindex3 = pd.date_range("1/1/2014", periods=2, freq="h")
         cls.date_time_index = timeindex1.append(timeindex2).append(timeindex3)
         cls.periods = [timeindex1, timeindex2, timeindex3]
 
@@ -1529,7 +1529,7 @@ class TestsMultiPeriodConstraint:
                     nominal_value=100, min=0.32, nonconvex=solph.NonConvex()
                 )
             },
-            coefficients=[-17, 0.9],
+            coefficients={bth: (-17, 0.9)},
         )
         self.energysystem.add(bgas, bth, otrf)
         self.compare_lp_files("offsetconverter_multi_period.lp")
@@ -2316,7 +2316,7 @@ class TestsMultiPeriodConstraint:
 
         # Create a list of timeindex for each period
         periods = [
-            pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years
+            pd.date_range(f"1/1/{i}", periods=3, freq="h") for i in years
         ]
 
         # Create an overall timeindex

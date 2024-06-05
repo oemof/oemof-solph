@@ -4,7 +4,7 @@ from oemof import solph
 
 
 def test_special():
-    date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
         infer_last_interval=True,
@@ -28,7 +28,7 @@ def test_special():
 
 
 def test_something_else():
-    date_time_index = pd.date_range("1/1/2012", periods=5, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=True
     )

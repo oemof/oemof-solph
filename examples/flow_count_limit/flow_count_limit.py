@@ -50,7 +50,7 @@ except ImportError:
 
 def main():
     energy_system = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=4, freq="H")
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h")
     )
 
     bel = solph.Bus(label="bel")

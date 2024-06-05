@@ -112,6 +112,7 @@ class PiecewiseLinearConverterBlock(ScalarBlock):
     **The following constraints are created:**
 
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):

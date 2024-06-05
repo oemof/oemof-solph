@@ -23,7 +23,7 @@ def test_regression_investment_storage(solver="cbc"):
     """
 
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=4, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=4, freq="h")
 
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=True

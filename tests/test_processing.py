@@ -34,7 +34,7 @@ class TestParameterResult:
             timeindex=pandas.date_range(
                 "2016-01-01",
                 periods=cls.period,
-                freq="H",
+                freq="h",
             ),
             infer_last_interval=True,
         )

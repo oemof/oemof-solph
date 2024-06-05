@@ -141,7 +141,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
+    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="h")
     energysystem = EnergySystem(
         timeindex=datetimeindex, infer_last_interval=True
     )

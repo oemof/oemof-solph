@@ -44,11 +44,14 @@ This example requires the version v0.5.x of oemof. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import numpy as np
 import os
-import pandas as pd
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+
 from oemof import solph
 
 try:
@@ -86,7 +89,7 @@ def offset_converter_example():
     data = pd.read_csv(filepath_or_buffer=filename)
 
     # Change the index of data to be able to select data based on the time range.
-    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
+    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
 
     # Choose the range of the solar potential and demand
     # based on the selected simulation period.
@@ -97,7 +100,7 @@ def offset_converter_example():
 
     # Create the energy system.
     date_time_index = pd.date_range(
-        start=start_date, periods=n_days * 24, freq="H"
+        start=start_date, periods=n_days * 24, freq="h"
     )
     energy_system = solph.EnergySystem(timeindex=date_time_index)
 
@@ -155,10 +158,10 @@ def offset_converter_example():
 
     # Calculate the two polynomial coefficients, i.e. the y-intersection and the
     # slope of the linear equation.
-    c1 = (max_load / max_efficiency - min_load / min_efficiency) / (
-        max_load - min_load
+    c1 = (max_load - min_load) / (
+        max_load / max_efficiency - min_load / min_efficiency
     )
-    c0 = min_load * (1 / min_efficiency - c1)
+    c0 = min_load * (1 - c1 / min_efficiency)
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh
@@ -277,7 +280,7 @@ def offset_converter_example():
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "cbc"
+    solver = "gurobi"
 
     model = solph.Model(energy_system)
     model.solve(
