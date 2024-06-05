@@ -61,7 +61,6 @@ License
 import logging
 import os
 import pprint as pp
-import warnings
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -82,13 +81,8 @@ STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    try:
-        data = pd.read_csv(file_path)
-    except FileNotFoundError:
-        warn_msg = f"Data file not found: {file_path}."
-        "Values for one timestep created!"
-        warnings.warn(warn_msg, UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    dir = os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(dir + "/" + file_path)
     return data
 
 
@@ -117,8 +111,7 @@ def main(dump_and_restore=False):
 
     # Read data file
     file_name = "basic_example.csv"
-    file_path = os.path.join(os.getcwd(), file_name)
-    data = get_data_from_file_path(file_path)
+    data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
