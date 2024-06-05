@@ -690,12 +690,12 @@ The following example illustrates how to define an OffsetConverter for given inf
 
     >>> from oemof import solph
 
-    >>> eta_min = 0.5                # efficiency at minimal operation point
-    >>> eta_max = 0.8                # efficiency at nominal operation point
-    >>> P_out_min = 20               # absolute minimal output power
-    >>> P_out_max = 100              # absolute nominal output power
-    >>> l_max = P_out_max/P_out_max  # upper part load limit
-    >>> l_min = P_out_min/P_out_max  # lower part load limit
+    >>> eta_min = 0.5                  # efficiency at minimal operation point
+    >>> eta_max = 0.8                  # efficiency at nominal operation point
+    >>> P_out_min = 20                 # absolute minimal output power
+    >>> P_out_max = 100                # absolute nominal output power
+    >>> l_max = 1                      # upper part load limit
+    >>> l_min = P_out_min / P_out_max  # lower part load limit
 
     # calculate slope and offset with respect to the output, since the
     # output is the `NonConvex` flow.
