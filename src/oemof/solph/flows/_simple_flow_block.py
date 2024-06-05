@@ -215,7 +215,7 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts] * m.timeincrement[ts]
                     for p, ts in m.TIMEINDEX
                 )
                 rhs = (
@@ -235,7 +235,7 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts] * m.timeincrement[ts]
                     for p, ts in m.TIMEINDEX
                 )
                 rhs = (
@@ -260,14 +260,12 @@ class SimpleFlowBlock(ScalarBlock):
                             m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index),
                             ]
                             - m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index - 1)[0],
-                                m.TIMEINDEX.at(index - 1)[1],
+                                m.TIMEINDEX.at(index - 1),
                             ]
                         )
                         rhs = self.positive_gradient[
@@ -277,8 +275,7 @@ class SimpleFlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index)
                             ),
                             lhs <= rhs,
                         )
@@ -289,8 +286,7 @@ class SimpleFlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index)
                             ),
                             lhs == rhs,
                         )
@@ -311,14 +307,12 @@ class SimpleFlowBlock(ScalarBlock):
                             m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index - 1)[0],
-                                m.TIMEINDEX.at(index - 1)[1],
+                                m.TIMEINDEX.at(index - 1)
                             ]
                             - m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index)
                             ]
                         )
                         rhs = self.negative_gradient[
@@ -328,8 +322,7 @@ class SimpleFlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index)
                             ),
                             lhs <= rhs,
                         )
@@ -340,8 +333,7 @@ class SimpleFlowBlock(ScalarBlock):
                             (
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMEINDEX.at(index)
                             ),
                             lhs == rhs,
                         )
@@ -353,9 +345,9 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_negative_gradient_flow_rule
         )
 
-        def _integer_flow_rule(block, ii, oi, pi, ti):
+        def _integer_flow_rule(block, ii, oi, ti):
             """Force flow variable to NonNegativeInteger values."""
-            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, pi, ti]
+            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
 
         self.integer_flow_constr = Constraint(
             self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule
@@ -368,7 +360,7 @@ class SimpleFlowBlock(ScalarBlock):
                 for inp, out in self.LIFETIME_FLOWS:
                     for p, ts in m.TIMEINDEX:
                         if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
-                            lhs = m.flow[inp, out, p, ts]
+                            lhs = m.flow[inp, out, ts]
                             rhs = 0
                             self.lifetime_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
@@ -462,9 +454,9 @@ class SimpleFlowBlock(ScalarBlock):
         if m.es.periods is None:
             for i, o in m.FLOWS:
                 if m.flows[i, o].variable_costs[0] is not None:
-                    for p, t in m.TIMEINDEX:
+                    for t in m.TIMEINDEX:
                         variable_costs += (
-                            m.flow[i, o, p, t]
+                            m.flow[i, o, t]
                             * m.objective_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                         )

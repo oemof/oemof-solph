@@ -425,31 +425,16 @@ class Model(BaseModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
+
+        self.TIMEINDEX = po.Set(
+            initialize=list(
+                range(len(self.es.timeincrement)),
+            ),
+            ordered=True,
+        )
         if self.es.periods is None:
-            self.TIMEINDEX = po.Set(
-                initialize=list(
-                    zip(
-                        [0] * len(self.es.timeincrement),
-                        range(len(self.es.timeincrement)),
-                    )
-                ),
-                ordered=True,
-            )
             self.PERIODS = po.Set(initialize=[0])
         else:
-            nested_list = [
-                [k] * len(self.es.periods[k])
-                for k in range(len(self.es.periods))
-            ]
-            flattened_list = [
-                item for sublist in nested_list for item in sublist
-            ]
-            self.TIMEINDEX = po.Set(
-                initialize=list(
-                    zip(flattened_list, range(len(self.es.timeincrement)))
-                ),
-                ordered=True,
-            )
             self.PERIODS = po.Set(
                 initialize=sorted(list(set(range(len(self.es.periods)))))
             )
@@ -496,27 +481,27 @@ class Model(BaseModel):
             if self.flows[o, i].nominal_value is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for p, t in self.TIMEINDEX:
-                        self.flow[o, i, p, t].value = (
+                        self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]
                             * self.flows[o, i].nominal_value
                         )
-                        self.flow[o, i, p, t].fix()
+                        self.flow[o, i, t].fix()
                 else:
                     for p, t in self.TIMEINDEX:
-                        self.flow[o, i, p, t].setub(
+                        self.flow[o, i, t].setub(
                             self.flows[o, i].max[t]
                             * self.flows[o, i].nominal_value
                         )
                     if not self.flows[o, i].nonconvex:
                         for p, t in self.TIMEINDEX:
-                            self.flow[o, i, p, t].setlb(
+                            self.flow[o, i, t].setlb(
                                 self.flows[o, i].min[t]
                                 * self.flows[o, i].nominal_value
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for p, t in self.TIMEINDEX:
-                            self.flow[o, i, p, t].setlb(0)
+                            self.flow[o, i, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
                     for p, t in self.TIMEINDEX:
-                        self.flow[o, i, p, t].setlb(0)
+                        self.flow[o, i, t].setlb(0)
