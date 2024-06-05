@@ -37,7 +37,10 @@ def create_energysystem_stub(num_in, num_out):
 def solve_and_extract_results(es):
     model = solph.Model(es)
     model.solve("cbc")
-    return solph.views.convert_keys_to_strings(model.results())
+    results = solph.views.convert_keys_to_strings(model.results())
+
+    assert model.solver_results["Solver"][0]["Termination condition"] != "infeasible"
+    return results
 
 
 def add_OffsetConverter(
@@ -73,13 +76,6 @@ def add_OffsetConverter(
     fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
     fix_flow.fix = fix
     fix_flow.nominal_value = 1
-
-    es.add(
-        solph.components.Source(
-            "slack source",
-            outputs={es.node["bus output 0"]: solph.Flow(variable_costs=1000)},
-        )
-    )
 
     slopes = {}
     offsets = {}
