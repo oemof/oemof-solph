@@ -1361,7 +1361,7 @@ class TestsConstraint:
         eta_at_min = 0.35
 
         slope, offset = (
-            solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+            solph.components.slope_offset_from_nonconvex_output(
                 1, min, eta_at_nom, eta_at_min
             )
         )
@@ -1396,7 +1396,7 @@ class TestsConstraint:
         eta_at_min = 0.35
 
         slope, offset = (
-            solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+            solph.components.slope_offset_from_nonconvex_output(
                 1, min, eta_at_nom, eta_at_min
             )
         )

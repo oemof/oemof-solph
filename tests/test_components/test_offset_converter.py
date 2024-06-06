@@ -3,10 +3,10 @@ import numpy as np
 from oemof import solph
 from oemof.solph._plumbing import sequence
 from oemof.solph.components._offset_converter import (
-    calculate_slope_and_offset_with_reference_to_input,
+    slope_offset_from_nonconvex_input,
 )
 from oemof.solph.components._offset_converter import (
-    calculate_slope_and_offset_with_reference_to_output,
+    slope_offset_from_nonconvex_output,
 )
 
 
@@ -62,13 +62,13 @@ def add_OffsetConverter(
     if reference_bus in oc_outputs:
         f = oc_outputs[reference_bus]
         get_slope_and_offset = (
-            calculate_slope_and_offset_with_reference_to_output
+            slope_offset_from_nonconvex_output
         )
         fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
     else:
         f = oc_inputs[reference_bus]
         get_slope_and_offset = (
-            calculate_slope_and_offset_with_reference_to_input
+            slope_offset_from_nonconvex_input
         )
         fix = [0] + np.linspace(
             minimal_value * eta_at_min[es.node["bus output 0"]],
@@ -129,7 +129,7 @@ def test_OffsetConverter_single_input_single_output_with_output_reference():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = calculate_slope_and_offset_with_reference_to_output(
+    slope, offset = slope_offset_from_nonconvex_output(
         1, minimal_value / nominal_value, 0.7, 0.5
     )
     output_flow = results["offset converter", "bus output 0"]["sequences"][
@@ -173,7 +173,7 @@ def test_OffsetConverter_single_input_single_output_with_output_reference_eta_de
 
     results = solve_and_extract_results(es)
 
-    slope, offset = calculate_slope_and_offset_with_reference_to_output(
+    slope, offset = slope_offset_from_nonconvex_output(
         1, minimal_value / nominal_value, 0.5, 0.7
     )
     output_flow = results["offset converter", "bus output 0"]["sequences"][
@@ -217,7 +217,7 @@ def test_OffsetConverter_single_input_single_output_with_input_reference():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = calculate_slope_and_offset_with_reference_to_input(
+    slope, offset = slope_offset_from_nonconvex_input(
         1, minimal_value / nominal_value, 0.7, 0.5
     )
     input_flow = results["bus input 0", "offset converter"]["sequences"][
@@ -261,7 +261,7 @@ def test_OffsetConverter_single_input_single_output_with_input_reference_eta_dec
 
     results = solve_and_extract_results(es)
 
-    slope, offset = calculate_slope_and_offset_with_reference_to_input(
+    slope, offset = slope_offset_from_nonconvex_input(
         1, minimal_value / nominal_value, 0.5, 0.7
     )
     input_flow = results["bus input 0", "offset converter"]["sequences"][
@@ -329,7 +329,7 @@ def test_OffsetConverter_05x_compatibility():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = calculate_slope_and_offset_with_reference_to_output(
+    slope, offset = slope_offset_from_nonconvex_output(
         1, minimal_value / nominal_value, 0.7, 0.5
     )
     output_flow = results["offset converter", "bus output 0"]["sequences"][

@@ -19,7 +19,7 @@ from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
 from oemof.solph.components._offset_converter import (
-    calculate_slope_and_offset_with_reference_to_output,
+    slope_offset_from_nonconvex_output,
 )
 
 logging.disable(logging.INFO)
@@ -1528,7 +1528,7 @@ class TestsMultiPeriodConstraint:
         eta_at_min = 0.7
         eta_at_nom = 0.9
 
-        slope, offset = calculate_slope_and_offset_with_reference_to_output(
+        slope, offset = slope_offset_from_nonconvex_output(
             1, min, eta_at_nom, eta_at_min
         )
 

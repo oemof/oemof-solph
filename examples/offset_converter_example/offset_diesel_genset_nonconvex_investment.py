@@ -159,7 +159,9 @@ def offset_converter_example():
     # Calculate the two polynomial coefficients, i.e. the y-intersection and the
     # slope of the linear equation. There is a conveniece function for that
     # in solph:
-    slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(max_load, min_load, max_efficiency, min_efficiency)
+    slope, offset = solph.components.slope_offset_from_nonconvex_output(
+        max_load, min_load, max_efficiency, min_efficiency
+    )
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh

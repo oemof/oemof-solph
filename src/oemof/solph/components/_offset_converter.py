@@ -279,7 +279,7 @@ class OffsetConverter(Node):
                     / (flow.min[i] - coefficients[0][i])
                 )
 
-                c0, c1 = calculate_slope_and_offset_with_reference_to_output(
+                c0, c1 = slope_offset_from_nonconvex_output(
                     flow.max[i], flow.min[i], eta_at_max, eta_at_min
                 )
                 slope += [c0]
@@ -461,15 +461,17 @@ class OffsetConverterBlock(ScalarBlock):
         self.relation_build = BuildAction(rule=_relation_rule)
 
 
-def calculate_slope_and_offset_with_reference_to_input(
-    max, min, eta_at_max, eta_at_min
+def slope_offset_from_nonconvex_input(
+    max_load, min_load, eta_at_max, eta_at_min
 ):
     r"""Calculate the slope and the offset with max and min given for input
 
     The reference is the input flow here. That means, the `NonConvex` flow
-    is specified at one of the input flows. Therefore the `max` and the `min`
-    both reference that flow. `eta_at_max` and `eta_at_min` are the efficiency
-    values at the referenced point.
+    is specified at one of the input flows. The `max_load` and the `min_load`
+    are the `max` and the `min` specifications for the `NonConvex` flow.
+    `eta_at_max` and `eta_at_min` are the efficiency values of a different
+    flow, e.g. an output, with respect to the `max_load` and `min_load`
+    operation points.
 
     .. math::
 
@@ -483,9 +485,9 @@ def calculate_slope_and_offset_with_reference_to_input(
 
     Parameters
     ----------
-    max : float
+    max_load : float
         Maximum load value, e.g. 1
-    min : float
+    min_load : float
         Minimum load value, e.g. 0.5
     eta_at_max : float
         Efficiency at maximum load.
@@ -496,21 +498,57 @@ def calculate_slope_and_offset_with_reference_to_input(
     -------
     tuple
         slope and offset
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> max_load = 1
+    >>> min_load = 0.5
+    >>> eta_at_min = 0.4
+    >>> eta_at_max = 0.3
+
+    With the input load being at 100 %, in this example, the efficiency should
+    be 30 %. With the input load being at 50 %, it should be 40 %. We can
+    calcualte slope and the offset which is normed to the nominal value of
+    the referenced flow (in this case the input flow) always.
+
+    >>> slope, offset = solph.components.slope_offset_from_nonconvex_input(
+    ...     max_load, min_load, eta_at_max, eta_at_min
+    ... )
+    >>> input_flow = 10
+    >>> input_flow_nominal = 10
+    >>> output_flow = slope * input_flow + offset * input_flow_nominal
+
+    We can then calculate with the `OffsetConverter` input output relation,
+    what the resulting efficiency is. At max operating conditions it should be
+    identical to the efficiency we put in initially. Analogously, we apply this
+    to the minimal load point.
+
+    >>> round(output_flow / input_flow, 3) == eta_at_max
+    True
+    >>> input_flow = 5
+    >>> output_flow = slope * input_flow + offset * input_flow_nominal
+    >>> round(output_flow / input_flow, 3) == eta_at_min
+    True
     """
-    slope = (max * eta_at_max - min * eta_at_min) / (max - min)
+    slope = (
+        (max_load * eta_at_max - min_load * eta_at_min) / (max_load - min_load)
+    )
     offset = eta_at_max - slope
     return slope, offset
 
 
-def calculate_slope_and_offset_with_reference_to_output(
-    max, min, eta_at_max, eta_at_min
+def slope_offset_from_nonconvex_output(
+    max_load, min_load, eta_at_max, eta_at_min
 ):
     r"""Calculate the slope and the offset with max and min given for output.
 
     The reference is the output flow here. That means, the `NonConvex` flow
-    is specified at one of the output flows. Therefore the `max` and the `min`
-    both reference that flow. `eta_at_max` and `eta_at_min` are the efficiency
-    values at the referenced point.
+    is specified at one of the output flows. The `max_load` and the `min_load`
+    are the `max` and the `min` specifications for the `NonConvex` flow.
+    `eta_at_max` and `eta_at_min` are the efficiency values of a different
+    flow, e.g. an input, with respect to the `max_load` and `min_load`
+    operation points.
 
     .. math::
 
@@ -524,9 +562,9 @@ def calculate_slope_and_offset_with_reference_to_output(
 
     Parameters
     ----------
-    max : float
+    max_load : float
         Maximum load value, e.g. 1
-    min : float
+    min_load : float
         Minimum load value, e.g. 0.5
     eta_at_max : float
         Efficiency at maximum load.
@@ -537,7 +575,41 @@ def calculate_slope_and_offset_with_reference_to_output(
     -------
     tuple
         slope and offset
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> max_load = 1
+    >>> min_load = 0.5
+    >>> eta_at_min = 0.7
+    >>> eta_at_max = 0.8
+
+    With the output load being at 100 %, in this example, the efficiency should
+    be 80 %. With the input load being at 50 %, it should be 70 %. We can
+    calcualte slope and the offset, which is normed to the nominal value of
+    the referenced flow (in this case the output flow) always.
+
+    >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(
+    ...     max_load, min_load, eta_at_max, eta_at_min
+    ... )
+    >>> output_flow = 10
+    >>> output_flow_nominal = 10
+    >>> input_flow = slope * output_flow + offset * output_flow_nominal
+
+    We can then calculate with the `OffsetConverter` input output relation,
+    what the resulting efficiency is. At max operating conditions it should be
+    identical to the efficiency we put in initially. Analogously, we apply this
+    to the minimal load point.
+
+    >>> round(output_flow / input_flow, 3) == eta_at_max
+    True
+    >>> output_flow = 5
+    >>> input_flow = slope * output_flow + offset * output_flow_nominal
+    >>> round(output_flow / input_flow, 3) == eta_at_min
+    True
     """
-    slope = (max / eta_at_max - min / eta_at_min) / (max - min)
+    slope = (
+        (max_load / eta_at_max - min_load / eta_at_min) / (max_load - min_load)
+    )
     offset = 1 / eta_at_max - slope
     return slope, offset

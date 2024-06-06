@@ -699,7 +699,7 @@ The following example illustrates how to define an OffsetConverter for given inf
 
     # calculate slope and offset with respect to the output, since the
     # output is the `NonConvex` flow.
-    >>> slope, offset = solph.components._offset_converter.calculate_slope_and_offset_with_reference_to_output(
+    >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(
     ...     l_max, l_min, eta_max, eta_min
     ... )
     >>> round(slope, 3)
