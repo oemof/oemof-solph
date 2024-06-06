@@ -256,10 +256,6 @@ class OffsetConverter(Node):
                 len(coefficients[0]),
                 len(coefficients[1]),
             )
-            flow.max[max_len - 1]
-            flow.min[max_len - 1]
-            coefficients[0][max_len - 1]
-            coefficients[1][max_len - 1]
 
             # this could by vectorized, but since it is an API compatibility
             # fix I will not do this here
