@@ -61,15 +61,11 @@ def add_OffsetConverter(
 
     if reference_bus in oc_outputs:
         f = oc_outputs[reference_bus]
-        get_slope_and_offset = (
-            slope_offset_from_nonconvex_output
-        )
+        get_slope_and_offset = slope_offset_from_nonconvex_output
         fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
     else:
         f = oc_inputs[reference_bus]
-        get_slope_and_offset = (
-            slope_offset_from_nonconvex_input
-        )
+        get_slope_and_offset = slope_offset_from_nonconvex_input
         fix = [0] + np.linspace(
             minimal_value * eta_at_min[es.node["bus output 0"]],
             nominal_value * eta_at_nom[es.node["bus output 0"]],
