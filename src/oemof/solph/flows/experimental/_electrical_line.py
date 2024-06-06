@@ -170,7 +170,7 @@ class ElectricalLineBlock(ScalarBlock):
             bus.slack = True
 
         def _voltage_angle_relation(block):
-            for p, t in m.TIMESTEPS:
+            for t in m.TIMESTEPS:
                 for n in group:
                     if n.input.slack is True:
                         self.voltage_angle[n.output, t].value = 0
