@@ -103,7 +103,7 @@ def add_OffsetConverter(
     es.add(oc)
 
 
-def test_OffsetConverter_single_input_single_output_with_output_reference():
+def test_OffsetConverter_single_input_output_ref_output():
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
@@ -147,7 +147,7 @@ def test_OffsetConverter_single_input_single_output_with_output_reference():
     )
 
 
-def test_OffsetConverter_single_input_single_output_with_output_reference_eta_decreasing():
+def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
@@ -191,7 +191,7 @@ def test_OffsetConverter_single_input_single_output_with_output_reference_eta_de
     )
 
 
-def test_OffsetConverter_single_input_single_output_with_input_reference():
+def test_OffsetConverter_single_input_output_ref_input():
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
@@ -235,7 +235,7 @@ def test_OffsetConverter_single_input_single_output_with_input_reference():
     )
 
 
-def test_OffsetConverter_single_input_single_output_with_input_reference_eta_decreasing():
+def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)

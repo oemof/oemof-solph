@@ -138,7 +138,7 @@ class OffsetConverter(Node):
             and normed_offsets is None
         ):
             normed_offsets, conversion_factors = (
-                self.get_normed_offset_and_conversion_factors_from_old_style_coefficients(
+                self.normed_offset_and_conversion_factors_from_coefficients(
                     coefficients
                 )
             )
@@ -223,7 +223,7 @@ class OffsetConverter(Node):
     def constraint_group(self):
         return OffsetConverterBlock
 
-    def get_normed_offset_and_conversion_factors_from_old_style_coefficients(
+    def normed_offset_and_conversion_factors_from_coefficients(
         self, coefficients
     ):
         """

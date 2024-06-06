@@ -35,4 +35,6 @@ __all__ = [
     "Sink",
     "Transformer",
     "Source",
+    "slope_offset_from_nonconvex_input",
+    "slope_offset_from_nonconvex_output",
 ]
