@@ -746,11 +746,7 @@ class NonConvexFlowBlock(ScalarBlock):
                                 m.TIMESTEPS[index],
                             ]
                             * self.status[i, o, m.TIMESTEPS[index]]
-                            - m.flow[
-                                i,
-                                o,
-                                m.TIMESTEPS[index - 1]
-                            ]
+                            - m.flow[i, o, m.TIMESTEPS[index - 1]]
                             * self.status[i, o, m.TIMESTEPS[index - 1]]
                         )
                         rhs = self.positive_gradient[
@@ -802,9 +798,7 @@ class NonConvexFlowBlock(ScalarBlock):
                             ]
                             * self.status[i, o, m.TIMESTEPS[index]]
                         )
-                        rhs = self.negative_gradient[
-                            i, o, m.TIMESTEPS[index]
-                        ]
+                        rhs = self.negative_gradient[i, o, m.TIMESTEPS[index]]
                         self.negative_gradient_constr.add(
                             (
                                 i,

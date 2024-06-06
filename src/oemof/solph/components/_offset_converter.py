@@ -290,9 +290,7 @@ class OffsetConverterBlock(ScalarBlock):
                         for i in in_flows[n]:
                             expr = 0
                             expr += -m.flow[n, o, t]
-                            expr += (
-                                m.flow[i, n, t] * n.coefficients[o][1][t]
-                            )
+                            expr += m.flow[i, n, t] * n.coefficients[o][1][t]
                             # `Y(t)` in the last term of the constraint
                             # (":math:`C_0(t) \cdot Y(t)`") is different for
                             # different cases. If both `Investment` and
