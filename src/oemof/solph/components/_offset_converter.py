@@ -527,8 +527,8 @@ def slope_offset_from_nonconvex_input(
     >>> round(output_flow / input_flow, 3) == eta_at_min
     True
     """
-    slope = (
-        (max_load * eta_at_max - min_load * eta_at_min) / (max_load - min_load)
+    slope = (max_load * eta_at_max - min_load * eta_at_min) / (
+        max_load - min_load
     )
     offset = eta_at_max - slope
     return slope, offset
@@ -604,8 +604,8 @@ def slope_offset_from_nonconvex_output(
     >>> round(output_flow / input_flow, 3) == eta_at_min
     True
     """
-    slope = (
-        (max_load / eta_at_max - min_load / eta_at_min) / (max_load - min_load)
+    slope = (max_load / eta_at_max - min_load / eta_at_min) / (
+        max_load - min_load
     )
     offset = 1 / eta_at_max - slope
     return slope, offset

@@ -47,7 +47,12 @@ def solve_and_extract_results(es):
 
 
 def check_results(
-    results, reference_bus, nominal_value, minimal_value, eta_at_nom, eta_at_min
+    results,
+    reference_bus,
+    nominal_value,
+    minimal_value,
+    eta_at_nom,
+    eta_at_min,
 ):
     for bus in eta_at_nom:
         if "input" in reference_bus.label:
@@ -55,35 +60,40 @@ def check_results(
                 1,
                 minimal_value / nominal_value,
                 eta_at_nom[bus],
-                eta_at_min[bus]
+                eta_at_min[bus],
             )
             reference_flow = results[reference_bus.label, "offset converter"][
                 "sequences"
             ]["flow"]
-            reference_flow_status = results[reference_bus.label, "offset converter"][
-                "sequences"
-            ]["status"]
+            reference_flow_status = results[
+                reference_bus.label, "offset converter"
+            ]["sequences"]["status"]
         else:
             slope, offset = slope_offset_from_nonconvex_output(
                 1,
                 minimal_value / nominal_value,
                 eta_at_nom[bus],
-                eta_at_min[bus]
+                eta_at_min[bus],
             )
             reference_flow = results["offset converter", reference_bus.label][
                 "sequences"
             ]["flow"]
-            reference_flow_status = results["offset converter", reference_bus.label][
-                "sequences"
-            ]["status"]
+            reference_flow_status = results[
+                "offset converter", reference_bus.label
+            ]["sequences"]["status"]
 
         flow_expected = (
-            offset * nominal_value * reference_flow_status + slope * reference_flow
+            offset * nominal_value * reference_flow_status
+            + slope * reference_flow
         )
         if "input" in bus.label:
-            flow_actual = results[bus.label, "offset converter"]["sequences"]["flow"]
+            flow_actual = results[bus.label, "offset converter"]["sequences"][
+                "flow"
+            ]
         else:
-            flow_actual = results["offset converter", bus.label]["sequences"]["flow"]
+            flow_actual = results["offset converter", bus.label]["sequences"][
+                "flow"
+            ]
 
         np.testing.assert_array_almost_equal(flow_actual, flow_expected)
 
@@ -173,7 +183,7 @@ def test_OffsetConverter_single_input_output_ref_output():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
@@ -205,7 +215,7 @@ def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
@@ -237,7 +247,7 @@ def test_OffsetConverter_single_input_output_ref_input():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
@@ -269,7 +279,7 @@ def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
@@ -284,13 +294,12 @@ def test_OffsetConverter_double_input_output_ref_input():
     eta_at_nom = {
         es.groups["bus output 0"]: 0.7,
         es.groups["bus output 1"]: 0.2,
-        es.groups["bus input 1"]: 0.2
-
+        es.groups["bus input 1"]: 0.2,
     }
     eta_at_min = {
         es.groups["bus output 0"]: 0.5,
         es.groups["bus output 1"]: 0.3,
-        es.groups["bus input 1"]: 0.2
+        es.groups["bus input 1"]: 0.2,
     }
 
     add_OffsetConverter(
@@ -310,7 +319,7 @@ def test_OffsetConverter_double_input_output_ref_input():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
@@ -326,13 +335,12 @@ def test_OffsetConverter_double_input_output_ref_output():
     eta_at_nom = {
         es.groups["bus input 0"]: 0.7,
         es.groups["bus output 1"]: 0.2,
-        es.groups["bus input 1"]: 0.2
-
+        es.groups["bus input 1"]: 0.2,
     }
     eta_at_min = {
         es.groups["bus input 0"]: 0.5,
         es.groups["bus output 1"]: 0.3,
-        es.groups["bus input 1"]: 0.2
+        es.groups["bus input 1"]: 0.2,
     }
 
     add_OffsetConverter(
@@ -352,7 +360,7 @@ def test_OffsetConverter_double_input_output_ref_output():
         nominal_value,
         minimal_value,
         eta_at_nom,
-        eta_at_min
+        eta_at_min,
     )
 
 
