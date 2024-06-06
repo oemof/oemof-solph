@@ -107,9 +107,9 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         the om object, in this case we don't need anything from the block
         except the newly defined set MYFLOWS.
         """
-        expr = om.flow[si, e, ti] >= om.flows[si, e].outflow_share[
-            ti
-        ] * sum(om.flow[i, o, ti] for (i, o) in om.FLOWS if o == e)
+        expr = om.flow[si, e, ti] >= om.flows[si, e].outflow_share[ti] * sum(
+            om.flow[i, o, ti] for (i, o) in om.FLOWS if o == e
+        )
         return expr
 
     myblock.inflow_share = po.Constraint(
