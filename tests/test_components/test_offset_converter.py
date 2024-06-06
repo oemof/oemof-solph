@@ -46,6 +46,48 @@ def solve_and_extract_results(es):
     return results
 
 
+def check_results(
+    results, reference_bus, nominal_value, minimal_value, eta_at_nom, eta_at_min
+):
+    for bus in eta_at_nom:
+        if "input" in reference_bus.label:
+            slope, offset = slope_offset_from_nonconvex_input(
+                1,
+                minimal_value / nominal_value,
+                eta_at_nom[bus],
+                eta_at_min[bus]
+            )
+            reference_flow = results[reference_bus.label, "offset converter"][
+                "sequences"
+            ]["flow"]
+            reference_flow_status = results[reference_bus.label, "offset converter"][
+                "sequences"
+            ]["status"]
+        else:
+            slope, offset = slope_offset_from_nonconvex_output(
+                1,
+                minimal_value / nominal_value,
+                eta_at_nom[bus],
+                eta_at_min[bus]
+            )
+            reference_flow = results["offset converter", reference_bus.label][
+                "sequences"
+            ]["flow"]
+            reference_flow_status = results["offset converter", reference_bus.label][
+                "sequences"
+            ]["status"]
+
+        flow_expected = (
+            offset * nominal_value * reference_flow_status + slope * reference_flow
+        )
+        if "input" in bus.label:
+            flow_actual = results[bus.label, "offset converter"]["sequences"]["flow"]
+        else:
+            flow_actual = results["offset converter", bus.label]["sequences"]["flow"]
+
+        np.testing.assert_array_almost_equal(flow_actual, flow_expected)
+
+
 def add_OffsetConverter(
     es, reference_bus, nominal_value, minimal_value, eta_at_nom, eta_at_min
 ):
@@ -125,25 +167,13 @@ def test_OffsetConverter_single_input_output_ref_output():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = slope_offset_from_nonconvex_output(
-        1, minimal_value / nominal_value, 0.7, 0.5
-    )
-    output_flow = results["offset converter", "bus output 0"]["sequences"][
-        "flow"
-    ]
-    output_flow_status = results["offset converter", "bus output 0"][
-        "sequences"
-    ]["status"]
-
-    input_flow_expected = (
-        offset * nominal_value * output_flow_status + slope * output_flow
-    )
-    input_flow_actual = results["bus input 0", "offset converter"][
-        "sequences"
-    ]["flow"]
-
-    np.testing.assert_array_almost_equal(
-        input_flow_actual, input_flow_expected
+    check_results(
+        results,
+        es.groups["bus output 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
     )
 
 
@@ -169,25 +199,13 @@ def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = slope_offset_from_nonconvex_output(
-        1, minimal_value / nominal_value, 0.5, 0.7
-    )
-    output_flow = results["offset converter", "bus output 0"]["sequences"][
-        "flow"
-    ]
-    output_flow_status = results["offset converter", "bus output 0"][
-        "sequences"
-    ]["status"]
-
-    input_flow_expected = (
-        offset * nominal_value * output_flow_status + slope * output_flow
-    )
-    input_flow_actual = results["bus input 0", "offset converter"][
-        "sequences"
-    ]["flow"]
-
-    np.testing.assert_array_almost_equal(
-        input_flow_actual, input_flow_expected
+    check_results(
+        results,
+        es.groups["bus output 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
     )
 
 
@@ -213,25 +231,13 @@ def test_OffsetConverter_single_input_output_ref_input():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = slope_offset_from_nonconvex_input(
-        1, minimal_value / nominal_value, 0.7, 0.5
-    )
-    input_flow = results["bus input 0", "offset converter"]["sequences"][
-        "flow"
-    ]
-    input_flow_status = results["bus input 0", "offset converter"][
-        "sequences"
-    ]["status"]
-
-    output_flow_expected = (
-        offset * nominal_value * input_flow_status + slope * input_flow
-    )
-    output_flow_actual = results["offset converter", "bus output 0"][
-        "sequences"
-    ]["flow"]
-
-    np.testing.assert_array_almost_equal(
-        output_flow_actual, output_flow_expected
+    check_results(
+        results,
+        es.groups["bus input 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
     )
 
 
@@ -257,25 +263,96 @@ def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
 
     results = solve_and_extract_results(es)
 
-    slope, offset = slope_offset_from_nonconvex_input(
-        1, minimal_value / nominal_value, 0.5, 0.7
+    check_results(
+        results,
+        es.groups["bus input 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
     )
-    input_flow = results["bus input 0", "offset converter"]["sequences"][
-        "flow"
-    ]
-    input_flow_status = results["bus input 0", "offset converter"][
-        "sequences"
-    ]["status"]
 
-    output_flow_expected = (
-        offset * nominal_value * input_flow_status + slope * input_flow
+
+def test_OffsetConverter_double_input_output_ref_input():
+    num_in = 2
+    num_out = 2
+    es = create_energysystem_stub(num_in, num_out)
+
+    nominal_value = 10
+    minimal_value = 3
+
+    eta_at_nom = {
+        es.groups["bus output 0"]: 0.7,
+        es.groups["bus output 1"]: 0.2,
+        es.groups["bus input 1"]: 0.2
+
+    }
+    eta_at_min = {
+        es.groups["bus output 0"]: 0.5,
+        es.groups["bus output 1"]: 0.3,
+        es.groups["bus input 1"]: 0.2
+    }
+
+    add_OffsetConverter(
+        es,
+        es.groups["bus input 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min,
     )
-    output_flow_actual = results["offset converter", "bus output 0"][
-        "sequences"
-    ]["flow"]
 
-    np.testing.assert_array_almost_equal(
-        output_flow_actual, output_flow_expected
+    results = solve_and_extract_results(es)
+
+    check_results(
+        results,
+        es.groups["bus input 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
+    )
+
+
+def test_OffsetConverter_double_input_output_ref_output():
+    num_in = 2
+    num_out = 2
+
+    es = create_energysystem_stub(num_in, num_out)
+
+    nominal_value = 10
+    minimal_value = 3
+
+    eta_at_nom = {
+        es.groups["bus input 0"]: 0.7,
+        es.groups["bus output 1"]: 0.2,
+        es.groups["bus input 1"]: 0.2
+
+    }
+    eta_at_min = {
+        es.groups["bus input 0"]: 0.5,
+        es.groups["bus output 1"]: 0.3,
+        es.groups["bus input 1"]: 0.2
+    }
+
+    add_OffsetConverter(
+        es,
+        es.groups["bus output 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min,
+    )
+
+    results = solve_and_extract_results(es)
+
+    check_results(
+        results,
+        es.groups["bus output 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min
     )
 
 
@@ -312,13 +389,6 @@ def test_OffsetConverter_05x_compatibility():
             )
         },
         coefficients=(offset, slope),
-    )
-
-    es.add(
-        solph.components.Source(
-            "slack source",
-            outputs={es.node["bus output 0"]: solph.Flow(variable_costs=1000)},
-        )
     )
 
     es.add(oc)
