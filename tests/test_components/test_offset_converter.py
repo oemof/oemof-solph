@@ -364,6 +364,51 @@ def test_OffsetConverter_double_input_output_ref_output():
     )
 
 
+def test_two_OffsetConverters_with_and_without_investment():
+    num_in = 1
+    num_out = 1
+
+    es = create_energysystem_stub(num_in, num_out)
+
+    nominal_value = 10
+    minimal_value = 3
+
+    eta_at_nom = {
+        es.groups["bus input 0"]: 0.7,
+    }
+    eta_at_min = {
+        es.groups["bus input 0"]: 0.5,
+    }
+
+    add_OffsetConverter(
+        es,
+        es.groups["bus output 0"],
+        nominal_value,
+        minimal_value,
+        eta_at_nom,
+        eta_at_min,
+    )
+
+    input_bus = es.groups["bus input 0"]
+
+    oc = solph.components.OffsetConverter(
+        label="investment offset converter",
+        inputs={input_bus: solph.Flow()},
+        outputs={
+            es.groups["bus output 0"]: solph.Flow(
+                nonconvex=solph.NonConvex,
+                nominal_value=10,
+            )
+        },
+        conversion_factors={input_bus: 1},
+        normed_offsets={input_bus: 0}
+    )
+
+    es.add(oc)
+
+    _ = solve_and_extract_results(es)
+
+
 def test_OffsetConverter_05x_compatibility():
 
     num_in = 1
