@@ -182,6 +182,8 @@ class OffsetConverter(Node):
                     "NonConvex flow!"
                 )
 
+        self._reference_flow = _reference_flow[0]
+
         if conversion_factors is None:
             conversion_factors = {}
 
@@ -291,6 +293,66 @@ class OffsetConverter(Node):
             warn(msg, DeprecationWarning)
 
         return normed_offsets, conversion_factors
+
+
+    def plot_partload(self, bus, tstep):
+        """Create a matplotlib figure of the flow to nonconvex flow relation.
+
+        Parameters
+        ----------
+        bus : oemof.solph.Bus
+            Bus, to which the NOT-nonconvex input or output is connected to.
+        tstep : int
+            Timestep to generate the figure for.
+
+        Returns
+        -------
+        tuple
+            A tuple with the matplotlib figure and axes objects.
+        """
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        fig, ax = plt.subplots(2, sharex=True)
+
+        slope = self.conversion_factors[bus][tstep]
+        offset = self.normed_offsets[bus][tstep]
+
+        min_load = self._reference_flow.min[tstep]
+        max_load = self._reference_flow.max[tstep]
+
+        infeasible_load = np.linspace(0, min_load)
+        feasible_load = np.linspace(min_load, max_load)
+
+        y_feasible = feasible_load * slope + offset
+        y_infeasible = infeasible_load * slope + offset
+
+        _ = ax[0].plot(feasible_load, y_feasible, label="operational range")
+        color = _[0].get_color()
+        ax[0].plot(infeasible_load, y_infeasible, "--", color=color)
+        ax[0].scatter(
+            [0, feasible_load[0], feasible_load[-1]],
+            [y_infeasible[0], y_feasible[0], y_feasible[-1]],
+            color=color
+        )
+        ax[0].legend()
+
+        ratio = y_feasible / feasible_load
+        ax[1].plot(feasible_load, ratio)
+        ax[1].scatter(
+            [feasible_load[0], feasible_load[-1]],
+            [ratio[0], ratio[-1]],
+            color=color
+        )
+
+        ax[0].set_ylabel(f"flow from/to bus '{bus.label}'")
+        ax[1].set_ylabel("efficiency $\\frac{y}{x}$")
+        ax[1].set_xlabel("nonconvex flow")
+
+        _ = [(_.set_axisbelow(True), _.grid()) for _ in ax]
+        plt.tight_layout()
+
+        return fig, ax
 
 
 # --- BEGIN: To be removed for versions >= v0.6 ---

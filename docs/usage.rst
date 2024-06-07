@@ -683,55 +683,100 @@ OffsetConverter (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The `OffsetConverter` object makes it possible to create a Converter with efficiencies depending on the part load condition.
-For this object it is necessary to define the outflow as a nonconvex flow and to set a minimum load.
-The following example illustrates how to define an OffsetConverter for given information for the output:
+For this it is necessary to define one flow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetConverter for given
+information for an output, i.e. a combined heat and power plant. The plant
+generates up to 100 kW electric energy at an efficiency of 40 %. In minimal
+load the electric efficiency is at 30 %, and the minimum possible load is 50 %
+of the nominal load. At the same time, heat is produced with a constant
+efficiency. By using the `OffsetConverter` a linear relation of in- and output
+power with a power dependent efficiency is generated.
 
 .. code-block:: python
 
     >>> from oemof import solph
 
-    >>> eta_min = 0.5                  # efficiency at minimal operation point
-    >>> eta_max = 0.8                  # efficiency at nominal operation point
-    >>> P_out_min = 20                 # absolute minimal output power
-    >>> P_out_max = 100                # absolute nominal output power
-    >>> l_max = 1                      # upper part load limit
-    >>> l_min = P_out_min / P_out_max  # lower part load limit
+    >>> eta_el_min = 0.3                  # electrical efficiency at minimal operation point
+    >>> eta_el_max = 0.4                  # electrical efficiency at nominal operation point
+    >>> eta_th_min = 0.5                  # thermal efficiency at minimal operation point
+    >>> eta_th_max = 0.5                  # thermal efficiency at nominal operation point
+    >>> P_out_min = 20                    # absolute minimal output power
+    >>> P_out_max = 100                   # absolute nominal output power
 
-    # calculate slope and offset with respect to the output, since the
-    # output is the `NonConvex` flow.
-    >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(
-    ...     l_max, l_min, eta_max, eta_min
+As reference for our system we use the input and will mark that flow as
+nonconvex respectively. The efficiencies for electricity and heat output have
+therefore to be defined with respect to the input flow. The same is true for
+the minimal and maximal load. Therefore, we first calculate the minimum and
+maximum input of fuel and then derive the slope and offset for both outputs.
+
+.. code-block:: python
+
+    >>> P_in_max = P_out_max / eta_el_max
+    >>> P_in_min = P_out_min / eta_el_min
+    >>> P_in_max
+    250.0
+    >>> round(P_in_min, 2)
+    66.67
+
+With that information, we can derive the normed minimal and maximal load of the
+nonconvex flow, and calculate the slope and the offset for both outputs. Note,
+that the offset for the heat output is 0, because the thermal heat output
+efficiency is constant.
+
+.. code-block:: python
+
+    >>> l_max = 1
+    >>> l_min = P_in_min / P_in_max
+    >>> slope_el, offset_el = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_el_max, eta_el_min
     ... )
-    >>> round(slope, 3)
-    1.062
-    >>> round(offset, 3)
-    0.188
+    >>> slope_th, offset_th = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_th_max, eta_th_min
+    ... )
+    >>> round(slope_el, 3)
+    0.436
+    >>> round(offset_el, 3)
+    -0.036
+    >>> round(slope_th, 3)
+    0.5
+    >>> round(offset_th, 3)
+    0.0
+
+Then we can create our component with the buses attached to it.
+
+.. code-block:: python
 
     >>> bfuel = solph.Bus("fuel")
+    >>> bel = solph.Bus("electricity")
     >>> bth = solph.Bus("heat")
 
     # define OffsetConverter
     >>> diesel_genset = solph.components.OffsetConverter(
     ...     label='boiler',
-    ...     inputs={bfuel: solph.flows.Flow()},
-    ...     outputs={
-    ...         bth: solph.flows.Flow(
+    ...     inputs={
+    ...         bfuel: solph.flows.Flow(
     ...             nominal_value=P_out_max,
     ...             max=l_max,
     ...             min=l_min,
     ...             nonconvex=solph.NonConvex()
-    ...         ),
+    ...         )
     ...     },
-    ...     conversion_factors={bfuel: slope},
-    ...     normed_offsets={bfuel: offset},
+    ...     outputs={
+    ...         bel: solph.flows.Flow(),
+    ...         bth: solph.flows.Flow(),
+    ...     },
+    ...     conversion_factors={bel: slope_el, bth: slope_th},
+    ...     normed_offsets={bel: offset_el, bth: offset_th},
     ... )
 
-This example represents a boiler, which is supplied by fuel and generates heat.
-It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
-The boiler cannot operate under 20 % of nominal thermal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
-By using the `OffsetConverter` a linear relation of in- and output power with a power dependent efficiency is generated.
+    >>> fig_el, ax_el = diesel_genset.plot_partload(bel, 0)
+    >>> fig_th, ax_th = diesel_genset.plot_partload(bth, 0)
+    >>> import matplotlib.pyplot as plt
+    >>> fig_el.savefig("docs/_files/OffsetConverter_relations_1.svg")
+    >>> fig_th.savefig("docs/_files/OffsetConverter_relations_2.svg")
 
 .. note::
+
     One of the inputs and outputs has to be a `NonConvex` flow and this flow
     will serve as the reference for the `conversion_factors` and the
     `normed_offsets`. The `NonConvex` flow also holds
@@ -745,33 +790,34 @@ By using the `OffsetConverter` a linear relation of in- and output power with a 
     output buses. Note, that you cannot have the `conversion_factors` or
     `normed_offsets` point to the `NonConvex` flow.
 
-The following figures illustrate the relations:
+The following figures show the power at the electrical and the thermal output
+and the resepctive ratios to the nonconvex flow (normalized). The efficiency
+becomes non-linear.
 
-.. 	image:: _files/OffsetConverter_power_relation.svg
+.. 	image:: _files/OffsetConverter_relations_1.svg
    :width: 70 %
-   :alt: OffsetConverter_power_relation.svg
+   :alt: OffsetConverter_relations_1.svg
    :align: center
 
-Now, it becomes clear, why this object has been named `OffsetConverter`. The
-linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
-the offset :math:`C_{0}` with the binary status variable of the `NonConvex` flow, the origin (0, 0) becomes
-part of the solution space and the boiler is allowed to switch off:
+
+.. 	image:: _files/OffsetConverter_relations_2.svg
+   :width: 70 %
+   :alt: OffsetConverter_relations_2.svg
+   :align: center
+
+.. math::
+
+    \eta = P_(t) / P_{ref}(t)
+
+It also becomes clear, why the component has been named `OffsetConverter`. The
+linear equation of inflow to electrical outflow does not hit the origin, but is
+offset. By multiplying the offset :math:`y_\text{0,normed}` with the binary
+status variable of the `NonConvex` flow, the origin (0, 0) becomes part of the
+solution space and the boiler is allowed to switch off.
 
 .. include:: ../src/oemof/solph/components/_offset_converter.py
   :start-after: _OffsetConverter-equations:
   :end-before: """
-
-The following figure shows the efficiency dependent on the output power,
-which results in a nonlinear relation:
-
-.. math::
-
-    \eta = m \cdot P_{out}(t) / (P_{out}(t) - b)
-
-.. 	image:: _files/OffsetConverter_efficiency.svg
-   :width: 70 %
-   :alt: OffsetConverter_efficiency.svg
-   :align: center
 
 The parameters :math:`y_\text{0,normed}` and :math:`m` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 It is also possible to define multiple outputs.
