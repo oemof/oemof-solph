@@ -769,12 +769,6 @@ Then we can create our component with the buses attached to it.
     ...     normed_offsets={bel: offset_el, bth: offset_th},
     ... )
 
-    >>> fig_el, ax_el = diesel_genset.plot_partload(bel, 0)
-    >>> fig_th, ax_th = diesel_genset.plot_partload(bth, 0)
-    >>> import matplotlib.pyplot as plt
-    >>> fig_el.savefig("docs/_files/OffsetConverter_relations_1.svg")
-    >>> fig_th.savefig("docs/_files/OffsetConverter_relations_2.svg")
-
 .. note::
 
     One of the inputs and outputs has to be a `NonConvex` flow and this flow
@@ -807,7 +801,7 @@ becomes non-linear.
 
 .. math::
 
-    \eta = P_(t) / P_{ref}(t)
+    \eta = P(t) / P_\text{ref}(t)
 
 It also becomes clear, why the component has been named `OffsetConverter`. The
 linear equation of inflow to electrical outflow does not hit the origin, but is
