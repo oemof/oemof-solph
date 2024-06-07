@@ -258,10 +258,6 @@ class OffsetConverter(Node):
                 len(coefficients[1]),
             )
 
-            # this could by vectorized, but since it is an API compatibility
-            # fix I will not do this here
-            eta_at_max = sequence(0)
-            eta_at_min = sequence(0)
             slope = []
             offset = []
             for i in range(max_len):
@@ -282,9 +278,6 @@ class OffsetConverter(Node):
                 slope += [c0]
                 offset += [c1]
 
-            # apparently, when coefficients are given as a list, it is assumed,
-            # that the list identical in length to the timeindex
-            # There should be a general check, if lenghts match then!
             if max_len == 1:
                 slope = sequence(slope[0])
                 offset = sequence(offset[0])
