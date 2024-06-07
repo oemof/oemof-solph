@@ -228,7 +228,7 @@ def test_offsetconverter_without_nonconvex():
         components.OffsetConverter(
             label="diesel_genset",
             inputs={b_diesel: Flow()},
-            outputs={b_el: Flow()}
+            outputs={b_el: Flow()},
         )
 
 
@@ -262,11 +262,7 @@ def test_offsetconverter_investment_not_on_nonconvex():
         b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
             inputs={b_diesel: Flow(nominal_value=Investment(maximum=1))},
-            outputs={
-                b_heat: Flow(
-                    nonconvex=NonConvex()
-                )
-            },
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 

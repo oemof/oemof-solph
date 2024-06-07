@@ -294,7 +294,6 @@ class OffsetConverter(Node):
 
         return normed_offsets, conversion_factors
 
-
     def plot_partload(self, bus, tstep):
         """Create a matplotlib figure of the flow to nonconvex flow relation.
 
@@ -333,7 +332,7 @@ class OffsetConverter(Node):
         ax[0].scatter(
             [0, feasible_load[0], feasible_load[-1]],
             [y_infeasible[0], y_feasible[0], y_feasible[-1]],
-            color=color
+            color=color,
         )
         ax[0].legend()
 
@@ -342,7 +341,7 @@ class OffsetConverter(Node):
         ax[1].scatter(
             [feasible_load[0], feasible_load[-1]],
             [ratio[0], ratio[-1]],
-            color=color
+            color=color,
         )
 
         ax[0].set_ylabel(f"flow from/to bus '{bus.label}'")

@@ -403,7 +403,7 @@ def test_two_OffsetConverters_with_and_without_investment():
             )
         },
         conversion_factors={input_bus: 1},
-        normed_offsets={input_bus: 0}
+        normed_offsets={input_bus: 0},
     )
 
     es.add(oc)
