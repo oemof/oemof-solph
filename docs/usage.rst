@@ -766,14 +766,14 @@ which results in a nonlinear relation:
 
 .. math::
 
-    \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
+    \eta = m \cdot P_{out}(t) / (P_{out}(t) - b)
 
 .. 	image:: _files/OffsetConverter_efficiency.svg
    :width: 70 %
    :alt: OffsetConverter_efficiency.svg
    :align: center
 
-The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+The parameters :math:`y_\text{0,normed}` and :math:`m` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 It is also possible to define multiple outputs.
 
 .. note:: See the :py:class:`~oemof.solph.components._offset_converter.OffsetConverter` class for all parameters and the mathematical background.

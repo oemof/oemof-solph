@@ -223,16 +223,16 @@ def test_offsetconverter_without_nonconvex():
             "`NonConvex` attribute."
         ),
     ):
+        b_diesel = Bus(label="bus_diesel")
         b_el = Bus(label="bus_electricity")
         components.OffsetConverter(
             label="diesel_genset",
-            inputs={b_el: Flow()},
-            outputs={b_el: Flow()},
-            conversion_factors={b_el: (2.5, 0.5)},
+            inputs={b_diesel: Flow()},
+            outputs={b_el: Flow()}
         )
 
 
-def test_offsetconverter_nonconvex_on_inputs():
+def test_offsetconverter_multiple_nonconvex():
     """NonConvex attribute is defined for more than one flow."""
     with pytest.raises(
         ValueError,
@@ -242,25 +242,29 @@ def test_offsetconverter_nonconvex_on_inputs():
         ),
     ):
         b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
             inputs={b_diesel: Flow(nonconvex=NonConvex())},
-            outputs={b_diesel: Flow(nonconvex=NonConvex())},
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 
-def test_offsetconverter_investment_on_inputs():
+def test_offsetconverter_investment_not_on_nonconvex():
     """Investment attribute is defined for a not NonConvex flow."""
     with pytest.raises(
         TypeError,
-        match="`Investment` attribute must be defined only for the NonConvex "
-        + "flow!",
+        match=(
+            "`Investment` attribute must be defined only for the NonConvex "
+            "flow!"
+        ),
     ):
         b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
-            inputs={b_diesel: Flow(nominal_value=Investment())},
+            inputs={b_diesel: Flow(nominal_value=Investment(maximum=1))},
             outputs={
-                b_diesel: Flow(
-                    nonconvex=NonConvex(), nominal_value=Investment(maximum=1)
+                b_heat: Flow(
+                    nonconvex=NonConvex()
                 )
             },
         )
