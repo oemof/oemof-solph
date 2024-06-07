@@ -31,39 +31,40 @@ from oemof.solph._plumbing import sequence
 
 
 class OffsetConverter(Node):
-    """An object with one input and multiple outputs and two coefficients
+    r"""An object with one input and multiple outputs and two coefficients
     per output to model part load behaviour.
     The output must contain a NonConvex object.
 
     Parameters
     ----------
-    conversion_factors : dict, (:math:`C_1(t)`)
+    conversion_factors : dict, (:math:`m(t)`)
         Dict containing the respective bus as key and as value the parameter
-        :math:`C_1(t)`. It represents the slope of a linear equation with
+        :math:`m(t)`. It represents the slope of a linear equation with
         respect to the `NonConvex` flow. The value can either be a scalar or a
         sequence with length of time horizon for simulation.
 
-    normed_offsets : dict, (:math:`C_0(t)`)
+    normed_offsets : dict, (:math:`y_\text{0,normed}(t)`)
         Dict containing the respective bus as key and as value the parameter
-        :math:`C_0(t)`. It represents the y-intercept with respect to the
-        `NonConvex` flow divided by the `nominal_value` of the `NonConvex` flow
-        (this is for internal purposes). The value can either be a scalar or a
-        sequence with length of time horizon for simulation.
+        :math:`y_\text{0,normed}(t)`. It represents the y-intercept with respect
+        to the `NonConvex` flow divided by the `nominal_value` of the
+        `NonConvex` flow (this is for internal purposes). The value can either
+        be a scalar or a sequence with length of time horizon for simulation.
     Notes
     -----
-    **C_1 and C_0 can be calculated as follows:**
+    **:math:`m(t)` and :math:`y_\text{0,normed}(t)` can be calculated as **
+    **follows:**
 
     .. _OffsetConverterCoefficients-equations:
 
     .. math::
 
-        C_1 = \\frac{(l_{max}/\\eta_{max}-l_{min}/\\eta_{min}}{l_{max}-l_{min}}
+        m = \frac{(l_{max}/\eta_{max}-l_{min}/\eta_{min}}{l_{max}-l_{min}}
 
-        C_0 = \\frac{1}{\\eta_{max}} - C_1
+        y_\text{0,normed} = \frac{1}{\eta_{max}} - m
 
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
     partload share (e.g. 1.0 and 0.5) with reference to the `NonConvex` flow
-    and :math:`\\eta_{max}` and :math:`\\eta_{min}` are the respective
+    and :math:`\eta_{max}` and :math:`\eta_{min}` are the respective
     efficiencies/conversion factors at these partloads.
 
     The sets, variables, constraints and objective parts are created
@@ -79,16 +80,16 @@ class OffsetConverter(Node):
     >>> l_min = 0.5
     >>> eta_max = 0.5
     >>> eta_min = 0.3
-    >>> c1 = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
-    >>> c0 = 1 / eta_max - c1
+    >>> slope = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
+    >>> offset = 1 / eta_max - slope
     >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
     ...         nominal_value=l_nominal, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
-    ...    conversion_factors={bel: c1},
-    ...    normed_offsets={bel: c0},
+    ...    conversion_factors={bel: slope},
+    ...    normed_offsets={bel: offset},
     ... )
     >>> type(ostf)
     <class 'oemof.solph.components._offset_converter.OffsetConverter'>
@@ -339,26 +340,27 @@ class OffsetConverterBlock(ScalarBlock):
 
     .. math::
         &
-        P_{out}(p, t) = P_{in}(p, t) \cdot C_1(t) + P_nom(p) \cdot Y(t) \cdot C_0(t) \\
+        P(p, t) = P_\text{ref}(p, t) \cdot m(t)
+        + P_\text{nom,ref}(p) \cdot Y_\text{ref}(t) \cdot y_\text{0,normed}(t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | symbol             | attribute                 | type | explanation                                      |
-    +====================+===========================+======+==================================================+
-    | :math:`P_{out}(t)` | `flow[n,o,p,t]`           | V    | Outflow of converter                             |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`           | V    | Inflow of converter                              |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`Y(t)`       |                           | V    | Binary status variable of nonconvex outflow      |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`P_{nom}(t)` |                           | V    | Nominal value (max. capacity) of the outflow     |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`C_1(t)`     | `coefficients[o][1][n,t]` | P    | Linear coefficient 1 (slope)                     |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`C_0(t)`     | `coefficients[o][0][n,t]` | P    | Linear coefficient 0 (y-intersection)/P_{nom}(t) |
-    +--------------------+---------------------------+------+--------------------------------------------------+
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | symbol                       | attribute                                                    | type | explanation                                                                 |
+    +==============================+===========================+======+================================================================================================================+
+    | :math:`P(t)`                 | `flow[i,n,p,t]` or `flow[n,o,p,t]`                           | V    | **Non**-nonconvex flows at input or output                                  |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`P_{in}(t)`            | `flow[i,n,p,t]` or `flow[n,o,p,t]`                           | V    | nonconvex flow of converter                                                 |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`Y(t)`                 |                                                              | V    | Binary status variable of nonconvex flow                                    |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`P_{nom}(t)`           |                                                              | V    | Nominal value (max. capacity) of the nonconvex flow                         |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`m(t)`                 | `conversion_factors[i][n,t]` or `conversion_factors[o][n,t]` | P    | Linear coefficient 1 (slope) of a **Non**-nonconvex flows                   |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`y_\text{0,normed}(t)` | `normed_offsets[i][n,t]` or `normed_offsets[o][n,t]`         | P    | Linear coefficient 0 (y-intersection)/P_{nom}(t) of **Non**-nonconvex flows |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
 
     Note that :math:`P_{nom}(t) \cdot Y(t)` is merged into one variable,
     called `status_nominal[n, o, p, t]`.
