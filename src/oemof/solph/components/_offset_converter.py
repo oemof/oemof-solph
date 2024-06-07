@@ -480,22 +480,18 @@ class OffsetConverterBlock(ScalarBlock):
                         ref_flow = m.flow[n, reference_node[n], p, t]
                         status_nominal_idx = n, reference_node[n], t
 
-                    if hasattr(m.NonConvexFlowBlock, "status_nominal"):
-                        status_nominal = m.NonConvexFlowBlock.status_nominal
-
-                    if hasattr(m, "InvestNonConvexFlowBlock"):
-                        if hasattr(
-                            m.InvestNonConvexFlowBlock, "status_nominal"
-                        ):
-                            if (
+                    try:
+                        ref_status_nominal = (
+                            m.InvestNonConvexFlowBlock.status_nominal[
                                 status_nominal_idx
-                                in m.InvestNonConvexFlowBlock.status_nominal
-                            ):
-                                status_nominal = (
-                                    m.InvestNonConvexFlowBlock.status_nominal
-                                )
-
-                    ref_status_nominal = status_nominal[status_nominal_idx]
+                            ]
+                        )
+                    except (AttributeError, KeyError):
+                        ref_status_nominal = (
+                            m.NonConvexFlowBlock.status_nominal[
+                                status_nominal_idx
+                            ]
+                        )
 
                     for f in in_flows[n] + out_flows[n]:
                         rhs = 0

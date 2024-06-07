@@ -396,8 +396,10 @@ def test_two_OffsetConverters_with_and_without_investment():
         inputs={input_bus: solph.Flow()},
         outputs={
             es.groups["bus output 0"]: solph.Flow(
-                nonconvex=solph.NonConvex,
-                nominal_value=10,
+                nonconvex=solph.NonConvex(),
+                nominal_value=solph.Investment(
+                    maximum=nominal_value, ep_costs=10
+                ),
             )
         },
         conversion_factors={input_bus: 1},
@@ -406,6 +408,9 @@ def test_two_OffsetConverters_with_and_without_investment():
 
     es.add(oc)
 
+    fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
+    fix_flow.fix = [v * 2 for v in fix_flow.fix]
+    # if the model solves it is feasible
     _ = solve_and_extract_results(es)
 
 
