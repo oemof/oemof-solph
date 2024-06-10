@@ -147,7 +147,10 @@ class OffsetConverter(Node):
         elif coefficients is not None and (
             conversion_factors is not None or normed_offsets is not None
         ):
-            msg = ""
+            msg = (
+                "The deprecated argument `coefficients` cannot be used in combination "
+                "with its replacements (`conversion_factors` and `normed_offsets`)."
+            )
             raise TypeError(msg)
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
