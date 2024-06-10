@@ -1,6 +1,7 @@
+import warnings
+
 import numpy as np
 import pytest
-import warnings
 
 from oemof import solph
 from oemof.solph._plumbing import sequence
