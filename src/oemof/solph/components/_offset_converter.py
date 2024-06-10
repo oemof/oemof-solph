@@ -148,8 +148,9 @@ class OffsetConverter(Node):
             conversion_factors is not None or normed_offsets is not None
         ):
             msg = (
-                "The deprecated argument `coefficients` cannot be used in combination "
-                "with its replacements (`conversion_factors` and `normed_offsets`)."
+                "The deprecated argument `coefficients` cannot be used in "
+                "combination with its replacements (`conversion_factors` and "
+                "`normed_offsets`)."
             )
             raise TypeError(msg)
 
