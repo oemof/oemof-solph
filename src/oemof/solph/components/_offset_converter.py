@@ -273,8 +273,8 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, p, t)
-                for p, t in m.TIMEINDEX
+                (n, i, o, t)
+                for t in m.TIMESTEPS
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
