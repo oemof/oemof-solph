@@ -255,7 +255,7 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMESTEPS) + 1):
-                    if m.TIMESTEPS.at(index)[1] > 0:
+                    if m.TIMESTEPS.at(index) > 0:
                         lhs = (
                             m.flow[
                                 inp,
@@ -269,7 +269,7 @@ class SimpleFlowBlock(ScalarBlock):
                             ]
                         )
                         rhs = self.positive_gradient[
-                            inp, out, m.TIMESTEPS.at(index)[1]
+                            inp, out, m.TIMESTEPS.at(index)
                         ]
                         self.positive_gradient_constr.add(
                             (inp, out, m.TIMESTEPS.at(index)),
