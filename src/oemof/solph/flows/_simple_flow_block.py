@@ -359,7 +359,7 @@ class SimpleFlowBlock(ScalarBlock):
                             m.flows[inp, out].lifetime - m.flows[inp, out].age
                             <= m.es.periods_years[p]
                         ):
-                            lhs = m.flow[inp, out, p, ts]
+                            lhs = m.flow[inp, out, ts]
                             rhs = 0
                             self.lifetime_age_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
