@@ -2,120 +2,120 @@
 
 min 
 objective:
-+1 flow(gasBus_pwltf_0_0)
-+1 flow(gasBus_pwltf_0_1)
-+0.9803921568627451 flow(gasBus_pwltf_1_2)
-+0.9803921568627451 flow(gasBus_pwltf_1_3)
-+0.9611687812379853 flow(gasBus_pwltf_2_4)
-+0.9611687812379853 flow(gasBus_pwltf_2_5)
++1 flow(gasBus_pwltf_0)
++1 flow(gasBus_pwltf_1)
++0.9803921568627451 flow(gasBus_pwltf_2)
++0.9803921568627451 flow(gasBus_pwltf_3)
++0.9611687812379853 flow(gasBus_pwltf_4)
++0.9611687812379853 flow(gasBus_pwltf_5)
 
 s.t.
 
-c_e_BusBlock_balance(gasBus_0_0)_:
-+1 flow(gasBus_pwltf_0_0)
+c_e_BusBlock_balance(electricityBus_0)_:
++1 flow(pwltf_electricityBus_0)
 = 0
 
-c_e_BusBlock_balance(gasBus_0_1)_:
-+1 flow(gasBus_pwltf_0_1)
+c_e_BusBlock_balance(electricityBus_1)_:
++1 flow(pwltf_electricityBus_1)
 = 0
 
-c_e_BusBlock_balance(gasBus_1_2)_:
-+1 flow(gasBus_pwltf_1_2)
+c_e_BusBlock_balance(electricityBus_2)_:
++1 flow(pwltf_electricityBus_2)
 = 0
 
-c_e_BusBlock_balance(gasBus_1_3)_:
-+1 flow(gasBus_pwltf_1_3)
+c_e_BusBlock_balance(electricityBus_3)_:
++1 flow(pwltf_electricityBus_3)
 = 0
 
-c_e_BusBlock_balance(gasBus_2_4)_:
-+1 flow(gasBus_pwltf_2_4)
+c_e_BusBlock_balance(electricityBus_4)_:
++1 flow(pwltf_electricityBus_4)
 = 0
 
-c_e_BusBlock_balance(gasBus_2_5)_:
-+1 flow(gasBus_pwltf_2_5)
+c_e_BusBlock_balance(electricityBus_5)_:
++1 flow(pwltf_electricityBus_5)
 = 0
 
-c_e_BusBlock_balance(electricityBus_0_0)_:
-+1 flow(pwltf_electricityBus_0_0)
+c_e_BusBlock_balance(gasBus_0)_:
++1 flow(gasBus_pwltf_0)
 = 0
 
-c_e_BusBlock_balance(electricityBus_0_1)_:
-+1 flow(pwltf_electricityBus_0_1)
+c_e_BusBlock_balance(gasBus_1)_:
++1 flow(gasBus_pwltf_1)
 = 0
 
-c_e_BusBlock_balance(electricityBus_1_2)_:
-+1 flow(pwltf_electricityBus_1_2)
+c_e_BusBlock_balance(gasBus_2)_:
++1 flow(gasBus_pwltf_2)
 = 0
 
-c_e_BusBlock_balance(electricityBus_1_3)_:
-+1 flow(pwltf_electricityBus_1_3)
+c_e_BusBlock_balance(gasBus_3)_:
++1 flow(gasBus_pwltf_3)
 = 0
 
-c_e_BusBlock_balance(electricityBus_2_4)_:
-+1 flow(pwltf_electricityBus_2_4)
+c_e_BusBlock_balance(gasBus_4)_:
++1 flow(gasBus_pwltf_4)
 = 0
 
-c_e_BusBlock_balance(electricityBus_2_5)_:
-+1 flow(pwltf_electricityBus_2_5)
+c_e_BusBlock_balance(gasBus_5)_:
++1 flow(gasBus_pwltf_5)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_0_0)_:
--1 flow(gasBus_pwltf_0_0)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_0)_:
+-1 flow(gasBus_pwltf_0)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_0)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_0_1)_:
--1 flow(gasBus_pwltf_0_1)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_1)_:
+-1 flow(gasBus_pwltf_1)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_1)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_1_2)_:
--1 flow(gasBus_pwltf_1_2)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_2)_:
+-1 flow(gasBus_pwltf_2)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_2)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_1_3)_:
--1 flow(gasBus_pwltf_1_3)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_3)_:
+-1 flow(gasBus_pwltf_3)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_3)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_2_4)_:
--1 flow(gasBus_pwltf_2_4)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_4)_:
+-1 flow(gasBus_pwltf_4)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_4)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_2_5)_:
--1 flow(gasBus_pwltf_2_5)
+c_e_PiecewiseLinearConverterBlock_equate_in(pwltf_5)_:
+-1 flow(gasBus_pwltf_5)
 +1 PiecewiseLinearConverterBlock_inflow(pwltf_5)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_0_0)_:
--1 flow(pwltf_electricityBus_0_0)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_0)_:
+-1 flow(pwltf_electricityBus_0)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_0)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_0_1)_:
--1 flow(pwltf_electricityBus_0_1)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_1)_:
+-1 flow(pwltf_electricityBus_1)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_1)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_1_2)_:
--1 flow(pwltf_electricityBus_1_2)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_2)_:
+-1 flow(pwltf_electricityBus_2)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_2)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_1_3)_:
--1 flow(pwltf_electricityBus_1_3)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_3)_:
+-1 flow(pwltf_electricityBus_3)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_3)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_2_4)_:
--1 flow(pwltf_electricityBus_2_4)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_4)_:
+-1 flow(pwltf_electricityBus_4)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_4)
 = 0
 
-c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_2_5)_:
--1 flow(pwltf_electricityBus_2_5)
+c_e_PiecewiseLinearConverterBlock_equate_out(pwltf_5)_:
+-1 flow(pwltf_electricityBus_5)
 +1 PiecewiseLinearConverterBlock_outflow(pwltf_5)
 = 0
 
@@ -142,9 +142,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_constraint3(2)_:
@@ -195,9 +195,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_constraint3(2)_:
@@ -248,9 +248,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_constraint3(2)_:
@@ -301,9 +301,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_constraint3(2)_:
@@ -354,9 +354,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_constraint3(2)_:
@@ -407,9 +407,9 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_constraint2_:
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_constraint3(1)_:
+-1 PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_1)
 -1 PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_2)
 +1 PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_bin_y(1)
--1 PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_1)
 = 0
 
 c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_constraint3(2)_:
@@ -438,18 +438,18 @@ c_e_PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_constraint4_:
 = 1
 
 bounds
-   0 <= flow(gasBus_pwltf_0_0) <= 100
-   0 <= flow(gasBus_pwltf_0_1) <= 100
-   0 <= flow(gasBus_pwltf_1_2) <= 100
-   0 <= flow(gasBus_pwltf_1_3) <= 100
-   0 <= flow(gasBus_pwltf_2_4) <= 100
-   0 <= flow(gasBus_pwltf_2_5) <= 100
-   0 <= flow(pwltf_electricityBus_0_0) <= +inf
-   0 <= flow(pwltf_electricityBus_0_1) <= +inf
-   0 <= flow(pwltf_electricityBus_1_2) <= +inf
-   0 <= flow(pwltf_electricityBus_1_3) <= +inf
-   0 <= flow(pwltf_electricityBus_2_4) <= +inf
-   0 <= flow(pwltf_electricityBus_2_5) <= +inf
+   0 <= flow(gasBus_pwltf_0) <= 100
+   0 <= flow(gasBus_pwltf_1) <= 100
+   0 <= flow(gasBus_pwltf_2) <= 100
+   0 <= flow(gasBus_pwltf_3) <= 100
+   0 <= flow(gasBus_pwltf_4) <= 100
+   0 <= flow(gasBus_pwltf_5) <= 100
+   0 <= flow(pwltf_electricityBus_0) <= +inf
+   0 <= flow(pwltf_electricityBus_1) <= +inf
+   0 <= flow(pwltf_electricityBus_2) <= +inf
+   0 <= flow(pwltf_electricityBus_3) <= +inf
+   0 <= flow(pwltf_electricityBus_4) <= +inf
+   0 <= flow(pwltf_electricityBus_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_inflow(pwltf_0) <= 100
    0 <= PiecewiseLinearConverterBlock_inflow(pwltf_1) <= 100
    0 <= PiecewiseLinearConverterBlock_inflow(pwltf_2) <= 100
@@ -462,6 +462,7 @@ bounds
    0 <= PiecewiseLinearConverterBlock_outflow(pwltf_3) <= 10000
    0 <= PiecewiseLinearConverterBlock_outflow(pwltf_4) <= 10000
    0 <= PiecewiseLinearConverterBlock_outflow(pwltf_5) <= 10000
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(2_3) <= +inf
@@ -470,10 +471,10 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_0)_DCC_bin_y(4) <= 1
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(2_3) <= +inf
@@ -482,10 +483,10 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_1)_DCC_bin_y(4) <= 1
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(2_3) <= +inf
@@ -494,10 +495,10 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_2)_DCC_bin_y(4) <= 1
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(2_3) <= +inf
@@ -506,10 +507,10 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_3)_DCC_bin_y(4) <= 1
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(2_3) <= +inf
@@ -518,10 +519,10 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_4)_DCC_bin_y(4) <= 1
+   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(2_2) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(2_3) <= +inf
@@ -530,7 +531,6 @@ bounds
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(4_4) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(4_5) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_bin_y(1) <= 1
-   0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_lambda(1_1) <= +inf
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_bin_y(2) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_bin_y(3) <= 1
    0 <= PiecewiseLinearConverterBlock_piecewise(pwltf_5)_DCC_bin_y(4) <= 1
