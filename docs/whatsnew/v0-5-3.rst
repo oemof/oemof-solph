@@ -25,7 +25,7 @@ Other changes
 #############
 
 * Unified (usage) documentation for `OffsetConverter`
-* Remove approach to model cellular systes (was more confusing than it helped)
+* Remove approach to model cellular systems (was more confusing than it helped)
 
 Known issues
 ############
