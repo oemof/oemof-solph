@@ -25,6 +25,7 @@ Other changes
 #############
 
 * Unified (usage) documentation for `OffsetConverter`
+* Remove approach to model cellular systems (was more confusing than it helped)
 
 Known issues
 ############
@@ -34,3 +35,4 @@ Contributors
 
 * Lennart Schürmann
 * Richard Keil
+* Patrik Schönfeldt
