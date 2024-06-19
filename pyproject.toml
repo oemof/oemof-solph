@@ -116,6 +116,7 @@ norecursedirs = [
     ".env",
     "dist",
     "build",
+    "docs/_build",
     "migrations",
     "examples",
 ]
