@@ -45,12 +45,8 @@ class BaseModel(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or (experimental) list
+    energysystem : EnergySystem object
         Object that holds the nodes of an oemof energy system graph.
-        Experimental: If a list is passed, the list needs to hold EnergySystem
-        objects and a cellular structure is assumed. In this case, the first
-        element needs to be the upmost energy cell (structurally containing
-        all other cells).
     constraint_groups : list (optional)
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -76,7 +72,7 @@ class BaseModel(po.ConcreteModel):
     name : str
         Name of the model
     es : solph.EnergySystem
-        Energy system of the model (upmost energy cell for cellular structures)
+        Energy system of the model
     meta : `pyomo.opt.results.results_.SolverResults` or None
         Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
@@ -115,13 +111,8 @@ class BaseModel(po.ConcreteModel):
         # ########################  Arguments #################################
 
         self.name = kwargs.get("name", type(self).__name__)
-        self.is_cellular = isinstance(energysystem, list)
 
-        if self.is_cellular:
-            self.es = energysystem[0]
-            self.ec = energysystem[1:]
-        else:
-            self.es = energysystem
+        self.es = energysystem
         self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
 
         self.objective_weighting = kwargs.get(
@@ -132,27 +123,14 @@ class BaseModel(po.ConcreteModel):
             "constraint_groups", []
         )
 
-        if self.is_cellular:
-            for es in energysystem:
-                self._constraint_groups += [
-                    i
-                    for i in es.groups
-                    if hasattr(i, "CONSTRAINT_GROUP")
-                    and i not in self._constraint_groups
-                ]
-        else:
-            self._constraint_groups += [
-                i
-                for i in self.es.groups
-                if hasattr(i, "CONSTRAINT_GROUP")
-                and i not in self._constraint_groups
-            ]
+        self._constraint_groups += [
+            i
+            for i in self.es.groups
+            if hasattr(i, "CONSTRAINT_GROUP")
+            and i not in self._constraint_groups
+        ]
 
         self.flows = self.es.flows()
-        if self.is_cellular:
-            for cell in self.ec:
-                for io, f in cell.flows().items():
-                    self.flows.update({io: f})
 
         self.solver_results = None
         self.dual = None
@@ -306,10 +284,6 @@ class Model(BaseModel):
     ----------
     energysystem : EnergySystem object or (experimental) list
         Object that holds the nodes of an oemof energy system graph.
-        Experimental: If a list is passed, the list needs to hold EnergySystem
-        objects and a cellular structure is assumed. In this case, the first
-        element needs to be the upmost energy cell (structurally containing
-        all other cells).
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
@@ -403,10 +377,7 @@ class Model(BaseModel):
         Also create sets PERIODS and TIMEINDEX used for multi-period models.
         """
         self.nodes = list(self.es.nodes)
-        if self.is_cellular:
-            # collect all nodes from the child cells
-            for cell in self.ec:
-                self.nodes.extend(cell.nodes)
+
         # create set with all nodes
         self.NODES = po.Set(initialize=[n for n in self.nodes])
 

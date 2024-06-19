@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Francesco Witte
 
 SPDX-License-Identifier: MIT
 
@@ -31,38 +32,41 @@ from oemof.solph._plumbing import sequence
 
 
 class OffsetConverter(Node):
-    """An object with one input and multiple outputs and two coefficients
+    r"""An object with one input and multiple outputs and two coefficients
     per output to model part load behaviour.
     The output must contain a NonConvex object.
 
     Parameters
     ----------
-    coefficients : dict of tuples, (:math:`C_0(t)`, :math:`C_1(t)`)
-        Dict of tuples containing the respective output bus as key and
-        as value a tuple with the parameters :math:`C_0(t)` and :math:`C_1(t)`.
-        Here, :math:`C_1(t)` represents the slope of a linear equation and
-        :math:`C_0(t)` is the y-intercept devided by the `nominal_value` of the
-        output flow (this is for internal purposes).
+    conversion_factors : dict, (:math:`m(t)`)
+        Dict containing the respective bus as key and as value the parameter
+        :math:`m(t)`. It represents the slope of a linear equation with
+        respect to the `NonConvex` flow. The value can either be a scalar or a
+        sequence with length of time horizon for simulation.
 
-        The tuple values can either be a scalar or a sequence with length
-        of time horizon for simulation.
-
+    normed_offsets : dict, (:math:`y_\text{0,normed}(t)`)
+        Dict containing the respective bus as key and as value the parameter
+        :math:`y_\text{0,normed}(t)`. It represents the y-intercept with respect
+        to the `NonConvex` flow divided by the `nominal_value` of the
+        `NonConvex` flow (this is for internal purposes). The value can either
+        be a scalar or a sequence with length of time horizon for simulation.
     Notes
     -----
-    **C_1 and C_0 can be calculated as follows:**
+    **:math:`m(t)` and :math:`y_\text{0,normed}(t)` can be calculated as **
+    **follows:**
 
     .. _OffsetConverterCoefficients-equations:
 
     .. math::
 
-        C_1 = (l_{max}-l_{min})/(l_{max}/\\eta_{max}-l_{min}/\\eta_{min})
+        m = \frac{(l_{max}/\eta_{max}-l_{min}/\eta_{min}}{l_{max}-l_{min}}
 
-        C_0 = l_{min} \\cdot (1-C_1/\\eta_{min})
+        y_\text{0,normed} = \frac{1}{\eta_{max}} - m
 
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
-    partload share (e.g. 1.0 and 0.3) and :math:`\\eta_{max}` and
-    :math:`\\eta_{min}` are the efficiencies/conversion factors at these
-    partloads.
+    partload share (e.g. 1.0 and 0.5) with reference to the `NonConvex` flow
+    and :math:`\eta_{max}` and :math:`\eta_{min}` are the respective
+    efficiencies/conversion factors at these partloads.
 
     The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
@@ -72,22 +76,38 @@ class OffsetConverter(Node):
     >>> from oemof import solph
     >>> bel = solph.buses.Bus(label='bel')
     >>> bth = solph.buses.Bus(label='bth')
+    >>> l_nominal = 60
     >>> l_max = 1
     >>> l_min = 0.5
     >>> eta_max = 0.5
     >>> eta_min = 0.3
-    >>> c1 = (l_max-l_min)/(l_max/eta_max-l_min/eta_min)
-    >>> c0 = l_min*(1-c1/eta_min)
+    >>> slope = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
+    >>> offset = 1 / eta_max - slope
     >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_value=60, min=l_min, max=l_max,
+    ...         nominal_value=l_nominal, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
-    ...    coefficients={bth: (c0, c1)}
+    ...    conversion_factors={bel: slope},
+    ...    normed_offsets={bel: offset},
     ... )
     >>> type(ostf)
     <class 'oemof.solph.components._offset_converter.OffsetConverter'>
+
+    The input required to operate at minimum load, can be computed from the
+    slope and offset:
+
+    >>> input_at_min = ostf.conversion_factors[bel][0] * l_min + ostf.normed_offsets[bel][0] * l_max
+    >>> input_at_min * l_nominal
+    100.0
+
+    The same can be done for the input at nominal load:
+
+    >>> input_at_max = l_max * (ostf.conversion_factors[bel][0] + ostf.normed_offsets[bel][0])
+    >>> input_at_max * l_nominal
+    120.0
+
     """  # noqa: E501
 
     def __init__(
@@ -95,11 +115,14 @@ class OffsetConverter(Node):
         inputs,
         outputs,
         label=None,
+        conversion_factors=None,
+        normed_offsets=None,
         coefficients=None,
         custom_attributes=None,
     ):
         if custom_attributes is None:
             custom_attributes = {}
+
         super().__init__(
             inputs=inputs,
             outputs=outputs,
@@ -107,78 +130,233 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
-        if coefficients is not None:
-            self.coefficients = dict()
-            if isinstance(coefficients, tuple):
-                # TODO: add the correct version in the message
-                msg = (
-                    "Passing a tuple to the keyword `coefficients` will be"
-                    " deprecated in a later version. Please use a dict to"
-                    " specify the corresponding output flow. The first output"
-                    " flow will be assumed as target by default."
+        # this part is used for the transition phase from the old
+        # OffsetConverter API to the new one. It calcualtes the
+        # conversion_factors and normed_offsets from the coefficients and the
+        # outputs information on min and max.
+        if (
+            coefficients is not None
+            and conversion_factors is None
+            and normed_offsets is None
+        ):
+            normed_offsets, conversion_factors = (
+                self.normed_offset_and_conversion_factors_from_coefficients(
+                    coefficients
                 )
-                warn(msg, DeprecationWarning)
-                if len(coefficients) != 2:
-                    raise ValueError(
-                        "Two coefficients or coefficient series have to be"
-                        " given."
-                    )
-                self.coefficients.update(
-                    {
-                        [k for k in self.outputs.keys()][0]: tuple(
-                            [sequence(i) for i in coefficients]
-                        )
-                    }
-                )
-            elif isinstance(coefficients, dict):
-                for k, v in coefficients.items():
-                    if len(v) != 2:
-                        raise ValueError(
-                            "Two coefficients or coefficient series have to be"
-                            " given."
-                        )
-                    self.coefficients.update(
-                        {k: (sequence(v[0]), sequence(v[1]))}
-                    )
-            else:
-                raise TypeError(
-                    "`coefficiencts` needs to be either dict or tuple"
-                    " (deprecated)."
-                )
-
-        # `OffsetConverter` always needs the `NonConvex` attribute, but the
-        # `Investment` attribute is optional. If it is used, the
-        # `InvestNonConvexFlow` will be used in the definition of constraints,
-        # otherwise, the `NonConvexFlow` will be used.
-        if len(self.outputs):
-            for v in self.outputs.values():
-                if not v.nonconvex:
-                    raise TypeError(
-                        "Output flow must have the `NonConvex` attribute!"
-                    )
-
-        # `Investment` and `NonConvex` attributes cannot be defined for the
-        # input flow.
-        if len(self.inputs):
-            for v in self.inputs.values():
-                if v.investment:
-                    raise TypeError(
-                        "`Investment` attribute must be defined only for the "
-                        + "output flow!"
-                    )
-                if v.nonconvex:
-                    raise TypeError(
-                        "`NonConvex` attribute must be defined only for the "
-                        + "output flow!"
-                    )
-
-        if len(self.inputs) > 1:
-            raise ValueError(
-                "Component `OffsetConverter` must not have more than 1 input!"
             )
+
+        elif coefficients is not None and (
+            conversion_factors is not None or normed_offsets is not None
+        ):
+            msg = (
+                "The deprecated argument `coefficients` cannot be used in "
+                "combination with its replacements (`conversion_factors` and "
+                "`normed_offsets`)."
+            )
+            raise TypeError(msg)
+
+        _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
+        _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
+        if len(_reference_flow) != 1:
+            raise ValueError(
+                "Exactly one flow of the `OffsetConverter` must have the "
+                "`NonConvex` attribute."
+            )
+
+        if _reference_flow[0] in self.inputs.values():
+            self._reference_node_at_input = True
+            self._reference_node = _reference_flow[0].input
+        else:
+            self._reference_node_at_input = False
+            self._reference_node = _reference_flow[0].output
+
+        _investment_node = [
+            v.input for v in self.inputs.values() if v.investment
+        ]
+        _investment_node += [
+            v.output for v in self.outputs.values() if v.investment
+        ]
+
+        if len(_investment_node) > 0:
+            if (
+                len(_investment_node) > 1
+                or self._reference_node != _investment_node[0]
+            ):
+                raise TypeError(
+                    "`Investment` attribute must be defined only for the "
+                    "NonConvex flow!"
+                )
+
+        self._reference_flow = _reference_flow[0]
+
+        if conversion_factors is None:
+            conversion_factors = {}
+
+        if self._reference_node in conversion_factors:
+            raise ValueError(
+                "Conversion factors cannot be specified for the `NonConvex` "
+                "flow."
+            )
+
+        self.conversion_factors = {
+            k: sequence(v) for k, v in conversion_factors.items()
+        }
+
+        missing_conversion_factor_keys = (
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.conversion_factors)
+
+        for cf in missing_conversion_factor_keys:
+            self.conversion_factors[cf] = sequence(1)
+
+        if normed_offsets is None:
+            normed_offsets = {}
+
+        if self._reference_node in normed_offsets:
+            raise ValueError(
+                "Normed offsets cannot be specified for the `NonConvex` flow."
+            )
+
+        self.normed_offsets = {
+            k: sequence(v) for k, v in normed_offsets.items()
+        }
+
+        missing_normed_offsets_keys = (
+            set(self.outputs) | set(self.inputs)
+        ) - set(self.normed_offsets)
+
+        for cf in missing_normed_offsets_keys:
+            self.normed_offsets[cf] = sequence(0)
 
     def constraint_group(self):
         return OffsetConverterBlock
+
+    def normed_offset_and_conversion_factors_from_coefficients(
+        self, coefficients
+    ):
+        """
+        Calculate slope and offset for new API from the old API coefficients.
+
+        Parameters
+        ----------
+        coefficients : tuple
+            tuple holding the coefficients (offset, slope) for the old style
+            OffsetConverter.
+
+        Returns
+        -------
+        tuple
+            A tuple holding the slope and the offset for the new
+            OffsetConverter API.
+        """
+        coefficients = tuple([sequence(i) for i in coefficients])
+        if len(coefficients) != 2:
+            raise ValueError(
+                "Two coefficients or coefficient series have to be given."
+            )
+
+        input_bus = list(self.inputs.values())[0].input
+        for flow in self.outputs.values():
+
+            max_len = max(
+                len(flow.max),
+                len(flow.min),
+                len(coefficients[0]),
+                len(coefficients[1]),
+            )
+
+            slope = []
+            offset = []
+            for i in range(max_len):
+                eta_at_max = (
+                    flow.max[i]
+                    * coefficients[1][i]
+                    / (flow.max[i] - coefficients[0][i])
+                )
+                eta_at_min = (
+                    flow.min[i]
+                    * coefficients[1][i]
+                    / (flow.min[i] - coefficients[0][i])
+                )
+
+                c0, c1 = slope_offset_from_nonconvex_output(
+                    flow.max[i], flow.min[i], eta_at_max, eta_at_min
+                )
+                slope += [c0]
+                offset += [c1]
+
+            if max_len == 1:
+                slope = sequence(slope[0])
+                offset = sequence(offset[0])
+
+            conversion_factors = {input_bus: slope}
+            normed_offsets = {input_bus: offset}
+            msg = (
+                "The usage of coefficients is depricated, use "
+                "conversion_factors and normed_offsets instead."
+            )
+            warn(msg, DeprecationWarning)
+
+        return normed_offsets, conversion_factors
+
+    def plot_partload(self, bus, tstep):
+        """Create a matplotlib figure of the flow to nonconvex flow relation.
+
+        Parameters
+        ----------
+        bus : oemof.solph.Bus
+            Bus, to which the NOT-nonconvex input or output is connected to.
+        tstep : int
+            Timestep to generate the figure for.
+
+        Returns
+        -------
+        tuple
+            A tuple with the matplotlib figure and axes objects.
+        """
+        import matplotlib.pyplot as plt
+        import numpy as np
+
+        fig, ax = plt.subplots(2, sharex=True)
+
+        slope = self.conversion_factors[bus][tstep]
+        offset = self.normed_offsets[bus][tstep]
+
+        min_load = self._reference_flow.min[tstep]
+        max_load = self._reference_flow.max[tstep]
+
+        infeasible_load = np.linspace(0, min_load)
+        feasible_load = np.linspace(min_load, max_load)
+
+        y_feasible = feasible_load * slope + offset
+        y_infeasible = infeasible_load * slope + offset
+
+        _ = ax[0].plot(feasible_load, y_feasible, label="operational range")
+        color = _[0].get_color()
+        ax[0].plot(infeasible_load, y_infeasible, "--", color=color)
+        ax[0].scatter(
+            [0, feasible_load[0], feasible_load[-1]],
+            [y_infeasible[0], y_feasible[0], y_feasible[-1]],
+            color=color,
+        )
+        ax[0].legend()
+
+        ratio = y_feasible / feasible_load
+        ax[1].plot(feasible_load, ratio)
+        ax[1].scatter(
+            [feasible_load[0], feasible_load[-1]],
+            [ratio[0], ratio[-1]],
+            color=color,
+        )
+
+        ax[0].set_ylabel(f"flow from/to bus '{bus.label}'")
+        ax[1].set_ylabel("efficiency $\\frac{y}{x}$")
+        ax[1].set_xlabel("nonconvex flow")
+
+        _ = [(_.set_axisbelow(True), _.grid()) for _ in ax]
+        plt.tight_layout()
+
+        return fig, ax
 
 
 # --- BEGIN: To be removed for versions >= v0.6 ---
@@ -219,26 +397,27 @@ class OffsetConverterBlock(ScalarBlock):
 
     .. math::
         &
-        P_{out}(p, t) = P_{in}(p, t) \cdot C_1(t) + P_nom(p) \cdot Y(t) \cdot C_0(t) \\
+        P(p, t) = P_\text{ref}(p, t) \cdot m(t)
+        + P_\text{nom,ref}(p) \cdot Y_\text{ref}(t) \cdot y_\text{0,normed}(t) \\
 
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | symbol             | attribute                 | type | explanation                                      |
-    +====================+===========================+======+==================================================+
-    | :math:`P_{out}(t)` | `flow[n,o,p,t]`           | V    | Outflow of converter                             |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`P_{in}(t)`  | `flow[i,n,p,t]`           | V    | Inflow of converter                              |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`Y(t)`       |                           | V    | Binary status variable of nonconvex outflow      |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`P_{nom}(t)` |                           | V    | Nominal value (max. capacity) of the outflow     |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`C_1(t)`     | `coefficients[o][1][n,t]` | P    | Linear coefficient 1 (slope)                     |
-    +--------------------+---------------------------+------+--------------------------------------------------+
-    | :math:`C_0(t)`     | `coefficients[o][0][n,t]` | P    | Linear coefficient 0 (y-intersection)/P_{nom}(t) |
-    +--------------------+---------------------------+------+--------------------------------------------------+
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | symbol                       | attribute                                                    | type | explanation                                                                 |
+    +==============================+==============================================================+======+=============================================================================+
+    | :math:`P(t)`                 | `flow[i,n,p,t]` or `flow[n,o,p,t]`                           | V    | **Non**-nonconvex flows at input or output                                  |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`P_{in}(t)`            | `flow[i,n,p,t]` or `flow[n,o,p,t]`                           | V    | nonconvex flow of converter                                                 |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`Y(t)`                 |                                                              | V    | Binary status variable of nonconvex flow                                    |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`P_{nom}(t)`           |                                                              | V    | Nominal value (max. capacity) of the nonconvex flow                         |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`m(t)`                 | `conversion_factors[i][n,t]` or `conversion_factors[o][n,t]` | P    | Linear coefficient 1 (slope) of a **Non**-nonconvex flows                   |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
+    | :math:`y_\text{0,normed}(t)` | `normed_offsets[i][n,t]` or `normed_offsets[o][n,t]`         | P    | Linear coefficient 0 (y-intersection)/P_{nom}(t) of **Non**-nonconvex flows |
+    +------------------------------+--------------------------------------------------------------+------+-----------------------------------------------------------------------------+
 
     Note that :math:`P_{nom}(t) \cdot Y(t)` is merged into one variable,
     called `status_nominal[n, o, p, t]`.
@@ -268,16 +447,25 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.OFFSETCONVERTERS = Set(initialize=[n for n in group])
 
-        in_flows = {n: [i for i in n.inputs.keys()] for n in group}
-        out_flows = {n: [o for o in n.outputs.keys()] for n in group}
+        reference_node = {n: n._reference_node for n in group}
+        reference_node_at_input = {
+            n: n._reference_node_at_input for n in group
+        }
+        in_flows = {
+            n: [i for i in n.inputs.keys() if i != n._reference_node]
+            for n in group
+        }
+        out_flows = {
+            n: [o for o in n.outputs.keys() if o != n._reference_node]
+            for n in group
+        }
 
         self.relation = Constraint(
             [
-                (n, i, o, t)
+                (n, reference_node[n], f, t)
                 for t in m.TIMESTEPS
                 for n in group
-                for o in out_flows[n]
-                for i in in_flows[n]
+                for f in in_flows[n] + out_flows[n]
             ],
             noruleinit=True,
         )
@@ -286,46 +474,193 @@ class OffsetConverterBlock(ScalarBlock):
             """Link binary input and output flow to component outflow."""
             for t in m.TIMESTEPS:
                 for n in group:
-                    for o in out_flows[n]:
-                        for i in in_flows[n]:
-                            expr = 0
-                            expr += -m.flow[n, o, t]
-                            expr += m.flow[i, n, t] * n.coefficients[o][1][t]
-                            # `Y(t)` in the last term of the constraint
-                            # (":math:`C_0(t) \cdot Y(t)`") is different for
-                            # different cases. If both `Investment` and
-                            # `NonConvex` attributes are used for the
-                            # `OffsetConverter`, `Y(t)` would represent the
-                            # `status_nominal[n,o,t]` in the
-                            # `InvestNonConvexFlow`. But if only the
-                            # `NonConvex` attribute is defined for the
-                            # `OffsetConverter`, `Y(t)` would correspond to
-                            # the `status_nominal[n,o,t]` in the
-                            # `NonConvexFlow`.
-                            try:
-                                expr += (
-                                    m.InvestNonConvexFlowBlock.status_nominal[
-                                        n, o, t
-                                    ]
-                                    * n.coefficients[o][0][t]
-                                )
-                            # `KeyError` occurs when more than one
-                            # `OffsetConverter` is defined, and in some of
-                            # them only the `NonConvex` attribute is
-                            # considered, while in others both `NonConvex`
-                            # and `Investment` attributes are defined.
-                            # `AttributeError` only occurs when the
-                            # `OffsetConverter` has only the `NonConvex`
-                            # attribute, and therefore,
-                            # `m.InvestNonConvexFlowBlock.status_nominal`
-                            # (inside the `try` block) does not exist.
-                            except (KeyError, AttributeError):
-                                expr += (
-                                    m.NonConvexFlowBlock.status_nominal[
-                                        n, o, t
-                                    ]
-                                    * n.coefficients[o][0][t]
-                                )
-                            block.relation.add((n, i, o, t), (expr == 0))
+
+                    if reference_node_at_input[n]:
+                        ref_flow = m.flow[reference_node[n], n, t]
+                        status_nominal_idx = reference_node[n], n, t
+                    else:
+                        ref_flow = m.flow[n, reference_node[n], t]
+                        status_nominal_idx = n, reference_node[n], t
+
+                    try:
+                        ref_status_nominal = (
+                            m.InvestNonConvexFlowBlock.status_nominal[
+                                status_nominal_idx
+                            ]
+                        )
+                    except (AttributeError, KeyError):
+                        ref_status_nominal = (
+                            m.NonConvexFlowBlock.status_nominal[
+                                status_nominal_idx
+                            ]
+                        )
+
+                    for f in in_flows[n] + out_flows[n]:
+                        rhs = 0
+                        if f in in_flows[n]:
+                            rhs += m.flow[f, n, t]
+                        else:
+                            rhs += m.flow[n, f, t]
+
+                        lhs = 0
+                        lhs += ref_flow * n.conversion_factors[f][t]
+                        lhs += ref_status_nominal * n.normed_offsets[f][t]
+                        block.relation.add(
+                            (n, reference_node[n], f, t), (lhs == rhs)
+                        )
 
         self.relation_build = BuildAction(rule=_relation_rule)
+
+
+def slope_offset_from_nonconvex_input(
+    max_load, min_load, eta_at_max, eta_at_min
+):
+    r"""Calculate the slope and the offset with max and min given for input
+
+    The reference is the input flow here. That means, the `NonConvex` flow
+    is specified at one of the input flows. The `max_load` and the `min_load`
+    are the `max` and the `min` specifications for the `NonConvex` flow.
+    `eta_at_max` and `eta_at_min` are the efficiency values of a different
+    flow, e.g. an output, with respect to the `max_load` and `min_load`
+    operation points.
+
+    .. math::
+
+        \text{slope} =
+        \frac{
+            \text{max} \cdot \eta_\text{at max}
+            - \text{min} \cdot \eta_\text{at min}
+        }{\text{max} - \text{min}}\\
+
+        \text{offset} = \eta_\text{at,max} - \text{slope}
+
+    Parameters
+    ----------
+    max_load : float
+        Maximum load value, e.g. 1
+    min_load : float
+        Minimum load value, e.g. 0.5
+    eta_at_max : float
+        Efficiency at maximum load.
+    eta_at_min : float
+        Efficiency at minimum load.
+
+    Returns
+    -------
+    tuple
+        slope and offset
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> max_load = 1
+    >>> min_load = 0.5
+    >>> eta_at_min = 0.4
+    >>> eta_at_max = 0.3
+
+    With the input load being at 100 %, in this example, the efficiency should
+    be 30 %. With the input load being at 50 %, it should be 40 %. We can
+    calcualte slope and the offset which is normed to the nominal value of
+    the referenced flow (in this case the input flow) always.
+
+    >>> slope, offset = solph.components.slope_offset_from_nonconvex_input(
+    ...     max_load, min_load, eta_at_max, eta_at_min
+    ... )
+    >>> input_flow = 10
+    >>> input_flow_nominal = 10
+    >>> output_flow = slope * input_flow + offset * input_flow_nominal
+
+    We can then calculate with the `OffsetConverter` input output relation,
+    what the resulting efficiency is. At max operating conditions it should be
+    identical to the efficiency we put in initially. Analogously, we apply this
+    to the minimal load point.
+
+    >>> round(output_flow / input_flow, 3) == eta_at_max
+    True
+    >>> input_flow = 5
+    >>> output_flow = slope * input_flow + offset * input_flow_nominal
+    >>> round(output_flow / input_flow, 3) == eta_at_min
+    True
+    """
+    slope = (max_load * eta_at_max - min_load * eta_at_min) / (
+        max_load - min_load
+    )
+    offset = eta_at_max - slope
+    return slope, offset
+
+
+def slope_offset_from_nonconvex_output(
+    max_load, min_load, eta_at_max, eta_at_min
+):
+    r"""Calculate the slope and the offset with max and min given for output.
+
+    The reference is the output flow here. That means, the `NonConvex` flow
+    is specified at one of the output flows. The `max_load` and the `min_load`
+    are the `max` and the `min` specifications for the `NonConvex` flow.
+    `eta_at_max` and `eta_at_min` are the efficiency values of a different
+    flow, e.g. an input, with respect to the `max_load` and `min_load`
+    operation points.
+
+    .. math::
+
+        \text{slope} =
+        \frac{
+            \frac{\text{max}}{\eta_\text{at max}}
+            - \frac{\text{min}}{\eta_\text{at min}}
+        }{\text{max} - \text{min}}\\
+
+        \text{offset} = \frac{1}{\eta_\text{at,max}} - \text{slope}
+
+    Parameters
+    ----------
+    max_load : float
+        Maximum load value, e.g. 1
+    min_load : float
+        Minimum load value, e.g. 0.5
+    eta_at_max : float
+        Efficiency at maximum load.
+    eta_at_min : float
+        Efficiency at minimum load.
+
+    Returns
+    -------
+    tuple
+        slope and offset
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> max_load = 1
+    >>> min_load = 0.5
+    >>> eta_at_min = 0.7
+    >>> eta_at_max = 0.8
+
+    With the output load being at 100 %, in this example, the efficiency should
+    be 80 %. With the input load being at 50 %, it should be 70 %. We can
+    calcualte slope and the offset, which is normed to the nominal value of
+    the referenced flow (in this case the output flow) always.
+
+    >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(
+    ...     max_load, min_load, eta_at_max, eta_at_min
+    ... )
+    >>> output_flow = 10
+    >>> output_flow_nominal = 10
+    >>> input_flow = slope * output_flow + offset * output_flow_nominal
+
+    We can then calculate with the `OffsetConverter` input output relation,
+    what the resulting efficiency is. At max operating conditions it should be
+    identical to the efficiency we put in initially. Analogously, we apply this
+    to the minimal load point.
+
+    >>> round(output_flow / input_flow, 3) == eta_at_max
+    True
+    >>> output_flow = 5
+    >>> input_flow = slope * output_flow + offset * output_flow_nominal
+    >>> round(output_flow / input_flow, 3) == eta_at_min
+    True
+    """
+    slope = (max_load / eta_at_max - min_load / eta_at_min) / (
+        max_load - min_load
+    )
+    offset = 1 / eta_at_max - slope
+    return slope, offset

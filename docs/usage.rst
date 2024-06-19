@@ -683,71 +683,137 @@ OffsetConverter (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The `OffsetConverter` object makes it possible to create a Converter with efficiencies depending on the part load condition.
-For this object it is necessary to define the outflow as a nonconvex flow and to set a minimum load.
-The following example illustrates how to define an OffsetConverter for given information for the output:
+For this it is necessary to define one flow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetConverter for given
+information for an output, i.e. a combined heat and power plant. The plant
+generates up to 100 kW electric energy at an efficiency of 40 %. In minimal
+load the electric efficiency is at 30 %, and the minimum possible load is 50 %
+of the nominal load. At the same time, heat is produced with a constant
+efficiency. By using the `OffsetConverter` a linear relation of in- and output
+power with a power dependent efficiency is generated.
 
 .. code-block:: python
 
-    eta_min = 0.5                # efficiency at minimal operation point
-    eta_max = 0.8                # efficiency at nominal operation point
-    P_out_min = 20               # absolute minimal output power
-    P_out_max = 100              # absolute nominal output power
-    l_max = P_out_max/P_out_max  # upper part load limit
-    l_min = P_out_min/P_out_max  # lower part load limit
+    >>> from oemof import solph
 
-    # calculate coefficients of input-output line equation
-    c1 = (l_max-l_min)/(l_max/eta_max - l_min/eta_min)
-    c0 = l_min * (1-c1/eta_min)
+    >>> eta_el_min = 0.3                  # electrical efficiency at minimal operation point
+    >>> eta_el_max = 0.4                  # electrical efficiency at nominal operation point
+    >>> eta_th_min = 0.5                  # thermal efficiency at minimal operation point
+    >>> eta_th_max = 0.5                  # thermal efficiency at nominal operation point
+    >>> P_out_min = 20                    # absolute minimal output power
+    >>> P_out_max = 100                   # absolute nominal output power
+
+As reference for our system we use the input and will mark that flow as
+nonconvex respectively. The efficiencies for electricity and heat output have
+therefore to be defined with respect to the input flow. The same is true for
+the minimal and maximal load. Therefore, we first calculate the minimum and
+maximum input of fuel and then derive the slope and offset for both outputs.
+
+.. code-block:: python
+
+    >>> P_in_max = P_out_max / eta_el_max
+    >>> P_in_min = P_out_min / eta_el_min
+    >>> P_in_max
+    250.0
+    >>> round(P_in_min, 2)
+    66.67
+
+With that information, we can derive the normed minimal and maximal load of the
+nonconvex flow, and calculate the slope and the offset for both outputs. Note,
+that the offset for the heat output is 0, because the thermal heat output
+efficiency is constant.
+
+.. code-block:: python
+
+    >>> l_max = 1
+    >>> l_min = P_in_min / P_in_max
+    >>> slope_el, offset_el = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_el_max, eta_el_min
+    ... )
+    >>> slope_th, offset_th = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_th_max, eta_th_min
+    ... )
+    >>> round(slope_el, 3)
+    0.436
+    >>> round(offset_el, 3)
+    -0.036
+    >>> round(slope_th, 3)
+    0.5
+    >>> round(offset_th, 3)
+    0.0
+
+Then we can create our component with the buses attached to it.
+
+.. code-block:: python
+
+    >>> bfuel = solph.Bus("fuel")
+    >>> bel = solph.Bus("electricity")
+    >>> bth = solph.Bus("heat")
 
     # define OffsetConverter
-    solph.components.OffsetConverter(
-        label='boiler',
-        inputs={bfuel: solph.flows.Flow()},
-        outputs={
-            bth: solph.flows.Flow(
-                nominal_value=P_out_max,
-                max=l_max,
-                min=l_min,
-                nonconvex=solph.NonConvex()
-            ),
-        },
-        coefficients = {bth: (c0, c1)},
-    )
+    >>> diesel_genset = solph.components.OffsetConverter(
+    ...     label='boiler',
+    ...     inputs={
+    ...         bfuel: solph.flows.Flow(
+    ...             nominal_value=P_out_max,
+    ...             max=l_max,
+    ...             min=l_min,
+    ...             nonconvex=solph.NonConvex()
+    ...         )
+    ...     },
+    ...     outputs={
+    ...         bel: solph.flows.Flow(),
+    ...         bth: solph.flows.Flow(),
+    ...     },
+    ...     conversion_factors={bel: slope_el, bth: slope_th},
+    ...     normed_offsets={bel: offset_el, bth: offset_th},
+    ... )
 
-This example represents a boiler, which is supplied by fuel and generates heat.
-It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
-The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
-Note that the nonconvex flow has to be defined for the output flow.
-By using the OffsetConverter a linear relation of in- and output power with a power dependent efficiency is generated.
-The following figures illustrate the relations:
+.. note::
 
-.. 	image:: _files/OffsetConverter_power_relation.svg
+    One of the inputs and outputs has to be a `NonConvex` flow and this flow
+    will serve as the reference for the `conversion_factors` and the
+    `normed_offsets`. The `NonConvex` flow also holds
+
+    - the `nominal_value` (or `Investment` in case of investment optimization),
+    - the `min` and
+    - the `max` attributes.
+
+    The `conversion_factors` and `normed_offsets` are specified similar to the
+    `Converter` API with dictionaries referencing the respective input and
+    output buses. Note, that you cannot have the `conversion_factors` or
+    `normed_offsets` point to the `NonConvex` flow.
+
+The following figures show the power at the electrical and the thermal output
+and the resepctive ratios to the nonconvex flow (normalized). The efficiency
+becomes non-linear.
+
+.. 	image:: _files/OffsetConverter_relations_1.svg
    :width: 70 %
-   :alt: OffsetConverter_power_relation.svg
+   :alt: OffsetConverter_relations_1.svg
    :align: center
 
-Now, it becomes clear, why this object has been named `OffsetConverter`. The
-linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
-the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
-part of the solution space and the boiler is allowed to switch off:
+
+.. 	image:: _files/OffsetConverter_relations_2.svg
+   :width: 70 %
+   :alt: OffsetConverter_relations_2.svg
+   :align: center
+
+.. math::
+
+    \eta = P(t) / P_\text{ref}(t)
+
+It also becomes clear, why the component has been named `OffsetConverter`. The
+linear equation of inflow to electrical outflow does not hit the origin, but is
+offset. By multiplying the offset :math:`y_\text{0,normed}` with the binary
+status variable of the `NonConvex` flow, the origin (0, 0) becomes part of the
+solution space and the boiler is allowed to switch off.
 
 .. include:: ../src/oemof/solph/components/_offset_converter.py
   :start-after: _OffsetConverter-equations:
   :end-before: """
 
-The following figures shows the efficiency dependent on the output power,
-which results in a nonlinear relation:
-
-.. math::
-
-    \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
-
-.. 	image:: _files/OffsetConverter_efficiency.svg
-   :width: 70 %
-   :alt: OffsetConverter_efficiency.svg
-   :align: center
-
-The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+The parameters :math:`y_\text{0,normed}` and :math:`m` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
 It is also possible to define multiple outputs.
 
 .. note:: See the :py:class:`~oemof.solph.components._offset_converter.OffsetConverter` class for all parameters and the mathematical background.
@@ -1281,130 +1347,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
-
-Modelling cellular energy systems and modularizing energy system models
------------------------------------------------------------------------
-
-The cellular approach is a concept proposed by the [VDE-ETG](https://shop.vde.com/en/vde-study-the-cellular-approach). It is
-related to smart-grids and multi-microgrid systems but extends both. The idea is to group the components of an energy system
-into a hierarchically aggregating structure of cells. For example, the sources, sinks, storages and converters of a household
-could be a single cell. Then a group of physically neighboring households could form another cell, consisting of household-cells.
-This behaviour can be scaled up. The real game-changer in the cellular approach is the way the cells are operated, which will
-not be covered here. Here, we focus on the way such cellular energy systems can be modeled.
-
-So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. However,
-the implementation can also be regarded as a precursor for further functionality. Decomposition techniques such
-as [Benders](https://en.wikipedia.org/wiki/Benders_decomposition) or
-[Dantzig-Wolfe](https://en.wikipedia.org/wiki/Dantzig%E2%80%93Wolfe_decomposition) could be implemented in solph. These methods
-are dependent on a special constraint matrix structure, which the cellular modelling approach presented here is helping to obtain.
-
-Modelling procedure
-^^^^^^^^^^^^^^^^^^^
-
-Similar to the creation of regular energy systems, the creation of energy cells is the first step in model creation. Essentially,
-each energy cell is just an energy system, therefore we use the class :py:class:`oemof.solph.EnergySystem` to create energy cells.
-
-.. code-block:: python
-
-    from oemof.solph import EnergySystem
-
-    es = EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=False
-    )
-    ec_1 = EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=False
-    )
-    ec_2 = EnergySystem(
-        label="ec_2", timeindex=timeindex, inver_last_interval=False
-    )
-
-Now we can go on and add components to the energy cells just like we do with regular energy systems.
-
-.. code-block:: python
-
-    from oemof import solph
-
-    bus_el_es = solph.buses.Bus(label="bus_el_es")
-    es.add(bus_el_es)
-
-    bus_el_ec_1 = solph.buses.Bus(label="bus_el_ec_1")
-    sink_el_ec_1 = solph.components.Sink(
-        label="sink_el_ec_1",
-        inputs={bus_el_ec_1: flows.Flow(fix=10, nominal_value=1)},
-    )
-    source_el_ec_1 = solph.components.Source(
-        label="source_el_ec_1",
-        outputs={
-            bus_el_ec_1: flows.Flow(
-                max=30, nominal_value=1, variable_costs=10,
-            ),
-        },
-    )
-    ec_1.add(bus_el_ec_1, sink_el_ec_1, source_el_ec_1)
-
-.. note:: This is just an exemplary piece of code. A (little bit more interesting) working
-    example can be found in the examples.
-
-The next step would be to model the connections between cells. Here, we resort to the class
-:py:class:`oemof.solph.components.Link`. Each connection Link has two inputs (from the
-"parent cell" and the "child cell") and two outputs (to the "parent cell" and the "child
-cell"). A connection between the "parent cell" `es` and the "child cell" `ec_1` could look
-like this:
-
-.. code-block:: python
-
-    connector_el_ec_1 = solph.buses.Bus(
-        label="connector_el_ec_1",
-        inputs={
-            bus_el_es: flows.Flow(),
-            bus_el_ec_1: flows.Flow(),
-        },
-        outputs={
-            bus_el_es: flows.Flow(),
-            bus_el_ec_1: flows.Flow(),
-        },
-        conversion_factors={
-            (bus_el_es, bus_el_ec_1): 0.85,
-            (bus_el_ec_1, bus_el_es): 0.85
-        }
-    )
-    es.add(connector_el_ec_1)
-
-The `conversion_factors` can be used to model transmission losses. Here, a symmetrical
-loss of 15% is assumed.
-All connection Links are added to the upmost energy cell.
-
-.. note:: Note that we do not add the energy cells as components to their parent cells!
-    Instead, the hierarchical structure is flattened and all connections between the cells
-    are created as depicted above.
-
-The last step is to create (and solve) the model. Again, this is fairly similar to the
-regular model creation. However, instead of passing just one instance of
-:py:class:`oemof.solph.EnergySystem`, a list of energy systems is passed.
-
-.. warning::
-    By convention the first element of the list is assumed to be the upmost energy cell.
-    The ordering afterwards does not play a role.
-
-.. note:: The resulting model is monolithic. This means that all components of all energy
-    cells are actually grouped into one pyomo model. It would, therefore, also be possible
-    to model all the components in one :py:class:`oemof.solph.EnergySystem` instance and
-    the results would be identical.
-
-.. code-block:: python
-
-    cmodel = Model(
-        energysystem=[es, ec_1, ec_2, ...]
-    )
-    cmodel.solve()
-
-As pointed out above, the resulting model is monolithic. Nonetheless, this modelling approach
-holds some benefits:
-
-* Better overview through segmentation of the energy system
-* (Facilitated) opportunity to model cellular energy systems where the energy exchanged between cells
-  is of interest
-* Segmentation of the energy system is a necessary precursor for distributed optimization via Dantzig-Wolfe
 
 
 Mixed Integer (Linear) Problems

@@ -4,13 +4,22 @@ v0.5.3
 API changes
 ###########
 
-* `coefficient` of `OffsetConverter` expects a dictionary similar to 
-  `Converter`s `conversion_factors`
+* The `OffsetConverter` expects two dictionaries now instead of the
+  `coefficient` tuple. These are, `conversion_factors` with the slope relative
+  to the `NonConvex` flow, and `normed_offsets` with the normed offsets
+  relative to the `NonConvex` flow.
+* The `NonConvex` attribute must be specified for one of `Flow` at the inlets
+  or outlets of the `OffsetConverter`. `min`, `max` and `nominal_value` have to
+  be specified for the same `Flow`.
 
 New features
 ############
 
-* `OffsetConverter` can now handle multiple outputs
+* `OffsetConverter` can now handle multiple inputs and outputs
+* There are two methods available for the `OffsetConverter` to calculate the
+  slope and normed offset relative to the `NonConvex` input given the `min`,
+  `max` and the respective efficiencies/ratios, i.e.
+  `slope_offset_from_nonconvex_input` and `slope_offset_from_nonconvex_output`.
 
 Documentation
 #############
@@ -25,6 +34,7 @@ Other changes
 #############
 
 * Unified (usage) documentation for `OffsetConverter`
+* Remove approach to model cellular systems (was more confusing than it helped)
 
 Known issues
 ############
@@ -34,3 +44,5 @@ Contributors
 
 * Lennart Schürmann
 * Richard Keil
+* Francesco Witte
+* Patrik Schönfeldt

@@ -144,40 +144,40 @@ c_u_NonConvexFlowBlock_max(gasboiler_thermalBus_5)_:
 -1 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5)
 <= 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_0)_:
-+0.9 flow(gasBus_gasboiler_0)
--1 flow(gasboiler_thermalBus_0)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_0)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_0)_:
+-1 flow(gasBus_gasboiler_0)
++0.9617180205415501 flow(gasboiler_thermalBus_0)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_0)
 = 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_1)_:
-+0.9 flow(gasBus_gasboiler_1)
--1 flow(gasboiler_thermalBus_1)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_1)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_1)_:
+-1 flow(gasBus_gasboiler_1)
++0.9617180205415501 flow(gasboiler_thermalBus_1)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_1)
 = 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_2)_:
-+0.9 flow(gasBus_gasboiler_2)
--1 flow(gasboiler_thermalBus_2)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_2)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_2)_:
+-1 flow(gasBus_gasboiler_2)
++0.9617180205415501 flow(gasboiler_thermalBus_2)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_2)
 = 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_3)_:
-+0.9 flow(gasBus_gasboiler_3)
--1 flow(gasboiler_thermalBus_3)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_3)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_3)_:
+-1 flow(gasBus_gasboiler_3)
++0.9617180205415501 flow(gasboiler_thermalBus_3)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_3)
 = 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_4)_:
-+0.9 flow(gasBus_gasboiler_4)
--1 flow(gasboiler_thermalBus_4)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_4)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_4)_:
+-1 flow(gasBus_gasboiler_4)
++0.9617180205415501 flow(gasboiler_thermalBus_4)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_4)
 = 0
 
-c_e_OffsetConverterBlock_relation(gasboiler_gasBus_thermalBus_5)_:
-+0.9 flow(gasBus_gasboiler_5)
--1 flow(gasboiler_thermalBus_5)
--17 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5)
+c_e_OffsetConverterBlock_relation(gasboiler_thermalBus_gasBus_5)_:
+-1 flow(gasBus_gasboiler_5)
++0.9617180205415501 flow(gasboiler_thermalBus_5)
++0.14939309056956107 NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5)
 = 0
 
 bounds
@@ -195,16 +195,16 @@ bounds
    0 <= flow(gasboiler_thermalBus_4) <= 100
    0 <= flow(gasboiler_thermalBus_5) <= 100
    0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_0) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_1) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_2) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_3) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_4) <= +inf
-   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_0) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_1) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_1) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_2) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_2) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_3) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_3) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_4) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_4) <= 1
+   0 <= NonConvexFlowBlock_status_nominal(gasboiler_thermalBus_5) <= +inf
    0 <= NonConvexFlowBlock_status(gasboiler_thermalBus_5) <= 1
 binary
   NonConvexFlowBlock_status(gasboiler_thermalBus_0)
