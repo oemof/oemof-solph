@@ -11,28 +11,28 @@ objective:
 
 s.t.
 
-c_e_BusBlock_balance(bus_elec_0_0)_:
-+1 flow(bus_elec_demand_dsm_0_0)
+c_e_BusBlock_balance(bus_elec_0)_:
++1 flow(bus_elec_demand_dsm_0)
 = 0
 
-c_e_BusBlock_balance(bus_elec_0_1)_:
-+1 flow(bus_elec_demand_dsm_0_1)
+c_e_BusBlock_balance(bus_elec_1)_:
++1 flow(bus_elec_demand_dsm_1)
 = 0
 
-c_e_BusBlock_balance(bus_elec_1_2)_:
-+1 flow(bus_elec_demand_dsm_1_2)
+c_e_BusBlock_balance(bus_elec_2)_:
++1 flow(bus_elec_demand_dsm_2)
 = 0
 
-c_e_BusBlock_balance(bus_elec_1_3)_:
-+1 flow(bus_elec_demand_dsm_1_3)
+c_e_BusBlock_balance(bus_elec_3)_:
++1 flow(bus_elec_demand_dsm_3)
 = 0
 
-c_e_BusBlock_balance(bus_elec_2_4)_:
-+1 flow(bus_elec_demand_dsm_2_4)
+c_e_BusBlock_balance(bus_elec_4)_:
++1 flow(bus_elec_demand_dsm_4)
 = 0
 
-c_e_BusBlock_balance(bus_elec_2_5)_:
-+1 flow(bus_elec_demand_dsm_2_5)
+c_e_BusBlock_balance(bus_elec_5)_:
++1 flow(bus_elec_demand_dsm_5)
 = 0
 
 c_e_SinkDSMOemofBlock_shift_shed_vars(demand_dsm_0)_:
@@ -61,44 +61,44 @@ c_e_SinkDSMOemofBlock_shift_shed_vars(demand_dsm_5)_:
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_0_0)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_0)
-+1 flow(bus_elec_demand_dsm_0_0)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_0)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_0)
++1 flow(bus_elec_demand_dsm_0)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_0)
 = 1
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_0_1)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_1)
-+1 flow(bus_elec_demand_dsm_0_1)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_1)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_1)
++1 flow(bus_elec_demand_dsm_1)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_1)
 = 1
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_1_2)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_2)
-+1 flow(bus_elec_demand_dsm_1_2)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_2)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_2)
++1 flow(bus_elec_demand_dsm_2)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_2)
 = 1
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_1_3)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_3)
-+1 flow(bus_elec_demand_dsm_1_3)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_3)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_3)
++1 flow(bus_elec_demand_dsm_3)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_3)
 = 1
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_2_4)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_4)
-+1 flow(bus_elec_demand_dsm_2_4)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_4)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_4)
++1 flow(bus_elec_demand_dsm_4)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_4)
 = 1
 
 c_e_SinkDSMOemofBlock_input_output_relation(demand_dsm_2_5)_:
 +1 SinkDSMOemofBlock_dsm_do_shift(demand_dsm_5)
-+1 flow(bus_elec_demand_dsm_2_5)
-+1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_5)
 -1 SinkDSMOemofBlock_dsm_up(demand_dsm_5)
++1 flow(bus_elec_demand_dsm_5)
++1 SinkDSMOemofBlock_dsm_do_shed(demand_dsm_5)
 = 1
 
 c_u_SinkDSMOemofBlock_dsm_up_constraint(demand_dsm_0)_:
@@ -183,22 +183,22 @@ bounds
    0 <= SinkDSMOemofBlock_dsm_do_shift(demand_dsm_3) <= +inf
    0 <= SinkDSMOemofBlock_dsm_do_shift(demand_dsm_4) <= +inf
    0 <= SinkDSMOemofBlock_dsm_do_shift(demand_dsm_5) <= +inf
-   0 <= flow(bus_elec_demand_dsm_0_0) <= +inf
-   0 <= flow(bus_elec_demand_dsm_0_1) <= +inf
-   0 <= flow(bus_elec_demand_dsm_1_2) <= +inf
-   0 <= flow(bus_elec_demand_dsm_1_3) <= +inf
-   0 <= flow(bus_elec_demand_dsm_2_4) <= +inf
-   0 <= flow(bus_elec_demand_dsm_2_5) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_0) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_1) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_2) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_3) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_4) <= +inf
-   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_5) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_0) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_1) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_2) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_3) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_4) <= +inf
    0 <= SinkDSMOemofBlock_dsm_up(demand_dsm_5) <= +inf
+   0 <= flow(bus_elec_demand_dsm_0) <= +inf
+   0 <= flow(bus_elec_demand_dsm_1) <= +inf
+   0 <= flow(bus_elec_demand_dsm_2) <= +inf
+   0 <= flow(bus_elec_demand_dsm_3) <= +inf
+   0 <= flow(bus_elec_demand_dsm_4) <= +inf
+   0 <= flow(bus_elec_demand_dsm_5) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_0) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_1) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_2) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_3) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_4) <= +inf
+   0 <= SinkDSMOemofBlock_dsm_do_shed(demand_dsm_5) <= +inf
 end

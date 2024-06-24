@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Francesco Witte
 
 SPDX-License-Identifier: MIT
 
@@ -365,16 +366,14 @@ class OffsetTransformer(OffsetConverter):
         inputs,
         outputs,
         label=None,
-        conversion_factors=None,
-        normed_offsets=None,
+        coefficients=None,
         custom_attributes=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
-            conversion_factors=conversion_factors,
-            normed_offsets=normed_offsets,
+            coefficients=coefficients,
             custom_attributes=custom_attributes,
         )
         warn(
@@ -463,8 +462,8 @@ class OffsetConverterBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, reference_node[n], f, p, t)
-                for p, t in m.TIMEINDEX
+                (n, reference_node[n], f, t)
+                for t in m.TIMESTEPS
                 for n in group
                 for f in in_flows[n] + out_flows[n]
             ],
@@ -473,14 +472,14 @@ class OffsetConverterBlock(ScalarBlock):
 
         def _relation_rule(block):
             """Link binary input and output flow to component outflow."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n in group:
 
                     if reference_node_at_input[n]:
-                        ref_flow = m.flow[reference_node[n], n, p, t]
+                        ref_flow = m.flow[reference_node[n], n, t]
                         status_nominal_idx = reference_node[n], n, t
                     else:
-                        ref_flow = m.flow[n, reference_node[n], p, t]
+                        ref_flow = m.flow[n, reference_node[n], t]
                         status_nominal_idx = n, reference_node[n], t
 
                     try:
@@ -499,15 +498,15 @@ class OffsetConverterBlock(ScalarBlock):
                     for f in in_flows[n] + out_flows[n]:
                         rhs = 0
                         if f in in_flows[n]:
-                            rhs += m.flow[f, n, p, t]
+                            rhs += m.flow[f, n, t]
                         else:
-                            rhs += m.flow[n, f, p, t]
+                            rhs += m.flow[n, f, t]
 
                         lhs = 0
                         lhs += ref_flow * n.conversion_factors[f][t]
                         lhs += ref_status_nominal * n.normed_offsets[f][t]
                         block.relation.add(
-                            (n, reference_node[n], f, p, t), (lhs == rhs)
+                            (n, reference_node[n], f, t), (lhs == rhs)
                         )
 
         self.relation_build = BuildAction(rule=_relation_rule)

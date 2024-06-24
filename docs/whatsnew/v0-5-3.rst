@@ -35,6 +35,7 @@ Other changes
 
 * Unified (usage) documentation for `OffsetConverter`
 * Remove approach to model cellular systems (was more confusing than it helped)
+* Refine indexing of flows (period index was not needed).
 
 Known issues
 ############

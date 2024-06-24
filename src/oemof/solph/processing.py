@@ -273,12 +273,12 @@ def results(model, remove_last_time_point=False):
     # add dual variables for bus constraints
     if model.dual is not None:
         grouped = groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
         )
-        for bus, timeindex in grouped:
+        for bus, timestep in grouped:
             duals = [
-                model.dual[model.BusBlock.balance[bus, p, t]]
-                for _, p, t in timeindex
+                model.dual[model.BusBlock.balance[bus, t]]
+                for _, t in timestep
             ]
             if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])

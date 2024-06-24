@@ -105,17 +105,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
     * :math:`\dot H_{Fuel}`
 
-        Fuel input flow, represented in code as `flow[i, n, p, t]`
+        Fuel input flow, represented in code as `flow[i, n, t]`
 
     * :math:`P_{el}`
 
         Electric power outflow, represented in code as
-        `flow[n, main_output, p, t]`
+        `flow[n, main_output, t]`
 
     * :math:`\dot Q_{th}`
 
         Thermal output flow, represented in code as
-        `flow[n, tapped_output, p, t]`
+        `flow[n, tapped_output, t]`
 
     **Parameters**
 
@@ -242,18 +242,18 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
                     rhs = (
-                        m.flow[g, g.main_output, p, t]
-                        + m.flow[g, g.tapped_output, p, t]
+                        m.flow[g, g.main_output, t]
+                        + m.flow[g, g.tapped_output, t]
                         * g.main_flow_loss_index[t]
                     ) / g.conversion_factor_full_condensation_sq[t]
-                    block.input_output_relation.add((g, p, t), (lhs == rhs))
+                    block.input_output_relation.add((g, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -261,17 +261,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _out_flow_relation_rule(block):
             """Relation between main and tapped output in full chp mode."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
-                    lhs = m.flow[g, g.main_output, p, t]
+                    lhs = m.flow[g, g.main_output, t]
                     rhs = (
-                        m.flow[g, g.tapped_output, p, t]
+                        m.flow[g, g.tapped_output, t]
                         * g.flow_relation_index[t]
                     )
-                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
 
         self.out_flow_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule

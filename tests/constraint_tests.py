@@ -1950,7 +1950,7 @@ class TestsConstraint:
         with storage_level_constraint
         """
         es = solph.EnergySystem(
-            timeindex=pd.date_range("2022-01-01", freq="1H", periods=2),
+            timeindex=pd.date_range("2022-01-01", freq="h", periods=2),
             infer_last_interval=True,
         )
 
