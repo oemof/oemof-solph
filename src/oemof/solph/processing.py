@@ -277,8 +277,7 @@ def results(model, remove_last_time_point=False):
         )
         for bus, timestep in grouped:
             duals = [
-                model.dual[model.BusBlock.balance[bus, t]]
-                for _, t in timestep
+                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
             if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
