@@ -1,5 +1,5 @@
-v0.5.3
-------
+v0.5.3 (June 25th, 2024)
+------------------------
 
 API changes
 ###########
@@ -20,9 +20,6 @@ New features
   slope and normed offset relative to the `NonConvex` input given the `min`,
   `max` and the respective efficiencies/ratios, i.e.
   `slope_offset_from_nonconvex_input` and `slope_offset_from_nonconvex_output`.
-
-Documentation
-#############
 
 Bug fixes
 #########
