@@ -173,7 +173,7 @@ def test_link_raise_key_error_in_Linkblock(warning_fixture):
     """Link raises KeyError if conversion factors don't match the connected
     busses."""
 
-    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
         infer_last_interval=True,

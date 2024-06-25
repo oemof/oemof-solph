@@ -21,7 +21,7 @@ from oemof import solph
 def check_oemof_installation(silent=False):
     logging.disable(logging.CRITICAL)
 
-    date_time_index = pd.date_range("1/1/2012", periods=6, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=6, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
         infer_last_interval=False,

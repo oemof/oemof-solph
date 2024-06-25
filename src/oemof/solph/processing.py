@@ -233,9 +233,9 @@ def results(model, remove_last_time_point=False):
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
-        k
-        if len(k) > 1
-        else (k[0], None): v[["timestep", "variable_name", "value"]]
+        k if len(k) > 1 else (k[0], None): v[
+            ["timestep", "variable_name", "value"]
+        ]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -273,12 +273,11 @@ def results(model, remove_last_time_point=False):
     # add dual variables for bus constraints
     if model.dual is not None:
         grouped = groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
+            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
         )
-        for bus, timeindex in grouped:
+        for bus, timestep in grouped:
             duals = [
-                model.dual[model.BusBlock.balance[bus, p, t]]
-                for _, p, t in timeindex
+                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
             if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
@@ -430,11 +429,11 @@ def convert_keys_to_strings(result, keep_none_type=False):
     """
     if keep_none_type:
         converted = {
-            tuple([str(e) if e is not None else None for e in k])
-            if isinstance(k, tuple)
-            else str(k)
-            if k is not None
-            else None: v
+            (
+                tuple([str(e) if e is not None else None for e in k])
+                if isinstance(k, tuple)
+                else str(k) if k is not None else None
+            ): v
             for k, v in result.items()
         }
     else:
