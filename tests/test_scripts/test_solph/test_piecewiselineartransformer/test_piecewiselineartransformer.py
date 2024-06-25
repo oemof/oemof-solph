@@ -26,7 +26,7 @@ from oemof.solph.flows import Flow
 def test_pwltf():
     # Set timeindex and create data
     periods = 20
-    datetimeindex = pd.date_range("1/1/2019", periods=periods, freq="H")
+    datetimeindex = pd.date_range("1/1/2019", periods=periods, freq="h")
     step = 5
     demand = np.arange(0, step * periods, step)
 

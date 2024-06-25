@@ -494,6 +494,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -564,7 +565,7 @@ class SinkDSMOemofBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # Inflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
@@ -894,6 +895,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1191,7 +1193,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # Inflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
@@ -1666,6 +1668,7 @@ class SinkDSMDIWBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa E:501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1742,7 +1745,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -1762,7 +1765,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -1784,7 +1787,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # last time steps: end - delay time
                     else:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2414,6 +2417,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -2717,7 +2721,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2737,7 +2741,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2759,7 +2763,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # last time steps: end - delay time
                     else:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -3610,6 +3614,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             =========================================== ================================= ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -3717,7 +3722,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # outflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand +- DR
                     rhs = (
@@ -4681,6 +4686,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -5018,7 +5024,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # outflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand +- DR
                     rhs = (

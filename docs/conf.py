@@ -6,6 +6,9 @@ import sys
 import matplotlib
 from sphinx.ext.autodoc import between
 
+from oemof.solph import __version__
+
+
 matplotlib.use("agg")
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
@@ -36,7 +39,7 @@ project = "oemof.solph"
 year = "2014-2023"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.5.2"
+version = release = __version__
 
 pygments_style = "trac"
 templates_path = ["."]

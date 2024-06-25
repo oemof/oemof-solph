@@ -42,7 +42,7 @@ from oemof import solph
 
 def storage_costs_example():
     # create an energy system
-    idx = pd.date_range("1/1/2023", periods=13, freq="H")
+    idx = pd.date_range("1/1/2023", periods=13, freq="h")
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
     # power bus

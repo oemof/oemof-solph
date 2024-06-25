@@ -129,7 +129,7 @@ def draw_graph(
 
 
 def main():
-    datetimeindex = pd.date_range("1/1/2017", periods=3, freq="H")
+    datetimeindex = pd.date_range("1/1/2017", periods=3, freq="h")
 
     es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
 
