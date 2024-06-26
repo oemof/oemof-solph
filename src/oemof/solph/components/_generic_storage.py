@@ -1201,7 +1201,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         # ######################### Variables  ################################
         self.storage_content = Var(
-            self.INVESTSTORAGES, m.TIMESTEPS, within=NonNegativeReals
+            self.INVESTSTORAGES, m.TIMEPOINTS, within=NonNegativeReals
         )
 
         def _storage_investvar_bound_rule(block, n, p):
@@ -1520,13 +1520,13 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         def _storage_balance_rule(block, n, p, t):
             """
-            Rule definition for the storage balance of every storage n
-            for every time step but the first.
+            Rule definition for the storage balance of every storage n and
+            every timestep.
             """
             expr = 0
-            expr += block.storage_content[n, t]
+            expr += block.storage_content[n, t + 1]
             expr += (
-                -block.storage_content[n, t - 1]
+                -block.storage_content[n, t]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
