@@ -104,7 +104,12 @@ def create_time_index(
         else:
             hoy = 8760
         number = round(hoy / interval)
-    if start is None:
+    if start is not None:
+        if year is not None:
+            raise ValueError(
+                "Arguments 'start' and 'year' are mutually exclusive."
+            )
+    else:
         start = f"1/1/{year}"
     try:
         time_index = pd.date_range(
