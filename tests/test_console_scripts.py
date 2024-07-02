@@ -12,4 +12,14 @@ from oemof.solph import _console_scripts as console_scripts
 
 
 def test_console_scripts():
-    console_scripts.check_oemof_installation(silent=False)
+    # this is just a smoke test
+    console_scripts.check_oemof_installation()
+
+
+def test_solver_check():
+    solver_list = ["cbc", "invalid solver"]
+    results = console_scripts._check_oemof_installation(solver_list)
+
+    assert isinstance(results, dict)
+    assert list(results.keys()) == solver_list
+    assert not results["invalid solver"]
