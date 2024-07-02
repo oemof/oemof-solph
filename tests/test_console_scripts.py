@@ -22,4 +22,4 @@ def test_solver_check():
 
     assert isinstance(results, dict)
     assert list(results.keys()) == solver_list
-    assert results["invalid solver"] == False
+    assert results["invalid solver"] is False
