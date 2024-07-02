@@ -54,7 +54,7 @@ def create_time_index(
     year: int = None,
     interval: float = 1,
     number: int = None,
-    start: datetime.datetime or datetime.date = None,
+    start: datetime.date = None,
 ):
     """
     Create a datetime index for one year.
