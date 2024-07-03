@@ -216,7 +216,7 @@ def results(model, remove_last_time_point=False):
 
     Parameters
     ----------
-    model : oemof.solph.BaseModel
+    model : oemof.solph.Model
         A solved oemof.solph model.
     remove_last_time_point : bool
         The last time point of all TIMEPOINT variables is removed to get the

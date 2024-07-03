@@ -634,12 +634,12 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     * :math:`P_i(p, t)`
 
         Inflow of the storage
-        (created in :class:`oemof.solph.models.BaseModel`).
+        (created in :class:`oemof.solph.models.Model`).
 
     * :math:`P_o(p, t)`
 
         Outflow of the storage
-        (created in :class:`oemof.solph.models.BaseModel`).
+        (created in :class:`oemof.solph.models.Model`).
 
     * :math:`E(t)`
 

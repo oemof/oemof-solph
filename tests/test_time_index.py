@@ -109,7 +109,7 @@ def test_energysystem_with_numeric_index_non_equidistant():
 def test_model_timeincrement_with_valid_timeindex():
     datetimeindex = pd.date_range("1/1/2012", periods=5, freq="h")
     es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
-    m = solph._models.BaseModel(es)
+    m = solph._models.Model(es)
     assert es.timeincrement.sum() == 5
     assert m.timeincrement.sum() == 5
     assert m.timeincrement[2] == 1
@@ -151,13 +151,13 @@ def test_overwrite_timeincrement():
         infer_last_interval=True,
     )
     assert es.timeincrement[0] == 1
-    m = solph._models.BaseModel(es, timeincrement=[3])
+    m = solph._models.Model(es, timeincrement=[3])
     assert m.timeincrement[0] == 3
 
 
 def test_model_timeincrement_list():
-    es = solph.EnergySystem()
-    m = solph._models.BaseModel(es, timeincrement=[0, 1, 2, 3])
+    es = solph.EnergySystem(timeincrement=[0.1, 1, 2, 3])
+    m = solph._models.Model(es)
     assert m.timeincrement[3] == 3
 
 
