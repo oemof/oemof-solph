@@ -12,6 +12,7 @@ import pandas as pd
 import pytest
 
 from oemof import solph
+from oemof.tools import debugging
 
 
 def test_energysystem_with_datetimeindex_infer_last_interval():
@@ -151,7 +152,8 @@ def test_overwrite_timeincrement():
         infer_last_interval=True,
     )
     assert es.timeincrement[0] == 1
-    m = solph._models.Model(es, timeincrement=[3])
+    with pytest.warns(debugging.SuspiciousUsageWarning):
+        m = solph._models.Model(es, timeincrement=[3])
     assert m.timeincrement[0] == 3
 
 

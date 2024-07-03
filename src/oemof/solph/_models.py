@@ -160,7 +160,14 @@ class Model(po.ConcreteModel):
         self.name = kwargs.get("name", type(self).__name__)
 
         self.es = energysystem
-        self.timeincrement = kwargs.get("timeincrement", self.es.timeincrement)
+
+        if kwargs.get("timeincrement"):
+            msg = "Resetting timeincrement from EnergySystem in Model."
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+
+            self.timeincrement = kwargs.get("timeincrement")
+        else:
+            self.timeincrement = self.es.timeincrement
 
         self.objective_weighting = kwargs.get(
             "objective_weighting", self.timeincrement
@@ -182,7 +189,7 @@ class Model(po.ConcreteModel):
         self.solver_results = None
         self.dual = None
         self.rc = None
-        
+
         if discount_rate is not None:
             self.discount_rate = discount_rate
         elif (
@@ -343,7 +350,6 @@ class Model(po.ConcreteModel):
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setlb(0)
 
-
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have
         been grouped in the defined constraint groups. This collects all the
@@ -453,4 +459,3 @@ class Model(po.ConcreteModel):
         relaxer._apply_to(self)
 
         return self
-
