@@ -16,7 +16,6 @@ from collections import abc
 from itertools import repeat
 
 import numpy as np
-import pandas as pd
 
 
 def sequence(iterable_or_scalar):
@@ -37,6 +36,7 @@ def sequence(iterable_or_scalar):
     >>> y[10]
     11
 
+    >>> import pandas as pd
     >>> s1 = sequence(pd.Series([1,5,9]))
     >>> s1[2]
     9
