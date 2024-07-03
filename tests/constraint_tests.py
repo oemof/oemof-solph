@@ -1356,6 +1356,14 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
+        min = 0.2
+        eta_at_nom = 0.4
+        eta_at_min = 0.35
+
+        slope, offset = solph.components.slope_offset_from_nonconvex_output(
+            1, min, eta_at_nom, eta_at_min
+        )
+
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
             inputs={
@@ -1365,10 +1373,11 @@ class TestsConstraint:
                 b_el: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    min=0.2,
+                    min=min,
                 )
             },
-            coefficients={b_el: (2.5, 0.5)},
+            conversion_factors={b_diesel: slope},
+            normed_offsets={b_diesel: offset},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
@@ -1380,12 +1389,20 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
+        min = 0.2
+        eta_at_nom = 0.4
+        eta_at_min = 0.35
+
+        slope, offset = solph.components.slope_offset_from_nonconvex_output(
+            1, min, eta_at_nom, eta_at_min
+        )
+
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
             inputs={b_diesel: solph.flows.Flow()},
             outputs={
                 b_el: solph.flows.Flow(
-                    min=0.2,
+                    min=min,
                     nonconvex=solph.NonConvex(),
                     nominal_value=solph.Investment(
                         ep_costs=100,
@@ -1393,7 +1410,8 @@ class TestsConstraint:
                     ),
                 )
             },
-            coefficients={b_el: (2.5, 0.5)},
+            conversion_factors={b_diesel: slope},
+            normed_offsets={b_diesel: offset},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
@@ -1932,7 +1950,7 @@ class TestsConstraint:
         with storage_level_constraint
         """
         es = solph.EnergySystem(
-            timeindex=pd.date_range("2022-01-01", freq="1H", periods=2),
+            timeindex=pd.date_range("2022-01-01", freq="h", periods=2),
             infer_last_interval=True,
         )
 

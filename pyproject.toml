@@ -57,7 +57,7 @@ requires-python = ">=3.8"
 dependencies = [
     "blinker",
     "dill",
-    "numpy",
+    "numpy < 2.0.0",
     "pandas >= 2.0.0",
     "pyomo >= 6.6.0, < 7.0",
     "networkx",
@@ -116,6 +116,7 @@ norecursedirs = [
     ".env",
     "dist",
     "build",
+    "docs/_build",
     "migrations",
     "examples",
 ]

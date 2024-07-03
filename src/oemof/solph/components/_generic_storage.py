@@ -508,7 +508,7 @@ class GenericStorageBlock(ScalarBlock):
 
         #  ************* Constraints ***************************
 
-        def _storage_balance_rule(block, n, p, t):
+        def _storage_balance_rule(block, n, t):
             """
             Rule definition for the storage balance of every storage n and
             every timestep.
@@ -526,15 +526,15 @@ class GenericStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
-            self.STORAGES, m.TIMEINDEX, rule=_storage_balance_rule
+            self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
         )
 
         def _balanced_storage_rule(block, n):
@@ -1258,7 +1258,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        reduced_periods_timesteps = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
+        reduced_periods_timeindex = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
 
         # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
@@ -1507,10 +1507,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 )
                 expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
                 expr += (
-                    -m.flow[i[n], n, 0, 0] * n.inflow_conversion_factor[0]
+                    -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
                 ) * m.timeincrement[0]
                 expr += (
-                    m.flow[n, o[n], 0, 0] / n.outflow_conversion_factor[0]
+                    m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
                 ) * m.timeincrement[0]
                 return expr == 0
 
@@ -1536,16 +1536,16 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 
         self.balance = Constraint(
             self.INVESTSTORAGES,
-            reduced_periods_timesteps,
+            reduced_periods_timeindex,
             rule=_storage_balance_rule,
         )
 

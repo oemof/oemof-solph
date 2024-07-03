@@ -215,96 +215,54 @@ def test_generic_storage_too_many_outputs():
 
 
 def test_offsetconverter_without_nonconvex():
-    """No NonConvex attribute is defined for the output flow."""
+    """No NonConvex attribute is defined for any of the attached flows."""
     with pytest.raises(
-        TypeError, match="Output flow must have the `NonConvex` attribute!"
+        ValueError,
+        match=(
+            "Exactly one flow of the `OffsetConverter` must have the "
+            "`NonConvex` attribute."
+        ),
     ):
+        b_diesel = Bus(label="bus_diesel")
         b_el = Bus(label="bus_electricity")
         components.OffsetConverter(
             label="diesel_genset",
-            inputs={b_el: Flow()},
+            inputs={b_diesel: Flow()},
             outputs={b_el: Flow()},
-            coefficients={b_el: (2.5, 0.5)},
         )
 
 
-def test_offsetconverter_nonconvex_on_inputs():
-    """NonConvex attribute is defined for the input flow."""
+def test_offsetconverter_multiple_nonconvex():
+    """NonConvex attribute is defined for more than one flow."""
     with pytest.raises(
-        TypeError,
-        match="`NonConvex` attribute must be defined only for the output "
-        + "flow!",
+        ValueError,
+        match=(
+            "Exactly one flow of the `OffsetConverter` must have the "
+            "`NonConvex` attribute."
+        ),
     ):
         b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
             inputs={b_diesel: Flow(nonconvex=NonConvex())},
-            outputs={b_diesel: Flow(nonconvex=NonConvex())},
-            coefficients={b_diesel: (2.5, 0.5)},
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 
-def test_offsetconverter_investment_on_inputs():
-    """Investment attribute is defined for the input flow."""
+def test_offsetconverter_investment_not_on_nonconvex():
+    """Investment attribute is defined for a not NonConvex flow."""
     with pytest.raises(
         TypeError,
-        match="`Investment` attribute must be defined only for the output "
-        + "flow!",
+        match=(
+            "`Investment` attribute must be defined only for the NonConvex "
+            "flow!"
+        ),
     ):
         b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
-            inputs={b_diesel: Flow(nominal_value=Investment())},
-            outputs={
-                b_diesel: Flow(
-                    nonconvex=NonConvex(), nominal_value=Investment(maximum=1)
-                )
-            },
-            coefficients={b_diesel: (2.5, 0.5)},
-        )
-
-
-def test_offsetconverter_not_enough_coefficients():
-    with pytest.raises(
-        ValueError,
-        match="Two coefficients or coefficient series have to be given.",
-    ):
-        bus = Bus(label="Bus")
-        components.OffsetConverter(
-            label="of1",
-            inputs={bus: Flow()},
-            outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients={bus: ([1, 4, 7])},
-        )
-
-
-def test_offsetconverter_too_many_coefficients():
-    with pytest.raises(
-        ValueError,
-        match="Two coefficients or coefficient series have to be given.",
-    ):
-        bus = Bus(label="Bus")
-        components.OffsetConverter(
-            label="of2",
-            inputs={bus: Flow()},
-            outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients={bus: (1, 4, 7)},
-        )
-
-
-def test_offsetconverter_too_many_input_flows():
-    """Too many Input Flows defined."""
-    with pytest.raises(
-        ValueError,
-        match="Component `OffsetConverter` must not have more than 1 input!",
-    ):
-        b_gas = Bus(label="bus_gas")
-        b_coal = Bus(label="bus_coal")
-        components.OffsetConverter(
-            inputs={
-                b_gas: Flow(),
-                b_coal: Flow(),
-            },
-            outputs={b_coal: Flow(nonconvex=NonConvex())},
-            coefficients=(20, 0.5),
+            inputs={b_diesel: Flow(nominal_value=Investment(maximum=1))},
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 
