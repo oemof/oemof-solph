@@ -188,7 +188,6 @@ def test_invalid_conversion_factor():
                 bus2: 2,
             },
             normed_offsets={bus2: -0.5},
-            custom_attributes={"foo": "bar"},
         )
 
 
@@ -208,7 +207,6 @@ def test_invalid_normed_offset():
                 bus1: -0.2,
                 bus2: -0.5,
             },
-            custom_attributes={"foo": "bar"},
         )
 
 
