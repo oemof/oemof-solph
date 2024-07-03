@@ -158,6 +158,53 @@ def add_OffsetConverter(
     es.add(oc)
 
 
+def test_custom_properties():
+    bus1 = solph.Bus()
+    bus2 = solph.Bus()
+    oc = solph.components.OffsetConverter(
+        inputs={bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())},
+        outputs={bus2: solph.Flow()},
+        conversion_factors={bus2: 2},
+        normed_offsets={bus2: -0.5},
+        custom_attributes={"foo": "bar"},
+    )
+
+    assert oc.custom_properties["foo"] == "bar"
+
+
+def test_invalid_conversion_factor():
+    bus1 = solph.Bus()
+    bus2 = solph.Bus()
+    with pytest.raises(ValueError, match="Conversion factors cannot be "):
+        solph.components.OffsetConverter(
+            inputs={bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())},
+            outputs={bus2: solph.Flow()},
+            conversion_factors={
+                bus1: 1,
+                bus2: 2,
+            },
+            normed_offsets={bus2: -0.5},
+            custom_attributes={"foo": "bar"},
+        )
+
+
+def test_invalid_normed_offset():
+    bus1 = solph.Bus()
+    bus2 = solph.Bus()
+    with pytest.raises(ValueError, match="Normed offsets cannot be "):
+        solph.components.OffsetConverter(
+            inputs={bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())},
+            outputs={bus2: solph.Flow()},
+            conversion_factors={
+                bus2: 2,
+            },
+            normed_offsets={
+                bus1: -0.2,
+                bus2: -0.5,
+            },
+            custom_attributes={"foo": "bar"},
+        )
+
 def test_OffsetConverter_single_input_output_ref_output():
     num_in = 1
     num_out = 1
