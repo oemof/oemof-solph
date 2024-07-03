@@ -210,6 +210,19 @@ def test_invalid_normed_offset():
         )
 
 
+def test_wrong_number_of_coefficients():
+    bus1 = solph.Bus()
+    bus2 = solph.Bus()
+    with pytest.raises(ValueError, match="Two coefficients"):
+        solph.components.OffsetTransformer(
+            inputs={
+                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+            },
+            outputs={bus2: solph.Flow()},
+            coefficients=(1, 2, 3),
+        )
+
+
 def test_OffsetConverter_single_input_output_ref_output():
     num_in = 1
     num_out = 1
