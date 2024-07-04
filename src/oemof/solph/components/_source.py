@@ -13,11 +13,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
-
-from warnings import warn
-
 from oemof.network import Node
-from oemof.tools import debugging
 
 
 class Source(Node):
@@ -28,6 +24,9 @@ class Source(Node):
     label : str
         String holding the label of the Source object.
         The label of each object must be unique.
+    outputs: dict
+        A dictionary mapping input nodes to corresponding outflows
+        (i.e. output values).
 
     Examples
     --------
@@ -48,30 +47,13 @@ class Source(Node):
 
     >>> str(pv_plant.outputs[bel].output)
     'electricity'
-
-    Notes
-    -----
-    It is theoretically possible to use the Source object with multiple
-    outputs. However, we strongly recommend using multiple Source objects
-    instead.
     """
 
-    def __init__(self, label=None, outputs=None, custom_attributes=None):
+    def __init__(self, label=None, *, outputs, custom_attributes=None):
         if outputs is None:
             outputs = {}
         if custom_attributes is None:
             custom_attributes = {}
-
-        if len(outputs) != 1:
-            msg = (
-                "A Source is designed to have one output but you provided {0}."
-                " If this is intended and you know what you are doing you can "
-                "disable the SuspiciousUsageWarning globally."
-            )
-            warn(
-                msg.format(len(outputs)),
-                debugging.SuspiciousUsageWarning,
-            )
 
         super().__init__(
             label=label, outputs=outputs, custom_properties=custom_attributes
