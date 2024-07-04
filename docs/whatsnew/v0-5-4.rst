@@ -4,6 +4,8 @@ v0.5.4
 API changes
 ###########
 
+* Explicitly allow to have multiple inputs or outputs for Sinks and Sources,
+  respectively.
 
 New features
 ############
@@ -29,3 +31,4 @@ Known issues
 Contributors
 ############
 
+* Patrik Schönfeldt
