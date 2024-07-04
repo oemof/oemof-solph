@@ -282,12 +282,12 @@ class OffsetConverter(Node):
                 c0, c1 = slope_offset_from_nonconvex_output(
                     flow.max[i], flow.min[i], eta_at_max, eta_at_min
                 )
-                slope += [c0]
-                offset += [c1]
+                slope.append(c0)
+                offset.append(c1)
 
             if max_len == 1:
-                slope = sequence(slope[0])
-                offset = sequence(offset[0])
+                slope = slope[0]
+                offset = offset[0]
 
             conversion_factors = {input_bus: slope}
             normed_offsets = {input_bus: offset}
