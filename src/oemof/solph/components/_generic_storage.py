@@ -497,6 +497,8 @@ class GenericStorageBlock(ScalarBlock):
             self.STORAGES, m.TIMEPOINTS, bounds=_storage_content_bound_rule
         )
 
+        self.storage_losses = Var(self.STORAGES, m.TIMESTEPS)
+
         # set the initial storage content
         # ToDo: More elegant code possible?
         for n in group:
@@ -508,16 +510,9 @@ class GenericStorageBlock(ScalarBlock):
 
         #  ************* Constraints ***************************
 
-        def _storage_balance_rule(block, n, t):
-            """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
-            """
-            expr = 0
-            expr += block.storage_content[n, t + 1]
-            expr += (
-                -block.storage_content[n, t]
-                * (1 - n.loss_rate[t]) ** m.timeincrement[t]
+        def _storage_losses_rule(block, n, t):
+            expr = block.storage_content[n, t] * (
+                n.loss_rate[t] ** m.timeincrement[t]
             )
             expr += (
                 n.fixed_losses_relative[t]
@@ -525,13 +520,27 @@ class GenericStorageBlock(ScalarBlock):
                 * m.timeincrement[t]
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
+
+            return expr == block.storage_losses[n, t]
+
+        self.losses = Constraint(
+            self.STORAGES, m.TIMESTEPS, rule=_storage_losses_rule
+        )
+
+        def _storage_balance_rule(block, n, t):
+            """
+            Rule definition for the storage balance of every storage n and
+            every timestep.
+            """
+            expr = block.storage_content[n, t]
+            expr -= block.storage_losses[n, t]
             expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
-            expr += (
+            expr -= (
                 m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
-            return expr == 0
+            return expr == block.storage_content[n, t + 1]
 
         self.balance = Constraint(
             self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
