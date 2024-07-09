@@ -36,46 +36,76 @@ c_e_BusBlock_balance(electricityBus_5)_:
 +1 flow(storage1_electricityBus_5)
 = 0
 
+c_e_GenericStorageBlock_losses(storage1_0)_:
+-1 GenericStorageBlock_storage_losses(storage1_0)
+= 0
+
+c_e_GenericStorageBlock_losses(storage1_1)_:
+-1 GenericStorageBlock_storage_losses(storage1_1)
+= 0
+
+c_e_GenericStorageBlock_losses(storage1_2)_:
+-1 GenericStorageBlock_storage_losses(storage1_2)
+= 0
+
+c_e_GenericStorageBlock_losses(storage1_3)_:
+-1 GenericStorageBlock_storage_losses(storage1_3)
+= 0
+
+c_e_GenericStorageBlock_losses(storage1_4)_:
+-1 GenericStorageBlock_storage_losses(storage1_4)
+= 0
+
+c_e_GenericStorageBlock_losses(storage1_5)_:
+-1 GenericStorageBlock_storage_losses(storage1_5)
+= 0
+
 c_e_GenericStorageBlock_balance(storage1_0)_:
--1 flow(electricityBus_storage1_0)
-+1 flow(storage1_electricityBus_0)
--1 GenericStorageBlock_storage_content(storage1_0)
-+1 GenericStorageBlock_storage_content(storage1_1)
++1 flow(electricityBus_storage1_0)
+-1 flow(storage1_electricityBus_0)
+-1 GenericStorageBlock_storage_losses(storage1_0)
++1 GenericStorageBlock_storage_content(storage1_0)
+-1 GenericStorageBlock_storage_content(storage1_1)
 = 0
 
 c_e_GenericStorageBlock_balance(storage1_1)_:
--1 flow(electricityBus_storage1_1)
-+1 flow(storage1_electricityBus_1)
--1 GenericStorageBlock_storage_content(storage1_1)
-+1 GenericStorageBlock_storage_content(storage1_2)
++1 flow(electricityBus_storage1_1)
+-1 flow(storage1_electricityBus_1)
+-1 GenericStorageBlock_storage_losses(storage1_1)
++1 GenericStorageBlock_storage_content(storage1_1)
+-1 GenericStorageBlock_storage_content(storage1_2)
 = 0
 
 c_e_GenericStorageBlock_balance(storage1_2)_:
--1 flow(electricityBus_storage1_2)
-+1 flow(storage1_electricityBus_2)
--1 GenericStorageBlock_storage_content(storage1_2)
-+1 GenericStorageBlock_storage_content(storage1_3)
++1 flow(electricityBus_storage1_2)
+-1 flow(storage1_electricityBus_2)
+-1 GenericStorageBlock_storage_losses(storage1_2)
++1 GenericStorageBlock_storage_content(storage1_2)
+-1 GenericStorageBlock_storage_content(storage1_3)
 = 0
 
 c_e_GenericStorageBlock_balance(storage1_3)_:
--1 flow(electricityBus_storage1_3)
-+1 flow(storage1_electricityBus_3)
--1 GenericStorageBlock_storage_content(storage1_3)
-+1 GenericStorageBlock_storage_content(storage1_4)
++1 flow(electricityBus_storage1_3)
+-1 flow(storage1_electricityBus_3)
+-1 GenericStorageBlock_storage_losses(storage1_3)
++1 GenericStorageBlock_storage_content(storage1_3)
+-1 GenericStorageBlock_storage_content(storage1_4)
 = 0
 
 c_e_GenericStorageBlock_balance(storage1_4)_:
--1 flow(electricityBus_storage1_4)
-+1 flow(storage1_electricityBus_4)
--1 GenericStorageBlock_storage_content(storage1_4)
-+1 GenericStorageBlock_storage_content(storage1_5)
++1 flow(electricityBus_storage1_4)
+-1 flow(storage1_electricityBus_4)
+-1 GenericStorageBlock_storage_losses(storage1_4)
++1 GenericStorageBlock_storage_content(storage1_4)
+-1 GenericStorageBlock_storage_content(storage1_5)
 = 0
 
 c_e_GenericStorageBlock_balance(storage1_5)_:
--1 flow(electricityBus_storage1_5)
-+1 flow(storage1_electricityBus_5)
--1 GenericStorageBlock_storage_content(storage1_5)
-+1 GenericStorageBlock_storage_content(storage1_6)
++1 flow(electricityBus_storage1_5)
+-1 flow(storage1_electricityBus_5)
+-1 GenericStorageBlock_storage_losses(storage1_5)
++1 GenericStorageBlock_storage_content(storage1_5)
+-1 GenericStorageBlock_storage_content(storage1_6)
 = 0
 
 bounds
@@ -92,6 +122,12 @@ bounds
    0 <= flow(storage1_electricityBus_3) <= +inf
    0 <= flow(storage1_electricityBus_4) <= +inf
    0 <= flow(storage1_electricityBus_5) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_0) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_1) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_2) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_3) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_4) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage1_5) <= +inf
    0 <= GenericStorageBlock_storage_content(storage1_0) <= 1111
    0 <= GenericStorageBlock_storage_content(storage1_1) <= 1111
    0 <= GenericStorageBlock_storage_content(storage1_2) <= 1111

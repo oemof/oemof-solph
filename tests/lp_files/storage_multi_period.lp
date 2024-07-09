@@ -47,45 +47,80 @@ c_e_BusBlock_balance(electricityBus_5)_:
 +1 flow(storage_no_invest_electricityBus_5)
 = 0
 
+c_e_GenericStorageBlock_losses(storage_no_invest_0)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_0)
+= -5200.0
+
+c_e_GenericStorageBlock_losses(storage_no_invest_1)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_1)
++0.13 GenericStorageBlock_storage_content(storage_no_invest_1)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_no_invest_2)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_2)
++0.13 GenericStorageBlock_storage_content(storage_no_invest_2)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_no_invest_3)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_3)
++0.13 GenericStorageBlock_storage_content(storage_no_invest_3)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_no_invest_4)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_4)
++0.13 GenericStorageBlock_storage_content(storage_no_invest_4)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_no_invest_5)_:
+-1 GenericStorageBlock_storage_losses(storage_no_invest_5)
++0.13 GenericStorageBlock_storage_content(storage_no_invest_5)
+= 0
+
 c_e_GenericStorageBlock_balance(storage_no_invest_0)_:
--0.97 flow(electricityBus_storage_no_invest_0)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_0)
-+1 GenericStorageBlock_storage_content(storage_no_invest_1)
-= 34800.0
++0.97 flow(electricityBus_storage_no_invest_0)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_0)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_0)
+-1 GenericStorageBlock_storage_content(storage_no_invest_1)
+= -40000.0
 
 c_e_GenericStorageBlock_balance(storage_no_invest_1)_:
--0.97 flow(electricityBus_storage_no_invest_1)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_1)
--0.87 GenericStorageBlock_storage_content(storage_no_invest_1)
-+1 GenericStorageBlock_storage_content(storage_no_invest_2)
++0.97 flow(electricityBus_storage_no_invest_1)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_1)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_1)
++1 GenericStorageBlock_storage_content(storage_no_invest_1)
+-1 GenericStorageBlock_storage_content(storage_no_invest_2)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_no_invest_2)_:
--0.97 flow(electricityBus_storage_no_invest_2)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_2)
--0.87 GenericStorageBlock_storage_content(storage_no_invest_2)
-+1 GenericStorageBlock_storage_content(storage_no_invest_3)
++0.97 flow(electricityBus_storage_no_invest_2)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_2)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_2)
++1 GenericStorageBlock_storage_content(storage_no_invest_2)
+-1 GenericStorageBlock_storage_content(storage_no_invest_3)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_no_invest_3)_:
--0.97 flow(electricityBus_storage_no_invest_3)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_3)
--0.87 GenericStorageBlock_storage_content(storage_no_invest_3)
-+1 GenericStorageBlock_storage_content(storage_no_invest_4)
++0.97 flow(electricityBus_storage_no_invest_3)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_3)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_3)
++1 GenericStorageBlock_storage_content(storage_no_invest_3)
+-1 GenericStorageBlock_storage_content(storage_no_invest_4)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_no_invest_4)_:
--0.97 flow(electricityBus_storage_no_invest_4)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_4)
--0.87 GenericStorageBlock_storage_content(storage_no_invest_4)
-+1 GenericStorageBlock_storage_content(storage_no_invest_5)
++0.97 flow(electricityBus_storage_no_invest_4)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_4)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_4)
++1 GenericStorageBlock_storage_content(storage_no_invest_4)
+-1 GenericStorageBlock_storage_content(storage_no_invest_5)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_no_invest_5)_:
--0.97 flow(electricityBus_storage_no_invest_5)
-+1.1627906976744187 flow(storage_no_invest_electricityBus_5)
--0.87 GenericStorageBlock_storage_content(storage_no_invest_5)
-+1 GenericStorageBlock_storage_content(storage_no_invest_6)
++0.97 flow(electricityBus_storage_no_invest_5)
+-1.1627906976744187 flow(storage_no_invest_electricityBus_5)
+-1 GenericStorageBlock_storage_losses(storage_no_invest_5)
++1 GenericStorageBlock_storage_content(storage_no_invest_5)
+-1 GenericStorageBlock_storage_content(storage_no_invest_6)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage_no_invest)_:
@@ -105,6 +140,12 @@ bounds
    0 <= flow(storage_no_invest_electricityBus_3) <= 16667
    0 <= flow(storage_no_invest_electricityBus_4) <= 16667
    0 <= flow(storage_no_invest_electricityBus_5) <= 16667
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_0) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_1) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_2) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_3) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_4) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_no_invest_5) <= +inf
    0.0 <= GenericStorageBlock_storage_content(storage_no_invest_1) <= 100000.0
    0.0 <= GenericStorageBlock_storage_content(storage_no_invest_2) <= 100000.0
    0.0 <= GenericStorageBlock_storage_content(storage_no_invest_3) <= 100000.0

@@ -88,17 +88,28 @@ c_e_BusBlock_balance(multiplexer_1)_:
 +1 flow(in_1_multiplexer_1)
 = 0
 
+c_e_GenericStorageBlock_losses(storage_0)_:
+-1 GenericStorageBlock_storage_losses(storage_0)
+= -1.0
+
+c_e_GenericStorageBlock_losses(storage_1)_:
++0.25 GenericStorageBlock_storage_content(storage_1)
+-1 GenericStorageBlock_storage_losses(storage_1)
+= 0
+
 c_e_GenericStorageBlock_balance(storage_0)_:
--1 flow(multiplexer_storage_0)
-+1 flow(storage_multiplexer_0)
-+1 GenericStorageBlock_storage_content(storage_1)
-= 3.0
++1 flow(multiplexer_storage_0)
+-1 flow(storage_multiplexer_0)
+-1 GenericStorageBlock_storage_content(storage_1)
+-1 GenericStorageBlock_storage_losses(storage_0)
+= -4
 
 c_e_GenericStorageBlock_balance(storage_1)_:
--1 flow(multiplexer_storage_1)
-+1 flow(storage_multiplexer_1)
--0.75 GenericStorageBlock_storage_content(storage_1)
-+1 GenericStorageBlock_storage_content(storage_2)
++1 flow(multiplexer_storage_1)
+-1 flow(storage_multiplexer_1)
++1 GenericStorageBlock_storage_content(storage_1)
+-1 GenericStorageBlock_storage_content(storage_2)
+-1 GenericStorageBlock_storage_losses(storage_1)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage)_:
@@ -126,6 +137,8 @@ bounds
    0 <= GenericStorageBlock_storage_content(storage_2) <= 4
    0 <= multiplexer_active_input(in_1_0) <= 1
    0 <= multiplexer_active_input(in_1_1) <= 1
+   -inf <= GenericStorageBlock_storage_losses(storage_0) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_1) <= +inf
 binary
   multiplexer_active_output(out_0_0)
   multiplexer_active_output(out_0_1)
