@@ -165,27 +165,27 @@ c_e_GenericStorageBlock_losses(storage_2)_:
 
 c_e_GenericStorageBlock_losses(storage_3)_:
 -1 GenericStorageBlock_storage_losses(storage_3)
-+0.010000000000000002 GenericStorageBlock_storage_content(storage_3)
++0.19 GenericStorageBlock_storage_content(storage_3)
 = 0
 
 c_e_GenericStorageBlock_losses(storage_4)_:
 -1 GenericStorageBlock_storage_losses(storage_4)
-+0.010000000000000002 GenericStorageBlock_storage_content(storage_4)
++0.19 GenericStorageBlock_storage_content(storage_4)
 = 0
 
 c_e_GenericStorageBlock_losses(storage_5)_:
 -1 GenericStorageBlock_storage_losses(storage_5)
-+0.31622776601683794 GenericStorageBlock_storage_content(storage_5)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_5)
 = 0
 
 c_e_GenericStorageBlock_losses(storage_6)_:
 -1 GenericStorageBlock_storage_losses(storage_6)
-+0.31622776601683794 GenericStorageBlock_storage_content(storage_6)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_6)
 = 0
 
 c_e_GenericStorageBlock_losses(storage_7)_:
 -1 GenericStorageBlock_storage_losses(storage_7)
-+0.31622776601683794 GenericStorageBlock_storage_content(storage_7)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_7)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_0)_:

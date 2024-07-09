@@ -360,7 +360,7 @@ class GenericStorageBlock(ScalarBlock):
 
     Storage losses :attr:`om.Storage.losses[n, t]`
         .. math:: E_{loss}(t) = &E(t-1) \cdot
-            \beta(t)^{\tau(t)/(t_u)} \\
+            1 - (1 - \beta(t))^{\tau(t)/(t_u)} \\
             &- \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)}\\
             &- \delta(t) \cdot {\tau(t)/(t_u)}
 
@@ -515,7 +515,7 @@ class GenericStorageBlock(ScalarBlock):
 
         def _storage_losses_rule(block, n, t):
             expr = block.storage_content[n, t] * (
-                n.loss_rate[t] ** m.timeincrement[t]
+                1 - (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
                 n.fixed_losses_relative[t]
