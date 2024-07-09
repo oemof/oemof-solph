@@ -358,11 +358,14 @@ class GenericStorageBlock(ScalarBlock):
         .. math::
             E(t_{last}) = E(-1)
 
-    Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(t) = &E(t-1) \cdot
-            (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
+    Storage losses :attr:`om.Storage.losses[n, t]`
+        .. math:: E_{loss}(t) = &E(t-1) \cdot
+            \beta(t)^{\tau(t)/(t_u)} \\
             &- \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)}\\
-            &- \delta(t) \cdot {\tau(t)/(t_u)}\\
+            &- \delta(t) \cdot {\tau(t)/(t_u)}
+
+    Storage balance :attr:`om.Storage.balance[n, t]`
+        .. math:: E(t) = &E(t-1) - E_{loss}(t)
             &- \frac{\dot{E}_o(p, t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(p, t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -1025,6 +1028,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         of the storage"
         ":math:`E(t)`", ":attr:`storage_content[n, t]`", "Current storage
         content (current absolute stored energy)"
+        ":math:`E_{loss}(t)`", ":attr:`storage_losses[n, t]`", "Current storage
+        losses (absolute losses per time step)"
         ":math:`E_{invest}(p)`", ":attr:`invest[n, p]`", "Invested (nominal)
         capacity of the storage"
         ":math:`E_{old}(p)`", ":attr:`old[n, p]`", "
