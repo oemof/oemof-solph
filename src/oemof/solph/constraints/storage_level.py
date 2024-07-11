@@ -121,14 +121,19 @@ def storage_level_constraint(
             .. math::
                 y_n \le E(t) / E_n
             """
-            for p, k, g in m.TIMEINDEX_TYPICAL_CLUSTER:
+            for p, i, g in m.TIMEINDEX_CLUSTER:
+                k = m.es.tsa_parameters[p]["order"][i]
                 t = m.get_timestep_from_tsam_timestep(p, k, g)
+                tk = m.get_timestep_from_tsam_timestep(p, k, g)
                 for o in output_levels:
                     getattr(m, constraint_name).add(
-                        (o, p, k, g),
-                        m.GenericStorageBlock.storage_content_intra[
+                        (o, p, i, g),
+                        (m.GenericStorageBlock.storage_content_intra[
                             storage_component,  p, k, g + 1
-                        ]
+                        ] + m.GenericStorageBlock.storage_content_inter[
+                            storage_component, i
+                        ] * (1 - storage_component.loss_rate[t]
+                             ) ** (g * m.timeincrement[tk]))
                         / storage_component.nominal_storage_capacity
                         >= active_output[o, p, k, g] * output_levels[o],
                     )
@@ -138,7 +143,7 @@ def storage_level_constraint(
             constraint_name,
             po.Constraint(
                 OUTPUTS,
-                model.TIMEINDEX_TYPICAL_CLUSTER,
+                model.TIMEINDEX_CLUSTER,
                 noruleinit=True,
             ),
         )
@@ -251,19 +256,22 @@ def storage_level_constraint(
             .. math::
                 \hat{y}_n \ge (E(t) - E_n) / E_{max}
             """
-            for p, k, g in m.TIMEINDEX_TYPICAL_CLUSTER:
+            for p, i, g in m.TIMEINDEX_CLUSTER:
+                k = m.es.tsa_parameters[p]["order"][i]
                 t = m.get_timestep_from_tsam_timestep(p, k, g)
-                for i in input_levels:
+                tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                for inp in input_levels:
                     getattr(m, constraint_name).add(
-                        (i, p, k, g),
-                        (
-                            m.GenericStorageBlock.storage_content_intra[
-                                storage_component, p, k, g + 1
-                            ]
-                            / storage_component.nominal_storage_capacity
-                            - input_levels[i]
-                        )
-                        <= inactive_input[i, p, k, g],
+                        (inp, p, i, g),
+                        (m.GenericStorageBlock.storage_content_intra[
+                            storage_component,  p, k, g + 1
+                        ] + m.GenericStorageBlock.storage_content_inter[
+                            storage_component, i
+                        ] * (1 - storage_component.loss_rate[t]
+                             ) ** (g * m.timeincrement[tk]))
+                        / storage_component.nominal_storage_capacity
+                        - input_levels[inp]
+                        <= inactive_input[inp, p, k, g],
                     )
 
         setattr(
@@ -271,7 +279,7 @@ def storage_level_constraint(
             constraint_name,
             po.Constraint(
                 INPUTS,
-                model.TIMEINDEX_TYPICAL_CLUSTER,
+                model.TIMEINDEX_CLUSTER,
                 noruleinit=True,
             ),
         )
