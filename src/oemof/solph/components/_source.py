@@ -21,7 +21,7 @@ class Source(Node):
 
     Parameters
     ----------
-    label : str
+    label : str or tuple
         String holding the label of the Source object.
         The label of each object must be unique.
     outputs: dict

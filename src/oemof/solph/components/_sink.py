@@ -21,7 +21,7 @@ class Sink(Node):
 
     Parameters
     ----------
-    label : str
+    label : str or tuple
         String holding the label of the Sink object.
         The label of each object must be unique.
     inputs: dict
