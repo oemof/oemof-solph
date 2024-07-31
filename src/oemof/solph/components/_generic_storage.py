@@ -616,9 +616,12 @@ class GenericStorageBlock(ScalarBlock):
 
         for n in self.STORAGES:
             if n.storage_costs[0] is not None:
-                for t in m.TIMEPOINTS:
+                # We actually want to iterate over all TIMEPOINTS except the
+                # 0th. As integers are used for the index, this is equicalent
+                # to iterating over the TIMESTEPS with one offset.
+                for t in m.TIMESTEPS:
                     storage_costs += (
-                        self.storage_content[n, t] * n.storage_costs[t]
+                        self.storage_content[n, t + 1] * n.storage_costs[t]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)

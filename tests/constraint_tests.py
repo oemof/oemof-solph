@@ -283,7 +283,7 @@ class TestsConstraint:
             },
             nominal_storage_capacity=1e5,
             loss_rate=0.13,
-            storage_costs=0.1,
+            storage_costs=[0.1, 0.2, 0.3, 0.4],
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             initial_storage_level=0.4,
