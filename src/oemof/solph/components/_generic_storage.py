@@ -616,12 +616,9 @@ class GenericStorageBlock(ScalarBlock):
 
         for n in self.STORAGES:
             if n.storage_costs[0] is not None:
-                storage_costs += (
-                    self.storage_content[n, 0] * n.storage_costs[0]
-                )
-                for t in m.TIMESTEPS:
+                for t in m.TIMEPOINTS:
                     storage_costs += (
-                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                        self.storage_content[n, t] * n.storage_costs[t]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
