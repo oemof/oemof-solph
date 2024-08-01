@@ -52,8 +52,8 @@ class OffsetConverter(Node):
         be a scalar or a sequence with length of time horizon for simulation.
     Notes
     -----
-    **:math:`m(t)` and :math:`y_\text{0,normed}(t)` can be calculated as **
-    **follows:**
+
+    :math:`m(t)` and :math:`y_\text{0,normed}(t)` can be calculated as follows:
 
     .. _OffsetConverterCoefficients-equations:
 
@@ -66,7 +66,18 @@ class OffsetConverter(Node):
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
     partload share (e.g. 1.0 and 0.5) with reference to the `NonConvex` flow
     and :math:`\eta_{max}` and :math:`\eta_{min}` are the respective
-    efficiencies/conversion factors at these partloads.
+    efficiencies/conversion factors at these partloads. Alternatively, you can
+    use the inbuilt methods:
+
+    - If the `NonConvex` flow is at an input of the component:
+      :py:meth:`oemof.solph.components._offset_converter.slope_offset_from_nonconvex_input`,
+    - If the `NonConvex` flow is at an output of the component:
+      :py:meth:`oemof.solph.components._offset_converter.slope_offset_from_nonconvex_output`
+
+    You can import these methods from the `oemof.solph.components` level:
+
+    >>> from oemof.solph.components import slope_offset_from_nonconvex_input
+    >>> from oemof.solph.components import slope_offset_from_nonconvex_output
 
     The sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
@@ -83,6 +94,17 @@ class OffsetConverter(Node):
     >>> eta_min = 0.3
     >>> slope = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
     >>> offset = 1 / eta_max - slope
+
+    Or use the provided method as explained in the previous section:
+
+    >>> _slope, _offset = slope_offset_from_nonconvex_output(
+    ...     l_max, l_min, eta_max, eta_min
+    ... )
+    >>> slope == _slope
+    True
+    >>> offset == _offset
+    True
+
     >>> ostf = solph.components.OffsetConverter(
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
@@ -282,12 +304,12 @@ class OffsetConverter(Node):
                 c0, c1 = slope_offset_from_nonconvex_output(
                     flow.max[i], flow.min[i], eta_at_max, eta_at_min
                 )
-                slope += [c0]
-                offset += [c1]
+                slope.append(c0)
+                offset.append(c1)
 
             if max_len == 1:
-                slope = sequence(slope[0])
-                offset = sequence(offset[0])
+                slope = slope[0]
+                offset = offset[0]
 
             conversion_factors = {input_bus: slope}
             normed_offsets = {input_bus: offset}
