@@ -18,9 +18,6 @@ from oemof import solph
 
 
 def test_infeasible_model():
-    # FutureWarning is i.e. emitted by network Entity registry
-    warnings.simplefilter(action="ignore", category=FutureWarning)
-
     es = solph.EnergySystem(timeincrement=[1])
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
