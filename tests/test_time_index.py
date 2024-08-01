@@ -10,9 +10,9 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import pytest
+from oemof.tools import debugging
 
 from oemof import solph
-from oemof.tools import debugging
 
 
 def test_energysystem_with_datetimeindex_infer_last_interval():

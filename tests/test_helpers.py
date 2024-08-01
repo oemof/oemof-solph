@@ -9,10 +9,11 @@ SPDX-License-Identifier: MIT
 """
 
 import os
+
 import pytest
 
-from oemof.solph import helpers
 from oemof.solph import create_time_index
+from oemof.solph import helpers
 
 
 def test_creation_of_extended_path():
