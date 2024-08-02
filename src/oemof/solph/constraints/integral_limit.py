@@ -144,7 +144,7 @@ def generic_integral_limit(
 
     if upper_limit is None and lower_limit is None:
         raise ValueError(
-            "At least one of upper_limit an lower_limit needs to be defined."
+            "At least one of upper_limit and lower_limit needs to be defined."
         )
 
     setattr(

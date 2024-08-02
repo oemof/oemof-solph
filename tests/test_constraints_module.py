@@ -29,6 +29,20 @@ def test_integral_limit_wrapper():
         )
 
 
+def test_limetless_limit():
+    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
+    model = solph.Model(energysystem)
+    with pytest.raises(
+        ValueError,
+        match="At least one of upper_limit and lower_limit needs to be defined.",
+    ):
+        solph.constraints.generic_integral_limit(model, "my_factor")
+
+
 def test_something_else():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
