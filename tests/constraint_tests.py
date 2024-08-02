@@ -904,6 +904,29 @@ class TestsConstraint:
 
         self.compare_lp_files("emission_limit_no_error.lp", my_om=om)
 
+    def test_flow_without_emission_for_emission_constraint_lower(self):
+        """Test that no error is thrown if no flows are explicitly passed"""
+        bel = solph.buses.Bus(label="electricityBus")
+        source1 = solph.components.Source(
+            label="source1",
+            outputs={
+                bel: solph.flows.Flow(
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": 0.8},
+                )
+            },
+        )
+        source2 = solph.components.Source(
+            label="source2", outputs={bel: solph.flows.Flow(nominal_value=100)}
+        )
+        self.energysystem.add(bel, source1, source2)
+        om = self.get_om()
+        solph.constraints.generic_integral_limit(
+            om, keyword="emission_factor", lower_limit=777
+        )
+
+        self.compare_lp_files("emission_limit_lower.lp", my_om=om)
+
     def test_equate_variables_constraint(self):
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
