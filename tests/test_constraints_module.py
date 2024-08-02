@@ -38,7 +38,7 @@ def test_limetless_limit():
     model = solph.Model(energysystem)
     with pytest.raises(
         ValueError,
-        match="At least one of upper_limit and lower_limit needs to be defined.",
+        match="At least one of upper_limit and lower_limit",
     ):
         solph.constraints.generic_integral_limit(model, "my_factor")
 
