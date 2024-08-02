@@ -46,7 +46,7 @@ class Model(po.ConcreteModel):
 
     Parameters
     ----------
-    energysystem : EnergySystem object or (experimental) list
+    energysystem : EnergySystem object
         Object that holds the nodes of an oemof energy system graph.
     constraint_groups : list
         Solph looks for these groups in the given energy system and uses them
@@ -192,15 +192,7 @@ class Model(po.ConcreteModel):
 
         if discount_rate is not None:
             self.discount_rate = discount_rate
-        elif (
-            not isinstance(energysystem, list)
-            and energysystem.periods is not None
-        ):
-            self._set_discount_rate_with_warning()
-        elif (
-            isinstance(energysystem, list)
-            and energysystem[0].periods is not None
-        ):
+        elif energysystem.periods is not None:
             self._set_discount_rate_with_warning()
         else:
             pass
