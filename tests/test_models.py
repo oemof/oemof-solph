@@ -28,11 +28,7 @@ def test_infeasible_model():
     )
     es.add(
         solph.components.Source(
-            outputs={
-                bel: solph.flows.Flow(
-                    nominal_value=4, variable_costs=5
-                )
-            }
+            outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)}
         )
     )
     m = solph.Model(es)
