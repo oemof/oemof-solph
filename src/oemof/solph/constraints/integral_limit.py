@@ -102,7 +102,7 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     --------
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='h')
     >>> energysystem = solph.EnergySystem(
     ...     timeindex=date_time_index,
     ...     infer_last_interval=False,
@@ -129,11 +129,11 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                om.flow[inflow, outflow, p, t]
+                om.flow[inflow, outflow, t]
                 * om.timeincrement[t]
                 * sequence(getattr(flows[inflow, outflow], keyword))[t]
                 for (inflow, outflow) in flows
-                for p, t in om.TIMEINDEX
+                for t in om.TIMESTEPS
             )
         ),
     )
@@ -208,7 +208,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
 
     def _periodical_integral_limit_rule(m, p):
         expr = sum(
-            om.flow[inflow, outflow, p, t]
+            om.flow[inflow, outflow, t]
             * om.timeincrement[t]
             * sequence(getattr(flows[inflow, outflow], keyword))[t]
             for (inflow, outflow) in flows

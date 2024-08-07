@@ -61,9 +61,9 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.1/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/latest/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.5.1...dev
+    :target: https://github.com/oemof/oemof-solph/compare/master...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
@@ -267,7 +267,7 @@ or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact informa
 License
 =======
 
-Copyright (c) 2023 oemof developer group
+Copyright (c) oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

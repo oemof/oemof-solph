@@ -37,7 +37,7 @@ def test_gen_caes():
     periods = len(data) - 1
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=periods, freq="H")
+    idx = pd.date_range("1/1/2017", periods=periods, freq="h")
     es = EnergySystem(timeindex=idx, infer_last_interval=True)
 
     # resources

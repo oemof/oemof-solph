@@ -34,7 +34,7 @@ class TestParameterResult:
             timeindex=pandas.date_range(
                 "2016-01-01",
                 periods=cls.period,
-                freq="H",
+                freq="h",
             ),
             infer_last_interval=True,
         )
@@ -290,7 +290,7 @@ class TestParameterResult:
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]
-        self.mod.flow[trsf, bus, 0, 5] = float("nan")
+        self.mod.flow[trsf, bus, 5] = float("nan")
         with pytest.raises(ValueError):
             processing.results(self.mod)
 
