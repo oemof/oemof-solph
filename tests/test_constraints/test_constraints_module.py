@@ -1,68 +1,114 @@
+import numpy as np
 import pandas as pd
+import pytest
 
 from oemof import solph
 
 
-def test_special():
-    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
+def test_integral_limit():
+    periods = 5
+    integral_limit1 = 250
+    low_emission_flow_limit = 500
+    integral_weight1 = 0.8
+    integral_weight3 = 1.0
+    emission_factor_low = 0.5
+    emission_factor_high = 1
+    high_emission_flow_limit = 200
+    emission_limit = (
+        emission_factor_low * low_emission_flow_limit
+        + emission_factor_high * high_emission_flow_limit
+    )
+
+    date_time_index = pd.date_range("1/1/2012", periods=periods, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
         infer_last_interval=True,
     )
-    bel = solph.buses.Bus(label="electricityBus")
+    bel = solph.buses.Bus(label="electricityBus", balanced=False)
     flow1 = solph.flows.Flow(
         nominal_value=100,
-        custom_attributes={"my_factor": 0.8},
+        custom_attributes={
+            "my_factor": integral_weight1,
+            "emission_factor": emission_factor_low,
+        },
+        variable_costs=-1,
     )
-    flow2 = solph.flows.Flow(nominal_value=50)
+    flow2 = solph.flows.Flow(
+        nominal_value=50,
+        variable_costs=-0.5,
+    )
+    flow3 = solph.flows.Flow(
+        nominal_value=100,
+        custom_attributes={
+            "my_factor": integral_weight3,
+            "emission_factor": emission_factor_low,
+        },
+        variable_costs=-0.5,
+    )
+    flow4 = solph.flows.Flow(
+        nominal_value=500,
+        custom_attributes={
+            "emission_factor": emission_factor_high,
+        },
+        variable_costs=-0.1,
+    )
+
     src1 = solph.components.Source(label="source1", outputs={bel: flow1})
     src2 = solph.components.Source(label="source2", outputs={bel: flow2})
-    energysystem.add(bel, src1, src2)
+    src3 = solph.components.Source(label="source3", outputs={bel: flow3})
+    src4 = solph.components.Source(label="source4", outputs={bel: flow4})
+    energysystem.add(bel, src1, src2, src3, src4)
     model = solph.Model(energysystem)
-    flow_with_keyword = {
+
+    flows_with_keyword = {
         (src1, bel): flow1,
     }
+
     solph.constraints.generic_integral_limit(
-        model, "my_factor", flow_with_keyword, limit=777
+        model, "my_factor", flows_with_keyword, limit=integral_limit1
+    )
+    solph.constraints.emission_limit(
+        model,
+        limit=emission_limit,
     )
 
+    solph.constraints.generic_integral_limit(
+        model,
+        "my_factor",
+        limit_name="limit_my_factor",
+        limit=low_emission_flow_limit,
+    )
 
-def test_something_else():
-    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index, infer_last_interval=True
+    model.solve(solve_kwargs={"tee": True})
+
+    results = solph.processing.results(model)
+
+    # total limeted to integral_limit1
+    assert integral_weight1 * sum(
+        results[(src1, bel)]["sequences"]["flow"][:-1]
+    ) == pytest.approx(integral_limit1)
+
+    # unconstrained, full load all the time
+    assert (
+        np.array(results[(src2, bel)]["sequences"]["flow"][:-1])
+        == np.full(periods, 50)
+    ).all()
+
+    # have my_factor, limited to low_emission_flow_limit
+    assert integral_weight1 * sum(
+        results[(src1, bel)]["sequences"]["flow"][:-1]
+    ) + integral_weight3 * sum(
+        results[(src3, bel)]["sequences"]["flow"][:-1]
+    ) == pytest.approx(
+        low_emission_flow_limit
     )
-    bel1 = solph.buses.Bus(label="electricity1")
-    bel2 = solph.buses.Bus(label="electricity2")
-    energysystem.add(bel1, bel2)
-    energysystem.add(
-        solph.components.Converter(
-            label="powerline_1_2",
-            inputs={bel1: solph.flows.Flow()},
-            outputs={
-                bel2: solph.flows.Flow(
-                    nominal_value=solph.Investment(ep_costs=20)
-                )
-            },
-        )
-    )
-    energysystem.add(
-        solph.components.Converter(
-            label="powerline_2_1",
-            inputs={bel2: solph.flows.Flow()},
-            outputs={
-                bel1: solph.flows.Flow(
-                    nominal_value=solph.Investment(ep_costs=20)
-                )
-            },
-        )
-    )
-    om = solph.Model(energysystem)
-    line12 = energysystem.groups["powerline_1_2"]
-    line21 = energysystem.groups["powerline_2_1"]
-    solph.constraints.equate_variables(
-        om,
-        om.InvestmentFlowBlock.invest[line12, bel2, 0],
-        om.InvestmentFlowBlock.invest[line21, bel1, 0],
-        name="my_name",
+
+    assert emission_factor_low * sum(
+        results[(src1, bel)]["sequences"]["flow"][:-1]
+    ) + emission_factor_low * sum(
+        results[(src3, bel)]["sequences"]["flow"][:-1]
+    ) + emission_factor_high * sum(
+        results[(src4, bel)]["sequences"]["flow"][:-1]
+    ) == pytest.approx(
+        emission_limit
     )
