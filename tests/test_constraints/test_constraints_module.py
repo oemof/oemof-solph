@@ -79,7 +79,7 @@ def test_integral_limit():
         limit=low_emission_flow_limit,
     )
 
-    model.solve(solve_kwargs={"tee": True})
+    model.solve()
 
     results = solph.processing.results(model)
 
