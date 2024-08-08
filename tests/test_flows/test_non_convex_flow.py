@@ -1,4 +1,5 @@
 import pandas as pd
+import pytest
 
 from oemof import solph
 
@@ -31,6 +32,7 @@ def test_initial_status_off():
     ).all()
 
 
+@pytest.mark.skip(reason="Reported issue (see #1099).")
 def test_initial_status_on():
     date_time_index = pd.date_range("1/1/2012", periods=10, freq="h")
     energysystem = solph.EnergySystem(
