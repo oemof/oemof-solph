@@ -19,10 +19,9 @@ SPDX-FileCopyrightText: Francesco Witte
 SPDX-License-Identifier: MIT
 
 """
-import numpy as np
-
 from warnings import warn
 
+import numpy as np
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
