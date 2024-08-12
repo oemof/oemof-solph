@@ -14,21 +14,21 @@ from oemof.solph._plumbing import sequence
 def test_sequence():
     seq0 = sequence(0)
     assert seq0[0] == 0
-    assert len(seq0) == 1
+    assert seq0.size == None
 
     assert seq0[10] == 0
-    assert len(seq0) == 11
+    assert seq0.size == None
 
-    assert max(seq0) == 0
+    assert seq0.max() == 0
 
     seq10 = sequence(10)
-    assert max(seq10) == 10
+    assert seq10.max() == 10
 
     assert seq10[0] == 10
-    assert len(seq10) == 1
+    assert seq10.size == None
 
-    assert seq10[10] == 10
-    assert len(seq10) == 11
+    seq10.size = 10
+    assert seq10.size == 10
 
     seq12 = sequence([1, 3])
     assert max(seq12) == 3

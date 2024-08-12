@@ -191,12 +191,11 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         ]["label"]
         == "('fixed_chp', 'gas')"
     )
-    assert (
+    assert float(
         parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)][
             "scalars"
         ]["conversion_factors_('electricity', 2)"]
-        == 0.3
-    )
+    ) == pytest.approx(0.3)
 
     # objective function
     assert solph.processing.meta_results(om)["objective"] == pytest.approx(

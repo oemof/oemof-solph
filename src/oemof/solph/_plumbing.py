@@ -52,6 +52,7 @@ def sequence(iterable_or_scalar):
     if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
         iterable_or_scalar, str
     ):
+
         return np.array(iterable_or_scalar)
     else:
         return _FakeSequence(value=iterable_or_scalar)
@@ -77,29 +78,50 @@ class _FakeSequence:
     42
     """
 
-    def __init__(self, value, length=1):
+    def __init__(self, value, length=None):
         self._value = value
         self._length = length
 
     @property
-    def length(self):
+    def size(self):
         return self._length
 
-    @length.setter
-    def length(self, value):
+    @size.setter
+    def size(self, value):
         self._length = value
+
+    def __int__(self):
+        return int(self._value)
+
+    def __float__(self):
+        return float(self._value)
 
     def __getitem__(self, _):
         return self._value
 
     def __repr__(self):
-        return str([i for i in self])
+        if self._length is not None:
+            return str([i for i in self])
+        else:
+            return f"[{self._value}, {self._value}, ..., {self._value}]"
 
     def __len__(self):
         return self._length
 
     def __iter__(self):
         return repeat(self._value, self._length)
+
+    def max(self):
+        return self._value
+
+    def min(self):
+        return self._value
+
+    def sum(self):
+        if self._length in None:
+            return np.inf
+        else:
+            return self._length * self._value
 
     def to_numpy(self, length=None):
         if length is not None:
