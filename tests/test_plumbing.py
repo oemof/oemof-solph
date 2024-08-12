@@ -14,10 +14,10 @@ from oemof.solph._plumbing import sequence
 def test_sequence():
     seq0 = sequence(0)
     assert seq0[0] == 0
-    assert seq0.size == None
+    assert seq0.size is None
 
     assert seq0[10] == 0
-    assert seq0.size == None
+    assert seq0.size is None
 
     assert seq0.max() == 0
 
@@ -25,7 +25,7 @@ def test_sequence():
     assert seq10.max() == 10
 
     assert seq10[0] == 10
-    assert seq10.size == None
+    assert seq10.size is None
 
     seq10.size = 10
     assert seq10.size == 10

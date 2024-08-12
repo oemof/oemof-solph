@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-from collections import UserList
 from collections import abc
 from itertools import repeat
 

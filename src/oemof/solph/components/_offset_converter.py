@@ -21,7 +21,6 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-import numpy as np
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
