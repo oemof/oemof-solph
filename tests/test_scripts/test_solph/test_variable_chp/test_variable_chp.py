@@ -191,7 +191,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         ]["label"]
         == "('fixed_chp', 'gas')"
     )
-    assert float(
+    assert (
         parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)][
             "scalars"
         ]["conversion_factors_('electricity', 2)"]
