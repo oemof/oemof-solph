@@ -128,3 +128,7 @@ class _FakeSequence:
             return np.full(length, self._value)
         else:
             return np.full(len(self), self._value)
+
+    @property
+    def value(self):
+        return self._value
