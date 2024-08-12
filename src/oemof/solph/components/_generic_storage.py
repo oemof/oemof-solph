@@ -1127,7 +1127,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     "For a multi-period investment model, fixed absolute"
                     " losses are not supported. Please remove parameter."
                 )
-                if n.fixed_losses_absolute.default != 0:
+                if n.fixed_losses_absolute[0] != 0:
                     raise ValueError(error_fixed_absolute_losses)
                 error_initial_storage_level = (
                     "For a multi-period model, initial_storage_level is"
