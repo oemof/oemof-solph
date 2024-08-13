@@ -21,6 +21,8 @@ Bug fixes
 Other changes
 #############
 
+* Refined internal sequence generation. (For e.g. constraint formulations,
+  Scalars are internally mapped to fake sequences without a defined length.)
 
 Known issues
 ############
