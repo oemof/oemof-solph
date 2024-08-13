@@ -55,14 +55,14 @@ def test_initial_status_on():
     assert (flow_result["flow"][:-1] == 3 * [5] + 7 * [0]).all()
 
 
-def test_activity_costs_start_on():
+def test_activity_costs():
     # activity costs higher then revenue for first time steps
     flow = solph.flows.Flow(
         nominal_value=10,
         min=0.1,
         max=[i * 0.1 for i in range(10)],
-        nonconvex=solph.NonConvex(activity_costs=1),
-        variable_costs=9 * [-0.45] + [10],
+        nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
+        variable_costs=-0.45,
     )
     flow_result = _run_model(flow)["flow"][:-1]
 
