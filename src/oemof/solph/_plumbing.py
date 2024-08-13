@@ -88,12 +88,6 @@ class _FakeSequence:
     def size(self, value):
         self._length = value
 
-    def __int__(self):
-        return int(self._value)
-
-    def __float__(self):
-        return float(self._value)
-
     def __getitem__(self, _):
         return self._value
 
