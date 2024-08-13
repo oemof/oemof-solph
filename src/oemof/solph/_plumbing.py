@@ -18,7 +18,7 @@ import numpy as np
 
 
 def sequence(iterable_or_scalar):
-    """Tests if an object is iterable (except string) or scalar and returns
+    """Checks if an object is iterable (except string) or scalar and returns
     the original sequence if object is an iterable and an 'emulated'
     sequence object of class _Sequence if object is a scalar or string.
 
@@ -48,10 +48,9 @@ def sequence(iterable_or_scalar):
     10
 
     """
-    if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
-        iterable_or_scalar, str
-    ):
-
+    if isinstance(iterable_or_scalar, str):
+        return iterable_or_scalar
+    elif isinstance(iterable_or_scalar, abc.Iterable):
         return np.array(iterable_or_scalar)
     else:
         return _FakeSequence(value=iterable_or_scalar)
@@ -117,7 +116,7 @@ class _FakeSequence:
         return self._value
 
     def sum(self):
-        if self._length in None:
+        if self._length is None:
             return np.inf
         else:
             return self._length * self._value
