@@ -42,6 +42,30 @@ def test_initial_status_off():
     assert (flow_result["flow"][:-1] == 5 * [0] + 5 * [10]).all()
 
 
+def test_maximum_shutdowns():
+    flow = solph.flows.Flow(
+        nominal_value=10,
+        min=0.5,
+        nonconvex=solph.NonConvex(maximum_shutdowns=1),
+        variable_costs=[1, -2, 1, 1, 1, -5, 1, 1, 1, -2],
+    )
+    flow_result = _run_model(flow)
+
+    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 1]
+
+
+def test_maximum_startups():
+    flow = solph.flows.Flow(
+        nominal_value=10,
+        min=0.5,
+        nonconvex=solph.NonConvex(maximum_startups=1),
+        variable_costs=[1, -4, 1, 1, 1, -5, 1, 1, 5, -3],
+    )
+    flow_result = _run_model(flow)
+
+    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+
+
 def test_initial_status_on():
     # positive costs but turned on initially
     flow = solph.flows.Flow(
