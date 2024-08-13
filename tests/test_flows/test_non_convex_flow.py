@@ -69,6 +69,19 @@ def test_activity_costs():
     assert (flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]).all()
 
 
+def test_inactivity_costs():
+    # inactivity costs lower then running costs for middle time steps
+    flow = solph.flows.Flow(
+        nominal_value=10,
+        min=[i * 0.1 for i in range(10)],
+        nonconvex=solph.NonConvex(inactivity_costs=9 * [1] + [10]),
+        variable_costs=0.45,
+    )
+    flow_result = _run_model(flow)["flow"][:-1]
+
+    assert (flow_result == [0, 1, 2, 0, 0, 0, 0, 0, 0, 9]).all()
+
+
 def test_startup_costs_start_off():
     price_pattern = [1, 1, 1, -4, 1, 1, 1, -4, 1, 1]
 
