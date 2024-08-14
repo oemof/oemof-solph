@@ -1111,11 +1111,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _create(self, group=None):
+    def _create(self, group):
         """Create a storage block for investment modeling"""
         m = self.parent_block()
-        if group is None:
-            return None
 
         # ########################## CHECKS ###################################
         if m.es.periods is not None:
@@ -1215,7 +1213,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             self.INVESTSTORAGES, m.TIMEPOINTS, within=NonNegativeReals
         )
 
-        def _storage_investvar_bound_rule(block, n, p):
+        def _storage_investvar_bound_rule(_, n, p):
             """
             Rule definition to bound the invested storage capacity `invest`.
             """
