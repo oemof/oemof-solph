@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-from collections import UserList
 from collections import abc
 from itertools import repeat
 
@@ -19,7 +18,7 @@ import numpy as np
 
 
 def sequence(iterable_or_scalar):
-    """Tests if an object is iterable (except string) or scalar and returns
+    """Checks if an object is iterable (except string) or scalar and returns
     the original sequence if object is an iterable and an 'emulated'
     sequence object of class _Sequence if object is a scalar or string.
 
@@ -47,64 +46,81 @@ def sequence(iterable_or_scalar):
 
     >>> x[10]
     10
-    >>> print(x)
-    [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
 
     """
-    if isinstance(iterable_or_scalar, abc.Iterable) and not isinstance(
-        iterable_or_scalar, str
-    ):
+    if isinstance(iterable_or_scalar, str):
+        return iterable_or_scalar
+    elif isinstance(iterable_or_scalar, abc.Iterable):
         return np.array(iterable_or_scalar)
     else:
-        return _Sequence(default=iterable_or_scalar)
+        return _FakeSequence(value=iterable_or_scalar)
 
 
-class _Sequence(UserList):
+class _FakeSequence:
     """Emulates a list whose length is not known in advance.
 
     Parameters
     ----------
-    source:
-    default:
+    value : scalar
+    length : integer
 
 
     Examples
     --------
-    >>> s = _Sequence(default=42)
-    >>> len(s)
-    1
-    >>> s[1]
-    42
-    >>> s[2]
-    42
-    >>> len(s)
-    3
+    >>> s = _FakeSequence(value=42, length=5)
     >>> s
-    [42, 42, 42]
-    >>> s[8]
+    [42, 42, 42, 42, 42]
+    >>> s = _FakeSequence(value=42)
+    >>> # undefined lenght, access still works
+    >>> s[1337]
     42
-
-
     """
 
-    def __init__(self, *args, **kwargs):
-        self.default = kwargs["default"]
-        self.default_changed = False
-        self.highest_index = 0
-        super().__init__(*args)
+    def __init__(self, value, length=None):
+        self._value = value
+        self._length = length
 
-    def __getitem__(self, key):
-        self.highest_index = max(self.highest_index, key)
-        return self.default
+    @property
+    def size(self):
+        return self._length
 
-    def __init_list(self):
-        self.data = [self.default] * (self.highest_index + 1)
+    @size.setter
+    def size(self, value):
+        self._length = value
+
+    def __getitem__(self, _):
+        return self._value
 
     def __repr__(self):
-        return str([i for i in self])
+        if self._length is not None:
+            return str([i for i in self])
+        else:
+            return f"[{self._value}, {self._value}, ..., {self._value}]"
 
     def __len__(self):
-        return max(len(self.data), self.highest_index + 1)
+        return self._length
 
     def __iter__(self):
-        return repeat(self.default, self.highest_index + 1)
+        return repeat(self._value, self._length)
+
+    def max(self):
+        return self._value
+
+    def min(self):
+        return self._value
+
+    def sum(self):
+        if self._length is None:
+            return np.inf
+        else:
+            return self._length * self._value
+
+    def to_numpy(self, length=None):
+        if length is not None:
+            return np.full(length, self._value)
+        else:
+            return np.full(len(self), self._value)
+
+    @property
+    def value(self):
+        return self._value
