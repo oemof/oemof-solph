@@ -216,3 +216,131 @@ def test_invest_content_uncoupled():
         result[(storage, None)]["sequences"]["storage_content"]
     )
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
+
+
+def test_invest_content_minimum():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(
+            year=2023,
+            number=10,
+        ),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        "storage",
+        inputs={bus: solph.Flow(nominal_value=2, variable_costs=-2)},
+        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        nominal_storage_capacity=solph.Investment(
+            ep_costs=0.1,
+            minimum=32,
+        ),
+        initial_storage_level=0,
+        balanced=False,
+    )
+    es.add(storage)
+
+    model = solph.Model(es)
+    model.solve("cbc")
+
+    result = solph.processing.results(model)
+    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
+    assert list(storage_inflow)[:-1] == 10 * [2]
+
+    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_cpacity == pytest.approx(32)
+
+    storage_content = list(
+        result[(storage, None)]["sequences"]["storage_content"]
+    )
+    assert storage_content == pytest.approx([i * 2 for i in range(0, 11)])
+
+
+def test_invest_content_minimum_nonconvex():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(
+            year=2023,
+            number=10,
+        ),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        "storage",
+        inputs={bus: solph.Flow(nominal_value=2, variable_costs=0.1)},
+        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        nominal_storage_capacity=solph.Investment(
+            ep_costs=0.1,
+            minimum=32,
+            nonconvex=solph.NonConvex(),
+        ),
+        balanced=False,
+    )
+    es.add(storage)
+
+    model = solph.Model(es)
+    model.solve("cbc")
+
+    result = solph.processing.results(model)
+    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
+    assert list(storage_inflow)[:-1] == 10 * [0]
+
+    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_cpacity == pytest.approx(0)
+
+    storage_content = list(
+        result[(storage, None)]["sequences"]["storage_content"]
+    )
+    assert storage_content == pytest.approx(11 * [0])
+
+
+def test_invest_content_maximum():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(
+            year=2023,
+            number=10,
+        ),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        "storage",
+        inputs={
+            bus: solph.Flow(
+                nominal_value=2,
+                variable_costs=[-2 + i * 0.01 for i in range(0, 11)],
+            )
+        },
+        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        nominal_storage_capacity=solph.Investment(
+            ep_costs=0.1,
+            maximum=10,
+        ),
+        initial_storage_level=0,
+        balanced=False,
+    )
+    es.add(storage)
+
+    model = solph.Model(es)
+    model.solve("cbc")
+
+    result = solph.processing.results(model)
+
+    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_cpacity == pytest.approx(10)
+
+    storage_content = list(
+        result[(storage, None)]["sequences"]["storage_content"]
+    )
+    assert storage_content == pytest.approx(
+        [min(i * 1.9, 10) for i in range(0, 11)]
+    )
