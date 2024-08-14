@@ -596,9 +596,6 @@ class GenericStorageBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        if not hasattr(self, "STORAGES"):
-            return 0
-
         fixed_costs = 0
 
         if m.es.periods is not None:
@@ -1749,9 +1746,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def _objective_expression(self):
         """Objective expression with fixed and investment costs."""
         m = self.parent_block()
-
-        if not hasattr(self, "INVESTSTORAGES"):
-            return 0
 
         investment_costs = 0
         period_investment_costs = {p: 0 for p in m.PERIODS}
