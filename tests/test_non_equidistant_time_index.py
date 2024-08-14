@@ -24,7 +24,7 @@ from oemof.solph import processing
 class TestParameterResult:
     @classmethod
     def setup_class(cls):
-        dtindex1 = pd.date_range("1/1/2012", periods=24, freq="H")
+        dtindex1 = pd.date_range("1/1/2012", periods=24, freq="h")
         dtindex2 = pd.date_range("1/2/2012", periods=49, freq="30min")
         dtindex = dtindex1.union(dtindex2)
         es = EnergySystem(timeindex=dtindex, infer_last_interval=False)

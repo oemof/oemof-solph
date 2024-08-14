@@ -63,7 +63,7 @@ def test_tuples_as_labels_example(
     filename="storage_investment.csv", solver="cbc"
 ):
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=40, freq="h")
 
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
@@ -217,8 +217,8 @@ def test_tuples_as_labels_example(
     # Problem results
     assert int(meta["problem"]["Lower bound"]) == 37819254
     assert int(meta["problem"]["Upper bound"]) == 37819254
-    assert meta["problem"]["Number of variables"] == 280
-    assert meta["problem"]["Number of constraints"] == 162
+    assert meta["problem"]["Number of variables"] == 320
+    assert meta["problem"]["Number of constraints"] == 202
     assert meta["problem"]["Number of nonzeros"] == 116
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"

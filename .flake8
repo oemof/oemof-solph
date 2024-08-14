@@ -1,0 +1,4 @@
+[flake8]
+max-line-length = 79
+exclude = */migrations/*, docs/conf.py
+ignore = E203, W503

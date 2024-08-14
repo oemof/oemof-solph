@@ -1,0 +1,34 @@
+v0.5.4
+------
+
+API changes
+###########
+
+* Explicitly allow to have multiple inputs or outputs for Sinks and Sources,
+  respectively.
+
+New features
+############
+
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Known issues
+############
+
+* Incompatible to numpy >= 2.0.0. This is because of Pyomo, but we have to
+  enforce a lower version in our package.
+
+Contributors
+############
+
+* Patrik Schönfeldt

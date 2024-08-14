@@ -50,7 +50,7 @@ def main():
     # used.
     gradient = 0.01
 
-    date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=48, freq="h")
     print(date_time_index)
     energysystem = EnergySystem(
         timeindex=date_time_index, infer_last_interval=True

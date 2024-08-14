@@ -270,13 +270,6 @@ class GenericStorage(Node):
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
-        if self.investment and self.nominal_storage_capacity is not None:
-            e1 = (
-                "If an investment object is defined the invest variable "
-                "replaces the nominal_storage_capacity.\n Therefore the "
-                "nominal_storage_capacity should be 'None'.\n"
-            )
-            raise AttributeError(e1)
         if (
             self.invest_relation_input_output is not None
             and self.invest_relation_output_capacity is not None
@@ -365,11 +358,14 @@ class GenericStorageBlock(ScalarBlock):
         .. math::
             E(t_{last}) = E(-1)
 
-    Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(t) = &E(t-1) \cdot
-            (1 - \beta(t)) ^{\tau(t)/(t_u)} \\
+    Storage losses :attr:`om.Storage.losses[n, t]`
+        .. math:: E_{loss}(t) = &E(t-1) \cdot
+            1 - (1 - \beta(t))^{\tau(t)/(t_u)} \\
             &- \gamma(t)\cdot E_{nom} \cdot {\tau(t)/(t_u)}\\
-            &- \delta(t) \cdot {\tau(t)/(t_u)}\\
+            &- \delta(t) \cdot {\tau(t)/(t_u)}
+
+    Storage balance :attr:`om.Storage.balance[n, t]`
+        .. math:: E(t) = &E(t-1) - E_{loss}(t)
             &- \frac{\dot{E}_o(p, t)}{\eta_o(t)} \cdot \tau(t)
             + \dot{E}_i(p, t) \cdot \eta_i(t) \cdot \tau(t)
 
@@ -504,6 +500,8 @@ class GenericStorageBlock(ScalarBlock):
             self.STORAGES, m.TIMEPOINTS, bounds=_storage_content_bound_rule
         )
 
+        self.storage_losses = Var(self.STORAGES, m.TIMESTEPS)
+
         # set the initial storage content
         # ToDo: More elegant code possible?
         for n in group:
@@ -515,16 +513,9 @@ class GenericStorageBlock(ScalarBlock):
 
         #  ************* Constraints ***************************
 
-        def _storage_balance_rule(block, n, p, t):
-            """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
-            """
-            expr = 0
-            expr += block.storage_content[n, t + 1]
-            expr += (
-                -block.storage_content[n, t]
-                * (1 - n.loss_rate[t]) ** m.timeincrement[t]
+        def _storage_losses_rule(block, n, t):
+            expr = block.storage_content[n, t] * (
+                1 - (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
                 n.fixed_losses_relative[t]
@@ -532,16 +523,30 @@ class GenericStorageBlock(ScalarBlock):
                 * m.timeincrement[t]
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
+
+            return expr == block.storage_losses[n, t]
+
+        self.losses = Constraint(
+            self.STORAGES, m.TIMESTEPS, rule=_storage_losses_rule
+        )
+
+        def _storage_balance_rule(block, n, t):
+            """
+            Rule definition for the storage balance of every storage n and
+            every timestep.
+            """
+            expr = block.storage_content[n, t]
+            expr -= block.storage_losses[n, t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
-            expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+            expr -= (
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
-            return expr == 0
+            return expr == block.storage_content[n, t + 1]
 
         self.balance = Constraint(
-            self.STORAGES, m.TIMEINDEX, rule=_storage_balance_rule
+            self.STORAGES, m.TIMESTEPS, rule=_storage_balance_rule
         )
 
         def _balanced_storage_rule(block, n):
@@ -1023,6 +1028,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         of the storage"
         ":math:`E(t)`", ":attr:`storage_content[n, t]`", "Current storage
         content (current absolute stored energy)"
+        ":math:`E_{loss}(t)`", ":attr:`storage_losses[n, t]`", "Current storage
+        losses (absolute losses per time step)"
         ":math:`E_{invest}(p)`", ":attr:`invest[n, p]`", "Invested (nominal)
         capacity of the storage"
         ":math:`E_{old}(p)`", ":attr:`old[n, p]`", "
@@ -1514,10 +1521,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 
