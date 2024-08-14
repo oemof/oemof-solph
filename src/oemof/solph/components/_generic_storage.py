@@ -1219,7 +1219,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             """
             if n in self.CONVEX_INVESTSTORAGES:
                 return n.investment.minimum[p], n.investment.maximum[p]
-            elif n in self.NON_CONVEX_INVESTSTORAGES:
+            else:  # n in self.NON_CONVEX_INVESTSTORAGES
                 return 0, n.investment.maximum[p]
 
         self.invest = Var(
