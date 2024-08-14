@@ -1716,7 +1716,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 )
                 return expr
 
-            # Set the lower bound of the storage content if the attribute exists
             self.min_storage_content = Constraint(
                 self.MIN_INVESTSTORAGES,
                 m.TIMEPOINTS,
@@ -1752,7 +1751,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 )
                 return expr
 
-            # Set the lower bound of the storage content if the attribute exists
             self.min_storage_content = Constraint(
                 self.MIN_INVESTSTORAGES,
                 m.TIMEINDEX,
