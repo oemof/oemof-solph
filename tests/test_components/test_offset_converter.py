@@ -107,9 +107,8 @@ def add_OffsetConverter(
 ):
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
-    with warnings.catch_warnings(
-        action="ignore", category=ExperimentalFeatureWarning
-    ):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
         oc_inputs = {
             b: solph.Flow()
             for label, b in es.node.items()
@@ -488,9 +487,8 @@ def test_two_OffsetConverters_with_and_without_investment():
 
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
-    with warnings.catch_warnings(
-        action="ignore", category=ExperimentalFeatureWarning
-    ):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
         fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
         fix_flow.fix = [v * 2 for v in fix_flow.fix]
     # if the model solves it is feasible
@@ -508,9 +506,8 @@ def test_OffsetConverter_05x_compatibility():
 
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
-    with warnings.catch_warnings(
-        action="ignore", category=ExperimentalFeatureWarning
-    ):
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=ExperimentalFeatureWarning)
         fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
         fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
         fix_flow.fix = fix
