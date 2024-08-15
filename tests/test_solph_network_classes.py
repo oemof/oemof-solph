@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
+from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
 
@@ -60,20 +61,22 @@ class TestConverterClass:
         with pytest.raises(IndexError):
             self.a = transf.conversion_factors[self.bus][6]
 
-    @pytest.mark.filterwarnings("ignore:Attribute <outputs>:UserWarning")
     def test_converter_missing_output_create_empty_dict(self):
-        trfr = solph.components.Converter(inputs={})
-        assert trfr.outputs == {}
+        with pytest.warns(SuspiciousUsageWarning):
+            trfr = solph.components.Converter(inputs={})
+            assert trfr.outputs == {}
 
-    @pytest.mark.filterwarnings("ignore:Attribute <inputs>:UserWarning")
     def test_converter_missing_input_create_empty_dict(self):
-        trfr = solph.components.Converter(outputs={})
-        assert trfr.inputs == {}
+        with pytest.warns(SuspiciousUsageWarning):
+            trfr = solph.components.Converter(outputs={})
+            assert trfr.inputs == {}
 
 
 def test_transformer_wrapper():
     with pytest.warns(FutureWarning):
-        solph.components.Transformer()
+        # no inputs/outputs
+        with pytest.warns(SuspiciousUsageWarning):
+            solph.components.Transformer()
 
 
 def test_offset_transformer_wrapper():

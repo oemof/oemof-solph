@@ -2,6 +2,7 @@ import warnings
 
 import numpy as np
 import pytest
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 from oemof.solph._plumbing import sequence
@@ -104,58 +105,67 @@ def check_results(
 def add_OffsetConverter(
     es, reference_bus, nominal_value, minimal_value, eta_at_nom, eta_at_min
 ):
+    # Use of experimental API to access nodes by label.
+    # Can be removed with future release of network.
+    with warnings.catch_warnings(
+        action="ignore", category=ExperimentalFeatureWarning
+    ):
+        oc_inputs = {
+            b: solph.Flow()
+            for label, b in es.node.items()
+            if "bus input" in label
+        }
+        oc_outputs = {
+            b: solph.Flow()
+            for label, b in es.node.items()
+            if "bus output" in label
+        }
 
-    oc_inputs = {
-        b: solph.Flow() for label, b in es.node.items() if "bus input" in label
-    }
-    oc_outputs = {
-        b: solph.Flow()
-        for label, b in es.node.items()
-        if "bus output" in label
-    }
+        if reference_bus in oc_outputs:
+            f = oc_outputs[reference_bus]
+            get_slope_and_offset = slope_offset_from_nonconvex_output
+            fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
+        else:
+            f = oc_inputs[reference_bus]
+            get_slope_and_offset = slope_offset_from_nonconvex_input
+            fix = [0] + np.linspace(
+                minimal_value * eta_at_min[es.node["bus output 0"]],
+                nominal_value * eta_at_nom[es.node["bus output 0"]],
+                9,
+            ).tolist()
 
-    if reference_bus in oc_outputs:
-        f = oc_outputs[reference_bus]
-        get_slope_and_offset = slope_offset_from_nonconvex_output
-        fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
-    else:
-        f = oc_inputs[reference_bus]
-        get_slope_and_offset = slope_offset_from_nonconvex_input
-        fix = [0] + np.linspace(
-            minimal_value * eta_at_min[es.node["bus output 0"]],
-            nominal_value * eta_at_nom[es.node["bus output 0"]],
-            9,
-        ).tolist()
+        fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
+        fix_flow.fix = fix
+        fix_flow.nominal_value = 1
 
-    fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
-    fix_flow.fix = fix
-    fix_flow.nominal_value = 1
+        slopes = {}
+        offsets = {}
 
-    slopes = {}
-    offsets = {}
+        for bus in list(oc_inputs) + list(oc_outputs):
+            if bus == reference_bus:
+                continue
+            slope, offset = get_slope_and_offset(
+                1,
+                minimal_value / nominal_value,
+                eta_at_nom[bus],
+                eta_at_min[bus],
+            )
+            slopes[bus] = slope
+            offsets[bus] = offset
 
-    for bus in list(oc_inputs) + list(oc_outputs):
-        if bus == reference_bus:
-            continue
-        slope, offset = get_slope_and_offset(
-            1, minimal_value / nominal_value, eta_at_nom[bus], eta_at_min[bus]
+        f.nonconvex = solph.NonConvex()
+        f.nominal_value = nominal_value
+        f.min = sequence(minimal_value / nominal_value)
+
+        oc = solph.components.OffsetConverter(
+            label="offset converter",
+            inputs=oc_inputs,
+            outputs=oc_outputs,
+            conversion_factors=slopes,
+            normed_offsets=offsets,
         )
-        slopes[bus] = slope
-        offsets[bus] = offset
 
-    f.nonconvex = solph.NonConvex()
-    f.nominal_value = nominal_value
-    f.min = sequence(minimal_value / nominal_value)
-
-    oc = solph.components.OffsetConverter(
-        label="offset converter",
-        inputs=oc_inputs,
-        outputs=oc_outputs,
-        conversion_factors=slopes,
-        normed_offsets=offsets,
-    )
-
-    es.add(oc)
+        es.add(oc)
 
 
 def test_custom_properties():
@@ -476,8 +486,13 @@ def test_two_OffsetConverters_with_and_without_investment():
 
     es.add(oc)
 
-    fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
-    fix_flow.fix = [v * 2 for v in fix_flow.fix]
+    # Use of experimental API to access nodes by label.
+    # Can be removed with future release of network.
+    with warnings.catch_warnings(
+        action="ignore", category=ExperimentalFeatureWarning
+    ):
+        fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
+        fix_flow.fix = [v * 2 for v in fix_flow.fix]
     # if the model solves it is feasible
     _ = solve_and_extract_results(es)
 
@@ -491,10 +506,15 @@ def test_OffsetConverter_05x_compatibility():
     nominal_value = 10
     minimal_value = 3
 
-    fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
-    fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
-    fix_flow.fix = fix
-    fix_flow.nominal_value = 1
+    # Use of experimental API to access nodes by label.
+    # Can be removed with future release of network.
+    with warnings.catch_warnings(
+        action="ignore", category=ExperimentalFeatureWarning
+    ):
+        fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
+        fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
+        fix_flow.fix = fix
+        fix_flow.nominal_value = 1
 
     eta_at_nom = 0.7
     eta_at_min = 0.5
