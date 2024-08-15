@@ -27,7 +27,7 @@ def test_multi_input_sink():
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', ExperimentalFeatureWarning)
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
         es.add(
             solph.components.Sink(
                 inputs={
