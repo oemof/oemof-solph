@@ -293,7 +293,7 @@ class Flow(Edge):
         if (
             self.investment
             and self.nonconvex
-            and not np.isfinite(self.investment.maximum)
+            and not np.isfinite(self.investment.maximum.max())
         ):
             raise AttributeError(
                 "Investment into a non-convex flows needs a maximum "

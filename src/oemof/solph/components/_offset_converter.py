@@ -19,7 +19,6 @@ SPDX-FileCopyrightText: Francesco Witte
 SPDX-License-Identifier: MIT
 
 """
-
 from warnings import warn
 
 from oemof.network import Node
@@ -280,16 +279,14 @@ class OffsetConverter(Node):
         input_bus = list(self.inputs.values())[0].input
         for flow in self.outputs.values():
 
-            max_len = max(
-                len(flow.max),
-                len(flow.min),
-                len(coefficients[0]),
-                len(coefficients[1]),
-            )
+            if flow.max.size is not None:
+                target_len = flow.max.size
+            else:
+                target_len = 1
 
             slope = []
             offset = []
-            for i in range(max_len):
+            for i in range(target_len):
                 eta_at_max = (
                     flow.max[i]
                     * coefficients[1][i]
@@ -307,7 +304,7 @@ class OffsetConverter(Node):
                 slope.append(c0)
                 offset.append(c1)
 
-            if max_len == 1:
+            if target_len == 1:
                 slope = slope[0]
                 offset = offset[0]
 

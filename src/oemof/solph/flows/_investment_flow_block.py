@@ -141,11 +141,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
         self.MIN_INVESTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if (g[2].min[0] != 0 or len(g[2].min) > 1)
-            ]
+            initialize=[(g[0], g[1]) for g in group if g[2].min.min() != 0]
         )
 
         self.EXISTING_INVESTFLOWS = Set(
