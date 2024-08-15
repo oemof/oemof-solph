@@ -8,8 +8,6 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-License-Identifier: MIT
 """
 
-import pandas as pd
-
 from oemof import solph
 
 from . import _run_flow_model
