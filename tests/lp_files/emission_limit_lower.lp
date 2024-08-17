@@ -6,31 +6,25 @@ objective:
 
 s.t.
 
-c_u_integral_limit_emission_factor_upper_limit_:
-+0.5 flow(source1_electricityBus_0)
--1.0 flow(source1_electricityBus_1)
-+2.0 flow(source1_electricityBus_2)
-+3.5 flow(source2_electricityBus_0)
-+3.5 flow(source2_electricityBus_1)
-+3.5 flow(source2_electricityBus_2)
-<= 777
+c_l_integral_limit_emission_factor_lower_limit_:
++0.8 flow(source1_electricityBus_0)
++0.8 flow(source1_electricityBus_1)
++0.8 flow(source1_electricityBus_2)
+>= 777
 
 c_e_BusBlock_balance(electricityBus_0)_:
 +1 flow(source1_electricityBus_0)
 +1 flow(source2_electricityBus_0)
-+1 flow(source3_electricityBus_0)
 = 0
 
 c_e_BusBlock_balance(electricityBus_1)_:
 +1 flow(source1_electricityBus_1)
 +1 flow(source2_electricityBus_1)
-+1 flow(source3_electricityBus_1)
 = 0
 
 c_e_BusBlock_balance(electricityBus_2)_:
 +1 flow(source1_electricityBus_2)
 +1 flow(source2_electricityBus_2)
-+1 flow(source3_electricityBus_2)
 = 0
 
 bounds
@@ -41,7 +35,4 @@ bounds
    0 <= flow(source2_electricityBus_0) <= 100
    0 <= flow(source2_electricityBus_1) <= 100
    0 <= flow(source2_electricityBus_2) <= 100
-   0 <= flow(source3_electricityBus_0) <= 100
-   0 <= flow(source3_electricityBus_1) <= 100
-   0 <= flow(source3_electricityBus_2) <= 100
 end

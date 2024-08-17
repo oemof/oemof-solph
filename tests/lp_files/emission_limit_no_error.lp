@@ -6,7 +6,7 @@ objective:
 
 s.t.
 
-c_u_integral_limit_emission_factor_constraint_:
+c_u_integral_limit_emission_factor_upper_limit_:
 +0.8 flow(source1_electricityBus_0)
 +0.8 flow(source1_electricityBus_1)
 +0.8 flow(source1_electricityBus_2)
