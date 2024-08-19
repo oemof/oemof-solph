@@ -230,14 +230,14 @@ class NonConvexFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if max(g[2].nonconvex.minimum_uptime) > 0
+                if g[2].nonconvex.minimum_uptime.max() > 0
             ]
         )
         self.MINDOWNTIMEFLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if max(g[2].nonconvex.minimum_downtime) > 0
+                if g[2].nonconvex.minimum_downtime.max() > 0
             ]
         )
         self.NEGATIVE_GRADIENT_FLOWS = Set(

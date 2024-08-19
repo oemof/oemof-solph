@@ -149,59 +149,106 @@ c_e_ConverterBlock_relation(boiler_gas_heat_7)_:
 -1 flow(boiler_heat_7)
 = 0
 
+c_e_GenericStorageBlock_losses(storage_0)_:
+-1 GenericStorageBlock_storage_losses(storage_0)
+= -30.0
+
+c_e_GenericStorageBlock_losses(storage_1)_:
+-1 GenericStorageBlock_storage_losses(storage_1)
++0.1 GenericStorageBlock_storage_content(storage_1)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_2)_:
+-1 GenericStorageBlock_storage_losses(storage_2)
++0.1 GenericStorageBlock_storage_content(storage_2)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_3)_:
+-1 GenericStorageBlock_storage_losses(storage_3)
++0.19 GenericStorageBlock_storage_content(storage_3)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_4)_:
+-1 GenericStorageBlock_storage_losses(storage_4)
++0.19 GenericStorageBlock_storage_content(storage_4)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_5)_:
+-1 GenericStorageBlock_storage_losses(storage_5)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_5)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_6)_:
+-1 GenericStorageBlock_storage_losses(storage_6)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_6)
+= 0
+
+c_e_GenericStorageBlock_losses(storage_7)_:
+-1 GenericStorageBlock_storage_losses(storage_7)
++0.05131670194948623 GenericStorageBlock_storage_content(storage_7)
+= 0
+
 c_e_GenericStorageBlock_balance(storage_0)_:
--1 flow(heat_storage_0)
-+1 flow(storage_heat_0)
-+1 GenericStorageBlock_storage_content(storage_1)
-= 270.0
++1 flow(heat_storage_0)
+-1 flow(storage_heat_0)
+-1 GenericStorageBlock_storage_losses(storage_0)
+-1 GenericStorageBlock_storage_content(storage_1)
+= -300
 
 c_e_GenericStorageBlock_balance(storage_1)_:
--1 flow(heat_storage_1)
-+1 flow(storage_heat_1)
--0.9 GenericStorageBlock_storage_content(storage_1)
-+1 GenericStorageBlock_storage_content(storage_2)
++1 flow(heat_storage_1)
+-1 flow(storage_heat_1)
+-1 GenericStorageBlock_storage_losses(storage_1)
++1 GenericStorageBlock_storage_content(storage_1)
+-1 GenericStorageBlock_storage_content(storage_2)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_2)_:
--1 flow(heat_storage_2)
-+1 flow(storage_heat_2)
--0.9 GenericStorageBlock_storage_content(storage_2)
-+1 GenericStorageBlock_storage_content(storage_3)
++1 flow(heat_storage_2)
+-1 flow(storage_heat_2)
+-1 GenericStorageBlock_storage_losses(storage_2)
++1 GenericStorageBlock_storage_content(storage_2)
+-1 GenericStorageBlock_storage_content(storage_3)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_3)_:
--2.0 flow(heat_storage_3)
-+2.0 flow(storage_heat_3)
--0.81 GenericStorageBlock_storage_content(storage_3)
-+1 GenericStorageBlock_storage_content(storage_4)
++2.0 flow(heat_storage_3)
+-2.0 flow(storage_heat_3)
+-1 GenericStorageBlock_storage_losses(storage_3)
++1 GenericStorageBlock_storage_content(storage_3)
+-1 GenericStorageBlock_storage_content(storage_4)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_4)_:
--2.0 flow(heat_storage_4)
-+2.0 flow(storage_heat_4)
--0.81 GenericStorageBlock_storage_content(storage_4)
-+1 GenericStorageBlock_storage_content(storage_5)
++2.0 flow(heat_storage_4)
+-2.0 flow(storage_heat_4)
+-1 GenericStorageBlock_storage_losses(storage_4)
++1 GenericStorageBlock_storage_content(storage_4)
+-1 GenericStorageBlock_storage_content(storage_5)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_5)_:
--0.5 flow(heat_storage_5)
-+0.5 flow(storage_heat_5)
--0.9486832980505138 GenericStorageBlock_storage_content(storage_5)
-+1 GenericStorageBlock_storage_content(storage_6)
++0.5 flow(heat_storage_5)
+-0.5 flow(storage_heat_5)
+-1 GenericStorageBlock_storage_losses(storage_5)
++1 GenericStorageBlock_storage_content(storage_5)
+-1 GenericStorageBlock_storage_content(storage_6)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_6)_:
--0.5 flow(heat_storage_6)
-+0.5 flow(storage_heat_6)
--0.9486832980505138 GenericStorageBlock_storage_content(storage_6)
-+1 GenericStorageBlock_storage_content(storage_7)
++0.5 flow(heat_storage_6)
+-0.5 flow(storage_heat_6)
+-1 GenericStorageBlock_storage_losses(storage_6)
++1 GenericStorageBlock_storage_content(storage_6)
+-1 GenericStorageBlock_storage_content(storage_7)
 = 0
 
 c_e_GenericStorageBlock_balance(storage_7)_:
--0.5 flow(heat_storage_7)
-+0.5 flow(storage_heat_7)
--0.9486832980505138 GenericStorageBlock_storage_content(storage_7)
-+1 GenericStorageBlock_storage_content(storage_8)
++0.5 flow(heat_storage_7)
+-0.5 flow(storage_heat_7)
+-1 GenericStorageBlock_storage_losses(storage_7)
++1 GenericStorageBlock_storage_content(storage_7)
+-1 GenericStorageBlock_storage_content(storage_8)
 = 0
 
 c_e_GenericStorageBlock_balanced_cstr(storage)_:
@@ -241,6 +288,14 @@ bounds
    0 <= flow(storage_heat_5) <= 100
    0 <= flow(storage_heat_6) <= 100
    0 <= flow(storage_heat_7) <= 100
+   -inf <= GenericStorageBlock_storage_losses(storage_0) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_1) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_2) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_3) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_4) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_5) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_6) <= +inf
+   -inf <= GenericStorageBlock_storage_losses(storage_7) <= +inf
    0 <= GenericStorageBlock_storage_content(storage_1) <= 300
    0 <= GenericStorageBlock_storage_content(storage_2) <= 300
    0 <= GenericStorageBlock_storage_content(storage_3) <= 300

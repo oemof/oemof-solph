@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 """
 
 import sys
+from collections import abc
 from itertools import groupby
 
 import numpy as np
@@ -25,6 +26,7 @@ from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
 
+from ._plumbing import _FakeSequence
 from .helpers import flatten
 
 
@@ -510,7 +512,8 @@ def __separate_attrs(
     """
 
     def detect_scalars_and_sequences(com):
-        com_data = {"scalars": {}, "sequences": {}}
+        scalars = {}
+        sequences = {}
 
         default_exclusions = [
             "__",
@@ -538,13 +541,13 @@ def __separate_attrs(
             # "investment" prefix to component data:
             if attr_value.__class__.__name__ == "Investment":
                 invest_data = detect_scalars_and_sequences(attr_value)
-                com_data["scalars"].update(
+                scalars.update(
                     {
                         "investment_" + str(k): v
                         for k, v in invest_data["scalars"].items()
                     }
                 )
-                com_data["sequences"].update(
+                sequences.update(
                     {
                         "investment_" + str(k): v
                         for k, v in invest_data["sequences"].items()
@@ -553,7 +556,7 @@ def __separate_attrs(
                 continue
 
             if isinstance(attr_value, str):
-                com_data["scalars"][a] = attr_value
+                scalars[a] = attr_value
                 continue
 
             # If the label is a tuple it is iterable, therefore it should be
@@ -561,16 +564,19 @@ def __separate_attrs(
             if a == "label":
                 attr_value = str(attr_value)
 
-            # check if attribute is iterable
-            # see: https://stackoverflow.com/questions/1952464/
-            # in-python-how-do-i-determine-if-an-object-is-iterable
-            try:
-                _ = (e for e in attr_value)
-                com_data["sequences"][a] = attr_value
-            except TypeError:
-                com_data["scalars"][a] = attr_value
+            if isinstance(attr_value, abc.Iterable):
+                sequences[a] = attr_value
+            elif isinstance(attr_value, _FakeSequence):
+                scalars[a] = attr_value.value
+            else:
+                scalars[a] = attr_value
 
-        com_data["sequences"] = flatten(com_data["sequences"])
+        sequences = flatten(sequences)
+
+        com_data = {
+            "scalars": scalars,
+            "sequences": sequences,
+        }
         move_undetected_scalars(com_data)
         if exclude_none:
             remove_nones(com_data)
@@ -586,19 +592,11 @@ def __separate_attrs(
             if isinstance(value, str):
                 com["scalars"][ckey] = value
                 del com["sequences"][ckey]
-                continue
-            try:
-                _ = (e for e in value)
-            except TypeError:
-                com["scalars"][ckey] = value
+            elif isinstance(value, _FakeSequence):
+                com["scalars"][ckey] = value.value
                 del com["sequences"][ckey]
-            else:
-                try:
-                    if not value.default_changed:
-                        com["scalars"][ckey] = value.default
-                        del com["sequences"][ckey]
-                except AttributeError:
-                    pass
+            elif len(value) == 0:
+                del com["sequences"][ckey]
 
     def remove_nones(com):
         for ckey, value in list(com["scalars"].items()):

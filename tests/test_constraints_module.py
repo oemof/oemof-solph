@@ -1,9 +1,10 @@
 import pandas as pd
+import pytest
 
 from oemof import solph
 
 
-def test_special():
+def test_integral_limit_wrapper():
     date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
@@ -22,9 +23,24 @@ def test_special():
     flow_with_keyword = {
         (src1, bel): flow1,
     }
-    solph.constraints.generic_integral_limit(
-        model, "my_factor", flow_with_keyword, limit=777
+    with pytest.warns(FutureWarning):
+        solph.constraints.generic_integral_limit(
+            model, "my_factor", flow_with_keyword, limit=777
+        )
+
+
+def test_limetless_limit():
+    date_time_index = pd.date_range("1/1/2012", periods=5, freq="h")
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
     )
+    model = solph.Model(energysystem)
+    with pytest.raises(
+        ValueError,
+        match="At least one of upper_limit and lower_limit",
+    ):
+        solph.constraints.generic_integral_limit(model, "my_factor")
 
 
 def test_something_else():
