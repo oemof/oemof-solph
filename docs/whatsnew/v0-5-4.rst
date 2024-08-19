@@ -1,8 +1,5 @@
-v0.5.4
-------
-
-API changes
-###########
+v0.5.4 (August 19th, 2024)
+--------------------------
 
 New features
 ############
@@ -16,10 +13,6 @@ Documentation
 #############
 
 * Improve documentation of full load time.
-
-Bug fixes
-#########
-
 
 Other changes
 #############
