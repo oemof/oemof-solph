@@ -6,6 +6,7 @@ API changes
 
 * Explicitly allow to have multiple inputs or outputs for Sinks and Sources,
   respectively.
+* Allow to set lower limits for generic_integral_limit constraint.
 
 New features
 ############
@@ -13,6 +14,8 @@ New features
 
 Documentation
 #############
+
+* Improve documentation of full load time.
 
 Bug fixes
 #########
