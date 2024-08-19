@@ -67,7 +67,7 @@ def test_activity_costs():
     flow = solph.flows.Flow(
         nominal_value=10,
         min=0.1,
-        max=[i * 0.1 for i in range(10)],
+        max=[0.1] + [i * 0.1 for i in range(1, 10)],
         nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
         variable_costs=-0.45,
     )

@@ -25,56 +25,56 @@ class TestConverterClass:
 
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_empty_converter(self):
-        transf = solph.components.Converter()
-        assert isinstance(transf.conversion_factors, dict)
-        assert len(transf.conversion_factors.keys()) == 0
+        converter = solph.components.Converter()
+        assert isinstance(converter.conversion_factors, dict)
+        assert len(converter.conversion_factors.keys()) == 0
 
     def test_default_conversion_factor(self):
-        transf = solph.components.Converter(
+        converter = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             outputs={self.bus: solph.flows.Flow()},
         )
-        assert transf.conversion_factors[self.bus][2] == 1
+        assert converter.conversion_factors[self.bus][2] == 1
 
     def test_sequence_conversion_factor_from_scalar(self):
-        transf = solph.components.Converter(
+        converter = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: 2},
         )
-        assert transf.conversion_factors[self.bus][6] == 2
+        assert converter.conversion_factors[self.bus][6] == 2
 
     def test_sequence_conversion_factor_from_list_correct_length(self):
-        transf = solph.components.Converter(
+        converter = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )
-        assert len(transf.conversion_factors[self.bus]) == 1
+        assert len(converter.conversion_factors[self.bus]) == 1
 
     def test_sequence_conversion_factor_from_list_wrong_length(self):
-        transf = solph.components.Converter(
+        converter = solph.components.Converter(
             inputs={self.bus: solph.flows.Flow()},
             outputs={self.bus: solph.flows.Flow()},
             conversion_factors={self.bus: [2]},
         )
         with pytest.raises(IndexError):
-            self.a = transf.conversion_factors[self.bus][6]
+            self.a = converter.conversion_factors[self.bus][6]
 
     def test_converter_missing_output_create_empty_dict(self):
         with pytest.warns(SuspiciousUsageWarning):
-            trfr = solph.components.Converter(inputs={})
-            assert trfr.outputs == {}
+            converter = solph.components.Converter(inputs={})
+            assert converter.outputs == {}
 
     def test_converter_missing_input_create_empty_dict(self):
         with pytest.warns(SuspiciousUsageWarning):
-            trfr = solph.components.Converter(outputs={})
-            assert trfr.inputs == {}
+            converter = solph.components.Converter(outputs={})
+            assert converter.inputs == {}
 
 
 def test_transformer_wrapper():
+    # two warnings: Wrapper and no inputs/outputs
     with pytest.warns(FutureWarning):
-        # no inputs/outputs
         with pytest.warns(SuspiciousUsageWarning):
             solph.components.Transformer()
 

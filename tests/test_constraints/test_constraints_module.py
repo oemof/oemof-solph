@@ -60,6 +60,7 @@ def test_integral_limit():
     energysystem.add(bel, src1, src2, src3, src4)
     model = solph.Model(energysystem)
 
+    # Note we do not consider flow3 for this constraint.
     flows_with_keyword = {
         (src1, bel): flow1,
     }

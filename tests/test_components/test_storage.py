@@ -93,8 +93,6 @@ def test_invest_power_uncoupled():
     invest_outflow = result[(storage, bus)]["scalars"]["invest"]
     assert invest_outflow == pytest.approx(0)
 
-    print(result)
-
 
 def test_invest_power_coupled():
     es = solph.EnergySystem(
@@ -139,8 +137,6 @@ def test_invest_power_coupled():
 
     invest_outflow = result[(storage, bus)]["scalars"]["invest"]
     assert invest_outflow == pytest.approx(2)
-
-    print(result)
 
 
 def test_storage_charging():
@@ -209,8 +205,8 @@ def test_invest_content_uncoupled():
     storage_inflow = result[(bus, storage)]["sequences"]["flow"]
     assert list(storage_inflow)[:-1] == 10 * [2]
 
-    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_cpacity == pytest.approx(19)
+    invest_capacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_capacity == pytest.approx(19)
 
     storage_content = list(
         result[(storage, None)]["sequences"]["storage_content"]
@@ -250,8 +246,8 @@ def test_invest_content_minimum():
     storage_inflow = result[(bus, storage)]["sequences"]["flow"]
     assert list(storage_inflow)[:-1] == 10 * [2]
 
-    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_cpacity == pytest.approx(32)
+    invest_capacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_capacity == pytest.approx(32)
 
     storage_content = list(
         result[(storage, None)]["sequences"]["storage_content"]
@@ -291,8 +287,8 @@ def test_invest_content_minimum_nonconvex():
     storage_inflow = result[(bus, storage)]["sequences"]["flow"]
     assert list(storage_inflow)[:-1] == 10 * [0]
 
-    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_cpacity == pytest.approx(0)
+    invest_capacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_capacity == pytest.approx(0)
 
     storage_content = list(
         result[(storage, None)]["sequences"]["storage_content"]
@@ -335,8 +331,8 @@ def test_invest_content_maximum():
 
     result = solph.processing.results(model)
 
-    invest_cpacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_cpacity == pytest.approx(10)
+    invest_capacity = result[(storage, None)]["scalars"]["invest"]
+    assert invest_capacity == pytest.approx(10)
 
     storage_content = list(
         result[(storage, None)]["sequences"]["storage_content"]

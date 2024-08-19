@@ -68,8 +68,8 @@ def create_time_index(
     Parameters
     ----------
     year : int, datetime
-        The year of the index. If number and start is set the year parameter is
-        ignored.
+        The year of the index.
+        Used to automatically set start and number for the specific year.
     interval : float
         The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
         interval (default: 1).
@@ -100,10 +100,10 @@ def create_time_index(
     """
     if number is None:
         if calendar.isleap(year):
-            hoy = 8784
+            hours_in_year = 8784
         else:
-            hoy = 8760
-        number = round(hoy / interval)
+            hours_in_year = 8760
+        number = round(hours_in_year / interval)
     if start is not None:
         if year is not None:
             raise ValueError(

@@ -349,10 +349,9 @@ class Model(po.ConcreteModel):
         and adds them to the model.
         """
         for group in self._constraint_groups:
-            # create instance for block
             block = group()
-            # Add block to model
             self.add_component(str(block), block)
+
             # create constraints etc. related with block for all nodes
             # in the group
             block._create(group=self.es.groups.get(group))

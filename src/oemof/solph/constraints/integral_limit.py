@@ -137,7 +137,7 @@ def generic_integral_limit(
     >>> model = solph.Model(energysystem)
     >>> flow_with_keyword = {(src1, bel): flow1, }
     >>> model = solph.constraints.generic_integral_limit(
-    ...     model, "my_factor", flow_with_keyword, limit=777)
+    ...     model, "my_factor", flow_with_keyword, upper_limit=777)
     """
     flows = _check_and_set_flows(om, flows, keyword)
     if limit_name is None:
