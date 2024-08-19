@@ -110,7 +110,8 @@ class GenericStorage(Node):
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
-        Cost (per energy) for having energy in the storage.
+        Cost (per energy) for having energy in the storage, starting from
+        time point :math:`t_{1}`.
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -423,7 +424,7 @@ class GenericStorageBlock(ScalarBlock):
     * :attr: `storage_costs` not 0
 
         .. math::
-            \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
+            \sum_{t \in \textrm{TIMEPOINTS} > 0} c_{storage}(t) \cdot E(t)
 
 
     *Multi-period model*
@@ -613,12 +614,12 @@ class GenericStorageBlock(ScalarBlock):
 
         for n in self.STORAGES:
             if n.storage_costs[0] is not None:
-                storage_costs += (
-                    self.storage_content[n, 0] * n.storage_costs[0]
-                )
+                # We actually want to iterate over all TIMEPOINTS except the
+                # 0th. As integers are used for the index, this is equicalent
+                # to iterating over the TIMESTEPS with one offset.
                 for t in m.TIMESTEPS:
                     storage_costs += (
-                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                        self.storage_content[n, t + 1] * n.storage_costs[t]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)

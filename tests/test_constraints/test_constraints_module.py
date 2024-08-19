@@ -65,7 +65,7 @@ def test_integral_limit():
     }
 
     solph.constraints.generic_integral_limit(
-        model, "my_factor", flows_with_keyword, limit=integral_limit1
+        model, "my_factor", flows_with_keyword, upper_limit=integral_limit1
     )
     solph.constraints.emission_limit(
         model,
@@ -76,7 +76,7 @@ def test_integral_limit():
         model,
         "my_factor",
         limit_name="limit_my_factor",
-        limit=low_emission_flow_limit,
+        upper_limit=low_emission_flow_limit,
     )
 
     model.solve()
