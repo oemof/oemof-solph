@@ -66,15 +66,13 @@ class Flow(Edge):
             the normed *upper bound* on the negative difference
             (`flow[t-1] > flow[t]`) of two consecutive flow values.
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
-        Upper bound on the summed flow expressed as the equivalent time that
-        the flow would have to run at full capacity to yield the same sum. The
-        value will be multiplied with the nominal_value to get the absolute
-        limit.
+        Maximum energy transported by the flow expressed as the time (in
+        hours) that the flow would have to run at nominal capacity
+        (`nominal_value`).
     full_load_time_min : numeric, :math:`t_{full\_load,min}`
-        Lower bound on the summed flow expressed as the equivalent time that
-        the flow would have to run at full capacity to yield the same sum. The
-        value will be multiplied with the nominal_value to get the absolute
-        limit.
+        Minimum energy transported by the flow expressed as the time (in
+        hours) that the flow would have to run at nominal capacity
+        (`nominal_value`).
     integer : boolean
         Set True to bound the flow values to integers.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
@@ -293,7 +291,7 @@ class Flow(Edge):
         if (
             self.investment
             and self.nonconvex
-            and not np.isfinite(self.investment.maximum)
+            and not np.isfinite(self.investment.maximum.max())
         ):
             raise AttributeError(
                 "Investment into a non-convex flows needs a maximum "

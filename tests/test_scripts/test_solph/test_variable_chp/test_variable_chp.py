@@ -26,7 +26,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     logging.info("Initialize the energy system")
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
+    date_time_index = pd.date_range("5/5/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=True
     )
@@ -195,8 +195,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)][
             "scalars"
         ]["conversion_factors_('electricity', 2)"]
-        == 0.3
-    )
+    ) == pytest.approx(0.3)
 
     # objective function
     assert solph.processing.meta_results(om)["objective"] == pytest.approx(

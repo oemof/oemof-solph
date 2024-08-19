@@ -89,7 +89,7 @@ def main():
 
     # Change the index of data to be able to select data based on the time
     # range.
-    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
+    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
 
     # Choose the range of the solar potential and demand
     # based on the selected simulation period.

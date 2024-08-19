@@ -29,7 +29,7 @@ class TestsConstraint:
             r"^objective.*(?=s\.t\.)", re.DOTALL | re.MULTILINE
         )
 
-        cls.date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+        cls.date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
 
         cls.tmppath = solph.helpers.extend_basic_path("tmp")
         logging.info(cls.tmppath)
@@ -283,7 +283,7 @@ class TestsConstraint:
             },
             nominal_storage_capacity=1e5,
             loss_rate=0.13,
-            storage_costs=0.1,
+            storage_costs=[0.1, 0.2, 0.3, 0.4],
             inflow_conversion_factor=0.97,
             outflow_conversion_factor=0.86,
             initial_storage_level=0.4,
@@ -904,6 +904,29 @@ class TestsConstraint:
 
         self.compare_lp_files("emission_limit_no_error.lp", my_om=om)
 
+    def test_flow_without_emission_for_emission_constraint_lower(self):
+        """Test that no error is thrown if no flows are explicitly passed"""
+        bel = solph.buses.Bus(label="electricityBus")
+        source1 = solph.components.Source(
+            label="source1",
+            outputs={
+                bel: solph.flows.Flow(
+                    nominal_value=100,
+                    custom_attributes={"emission_factor": 0.8},
+                )
+            },
+        )
+        source2 = solph.components.Source(
+            label="source2", outputs={bel: solph.flows.Flow(nominal_value=100)}
+        )
+        self.energysystem.add(bel, source1, source2)
+        om = self.get_om()
+        solph.constraints.generic_integral_limit(
+            om, keyword="emission_factor", lower_limit=777
+        )
+
+        self.compare_lp_files("emission_limit_lower.lp", my_om=om)
+
     def test_equate_variables_constraint(self):
         """Testing the equate_variables function in the constraint module."""
         bus1 = solph.buses.Bus(label="Bus1")
@@ -1356,6 +1379,14 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
+        min = 0.2
+        eta_at_nom = 0.4
+        eta_at_min = 0.35
+
+        slope, offset = solph.components.slope_offset_from_nonconvex_output(
+            1, min, eta_at_nom, eta_at_min
+        )
+
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
             inputs={
@@ -1365,10 +1396,11 @@ class TestsConstraint:
                 b_el: solph.flows.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_value=100,
-                    min=0.2,
+                    min=min,
                 )
             },
-            coefficients=[2.5, 0.5],
+            conversion_factors={b_diesel: slope},
+            normed_offsets={b_diesel: offset},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
@@ -1380,12 +1412,20 @@ class TestsConstraint:
         b_diesel = solph.buses.Bus(label="bus_diesel")
         b_el = solph.buses.Bus(label="bus_electricity")
 
+        min = 0.2
+        eta_at_nom = 0.4
+        eta_at_min = 0.35
+
+        slope, offset = solph.components.slope_offset_from_nonconvex_output(
+            1, min, eta_at_nom, eta_at_min
+        )
+
         diesel_genset = solph.components.OffsetConverter(
             label="diesel_genset",
             inputs={b_diesel: solph.flows.Flow()},
             outputs={
                 b_el: solph.flows.Flow(
-                    min=0.2,
+                    min=min,
                     nonconvex=solph.NonConvex(),
                     nominal_value=solph.Investment(
                         ep_costs=100,
@@ -1393,7 +1433,8 @@ class TestsConstraint:
                     ),
                 )
             },
-            coefficients=[2.5, 0.5],
+            conversion_factors={b_diesel: slope},
+            normed_offsets={b_diesel: offset},
         )
         self.energysystem.add(b_diesel, b_el, diesel_genset)
 
@@ -1903,7 +1944,7 @@ class TestsConstraint:
         """Constraint test of an energy system
         with non-equidistant time index
         """
-        idxh = pd.date_range("1/1/2017", periods=3, freq="H")
+        idxh = pd.date_range("1/1/2017", periods=3, freq="h")
         idx2h = pd.date_range("1/1/2017 03:00:00", periods=2, freq="2H")
         idx30m = pd.date_range("1/1/2017 07:00:00", periods=4, freq="30min")
         timeindex = idxh.append([idx2h, idx30m])
@@ -1932,7 +1973,7 @@ class TestsConstraint:
         with storage_level_constraint
         """
         es = solph.EnergySystem(
-            timeindex=pd.date_range("2022-01-01", freq="1H", periods=2),
+            timeindex=pd.date_range("2022-01-01", freq="h", periods=2),
             infer_last_interval=True,
         )
 

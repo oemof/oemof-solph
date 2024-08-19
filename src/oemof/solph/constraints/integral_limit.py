@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
+import warnings
 
 from pyomo import environ as po
 
@@ -29,7 +30,7 @@ def emission_limit(om, flows=None, limit=None):
 
     """
     generic_integral_limit(
-        om, keyword="emission_factor", flows=flows, limit=limit
+        om, keyword="emission_factor", flows=flows, upper_limit=limit
     )
 
 
@@ -49,7 +50,9 @@ def emission_limit_per_period(om, flows=None, limit=None):
     )
 
 
-def generic_integral_limit(om, keyword, flows=None, limit=None):
+def generic_integral_limit(
+    om, keyword, flows=None, upper_limit=None, lower_limit=None, limit=None
+):
     r"""Set a global limit for flows weighted by attribute named keyword.
     The attribute named keyword has to be added
     to every flow you want to take into account.
@@ -69,8 +72,10 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
         used.
     keyword : string
         attribute to consider
-    limit : numeric
-        Absolute limit of keyword attribute for the energy system.
+    upper_limit : numeric
+        Absolute upper limit of keyword attribute for the energy system.
+    lower_limit : numeric
+        Absolute lower limit of keyword attribute for the energy system.
 
     Note
     ----
@@ -80,7 +85,10 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     **Constraint:**
 
     .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
-               \cdot \tau(t) \leq M
+               \cdot \tau(t) \leq UB
+
+    .. math:: \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
+               \cdot \tau(t) \geq LB
 
 
     With `F_I` being the set of flows considered for the integral limit and
@@ -95,14 +103,15 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     :math:`P_n(p, t)` V    power flow :math:`n` at time index :math:`p, t`
     :math:`w_N(t)`    P    weight given to Flow named according to `keyword`
     :math:`\tau(t)`   P    width of time step :math:`t`
-    :math:`L`         P    global limit given by keyword `limit`
+    :math:`UB`        P    global limit given by keyword `upper_limit`
+    :math:`LB`        P    global limit given by keyword `lower_limit`
     ================= ==== ====================================================
 
     Examples
     --------
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='H')
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='h')
     >>> energysystem = solph.EnergySystem(
     ...     timeindex=date_time_index,
     ...     infer_last_interval=False,
@@ -124,25 +133,46 @@ def generic_integral_limit(om, keyword, flows=None, limit=None):
     flows = _check_and_set_flows(om, flows, keyword)
     limit_name = "integral_limit_" + keyword
 
+    if limit is not None:
+        msg = (
+            "The keyword argument 'limit' to generic_integral_limit has been"
+            "renamed to 'upper_limit'. The transitional wrapper will be"
+            "deleted in a future version."
+        )
+        warnings.warn(msg, FutureWarning)
+        upper_limit = limit
+
+    if upper_limit is None and lower_limit is None:
+        raise ValueError(
+            "At least one of upper_limit and lower_limit needs to be defined."
+        )
+
     setattr(
         om,
         limit_name,
         po.Expression(
             expr=sum(
-                om.flow[inflow, outflow, p, t]
+                om.flow[inflow, outflow, t]
                 * om.timeincrement[t]
                 * sequence(getattr(flows[inflow, outflow], keyword))[t]
                 for (inflow, outflow) in flows
-                for p, t in om.TIMEINDEX
+                for t in om.TIMESTEPS
             )
         ),
     )
 
-    setattr(
-        om,
-        limit_name + "_constraint",
-        po.Constraint(expr=(getattr(om, limit_name) <= limit)),
-    )
+    if upper_limit is not None:
+        setattr(
+            om,
+            limit_name + "_upper_limit",
+            po.Constraint(expr=(getattr(om, limit_name) <= upper_limit)),
+        )
+    if lower_limit is not None:
+        setattr(
+            om,
+            limit_name + "_lower_limit",
+            po.Constraint(expr=(getattr(om, limit_name) >= lower_limit)),
+        )
 
     return om
 
@@ -208,7 +238,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
 
     def _periodical_integral_limit_rule(m, p):
         expr = sum(
-            om.flow[inflow, outflow, p, t]
+            om.flow[inflow, outflow, t]
             * om.timeincrement[t]
             * sequence(getattr(flows[inflow, outflow], keyword))[t]
             for (inflow, outflow) in flows

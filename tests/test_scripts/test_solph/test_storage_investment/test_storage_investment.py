@@ -54,7 +54,7 @@ def test_optimise_storage_size(
     global PP_GAS
 
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=400, freq="h")
 
     es = solph.EnergySystem(
         timeindex=date_time_index,

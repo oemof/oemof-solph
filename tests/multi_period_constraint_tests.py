@@ -18,6 +18,9 @@ import pytest
 from pyomo.repn.tests.lp_diff import lp_diff
 
 from oemof import solph
+from oemof.solph.components._offset_converter import (
+    slope_offset_from_nonconvex_output,
+)
 
 logging.disable(logging.INFO)
 
@@ -45,9 +48,9 @@ class TestsMultiPeriodConstraint:
             r"^objective.*(?=s\.t\.)", re.DOTALL | re.MULTILINE
         )
 
-        timeindex1 = pd.date_range("1/1/2012", periods=2, freq="H")
-        timeindex2 = pd.date_range("1/1/2013", periods=2, freq="H")
-        timeindex3 = pd.date_range("1/1/2014", periods=2, freq="H")
+        timeindex1 = pd.date_range("1/1/2012", periods=2, freq="h")
+        timeindex2 = pd.date_range("1/1/2013", periods=2, freq="h")
+        timeindex3 = pd.date_range("1/1/2014", periods=2, freq="h")
         cls.date_time_index = timeindex1.append(timeindex2).append(timeindex3)
         cls.periods = [timeindex1, timeindex2, timeindex3]
 
@@ -1521,15 +1524,26 @@ class TestsMultiPeriodConstraint:
         bgas = solph.buses.Bus(label="gasBus")
         bth = solph.buses.Bus(label="thermalBus")
 
+        min = 0.32
+        eta_at_min = 0.7
+        eta_at_nom = 0.9
+
+        slope, offset = slope_offset_from_nonconvex_output(
+            1, min, eta_at_nom, eta_at_min
+        )
+
         otrf = solph.components.OffsetConverter(
             label="gasboiler",
             inputs={bgas: solph.flows.Flow()},
             outputs={
                 bth: solph.flows.Flow(
-                    nominal_value=100, min=0.32, nonconvex=solph.NonConvex()
+                    nominal_value=100,
+                    min=min,
+                    nonconvex=solph.NonConvex(),
                 )
             },
-            coefficients=[-17, 0.9],
+            conversion_factors={bgas: slope},
+            normed_offsets={bgas: offset},
         )
         self.energysystem.add(bgas, bth, otrf)
         self.compare_lp_files("offsetconverter_multi_period.lp")
@@ -2316,7 +2330,7 @@ class TestsMultiPeriodConstraint:
 
         # Create a list of timeindex for each period
         periods = [
-            pd.date_range(f"1/1/{i}", periods=3, freq="H") for i in years
+            pd.date_range(f"1/1/{i}", periods=3, freq="h") for i in years
         ]
 
         # Create an overall timeindex

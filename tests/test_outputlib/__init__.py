@@ -122,7 +122,7 @@ heat_pump = Converter(
     conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
 )
 
-datetimeindex = pd.date_range("1/1/2012", periods=24, freq="H")
+datetimeindex = pd.date_range("1/1/2012", periods=24, freq="h")
 energysystem = EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
 energysystem.add(
     bcoal,
