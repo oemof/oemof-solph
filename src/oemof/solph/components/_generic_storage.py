@@ -419,26 +419,18 @@ class GenericStorageBlock(ScalarBlock):
 
     **The following parts of the objective function are created:**
 
-    *Standard model*
-
     * :attr: `storage_costs` not 0
 
         .. math::
             \sum_{t \in \textrm{TIMEPOINTS} > 0} c_{storage}(t) \cdot E(t)
 
-
-    *Multi-period model*
-
-    * :attr:`fixed_costs` not None
+    * :attr:`fixed_costs` not 0
 
         .. math::
             \displaystyle \sum_{pp=0}^{year_{max}} E_{nom}
-            \cdot c_{fixed}(pp) \cdot DF^{-pp}
+            \cdot c_{fixed}(pp)
 
-    where:
-
-    * :math:`DF=(1+dr)` is the discount factor with discount rate :math:`dr`.
-    * :math:`year_{max}` denotes the last year of the optimization
+    where :math:`year_{max}` denotes the last year of the optimization
       horizon, i.e. at the end of the last period.
 
     """  # noqa: E501
@@ -588,26 +580,19 @@ class GenericStorageBlock(ScalarBlock):
         r"""
         Objective expression for storages with no investment.
 
-        Note
-        ----
-        * For standard models, this adds nothing as variable costs are
-          already added in the Block :py:class:`~.SimpleFlowBlock`.
-        * For multi-period models, fixed costs may be introduced
-          and added here.
+        * Fixed costs (will not have an impact on the actual optimisation).
+        * Variable costs for storage content.
         """
         m = self.parent_block()
 
         fixed_costs = 0
 
-        if m.es.periods is not None:
-            for n in self.STORAGES:
-                if n.fixed_costs[0] is not None:
-                    fixed_costs += sum(
-                        n.nominal_storage_capacity
-                        * n.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
-                        for pp in range(m.es.end_year_of_optimization)
-                    )
+        for n in self.STORAGES:
+            if 0 < n.fixed_costs.min() or n.fixed_costs.max() > 0:
+                fixed_costs += sum(
+                    n.nominal_storage_capacity * n.fixed_costs[pp]
+                    for pp in range(m.es.end_year_of_optimization)
+                )
         self.fixed_costs = Expression(expr=fixed_costs)
 
         storage_costs = 0
