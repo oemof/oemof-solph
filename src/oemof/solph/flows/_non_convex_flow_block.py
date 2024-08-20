@@ -325,24 +325,13 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.STARTUPFLOWS:
             m = self.parent_block()
 
-            if m.es.periods is None:
-                for i, o in self.STARTUPFLOWS:
-                    if m.flows[i, o].nonconvex.startup_costs[0] is not None:
-                        startup_costs += sum(
-                            self.startup[i, o, t]
-                            * m.flows[i, o].nonconvex.startup_costs[t]
-                            for t in m.TIMESTEPS
-                        )
-            else:
-                for i, o in self.STARTUPFLOWS:
-                    if m.flows[i, o].nonconvex.startup_costs[0] is not None:
-                        startup_costs += sum(
-                            self.startup[i, o, t]
-                            * m.flows[i, o].nonconvex.startup_costs[t]
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                            for p, t in m.TIMEINDEX
-                        )
+            for i, o in self.STARTUPFLOWS:
+                if m.flows[i, o].nonconvex.startup_costs[0] is not None:
+                    startup_costs += sum(
+                        self.startup[i, o, t]
+                        * m.flows[i, o].nonconvex.startup_costs[t]
+                        for t in m.TIMESTEPS
+                    )
 
             self.startup_costs = Expression(expr=startup_costs)
 
@@ -359,24 +348,13 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.SHUTDOWNFLOWS:
             m = self.parent_block()
 
-            if m.es.periods is None:
-                for i, o in self.SHUTDOWNFLOWS:
-                    if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
-                        shutdown_costs += sum(
-                            self.shutdown[i, o, t]
-                            * m.flows[i, o].nonconvex.shutdown_costs[t]
-                            for t in m.TIMESTEPS
-                        )
-            else:
-                for i, o in self.SHUTDOWNFLOWS:
-                    if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
-                        shutdown_costs += sum(
-                            self.shutdown[i, o, t]
-                            * m.flows[i, o].nonconvex.shutdown_costs[t]
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                            for p, t in m.TIMEINDEX
-                        )
+            for i, o in self.SHUTDOWNFLOWS:
+                if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
+                    shutdown_costs += sum(
+                        self.shutdown[i, o, t]
+                        * m.flows[i, o].nonconvex.shutdown_costs[t]
+                        for t in m.TIMESTEPS
+                    )
 
             self.shutdown_costs = Expression(expr=shutdown_costs)
 
@@ -393,24 +371,13 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.ACTIVITYCOSTFLOWS:
             m = self.parent_block()
 
-            if m.es.periods is None:
-                for i, o in self.ACTIVITYCOSTFLOWS:
-                    if m.flows[i, o].nonconvex.activity_costs[0] is not None:
-                        activity_costs += sum(
-                            self.status[i, o, t]
-                            * m.flows[i, o].nonconvex.activity_costs[t]
-                            for t in m.TIMESTEPS
-                        )
-            else:
-                for i, o in self.ACTIVITYCOSTFLOWS:
-                    if m.flows[i, o].nonconvex.activity_costs[0] is not None:
-                        activity_costs += sum(
-                            self.status[i, o, t]
-                            * m.flows[i, o].nonconvex.activity_costs[t]
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                            for p, t in m.TIMEINDEX
-                        )
+            for i, o in self.ACTIVITYCOSTFLOWS:
+                if m.flows[i, o].nonconvex.activity_costs[0] is not None:
+                    activity_costs += sum(
+                        self.status[i, o, t]
+                        * m.flows[i, o].nonconvex.activity_costs[t]
+                        for t in m.TIMESTEPS
+                    )
 
             self.activity_costs = Expression(expr=activity_costs)
 
@@ -427,24 +394,13 @@ class NonConvexFlowBlock(ScalarBlock):
         if self.INACTIVITYCOSTFLOWS:
             m = self.parent_block()
 
-            if m.es.periods is None:
-                for i, o in self.INACTIVITYCOSTFLOWS:
-                    if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
-                        inactivity_costs += sum(
-                            (1 - self.status[i, o, t])
-                            * m.flows[i, o].nonconvex.inactivity_costs[t]
-                            for t in m.TIMESTEPS
-                        )
-            else:
-                for i, o in self.INACTIVITYCOSTFLOWS:
-                    if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
-                        inactivity_costs += sum(
-                            (1 - self.status[i, o, t])
-                            * m.flows[i, o].nonconvex.inactivity_costs[t]
-                            * m.objective_weighting[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                            for p, t in m.TIMEINDEX
-                        )
+            for i, o in self.INACTIVITYCOSTFLOWS:
+                if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
+                    inactivity_costs += sum(
+                        (1 - self.status[i, o, t])
+                        * m.flows[i, o].nonconvex.inactivity_costs[t]
+                        for t in m.TIMESTEPS
+                    )
 
             self.inactivity_costs = Expression(expr=inactivity_costs)
 

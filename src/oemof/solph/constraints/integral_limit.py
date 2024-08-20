@@ -51,7 +51,13 @@ def emission_limit_per_period(om, flows=None, limit=None):
 
 
 def generic_integral_limit(
-    om, keyword, flows=None, upper_limit=None, lower_limit=None, limit=None
+    om,
+    keyword,
+    flows=None,
+    upper_limit=None,
+    lower_limit=None,
+    limit=None,
+    limit_name=None,
 ):
     r"""Set a global limit for flows weighted by attribute named keyword.
     The attribute named keyword has to be added
@@ -72,6 +78,9 @@ def generic_integral_limit(
         used.
     keyword : string
         attribute to consider
+    limit_name : string
+        Unique name for the constraint,
+        Defaults to "integral_limit_{keyword}".
     upper_limit : numeric
         Absolute upper limit of keyword attribute for the energy system.
     lower_limit : numeric
@@ -128,10 +137,11 @@ def generic_integral_limit(
     >>> model = solph.Model(energysystem)
     >>> flow_with_keyword = {(src1, bel): flow1, }
     >>> model = solph.constraints.generic_integral_limit(
-    ...     model, "my_factor", flow_with_keyword, limit=777)
+    ...     model, "my_factor", flow_with_keyword, upper_limit=777)
     """
     flows = _check_and_set_flows(om, flows, keyword)
-    limit_name = "integral_limit_" + keyword
+    if limit_name is None:
+        limit_name = "integral_limit_" + keyword
 
     if limit is not None:
         msg = (

@@ -18,7 +18,7 @@ import pandas as pd
 from oemof import solph
 
 
-def check_oemof_installation(silent=False):
+def _check_oemof_installation(solvers):
     logging.disable(logging.CRITICAL)
 
     date_time_index = pd.date_range("1/1/2012", periods=6, freq="h")
@@ -48,22 +48,38 @@ def check_oemof_installation(silent=False):
     om = solph.Model(energysystem)
 
     # check solvers
-    solver = dict()
-    for s in ["cbc", "glpk", "gurobi", "cplex"]:
+    solver_status = dict()
+    for s in solvers:
         try:
             om.solve(solver=s)
-            solver[s] = "working"
+            solver_status[s] = True
         except Exception:
-            solver[s] = "not working"
+            solver_status[s] = False
 
-    if not silent:
-        print()
-        print("*****************************")
-        print("Solver installed with oemof:")
-        print()
-        for s, t in solver.items():
-            print("{0}: {1}".format(s, t))
-        print()
-        print("*****************************")
-        print("oemof successfully installed.")
-        print("*****************************")
+    return solver_status
+
+
+def check_oemof_installation():
+
+    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex"]
+
+    solver_status = _check_oemof_installation(solvers_to_test)
+
+    print_text = (
+        "***********************************\n"
+        "Solver installed with oemof.solph:\n"
+        "\n"
+    )
+    for solver, works in solver_status.items():
+        if works:
+            print_text += f"{solver}: installed and working\n"
+        else:
+            print_text += f"{solver}: not installed/ not working\n"
+    print_text += (
+        "\n"
+        "***********************************\n"
+        "oemof.solph successfully installed.\n"
+        "***********************************\n"
+    )
+
+    print(print_text)
