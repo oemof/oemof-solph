@@ -49,7 +49,7 @@ class GenericStorage(Node):
 
     Parameters
     ----------
-    nominal_storage_capacity : numeric, :math:`E_{nom}` or
+    nominal_capacity : numeric, :math:`E_{nom}` or
             :class:`oemof.solph.options.Investment` object
         Absolute nominal capacity of the storage, fixed value or
         object describing parameter of investment optimisations.
