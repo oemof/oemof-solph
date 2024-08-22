@@ -73,7 +73,7 @@ def saturating_storage_example():
     storage_capacity = 10
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_storage_capacity=storage_capacity,
+        nominal_capacity=storage_capacity,
         inputs={bel: solph.Flow(nominal_capacity=inflow_capacity)},
         outputs={bel: solph.Flow(variable_costs=2)},
         initial_storage_level=0,

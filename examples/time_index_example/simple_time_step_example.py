@@ -70,7 +70,7 @@ def main():
         label="storage",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_storage_capacity=4,
+        nominal_capacity=4,
         initial_storage_level=0.5,
     )
     sink = solph.components.Sink(

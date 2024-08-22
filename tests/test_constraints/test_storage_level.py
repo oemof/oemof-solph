@@ -19,7 +19,7 @@ def test_storage_level_constraint():
 
     storage = solph.components.GenericStorage(
         label="storage",
-        nominal_storage_capacity=3,
+        nominal_capacity=3,
         initial_storage_level=1,
         balanced=True,
         storage_costs=0.1,

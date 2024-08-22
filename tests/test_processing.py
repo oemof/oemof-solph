@@ -67,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            nominal_storage_capacity=Investment(ep_costs=0.4),
+            nominal_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23

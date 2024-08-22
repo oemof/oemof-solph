@@ -153,7 +153,7 @@ def main():
 
     # create storage object representing a battery
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=999999999,
+        nominal_capacity=999999999,
         label="storage",
         inputs={bel: flows.Flow()},
         outputs={bel: flows.Flow()},

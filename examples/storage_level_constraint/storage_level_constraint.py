@@ -61,7 +61,7 @@ def storage_level_constraint_example():
 
     storage = GenericStorage(
         label="storage",
-        nominal_storage_capacity=3,
+        nominal_capacity=3,
         initial_storage_level=1,
         balanced=True,
         loss_rate=0.05,

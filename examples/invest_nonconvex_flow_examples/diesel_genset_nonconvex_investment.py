@@ -209,7 +209,7 @@ def main():
     epc_battery = 101.00  # currency/kWh/year
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},

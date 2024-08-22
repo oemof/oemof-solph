@@ -568,7 +568,7 @@ Furthermore, an efficiency for loading, unloading and a loss rate can be defined
         label='storage',
         inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
         outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        loss_rate=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
@@ -590,7 +590,7 @@ The following code block shows an example of the storage parametrization for the
         label='storage',
         inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
         outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        loss_rate=0.001, nominal_capacity=50,
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 

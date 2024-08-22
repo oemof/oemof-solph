@@ -185,7 +185,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         outputs={
             bus_el: flows.Flow(nominal_capacity=20, variable_costs=0, max=1)
         },
-        nominal_storage_capacity=20,
+        nominal_capacity=20,
         loss_rate=0,
         initial_storage_level=0,
         max_storage_level=1,

@@ -151,7 +151,7 @@ def test_tuples_as_labels_example(
     energysystem.add(
         solph.components.GenericStorage(
             label=Label("storage", "electricity", "battery"),
-            nominal_storage_capacity=204685,
+            nominal_capacity=204685,
             inputs={bel: solph.flows.Flow(variable_costs=10e10)},
             outputs={bel: solph.flows.Flow(variable_costs=10e10)},
             loss_rate=0.00,

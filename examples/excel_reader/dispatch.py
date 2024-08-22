@@ -250,7 +250,7 @@ def create_nodes(nd=None):
                             variable_costs=s["variable output costs"],
                         )
                     },
-                    nominal_storage_capacity=s["nominal capacity"],
+                    nominal_capacity=s["nominal capacity"],
                     loss_rate=s["capacity loss"],
                     initial_storage_level=s["initial capacity"],
                     max_storage_level=s["capacity max"],

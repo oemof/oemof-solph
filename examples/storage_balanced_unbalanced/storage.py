@@ -118,7 +118,7 @@ def storage_example():
         es.add(
             solph.components.GenericStorage(
                 label="storage_elec_{0}".format(name),
-                nominal_storage_capacity=PARAMETER["nominal_storage_capacity"],
+                nominal_capacity=PARAMETER["nominal_storage_capacity"],
                 inputs={bel: solph.Flow()},
                 outputs={bel: solph.Flow()},
                 initial_storage_level=data_set["initial_storage_level"],

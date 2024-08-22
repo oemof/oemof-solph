@@ -86,7 +86,7 @@ def test_regression_investment_storage(solver="cbc"):
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            nominal_storage_capacity=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=50,
                 existing=625046,
             ),

@@ -48,7 +48,7 @@ class TestParameterResult:
 
         batt = cmp.GenericStorage(
             label="storage",
-            nominal_storage_capacity=1000,
+            nominal_capacity=1000,
             inputs={b_el1: flows.Flow(variable_costs=3)},
             outputs={b_el1: flows.Flow(variable_costs=2.5)},
             loss_rate=0.00,

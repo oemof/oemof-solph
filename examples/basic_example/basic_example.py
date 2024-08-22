@@ -223,7 +223,7 @@ def main(dump_and_restore=False):
     nominal_capacity = nominal_capacity / 6
 
     battery_storage = components.GenericStorage(
-        nominal_storage_capacity=nominal_capacity,
+        nominal_capacity=nominal_capacity,
         label=STORAGE_LABEL,
         inputs={
             bus_electricity: flows.Flow(nominal_capacity=nominal_capacity)

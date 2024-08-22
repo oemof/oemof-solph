@@ -79,7 +79,7 @@ def test_connect_invest():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        nominal_storage_capacity=Investment(ep_costs=0.2),
+        nominal_capacity=Investment(ep_costs=0.2),
     )
     es.add(storage)
 

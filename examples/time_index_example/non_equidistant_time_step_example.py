@@ -87,7 +87,7 @@ def main():
         label="storage_fixed",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         fixed_losses_absolute=1,  # 1 energy unit loss per hour
     )
@@ -102,7 +102,7 @@ def main():
                 nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         loss_rate=0.5,  # 50 % losses per hour
     )

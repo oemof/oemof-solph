@@ -223,7 +223,7 @@ def main():
     # create storage object representing a battery
     cap = 400
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=cap,
+        nominal_capacity=cap,
         label="storage",
         inputs={bus_elec: flows.Flow(nominal_capacity=cap / 6)},
         outputs={
