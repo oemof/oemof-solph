@@ -169,7 +169,6 @@ class GenericStorage(Node):
         outputs=None,
         nominal_storage_capacity=None,
         initial_storage_level=None,
-        investment=None,
         invest_relation_input_output=None,
         invest_relation_input_capacity=None,
         invest_relation_output_capacity=None,
@@ -199,20 +198,6 @@ class GenericStorage(Node):
             outputs=outputs,
             custom_properties=custom_attributes,
         )
-        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
-        if investment is not None:
-            msg = (
-                "For backward compatibility,"
-                " the option investment overwrites the option"
-                + " nominal_storage_capacity."
-                + " Both options cannot be set at the same time."
-            )
-            if nominal_storage_capacity is not None:
-                raise AttributeError(msg)
-            else:
-                warn(msg, FutureWarning)
-            nominal_storage_capacity = investment
-        # --- END ---
 
         self.nominal_storage_capacity = None
         self.investment = None
