@@ -103,12 +103,6 @@ class GenericStorage(Node):
         To set different values in every time step use a sequence.
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
-    investment : :class:`oemof.solph.options.Investment` object
-        Object indicating if a nominal_value of the flow is determined by
-        the optimization problem. Note: This will refer all attributes to an
-        investment variable instead of to the nominal_storage_capacity. The
-        nominal_storage_capacity should not be set (or set to None) if an
-        investment object is used.
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
         Cost (per energy) for having energy in the storage, starting from
         time point :math:`t_{1}`.
