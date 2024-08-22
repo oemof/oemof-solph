@@ -55,3 +55,17 @@ def test_full_load_time_min():
     flow_result = list(_run_flow_model(flow)["flow"][:-1])
 
     assert flow_result == pytest.approx(4 * [2] + [1] + 5 * [0])
+
+
+# --- BEGIN: The following code can be removed for versions >= v0.7 ---
+def test_nominal_value_warning():
+    with pytest.warns(FutureWarning, match="nominal_value"):
+        _ = solph.flows.Flow(nominal_value=2)
+
+
+def test_nominal_value_error():
+    with pytest.raises(AttributeError, match="nominal_value"):
+        _ = solph.flows.Flow(nominal_value=2, nominal_capacity=1)
+
+
+# --- END ---
