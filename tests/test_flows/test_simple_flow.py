@@ -58,13 +58,13 @@ def test_full_load_time_min():
 
 
 # --- BEGIN: The following code can be removed for versions >= v0.7 ---
-def test_nominal_value_warning():
-    with pytest.warns(FutureWarning, match="nominal_value"):
+def test_nominal_capacity_warning():
+    with pytest.warns(FutureWarning, match="nominal_capacity"):
         _ = solph.flows.Flow(nominal_value=2)
 
 
-def test_nominal_value_error():
-    with pytest.raises(AttributeError, match="nominal_value"):
+def test_nominal_capacity_error():
+    with pytest.raises(AttributeError, match="nominal_capacity"):
         _ = solph.flows.Flow(nominal_value=2, nominal_capacity=1)
 
 

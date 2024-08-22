@@ -94,8 +94,10 @@ PiecewiseLinearConverter'>
                 + "more than 1 input and 1 output!"
             )
 
-        nominal_value = [a.nominal_value for a in self.inputs.values()][0]
-        if max(self.in_breakpoints) < nominal_value:
+        nominal_capacity = [a.nominal_capacity for a in self.inputs.values()][
+            0
+        ]
+        if max(self.in_breakpoints) < nominal_capacity:
             raise ValueError(
                 "Largest in_breakpoint must be larger or equal "
                 + "nominal value"

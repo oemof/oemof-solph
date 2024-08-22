@@ -104,7 +104,7 @@ class GenericStorage(Node):
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
     investment : :class:`oemof.solph.options.Investment` object
-        Object indicating if a nominal_value of the flow is determined by
+        Object indicating if a nominal_capacity of the flow is determined by
         the optimization problem. Note: This will refer all attributes to an
         investment variable instead of to the nominal_storage_capacity. The
         nominal_storage_capacity should not be set (or set to None) if an

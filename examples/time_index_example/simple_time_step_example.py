@@ -13,7 +13,7 @@ A minimal example to show how time steps work.
 * The initial_storage_level of a GenericStorage is given at the first time step.
   If the storage is balanced, this is the same storage level as in the last time
   step.
-* The nominal_value in Flows has to be interpreted in means of power: We have
+* The nominal_capacity in Flows has to be interpreted in means of power: We have
   nominal_capacity=0.5, but the maximum change of the storage content of an ideal
   storage is 0.125.
 

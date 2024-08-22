@@ -46,7 +46,7 @@ class OffsetConverter(Node):
     normed_offsets : dict, (:math:`y_\text{0,normed}(t)`)
         Dict containing the respective bus as key and as value the parameter
         :math:`y_\text{0,normed}(t)`. It represents the y-intercept with respect
-        to the `NonConvex` flow divided by the `nominal_value` of the
+        to the `NonConvex` flow divided by the `nominal_capacity` of the
         `NonConvex` flow (this is for internal purposes). The value can either
         be a scalar or a sequence with length of time horizon for simulation.
     Notes

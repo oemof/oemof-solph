@@ -53,12 +53,12 @@ class Flow(Edge):
         will be added to the objective expression of the optimization problem.
     max : numeric (iterable or scalar), :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_value` with :attr:`max`
+        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`
     min : numeric (iterable or scalar), :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
-        :attr:`nominal_value` to get the absolute value.
+        :attr:`nominal_capacity` to get the absolute value.
     positive_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
@@ -206,7 +206,7 @@ class Flow(Edge):
             for attribute, value in custom_attributes.items():
                 setattr(self, attribute, value)
 
-        self.nominal_value = None
+        self.nominal_capacity = None
         self.investment = None
 
         infinite_error_msg = (
@@ -216,7 +216,7 @@ class Flow(Edge):
         if isinstance(nominal_capacity, numbers.Real):
             if not math.isfinite(nominal_capacity):
                 raise ValueError(infinite_error_msg.format("nominal_capacity"))
-            self.nominal_value = nominal_capacity
+            self.nominal_capacity = nominal_capacity
         elif isinstance(nominal_capacity, Investment):
             self.investment = nominal_capacity
 
@@ -260,7 +260,7 @@ class Flow(Edge):
             "max",
         ]
         sequences = ["fix", "variable_costs", "min", "max"]
-        if self.investment is None and self.nominal_value is None:
+        if self.investment is None and self.nominal_capacity is None:
             for attr in need_nominal_value:
                 if isinstance(eval(attr), Iterable):
                     the_attr = eval(attr)[0]
@@ -287,7 +287,9 @@ class Flow(Edge):
         for attr in sequences:
             setattr(self, attr, sequence(eval(attr)))
 
-        if self.nominal_value is not None and not math.isfinite(self.max[0]):
+        if self.nominal_capacity is not None and not math.isfinite(
+            self.max[0]
+        ):
             raise ValueError(infinite_error_msg.format("max"))
 
         # Checking for impossible gradient combinations

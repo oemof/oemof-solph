@@ -99,7 +99,7 @@ class TestParameterResult:
                 {
                     "bidirectional": False,
                     "integer": False,
-                    "nominal_value": 1,
+                    "nominal_capacity": 1,
                     "max": 1,
                     "min": 0,
                     "variable_costs": 0,
@@ -124,7 +124,7 @@ class TestParameterResult:
             "lifetime": None,
             "integer": False,
             "investment": None,
-            "nominal_value": 1,
+            "nominal_capacity": 1,
             "nonconvex": None,
             "bidirectional": False,
             "full_load_time_max": None,

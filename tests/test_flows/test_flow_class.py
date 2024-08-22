@@ -82,6 +82,6 @@ def test_fix_sequence():
 
 
 def test_fix_sequence_non_nominal():
-    """Attribute fix needs nominal_value"""
+    """Attribute fix needs nominal_capacity"""
     with pytest.raises(AttributeError):
         Flow(fix=[0.3, 0.2, 0.7])
