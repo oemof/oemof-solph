@@ -13,6 +13,10 @@ API changes
 * Tansitional wrappers that still allowed to use "Transformer" and
   "OffsetTransformer" have been removed. Use of the new names
   ("Converter" and "OffsetConverter") is now obligatory.
+* Tansitional wrappers that still allowed to use "investment",
+  "summed_min", and "summed_max" as arguments to initialise a Flow
+  have been removed. Use of the new names ("nominal_value",
+  "full_load_time_min", and "full_load_time_max") is now obligatory.
 
 New features
 ############
