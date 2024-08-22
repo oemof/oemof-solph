@@ -43,7 +43,7 @@ def test_generic_storage_1():
 
 
 def test_generic_storage_2():
-    """Nominal value defined with investment model."""
+    """Nominal capacity defined with investment model."""
     bel = Bus()
     with pytest.raises(
         AttributeError,
@@ -65,7 +65,7 @@ def test_generic_storage_2():
 
 
 def test_generic_storage_3():
-    """Nominal value defined with investment model."""
+    """Nominal capacity defined with investment model."""
     bel = Bus()
     components.GenericStorage(
         label="storage4",

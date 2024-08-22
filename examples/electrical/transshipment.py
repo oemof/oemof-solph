@@ -77,7 +77,7 @@ def draw_graph(
     grph : networkxGraph
         A graph to draw.
     edge_labels : boolean
-        Use nominal values of flow as edge label
+        Use nominal capacities of flow as edge label
     node_color : dict or string
         Hex color code oder matplotlib color for each node. If string, all
         colors are the same.

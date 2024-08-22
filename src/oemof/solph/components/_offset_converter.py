@@ -579,7 +579,7 @@ def slope_offset_from_nonconvex_input(
 
     With the input load being at 100 %, in this example, the efficiency should
     be 30 %. With the input load being at 50 %, it should be 40 %. We can
-    calcualte slope and the offset which is normed to the nominal value of
+    calcualte slope and the offset which is normed to the nominal capacity of
     the referenced flow (in this case the input flow) always.
 
     >>> slope, offset = solph.components.slope_offset_from_nonconvex_input(
@@ -656,7 +656,7 @@ def slope_offset_from_nonconvex_output(
 
     With the output load being at 100 %, in this example, the efficiency should
     be 80 %. With the input load being at 50 %, it should be 70 %. We can
-    calcualte slope and the offset, which is normed to the nominal value of
+    calcualte slope and the offset, which is normed to the nominal capacity of
     the referenced flow (in this case the output flow) always.
 
     >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(
