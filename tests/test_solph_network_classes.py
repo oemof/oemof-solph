@@ -72,21 +72,6 @@ class TestConverterClass:
             assert converter.inputs == {}
 
 
-def test_transformer_wrapper():
-    # two warnings: Wrapper and no inputs/outputs
-    with pytest.warns(FutureWarning):
-        with pytest.warns(SuspiciousUsageWarning):
-            solph.components.Transformer()
-
-
-def test_offset_transformer_wrapper():
-    with pytest.warns(FutureWarning):
-        solph.components.OffsetTransformer(
-            inputs={solph.Bus("bus"): solph.Flow(nonconvex=solph.NonConvex())},
-            outputs={},
-        )
-
-
 def test_wrong_combination_invest_and_nominal_value():
     msg = "For backward compatibility, the option investment overwrites"
     with pytest.raises(AttributeError, match=msg):

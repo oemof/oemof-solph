@@ -378,34 +378,6 @@ class OffsetConverter(Node):
         return fig, ax
 
 
-# --- BEGIN: To be removed for versions >= v0.6 ---
-class OffsetTransformer(OffsetConverter):
-    def __init__(
-        self,
-        inputs,
-        outputs,
-        label=None,
-        coefficients=None,
-        custom_attributes=None,
-    ):
-        super().__init__(
-            label=label,
-            inputs=inputs,
-            outputs=outputs,
-            coefficients=coefficients,
-            custom_attributes=custom_attributes,
-        )
-        warn(
-            "solph.components.OffsetTransformer has been renamed to"
-            " solph.components.OffsetConverter. The transitional wrapper"
-            " will be deleted in the future.",
-            FutureWarning,
-        )
-
-
-# --- END ---
-
-
 class OffsetConverterBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
     :class:`~oemof.solph.components._offset_converter.OffsetConverter`

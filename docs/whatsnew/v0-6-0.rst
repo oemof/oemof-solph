@@ -10,6 +10,9 @@ API changes
   effectively the same) had double weight before. Also, if the
   initial storage level is defined, the costs just offset the
   objective value without changing anything else.
+* Tansitional wrappers that still allowed to use "Transformer" and
+  "OffsetTransformer" have been removed. Use of the new names
+  ("Converter" and "OffsetConverter") is now obligatory.
 
 New features
 ############
