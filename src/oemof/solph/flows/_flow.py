@@ -192,12 +192,6 @@ class Flow(Edge):
             else:
                 warn(msg, FutureWarning)
             nominal_capacity = nominal_value
-
-        msg = (
-            "\nThe parameter '{0}' is deprecated and will be removed "
-            + "in version v0.6.\nUse the parameter '{1}', "
-            + "to avoid this warning and future problems. "
-        )
         # --- END ---
 
         super().__init__()
