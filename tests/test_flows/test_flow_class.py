@@ -21,7 +21,7 @@ def test_summed_max_future_warning():
     """Can be removed with v0.6."""
     msg = "The parameter 'summed_max' is deprecated and will be removed"
     with warnings.catch_warnings(record=True) as w:
-        Flow(nominal_value=1, summed_max=2)
+        Flow(nominal_capacity=1, summed_max=2)
         assert len(w) == 1
         assert msg in str(w[-1].message)
 
@@ -30,7 +30,7 @@ def test_summed_min_future_warning():
     """Can be removed with v0.6."""
     msg = "The parameter 'summed_min' is deprecated and will be removed"
     with warnings.catch_warnings(record=True) as w:
-        Flow(nominal_value=1, summed_min=2)
+        Flow(nominal_capacity=1, summed_min=2)
         assert len(w) == 1
         assert msg in str(w[-1].message)
 

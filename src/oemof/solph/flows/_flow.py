@@ -41,10 +41,10 @@ class Flow(Edge):
 
     Parameters
     ----------
-    nominal_value : numeric, :math:`P_{nom}` or
+    nominal_capacity : numeric, :math:`P_{nom}` or
             :class:`Investment <oemof.solph.options.Investment>`
-        The nominal value of the flow, either fixed or as an investement
-        optimisation. If this value is set the corresponding optimization
+        The nominal calacity of the flow, either fixed or as an investement
+        optimisation. If this value is set, the corresponding optimization
         variable of the flow object will be bounded by this value
         multiplied by min(lower bound)/max(upper bound).
     variable_costs : numeric (iterable or scalar), default: 0, :math:`c`
@@ -68,11 +68,11 @@ class Flow(Edge):
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Maximum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
-        (`nominal_value`).
+        (`nominal_capacity`).
     full_load_time_min : numeric, :math:`t_{full\_load,min}`
         Minimum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
-        (`nominal_value`).
+        (`nominal_capacity`).
     integer : boolean
         Set True to bound the flow values to integers.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
@@ -107,7 +107,7 @@ class Flow(Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(nominal_value=2, fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_capacity=2, fix=[10, 4, 4], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
@@ -115,14 +115,17 @@ class Flow(Edge):
 
     Creating a flow object with time-depended lower and upper bounds:
 
-    >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_value=100)
+    >>> f1 = Flow(min=[0.2, 0.3], max=0.99, nominal_capacity=100)
     >>> f1.max[1]
     0.99
     """  # noqa: E501
 
     def __init__(
         self,
+        nominal_capacity=None,
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         nominal_value=None,
+        # --- END ---
         variable_costs=0,
         min=None,
         max=None,
@@ -176,6 +179,27 @@ class Flow(Edge):
             full_load_time_min = summed_min
         # --- END ---
 
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if nominal_value is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option nominal_value overwrites the option"
+                " nominal_capacity."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_capacity is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_capacity = nominal_value
+
+        msg = (
+            "\nThe parameter '{0}' is deprecated and will be removed "
+            + "in version v0.6.\nUse the parameter '{1}', "
+            + "to avoid this warning and future problems. "
+        )
+        # --- END ---
+
         super().__init__()
 
         if custom_attributes is not None:
@@ -189,12 +213,12 @@ class Flow(Edge):
             "{} must be a finite value. Passing an infinite "
             "value is not allowed."
         )
-        if isinstance(nominal_value, numbers.Real):
-            if not math.isfinite(nominal_value):
-                raise ValueError(infinite_error_msg.format("nominal_value"))
-            self.nominal_value = nominal_value
-        elif isinstance(nominal_value, Investment):
-            self.investment = nominal_value
+        if isinstance(nominal_capacity, numbers.Real):
+            if not math.isfinite(nominal_capacity):
+                raise ValueError(infinite_error_msg.format("nominal_capacity"))
+            self.nominal_value = nominal_capacity
+        elif isinstance(nominal_capacity, Investment):
+            self.investment = nominal_capacity
 
         if fixed_costs is not None:
             msg = (

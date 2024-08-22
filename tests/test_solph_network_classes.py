@@ -128,12 +128,12 @@ def test_flow_with_fix_and_min_max():
 
 
 def test_infinite_values():
-    msg1 = "nominal_value must be a finite value"
+    msg1 = "nominal_capacity must be a finite value"
     msg2 = "max must be a finite value"
     with pytest.raises(ValueError, match=msg1):
-        solph.flows.Flow(nominal_value=float("+inf"))
+        solph.flows.Flow(nominal_capacity=float("+inf"))
     with pytest.raises(ValueError, match=msg2):
-        solph.flows.Flow(nominal_value=1, max=float("+inf"))
+        solph.flows.Flow(nominal_capacity=1, max=float("+inf"))
 
 
 def test_attributes_needing_nominal_value_get_it():
