@@ -151,30 +151,26 @@ class OffsetConverter(Node):
             custom_properties=custom_attributes,
         )
 
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         # this part is used for the transition phase from the old
         # OffsetConverter API to the new one. It calcualtes the
         # conversion_factors and normed_offsets from the coefficients and the
         # outputs information on min and max.
-        if (
-            coefficients is not None
-            and conversion_factors is None
-            and normed_offsets is None
-        ):
+        if coefficients is not None:
+            if conversion_factors is not None or normed_offsets is not None:
+                msg = (
+                    "The deprecated argument `coefficients` cannot be used "
+                    "in combination with its replacements "
+                    "(`conversion_factors` and `normed_offsets`)."
+                )
+                raise TypeError(msg)
+
             normed_offsets, conversion_factors = (
                 self.normed_offset_and_conversion_factors_from_coefficients(
                     coefficients
                 )
             )
-
-        elif coefficients is not None and (
-            conversion_factors is not None or normed_offsets is not None
-        ):
-            msg = (
-                "The deprecated argument `coefficients` cannot be used in "
-                "combination with its replacements (`conversion_factors` and "
-                "`normed_offsets`)."
-            )
-            raise TypeError(msg)
+        # --- END ---
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
         _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
@@ -252,6 +248,7 @@ class OffsetConverter(Node):
     def constraint_group(self):
         return OffsetConverterBlock
 
+    # --- BEGIN: To be removed for versions >= v0.7 ---
     def normed_offset_and_conversion_factors_from_coefficients(
         self, coefficients
     ):
@@ -317,6 +314,8 @@ class OffsetConverter(Node):
             warn(msg, DeprecationWarning)
 
         return normed_offsets, conversion_factors
+
+    # --- END ---
 
     def plot_partload(self, bus, tstep):
         """Create a matplotlib figure of the flow to nonconvex flow relation.
