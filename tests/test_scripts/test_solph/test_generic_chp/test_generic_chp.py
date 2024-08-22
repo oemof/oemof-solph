@@ -59,7 +59,9 @@ def test_gen_chp():
         solph.components.Sink(
             label="demand_th",
             inputs={
-                bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=200)
+                bth: solph.flows.Flow(
+                    fix=data["demand_th"], nominal_capacity=200
+                )
             },
         )
     )

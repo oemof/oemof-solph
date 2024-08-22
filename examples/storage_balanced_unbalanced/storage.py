@@ -89,7 +89,9 @@ def storage_example():
             solph.components.Source(
                 label="pv_el_{0}".format(name),
                 outputs={
-                    bel: solph.Flow(fix=timeseries["pv_el"], nominal_value=1)
+                    bel: solph.Flow(
+                        fix=timeseries["pv_el"], nominal_capacity=1
+                    )
                 },
             )
         )
@@ -99,7 +101,7 @@ def storage_example():
                 label="demand_el_{0}".format(name),
                 inputs={
                     bel: solph.Flow(
-                        fix=timeseries["demand_el"], nominal_value=1
+                        fix=timeseries["demand_el"], nominal_capacity=1
                     )
                 },
             )

@@ -32,28 +32,34 @@ def test_storage_level_constraint():
 
     in_100 = solph.components.Source(
         label="in_100",
-        outputs={multiplexer: solph.Flow(nominal_value=5, variable_costs=0.1)},
+        outputs={
+            multiplexer: solph.Flow(nominal_capacity=5, variable_costs=0.1)
+        },
     )
     in_050 = solph.components.Source(
         label="in_050",
-        outputs={multiplexer: solph.Flow(nominal_value=5, variable_costs=0.1)},
+        outputs={
+            multiplexer: solph.Flow(nominal_capacity=5, variable_costs=0.1)
+        },
     )
     in_000 = solph.components.Source(
         label="in_000",
-        outputs={multiplexer: solph.Flow(nominal_value=5, variable_costs=0.1)},
+        outputs={
+            multiplexer: solph.Flow(nominal_capacity=5, variable_costs=0.1)
+        },
     )
 
     out_000 = solph.components.Sink(
         label="out_000",
-        inputs={multiplexer: solph.Flow(nominal_value=5)},
+        inputs={multiplexer: solph.Flow(nominal_capacity=5)},
     )
     out_050 = solph.components.Sink(
         label="out_050",
-        inputs={multiplexer: solph.Flow(nominal_value=5)},
+        inputs={multiplexer: solph.Flow(nominal_capacity=5)},
     )
     out_100 = solph.components.Sink(
         label="out_100",
-        inputs={multiplexer: solph.Flow(nominal_value=5)},
+        inputs={multiplexer: solph.Flow(nominal_capacity=5)},
     )
     es.add(in_000, in_050, in_100, out_000, out_050, out_100)
 

@@ -108,7 +108,7 @@ class OffsetConverter(Node):
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_value=l_nominal, min=l_min, max=l_max,
+    ...         nominal_capacity=l_nominal, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
     ...    conversion_factors={bel: slope},
     ...    normed_offsets={bel: offset},

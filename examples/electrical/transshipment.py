@@ -144,8 +144,8 @@ def main():
             label="line_0",
             inputs={b_0: Flow(), b_1: Flow()},
             outputs={
-                b_1: Flow(nominal_value=Investment()),
-                b_0: Flow(nominal_value=Investment()),
+                b_1: Flow(nominal_capacity=Investment()),
+                b_0: Flow(nominal_capacity=Investment()),
             },
             conversion_factors={(b_0, b_1): 0.95, (b_1, b_0): 0.9},
         )
@@ -154,26 +154,28 @@ def main():
     es.add(
         cmp.Source(
             label="gen_0",
-            outputs={b_0: Flow(nominal_value=100, variable_costs=50)},
+            outputs={b_0: Flow(nominal_capacity=100, variable_costs=50)},
         )
     )
 
     es.add(
         cmp.Source(
             label="gen_1",
-            outputs={b_1: Flow(nominal_value=100, variable_costs=50)},
+            outputs={b_1: Flow(nominal_capacity=100, variable_costs=50)},
         )
     )
 
     es.add(
         cmp.Sink(
-            label="load_0", inputs={b_0: Flow(nominal_value=150, fix=[0, 1])}
+            label="load_0",
+            inputs={b_0: Flow(nominal_capacity=150, fix=[0, 1])},
         )
     )
 
     es.add(
         cmp.Sink(
-            label="load_1", inputs={b_1: Flow(nominal_value=150, fix=[1, 0])}
+            label="load_1",
+            inputs={b_1: Flow(nominal_capacity=150, fix=[1, 0])},
         )
     )
 

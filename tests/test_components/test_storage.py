@@ -66,12 +66,14 @@ def test_invest_power_uncoupled():
         "storage",
         inputs={
             bus: solph.Flow(
-                variable_costs=-1, nominal_value=solph.Investment(ep_costs=0.1)
+                variable_costs=-1,
+                nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
         outputs={
             bus: solph.Flow(
-                variable_costs=1, nominal_value=solph.Investment(ep_costs=0.1)
+                variable_costs=1,
+                nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
         nominal_storage_capacity=10,
@@ -110,12 +112,14 @@ def test_invest_power_coupled():
         "storage",
         inputs={
             bus: solph.Flow(
-                variable_costs=-1, nominal_value=solph.Investment(ep_costs=0.1)
+                variable_costs=-1,
+                nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
         outputs={
             bus: solph.Flow(
-                variable_costs=1, nominal_value=solph.Investment(ep_costs=0.1)
+                variable_costs=1,
+                nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
         nominal_storage_capacity=10,
@@ -153,8 +157,8 @@ def test_storage_charging():
 
     storage = solph.components.GenericStorage(
         "storage",
-        inputs={bus: solph.Flow(nominal_value=2, variable_costs=-2)},
-        outputs={bus: solph.Flow(nominal_value=0.1)},
+        inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
+        outputs={bus: solph.Flow(nominal_capacity=0.1)},
         nominal_storage_capacity=19,
         initial_storage_level=0,
         balanced=False,
@@ -188,8 +192,8 @@ def test_invest_content_uncoupled():
 
     storage = solph.components.GenericStorage(
         "storage",
-        inputs={bus: solph.Flow(nominal_value=2, variable_costs=-2)},
-        outputs={bus: solph.Flow(nominal_value=0.1)},
+        inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
+        outputs={bus: solph.Flow(nominal_capacity=0.1)},
         nominal_storage_capacity=solph.Investment(
             ep_costs=0.1,
         ),
@@ -228,8 +232,8 @@ def test_invest_content_minimum():
 
     storage = solph.components.GenericStorage(
         "storage",
-        inputs={bus: solph.Flow(nominal_value=2, variable_costs=-2)},
-        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
+        outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
         nominal_storage_capacity=solph.Investment(
             ep_costs=0.1,
             minimum=32,
@@ -269,8 +273,8 @@ def test_invest_content_minimum_nonconvex():
 
     storage = solph.components.GenericStorage(
         "storage",
-        inputs={bus: solph.Flow(nominal_value=2, variable_costs=0.1)},
-        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=0.1)},
+        outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
         nominal_storage_capacity=solph.Investment(
             ep_costs=0.1,
             minimum=32,
@@ -312,11 +316,11 @@ def test_invest_content_maximum():
         "storage",
         inputs={
             bus: solph.Flow(
-                nominal_value=2,
+                nominal_capacity=2,
                 variable_costs=[-2 + i * 0.01 for i in range(0, 11)],
             )
         },
-        outputs={bus: solph.Flow(nominal_value=0.1, variable_costs=0.1)},
+        outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
         nominal_storage_capacity=solph.Investment(
             ep_costs=0.1,
             maximum=10,

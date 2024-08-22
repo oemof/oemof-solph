@@ -89,13 +89,13 @@ def storage_costs_example():
         nominal_storage_capacity=10,
         inputs={
             bel: solph.Flow(
-                nominal_value=1,
+                nominal_capacity=1,
                 variable_costs=electricity_price,
             )
         },
         outputs={
             bel: solph.Flow(
-                nominal_value=1,
+                nominal_capacity=1,
                 variable_costs=-electricity_price,
             )
         },
@@ -111,13 +111,13 @@ def storage_costs_example():
         nominal_storage_capacity=10,
         inputs={
             bel: solph.Flow(
-                nominal_value=1,
+                nominal_capacity=1,
                 variable_costs=electricity_price,
             )
         },
         outputs={
             bel: solph.Flow(
-                nominal_value=1,
+                nominal_capacity=1,
                 variable_costs=-electricity_price,
             )
         },

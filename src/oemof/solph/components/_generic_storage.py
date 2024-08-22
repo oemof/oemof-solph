@@ -141,8 +141,8 @@ class GenericStorage(Node):
     >>> my_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     nominal_storage_capacity=1000,
-    ...     inputs={my_bus: solph.flows.Flow(nominal_value=200, variable_costs=10)},
-    ...     outputs={my_bus: solph.flows.Flow(nominal_value=200)},
+    ...     inputs={my_bus: solph.flows.Flow(nominal_capacity=200, variable_costs=10)},
+    ...     outputs={my_bus: solph.flows.Flow(nominal_capacity=200)},
     ...     loss_rate=0.01,
     ...     initial_storage_level=0,
     ...     max_storage_level = 0.9,

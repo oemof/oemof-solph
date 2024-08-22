@@ -172,7 +172,7 @@ def test_custom_properties():
     bus2 = solph.Bus()
     oc = solph.components.OffsetConverter(
         inputs={
-            bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+            bus1: solph.Flow(nominal_capacity=2, nonconvex=solph.NonConvex())
         },
         outputs={bus2: solph.Flow()},
         conversion_factors={bus2: 2},
@@ -189,7 +189,9 @@ def test_invalid_conversion_factor():
     with pytest.raises(ValueError, match="Conversion factors cannot be "):
         solph.components.OffsetConverter(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             conversion_factors={
@@ -206,7 +208,9 @@ def test_invalid_normed_offset():
     with pytest.raises(ValueError, match="Normed offsets cannot be "):
         solph.components.OffsetConverter(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             conversion_factors={
@@ -225,7 +229,9 @@ def test_wrong_number_of_coefficients():
     with pytest.raises(ValueError, match="Two coefficients"):
         solph.components.OffsetTransformer(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             coefficients=(1, 2, 3),
@@ -474,7 +480,7 @@ def test_two_OffsetConverters_with_and_without_investment():
         outputs={
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     maximum=nominal_value, ep_costs=10
                 ),
             )
@@ -528,7 +534,7 @@ def test_OffsetConverter_05x_compatibility():
         outputs={
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
-                nominal_value=nominal_value,
+                nominal_capacity=nominal_value,
                 min=minimal_value / nominal_value,
             )
         },
@@ -575,7 +581,7 @@ def test_error_handling():
             outputs={
                 output_bus: solph.Flow(
                     nonconvex=solph.NonConvex(),
-                    nominal_value=10,
+                    nominal_capacity=10,
                     min=0.3,
                 )
             },
@@ -595,7 +601,7 @@ def test_error_handling():
                 outputs={
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
-                        nominal_value=10,
+                        nominal_capacity=10,
                         min=0.3,
                     )
                 },
@@ -612,7 +618,7 @@ def test_error_handling():
                 outputs={
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
-                        nominal_value=10,
+                        nominal_capacity=10,
                         min=0.3,
                     )
                 },

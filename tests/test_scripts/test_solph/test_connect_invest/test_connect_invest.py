@@ -57,7 +57,7 @@ def test_connect_invest():
     es.add(
         components.Source(
             label="wind",
-            outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
+            outputs={bel1: Flow(fix=data["wind"], nominal_capacity=1000000)},
         )
     )
 
@@ -65,7 +65,7 @@ def test_connect_invest():
     es.add(
         components.Sink(
             label="demand",
-            inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
+            inputs={bel1: Flow(fix=data["demand_el"], nominal_capacity=1)},
         )
     )
 
@@ -86,14 +86,14 @@ def test_connect_invest():
     line12 = components.Converter(
         label="line12",
         inputs={bel1: Flow()},
-        outputs={bel2: Flow(nominal_value=Investment(ep_costs=20))},
+        outputs={bel2: Flow(nominal_capacity=Investment(ep_costs=20))},
     )
     es.add(line12)
 
     line21 = components.Converter(
         label="line21",
         inputs={bel2: Flow()},
-        outputs={bel1: Flow(nominal_value=Investment(ep_costs=20))},
+        outputs={bel1: Flow(nominal_capacity=Investment(ep_costs=20))},
     )
     es.add(line21)
 

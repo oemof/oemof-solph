@@ -75,7 +75,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=16,
+                nominal_capacity=16,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
@@ -99,7 +99,7 @@ def main():
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
         nominal_storage_capacity=8,
@@ -110,7 +110,7 @@ def main():
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_value=8,
+                nominal_capacity=8,
                 variable_costs=0.1,
                 fix=[0.75, 0.5, 0, 0, 1, 0, 0, 0, 0],
             )

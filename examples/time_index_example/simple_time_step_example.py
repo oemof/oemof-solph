@@ -14,7 +14,7 @@ A minimal example to show how time steps work.
   If the storage is balanced, this is the same storage level as in the last time
   step.
 * The nominal_value in Flows has to be interpreted in means of power: We have
-  nominal_value=0.5, but the maximum change of the storage content of an ideal
+  nominal_capacity=0.5, but the maximum change of the storage content of an ideal
   storage is 0.125.
 
 Code
@@ -60,7 +60,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=2,
+                nominal_capacity=2,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
             )
@@ -77,7 +77,7 @@ def main():
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_value=2,
+                nominal_capacity=2,
                 variable_costs=0.1,
                 fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0],
             )

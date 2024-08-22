@@ -131,7 +131,7 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
+            inputs={bel: flows.Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
@@ -142,7 +142,7 @@ def main():
             inputs={bgas: flows.Flow()},
             outputs={
                 bel: flows.Flow(
-                    nominal_value=10e5,
+                    nominal_capacity=10e5,
                     negative_gradient_limit=gradient,
                     positive_gradient_limit=gradient,
                 )

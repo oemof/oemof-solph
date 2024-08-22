@@ -19,7 +19,7 @@ def test_gradient_limit():
     price_pattern = [8] + 8 * [-1] + [8]
 
     flow = solph.flows.Flow(
-        nominal_value=2,
+        nominal_capacity=2,
         variable_costs=price_pattern,
         positive_gradient_limit=0.4,
         negative_gradient_limit=0.25,
@@ -35,7 +35,7 @@ def test_full_load_time_max():
     price_pattern = [-i for i in range(11)]
 
     flow = solph.flows.Flow(
-        nominal_value=2,
+        nominal_capacity=2,
         variable_costs=price_pattern,
         full_load_time_max=4.5,
     )
@@ -48,7 +48,7 @@ def test_full_load_time_min():
     price_pattern = [i for i in range(11)]
 
     flow = solph.flows.Flow(
-        nominal_value=2,
+        nominal_capacity=2,
         variable_costs=price_pattern,
         full_load_time_min=4.5,
     )

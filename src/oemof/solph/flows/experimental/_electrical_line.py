@@ -60,7 +60,7 @@ class ElectricalLine(Flow):
 
     def __init__(self, **kwargs):
         super().__init__(
-            nominal_value=kwargs.get("nominal_value"),
+            nominal_capacity=kwargs.get("nominal_value"),
             variable_costs=kwargs.get("variable_costs", 0),
             min=kwargs.get("min"),
             max=kwargs.get("max"),

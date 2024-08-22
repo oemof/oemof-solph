@@ -151,7 +151,7 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=data["wind"],
-                nominal_value=solph.Investment(ep_costs=epc_wind),
+                nominal_capacity=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
@@ -161,7 +161,8 @@ def main():
         label="pv",
         outputs={
             bel: solph.Flow(
-                fix=data["pv"], nominal_value=solph.Investment(ep_costs=epc_pv)
+                fix=data["pv"],
+                nominal_capacity=solph.Investment(ep_costs=epc_pv),
             )
         },
     )
@@ -169,14 +170,14 @@ def main():
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_capacity=1)},
     )
 
     # create simple Converter object representing a gas power plant
     pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 

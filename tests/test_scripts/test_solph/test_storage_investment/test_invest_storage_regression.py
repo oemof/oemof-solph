@@ -39,7 +39,7 @@ def test_regression_investment_storage(solver="cbc"):
             label="demand",
             inputs={
                 bel: solph.flows.Flow(
-                    fix=[209643, 207497, 200108, 191892], nominal_value=1
+                    fix=[209643, 207497, 200108, 191892], nominal_capacity=1
                 )
             },
         )
@@ -57,7 +57,7 @@ def test_regression_investment_storage(solver="cbc"):
         solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.flows.Flow()},
-            outputs={bel: solph.flows.Flow(nominal_value=300000)},
+            outputs={bel: solph.flows.Flow(nominal_capacity=300000)},
             conversion_factors={bel: 0.58},
         )
     )
@@ -68,14 +68,14 @@ def test_regression_investment_storage(solver="cbc"):
             label="storage",
             inputs={
                 bel: solph.flows.Flow(
-                    nominal_value=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         existing=625046 / 6, maximum=0
                     )
                 )
             },
             outputs={
                 bel: solph.flows.Flow(
-                    nominal_value=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         existing=104174.33, maximum=1
                     )
                 )

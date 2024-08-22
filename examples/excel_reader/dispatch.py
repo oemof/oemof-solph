@@ -178,7 +178,7 @@ def create_nodes(nd=None):
     for i, re in nd["renewables"].iterrows():
         if re["active"]:
             # set static outflow values
-            outflow_args = {"nominal_value": re["capacity"]}
+            outflow_args = {"nominal_capacity": re["capacity"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == re["label"]:
@@ -196,7 +196,7 @@ def create_nodes(nd=None):
     for i, de in nd["demand"].iterrows():
         if de["active"]:
             # set static inflow values
-            inflow_args = {"nominal_value": de["nominal value"]}
+            inflow_args = {"nominal_capacity": de["nominal value"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == de["label"]:
@@ -225,7 +225,9 @@ def create_nodes(nd=None):
                     label=t["label"],
                     inputs={busd[t["from"]]: solph.Flow(**inflow_args)},
                     outputs={
-                        busd[t["to"]]: solph.Flow(nominal_value=t["capacity"])
+                        busd[t["to"]]: solph.Flow(
+                            nominal_capacity=t["capacity"]
+                        )
                     },
                     conversion_factors={busd[t["to"]]: t["efficiency"]},
                 )
@@ -238,13 +240,13 @@ def create_nodes(nd=None):
                     label=s["label"],
                     inputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_value=s["capacity inflow"],
+                            nominal_capacity=s["capacity inflow"],
                             variable_costs=s["variable input costs"],
                         )
                     },
                     outputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_value=s["capacity outflow"],
+                            nominal_capacity=s["capacity outflow"],
                             variable_costs=s["variable output costs"],
                         )
                     },

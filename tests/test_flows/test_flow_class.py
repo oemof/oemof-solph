@@ -36,7 +36,7 @@ def test_summed_min_future_warning():
 
 
 def test_source_with_full_load_time_max():
-    Flow(nominal_value=1, full_load_time_max=2)
+    Flow(nominal_capacity=1, full_load_time_max=2)
 
 
 def test_nonconvex_positive_gradient_error():
@@ -74,7 +74,7 @@ def test_non_convex_negative_gradient_error():
 
 
 def test_fix_sequence():
-    flow = Flow(nominal_value=4, fix=[0.3, 0.2, 0.7])
+    flow = Flow(nominal_capacity=4, fix=[0.3, 0.2, 0.7])
 
     assert flow.fix[0] == 0.3
     assert flow.fix[1] == 0.2
