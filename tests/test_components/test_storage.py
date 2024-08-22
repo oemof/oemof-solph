@@ -28,7 +28,7 @@ def test_relative_losses():
             "storage",
             inputs={bus: solph.Flow(variable_costs=1)},
             outputs={bus: solph.Flow(variable_costs=1)},
-            nominal_storage_capacity=10,
+            nominal_capacity=10,
             initial_storage_level=1,
             loss_rate=0.004125876075,  # half life of one week
         )
@@ -76,7 +76,7 @@ def test_invest_power_uncoupled():
                 nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
-        nominal_storage_capacity=10,
+        nominal_capacity=10,
         initial_storage_level=0,
         balanced=False,
     )
@@ -122,7 +122,7 @@ def test_invest_power_coupled():
                 nominal_capacity=solph.Investment(ep_costs=0.1),
             )
         },
-        nominal_storage_capacity=10,
+        nominal_capacity=10,
         invest_relation_input_output=0.5,
         initial_storage_level=0,
         balanced=False,
@@ -159,7 +159,7 @@ def test_storage_charging():
         "storage",
         inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
         outputs={bus: solph.Flow(nominal_capacity=0.1)},
-        nominal_storage_capacity=19,
+        nominal_capacity=19,
         initial_storage_level=0,
         balanced=False,
     )
@@ -194,7 +194,7 @@ def test_invest_content_uncoupled():
         "storage",
         inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
         outputs={bus: solph.Flow(nominal_capacity=0.1)},
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=0.1,
         ),
         initial_storage_level=0,
@@ -234,7 +234,7 @@ def test_invest_content_minimum():
         "storage",
         inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=-2)},
         outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=0.1,
             minimum=32,
         ),
@@ -275,7 +275,7 @@ def test_invest_content_minimum_nonconvex():
         "storage",
         inputs={bus: solph.Flow(nominal_capacity=2, variable_costs=0.1)},
         outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=0.1,
             minimum=32,
             nonconvex=solph.NonConvex(),
@@ -321,7 +321,7 @@ def test_invest_content_maximum():
             )
         },
         outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=0.1,
             maximum=10,
         ),
@@ -344,3 +344,28 @@ def test_invest_content_maximum():
     assert storage_content == pytest.approx(
         [min(i * 1.9, 10) for i in range(0, 11)]
     )
+
+
+# --- BEGIN: The following code can be removed for versions >= v0.6 ---
+def test_capacity_keyword_wrapper_warning():
+    with pytest.warns(FutureWarning, match="nominal_storage_capacity"):
+        bus = solph.Bus()
+        _ = solph.components.GenericStorage(
+            nominal_storage_capacity=5,
+            inputs={bus: solph.Flow()},
+            outputs={bus: solph.Flow()},
+        )
+
+
+def test_capacity_keyword_wrapper_error():
+    with pytest.raises(AttributeError, match="nominal_storage_capacity"):
+        bus = solph.Bus()
+        _ = solph.components.GenericStorage(
+            nominal_storage_capacity=5,
+            nominal_capacity=5,
+            inputs={bus: solph.Flow()},
+            outputs={bus: solph.Flow()},
+        )
+
+
+# --- END ---

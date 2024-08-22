@@ -167,7 +167,8 @@ class GenericStorage(Node):
         label=None,
         inputs=None,
         outputs=None,
-        nominal_storage_capacity=None,
+        nominal_capacity=None,
+        nominal_storage_capacity=None,  # Can be removed for versions >= v0.7
         initial_storage_level=None,
         investment=None,
         invest_relation_input_output=None,
@@ -207,20 +208,34 @@ class GenericStorage(Node):
                 + " nominal_storage_capacity."
                 + " Both options cannot be set at the same time."
             )
-            if nominal_storage_capacity is not None:
+            if nominal_capacity is not None:
                 raise AttributeError(msg)
             else:
                 warn(msg, FutureWarning)
             nominal_storage_capacity = investment
         # --- END ---
+        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        if nominal_storage_capacity is not None:
+            msg = (
+                "For backward compatibility,"
+                " the option nominal_storage_capacity overwrites the option"
+                + " nominal_capacity."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_capacity is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_capacity = nominal_storage_capacity
+        # --- END ---
 
         self.nominal_storage_capacity = None
         self.investment = None
         self._invest_group = False
-        if isinstance(nominal_storage_capacity, numbers.Real):
-            self.nominal_storage_capacity = nominal_storage_capacity
-        elif isinstance(nominal_storage_capacity, Investment):
-            self.investment = nominal_storage_capacity
+        if isinstance(nominal_capacity, numbers.Real):
+            self.nominal_storage_capacity = nominal_capacity
+        elif isinstance(nominal_capacity, Investment):
+            self.investment = nominal_capacity
             self._invest_group = True
 
         self.initial_storage_level = initial_storage_level
