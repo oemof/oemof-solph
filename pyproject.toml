@@ -57,8 +57,8 @@ requires-python = ">=3.8"
 dependencies = [
     "blinker",
     "dill",
-    "numpy",
-    "pandas >= 2.0.0",
+    "numpy >= 2.0.0",
+    "pandas >= 2.2.0",
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
