@@ -10,7 +10,7 @@ SPDX-FileCopyrightText: henhuy
 SPDX-License-Identifier: MIT
 
 """
-
+import warnings
 from collections import abc
 from itertools import repeat
 
@@ -69,10 +69,20 @@ def valid_sequence(sequence, length: int) -> bool:
         sequence.size = length
         return True
     if isinstance(sequence, np.ndarray):
-        if sequence.size >= length:
+        if sequence.size == length:
             return True
+        # --- BEGIN: To be removed for versions >= v0.6 ---
+        elif sequence.size > length:
+            warnings.warn(
+                "Sequence longer than needed"
+                f" ({sequence.size} items instead of {length})."
+                " This will be trated as an error in the future.",
+                FutureWarning,
+            )
+            return True
+        # --- END ---
         else:
-            raise ValueError(f"Lentgh of {sequence} should be {length}")
+            raise ValueError(f"Lentgh of {sequence} should be {length}.")
 
     return False
 
