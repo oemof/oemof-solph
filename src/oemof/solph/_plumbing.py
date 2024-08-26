@@ -56,6 +56,22 @@ def sequence(iterable_or_scalar):
         return _FakeSequence(value=iterable_or_scalar)
 
 
+def valid_sequence(sequence, length: int) -> bool:
+    if sequence[0] is None:
+        return False
+
+    if isinstance(sequence, _FakeSequence):
+        sequence.size = length
+        return True
+    if isinstance(sequence, np.ndarray):
+        if sequence.size >= length:
+            return True
+        else:
+            raise ValueError(f"Lentgh of {sequence} should be {length}")
+
+    return False
+
+
 class _FakeSequence:
     """Emulates a list whose length is not known in advance.
 
