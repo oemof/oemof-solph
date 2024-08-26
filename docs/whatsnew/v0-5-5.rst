@@ -1,0 +1,12 @@
+v0.5.5 ()
+--------------------------
+
+Bug fixes
+#########
+
+* Update required Pyomo version to allow working with numpy >= 2.0.0.
+
+Contributors
+############
+
+* Patrik Schönfeldt

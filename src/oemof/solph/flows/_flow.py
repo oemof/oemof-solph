@@ -111,7 +111,7 @@ class Flow(Edge):
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
-    4
+    np.int64(4)
 
     Creating a flow object with time-depended lower and upper bounds:
 
