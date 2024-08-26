@@ -81,3 +81,5 @@ def test_valid_sequence():
     # possible for any length
     assert valid_sequence(fake_sequence, 1337)
     assert len(fake_sequence) == 1337
+
+    assert not valid_sequence("abc", 3)
