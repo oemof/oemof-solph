@@ -70,6 +70,9 @@ def test_valid_sequence():
     np_array = np.array([0, 1, 2, 3, 4])
     assert valid_sequence(np_array, 5)
 
+    with pytest.warns(FutureWarning, match="Sequence longer than needed"):
+        valid_sequence(np_array, 4)
+
     # it's not that long
     with pytest.raises(ValueError):
         valid_sequence(np_array, 1337)
