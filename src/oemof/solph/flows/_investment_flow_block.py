@@ -180,7 +180,7 @@ class InvestmentFlowBlock(ScalarBlock):
         * :math:`P(p, t)`
 
             Actual flow value
-            (created in :class:`oemof.solph.models.BaseModel`),
+            (created in :class:`oemof.solph.models.Model`),
             indexed by tuple of periods p and timestep t
 
         * :math:`P_{invest}(p)`

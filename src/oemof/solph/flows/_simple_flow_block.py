@@ -237,7 +237,7 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_max_rule
         )
 
-        def _flow_full_load_time_min_rule(model):
+        def _flow_full_load_time_min_rule(_):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
@@ -257,7 +257,7 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_min_rule
         )
 
-        def _positive_gradient_flow_rule(model):
+        def _positive_gradient_flow_rule(_):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMESTEPS) + 1):

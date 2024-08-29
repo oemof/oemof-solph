@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import warnings
 
 import pytest
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 
@@ -21,17 +23,21 @@ def test_multi_output_source():
         es.add(b)
         es.add(solph.components.Sink(f"source {i}", inputs={b: solph.Flow()}))
 
-    es.add(
-        solph.components.Source(
-            outputs={
-                es.node[f"bus input {i}"]: solph.Flow(
-                    nominal_value=1,
-                    variable_costs=costs,
-                )
-                for i in range(num_out)
-            }
+    # Use of experimental API to access nodes by label.
+    # Can be removed with future release of network.
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
+        es.add(
+            solph.components.Source(
+                outputs={
+                    es.node[f"bus input {i}"]: solph.Flow(
+                        nominal_value=1,
+                        variable_costs=costs,
+                    )
+                    for i in range(num_out)
+                }
+            )
         )
-    )
 
     model = solph.Model(es)
     model.solve("cbc")

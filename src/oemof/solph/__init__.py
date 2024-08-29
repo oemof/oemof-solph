@@ -1,4 +1,4 @@
-__version__ = "0.5.5"
+__version__ = "0.6.0a2"
 
 from . import buses
 from . import components
@@ -8,8 +8,8 @@ from . import helpers
 from . import processing
 from . import views
 from ._energy_system import EnergySystem
-from ._energy_system import create_time_index
 from ._groupings import GROUPINGS
+from ._helpers import create_time_index
 from ._models import Model
 from ._options import Investment
 from ._options import NonConvex

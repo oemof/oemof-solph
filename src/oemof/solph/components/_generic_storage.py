@@ -54,15 +54,15 @@ class GenericStorage(Node):
             :class:`oemof.solph.options.Investment` object
         Absolute nominal capacity of the storage, fixed value or
         object describing parameter of investment optimisations.
-    invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
+    invest_relation_input_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
-    invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
+    invest_relation_output_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
-    invest_relation_input_output : numeric or None, :math:`r_{in,out}`
+    invest_relation_input_output : numeric (iterable or scalar) or None, :math:`r_{in,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
         flow investments to each other.
@@ -111,7 +111,8 @@ class GenericStorage(Node):
         nominal_storage_capacity should not be set (or set to None) if an
         investment object is used.
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
-        Cost (per energy) for having energy in the storage.
+        Cost (per energy) for having energy in the storage, starting from
+        time point :math:`t_{1}`.
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -234,9 +235,15 @@ class GenericStorage(Node):
         self.min_storage_level = sequence(min_storage_level)
         self.fixed_costs = sequence(fixed_costs)
         self.storage_costs = sequence(storage_costs)
-        self.invest_relation_input_output = invest_relation_input_output
-        self.invest_relation_input_capacity = invest_relation_input_capacity
-        self.invest_relation_output_capacity = invest_relation_output_capacity
+        self.invest_relation_input_output = sequence(
+            invest_relation_input_output
+        )
+        self.invest_relation_input_capacity = sequence(
+            invest_relation_input_capacity
+        )
+        self.invest_relation_output_capacity = sequence(
+            invest_relation_output_capacity
+        )
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
@@ -253,24 +260,22 @@ class GenericStorage(Node):
         coupled with storage capacity via invest relations
         """
         for flow in self.inputs.values():
-            if (
-                self.invest_relation_input_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_input_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_inflow)
         for flow in self.outputs.values():
-            if (
-                self.invest_relation_output_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_output_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_outflow)
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
         if (
-            self.invest_relation_input_output is not None
-            and self.invest_relation_output_capacity is not None
-            and self.invest_relation_input_capacity is not None
+            self.invest_relation_input_output[0] is not None
+            and self.invest_relation_output_capacity[0] is not None
+            and self.invest_relation_input_capacity[0] is not None
         ):
             e2 = (
                 "Overdetermined. Three investment object will be coupled"
@@ -420,7 +425,7 @@ class GenericStorageBlock(ScalarBlock):
     * :attr: `storage_costs` not 0
 
         .. math::
-            \sum_{t \in \textrm{TIMESTEPS}} c_{storage}(t) \cdot E(t)
+            \sum_{t \in \textrm{TIMEPOINTS} > 0} c_{storage}(t) \cdot E(t)
 
 
     *Multi-period model*
@@ -476,7 +481,9 @@ class GenericStorageBlock(ScalarBlock):
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -560,7 +567,7 @@ class GenericStorageBlock(ScalarBlock):
             self.STORAGES_BALANCED, rule=_balanced_storage_rule
         )
 
-        def _power_coupled(block):
+        def _power_coupled(_):
             """
             Rule definition for constraint to connect the input power
             and output power
@@ -569,7 +576,7 @@ class GenericStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -593,9 +600,6 @@ class GenericStorageBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        if not hasattr(self, "STORAGES"):
-            return 0
-
         fixed_costs = 0
 
         if m.es.periods is not None:
@@ -613,12 +617,12 @@ class GenericStorageBlock(ScalarBlock):
 
         for n in self.STORAGES:
             if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
-                storage_costs += (
-                    self.storage_content[n, 0] * n.storage_costs[0]
-                )
+                # We actually want to iterate over all TIMEPOINTS except the
+                # 0th. As integers are used for the index, this is equicalent
+                # to iterating over the TIMESTEPS with one offset.
                 for t in m.TIMESTEPS:
                     storage_costs += (
-                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                        self.storage_content[n, t + 1] * n.storage_costs[t]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
@@ -643,12 +647,12 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     * :math:`P_i(p, t)`
 
         Inflow of the storage
-        (created in :class:`oemof.solph.models.BaseModel`).
+        (created in :class:`oemof.solph.models.Model`).
 
     * :math:`P_o(p, t)`
 
         Outflow of the storage
-        (created in :class:`oemof.solph.models.BaseModel`).
+        (created in :class:`oemof.solph.models.Model`).
 
     * :math:`E(t)`
 
@@ -1111,11 +1115,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    def _create(self, group=None):
+    def _create(self, group):
         """Create a storage block for investment modeling"""
         m = self.parent_block()
-        if group is None:
-            return None
 
         # ########################## CHECKS ###################################
         if m.es.periods is not None:
@@ -1165,7 +1167,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_capacity is not None
+                if n.invest_relation_input_capacity[0] is not None
             ]
         )
 
@@ -1173,13 +1175,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_output_capacity is not None
+                if n.invest_relation_output_capacity[0] is not None
             ]
         )
 
         self.INVEST_REL_IN_OUT = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -1212,16 +1216,16 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         # ######################### Variables  ################################
         self.storage_content = Var(
-            self.INVESTSTORAGES, m.TIMESTEPS, within=NonNegativeReals
+            self.INVESTSTORAGES, m.TIMEPOINTS, within=NonNegativeReals
         )
 
-        def _storage_investvar_bound_rule(block, n, p):
+        def _storage_investvar_bound_rule(_, n, p):
             """
             Rule definition to bound the invested storage capacity `invest`.
             """
             if n in self.CONVEX_INVESTSTORAGES:
                 return n.investment.minimum[p], n.investment.maximum[p]
-            elif n in self.NON_CONVEX_INVESTSTORAGES:
+            else:  # n in self.NON_CONVEX_INVESTSTORAGES
                 return 0, n.investment.maximum[p]
 
         self.invest = Var(
@@ -1268,8 +1272,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         # ######################### CONSTRAINTS ###############################
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
-
-        reduced_periods_timeindex = [(p, t) for (p, t) in m.TIMEINDEX if t > 0]
 
         # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
@@ -1460,7 +1462,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
 
-            def _initially_empty_rule(block):
+            def _initially_empty_rule(_):
                 """Ensure storage to be empty initially"""
                 for n in self.INVESTSTORAGES:
                     expr = self.storage_content[n, 0] == 0
@@ -1491,7 +1493,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_fix_rule(block, n):
                 """Constraint for a fixed initial storage capacity."""
-                return block.init_content[n] == n.initial_storage_level * (
+                return block.storage_content[
+                    n, 0
+                ] == n.initial_storage_level * (
                     n.investment.existing + block.invest[n, 0]
                 )
 
@@ -1500,44 +1504,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inv_storage_init_content_fix_rule,
             )
 
-            def _storage_balance_first_rule(block, n):
-                """
-                Rule definition for the storage balance of every storage n
-                for the first time step.
-                """
-                expr = 0
-                expr += block.storage_content[n, 0]
-                expr += (
-                    -block.init_content[n]
-                    * (1 - n.loss_rate[0]) ** m.timeincrement[0]
-                )
-                expr += (
-                    n.fixed_losses_relative[0]
-                    * (n.investment.existing + self.invest[n, 0])
-                    * m.timeincrement[0]
-                )
-                expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
-                expr += (
-                    -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
-                ) * m.timeincrement[0]
-                expr += (
-                    m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
-                ) * m.timeincrement[0]
-                return expr == 0
-
-            self.balance_first = Constraint(
-                self.INVESTSTORAGES, rule=_storage_balance_first_rule
-            )
-
         def _storage_balance_rule(block, n, p, t):
             """
-            Rule definition for the storage balance of every storage n
-            for every time step but the first.
+            Rule definition for the storage balance of every storage n and
+            every timestep.
             """
             expr = 0
-            expr += block.storage_content[n, t]
+            expr += block.storage_content[n, t + 1]
             expr += (
-                -block.storage_content[n, t - 1]
+                -block.storage_content[n, t]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -1556,7 +1531,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         self.balance = Constraint(
             self.INVESTSTORAGES,
-            reduced_periods_timeindex,
+            m.TIMEINDEX,
             rule=_storage_balance_rule,
         )
 
@@ -1581,7 +1556,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -1602,7 +1577,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[i[n], n, p]
-                        == self.total[n, p] * n.invest_relation_input_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_input_capacity[p]
                     )
                     self.storage_capacity_inflow.add((n, p), expr)
 
@@ -1624,7 +1600,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                        == self.total[n, p] * n.invest_relation_output_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity[p]
                     )
                     self.storage_capacity_outflow.add((n, p), expr)
 
@@ -1636,40 +1613,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=_storage_capacity_outflow_invest_rule
         )
 
-        def _max_storage_content_invest_rule(block, n, p, t):
-            """
-            Rule definition for upper bound constraint for the
-            storage content.
-            """
-            expr = (
-                self.storage_content[n, t]
-                <= self.total[n, p] * n.max_storage_level[t]
-            )
-            return expr
-
-        self.max_storage_content = Constraint(
-            self.INVESTSTORAGES,
-            m.TIMEINDEX,
-            rule=_max_storage_content_invest_rule,
-        )
-
-        def _min_storage_content_invest_rule(block, n, p, t):
-            """
-            Rule definition of lower bound constraint for the
-            storage content.
-            """
-            expr = (
-                self.storage_content[n, t]
-                >= self.total[n, p] * n.min_storage_level[t]
-            )
-            return expr
-
-        # Set the lower bound of the storage content if the attribute exists
-        self.min_storage_content = Constraint(
-            self.MIN_INVESTSTORAGES,
-            m.TIMEINDEX,
-            rule=_min_storage_content_invest_rule,
-        )
+        self._add_storage_limit_constraints()
 
         def maximum_invest_limit(block, n, p):
             """
@@ -1743,12 +1687,82 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_overall_minimum_investflow_rule
             )
 
+    def _add_storage_limit_constraints(self):
+        m = self.parent_block()
+        if m.es.periods is None:
+
+            def _max_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition for upper bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    <= self.total[n, 0] * n.max_storage_level[t]
+                )
+                return expr
+
+            self.max_storage_content = Constraint(
+                self.INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_max_storage_content_invest_rule,
+            )
+
+            def _min_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition of lower bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    >= self.total[n, 0] * n.min_storage_level[t]
+                )
+                return expr
+
+            self.min_storage_content = Constraint(
+                self.MIN_INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_min_storage_content_invest_rule,
+            )
+        else:
+
+            def _max_storage_content_invest_rule(_, n, p, t):
+                """
+                Rule definition for upper bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    <= self.total[n, p] * n.max_storage_level[t]
+                )
+                return expr
+
+            self.max_storage_content = Constraint(
+                self.INVESTSTORAGES,
+                m.TIMEINDEX,
+                rule=_max_storage_content_invest_rule,
+            )
+
+            def _min_storage_content_invest_rule(_, n, p, t):
+                """
+                Rule definition of lower bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    >= self.total[n, p] * n.min_storage_level[t]
+                )
+                return expr
+
+            self.min_storage_content = Constraint(
+                self.MIN_INVESTSTORAGES,
+                m.TIMEINDEX,
+                rule=_min_storage_content_invest_rule,
+            )
+
     def _objective_expression(self):
         """Objective expression with fixed and investment costs."""
         m = self.parent_block()
-
-        if not hasattr(self, "INVESTSTORAGES"):
-            return 0
 
         investment_costs = 0
         period_investment_costs = {p: 0 for p in m.PERIODS}
