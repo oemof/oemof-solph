@@ -59,15 +59,21 @@ def sequence(iterable_or_scalar):
 def valid_sequence(sequence, length: int) -> bool:
     """Checks if an object is a numpy array of at least the given length
     or an 'emulated' sequence object of class _FakeSequence.
-    The latter is set to the required lenght.
+    If unset, the latter is set to the required lenght.
 
     """
     if sequence[0] is None:
         return False
 
     if isinstance(sequence, _FakeSequence):
-        sequence.size = length
-        return True
+        if sequence.size is None:
+            sequence.size = length
+
+        if sequence.size == length:
+            return True
+        else:
+            return False
+
     if isinstance(sequence, np.ndarray):
         if sequence.size == length:
             return True

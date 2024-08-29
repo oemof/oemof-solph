@@ -81,8 +81,14 @@ def test_valid_sequence():
     assert valid_sequence(fake_sequence, 5)
     assert len(fake_sequence) == 5
 
-    # possible for any length
+    # wil not automatically overwrite size
+    assert not valid_sequence(fake_sequence, 1337)
+    assert len(fake_sequence) == 5
+
+    # manually overwriting length is still possible
+    fake_sequence.size = 1337
     assert valid_sequence(fake_sequence, 1337)
     assert len(fake_sequence) == 1337
 
+    # strings are no valid sequences
     assert not valid_sequence("abc", 3)
