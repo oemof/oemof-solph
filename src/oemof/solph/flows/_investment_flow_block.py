@@ -29,6 +29,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._plumbing import valid_sequence
+
 
 class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
@@ -1007,7 +1009,9 @@ class InvestmentFlowBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.INVESTFLOWS:
-                if m.flows[i, o].investment.fixed_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                ):
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1022,7 +1026,9 @@ class InvestmentFlowBlock(ScalarBlock):
                         )
 
             for i, o in self.EXISTING_INVESTFLOWS:
-                if m.flows[i, o].investment.fixed_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                ):
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
                     range_limit = min(

@@ -10,7 +10,7 @@ SPDX-FileCopyrightText: henhuy
 SPDX-License-Identifier: MIT
 
 """
-
+import warnings
 from collections import abc
 from itertools import repeat
 
@@ -19,8 +19,8 @@ import numpy as np
 
 def sequence(iterable_or_scalar):
     """Checks if an object is iterable (except string) or scalar and returns
-    the original sequence if object is an iterable and an 'emulated'
-    sequence object of class _Sequence if object is a scalar or string.
+    the an numpy array of the sequence if object is an iterable or an
+    'emulated'  sequence object of class _FakeSequence if object is a scalar.
 
     Parameters
     ----------
@@ -54,6 +54,43 @@ def sequence(iterable_or_scalar):
         return np.array(iterable_or_scalar)
     else:
         return _FakeSequence(value=iterable_or_scalar)
+
+
+def valid_sequence(sequence, length: int) -> bool:
+    """Checks if an object is a numpy array of at least the given length
+    or an 'emulated' sequence object of class _FakeSequence.
+    If unset, the latter is set to the required lenght.
+
+    """
+    if sequence[0] is None:
+        return False
+
+    if isinstance(sequence, _FakeSequence):
+        if sequence.size is None:
+            sequence.size = length
+
+        if sequence.size == length:
+            return True
+        else:
+            return False
+
+    if isinstance(sequence, np.ndarray):
+        if sequence.size == length:
+            return True
+        # --- BEGIN: To be removed for versions >= v0.6 ---
+        elif sequence.size > length:
+            warnings.warn(
+                "Sequence longer than needed"
+                f" ({sequence.size} items instead of {length})."
+                " This will be trated as an error in the future.",
+                FutureWarning,
+            )
+            return True
+        # --- END ---
+        else:
+            raise ValueError(f"Lentgh of {sequence} should be {length}.")
+
+    return False
 
 
 class _FakeSequence:

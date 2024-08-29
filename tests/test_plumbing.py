@@ -11,6 +11,7 @@ import pytest
 
 from oemof.solph._plumbing import _FakeSequence
 from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 
 
 def test_fake_sequence():
@@ -63,3 +64,31 @@ def test_sequence():
     seq_ab = sequence("ab")
     assert isinstance(seq_ab, str)
     assert seq_ab == "ab"
+
+
+def test_valid_sequence():
+    np_array = np.array([0, 1, 2, 3, 4])
+    assert valid_sequence(np_array, 5)
+
+    with pytest.warns(FutureWarning, match="Sequence longer than needed"):
+        valid_sequence(np_array, 4)
+
+    # it's not that long
+    with pytest.raises(ValueError):
+        valid_sequence(np_array, 1337)
+
+    fake_sequence = _FakeSequence(42)
+    assert valid_sequence(fake_sequence, 5)
+    assert len(fake_sequence) == 5
+
+    # wil not automatically overwrite size
+    assert not valid_sequence(fake_sequence, 1337)
+    assert len(fake_sequence) == 5
+
+    # manually overwriting length is still possible
+    fake_sequence.size = 1337
+    assert valid_sequence(fake_sequence, 1337)
+    assert len(fake_sequence) == 1337
+
+    # strings are no valid sequences
+    assert not valid_sequence("abc", 3)
