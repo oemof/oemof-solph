@@ -38,7 +38,8 @@ from pyomo.environ import Var
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 
 
 class GenericStorage(Node):
@@ -224,19 +225,15 @@ class GenericStorage(Node):
 
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
-        self.loss_rate = solph_sequence(loss_rate)
-        self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
-        self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
-        self.inflow_conversion_factor = solph_sequence(
-            inflow_conversion_factor
-        )
-        self.outflow_conversion_factor = solph_sequence(
-            outflow_conversion_factor
-        )
-        self.max_storage_level = solph_sequence(max_storage_level)
-        self.min_storage_level = solph_sequence(min_storage_level)
-        self.fixed_costs = solph_sequence(fixed_costs)
-        self.storage_costs = solph_sequence(storage_costs)
+        self.loss_rate = sequence(loss_rate)
+        self.fixed_losses_relative = sequence(fixed_losses_relative)
+        self.fixed_losses_absolute = sequence(fixed_losses_absolute)
+        self.inflow_conversion_factor = sequence(inflow_conversion_factor)
+        self.outflow_conversion_factor = sequence(outflow_conversion_factor)
+        self.max_storage_level = sequence(max_storage_level)
+        self.min_storage_level = sequence(min_storage_level)
+        self.fixed_costs = sequence(fixed_costs)
+        self.storage_costs = sequence(storage_costs)
         self.invest_relation_input_output = invest_relation_input_output
         self.invest_relation_input_capacity = invest_relation_input_capacity
         self.invest_relation_output_capacity = invest_relation_output_capacity
@@ -603,7 +600,7 @@ class GenericStorageBlock(ScalarBlock):
 
         if m.es.periods is not None:
             for n in self.STORAGES:
-                if n.fixed_costs[0] is not None:
+                if valid_sequence(n.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         n.nominal_storage_capacity
                         * n.fixed_costs[pp]
@@ -615,7 +612,7 @@ class GenericStorageBlock(ScalarBlock):
         storage_costs = 0
 
         for n in self.STORAGES:
-            if n.storage_costs[0] is not None:
+            if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
                 storage_costs += (
                     self.storage_content[n, 0] * n.storage_costs[0]
                 )
@@ -1861,7 +1858,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1879,7 +1876,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         )
 
             for n in self.EXISTING_INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     range_limit = min(
