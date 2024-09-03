@@ -1798,7 +1798,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -1839,7 +1839,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     investment_costs_increment = (
                         self.invest[n, p] * annuity * present_value_factor
                         + self.invest_status[n, p] * n.investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -1865,9 +1865,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
-                            self.invest[n, p]
-                            * n.investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
+                            self.invest[n, p] * n.investment.fixed_costs[pp]
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
@@ -1882,9 +1880,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         m.es.end_year_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
-                        n.investment.existing
-                        * n.investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
+                        n.investment.existing * n.investment.fixed_costs[pp]
                         for pp in range(range_limit)
                     )
 
@@ -1956,15 +1952,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     self.invest[n, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
                 if nonconvex:
                     return convex_investment_costs + self.invest_status[
                         n, p
-                    ] * (n.investment.offset[-1] - n.investment.offset[p]) * (
-                        1 + m.discount_rate
-                    ) ** (
-                        -end_year_of_optimization
-                    )
+                    ] * (n.investment.offset[-1] - n.investment.offset[p])
                 else:
                     return convex_investment_costs
             else:

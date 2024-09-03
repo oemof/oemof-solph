@@ -1325,13 +1325,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
 
 .. note::
 
-    * You can specify a `discount_rate` for the model. If you do not do so, 0.02 will be used as a default, corresponding
-      to sort of a social discount rate. If you work with costs in real terms, discounting is obsolete, so define
-      `discount_rate = 0` in that case.
-    * You can specify an `interest_rate` for every investment object. If you do not do so, it will be chosen the same
-      as the model's `discount_rate`. You could use this default to model a perfect competition administered by some sort of
-      social planner, but even in a social planner setting, you might want to deviate from the `discount_rate`
-      value and/or discriminate among technologies with different risk profiles and hence different interest requirements.
     * For storage units, the `initial_content` is not allowed combined with multi-period investments.
       The storage inflow and outflow are forced to zero until the storage unit is invested into.
     * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
