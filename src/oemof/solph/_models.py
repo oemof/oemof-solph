@@ -52,9 +52,6 @@ class Model(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
-    discount_rate : float or None
-        The rate used for discounting in a multi-period model.
-        A 2% discount rate needs to be defined as 0.02.
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed, `timeincrement` will be used which
@@ -83,17 +80,6 @@ class Model(po.ConcreteModel):
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
         Store the reduced costs of the model if pyomo suffix is set to IMPORT
-
-    Note
-    ----
-
-    * The discount rate is only applicable for a multi-period model.
-    * If you want to work with costs data in nominal terms,
-      you should specify a discount rate.
-    * By default, there is a discount rate of 2% in a multi-period model.
-    * If you want to provide your costs data in real terms,
-      just specify `discount_rate = 0`, i.e. effectively there will be
-      no discounting.
 
 
     **The following basic sets are created**:
@@ -134,7 +120,7 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, discount_rate=None, **kwargs):
+    def __init__(self, energysystem, **kwargs):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
@@ -190,9 +176,7 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if discount_rate is not None:
-            self.discount_rate = discount_rate
-        elif energysystem.periods is not None:
+        if energysystem.periods is not None:
             self._set_discount_rate_with_warning()
         else:
             pass
