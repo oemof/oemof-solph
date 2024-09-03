@@ -31,7 +31,7 @@ def test_multi_output_source():
             solph.components.Source(
                 outputs={
                     es.node[f"bus input {i}"]: solph.Flow(
-                        nominal_value=1,
+                        nominal_capacity=1,
                         variable_costs=costs,
                     )
                     for i in range(num_out)

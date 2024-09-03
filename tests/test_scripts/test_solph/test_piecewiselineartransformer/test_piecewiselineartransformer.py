@@ -38,7 +38,7 @@ def test_pwltf():
     b_el = Bus(label="electricity")
     demand_el = Sink(
         label="demand",
-        inputs={b_el: Flow(nominal_value=1, fix=demand)},
+        inputs={b_el: Flow(nominal_capacity=1, fix=demand)},
     )
 
     energysystem.add(b_gas, b_el, demand_el)
@@ -52,7 +52,9 @@ def test_pwltf():
     # Create and add PiecewiseLinearConverter
     pwltf = solph.components.experimental.PiecewiseLinearConverter(
         label="pwltf",
-        inputs={b_gas: solph.flows.Flow(nominal_value=100, variable_costs=1)},
+        inputs={
+            b_gas: solph.flows.Flow(nominal_capacity=100, variable_costs=1)
+        },
         outputs={b_el: solph.flows.Flow()},
         in_breakpoints=in_breakpoints,
         conversion_function=conv_func,

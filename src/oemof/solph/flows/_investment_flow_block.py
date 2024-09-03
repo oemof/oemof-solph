@@ -187,12 +187,12 @@ class InvestmentFlowBlock(ScalarBlock):
 
             Value of the investment variable in period p,
             equal to what is being invested and equivalent resp. similar to
-            the nominal value of the flows after optimization.
+            the nominal capacity of the flows after optimization.
 
         * :math:`P_{total}(p)`
 
             Total installed capacity / energy in period p,
-            equivalent to the nominal value of the flows after optimization.
+            equivalent to the nominal capacity of the flows after optimization.
 
         * :math:`P_{old}(p)`
 

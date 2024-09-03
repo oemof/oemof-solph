@@ -60,8 +60,8 @@ class Link(Node):
 
     >>> link = solph.components.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.flows.Flow(nominal_value=4),
-    ...            bel1: solph.flows.Flow(nominal_value=2)},
+    ...    inputs={bel0: solph.flows.Flow(nominal_capacity=4),
+    ...            bel1: solph.flows.Flow(nominal_capacity=2)},
     ...    outputs={bel0: solph.flows.Flow(),
     ...             bel1: solph.flows.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})

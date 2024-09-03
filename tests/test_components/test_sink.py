@@ -32,7 +32,7 @@ def test_multi_input_sink():
             solph.components.Sink(
                 inputs={
                     es.node[f"bus input {i}"]: solph.Flow(
-                        nominal_value=1,
+                        nominal_capacity=1,
                         variable_costs=costs,
                     )
                     for i in range(num_in)

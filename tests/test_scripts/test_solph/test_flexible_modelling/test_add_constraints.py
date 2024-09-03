@@ -45,13 +45,13 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     es.add(
         components.Sink(
             label="Sink",
-            inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
+            inputs={b_el: Flow(nominal_capacity=40, fix=[0.5, 0.4, 0.3, 1])},
         )
     )
     pp_oil = components.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
+        outputs={b_el: Flow(nominal_capacity=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
 
@@ -60,7 +60,7 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         components.Converter(
             label="pp_lig",
             inputs={blig: Flow()},
-            outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
+            outputs={b_el: Flow(nominal_capacity=50, variable_costs=10)},
             conversion_factors={b_el: 0.41},
         )
     )

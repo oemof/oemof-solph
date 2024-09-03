@@ -150,26 +150,26 @@ def main():
     # create fixed source object representing wind power plants
     wind = solph.components.Source(
         label="wind",
-        outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
+        outputs={bel: solph.Flow(fix=data["wind"], nominal_capacity=1000000)},
     )
 
     # create fixed source object representing pv power plants
     pv = solph.components.Source(
         label="pv",
-        outputs={bel: solph.Flow(fix=data["pv"], nominal_value=600000)},
+        outputs={bel: solph.Flow(fix=data["pv"], nominal_capacity=600000)},
     )
 
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_capacity=1)},
     )
 
     # create simple Converter object representing a gas power plant
     pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 
@@ -184,7 +184,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        nominal_storage_capacity=solph.Investment(ep_costs=epc_storage),
+        nominal_capacity=solph.Investment(ep_costs=epc_storage),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

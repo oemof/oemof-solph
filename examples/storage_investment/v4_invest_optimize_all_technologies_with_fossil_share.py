@@ -146,7 +146,7 @@ def main():
         label="rgas",
         outputs={
             bgas: solph.Flow(
-                nominal_value=fossil_share
+                nominal_capacity=fossil_share
                 * consumption_total
                 / 0.58
                 * number_timesteps
@@ -162,7 +162,7 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=data["wind"],
-                nominal_value=solph.Investment(ep_costs=epc_wind),
+                nominal_capacity=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
@@ -172,7 +172,8 @@ def main():
         label="pv",
         outputs={
             bel: solph.Flow(
-                fix=data["pv"], nominal_value=solph.Investment(ep_costs=epc_pv)
+                fix=data["pv"],
+                nominal_capacity=solph.Investment(ep_costs=epc_pv),
             )
         },
     )
@@ -180,14 +181,14 @@ def main():
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_capacity=1)},
     )
 
     # create simple Converter object representing a gas power plant
     pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 
@@ -202,7 +203,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        nominal_storage_capacity=solph.Investment(ep_costs=epc_storage),
+        nominal_capacity=solph.Investment(ep_costs=epc_storage),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

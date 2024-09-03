@@ -94,7 +94,7 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
             variable_costs=25,
             min=0.2,
             max=0.8,
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=500,  # no maximum is provided here
             ),
             nonconvex=solph.NonConvex(),
@@ -140,8 +140,8 @@ def test_link_raise_key_error_in_Linkblock(warning_fixture):
     link = solph.components.Link(
         label="transshipment_link",
         inputs={
-            bel0: solph.flows.Flow(nominal_value=4),
-            bel1: solph.flows.Flow(nominal_value=2),
+            bel0: solph.flows.Flow(nominal_capacity=4),
+            bel1: solph.flows.Flow(nominal_capacity=2),
         },
         outputs={bel0: solph.flows.Flow(), look_out: solph.flows.Flow()},
         conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.7},

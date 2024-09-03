@@ -74,12 +74,12 @@ def equate_variables(model, var1, var2, factor1=1, name=None):
     ...    label='powerline_1_2',
     ...    inputs={bel1: solph.flows.Flow()},
     ...    outputs={bel2: solph.flows.Flow(
-    ...        nominal_value=solph.Investment(ep_costs=20))}))
+    ...        nominal_capacity=solph.Investment(ep_costs=20))}))
     >>> energysystem.add(solph.components.Converter(
     ...    label='powerline_2_1',
     ...    inputs={bel2: solph.flows.Flow()},
     ...    outputs={bel1: solph.flows.Flow(
-    ...        nominal_value=solph.Investment(ep_costs=20))}))
+    ...        nominal_capacity=solph.Investment(ep_costs=20))}))
     >>> om = solph.Model(energysystem)
     >>> line12 = energysystem.groups['powerline_1_2']
     >>> line21 = energysystem.groups['powerline_2_1']

@@ -26,7 +26,7 @@ def test_integral_limit():
     )
     bel = solph.buses.Bus(label="electricityBus", balanced=False)
     flow1 = solph.flows.Flow(
-        nominal_value=100,
+        nominal_capacity=100,
         custom_attributes={
             "my_factor": integral_weight1,
             "emission_factor": emission_factor_low,
@@ -34,11 +34,11 @@ def test_integral_limit():
         variable_costs=-1,
     )
     flow2 = solph.flows.Flow(
-        nominal_value=50,
+        nominal_capacity=50,
         variable_costs=-0.5,
     )
     flow3 = solph.flows.Flow(
-        nominal_value=100,
+        nominal_capacity=100,
         custom_attributes={
             "my_factor": integral_weight3,
             "emission_factor": emission_factor_low,
@@ -46,7 +46,7 @@ def test_integral_limit():
         variable_costs=-0.5,
     )
     flow4 = solph.flows.Flow(
-        nominal_value=500,
+        nominal_capacity=500,
         custom_attributes={
             "emission_factor": emission_factor_high,
         },

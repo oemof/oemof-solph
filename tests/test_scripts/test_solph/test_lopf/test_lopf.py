@@ -55,7 +55,7 @@ def test_lopf(solver="cbc"):
         input=b_el0,
         output=b_el1,
         reactance=0.0001,
-        nominal_value=Investment(ep_costs=10),
+        nominal_capacity=Investment(ep_costs=10),
         min=-1,
         max=1,
     )
@@ -64,7 +64,7 @@ def test_lopf(solver="cbc"):
         input=b_el1,
         output=b_el2,
         reactance=0.0001,
-        nominal_value=60,
+        nominal_capacity=60,
         min=-1,
         max=1,
     )
@@ -73,7 +73,7 @@ def test_lopf(solver="cbc"):
         input=b_el2,
         output=b_el0,
         reactance=0.0001,
-        nominal_value=60,
+        nominal_capacity=60,
         min=-1,
         max=1,
     )
@@ -81,21 +81,21 @@ def test_lopf(solver="cbc"):
     es.add(
         Source(
             label="gen_0",
-            outputs={b_el0: Flow(nominal_value=100, variable_costs=50)},
+            outputs={b_el0: Flow(nominal_capacity=100, variable_costs=50)},
         )
     )
 
     es.add(
         Source(
             label="gen_1",
-            outputs={b_el1: Flow(nominal_value=100, variable_costs=25)},
+            outputs={b_el1: Flow(nominal_capacity=100, variable_costs=25)},
         )
     )
 
     es.add(
         Sink(
             label="load",
-            inputs={b_el2: Flow(nominal_value=100, fix=1)},
+            inputs={b_el2: Flow(nominal_capacity=100, fix=1)},
         )
     )
 

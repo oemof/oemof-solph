@@ -33,7 +33,7 @@ wind = Source(
     outputs={
         bel: Flow(
             fix=data["wind"],
-            nominal_value=66.3,
+            nominal_capacity=66.3,
         )
     },
 )
@@ -43,7 +43,7 @@ pv = Source(
     outputs={
         bel: Flow(
             fix=data["pv"],
-            nominal_value=65.3,
+            nominal_capacity=65.3,
         )
     },
 )
@@ -53,7 +53,7 @@ demand_el = Sink(
     label="demand_elec",
     inputs={
         bel: Flow(
-            nominal_value=85,
+            nominal_capacity=85,
             fix=data["demand_el"],
         )
     },
@@ -63,7 +63,7 @@ demand_th = Sink(
     label="demand_therm",
     inputs={
         bth: Flow(
-            nominal_value=40,
+            nominal_capacity=40,
             fix=data["demand_th"],
         )
     },
@@ -73,28 +73,28 @@ demand_th = Sink(
 pp_coal = Converter(
     label="pp_coal",
     inputs={bcoal: Flow()},
-    outputs={bel: Flow(nominal_value=20.2, variable_costs=25)},
+    outputs={bel: Flow(nominal_capacity=20.2, variable_costs=25)},
     conversion_factors={bel: 0.39},
 )
 
 pp_lig = Converter(
     label="pp_lig",
     inputs={blig: Flow()},
-    outputs={bel: Flow(nominal_value=11.8, variable_costs=19)},
+    outputs={bel: Flow(nominal_capacity=11.8, variable_costs=19)},
     conversion_factors={bel: 0.41},
 )
 
 pp_gas = Converter(
     label="pp_gas",
     inputs={bgas: Flow()},
-    outputs={bel: Flow(nominal_value=41, variable_costs=40)},
+    outputs={bel: Flow(nominal_capacity=41, variable_costs=40)},
     conversion_factors={bel: 0.50},
 )
 
 pp_oil = Converter(
     label="pp_oil",
     inputs={boil: Flow()},
-    outputs={bel: Flow(nominal_value=5, variable_costs=50)},
+    outputs={bel: Flow(nominal_capacity=5, variable_costs=50)},
     conversion_factors={bel: 0.28},
 )
 
@@ -103,8 +103,8 @@ pp_chp = Converter(
     label="pp_chp",
     inputs={bgas: Flow()},
     outputs={
-        bel: Flow(nominal_value=30, variable_costs=42),
-        bth: Flow(nominal_value=40),
+        bel: Flow(nominal_capacity=30, variable_costs=42),
+        bth: Flow(nominal_capacity=40),
     },
     conversion_factors={bel: 0.3, bth: 0.4},
 )
@@ -118,7 +118,7 @@ cop = 3
 heat_pump = Converter(
     label="heat_pump",
     inputs={bel: Flow(), b_heat_source: Flow()},
-    outputs={bth: Flow(nominal_value=10)},
+    outputs={bth: Flow(nominal_capacity=10)},
     conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
 )
 

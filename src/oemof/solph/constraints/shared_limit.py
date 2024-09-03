@@ -69,13 +69,13 @@ def shared_limit(
     >>> b2 = solph.buses.Bus(label="Party2Bus")
     >>> storage1 = solph.components.GenericStorage(
     ...     label="Party1Storage",
-    ...     nominal_storage_capacity=5,
+    ...     nominal_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
     ...     outputs={b1: solph.flows.Flow()}
     ... )
     >>> storage2 = solph.components.GenericStorage(
     ...     label="Party2Storage",
-    ...     nominal_storage_capacity=5,
+    ...     nominal_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
     ...     outputs={b1: solph.flows.Flow()}
     ... )

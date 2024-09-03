@@ -29,7 +29,7 @@ New features
   `invest_relation_output_capacity` replace the existing attributes
   `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` for the
   investment mode. In case of the dispatch mode one should use the
-  `nominal_value` of the Flow classes. The attributes
+  `nominal_capacity` of the Flow classes. The attributes
   `nominal_input_capacity_ratio` and `nominal_input_capacity_ratio` will be
   removed in v0.3.0. Please adapt your application to avoid problems in the
   future (`Issue #480 <https://github.com/oemof/oemof-solph/pull/480>`_).
