@@ -42,28 +42,6 @@ def test_generic_storage_1():
         )
 
 
-def test_generic_storage_2():
-    """Nominal value defined with investment model."""
-    bel = Bus()
-    with pytest.raises(
-        AttributeError,
-        match="For backward compatibility, the option investment overwrites",
-    ):
-        components.GenericStorage(
-            label="storage3",
-            nominal_storage_capacity=45,
-            inputs={bel: Flow(variable_costs=10e10)},
-            outputs={bel: Flow(variable_costs=10e10)},
-            loss_rate=0.00,
-            initial_storage_level=0,
-            invest_relation_input_capacity=1 / 6,
-            invest_relation_output_capacity=1 / 6,
-            inflow_conversion_factor=1,
-            outflow_conversion_factor=0.8,
-            investment=Investment(ep_costs=23),
-        )
-
-
 def test_generic_storage_3():
     """Nominal value defined with investment model."""
     bel = Bus()
@@ -145,17 +123,6 @@ def test_generic_storage_with_convex_invest_offset():
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
             nominal_storage_capacity=Investment(offset=10),
-        )
-
-
-def test_generic_storage_invest_warning():
-    with pytest.warns(FutureWarning):
-        bel = Bus()
-        components.GenericStorage(
-            label="storage7",
-            inputs={bel: Flow()},
-            outputs={bel: Flow()},
-            investment=Investment(),
         )
 
 
