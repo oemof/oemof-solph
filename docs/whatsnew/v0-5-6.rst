@@ -10,3 +10,8 @@ Known issues
 ############
 
 * Indexing of Storage with capacity investment is off by one.
+
+Contributors
+############
+
+* Patrik Schönfeldt
