@@ -9,6 +9,7 @@ These are new features and improvements of note in each release
     :backlinks: top
 
 
+.. include::  whatsnew/v0-5-6.rst
 .. include::  whatsnew/v0-5-5.rst
 .. include::  whatsnew/v0-5-4.rst
 .. include::  whatsnew/v0-5-3.rst
