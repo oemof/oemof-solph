@@ -1,10 +1,10 @@
-v0.5.5 ()
+v0.5.5 (August 29th, 2024)
 --------------------------
 
 Bug fixes
 #########
 
-* Update required Pyomo version to allow working with numpy >= 2.0.0.
+* Fix iterating over _FakeSequence objects
 
 Contributors
 ############

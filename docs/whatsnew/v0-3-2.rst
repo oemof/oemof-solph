@@ -19,8 +19,7 @@ New components
 Documentation
 ####################
 
-* Revision of the `outputlib documentation
-  <https://oemof-solph.readthedocs.io/en/v0.3.2/oemof_outputlib.html>`_.
+* Revision of the outputlib documentation.
 
 Other changes
 ####################
