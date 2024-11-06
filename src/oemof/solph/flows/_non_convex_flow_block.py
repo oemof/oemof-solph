@@ -360,6 +360,7 @@ class NonConvexFlowBlock(ScalarBlock):
                     shutdown_costs += sum(
                         self.shutdown[i, o, t]
                         * m.flows[i, o].nonconvex.shutdown_costs[t]
+                        * m.tsam_weighting[t]
                         for t in m.TIMESTEPS
                     )
 
@@ -386,6 +387,7 @@ class NonConvexFlowBlock(ScalarBlock):
                     activity_costs += sum(
                         self.status[i, o, t]
                         * m.flows[i, o].nonconvex.activity_costs[t]
+                        * m.tsam_weighting[t]
                         for t in m.TIMESTEPS
                     )
 
@@ -412,6 +414,7 @@ class NonConvexFlowBlock(ScalarBlock):
                     inactivity_costs += sum(
                         (1 - self.status[i, o, t])
                         * m.flows[i, o].nonconvex.inactivity_costs[t]
+                        * m.tsam_weighting[t]
                         for t in m.TIMESTEPS
                     )
 

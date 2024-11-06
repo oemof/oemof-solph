@@ -14,6 +14,10 @@ SPDX-License-Identifier: MIT
 
 """
 
+import calendar
+import collections
+import datetime
+import itertools
 import warnings
 
 import numpy as np
@@ -60,6 +64,20 @@ class EnergySystem(es.EnergySystem):
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
 
+    tsa_parameters : list of dicts, dict or None
+        Parameter can be set in order to use aggregated timeseries from TSAM.
+        If multi-period model is used, one dict per period has to be set.
+        If no multi-period (aka single period) approach is selected, a single
+        dict can be provided.
+        If parameter is None, model is set up as usual.
+
+        Dict must contain keys `timesteps_per_period`
+        (from TSAMs `hoursPerPeriod`), `order` (from TSAMs `clusterOrder`) and
+        `occurrences` (from TSAMs `clusterPeriodNoOccur`).
+        When activated, storage equations and flow rules for full_load_time
+        will be adapted. Note that timeseries for components have to
+        be set up as already aggregated timeseries.
+
     use_remaining_value : bool
         If True, compare the remaining value of an investment to the
         original value (only applicable for multi-period models)
@@ -73,6 +91,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        tsa_parameters=None,
         use_remaining_value=False,
         groupings=None,
     ):
@@ -159,29 +178,49 @@ class EnergySystem(es.EnergySystem):
                 "timeincrement parameter or an incorrect timeindex."
             )
             raise TypeError(msg)
+        if tsa_parameters is not None:
+            msg = (
+                "CAUTION! You specified the 'tsa_parameters' attribute for "
+                "your energy system.\n This will lead to setting up "
+                "energysystem with aggregated timeseries. "
+                "Storages and flows will be adapted accordingly.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+
+            if isinstance(tsa_parameters, dict):
+                # Set up tsa_parameters for single period:
+                tsa_parameters = [tsa_parameters]
+
+            # Construct occurrences of typical periods
+            if periods is not None:
+                for p in range(len(periods)):
+                    tsa_parameters[p]["occurrences"] = collections.Counter(
+                        tsa_parameters[p]["order"]
+                    )
+            else:
+                tsa_parameters[0]["occurrences"] = collections.Counter(
+                    tsa_parameters[0]["order"]
+                )
+
+            # If segmentation is used, timesteps is set to number of
+            # segmentations per period.
+            # Otherwise, default timesteps_per_period is used.
+            for params in tsa_parameters:
+                if "segments" in params:
+                    params["timesteps"] = int(
+                        len(params["segments"]) / len(params["occurrences"])
+                    )
+                else:
+                    params["timesteps"] = params["timesteps_per_period"]
 
         super().__init__(
             groupings=groupings,
             timeindex=timeindex,
             timeincrement=timeincrement,
         )
-
-        self.periods = periods
-        if self.periods is not None:
-            msg = (
-                "CAUTION! You specified the 'periods' attribute for your "
-                "energy system.\n This will lead to creating "
-                "a multi-period optimization modeling which can be "
-                "used e.g. for long-term investment modeling.\n"
-                "Please be aware that the feature is experimental as of "
-                "now. If you find anything suspicious or any bugs, "
-                "please report them."
-            )
-            warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-            self._extract_periods_years()
-            self._extract_periods_matrix()
-            self._extract_end_year_of_optimization()
-            self.use_remaining_value = use_remaining_value
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices

@@ -222,6 +222,7 @@ class SimpleFlowBlock(ScalarBlock):
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
@@ -242,6 +243,7 @@ class SimpleFlowBlock(ScalarBlock):
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
                     m.flow[inp, out, ts] * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
@@ -442,6 +444,7 @@ class SimpleFlowBlock(ScalarBlock):
                         variable_costs += (
                             m.flow[i, o, t]
                             * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                         )
 
@@ -454,6 +457,7 @@ class SimpleFlowBlock(ScalarBlock):
                         variable_costs += (
                             m.flow[i, o, t]
                             * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
