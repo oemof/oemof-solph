@@ -17,7 +17,7 @@ Welcome to oemof.solph's documentation!
    contributing
    authors
    changelog
-   _logo/README.rst
+   _static/_logo/README.rst
 
 Indices and tables
 ==================

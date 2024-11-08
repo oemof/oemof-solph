@@ -75,11 +75,11 @@ Changelog = "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
 [project.optional-dependencies]
 dev = [
     "flit",
+    "furo",
     "matplotlib",
     "nbformat",
     "pytest",
     "sphinx",
-    "sphinx_rtd_theme",
     "sphinx-copybutton",
     "sphinx-design",
     "termcolor",
