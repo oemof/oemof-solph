@@ -15,12 +15,6 @@ So, if you want to know all details of a certain component or a function,
 please go the :ref:`api_reference_label`. There, you will find
 a detailed and complete description of all oemof-solph modules.
 
-.. contents::
-    :depth: 2
-    :local:
-    :backlinks: top
-
-
 How can I use solph?
 --------------------
 
