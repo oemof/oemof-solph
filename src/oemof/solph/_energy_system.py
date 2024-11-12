@@ -215,12 +215,33 @@ class EnergySystem(es.EnergySystem):
                     )
                 else:
                     params["timesteps"] = params["timesteps_per_period"]
+        self.tsa_parameters = tsa_parameters
 
+        timeincrement = self._init_timeincrement(
+            timeincrement, timeindex, periods, tsa_parameters
+        )
         super().__init__(
             groupings=groupings,
             timeindex=timeindex,
             timeincrement=timeincrement,
         )
+
+        self.periods = periods
+        if self.periods is not None:
+            msg = (
+                "CAUTION! You specified the 'periods' attribute for your "
+                "energy system.\n This will lead to creating "
+                "a multi-period optimization modeling which can be "
+                "used e.g. for long-term investment modeling.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.ExperimentalFeatureWarning)
+            self._extract_periods_years()
+            self._extract_periods_matrix()
+            self._extract_end_year_of_optimization()
+            self.use_remaining_value = use_remaining_value
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices
@@ -281,3 +302,49 @@ class EnergySystem(es.EnergySystem):
             - self.periods[period].min().year
             + 1
         )
+    @staticmethod
+    def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
+        """Check and initialize timeincrement"""
+
+        # Timeincrement in TSAM mode
+        if (
+            timeincrement is not None
+            and tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You must not specify timeincrement in TSAM mode. "
+                "TSAM will define timeincrement itself."
+            )
+            raise AttributeError(msg)
+        if (
+            tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+            and not all("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You have to set up segmentation in all periods, "
+                "if you want to use segmentation in TSAM mode"
+            )
+            raise AttributeError(msg)
+        if tsa_parameters is not None and all(
+            "segments" in params for params in tsa_parameters
+        ):
+            # Concatenate segments from TSAM parameters to get timeincrement
+            return list(
+                itertools.chain(
+                    *[params["segments"].values() for params in tsa_parameters]
+                )
+            )
+
+        elif timeindex is not None and timeincrement is None:
+            df = pd.DataFrame(timeindex)
+            timedelta = df.diff()
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            return timeincrement.squeeze()[1:].reset_index(drop=True)
+
+        return timeincrement

@@ -660,10 +660,10 @@ class GenericStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 
@@ -1736,9 +1736,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             """
             t = m.get_timestep_from_tsam_timestep(p, k, g)
             expr = 0
-            expr += block.storage_content_intra[n, p, k, g + 1]
+            expr += block.storage_content_intra[n, k, g + 1]
             expr += (
-                -block.storage_content_intra[n, p, k, g]
+                -block.storage_content_intra[n, k, g]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -1748,10 +1748,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
             expr += (
-                -m.flow[i[n], n, p, t] * n.inflow_conversion_factor[t]
+                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
             ) * m.timeincrement[t]
             expr += (
-                m.flow[n, o[n], p, t] / n.outflow_conversion_factor[t]
+                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
             ) * m.timeincrement[t]
             return expr == 0
 

@@ -34,6 +34,7 @@ from oemof.solph.components._generic_storage import GenericStorage
 
 from .helpers import flatten
 
+PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
 
 def get_tuple(x):
     """Get oemof tuple within iterable or create it
