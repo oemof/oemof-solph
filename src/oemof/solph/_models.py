@@ -290,40 +290,32 @@ class Model(po.ConcreteModel):
 
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(
-                self.es.tsa_parameters[p]["occurrences"][k]
-                for p in self.PERIODS
-                for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
+                self.es.tsa_parameters["occurrences"][k]
+                for k in range(len(self.es.tsa_parameters["occurrences"]))
                 for _ in range(
-                    self.es.tsa_parameters[p]["timesteps"]
+                    self.es.tsa_parameters["timesteps"]
                 )
             )
             self.CLUSTERS = po.Set(
                 initialize=list(
                     range(
-                        sum(
-                            len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
-                        )
+                        len(self.es.tsa_parameters["order"])
                     )
                 )
             )
             self.CLUSTERS_OFFSET = po.Set(
                 initialize=list(
                     range(
-                        sum(
-                            len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
-                        )
+                        len(self.es.tsa_parameters["order"])
                         + 1
                     )
                 )
             )
             self.TYPICAL_CLUSTERS = po.Set(
                 initialize=[
-                    (p, i)
-                    for p in self.PERIODS
+                    (i)
                     for i in range(
-                        len(self.es.tsa_parameters[p]["occurrences"])
+                        len(self.es.tsa_parameters["occurrences"])
                     )
                 ]
             )
@@ -506,11 +498,10 @@ class Model(po.ConcreteModel):
 
         return self
 
-    def get_timestep_from_tsam_timestep(self, p, ik, g):
+    def get_timestep_from_tsam_timestep(self, ik, g):
         """Return original timestep from cluster-based timestep"""
         t = (
-            p * len(self.TIMESTEPS_IN_PERIOD[p])
-            + ik * self.es.tsa_parameters[p]["timesteps"]
+            + ik * self.es.tsa_parameters["timesteps"]
             + g
         )
         return t
@@ -521,10 +512,9 @@ class Model(po.ConcreteModel):
         without offset
         """
         return [
-            (p, k, t)
-            for p in range(len(self.es.tsa_parameters))
-            for k in range(len(self.es.tsa_parameters[p][cluster_type]))
+            (k, t)
+            for k in range(len(self.es.tsa_parameters[cluster_type]))
             for t in range(
-                self.es.tsa_parameters[p]["timesteps"] + offset
+                self.es.tsa_parameters["timesteps"] + offset
             )
         ]

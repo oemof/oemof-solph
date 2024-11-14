@@ -192,29 +192,21 @@ class EnergySystem(es.EnergySystem):
 
             if isinstance(tsa_parameters, dict):
                 # Set up tsa_parameters for single period:
-                tsa_parameters = [tsa_parameters]
+                tsa_parameters = tsa_parameters
 
-            # Construct occurrences of typical periods
-            if periods is not None:
-                for p in range(len(periods)):
-                    tsa_parameters[p]["occurrences"] = collections.Counter(
-                        tsa_parameters[p]["order"]
-                    )
-            else:
-                tsa_parameters[0]["occurrences"] = collections.Counter(
-                    tsa_parameters[0]["order"]
-                )
+            tsa_parameters["occurrences"] = collections.Counter(
+                tsa_parameters["order"]
+            )
 
             # If segmentation is used, timesteps is set to number of
             # segmentations per period.
             # Otherwise, default timesteps_per_period is used.
-            for params in tsa_parameters:
-                if "segments" in params:
-                    params["timesteps"] = int(
-                        len(params["segments"]) / len(params["occurrences"])
-                    )
-                else:
-                    params["timesteps"] = params["timesteps_per_period"]
+            if "segments" in tsa_parameters:
+                tsa_parameters["timesteps"] = int(
+                    len(tsa_parameters["segments"]) / len(tsa_parameters["occurrences"])
+                )
+            else:
+                tsa_parameters["timesteps"] = tsa_parameters["timesteps_per_period"]
         self.tsa_parameters = tsa_parameters
 
         timeincrement = self._init_timeincrement(
