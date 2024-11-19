@@ -182,6 +182,8 @@ class EnergySystem(es.EnergySystem):
             self._extract_periods_matrix()
             self._extract_end_year_of_optimization()
             self.use_remaining_value = use_remaining_value
+        else:
+            self.end_year_of_optimization = 1
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices

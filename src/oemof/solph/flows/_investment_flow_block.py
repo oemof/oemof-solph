@@ -945,7 +945,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -990,7 +990,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         * present_value_factor_remaining
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -1021,7 +1021,6 @@ class InvestmentFlowBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(m.es.periods_years[p], range_limit)
                         )
 
@@ -1037,7 +1036,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 
@@ -1113,17 +1111,13 @@ class InvestmentFlowBlock(ScalarBlock):
                     self.invest[i, o, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
                 if nonconvex:
                     return convex_investment_costs + self.invest_status[
                         i, o, p
                     ] * (
                         m.flows[i, o].investment.offset[-1]
                         - m.flows[i, o].investment.offset[p]
-                    ) * (
-                        1 + m.discount_rate
-                    ) ** (
-                        -end_year_of_optimization
                     )
                 else:
                     return convex_investment_costs

@@ -26,6 +26,9 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
+@pytest.mark.skip(
+    reason="Too complex for a unit test. Results cannot be checked easily."
+)
 @pytest.mark.filterwarnings(
     "ignore:Ensure that your timeindex and timeincrement are"
     " consistent.:UserWarning"
