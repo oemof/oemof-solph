@@ -389,7 +389,7 @@ class Model(po.ConcreteModel):
         """
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+    def solve(self, solver="cbc", solver_io="lp", fail_on_infeasable=True, **kwargs):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -436,9 +436,14 @@ class Model(po.ConcreteModel):
                 "Optimization ended with status {0} and termination "
                 "condition {1}"
             )
-            warnings.warn(
-                msg.format(status, termination_condition), UserWarning
-            )
+
+            if fail_on_infeasable:
+                raise RuntimeError(msg)
+            else:
+                warnings.warn(
+                    msg.format(status, termination_condition), UserWarning
+                )
+    
         self.es.results = solver_results
         self.solver_results = solver_results
 
