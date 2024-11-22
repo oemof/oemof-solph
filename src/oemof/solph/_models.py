@@ -429,6 +429,9 @@ class Model(po.ConcreteModel):
             "Termination condition"
         ]
 
+        self.es.results = solver_results
+        self.solver_results = solver_results
+
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
         else:
@@ -442,11 +445,8 @@ class Model(po.ConcreteModel):
                     msg.format(status, termination_condition), UserWarning
                 )
             else:
-                raise RuntimeError(msg)                
-    
-        self.es.results = solver_results
-        self.solver_results = solver_results
-
+                raise RuntimeError(msg)               
+ 
         return solver_results
 
     def relax_problem(self):
