@@ -1,28 +1,40 @@
-.. oemof documentation master file, created by
-   sphinx-quickstart on Thu Dec 18 16:57:35 2014.
-   You can adapt this file completely to your liking, but it should at least
-   contain the root `toctree` directive.
+.. _tespy_label:
 
-=======================================
-Welcome to oemof.solph's documentation!
-=======================================
+.. include:: introduction.rst
 
-.. toctree::
-   :maxdepth: 3
+..  toctree::
+    :maxdepth: 2
+    :hidden:
 
-   readme
-   usage
-   reference/index
-   examples/index
-   contributing
-   authors
-   changelog
-   _static/_logo/README.rst
+    introduction
 
-Indices and tables
-==================
+..  toctree::
+    :maxdepth: 2
+    :caption: User Guide
+    :hidden:
 
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+    installation
+    introductory_tutorials
+    advanced_tutorials
+    showcase_examples
+    support
 
+..  toctree::
+    :maxdepth: 2
+    :caption: Documentation
+    :hidden:
+
+    basic_concepts
+    advanced_concepts
+    api
+    whats_new
+    zliterature
+
+..  toctree::
+    :maxdepth: 2
+    :caption: Contribute
+    :hidden:
+
+    development/what
+    development/how
+    community
