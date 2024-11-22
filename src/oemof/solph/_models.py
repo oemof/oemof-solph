@@ -389,7 +389,7 @@ class Model(po.ConcreteModel):
         """
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", fail_on_infeasable=True, **kwargs):
+    def solve(self, solver="cbc", solver_io="lp", allow_nonoptimal=False, **kwargs):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -437,12 +437,12 @@ class Model(po.ConcreteModel):
                 "condition {1}"
             )
 
-            if fail_on_infeasable:
-                raise RuntimeError(msg)
-            else:
+            if allow_nonoptimal:
                 warnings.warn(
                     msg.format(status, termination_condition), UserWarning
                 )
+            else:
+                raise RuntimeError(msg)                
     
         self.es.results = solver_results
         self.solver_results = solver_results
