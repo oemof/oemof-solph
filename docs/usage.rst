@@ -93,12 +93,12 @@ All solph *components* can be used to set up an energy system model but you shou
 An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
-.. 	figure:: _files/oemof_solph_example_darkmode.svg
+.. 	figure:: /_files/oemof_solph_example_darkmode.svg
    :alt: oemof_solph_example_darkmode.svgt
    :align: center
    :figclass: only-dark
 
-.. 	figure:: _files/oemof_solph_example.svg
+.. 	figure:: /_files/oemof_solph_example.svg
    :alt: oemof_solph_example.svg
    :align: center
    :figclass: only-light
@@ -410,12 +410,12 @@ the power loss factor :math:`\beta` (in some contexts also referred to as
 :math:`C_v`). The second constraint limits the decrease of electrical power and
 incorporates the backpressure coefficient :math:`C_b`.
 
-.. 	figure:: _files/ExtractionTurbine_range_of_operation.svg
+.. 	figure:: /_files/ExtractionTurbine_range_of_operation.svg
    :alt: variable_chp_plot.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/ExtractionTurbine_range_of_operation_darkmode.svg
+.. 	figure:: /_files/ExtractionTurbine_range_of_operation_darkmode.svg
    :alt: variable_chp_plot_darkmode.svg
    :align: center
    :figclass: only-dark
@@ -445,13 +445,13 @@ and thermal power production in contrast to a fixed chp (left). The plot is the
 output of an example in the `example directory
 <https://github.com/oemof/oemof-solph/tree/dev/examples>`_.
 
-.. 	figure:: _files/variable_chp_plot.svg
+.. 	figure:: /_files/variable_chp_plot.svg
    :scale: 10%
    :alt: variable_chp_plot.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/variable_chp_plot_darkmode.svg
+.. 	figure:: /_files/variable_chp_plot_darkmode.svg
    :scale: 10%
    :alt: variable_chp_plot_darkmode.svg
    :align: center
@@ -468,13 +468,13 @@ GenericCHP (component)
 With the GenericCHP class it is possible to model different types of CHP plants (combined cycle extraction turbines,
 back pressure turbines and motoric CHP), which use different ranges of operation, as shown in the figure below.
 
-.. 	figure:: _files/GenericCHP.svg
+.. 	figure:: /_files/GenericCHP.svg
    :scale: 70 %
    :alt: scheme of GenericCHP operation range
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/GenericCHP_darkmode.svg
+.. 	figure:: /_files/GenericCHP_darkmode.svg
    :scale: 70 %
    :alt: scheme of GenericCHP operation range
    :align: center
@@ -806,13 +806,13 @@ The following figures show the power at the electrical and the thermal output
 and the resepctive ratios to the nonconvex flow (normalized). The efficiency
 becomes non-linear.
 
-.. 	figure:: _files/OffsetConverter_relations_1.svg
+.. 	figure:: /_files/OffsetConverter_relations_1.svg
    :width: 70 %
    :alt: OffsetConverter_relations_1.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/OffsetConverter_relations_1_darkmode.svg
+.. 	figure:: /_files/OffsetConverter_relations_1_darkmode.svg
    :width: 70 %
    :alt: OffsetConverter_relations_1_darkmode.svg
    :align: center
@@ -821,13 +821,13 @@ becomes non-linear.
 
 
 
-.. 	figure:: _files/OffsetConverter_relations_2.svg
+.. 	figure:: /_files/OffsetConverter_relations_2.svg
    :width: 70 %
    :alt: OffsetConverter_relations_2.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/OffsetConverter_relations_2_darkmode.svg
+.. 	figure:: /_files/OffsetConverter_relations_2_darkmode.svg
    :width: 70 %
    :alt: OffsetConverter_relations_2_darkmode.svg
    :align: center
@@ -961,13 +961,13 @@ This small example of PV, grid and SinkDSM shows how to use the component
 
 Yielding the following results
 
-..  figure:: _files/Plot_delay_2013-01-01.svg
+..  figure:: /_files/Plot_delay_2013-01-01.svg
    :width: 85 %
    :alt: Plot_delay_2013-01-01.svg
    :align: center
    :figclass: only-light
 
-..  figure:: _files/Plot_delay_2013-01-01_darkmode.svg
+..  figure:: /_files/Plot_delay_2013-01-01_darkmode.svg
    :width: 85 %
    :alt: Plot_delay_2013-01-01_darkmode.svg
    :align: center
@@ -1088,13 +1088,13 @@ The following figures illustrates the use of the nonconvex investment flow.
 Here, :math:`c_{invest,fix}` is the *offset* value and :math:`c_{invest,var}` is
 the *ep_costs* value:
 
-.. 	figure:: _files/nonconvex_invest_investcosts_power.svg
+.. 	figure:: /_files/nonconvex_invest_investcosts_power.svg
    :width: 70 %
    :alt: nonconvex_invest_investcosts_power.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/nonconvex_invest_investcosts_power_darkmode.svg
+.. 	figure:: /_files/nonconvex_invest_investcosts_power_darkmode.svg
    :width: 70 %
    :alt: nonconvex_invest_investcosts_power_darkmode.svg
    :align: center
@@ -1107,13 +1107,13 @@ whereas in the nonconvex case, the investment can become zero as well.
 The calculation of the specific costs per kilowatt installed capacity results
 in the following relation for convex and nonconvex investments:
 
-.. 	figure:: _files/nonconvex_invest_specific_costs.svg
+.. 	figure:: /_files/nonconvex_invest_specific_costs.svg
    :width: 70 %
    :alt: nonconvex_invest_specific_costs.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/nonconvex_invest_specific_costs_darkmode.svg
+.. 	figure:: /_files/nonconvex_invest_specific_costs_darkmode.svg
    :width: 70 %
    :alt: nonconvex_invest_specific_costs_darkmode.svg
    :align: center
@@ -1488,13 +1488,13 @@ The following diagram shows the duration curve of a typical diesel genset in a h
 PV cells, battery, inverter, and rectifier. By using the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class,
 it is possible to obtain the optimal capacity of this component and simultaneously limit its operation between `min` and `max` loads.
 
-.. 	figure:: _files/diesel_genset_nonconvex_invest_flow.svg
+.. 	figure:: /_files/diesel_genset_nonconvex_invest_flow.svg
    :width: 100 %
    :alt: diesel_genset_nonconvex_invest_flow.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/diesel_genset_nonconvex_invest_flow_darkmode.svg
+.. 	figure:: /_files/diesel_genset_nonconvex_invest_flow_darkmode.svg
    :width: 100 %
    :alt: diesel_genset_nonconvex_invest_flow_darkmode.svg
    :align: center
@@ -1510,13 +1510,13 @@ Moreover, using the :py:class:`~oemof.solph.flows._investment_flow_block.Investm
 oversized diesel genset, which has a 30% larger capacity compared with the optimal capacity obtained from the
 :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class.
 
-.. 	figure:: _files/diesel_genset_investment_flow.svg
+.. 	figure:: /_files/diesel_genset_investment_flow.svg
    :width: 100 %
    :alt: diesel_genset_investment_flow.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/diesel_genset_investment_flow_darkmode.svg
+.. 	figure:: /_files/diesel_genset_investment_flow_darkmode.svg
    :width: 100 %
    :alt: diesel_genset_investment_flow_darkmode.svg
    :align: center
@@ -1528,13 +1528,13 @@ Solving such an optimisation problem considering `min`/`max` loads without the :
 :py:class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock` class. The following duration curve would be obtained by applying
 this method to the same diesel genset.
 
-.. 	figure:: _files/diesel_genset_nonconvex_flow.svg
+.. 	figure:: /_files/diesel_genset_nonconvex_flow.svg
    :width: 100 %
    :alt: diesel_genset_nonconvex_flow.svg
    :align: center
    :figclass: only-light
 
-.. 	figure:: _files/diesel_genset_nonconvex_flow_darkmode.svg
+.. 	figure:: /_files/diesel_genset_nonconvex_flow_darkmode.svg
    :width: 100 %
    :alt: diesel_genset_nonconvex_flow_darkmode.svg
    :align: center
