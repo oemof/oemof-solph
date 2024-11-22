@@ -27,7 +27,7 @@
     basic_concepts
     advanced_concepts
     api
-    whats_new
+    changelog
     zliterature
 
 ..  toctree::
@@ -35,6 +35,6 @@
     :caption: Contribute
     :hidden:
 
-    development/what
-    development/how
+    contributing
     community
+    authors
