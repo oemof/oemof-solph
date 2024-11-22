@@ -7,7 +7,7 @@ In this section we will introduce how to create your first simple oemof.solph mo
 subsections are step by step walkthroughs for typical energy system modelling applications.
 
 If you want to learn more about the basic building blocks, you should have a look at the
-:ref:`Documentation section <basic_concepts>` after the first steps. If
+:ref:`Documentation section <basic_concepts_label>` after the first steps. If
 you have any questions please reach out to the
 :ref:`oemof community <support_label>`.
 
