@@ -1,4 +1,4 @@
-.. _introductory_tutorial_label:
+.. _introductory_tutorials_label:
 
 Basic Examples
 ~~~~~~~~~~~~~~~~~~~~~~

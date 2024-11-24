@@ -1,4 +1,4 @@
-.. _oemof_solph_showcase_examples_label:
+.. _showcase_examples_label:
 
 ~~~~~~~~~~~~~~~~~~~~
 Showcases
