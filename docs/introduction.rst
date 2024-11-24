@@ -24,7 +24,6 @@ This is because installing the ``oemof`` meta package was once the best way to g
 Notice that you should prefeably install ``oemof.solph`` instead of ``oemof``
 if you want to use ``solph``.
 
-
 Everybody is welcome to use and/or develop oemof.solph.
 Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
@@ -39,13 +38,6 @@ Keep in touch! - You can become a watcher at our `github site <https://github.co
 but this will bring you quite a few mails and might be more interesting for developers.
 If you just want to get the latest news, like when is the next oemof meeting,
 you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
-
-Documentation
-=============
-The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <https://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <https://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
-
-
-.. _installation_label:
 
 Installation
 ============
@@ -68,9 +60,6 @@ If you want to use the latest features, you might want to install the **develope
 
 For running an oemof-solph optimisation model, you need to install a solver.
 Following you will find guidelines for the installation process for different operating systems.
-
-.. _windows_solver_label:
-.. _linux_solver_label:
 
 Installing a solver
 -------------------
@@ -97,17 +86,14 @@ To install the solvers have a look at the package repository of your Linux distr
 
 Check the solver installation by executing the test_installation example (see the `Installation test` section).
 
-
 **Mac OSX**
 
 Please follow the installation instructions on the respective homepages for details.
 
-CBC-solver: https://projects.coin-or.org/Cbc
-
-GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
+- CBC-solver: https://projects.coin-or.org/Cbc
+- GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
 If you install the CBC solver via brew (highly recommended), it should work without additional configuration.
-
 
 **conda**
 

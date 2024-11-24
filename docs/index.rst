@@ -1,5 +1,3 @@
-.. _tespy_label:
-
 .. include:: introduction.rst
 
 ..  toctree::

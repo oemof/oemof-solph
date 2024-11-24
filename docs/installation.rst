@@ -1,88 +1,139 @@
-============
-Installation
-============
+.. _installation_and_setup_label:
 
-If you have a working Python installation, use pypi to install the latest version of oemof.solph.
-Python >= 3.9 is recommended. Lower versions may work but are not tested.
+######################
+Installation and setup
+######################
 
-We highly recommend to use virtual environments.
-Please refer to the documentation of your Python distribution (e.g. Anaconda,
-Micromamba, or the version of Python that came with your Linux installation)
-to learn how to set up and use virtual environments.
+Following you find guidelines for the installation process for various
+operating systems. oemof.solph is a Python package, thus it requires you to
+have Python 3 installed. On top of that, you need a solver to use oemof.solph.
 
-::
+There are several solvers that can work with oemof.solph, both open source and
+commercial. Two open source solvers are widely used (HiGHS, CBC and GLPK), but
+oemof.solph suggests CBC (Coin-or branch and cut). It may be useful to compare
+results of different solvers to see which performs best. Other commercial
+solvers, like Gurobi or Cplex, are also options. Have a look at the
+`pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`__
+to learn about which solvers are supported.
 
-    (venv) pip install oemof.solph
+.. tab-set::
 
-If you want to use the latest features, you might want to install the **developer version**. The developer version is not recommended for productive use::
+   .. tab-item:: Using conda (all OS)
 
-    (venv) pip install https://github.com/oemof/oemof-solph/archive/dev.zip
+      You can download a lightweight and open source variant of conda:
+      "miniforge3".
 
+      1. Download latest `miniforge3 <https://github.com/conda-forge/miniforge>`__
+         for Python 3.x (64 or 32 bit).
+      2. Install miniforge3
+      3. Open "miniforge prompt" to manage your virtual environments. You can
+         create a new environment and acivate it by
 
-For running an oemof-solph optimisation model, you need to install a solver.
-Following you will find guidelines for the installation process for different operating systems.
+         .. code-block:: console
 
-.. _windows_solver_label:
-.. _linux_solver_label:
+            conda create -n oemof-solph-env python=3.11
+            activate oemof-solph-env
 
-Installing a solver
--------------------
+      4. Install a solver, e.g. CBC
 
-There are several solvers that can work with oemof, both open source and commercial.
-Two open source solvers are widely used (CBC and GLPK), but oemof suggests CBC (Coin-or branch and cut).
-It may be useful to compare results of different solvers to see which performs best.
-Other commercial solvers, like Gurobi or Cplex, are also options.
-Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
+         .. code-block:: console
 
-Check the solver installation by executing the test_installation example below (see section Installation Test).
+            conda install -c conda-forge coincbc
 
-**Linux**
+      5. Only AFTER you have installed the solver via conda, use pip to install
+         oemof.solph:
 
-To install the solvers have a look at the package repository of your Linux distribution or search for precompiled packages. GLPK and CBC ares available at Debian, Feodora, Ubuntu and others.
+         .. code-block:: console
 
-**Windows**
+            pip install oemof.solph
 
- 1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
- 2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
- 3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
- 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
- 5. Restart Windows
+   .. tab-item:: Linux
 
-Check the solver installation by executing the test_installation example (see the `Installation test` section).
+      **Installing Python 3**
 
+      Most Linux distributions will have Python 3 in their repository. Use the
+      specific software management to install it, if it is not yet installed.
+      If you are using Ubuntu/Debian try executing the following code in your
+      terminal:
 
-**Mac OSX**
+      .. code:: console
 
-Please follow the installation instructions on the respective homepages for details.
+         sudo apt-get install python3
 
-CBC-solver: https://projects.coin-or.org/Cbc
+      You can also download different versions of Python via
+      https://www.python.org/downloads/.
 
-GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
+      **Having Python 3 installed**
 
-If you install the CBC solver via brew (highly recommended), it should work without additional configuration.
+      We recommend installing oemof.solph within a virtual Python environment
+      and not into the base, system-wide Python installation. On Linux you can
+      use virtualenv to do so.
 
+      1. Install virtualenv using the package management of your Linux
+         distribution, pip install or install it from source
+         (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation.html>`_)
+      2. Open terminal to create and activate a virtual environment by typing:
 
-**conda**
+         .. code-block:: console
 
-Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+            virtualenv -p /usr/bin/python3 your_env_name
+            source your_env_name/bin/activate
 
-.. code:: console
+      3. In terminal type: :code:`pip install oemof.solph`
 
-    (venv) conda install -c conda-forge coincbc
-    (venv) pip install oemof.solph
+      Warning: If you have an older version of virtualenv you should update pip
+      :code:`pip install --upgrade pip`.
 
+      **Solver installation**
 
-.. _check_installation_label:
+      To install the solvers have a look at the package repository of your
+      Linux distribution or search for precompiled packages. GLPK and CBC ares
+      available at Debian, Feodora, Ubuntu and others.
+
+   .. tab-item:: Windows solver
+
+      We recommend using conda for the python installation. If you want to
+      install the solver externally (not via conda), you can follow these
+      steps:
+
+      1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_ or
+         `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
+      2. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
+      3. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
+      4. Restart Windows
+
+   .. tab-item:: OSX solver
+
+        We recommend using conda for the python installation. If you want to
+        install the solver externally (not via conda), you can follow these
+        instructions:
+
+        - CBC-solver: https://projects.coin-or.org/Cbc
+        - GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
+
+        If you install the CBC solver via brew (highly recommended), it should
+        work without additional configuration.
+
+   .. tab-item:: Developer version
+
+      If you would like to get access to not yet released features or features
+      under development you can install the developer version. The steps are
+      similar to the steps here, but INSTEAD of installing oemof.solph using
+
+      .. code-block:: console
+
+           pip install oemof.solph
+
+      follow the instructions on :ref:`this page <contribute_label>`.
 
 Installation test
 -----------------
-
 Test the installation and the installed solver by running the installation test
 in your virtual environment:
 
 .. code:: console
 
-  (venv) oemof_installation_test
+    oemof_installation_test
 
 If the installation was successful, you will receive something like this:
 
