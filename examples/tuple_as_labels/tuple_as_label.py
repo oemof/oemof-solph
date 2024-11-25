@@ -235,7 +235,7 @@ def main():
     )
 
     # create storage object representing a battery
-    nominal_storage_capacity = 5000
+    nominal_capacity = 5000
     storage = comp.GenericStorage(
         nominal_capacity=nominal_capacity,
         label=Label("storage", "electricity", "battery"),
