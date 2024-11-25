@@ -366,4 +366,6 @@ def test_capacity_keyword_wrapper_error():
             inputs={bus: solph.Flow()},
             outputs={bus: solph.Flow()},
         )
+
+
 # --- END ---
