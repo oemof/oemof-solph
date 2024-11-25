@@ -239,12 +239,8 @@ def main():
     storage = comp.GenericStorage(
         nominal_capacity=nominal_capacity,
         label=Label("storage", "electricity", "battery"),
-        inputs={
-            bel: flows.Flow(nominal_capacity=nominal_capacity / 6)
-        },
-        outputs={
-            bel: flows.Flow(nominal_capacity=nominal_capacity / 6)
-        },
+        inputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
+        outputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
         loss_rate=0.00,
         initial_storage_level=None,
         inflow_conversion_factor=1,
