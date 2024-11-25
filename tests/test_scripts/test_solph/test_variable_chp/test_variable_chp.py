@@ -130,7 +130,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     energysystem.add(
         solph.components.Converter(
             label=("fixed_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel2: solph.flows.Flow(), bth2: solph.flows.Flow()},
             conversion_factors={bel2: 0.3, bth2: 0.5},
         )
@@ -140,7 +140,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     energysystem.add(
         solph.components.ExtractionTurbineCHP(
             label=("variable_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},

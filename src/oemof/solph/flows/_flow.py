@@ -183,8 +183,8 @@ class Flow(Edge):
         if nominal_value is not None:
             msg = (
                 "For backward compatibility,"
-                " the option nominal_value overwrites the option"
-                " nominal_capacity."
+                + " the option nominal_value overwrites the option"
+                + " nominal_capacity."
                 + " Both options cannot be set at the same time."
             )
             if nominal_capacity is not None:

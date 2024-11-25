@@ -125,7 +125,7 @@ def test_optimise_storage_size(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={
-            bel: solph.flows.Flow(nominal_capacity=10e10, variable_costs=50)
+            bel: solph.flows.Flow(nominal_capacity=1e11, variable_costs=50)
         },
         conversion_factors={bel: 0.58},
     )

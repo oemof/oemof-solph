@@ -11,7 +11,7 @@ API changes
   initial storage level is defined, the costs just offset the
   objective value without changing anything else.
 * The parameters `GenericStorage.nominal_storage_capacity` and
-  `Flow.nominal_capacity` are now both called `nominal_calacity`.
+  `Flow.nominal_capacity` are now both called `nominal_capacity`.
 
 New features
 ############

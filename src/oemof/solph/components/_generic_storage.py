@@ -218,7 +218,7 @@ class GenericStorage(Node):
         if nominal_storage_capacity is not None:
             msg = (
                 "For backward compatibility,"
-                " the option nominal_storage_capacity overwrites the option"
+                + " the option nominal_storage_capacity overwrites the option"
                 + " nominal_capacity."
                 + " Both options cannot be set at the same time."
             )
