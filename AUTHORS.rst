@@ -28,6 +28,7 @@ Authors
 * Jonathan Amme
 * Julian Endres
 * Lluis Millet
+* Lena Rosin
 * Lennart Schürmann
 * Martin Soethe
 * Marie-Claire Gering

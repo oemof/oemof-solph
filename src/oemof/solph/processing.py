@@ -481,6 +481,13 @@ def meta_results(om, undefined=False):
                     meta_res[k1][k2] = msg.format(
                         type(om.es.results[k1][0][k2])
                     )
+    try:
+        meta_res["problem"]["MIPGap"] = (
+            meta_res["problem"]["Upper bound"]
+            - meta_res["problem"]["Lower bound"]
+        ) / meta_res["problem"]["Lower bound"]
+    except KeyError:
+        pass
 
     return meta_res
 

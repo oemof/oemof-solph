@@ -5,6 +5,7 @@ Bug fixes
 #########
 
 * Update required Pyomo version to allow working with numpy >= 2.0.0.
+* Mipgap is calculated in the meta results
 
 Known issues
 ############
@@ -15,3 +16,4 @@ Contributors
 ############
 
 * Patrik Schönfeldt
+* Lena Rosin

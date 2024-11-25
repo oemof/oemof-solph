@@ -170,4 +170,8 @@ authors:
     family-names: Gering
     given-names: Marie-Claire
     alias: "@MaGering"
+  -
+    family-names: Rosin
+    given-names: Lena
+    alias: "@leroum"
 ...
