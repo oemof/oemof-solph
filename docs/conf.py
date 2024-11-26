@@ -75,5 +75,6 @@ linkcheck_ignore = [
     r"https://forum.openmod-initiative.org/*",
     r"https://github.com/oemof/oemof-solph/issues/*",
     r"https://github.com/oemof/oemof-solph/pull/*",
-    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",  # 403 in CI pipeline
+    # Due to traffic limitation, the folowwing creates a 403 in CI pipeline:
+    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",
 ]
