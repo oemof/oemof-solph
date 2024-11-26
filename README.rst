@@ -189,7 +189,7 @@ Check the solver installation by executing the test_installation example (see th
 
 Please follow the installation instructions on the respective homepages for details.
 
-CBC-solver: https://projects.coin-or.org/Cbc
+CBC-solver: https://github.com/coin-or/Cbc
 
 GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
