@@ -73,11 +73,7 @@ linkcheck_ignore = [
     r"https://requires.io/.*",
     r"https://matrix.to/*",
     r"https://forum.openmod-initiative.org/*",
-] + (
-    [
-        r"https://github.com/oemof/oemof-solph/issues/*",
-        r"https://github.com/oemof/oemof-solph/pull/*",
-    ]
-    if "TRAVIS" not in os.environ
-    else []
-)
+    r"https://github.com/oemof/oemof-solph/issues/*",
+    r"https://github.com/oemof/oemof-solph/pull/*",
+    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",  # 403 in CI pipeline
+]
