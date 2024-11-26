@@ -38,7 +38,8 @@ from pyomo.environ import Var
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 
 
 class GenericStorage(Node):
@@ -53,15 +54,15 @@ class GenericStorage(Node):
             :class:`oemof.solph.options.Investment` object
         Absolute nominal capacity of the storage, fixed value or
         object describing parameter of investment optimisations.
-    invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
+    invest_relation_input_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,in}`
         Ratio between the investment variable of the input Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
-    invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
+    invest_relation_output_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the storage:
         :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
-    invest_relation_input_output : numeric or None, :math:`r_{in,out}`
+    invest_relation_input_output : numeric (iterable or scalar) or None, :math:`r_{in,out}`
         Ratio between the investment variable of the output Flow and the
         investment variable of the input flow. This ratio used to fix the
         flow investments to each other.
@@ -240,22 +241,24 @@ class GenericStorage(Node):
 
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
-        self.loss_rate = solph_sequence(loss_rate)
-        self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
-        self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
-        self.inflow_conversion_factor = solph_sequence(
-            inflow_conversion_factor
+        self.loss_rate = sequence(loss_rate)
+        self.fixed_losses_relative = sequence(fixed_losses_relative)
+        self.fixed_losses_absolute = sequence(fixed_losses_absolute)
+        self.inflow_conversion_factor = sequence(inflow_conversion_factor)
+        self.outflow_conversion_factor = sequence(outflow_conversion_factor)
+        self.max_storage_level = sequence(max_storage_level)
+        self.min_storage_level = sequence(min_storage_level)
+        self.fixed_costs = sequence(fixed_costs)
+        self.storage_costs = sequence(storage_costs)
+        self.invest_relation_input_output = sequence(
+            invest_relation_input_output
         )
-        self.outflow_conversion_factor = solph_sequence(
-            outflow_conversion_factor
+        self.invest_relation_input_capacity = sequence(
+            invest_relation_input_capacity
         )
-        self.max_storage_level = solph_sequence(max_storage_level)
-        self.min_storage_level = solph_sequence(min_storage_level)
-        self.fixed_costs = solph_sequence(fixed_costs)
-        self.storage_costs = solph_sequence(storage_costs)
-        self.invest_relation_input_output = invest_relation_input_output
-        self.invest_relation_input_capacity = invest_relation_input_capacity
-        self.invest_relation_output_capacity = invest_relation_output_capacity
+        self.invest_relation_output_capacity = sequence(
+            invest_relation_output_capacity
+        )
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
@@ -272,24 +275,22 @@ class GenericStorage(Node):
         coupled with storage capacity via invest relations
         """
         for flow in self.inputs.values():
-            if (
-                self.invest_relation_input_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_input_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_inflow)
         for flow in self.outputs.values():
-            if (
-                self.invest_relation_output_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_output_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_outflow)
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
         if (
-            self.invest_relation_input_output is not None
-            and self.invest_relation_output_capacity is not None
-            and self.invest_relation_input_capacity is not None
+            self.invest_relation_input_output[0] is not None
+            and self.invest_relation_output_capacity[0] is not None
+            and self.invest_relation_input_capacity[0] is not None
         ):
             e2 = (
                 "Overdetermined. Three investment object will be coupled"
@@ -495,7 +496,9 @@ class GenericStorageBlock(ScalarBlock):
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -588,7 +591,7 @@ class GenericStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -616,7 +619,7 @@ class GenericStorageBlock(ScalarBlock):
 
         if m.es.periods is not None:
             for n in self.STORAGES:
-                if n.fixed_costs[0] is not None:
+                if valid_sequence(n.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         n.nominal_storage_capacity
                         * n.fixed_costs[pp]
@@ -628,7 +631,7 @@ class GenericStorageBlock(ScalarBlock):
         storage_costs = 0
 
         for n in self.STORAGES:
-            if n.storage_costs[0] is not None:
+            if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
                 # We actually want to iterate over all TIMEPOINTS except the
                 # 0th. As integers are used for the index, this is equicalent
                 # to iterating over the TIMESTEPS with one offset.
@@ -1179,7 +1182,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_capacity is not None
+                if n.invest_relation_input_capacity[0] is not None
             ]
         )
 
@@ -1187,13 +1190,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_output_capacity is not None
+                if n.invest_relation_output_capacity[0] is not None
             ]
         )
 
         self.INVEST_REL_IN_OUT = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -1566,7 +1571,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -1587,7 +1592,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[i[n], n, p]
-                        == self.total[n, p] * n.invest_relation_input_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_input_capacity[p]
                     )
                     self.storage_capacity_inflow.add((n, p), expr)
 
@@ -1609,7 +1615,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                        == self.total[n, p] * n.invest_relation_output_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity[p]
                     )
                     self.storage_capacity_outflow.add((n, p), expr)
 
@@ -1880,7 +1887,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1898,7 +1905,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         )
 
             for n in self.EXISTING_INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     range_limit = min(

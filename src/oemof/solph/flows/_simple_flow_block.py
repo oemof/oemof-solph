@@ -26,6 +26,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._plumbing import valid_sequence
+
 
 class SimpleFlowBlock(ScalarBlock):
     r"""Flow block with definitions for standard flows.
@@ -172,12 +174,16 @@ class SimpleFlowBlock(ScalarBlock):
         )
         # set upper bound of gradient variable
         for i, o, f in group:
-            if m.flows[i, o].positive_gradient_limit[0] is not None:
+            if valid_sequence(
+                m.flows[i, o].positive_gradient_limit, len(m.TIMESTEPS)
+            ):
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
                         f.positive_gradient_limit[t] * f.nominal_capacity
                     )
-            if m.flows[i, o].negative_gradient_limit[0] is not None:
+            if valid_sequence(
+                m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
+            ):
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
                         f.negative_gradient_limit[t] * f.nominal_capacity
@@ -429,7 +435,9 @@ class SimpleFlowBlock(ScalarBlock):
 
         if m.es.periods is None:
             for i, o in m.FLOWS:
-                if m.flows[i, o].variable_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
                     for t in m.TIMESTEPS:
                         variable_costs += (
                             m.flow[i, o, t]
@@ -439,7 +447,9 @@ class SimpleFlowBlock(ScalarBlock):
 
         else:
             for i, o in m.FLOWS:
-                if m.flows[i, o].variable_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
                     for p, t in m.TIMEINDEX:
                         variable_costs += (
                             m.flow[i, o, t]
@@ -464,7 +474,7 @@ class SimpleFlowBlock(ScalarBlock):
 
             # Fixed costs for units with limited lifetime
             for i, o in self.LIFETIME_FLOWS:
-                if m.flows[i, o].fixed_costs[0] is not None:
+                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
                     range_limit = min(
                         m.es.end_year_of_optimization,
                         m.flows[i, o].lifetime,
@@ -477,7 +487,7 @@ class SimpleFlowBlock(ScalarBlock):
                     )
 
             for i, o in self.LIFETIME_AGE_FLOWS:
-                if m.flows[i, o].fixed_costs[0] is not None:
+                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
                     range_limit = min(
                         m.es.end_year_of_optimization,
                         m.flows[i, o].lifetime - m.flows[i, o].age,

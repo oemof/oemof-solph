@@ -25,7 +25,7 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 from oemof.solph.buses.experimental._electrical_bus import ElectricalBus
 from oemof.solph.flows._flow import Flow
 
@@ -75,7 +75,7 @@ class ElectricalLine(Flow):
             nonconvex=kwargs.get("nonconvex"),
             custom_attributes=kwargs.get("costom_attributes"),
         )
-        self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+        self.reactance = sequence(kwargs.get("reactance", 0.00001))
 
         self.input = kwargs.get("input")
         self.output = kwargs.get("output")

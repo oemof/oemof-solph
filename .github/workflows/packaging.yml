@@ -3,7 +3,10 @@ name: packaging
 on:
   # Make sure packaging process is not broken
   push:
-    branches: [master, dev]
+    branches:
+      - master
+      - dev
+      - 'release/**'
   pull_request:
   # Make a package for release
   release:
@@ -31,7 +34,7 @@ jobs:
       run: python -m build .
     - name: Run twine check
       run: twine check dist/*
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: tox-gh-actions-dist
         path: dist

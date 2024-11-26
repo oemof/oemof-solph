@@ -28,7 +28,7 @@ def test_gen_chp():
     data = pd.read_csv(full_filename)
 
     # select periods
-    periods = len(data) - 1
+    periods = len(data)
 
     # create an energy system
     idx = pd.date_range("1/1/2017", periods=periods, freq="h")
