@@ -33,10 +33,10 @@ jobs:
       - name: Git clone
         uses: actions/checkout@v2
 
-      - name: Set up Python ${{ env.default_python || '3.9' }}
+      - name: Set up Python ${{ env.default_python || '3.10' }}
         uses: actions/setup-python@v5
         with:
-          python-version: "${{ env.default_python || '3.9' }}"
+          python-version: "${{ env.default_python || '3.10' }}"
 
       - name: Pip cache
         uses: actions/cache@v2
