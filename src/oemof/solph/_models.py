@@ -389,7 +389,7 @@ class Model(po.ConcreteModel):
         """
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+    def solve(self, solver="cbc", solver_io="lp", allow_nonoptimal=False, **kwargs):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -429,6 +429,9 @@ class Model(po.ConcreteModel):
             "Termination condition"
         ]
 
+        self.es.results = solver_results
+        self.solver_results = solver_results
+
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
         else:
@@ -436,12 +439,14 @@ class Model(po.ConcreteModel):
                 "Optimization ended with status {0} and termination "
                 "condition {1}"
             )
-            warnings.warn(
-                msg.format(status, termination_condition), UserWarning
-            )
-        self.es.results = solver_results
-        self.solver_results = solver_results
 
+            if allow_nonoptimal:
+                warnings.warn(
+                    msg.format(status, termination_condition), UserWarning
+                )
+            else:
+                raise RuntimeError(msg)               
+ 
         return solver_results
 
     def relax_problem(self):
