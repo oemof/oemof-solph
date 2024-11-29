@@ -152,7 +152,7 @@ class Transformer(Converter):
             inputs=inputs,
             outputs=outputs,
             conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_attributes,
         )
         warn(
             "solph.components.Transformer has been renamed to"
