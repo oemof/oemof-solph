@@ -77,14 +77,14 @@ class ExtractionTurbineCHP(Converter):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
             conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_properties,
         )
         self.conversion_factor_full_condensation = {
             k: sequence(v)

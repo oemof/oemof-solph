@@ -99,21 +99,20 @@ class Converter(Node):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
-            custom_properties=custom_attributes,
+            custom_properties=custom_properties,
         )
         if not inputs:
             warn_if_missing_attribute(self, "inputs")

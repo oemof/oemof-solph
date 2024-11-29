@@ -10,6 +10,11 @@ API changes
   effectively the same) had double weight before. Also, if the
   initial storage level is defined, the costs just offset the
   objective value without changing anything else.
+* Rename custom_attributes to custom_properties for all Nodes.
+  Setting the oemof.network.Node.custom_properties
+  using an argument called "custom_attributes" was rather confusing.
+  Additionally, the class Bus already called the argument
+  "custom_properties".
 
 New features
 ############
