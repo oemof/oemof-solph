@@ -10,6 +10,8 @@ API changes
   effectively the same) had double weight before. Also, if the
   initial storage level is defined, the costs just offset the
   objective value without changing anything else.
+* The parameters `GenericStorage.nominal_storage_capacity` and
+  `Flow.nominal_value` are now both called `nominal_capacity`.
 
 New features
 ############
@@ -34,3 +36,4 @@ Contributors
 ############
 
 * Patrik Schönfeldt
+* Johannes Kochems

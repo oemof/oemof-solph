@@ -176,13 +176,15 @@ def main():
     noded["demand_elec"] = solph.components.Sink(
         label="demand_elec",
         inputs={
-            noded["bel"]: solph.Flow(fix=data["demand_el"], nominal_value=1)
+            noded["bel"]: solph.Flow(fix=data["demand_el"], nominal_capacity=1)
         },
     )
     noded["demand_el_2"] = solph.components.Sink(
         label="demand_el_2",
         inputs={
-            noded["bel2"]: solph.Flow(fix=data["demand_el"], nominal_value=1)
+            noded["bel2"]: solph.Flow(
+                fix=data["demand_el"], nominal_capacity=1
+            )
         },
     )
 
@@ -191,7 +193,7 @@ def main():
         label="demand_therm",
         inputs={
             noded["bth"]: solph.Flow(
-                fix=data["demand_th"], nominal_value=741000
+                fix=data["demand_th"], nominal_capacity=741000
             )
         },
     )
@@ -199,7 +201,7 @@ def main():
         label="demand_th_2",
         inputs={
             noded["bth2"]: solph.Flow(
-                fix=data["demand_th"], nominal_value=741000
+                fix=data["demand_th"], nominal_capacity=741000
             )
         },
     )
@@ -207,7 +209,7 @@ def main():
     # This is just a dummy Converter with a nominal input of zero
     noded["fixed_chp_gas"] = solph.components.Converter(
         label="fixed_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_value=0)},
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=0)},
         outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
         conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
     )
@@ -215,7 +217,7 @@ def main():
     # create a fixed Converter to distribute to the heat_2 and elec_2 buses
     noded["fixed_chp_gas_2"] = solph.components.Converter(
         label="fixed_chp_gas_2",
-        inputs={noded["bgas"]: solph.Flow(nominal_value=10e10)},
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
         outputs={noded["bel2"]: solph.Flow(), noded["bth2"]: solph.Flow()},
         conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
     )
@@ -223,7 +225,7 @@ def main():
     # create a fixed Converter to distribute to the heat and elec buses
     noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
         label="variable_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_value=10e10)},
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
         outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
         conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
         conversion_factor_full_condensation={noded["bel"]: 0.5},

@@ -314,25 +314,25 @@ class Model(po.ConcreteModel):
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for o, i in self.FLOWS:
-            if self.flows[o, i].nominal_value is not None:
+            if self.flows[o, i].nominal_capacity is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
+                            * self.flows[o, i].nominal_capacity
                         )
                         self.flow[o, i, t].fix()
                 else:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
                             self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
+                            * self.flows[o, i].nominal_capacity
                         )
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
                                 self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
+                                * self.flows[o, i].nominal_capacity
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for t in self.TIMESTEPS:

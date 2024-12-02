@@ -268,13 +268,13 @@ Sink (basic)
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above.
-The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_capacity'* is the maximum demand the normalised sequence is multiplied with.
 Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be changed by the solver.
 
 .. code-block:: python
 
     solph.components.Sink(label='electricity_demand', inputs={electricity_bus: solph.flows.Flow(
-        fix=my_demand_series, nominal_value=nominal_demand)})
+        fix=my_demand_series, nominal_capacity=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -292,21 +292,21 @@ Source (basic)
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have as feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
+While a wind power plant will have as feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_capacity*) and an annual limit (*full_load_time_max*).
 As we do have to pay for imported gas we should set variable costs.
 Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
 Alternatively, you might use *max* to allow for easy curtailment.
-The *nominal_value* sets the installed capacity.
+The *nominal_capacity* sets the installed capacity.
 
 .. code-block:: python
 
     solph.components.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
-            nominal_value=1000, full_load_time_max=1000000, variable_costs=50)})
+            nominal_capacity=1000, full_load_time_max=1000000, variable_costs=50)})
 
     solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
-        fix=wind_power_feedin_series, nominal_value=1000000)})
+        fix=wind_power_feedin_series, nominal_capacity=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -329,7 +329,7 @@ A condensing power plant can be defined by a converter with one input (fuel) and
     solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
-        outputs={b_el: solph.flows.Flow(nominal_value=10e10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=10e10)},
         conversion_factors={electricity_bus: 0.58})
 
 A CHP power plant would be defined in the same manner but with two outputs:
@@ -343,8 +343,8 @@ A CHP power plant would be defined in the same manner but with two outputs:
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow()},
-        outputs={b_el: Flow(nominal_value=30),
-                 b_th: Flow(nominal_value=40)},
+        outputs={b_el: Flow(nominal_capacity=30),
+                 b_th: Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
@@ -359,8 +359,8 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
-        outputs={b_el: Flow(nominal_value=30),
-                 b_th: Flow(nominal_value=40)},
+        outputs={b_el: Flow(nominal_capacity=30),
+                 b_th: Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
                             b_coal: 0.7, b_gas: 0.3})
 
@@ -430,7 +430,7 @@ applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
     solph.components._extractionTurbineCHP(
         label='variable_chp_gas',
-        inputs={b_gas: solph.flows.Flow(nominal_value=10e10)},
+        inputs={b_gas: solph.flows.Flow(nominal_capacity=10e10)},
         outputs={b_el: solph.flows.Flow(), b_th: solph.flows.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_full_condensation={b_el: 0.5})
@@ -561,16 +561,16 @@ GenericStorage (component)
 A component to model a storage with its basic characteristics. The
 GenericStorage is designed for one input and one output.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
+To limit the input and output flows, you can define the ``nominal_capacity`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
 
 .. code-block:: python
 
     solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
+        loss_rate=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
@@ -590,9 +590,9 @@ The following code block shows an example of the storage parametrization for the
 
     solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
+        loss_rate=0.001, nominal_capacity=50,
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
@@ -627,7 +627,7 @@ Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds tw
     *	Invest into the flow parameters e.g. a turbine or a pump
     *	Invest into capacity of the storage  e.g. a basin or a battery cell
 
-Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode.
+Investment in this context refers to the value of the variable for the 'nominal_capacity' (installed capacity) in the investment mode.
 
 As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows
 with the capacity of the storage.
@@ -645,8 +645,8 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
     solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
@@ -757,7 +757,7 @@ Then we can create our component with the buses attached to it.
     ...     label='boiler',
     ...     inputs={
     ...         bfuel: solph.flows.Flow(
-    ...             nominal_value=P_out_max,
+    ...             nominal_capacity=P_out_max,
     ...             max=l_max,
     ...             min=l_min,
     ...             nonconvex=solph.NonConvex()
@@ -777,7 +777,7 @@ Then we can create our component with the buses attached to it.
     will serve as the reference for the `conversion_factors` and the
     `normed_offsets`. The `NonConvex` flow also holds
 
-    - the `nominal_value` (or `Investment` in case of investment optimization),
+    - the `nominal_capacity` (can be `Investment` in case of investment optimization),
     - the `min` and
     - the `max` attributes.
 
@@ -899,7 +899,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     grid = solph.components.Source(label='Grid',
                         outputs={
                             b_elec: solph.flows.Flow(
-                                nominal_value=10000,
+                                nominal_capacity=10000,
                                 variable_costs=50)}
                         )
     es.add(grid)
@@ -909,7 +909,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
                           outputs={
                               b_elec: solph.flows.Flow(
                                   fix=data['pv'],
-                                  nominal_value=3.5)}
+                                  nominal_capacity=3.5)}
                           )
     es.add(s_wind)
 
@@ -958,7 +958,7 @@ The annual savings by building up new capacity must therefore compensate the ann
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
 Basically, an instance of the Investment class can be added to a Flow, a
-Storage or a DSM Sink. All parameters that usually refer to the *nominal_value/capacity* will
+Storage or a DSM Sink. All parameters that usually refer to the *nominal_capacity* will
 now refer to the investment variables and existing capacity. It is also
 possible to set a maximum limit for the capacity that can be build.
 If existing capacity is considered for a component with investment mode enabled,
@@ -983,7 +983,7 @@ turbines.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	nominal_value=solph.Investment(ep_costs=epc, maximum=50000))})
+	nominal_capacity=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
 capacity of 20,000 kW. We're still expecting the total wind power capacity, thus we
@@ -993,7 +993,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	    nominal_value=solph.Investment(ep_costs=epc,
+	    nominal_capacity=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
 
@@ -1028,7 +1028,7 @@ example of a converter:
         label='converter_nonconvex',
         inputs={bus_0: solph.flows.Flow()},
         outputs={bus_1: solph.flows.Flow(
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=4,
                 maximum=100,
                 minimum=20,
@@ -1185,7 +1185,7 @@ Then you add all the *components* and *buses* to your energy system, just as you
         label="electricity_demand",
         inputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=1000, fix=[0.8] * len(my_index)
+                nominal_capacity=1000, fix=[0.8] * len(my_index)
             )
         },
     )
@@ -1214,7 +1214,7 @@ Here is an example
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
@@ -1248,7 +1248,7 @@ This would mean that for investments in the particular period, these values woul
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
@@ -1275,7 +1275,7 @@ For components that is not invested into, you also can specify some additional a
         inputs={coal_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=600,
+                nominal_capacity=600,
                 max=1,
                 min=0.4,
                 lifetime=50,
@@ -1379,9 +1379,9 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
         inputs={b_gas: solph.flows.Flow()},
         outputs={b_el: solph.flows.Flow(
             nonconvex=solph.NonConvex(),
-            nominal_value=30,
+            nominal_capacity=30,
             min=0.5),
-        b_th: solph.flows.Flow(nominal_value=40)},
+        b_th: solph.flows.Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created Converter (i.e., CHP)
@@ -1423,7 +1423,7 @@ This nonlinearity is linearised in the
                 min=0.2,
                 max=1,
                 nonconvex=solph.NonConvex(),
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=90,
                     maximum=150, # required for the linearization
                 ),

@@ -198,7 +198,7 @@ def main():
     energysystem.add(
         comp.Source(
             label=Label("ee_source", "electricity", "wind"),
-            outputs={bel: flows.Flow(fix=data["wind"], nominal_value=2000)},
+            outputs={bel: flows.Flow(fix=data["wind"], nominal_capacity=2000)},
         )
     )
 
@@ -206,7 +206,7 @@ def main():
     energysystem.add(
         comp.Source(
             label=Label("ee_source", "electricity", "pv"),
-            outputs={bel: flows.Flow(fix=data["pv"], nominal_value=3000)},
+            outputs={bel: flows.Flow(fix=data["pv"], nominal_capacity=3000)},
         )
     )
 
@@ -215,7 +215,9 @@ def main():
         comp.Sink(
             label=Label("sink", "electricity", "demand"),
             inputs={
-                bel: flows.Flow(fix=data["demand_el"] / 1000, nominal_value=1)
+                bel: flows.Flow(
+                    fix=data["demand_el"] / 1000, nominal_capacity=1
+                )
             },
         )
     )
@@ -225,18 +227,20 @@ def main():
         comp.Converter(
             label=Label("power plant", "electricity", "gas"),
             inputs={bgas: flows.Flow()},
-            outputs={bel: flows.Flow(nominal_value=10000, variable_costs=50)},
+            outputs={
+                bel: flows.Flow(nominal_capacity=10000, variable_costs=50)
+            },
             conversion_factors={bel: 0.58},
         )
     )
 
     # create storage object representing a battery
-    nominal_storage_capacity = 5000
+    nominal_capacity = 5000
     storage = comp.GenericStorage(
-        nominal_storage_capacity=nominal_storage_capacity,
+        nominal_capacity=nominal_capacity,
         label=Label("storage", "electricity", "battery"),
-        inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
-        outputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
+        inputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
+        outputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
         loss_rate=0.00,
         initial_storage_level=None,
         inflow_conversion_factor=1,

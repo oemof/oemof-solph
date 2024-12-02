@@ -28,7 +28,7 @@ def test_equate_flows():
             b1: solph.Flow(
                 variable_costs=-0.5,
                 max=[0.5, 1],
-                nominal_value=4,
+                nominal_capacity=4,
                 custom_attributes={"keyword1": "group 1"},
             )
         },
@@ -38,7 +38,7 @@ def test_equate_flows():
         inputs={
             b1: solph.Flow(
                 variable_costs=0.1,
-                nominal_value=2,
+                nominal_capacity=2,
                 custom_attributes={"keyword2": "group 2"},
             )
         },
@@ -48,7 +48,7 @@ def test_equate_flows():
         inputs={
             b1: solph.Flow(
                 variable_costs=0.2,
-                nominal_value=3,
+                nominal_capacity=3,
                 custom_attributes={"keyword2": "group 2"},
             )
         },
@@ -58,7 +58,7 @@ def test_equate_flows():
         inputs={
             b1: solph.Flow(
                 variable_costs=0.2,
-                nominal_value=3,
+                nominal_capacity=3,
                 custom_attributes={"keyword3": "no group"},
             )
         },

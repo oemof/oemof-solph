@@ -121,7 +121,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
-        # and a continuous variable (`invest` or `nominal_value`)
+        # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
