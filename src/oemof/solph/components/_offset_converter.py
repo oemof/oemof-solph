@@ -139,16 +139,16 @@ class OffsetConverter(Node):
         conversion_factors=None,
         normed_offsets=None,
         coefficients=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
             inputs=inputs,
             outputs=outputs,
             label=label,
-            custom_properties=custom_attributes,
+            custom_properties=custom_properties,
         )
 
         # this part is used for the transition phase from the old
@@ -393,7 +393,7 @@ class OffsetTransformer(OffsetConverter):
             inputs=inputs,
             outputs=outputs,
             coefficients=coefficients,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_attributes,
         )
         warn(
             "solph.components.OffsetTransformer has been renamed to"

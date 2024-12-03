@@ -271,12 +271,12 @@ class SinkDSM(Sink):
         shift_eligibility=True,
         fixed_costs=0,
         investment=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
         super().__init__(
-            label=label, inputs=inputs, custom_attributes=custom_attributes
+            label=label, inputs=inputs, custom_properties=custom_properties
         )
 
         self.capacity_up = sequence(capacity_up)
