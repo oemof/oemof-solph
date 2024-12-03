@@ -99,7 +99,7 @@ class NonConvexFlowBlock(ScalarBlock):
 
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
-        # and a continuous variable (`invest` or `nominal_value`)
+        # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
             self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
@@ -661,7 +661,7 @@ class NonConvexFlowBlock(ScalarBlock):
             """Rule definition for status_nominal"""
             expr = (
                 self.status_nominal[i, o, t]
-                == self.status[i, o, t] * m.flows[i, o].nominal_value
+                == self.status[i, o, t] * m.flows[i, o].nominal_capacity
             )
             return expr
 

@@ -64,7 +64,7 @@ class ExtractionTurbineCHP(Converter):
     >>> bgas = solph.buses.Bus(label='commodityBus')
     >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+    ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
     ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})

@@ -130,7 +130,7 @@ def offset_converter_example():
         outputs={
             b_el_dc: solph.flows.Flow(
                 fix=solar_potential / peak_solar_potential,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_pv * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -173,7 +173,7 @@ def offset_converter_example():
                 variable_costs=variable_cost_diesel_genset,
                 min=min_load,
                 max=max_load,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,
                 ),
@@ -190,7 +190,7 @@ def offset_converter_example():
         label="rectifier",
         inputs={
             b_el_ac: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_rectifier * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -208,7 +208,7 @@ def offset_converter_example():
         label="inverter",
         inputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_inverter * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -224,13 +224,13 @@ def offset_converter_example():
     epc_battery = 101.00  # currency/kWh/year
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
         outputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(ep_costs=0)
+                nominal_capacity=solph.Investment(ep_costs=0)
             )
         },
         initial_storage_level=0.0,
@@ -249,7 +249,7 @@ def offset_converter_example():
         inputs={
             b_el_ac: solph.flows.Flow(
                 fix=hourly_demand / peak_demand,
-                nominal_value=peak_demand,
+                nominal_capacity=peak_demand,
             )
         },
     )

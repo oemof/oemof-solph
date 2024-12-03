@@ -80,7 +80,7 @@ def main():
         inputs={
             b_heat: solph.flows.Flow(
                 fix=[heat_demand(day) for day in range(0, periods)],
-                nominal_value=10,
+                nominal_capacity=10,
             )
         },
     )
@@ -89,7 +89,7 @@ def main():
         label="fireplace",
         outputs={
             b_heat: solph.flows.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.4,
                 max=1.0,
                 variable_costs=0.1,
@@ -104,7 +104,7 @@ def main():
     boiler = solph.components.Source(
         label="boiler",
         outputs={
-            b_heat: solph.flows.Flow(nominal_value=10, variable_costs=0.2)
+            b_heat: solph.flows.Flow(nominal_capacity=10, variable_costs=0.2)
         },
     )
 
@@ -117,7 +117,7 @@ def main():
         outputs={
             b_heat: solph.flows.Flow(
                 fix=[solar_thermal(day) for day in range(0, periods)],
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc, minimum=1.0, maximum=5.0
                 ),
             )
@@ -126,7 +126,7 @@ def main():
 
     excess_heat = solph.components.Sink(
         label="excess_heat",
-        inputs={b_heat: solph.flows.Flow(nominal_value=10)},
+        inputs={b_heat: solph.flows.Flow(nominal_capacity=10)},
     )
 
     es.add(demand_heat, fireplace, boiler, thermal_collector, excess_heat)
