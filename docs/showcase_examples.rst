@@ -1,4 +1,4 @@
-.. _oemof_solph_showcase_examples_label:
+.. _showcase_examples_label:
 
 ~~~~~~~~~~~~~~~~~~~~
 Showcases
@@ -6,7 +6,7 @@ Showcases
 
 On this page we collect showcases applications of oemof.solph. If you want to
 add your example here, please open an issue on GitHub and let us know. The
-source code of the application should be accessible freely, so other users can 
+source code of the application should be accessible freely, so other users can
 learn from your project.
 
 
@@ -21,7 +21,7 @@ learn from your project.
       :class: only-light
       :target: https://github.com/oemof/oemof-solph
 
-    .. image:: /_static/_logo/logo_oemof_solph_COMPACT_darkmode.svf
+    .. image:: /_static/_logo/logo_oemof_solph_COMPACT_darkmode.svg
       :align: center
       :alt: Example Caption
       :class: only-dark
