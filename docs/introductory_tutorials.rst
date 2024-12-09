@@ -25,7 +25,7 @@ you have any questions please reach out to the
     :gutter: 1
 
     .. grid-item-card::  Tutorial 1
-        :link: tutorial_1_label
+        :link: district_heating_portfolio_optimization_label
         :link-type: ref
 
         .. image:: /_files/example_network.svg
