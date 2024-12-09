@@ -9,7 +9,7 @@ The tutorial is set up in 4 different steps
 
 - The existing system delivering heat with a gas boiler
 - The optimization of a heat pump capacity utilizing waste heat from datacenter
-  and heat storage capacity
+  with heat storage (ad-hoc dimensioning, ~2 days of maximum heat demand)
 - Introduce minimal load with converter concept (just minimal load)
 
 .. figure:: /_files/example_network.svg
@@ -110,16 +110,16 @@ Step 2: Plan capacity of heat pump and heat storage
 
 3. Add waste heat source and electricity source
 
-4. Add heat pump
+4. Add heat storage
 
-5. Add heat storage
+5. Add heat pump
 
 6. Run model and analyze results
 
 Step 3: Introduce a minimal load for the converters
 ---------------------------------------------------
 
-1. Modify the converters, remaining parts are identical
+1. Modify the converters, remaining parts are identical.
 
 .. tip::
 
