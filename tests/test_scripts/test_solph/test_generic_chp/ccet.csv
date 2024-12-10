@@ -1,4 +1,4 @@
-timestep,demand_th,price_el,Eta_el_max_woDH,P_max_woDH,Eta_el_min_woDH,P_min_woDH,Beta,Q_CW_min,H_L_FG_share_max
+timestep,demand_th,price_el,Eta_el_max_woDH,P_max_woDH,Eta_el_min_woDH,P_min_woDH,beta,Q_CW_min,H_L_FG_share_max
 1,0.01,50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
 2,0.02,50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
 3,0.03,50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
@@ -198,4 +198,3 @@ timestep,demand_th,price_el,Eta_el_max_woDH,P_max_woDH,Eta_el_min_woDH,P_min_woD
 197,0.97,-50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
 198,0.98,-50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
 199,0.99,-50,0.53,199.73,0.43,80.65,0.19,31.71,0.19
-200,1,-50,0.53,199.73,0.43,80.65,0.19,31.71,0.19

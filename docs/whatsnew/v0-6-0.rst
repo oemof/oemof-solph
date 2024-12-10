@@ -1,0 +1,39 @@
+v0.6.0
+------
+
+API changes
+###########
+
+* Costs for energy storage are now defined for N-1 points in time
+  (initial time step is neglected). This is because with a balanced
+  storage, content of the initial and the first time step (which is
+  effectively the same) had double weight before. Also, if the
+  initial storage level is defined, the costs just offset the
+  objective value without changing anything else.
+* The parameters `GenericStorage.nominal_storage_capacity` and
+  `Flow.nominal_value` are now both called `nominal_capacity`.
+
+New features
+############
+
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Known issues
+############
+
+
+Contributors
+############
+
+* Patrik Schönfeldt
+* Johannes Kochems

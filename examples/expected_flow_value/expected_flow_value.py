@@ -46,11 +46,11 @@ def run_energy_system(index, costs, demands, losses, expected=None):
     bus = solph.buses.Bus(label="bus")
     source = solph.components.Source(
         label="source",
-        outputs={bus: solph.flows.NonConvexFlow(
+        outputs={bus: solph.flows.Flow(
             variable_costs=costs,
+            nonconvex=solph.NonConvex(activity_costs=0.01),
             min=0.2,
             nominal_value=100,
-            activity_costs=0.01,
         )},
     )
     storage = solph.components.GenericStorage(
@@ -65,8 +65,7 @@ def run_energy_system(index, costs, demands, losses, expected=None):
     sink = solph.components.Sink(
         label="sink",
         inputs={
-            bus: solph.flows.Flow(nominal_value=1,
-                                  fix=demands)
+            bus: solph.flows.Flow(nominal_value=1, fix=demands)
         },
     )
 

@@ -3,19 +3,21 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-=================================
-Welcome to oemof's documentation!
-=================================
+=======================================
+Welcome to oemof.solph's documentation!
+=======================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    readme
    usage
    reference/index
+   examples/index
    contributing
    authors
    changelog
+   _logo/README.rst
 
 Indices and tables
 ==================

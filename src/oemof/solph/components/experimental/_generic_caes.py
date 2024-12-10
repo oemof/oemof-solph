@@ -11,12 +11,13 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -25,7 +26,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class GenericCAES(on.Transformer):
+class GenericCAES(Node):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
@@ -55,8 +56,6 @@ class GenericCAES(on.Transformer):
     -----
     The following sets, variables, constraints and objective parts are created
      * :py:class:`~oemof.solph.blocks.generic_caes.GenericCAES`
-
-    TODO: Add description for constraints. See referenced paper until then!
 
     Examples
     --------
@@ -93,24 +92,37 @@ class GenericCAES(on.Transformer):
     ...    electrical_input={bel: solph.flows.Flow()},
     ...    fuel_input={bgas: solph.flows.Flow()},
     ...    electrical_output={bel: solph.flows.Flow()},
-    ...    params=concept, fixed_costs=0)
+    ...    params=concept)
     >>> type(caes)
     <class 'oemof.solph.components.experimental._generic_caes.GenericCAES'>
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        label,
+        *,
+        electrical_input,
+        fuel_input,
+        electrical_output,
+        params,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs={},
+            outputs={},
+            custom_properties=custom_properties,
+        )
 
-        super().__init__(*args, **kwargs)
-
-        self.electrical_input = kwargs.get("electrical_input")
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.params = kwargs.get("params")
+        self.electrical_input = electrical_input
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.params = params
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get("electrical_input"))
-        self.inputs.update(kwargs.get("fuel_input"))
-        self.outputs.update(kwargs.get("electrical_output"))
+        self.inputs.update(electrical_input)
+        self.inputs.update(fuel_input)
+        self.outputs.update(electrical_output)
 
     def constraint_group(self):
         return GenericCAESBlock
@@ -240,7 +252,7 @@ class GenericCAESBlock(ScalarBlock):
         ":math:`{P}_{cmp\_max}`", "`cmp_p_max[n,t]`", "V", "Max.
         compression power"
         ":math:`\dot{Q}_{cmp}` ", "`cmp_q_out_sum[n,t]`", "V", "Summed
-         heat flow in compression"
+        heat flow in compression"
         ":math:`\dot{Q}_{cmp\_out}` ", "`cmp_q_waste[n,t]`", "V", "
         Waste heat flow from compression"
         ":math:`ST_{exp}(t)`", "`exp_st[n,t]`", "V", "Status of
@@ -255,7 +267,7 @@ class GenericCAESBlock(ScalarBlock):
         ":math:`\dot{Q}_{exp\_add}(t)`", "`exp_q_add_in[n,t]`", "V", "
         Additional heat flow into expansion"
         ":math:`CAV_{fil}(t)`", "`cav_level[n,t]`", "V", "Filling level
-         if CAE"
+        if CAE"
         ":math:`\dot{E}_{cas\_in}(t)`", "`cav_e_in[n,t]`", "V", "
         Exergy flow into CAS"
         ":math:`\dot{E}_{cas\_out}(t)`", "`cav_e_out[n,t]`", "V", "
@@ -263,11 +275,11 @@ class GenericCAESBlock(ScalarBlock):
         ":math:`TES_{fil}(t)`", "`tes_level[n,t]`", "V", "Filling
         level of Thermal Energy Storage (TES)"
         ":math:`\dot{Q}_{tes\_in}(t)`", "`tes_e_in[n,t]`", "V", "Heat
-         flow into TES"
+        flow into TES"
         ":math:`\dot{Q}_{tes\_out}(t)`", "`tes_e_out[n,t]`", "V", "Heat
-         flow from TES"
+        flow from TES"
         ":math:`b_{cmp\_max}`", "`cmp_p_max_b[n,t]`", "P", "Specific
-         y-intersection"
+        y-intersection"
         ":math:`b_{cmp\_q}`", "`cmp_q_out_b[n,t]`", "P", "Specific
         y-intersection"
         ":math:`b_{exp\_max}`", "`exp_p_max_b[n,t]`", "P", "Specific
@@ -279,41 +291,42 @@ class GenericCAESBlock(ScalarBlock):
         ":math:`b_{cas\_out}`", "`cav_e_out_b[n,t]`", "P", "Specific
         y-intersection"
         ":math:`m_{cmp\_max}`", "`cmp_p_max_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cmp\_q}`", "`cmp_q_out_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{exp\_max}`", "`exp_p_max_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{exp\_q}`", "`exp_q_in_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cas\_in}`", "`cav_e_in_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`m_{cas\_out}`", "`cav_e_out_m[n,t]`", "P", "Specific
-         slope"
+        slope"
         ":math:`P_{cmp\_min}`", "`cmp_p_min[n,t]`", "P", "Min.
         compression power"
         ":math:`r_{cmp\_tes}`", "`cmp_q_tes_share[n,t]`", "P", "Ratio
-         between waste heat flow and heat flow into TES"
-        ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "Ratio
-         between external heat flow into expansion and heat flows from TES and
-          additional source"
+        between waste heat flow and heat flow into TES"
+        ":math:`r_{exp\_tes}`", "`exp_q_tes_share[n,t]`", "P", "
+        | Ratio between external heat flow into expansion
+        | and heat flows from TES and additional source"
         ":math:`\tau`", "`m.timeincrement[n,t]`", "P", "Time interval
-         length"
+        length"
         ":math:`TES_{fil\_max}`", "`tes_level_max[n,t]`", "P", "Max.
         filling level of TES"
         ":math:`CAS_{fil\_max}`", "`cav_level_max[n,t]`", "P", "Max.
-         filling level of TES"
-        ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "Temporal efficiency
-         (loss factor to take intertemporal losses into account)"
+        filling level of TES"
+        ":math:`\tau`", "`cav_eta_tmp[n,t]`", "P", "
+        | Temporal efficiency
+        | (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
-         (external) into Expansion"
+        `flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
+        (external) into Expansion"
 
     """
 

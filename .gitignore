@@ -20,8 +20,9 @@ develop-eggs
 .installed.cfg
 lib
 lib64
-venv*/
-pyvenv*/
+venv/
+.venv/
+pyvenv/
 pip-wheel-metadata/
 
 # Installer logs
@@ -44,6 +45,7 @@ htmlcov
 .project
 .pydevproject
 .idea
+.vscode
 *.iml
 *.komodoproject
 

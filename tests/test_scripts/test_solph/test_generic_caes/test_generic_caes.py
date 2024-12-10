@@ -15,8 +15,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
-from oemof.network.network import Node
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -35,29 +34,35 @@ def test_gen_caes():
     data = pd.read_csv(full_filename)
 
     # select periods
-    periods = len(data) - 1
+    periods = len(data)
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=periods, freq="H")
-    es = EnergySystem(timeindex=idx)
-    Node.registry = es
+    idx = pd.date_range("1/1/2017", periods=periods, freq="h")
+    es = EnergySystem(timeindex=idx, infer_last_interval=True)
 
     # resources
     bgas = Bus(label="bgas")
+    es.add(bgas)
 
-    Source(label="rgas", outputs={bgas: Flow(variable_costs=20)})
+    es.add(Source(label="rgas", outputs={bgas: Flow(variable_costs=20)}))
 
     # power
     bel_source = Bus(label="bel_source")
-    Source(
-        label="source_el",
-        outputs={bel_source: Flow(variable_costs=data["price_el_source"])},
+    es.add(bel_source)
+    es.add(
+        Source(
+            label="source_el",
+            outputs={bel_source: Flow(variable_costs=data["price_el_source"])},
+        )
     )
 
     bel_sink = Bus(label="bel_sink")
-    Sink(
-        label="sink_el",
-        inputs={bel_sink: Flow(variable_costs=data["price_el_sink"])},
+    es.add(bel_sink)
+    es.add(
+        Sink(
+            label="sink_el",
+            inputs={bel_sink: Flow(variable_costs=data["price_el_sink"])},
+        )
     )
 
     # dictionary with parameters for a specific CAES plant
@@ -86,13 +91,14 @@ def test_gen_caes():
     }
 
     # generic compressed air energy storage (caes) plant
-    GenericCAES(
-        label="caes",
-        electrical_input={bel_source: Flow()},
-        fuel_input={bgas: Flow()},
-        electrical_output={bel_sink: Flow()},
-        params=concept,
-        fixed_costs=0,
+    es.add(
+        GenericCAES(
+            label="caes",
+            electrical_input={bel_source: Flow()},
+            fuel_input={bgas: Flow()},
+            electrical_output={bel_sink: Flow()},
+            params=concept,
+        )
     )
 
     # create an optimization problem and solve it
@@ -134,4 +140,4 @@ def test_gen_caes():
     }
 
     for key in test_dict.keys():
-        eq_(int(round(data[key])), int(round(test_dict[key])))
+        assert data[key] == pytest.approx(test_dict[key])

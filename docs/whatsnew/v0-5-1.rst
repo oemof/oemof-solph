@@ -1,0 +1,73 @@
+v0.5.1 (August 31st, 2023)
+--------------------------
+
+
+API changes
+###########
+
+* The component `Transformer` is renamed to `Converter`.
+  When people hear "transformer", they think of electrical devices.
+  However, the Transformer is neither meant to be (only) electrical
+  nor bidirectional (as electrical transformers typically are).
+  Thus, the more generic term "converter" is now used.
+  (Note that we always had the argument "conversion_factor".)
+* Unify API for constant sized objects and sizing of investment. For both, `Flow` and
+  `GenericStorage`, the argument `investment` is now deprecated. Instead,
+  `nominal_capacity` and `nominal_storage_capacity` accept an `Investment` object.
+* Change investment for experimental :class:`oemof.solph.components.experimental._sink_dsm.SinkDSM`: Remove
+  obsolete parameters `flex_share_down` and `flex_share_up`.
+* Mainline link component :class:`oemof.solph.components._link.Link` from experimental.
+
+New features
+############
+
+* Add option to run multi-period (dynamic) investment models with oemof.solph as an experimental feature:
+    * You can change from standard model to multi-period model by defining the newly introduced `periods`
+      attribute of your energy system. Be aware that it is experimental as of now. `periods` is a list
+      of the periods you want to model (usually years) given as pandas.date_range objects.
+    * Add attributes `periods` to :class:`oemof.solph._energy_system.EnergySystem`.
+    * Introduce new Pyomo Sets `PERIODS` and `TIMEINDEX` in :class:`oemof.solph.models.Model`.
+    * Index all investment-related variables with `PERIODS` and flow variable with `TIMEINDEX`, which
+      is a tuple of periods and timesteps.
+    * Add lifetime tracking for investment options by introducing the attributes `lifetime` and `age`.
+    * Add new investment-related variables `total` holding the total capacity, `old` holding capacity
+      to be decommissioned, `old_exo` (for exogenous) holding existing capacity to be decommissioned and
+      `old_end` holding model-endogenously installed capacity to be decommissioned after its lifetime.
+    * Include discounting and calculating annuities in the objective function terms. Introduce attribute `discount_rate`
+      of :class:`oemof.solph.models.Model` and `interest_rate` for individual investment objects (options.Investment).
+* Add `storage_level_constraint` that allows to set flows from/to storage (in)active based on storage content.
+* `Model` now accepts a list of `EnergySystem` objects, which allows for modelling of cellular energysystems.
+* Add `storage_costs` option for `GenericStorage`. (Note: Differnt lengths of time steps are not considered.
+  If you use non-equidistant time steps, you need to scale costs accordingly.)
+
+Documentation
+#############
+
+* See extensive documentation in user guide and API reference for the new (experimental) multi-period feature.
+* Be more strict about about oemof (meta package) oemof.solph (this package).
+* Improved presentation of examples as part of the documentation.
+
+Bug fixes
+#########
+
+* Fixed error when calling `oemof_installation_test` as console script.
+* Corrected several typos in the docs.
+* Periods with multiple period lengths are now supported in multi-period investment.
+* Add missing 'custom_attributes' for the link component
+
+Testing
+#######
+
+* Add tests for experimental SinkDSM component.
+* Add tests for multi-period investment.
+
+Contributors
+############
+
+* Johannes Kochems
+* Patrik Schönfeldt
+* Tobi Rohrer
+* Julian Endres
+* Jann Launer
+* Lennart Schürmann
+

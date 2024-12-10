@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -24,7 +25,7 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 from oemof.solph.buses.experimental._electrical_bus import ElectricalBus
 from oemof.solph.flows._flow import Flow
 
@@ -57,9 +58,27 @@ class ElectricalLine(Flow):
 
     """  # noqa: E501
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+    def __init__(self, **kwargs):
+        super().__init__(
+            nominal_capacity=kwargs.get("nominal_capacity"),
+            variable_costs=kwargs.get("variable_costs", 0),
+            min=kwargs.get("min"),
+            max=kwargs.get("max"),
+            fix=kwargs.get("fix"),
+            positive_gradient_limit=kwargs.get("positive_gradient_limit"),
+            negative_gradient_limit=kwargs.get("negative_gradient_limit"),
+            full_load_time_max=kwargs.get("full_load_time_max"),
+            full_load_time_min=kwargs.get("full_load_time_min"),
+            integer=kwargs.get("integer", False),
+            bidirectional=kwargs.get("bidirectiona", False),
+            investment=kwargs.get("investment"),
+            nonconvex=kwargs.get("nonconvex"),
+            custom_attributes=kwargs.get("costom_attributes"),
+        )
+        self.reactance = sequence(kwargs.get("reactance", 0.00001))
+
+        self.input = kwargs.get("input")
+        self.output = kwargs.get("output")
 
         # set input / output flow values to -1 by default if not set by user
         if self.nonconvex is not None:
@@ -88,10 +107,10 @@ class ElectricalLineBlock(ScalarBlock):
 
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
-            flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
-            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
-            \forall t \\in \\textrm{TIMESTEPS}, \\
-            \forall n \\in \\textrm{ELECTRICAL\_LINES}.
+            flow(n, o, p, t) =  1 / reactance(n, t) \cdot
+            voltage\_angle(i(n), t) - voltage\_angle(o(n), t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
+            \forall n \in \textrm{ELECTRICAL\_LINES}.
 
     TODO: Add equate constraint of flows
 
