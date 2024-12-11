@@ -19,10 +19,10 @@ import pandas as pd
 from oemof import solph
 
 solver = "cbc"  # 'glpk', 'gurobi',...
-solver_verbose = True  # show/hide solver output
-time_steps = 24 * 31  # 8760
+solver_verbose = False  # show/hide solver output
+time_steps = 2000 # 8760
 
-date_time_index = pd.date_range("1/1/2000", periods=time_steps, freq="H")
+date_time_index = pd.date_range("1/1/2000", periods=time_steps, freq="h")
 
 rng = np.random.default_rng(seed=1337)
 random_costs = rng.exponential(size=time_steps)
@@ -33,7 +33,10 @@ random_losses = np.minimum(
 
 
 def run_energy_system(index, costs, demands, losses, expected=None):
-    energy_system = solph.EnergySystem(timeindex=index)
+    energy_system = solph.EnergySystem(
+        timeindex=index,
+        infer_last_interval=True,
+    )
 
     if expected is None:
         expected = {
@@ -41,6 +44,8 @@ def run_energy_system(index, costs, demands, losses, expected=None):
             (("source", "bus"), "flow"): None,
             (("storage", "bus"), "flow"): None,
         }
+    else:
+        expected = expected / 10
 
     bus = solph.buses.Bus(label="bus")
     source = solph.components.Source(
@@ -48,9 +53,10 @@ def run_energy_system(index, costs, demands, losses, expected=None):
         outputs={
             bus: solph.flows.Flow(
                 variable_costs=costs,
-                nonconvex=solph.NonConvex(activity_costs=0.01),
+                nonconvex=solph.NonConvex(),
+                expected=expected[(("source", "bus"), "flow")],
                 min=0.2,
-                nominal_value=100,
+                nominal_capacity=10,
             )
         },
     )
@@ -58,20 +64,22 @@ def run_energy_system(index, costs, demands, losses, expected=None):
         label="storage",
         inputs={
             bus: solph.flows.Flow(
-                expected=expected[(("bus", "storage"), "flow")]
+                nominal_capacity=10,
+                expected=expected[(("bus", "storage"), "flow")],
             )
         },
         outputs={
             bus: solph.flows.Flow(
-                expected=expected[(("storage", "bus"), "flow")]
+                nominal_capacity=10,
+                expected=expected[(("storage", "bus"), "flow")],
             )
         },
-        nominal_storage_capacity=1e4,
+        nominal_capacity=1e4,
         loss_rate=losses,
     )
     sink = solph.components.Sink(
         label="sink",
-        inputs={bus: solph.flows.Flow(nominal_value=1, fix=demands)},
+        inputs={bus: solph.flows.Flow(nominal_capacity=1, fix=demands)},
     )
 
     energy_system.add(bus, source, sink, storage)
@@ -95,6 +103,7 @@ results, meta_results["no hints 1"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses
 )
 bus_data = solph.views.node(results, "bus")["sequences"]
+
 _, meta_results["no hints 2"] = run_energy_system(
     date_time_index, random_costs, random_demands, random_losses
 )
