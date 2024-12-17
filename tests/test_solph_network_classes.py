@@ -72,33 +72,6 @@ class TestConverterClass:
             assert converter.inputs == {}
 
 
-def test_transformer_wrapper():
-    # two warnings: Wrapper and no inputs/outputs
-    with pytest.warns(FutureWarning):
-        with pytest.warns(SuspiciousUsageWarning):
-            solph.components.Transformer()
-
-
-def test_offset_transformer_wrapper():
-    with pytest.warns(FutureWarning):
-        solph.components.OffsetTransformer(
-            inputs={solph.Bus("bus"): solph.Flow(nonconvex=solph.NonConvex())},
-            outputs={},
-        )
-
-
-def test_wrong_combination_invest_and_nominal_value():
-    msg = "For backward compatibility, the option investment overwrites"
-    with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(investment=solph.Investment(), nominal_value=4)
-
-
-def test_invest_attribute_warning():
-    msg = "For backward compatibility, the option investment overwrites"
-    with pytest.warns(FutureWarning, match=msg):
-        solph.flows.Flow(investment=solph.Investment())
-
-
 def test_fixed_costs_warning():
     msg = (
         "Be aware that the fixed costs attribute is only\n"
@@ -128,12 +101,12 @@ def test_flow_with_fix_and_min_max():
 
 
 def test_infinite_values():
-    msg1 = "nominal_value must be a finite value"
+    msg1 = "nominal_capacity must be a finite value"
     msg2 = "max must be a finite value"
     with pytest.raises(ValueError, match=msg1):
-        solph.flows.Flow(nominal_value=float("+inf"))
+        solph.flows.Flow(nominal_capacity=float("+inf"))
     with pytest.raises(ValueError, match=msg2):
-        solph.flows.Flow(nominal_value=1, max=float("+inf"))
+        solph.flows.Flow(nominal_capacity=1, max=float("+inf"))
 
 
 def test_attributes_needing_nominal_value_get_it():
@@ -160,7 +133,7 @@ def test_attributes_needing_nominal_value_get_it():
 def test_min_max_values_for_bidirectional_flow():
     a = solph.flows.Flow(bidirectional=True)  # use default values
     b = solph.flows.Flow(
-        bidirectional=True, nominal_value=1, min=-0.8, max=0.9
+        bidirectional=True, nominal_capacity=1, min=-0.8, max=0.9
     )
     assert a.bidirectional
     assert a.max[0] == 1

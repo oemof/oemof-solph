@@ -46,7 +46,7 @@ class OffsetConverter(Node):
     normed_offsets : dict, (:math:`y_\text{0,normed}(t)`)
         Dict containing the respective bus as key and as value the parameter
         :math:`y_\text{0,normed}(t)`. It represents the y-intercept with respect
-        to the `NonConvex` flow divided by the `nominal_value` of the
+        to the `NonConvex` flow divided by the `nominal_capacity` of the
         `NonConvex` flow (this is for internal purposes). The value can either
         be a scalar or a sequence with length of time horizon for simulation.
     Notes
@@ -108,7 +108,7 @@ class OffsetConverter(Node):
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_value=l_nominal, min=l_min, max=l_max,
+    ...         nominal_capacity=l_nominal, min=l_min, max=l_max,
     ...         nonconvex=solph.NonConvex())},
     ...    conversion_factors={bel: slope},
     ...    normed_offsets={bel: offset},
@@ -139,42 +139,38 @@ class OffsetConverter(Node):
         conversion_factors=None,
         normed_offsets=None,
         coefficients=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
             inputs=inputs,
             outputs=outputs,
             label=label,
-            custom_properties=custom_attributes,
+            custom_properties=custom_properties,
         )
 
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         # this part is used for the transition phase from the old
         # OffsetConverter API to the new one. It calcualtes the
         # conversion_factors and normed_offsets from the coefficients and the
         # outputs information on min and max.
-        if (
-            coefficients is not None
-            and conversion_factors is None
-            and normed_offsets is None
-        ):
+        if coefficients is not None:
+            if conversion_factors is not None or normed_offsets is not None:
+                msg = (
+                    "The deprecated argument `coefficients` cannot be used "
+                    "in combination with its replacements "
+                    "(`conversion_factors` and `normed_offsets`)."
+                )
+                raise TypeError(msg)
+
             normed_offsets, conversion_factors = (
                 self.normed_offset_and_conversion_factors_from_coefficients(
                     coefficients
                 )
             )
-
-        elif coefficients is not None and (
-            conversion_factors is not None or normed_offsets is not None
-        ):
-            msg = (
-                "The deprecated argument `coefficients` cannot be used in "
-                "combination with its replacements (`conversion_factors` and "
-                "`normed_offsets`)."
-            )
-            raise TypeError(msg)
+        # --- END ---
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
         _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
@@ -252,6 +248,7 @@ class OffsetConverter(Node):
     def constraint_group(self):
         return OffsetConverterBlock
 
+    # --- BEGIN: To be removed for versions >= v0.7 ---
     def normed_offset_and_conversion_factors_from_coefficients(
         self, coefficients
     ):
@@ -318,6 +315,8 @@ class OffsetConverter(Node):
 
         return normed_offsets, conversion_factors
 
+    # --- END ---
+
     def plot_partload(self, bus, tstep):
         """Create a matplotlib figure of the flow to nonconvex flow relation.
 
@@ -376,34 +375,6 @@ class OffsetConverter(Node):
         plt.tight_layout()
 
         return fig, ax
-
-
-# --- BEGIN: To be removed for versions >= v0.6 ---
-class OffsetTransformer(OffsetConverter):
-    def __init__(
-        self,
-        inputs,
-        outputs,
-        label=None,
-        coefficients=None,
-        custom_attributes=None,
-    ):
-        super().__init__(
-            label=label,
-            inputs=inputs,
-            outputs=outputs,
-            coefficients=coefficients,
-            custom_attributes=custom_attributes,
-        )
-        warn(
-            "solph.components.OffsetTransformer has been renamed to"
-            " solph.components.OffsetConverter. The transitional wrapper"
-            " will be deleted in the future.",
-            FutureWarning,
-        )
-
-
-# --- END ---
 
 
 class OffsetConverterBlock(ScalarBlock):
@@ -579,7 +550,7 @@ def slope_offset_from_nonconvex_input(
 
     With the input load being at 100 %, in this example, the efficiency should
     be 30 %. With the input load being at 50 %, it should be 40 %. We can
-    calcualte slope and the offset which is normed to the nominal value of
+    calcualte slope and the offset which is normed to the nominal capacity of
     the referenced flow (in this case the input flow) always.
 
     >>> slope, offset = solph.components.slope_offset_from_nonconvex_input(
@@ -656,7 +627,7 @@ def slope_offset_from_nonconvex_output(
 
     With the output load being at 100 %, in this example, the efficiency should
     be 80 %. With the input load being at 50 %, it should be 70 %. We can
-    calcualte slope and the offset, which is normed to the nominal value of
+    calcualte slope and the offset, which is normed to the nominal capacity of
     the referenced flow (in this case the output flow) always.
 
     >>> slope, offset = solph.components.slope_offset_from_nonconvex_output(

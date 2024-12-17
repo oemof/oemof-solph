@@ -53,7 +53,7 @@ def solve_and_extract_results(es):
 def check_results(
     results,
     reference_bus,
-    nominal_value,
+    nominal_capacity,
     minimal_value,
     eta_at_nom,
     eta_at_min,
@@ -62,7 +62,7 @@ def check_results(
         if "input" in reference_bus.label:
             slope, offset = slope_offset_from_nonconvex_input(
                 1,
-                minimal_value / nominal_value,
+                minimal_value / nominal_capacity,
                 eta_at_nom[bus],
                 eta_at_min[bus],
             )
@@ -75,7 +75,7 @@ def check_results(
         else:
             slope, offset = slope_offset_from_nonconvex_output(
                 1,
-                minimal_value / nominal_value,
+                minimal_value / nominal_capacity,
                 eta_at_nom[bus],
                 eta_at_min[bus],
             )
@@ -87,7 +87,7 @@ def check_results(
             ]["sequences"]["status"]
 
         flow_expected = (
-            offset * nominal_value * reference_flow_status
+            offset * nominal_capacity * reference_flow_status
             + slope * reference_flow
         )
         if "input" in bus.label:
@@ -103,7 +103,7 @@ def check_results(
 
 
 def add_OffsetConverter(
-    es, reference_bus, nominal_value, minimal_value, eta_at_nom, eta_at_min
+    es, reference_bus, nominal_capacity, minimal_value, eta_at_nom, eta_at_min
 ):
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
@@ -123,19 +123,21 @@ def add_OffsetConverter(
         if reference_bus in oc_outputs:
             f = oc_outputs[reference_bus]
             get_slope_and_offset = slope_offset_from_nonconvex_output
-            fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
+            fix = [0] + np.linspace(
+                minimal_value, nominal_capacity, 9
+            ).tolist()
         else:
             f = oc_inputs[reference_bus]
             get_slope_and_offset = slope_offset_from_nonconvex_input
             fix = [0] + np.linspace(
                 minimal_value * eta_at_min[es.node["bus output 0"]],
-                nominal_value * eta_at_nom[es.node["bus output 0"]],
+                nominal_capacity * eta_at_nom[es.node["bus output 0"]],
                 9,
             ).tolist()
 
         fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
         fix_flow.fix = fix
-        fix_flow.nominal_value = 1
+        fix_flow.nominal_capacity = 1
 
         slopes = {}
         offsets = {}
@@ -145,7 +147,7 @@ def add_OffsetConverter(
                 continue
             slope, offset = get_slope_and_offset(
                 1,
-                minimal_value / nominal_value,
+                minimal_value / nominal_capacity,
                 eta_at_nom[bus],
                 eta_at_min[bus],
             )
@@ -153,8 +155,8 @@ def add_OffsetConverter(
             offsets[bus] = offset
 
         f.nonconvex = solph.NonConvex()
-        f.nominal_value = nominal_value
-        f.min = sequence(minimal_value / nominal_value)
+        f.nominal_capacity = nominal_capacity
+        f.min = sequence(minimal_value / nominal_capacity)
 
         oc = solph.components.OffsetConverter(
             label="offset converter",
@@ -172,12 +174,12 @@ def test_custom_properties():
     bus2 = solph.Bus()
     oc = solph.components.OffsetConverter(
         inputs={
-            bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+            bus1: solph.Flow(nominal_capacity=2, nonconvex=solph.NonConvex())
         },
         outputs={bus2: solph.Flow()},
         conversion_factors={bus2: 2},
         normed_offsets={bus2: -0.5},
-        custom_attributes={"foo": "bar"},
+        custom_properties={"foo": "bar"},
     )
 
     assert oc.custom_properties["foo"] == "bar"
@@ -189,7 +191,9 @@ def test_invalid_conversion_factor():
     with pytest.raises(ValueError, match="Conversion factors cannot be "):
         solph.components.OffsetConverter(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             conversion_factors={
@@ -206,7 +210,9 @@ def test_invalid_normed_offset():
     with pytest.raises(ValueError, match="Normed offsets cannot be "):
         solph.components.OffsetConverter(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             conversion_factors={
@@ -223,9 +229,11 @@ def test_wrong_number_of_coefficients():
     bus1 = solph.Bus()
     bus2 = solph.Bus()
     with pytest.raises(ValueError, match="Two coefficients"):
-        solph.components.OffsetTransformer(
+        solph.components.OffsetConverter(
             inputs={
-                bus1: solph.Flow(nominal_value=2, nonconvex=solph.NonConvex())
+                bus1: solph.Flow(
+                    nominal_capacity=2, nonconvex=solph.NonConvex()
+                )
             },
             outputs={bus2: solph.Flow()},
             coefficients=(1, 2, 3),
@@ -237,7 +245,7 @@ def test_OffsetConverter_single_input_output_ref_output():
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {es.groups["bus input 0"]: 0.7}
@@ -246,7 +254,7 @@ def test_OffsetConverter_single_input_output_ref_output():
     add_OffsetConverter(
         es,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -257,7 +265,7 @@ def test_OffsetConverter_single_input_output_ref_output():
     check_results(
         results,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -269,7 +277,7 @@ def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {es.groups["bus input 0"]: 0.5}
@@ -278,7 +286,7 @@ def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
     add_OffsetConverter(
         es,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -289,7 +297,7 @@ def test_OffsetConverter_single_input_output_ref_output_eta_decreasing():
     check_results(
         results,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -301,7 +309,7 @@ def test_OffsetConverter_single_input_output_ref_input():
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {es.groups["bus output 0"]: 0.7}
@@ -310,7 +318,7 @@ def test_OffsetConverter_single_input_output_ref_input():
     add_OffsetConverter(
         es,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -321,7 +329,7 @@ def test_OffsetConverter_single_input_output_ref_input():
     check_results(
         results,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -333,7 +341,7 @@ def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {es.groups["bus output 0"]: 0.5}
@@ -342,7 +350,7 @@ def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
     add_OffsetConverter(
         es,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -353,7 +361,7 @@ def test_OffsetConverter_single_input_output_ref_input_eta_decreasing():
     check_results(
         results,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -365,7 +373,7 @@ def test_OffsetConverter_double_input_output_ref_input():
     num_out = 2
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {
@@ -382,7 +390,7 @@ def test_OffsetConverter_double_input_output_ref_input():
     add_OffsetConverter(
         es,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -393,7 +401,7 @@ def test_OffsetConverter_double_input_output_ref_input():
     check_results(
         results,
         es.groups["bus input 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -406,7 +414,7 @@ def test_OffsetConverter_double_input_output_ref_output():
 
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {
@@ -423,7 +431,7 @@ def test_OffsetConverter_double_input_output_ref_output():
     add_OffsetConverter(
         es,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -434,7 +442,7 @@ def test_OffsetConverter_double_input_output_ref_output():
     check_results(
         results,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -447,7 +455,7 @@ def test_two_OffsetConverters_with_and_without_investment():
 
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     eta_at_nom = {
@@ -460,7 +468,7 @@ def test_two_OffsetConverters_with_and_without_investment():
     add_OffsetConverter(
         es,
         es.groups["bus output 0"],
-        nominal_value,
+        nominal_capacity,
         minimal_value,
         eta_at_nom,
         eta_at_min,
@@ -474,8 +482,8 @@ def test_two_OffsetConverters_with_and_without_investment():
         outputs={
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
-                nominal_value=solph.Investment(
-                    maximum=nominal_value, ep_costs=10
+                nominal_capacity=solph.Investment(
+                    maximum=nominal_capacity, ep_costs=10
                 ),
             )
         },
@@ -501,25 +509,25 @@ def test_OffsetConverter_05x_compatibility():
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
 
-    nominal_value = 10
+    nominal_capacity = 10
     minimal_value = 3
 
     # Use of experimental API to access nodes by label.
     # Can be removed with future release of network.
     with warnings.catch_warnings():
         warnings.simplefilter("ignore", category=ExperimentalFeatureWarning)
-        fix = [0] + np.linspace(minimal_value, nominal_value, 9).tolist()
+        fix = [0] + np.linspace(minimal_value, nominal_capacity, 9).tolist()
         fix_flow = es.flows()[es.node["bus output 0"], es.node["sink 0"]]
         fix_flow.fix = fix
-        fix_flow.nominal_value = 1
+        fix_flow.nominal_capacity = 1
 
     eta_at_nom = 0.7
     eta_at_min = 0.5
 
-    slope = (nominal_value - minimal_value) / (
-        nominal_value / eta_at_nom - minimal_value / eta_at_min
+    slope = (nominal_capacity - minimal_value) / (
+        nominal_capacity / eta_at_nom - minimal_value / eta_at_min
     )
-    offset = minimal_value / nominal_value * (1 - slope / eta_at_min)
+    offset = minimal_value / nominal_capacity * (1 - slope / eta_at_min)
 
     warnings.filterwarnings("ignore", "", DeprecationWarning)
     oc = solph.components.OffsetConverter(
@@ -528,8 +536,8 @@ def test_OffsetConverter_05x_compatibility():
         outputs={
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
-                nominal_value=nominal_value,
-                min=minimal_value / nominal_value,
+                nominal_capacity=nominal_capacity,
+                min=minimal_value / nominal_capacity,
             )
         },
         coefficients=(offset, slope),
@@ -541,7 +549,7 @@ def test_OffsetConverter_05x_compatibility():
     results = solve_and_extract_results(es)
 
     slope, offset = slope_offset_from_nonconvex_output(
-        1, minimal_value / nominal_value, 0.7, 0.5
+        1, minimal_value / nominal_capacity, 0.7, 0.5
     )
     output_flow = results["offset converter", "bus output 0"]["sequences"][
         "flow"
@@ -551,7 +559,7 @@ def test_OffsetConverter_05x_compatibility():
     ]["status"]
 
     input_flow_expected = (
-        offset * nominal_value * output_flow_status + slope * output_flow
+        offset * nominal_capacity * output_flow_status + slope * output_flow
     )
     input_flow_actual = results["bus input 0", "offset converter"][
         "sequences"
@@ -575,7 +583,7 @@ def test_error_handling():
             outputs={
                 output_bus: solph.Flow(
                     nonconvex=solph.NonConvex(),
-                    nominal_value=10,
+                    nominal_capacity=10,
                     min=0.3,
                 )
             },
@@ -595,7 +603,7 @@ def test_error_handling():
                 outputs={
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
-                        nominal_value=10,
+                        nominal_capacity=10,
                         min=0.3,
                     )
                 },
@@ -612,7 +620,7 @@ def test_error_handling():
                 outputs={
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
-                        nominal_value=10,
+                        nominal_capacity=10,
                         min=0.3,
                     )
                 },
