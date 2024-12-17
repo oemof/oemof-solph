@@ -229,7 +229,7 @@ def test_wrong_number_of_coefficients():
     bus1 = solph.Bus()
     bus2 = solph.Bus()
     with pytest.raises(ValueError, match="Two coefficients"):
-        solph.components.OffsetTransformer(
+        solph.components.OffsetConverter(
             inputs={
                 bus1: solph.Flow(
                     nominal_capacity=2, nonconvex=solph.NonConvex()

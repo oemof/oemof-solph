@@ -21,8 +21,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-from warnings import warn
-
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -135,34 +133,6 @@ class Converter(Node):
 
     def constraint_group(self):
         return ConverterBlock
-
-
-# --- BEGIN: To be removed for versions >= v0.6 ---
-class Transformer(Converter):
-    def __init__(
-        self,
-        label=None,
-        inputs=None,
-        outputs=None,
-        conversion_factors=None,
-        custom_attributes=None,
-    ):
-        super().__init__(
-            label=label,
-            inputs=inputs,
-            outputs=outputs,
-            conversion_factors=conversion_factors,
-            custom_properties=custom_attributes,
-        )
-        warn(
-            "solph.components.Transformer has been renamed to"
-            " solph.components.Converter. The transitional wrapper"
-            " will be deleted in the future.",
-            FutureWarning,
-        )
-
-
-# --- END ---
 
 
 class ConverterBlock(ScalarBlock):
