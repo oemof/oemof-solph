@@ -159,7 +159,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=1,
                 )
@@ -178,7 +177,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=2,
                 )
@@ -197,7 +195,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=3,
                 )
@@ -216,7 +213,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                         fixed_costs=1000,
                     ),
                     variable_costs=4,
@@ -237,7 +233,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=10,
                         lifetime=2,
                         age=1,
-                        interest_rate=0.02,
                     ),
                 )
             },
@@ -251,7 +246,6 @@ def test_multi_period_investment_model(solver="cbc"):
                         existing=10,
                         lifetime=2,
                         age=1,
-                        interest_rate=0.02,
                     ),
                 )
             },
@@ -271,7 +265,6 @@ def test_multi_period_investment_model(solver="cbc"):
                 existing=10,
                 lifetime=2,
                 age=1,
-                interest_rate=0.02,
                 fixed_costs=10,
             ),
         )
@@ -341,7 +334,6 @@ def test_multi_period_investment_model(solver="cbc"):
                 ep_costs=10,
                 lifetime=2,
                 age=1,
-                interest_rate=0.02,
             ),
         )
 

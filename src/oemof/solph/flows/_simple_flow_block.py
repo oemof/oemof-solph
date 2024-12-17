@@ -433,31 +433,17 @@ class SimpleFlowBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
-            for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for t in m.TIMESTEPS:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.objective_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                        )
+        for i, o in m.FLOWS:
+            if valid_sequence(m.flows[i, o].variable_costs, len(m.TIMESTEPS)):
+                for t in m.TIMESTEPS:
+                    variable_costs += (
+                        m.flow[i, o, t]
+                        * m.objective_weighting[t]
+                        * m.flows[i, o].variable_costs[t]
+                    )
 
-        else:
+        if m.es.periods is not None:
             for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for p, t in m.TIMEINDEX:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.objective_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
-
                 # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None
@@ -468,7 +454,6 @@ class SimpleFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -482,7 +467,6 @@ class SimpleFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 
@@ -495,7 +479,6 @@ class SimpleFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 

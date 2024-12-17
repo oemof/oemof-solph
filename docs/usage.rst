@@ -1201,8 +1201,6 @@ but with a few minor additions and modifications in the investment object itself
   free to reinvest or choose another option to fill up the missing capacity.
 * You can define an initial `age` if you have `existing` capacity. If you do not specify anything, the default value 0 will be used,
   meaning your `existing` capacity has just been newly invested.
-* You can define an `interest_rate` that the investor you model has, i.e. the return he desires expressed as the weighted
-  average osts of capital (wacc) and used for calculating annuities in the model itself.
 * You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage.
 
 Here is an example
@@ -1218,7 +1216,6 @@ Here is an example
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=100,
                 ),
                 variable_costs=3,
@@ -1252,7 +1249,6 @@ This would mean that for investments in the particular period, these values woul
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=[100, 110],
                 ),
                 variable_costs=3,
@@ -1327,13 +1323,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
 
 .. note::
 
-    * You can specify a `discount_rate` for the model. If you do not do so, 0.02 will be used as a default, corresponding
-      to sort of a social discount rate. If you work with costs in real terms, discounting is obsolete, so define
-      `discount_rate = 0` in that case.
-    * You can specify an `interest_rate` for every investment object. If you do not do so, it will be chosen the same
-      as the model's `discount_rate`. You could use this default to model a perfect competition administered by some sort of
-      social planner, but even in a social planner setting, you might want to deviate from the `discount_rate`
-      value and/or discriminate among technologies with different risk profiles and hence different interest requirements.
     * For storage units, the `initial_content` is not allowed combined with multi-period investments.
       The storage inflow and outflow are forced to zero until the storage unit is invested into.
     * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
