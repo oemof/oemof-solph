@@ -1199,8 +1199,6 @@ but with a few minor additions and modifications in the investment object itself
   free to reinvest or choose another option to fill up the missing capacity.
 * You can define an initial `age` if you have `existing` capacity. If you do not specify anything, the default value 0 will be used,
   meaning your `existing` capacity has just been newly invested.
-* You can define an `interest_rate` that the investor you model has, i.e. the return he desires expressed as the weighted
-  average osts of capital (wacc) and used for calculating annuities in the model itself.
 * You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage.
 
 Here is an example
@@ -1216,7 +1214,6 @@ Here is an example
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=100,
                 ),
                 variable_costs=3,
@@ -1250,7 +1247,6 @@ This would mean that for investments in the particular period, these values woul
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=[100, 110],
                 ),
                 variable_costs=3,

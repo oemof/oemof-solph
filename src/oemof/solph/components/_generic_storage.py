@@ -1087,8 +1087,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         Lifetime for investments in storage capacity"
         ":math:`a`", "`flows[i, o].investment.age`", "
         Initial age of existing capacity / energy"
-        ":math:`ir`", "`flows[i, o].investment.interest_rate`", "
-        interest rate for investment"
         ":math:`\tau(t)`", "", "Duration of time step"
         ":math:`t_u`", "", "Time unit of losses :math:`\beta(t)`,
         :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
@@ -1776,7 +1774,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = n.investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -1816,7 +1814,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             for n in self.NON_CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = n.investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),

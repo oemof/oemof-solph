@@ -921,7 +921,7 @@ class InvestmentFlowBlock(ScalarBlock):
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -964,7 +964,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),

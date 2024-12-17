@@ -1369,7 +1369,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
@@ -3203,7 +3203,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
@@ -5675,7 +5675,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for g in self.INVESTDR:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
