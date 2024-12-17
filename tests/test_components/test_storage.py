@@ -346,7 +346,7 @@ def test_invest_content_maximum():
     )
 
 
-# --- BEGIN: The following code can be removed for versions >= v0.6 ---
+# --- BEGIN: The following code can be removed for versions >= v0.7 ---
 def test_capacity_keyword_wrapper_warning():
     with pytest.warns(FutureWarning, match="nominal_storage_capacity"):
         bus = solph.Bus()

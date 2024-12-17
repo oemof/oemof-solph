@@ -215,7 +215,7 @@ class GenericStorage(Node):
                 warn(msg, FutureWarning)
             nominal_storage_capacity = investment
         # --- END ---
-        # --- BEGIN: The following code can be removed for versions >= v0.6 ---
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if nominal_storage_capacity is not None:
             msg = (
                 "For backward compatibility,"
