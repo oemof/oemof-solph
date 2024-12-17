@@ -179,7 +179,7 @@ def test_custom_properties():
         outputs={bus2: solph.Flow()},
         conversion_factors={bus2: 2},
         normed_offsets={bus2: -0.5},
-        custom_attributes={"foo": "bar"},
+        custom_properties={"foo": "bar"},
     )
 
     assert oc.custom_properties["foo"] == "bar"
