@@ -23,8 +23,8 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.components._converter import Converter
+from oemof.solph._plumbing import sequence
+from oemof.solph.components import Converter
 
 
 class ExtractionTurbineCHP(Converter):
@@ -64,7 +64,7 @@ class ExtractionTurbineCHP(Converter):
     >>> bgas = solph.buses.Bus(label='commodityBus')
     >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+    ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
     ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
@@ -77,17 +77,17 @@ class ExtractionTurbineCHP(Converter):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
             conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_properties,
         )
         self.conversion_factor_full_condensation = {
-            k: solph_sequence(v)
+            k: sequence(v)
             for k, v in conversion_factor_full_condensation.items()
         }
 

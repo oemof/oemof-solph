@@ -36,20 +36,20 @@ def test_generic_storage_1():
             invest_relation_input_output=1,
             invest_relation_output_capacity=1,
             invest_relation_input_capacity=1,
-            nominal_storage_capacity=Investment(),
+            nominal_capacity=Investment(),
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
         )
 
 
 def test_generic_storage_3():
-    """Nominal value defined with investment model."""
+    """Nominal capacity defined with investment model."""
     bel = Bus()
     components.GenericStorage(
         label="storage4",
-        nominal_storage_capacity=45,
-        inputs={bel: Flow(nominal_value=23, variable_costs=10e10)},
-        outputs={bel: Flow(nominal_value=7.5, variable_costs=10e10)},
+        nominal_capacity=45,
+        inputs={bel: Flow(nominal_capacity=23, variable_costs=10e10)},
+        outputs={bel: Flow(nominal_capacity=7.5, variable_costs=10e10)},
         loss_rate=0.00,
         initial_storage_level=0,
         inflow_conversion_factor=1,
@@ -65,7 +65,7 @@ def test_generic_storage_4():
     ):
         components.GenericStorage(
             label="storage4",
-            nominal_storage_capacity=10,
+            nominal_capacity=10,
             inputs={bel: Flow(variable_costs=10e10)},
             outputs={bel: Flow(variable_costs=10e10)},
             loss_rate=0.00,
@@ -90,7 +90,9 @@ def test_generic_storage_with_non_convex_investment():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            nominal_value=Investment(nonconvex=True, existing=5, maximum=25),
+            nominal_capacity=Investment(
+                nonconvex=True, existing=5, maximum=25
+            ),
         )
 
 
@@ -106,7 +108,7 @@ def test_generic_storage_with_non_convex_invest_maximum():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            nominal_storage_capacity=Investment(nonconvex=True),
+            nominal_capacity=Investment(nonconvex=True),
         )
 
 
@@ -122,7 +124,7 @@ def test_generic_storage_with_convex_invest_offset():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            nominal_storage_capacity=Investment(offset=10),
+            nominal_capacity=Investment(offset=10),
         )
 
 
@@ -142,9 +144,7 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
             label="storage4",
             inputs={bel: Flow()},
             outputs={bel: Flow()},
-            nominal_storage_capacity=Investment(
-                ep_costs=23, minimum=0, existing=0
-            ),
+            nominal_capacity=Investment(ep_costs=23, minimum=0, existing=0),
             fixed_losses_absolute=[0, 0, 4],
         )
 
@@ -228,7 +228,7 @@ def test_offsetconverter_investment_not_on_nonconvex():
         b_diesel = Bus(label="bus_diesel")
         b_heat = Bus(label="bus_heat")
         components.OffsetConverter(
-            inputs={b_diesel: Flow(nominal_value=Investment(maximum=1))},
+            inputs={b_diesel: Flow(nominal_capacity=Investment(maximum=1))},
             outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 

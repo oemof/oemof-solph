@@ -25,6 +25,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._plumbing import valid_sequence
+
 
 class NonConvexFlowBlock(ScalarBlock):
     r"""
@@ -97,7 +99,7 @@ class NonConvexFlowBlock(ScalarBlock):
 
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
-        # and a continuous variable (`invest` or `nominal_value`)
+        # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
             self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
@@ -326,7 +328,9 @@ class NonConvexFlowBlock(ScalarBlock):
             m = self.parent_block()
 
             for i, o in self.STARTUPFLOWS:
-                if m.flows[i, o].nonconvex.startup_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].nonconvex.startup_costs, len(m.TIMESTEPS)
+                ):
                     startup_costs += sum(
                         self.startup[i, o, t]
                         * m.flows[i, o].nonconvex.startup_costs[t]
@@ -349,7 +353,10 @@ class NonConvexFlowBlock(ScalarBlock):
             m = self.parent_block()
 
             for i, o in self.SHUTDOWNFLOWS:
-                if m.flows[i, o].nonconvex.shutdown_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].nonconvex.shutdown_costs,
+                    len(m.TIMESTEPS),
+                ):
                     shutdown_costs += sum(
                         self.shutdown[i, o, t]
                         * m.flows[i, o].nonconvex.shutdown_costs[t]
@@ -372,7 +379,10 @@ class NonConvexFlowBlock(ScalarBlock):
             m = self.parent_block()
 
             for i, o in self.ACTIVITYCOSTFLOWS:
-                if m.flows[i, o].nonconvex.activity_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].nonconvex.activity_costs,
+                    len(m.TIMESTEPS),
+                ):
                     activity_costs += sum(
                         self.status[i, o, t]
                         * m.flows[i, o].nonconvex.activity_costs[t]
@@ -395,7 +405,10 @@ class NonConvexFlowBlock(ScalarBlock):
             m = self.parent_block()
 
             for i, o in self.INACTIVITYCOSTFLOWS:
-                if m.flows[i, o].nonconvex.inactivity_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].nonconvex.inactivity_costs,
+                    len(m.TIMESTEPS),
+                ):
                     inactivity_costs += sum(
                         (1 - self.status[i, o, t])
                         * m.flows[i, o].nonconvex.inactivity_costs[t]
@@ -648,7 +661,7 @@ class NonConvexFlowBlock(ScalarBlock):
             """Rule definition for status_nominal"""
             expr = (
                 self.status_nominal[i, o, t]
-                == self.status[i, o, t] * m.flows[i, o].nominal_value
+                == self.status[i, o, t] * m.flows[i, o].nominal_capacity
             )
             return expr
 

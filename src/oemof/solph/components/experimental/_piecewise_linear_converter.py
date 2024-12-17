@@ -54,7 +54,7 @@ class PiecewiseLinearConverter(Node):
     >>> pwltf = solph.components.experimental.PiecewiseLinearConverter(
     ...    label='pwltf',
     ...    inputs={b_gas: solph.flows.Flow(
-    ...    nominal_value=100,
+    ...    nominal_capacity=100,
     ...    variable_costs=1)},
     ...    outputs={b_el: solph.flows.Flow()},
     ...    in_breakpoints=[0,25,50,75,100],
@@ -94,8 +94,10 @@ PiecewiseLinearConverter'>
                 + "more than 1 input and 1 output!"
             )
 
-        nominal_value = [a.nominal_value for a in self.inputs.values()][0]
-        if max(self.in_breakpoints) < nominal_value:
+        nominal_capacity = [a.nominal_capacity for a in self.inputs.values()][
+            0
+        ]
+        if max(self.in_breakpoints) < nominal_capacity:
             raise ValueError(
                 "Largest in_breakpoint must be larger or equal "
                 + "nominal value"

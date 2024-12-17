@@ -13,7 +13,7 @@ API changes
   (Note that we always had the argument "conversion_factor".)
 * Unify API for constant sized objects and sizing of investment. For both, `Flow` and
   `GenericStorage`, the argument `investment` is now deprecated. Instead,
-  `nominal_value` and `nominal_storage_capacity` accept an `Investment` object.
+  `nominal_capacity` and `nominal_storage_capacity` accept an `Investment` object.
 * Change investment for experimental :class:`oemof.solph.components.experimental._sink_dsm.SinkDSM`: Remove
   obsolete parameters `flex_share_down` and `flex_share_up`.
 * Mainline link component :class:`oemof.solph.components._link.Link` from experimental.

@@ -38,6 +38,7 @@ from pyomo.environ import Var
 
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 from oemof.solph.components._sink import Sink
 
 
@@ -270,12 +271,12 @@ class SinkDSM(Sink):
         shift_eligibility=True,
         fixed_costs=0,
         investment=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
         super().__init__(
-            label=label, inputs=inputs, custom_attributes=custom_attributes
+            label=label, inputs=inputs, custom_properties=custom_properties
         )
 
         self.capacity_up = sequence(capacity_up)
@@ -703,7 +704,7 @@ class SinkDSMOemofBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -1434,7 +1435,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1452,7 +1453,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
@@ -2198,7 +2199,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -3290,7 +3291,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -3308,7 +3309,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
@@ -4391,7 +4392,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -5791,7 +5792,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -5809,7 +5810,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(

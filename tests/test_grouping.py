@@ -41,7 +41,7 @@ class TestsGrouping:
                 label="Source",
                 outputs={
                     b: solph.flows.Flow(
-                        fix=[12, 16, 14], nominal_value=1000000
+                        fix=[12, 16, 14], nominal_capacity=1000000
                     )
                 },
             )
@@ -55,7 +55,9 @@ class TestsGrouping:
                         full_load_time_max=2.3,
                         variable_costs=25,
                         max=0.8,
-                        nominal_value=Investment(ep_costs=500, maximum=10e5),
+                        nominal_capacity=Investment(
+                            ep_costs=500, maximum=10e5
+                        ),
                     )
                 },
             )

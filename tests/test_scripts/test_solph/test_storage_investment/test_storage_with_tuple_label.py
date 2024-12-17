@@ -90,7 +90,9 @@ def test_tuples_as_labels_example(
         solph.components.Sink(
             label=Label("sink", "electricity", "demand"),
             inputs={
-                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -101,7 +103,8 @@ def test_tuples_as_labels_example(
             label=Label("source", "natural_gas", "commodity"),
             outputs={
                 bgas: solph.flows.Flow(
-                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                    nominal_capacity=194397000 * 400 / 8760,
+                    full_load_time_max=1,
                 )
             },
         )
@@ -111,7 +114,9 @@ def test_tuples_as_labels_example(
         solph.components.Source(
             label=Label("renewable", "electricity", "wind"),
             outputs={
-                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+                bel: solph.flows.Flow(
+                    fix=data["wind"], nominal_capacity=1000000
+                )
             },
         )
     )
@@ -122,7 +127,7 @@ def test_tuples_as_labels_example(
             outputs={
                 bel: solph.flows.Flow(
                     fix=data["pv"],
-                    nominal_value=582000,
+                    nominal_capacity=582000,
                 )
             },
         )
@@ -134,7 +139,9 @@ def test_tuples_as_labels_example(
             label=Label("pp", "electricity", "natural_gas"),
             inputs={bgas: solph.flows.Flow()},
             outputs={
-                bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+                bel: solph.flows.Flow(
+                    nominal_capacity=10e10, variable_costs=50
+                )
             },
             conversion_factors={bel: 0.58},
         )
@@ -144,7 +151,7 @@ def test_tuples_as_labels_example(
     energysystem.add(
         solph.components.GenericStorage(
             label=Label("storage", "electricity", "battery"),
-            nominal_storage_capacity=204685,
+            nominal_capacity=204685,
             inputs={bel: solph.flows.Flow(variable_costs=10e10)},
             outputs={bel: solph.flows.Flow(variable_costs=10e10)},
             loss_rate=0.00,

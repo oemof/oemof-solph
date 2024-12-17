@@ -38,122 +38,123 @@ from pyomo.environ import Var
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 
 
 class GenericStorage(Node):
     r"""
-    Component `GenericStorage` to model with basic characteristics of storages.
+        Component `GenericStorage` to model with basic characteristics of storages.
 
-    The GenericStorage is designed for one input and one output.
+        The GenericStorage is designed for one input and one output.
 
-    Parameters
-    ----------
-    nominal_storage_capacity : numeric, :math:`E_{nom}` or
-            :class:`oemof.solph.options.Investment` object
-        Absolute nominal capacity of the storage, fixed value or
-        object describing parameter of investment optimisations.
-    invest_relation_input_capacity : numeric or None, :math:`r_{cap,in}`
-        Ratio between the investment variable of the input Flow and the
-        investment variable of the storage:
-        :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
-    invest_relation_output_capacity : numeric or None, :math:`r_{cap,out}`
-        Ratio between the investment variable of the output Flow and the
-        investment variable of the storage:
-        :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
-    invest_relation_input_output : numeric or None, :math:`r_{in,out}`
-        Ratio between the investment variable of the output Flow and the
-        investment variable of the input flow. This ratio used to fix the
-        flow investments to each other.
-        Values < 1 set the input flow lower than the output and > 1 will
-        set the input flow higher than the output flow. If None no relation
-        will be set:
-        :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
-    initial_storage_level : numeric, :math:`c(-1)`
-        The relative storage content in the timestep before the first
-        time step of optimization (between 0 and 1).
+        Parameters
+        ----------
+        nominal_capacity : numeric, :math:`E_{nom}` or
+                :class:`oemof.solph.options.Investment` object
+            Absolute nominal capacity of the storage, fixed value or
+            object describing parameter of investment optimisations.
+        invest_relation_input_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,in}`
+            Ratio between the investment variable of the input Flow and the
+            investment variable of the storage:
+            :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
+        invest_relation_output_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,out}`
+            Ratio between the investment variable of the output Flow and the
+            investment variable of the storage:
+            :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
+        invest_relation_input_output : numeric (iterable or scalar) or None, :math:`r_{in,out}`
+            Ratio between the investment variable of the output Flow and the
+            investment variable of the input flow. This ratio used to fix the
+            flow investments to each other.
+            Values < 1 set the input flow lower than the output and > 1 will
+            set the input flow higher than the output flow. If None no relation
+            will be set:
+            :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
+        initial_storage_level : numeric, :math:`c(-1)`
+            The relative storage content in the timestep before the first
+            time step of optimization (between 0 and 1).
 
-        Note: When investment mode is used in a multi-period model,
-        `initial_storage_level` is not supported.
-        Storage output is forced to zero until the storage unit is invested in.
-    balanced : boolean
-        Couple storage level of first and last time step.
-        (Total inflow and total outflow are balanced.)
-    loss_rate : numeric (iterable or scalar)
-        The relative loss of the storage content per hour.
-    fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
-        Losses per hour that are independent of the storage content but
-        proportional to nominal storage capacity.
+            Note: When investment mode is used in a multi-period model,
+            `initial_storage_level` is not supported.
+            Storage output is forced to zero until the storage unit is invested in.
+        balanced : boolean
+            Couple storage level of first and last time step.
+            (Total inflow and total outflow are balanced.)
+        loss_rate : numeric (iterable or scalar)
+            The relative loss of the storage content per hour.
+        fixed_losses_relative : numeric (iterable or scalar), :math:`\gamma(t)`
+            Losses per hour that are independent of the storage content but
+            proportional to nominal storage capacity.
 
-        Note: Fixed losses are not supported in investment mode.
-    fixed_losses_absolute : numeric (iterable or scalar), :math:`\delta(t)`
-        Losses per hour that are independent of storage content and independent
-        of nominal storage capacity.
+            Note: Fixed losses are not supported in investment mode.
+        fixed_losses_absolute : numeric (iterable or scalar), :math:`\delta(t)`
+            Losses per hour that are independent of storage content and independent
+            of nominal storage capacity.
 
-        Note: Fixed losses are not supported in investment mode.
-    inflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_i(t)`
-        The relative conversion factor, i.e. efficiency associated with the
-        inflow of the storage.
-    outflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_o(t)`
-        see: inflow_conversion_factor
-    min_storage_level : numeric (iterable or scalar), :math:`c_{min}(t)`
-        The normed minimum storage content as fraction of the
-        nominal storage capacity or the capacity that has been invested into
-        (between 0 and 1).
-        To set different values in every time step use a sequence.
-    max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
-        see: min_storage_level
-    storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
-        Cost (per energy) for having energy in the storage, starting from
-        time point :math:`t_{1}`.
-    lifetime_inflow : int, :math:`n_{in}`
-        Determine the lifetime of an inflow; only applicable for multi-period
-        models which can invest in storage capacity and have an
-        invest_relation_input_capacity defined
-    lifetime_outflow : int, :math:`n_{in}`
-        Determine the lifetime of an outflow; only applicable for multi-period
-        models which can invest in storage capacity and have an
-        invest_relation_output_capacity defined
+            Note: Fixed losses are not supported in investment mode.
+        inflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_i(t)`
+            The relative conversion factor, i.e. efficiency associated with the
+            inflow of the storage.
+        outflow_conversion_factor : numeric (iterable or scalar), :math:`\eta_o(t)`
+            see: inflow_conversion_factor
+        min_storage_level : numeric (iterable or scalar), :math:`c_{min}(t)`
+            The normed minimum storage content as fraction of the
+            nominal storage capacity or the capacity that has been invested into
+            (between 0 and 1).
+            To set different values in every time step use a sequence.
+        max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
+            see: min_storage_level
+        storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
+            Cost (per energy) for having energy in the storage, starting from
+            time point :math:`t_{1}`.
+        lifetime_inflow : int, :math:`n_{in}`
+            Determine the lifetime of an inflow; only applicable for multi-period
+            models which can invest in storage capacity and have an
+            invest_relation_input_capacity defined
+        lifetime_outflow : int, :math:`n_{in}`
+            Determine the lifetime of an outflow; only applicable for multi-period
+            models which can invest in storage capacity and have an
+            invest_relation_output_capacity defined
 
-    Notes
-    -----
-    The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._generic_storage.GenericStorageBlock`
-       (if no Investment object present)
-     * :py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock`
-       (if Investment object present)
+        Notes
+        -----
+        The following sets, variables, constraints and objective parts are created
+         * :py:class:`~oemof.solph.components._generic_storage.GenericStorageBlock`
+           (if no Investment object present)
+         * :py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock`
+           (if Investment object present)
 
-    Examples
-    --------
-    Basic usage examples of the GenericStorage with a random selection of
-    attributes. See the Flow class for all Flow attributes.
+        Examples
+        --------
+        Basic usage examples of the GenericStorage with a random selection of
+        attributes. See the Flow class for all Flow attributes.
 
-    >>> from oemof import solph
+        >>> from oemof import solph
 
-    >>> my_bus = solph.buses.Bus('my_bus')
+        >>> my_bus = solph.buses.Bus('my_bus')
 
-    >>> my_storage = solph.components.GenericStorage(
-    ...     label='storage',
-    ...     nominal_storage_capacity=1000,
-    ...     inputs={my_bus: solph.flows.Flow(nominal_value=200, variable_costs=10)},
-    ...     outputs={my_bus: solph.flows.Flow(nominal_value=200)},
-    ...     loss_rate=0.01,
-    ...     initial_storage_level=0,
-    ...     max_storage_level = 0.9,
-    ...     inflow_conversion_factor=0.9,
-    ...     outflow_conversion_factor=0.93)
+        >>> my_storage = solph.components.GenericStorage(
+        ...     label='storage',
+        ...     nominal_capacity=1000,
+        ...     inputs={my_bus: solph.flows.Flow(nominal_capacity=200, variable_costs=10)},
+        ...     outputs={my_bus: solph.flows.Flow(nominal_capacity=200)},
+        ...     loss_rate=0.01,
+        ...     initial_storage_level=0,
+        ...     max_storage_level = 0.9,
+        ...     inflow_conversion_factor=0.9,
+        ...     outflow_conversion_factor=0.93)
 
-    >>> my_investment_storage = solph.components.GenericStorage(
-    ...     label='storage',
-    ...     nominal_storage_capacity=solph.Investment(ep_costs=50),
-    ...     inputs={my_bus: solph.flows.Flow()},
-    ...     outputs={my_bus: solph.flows.Flow()},
-    ...     loss_rate=0.02,
-    ...     initial_storage_level=None,
-    ...     invest_relation_input_capacity=1/6,
-    ...     invest_relation_output_capacity=1/6,
-    ...     inflow_conversion_factor=1,
-    ...     outflow_conversion_factor=0.8)
+        >>> my_investment_storage = solph.components.GenericStorage(
+        ...     label='storage',
+        ...     nominal_capacity=solph.Investment(ep_costs=50),
+        ...     inputs={my_bus: solph.flows.Flow()},
+        ...     outputs={my_bus: solph.flows.Flow()},
+        ...     loss_rate=0.02,
+        ...     initial_storage_level=None,
+        ...     invest_relation_input_capacity=1/6,
+        ...     invest_relation_output_capacity=1/6,
+        ...     inflow_conversion_factor=1,
+        ...     outflow_conversion_factor=0.8)
     """  # noqa: E501
 
     def __init__(
@@ -161,7 +162,8 @@ class GenericStorage(Node):
         label=None,
         inputs=None,
         outputs=None,
-        nominal_storage_capacity=None,
+        nominal_capacity=None,
+        nominal_storage_capacity=None,  # Can be removed for versions >= v0.7
         initial_storage_level=None,
         invest_relation_input_output=None,
         invest_relation_input_capacity=None,
@@ -192,34 +194,50 @@ class GenericStorage(Node):
             outputs=outputs,
             custom_properties=custom_attributes,
         )
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if nominal_storage_capacity is not None:
+            msg = (
+                "For backward compatibility,"
+                + " the option nominal_storage_capacity overwrites the option"
+                + " nominal_capacity."
+                + " Both options cannot be set at the same time."
+            )
+            if nominal_capacity is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            nominal_capacity = nominal_storage_capacity
+        # --- END ---
 
         self.nominal_storage_capacity = None
         self.investment = None
         self._invest_group = False
-        if isinstance(nominal_storage_capacity, numbers.Real):
-            self.nominal_storage_capacity = nominal_storage_capacity
-        elif isinstance(nominal_storage_capacity, Investment):
-            self.investment = nominal_storage_capacity
+        if isinstance(nominal_capacity, numbers.Real):
+            self.nominal_storage_capacity = nominal_capacity
+        elif isinstance(nominal_capacity, Investment):
+            self.investment = nominal_capacity
             self._invest_group = True
 
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
-        self.loss_rate = solph_sequence(loss_rate)
-        self.fixed_losses_relative = solph_sequence(fixed_losses_relative)
-        self.fixed_losses_absolute = solph_sequence(fixed_losses_absolute)
-        self.inflow_conversion_factor = solph_sequence(
-            inflow_conversion_factor
+        self.loss_rate = sequence(loss_rate)
+        self.fixed_losses_relative = sequence(fixed_losses_relative)
+        self.fixed_losses_absolute = sequence(fixed_losses_absolute)
+        self.inflow_conversion_factor = sequence(inflow_conversion_factor)
+        self.outflow_conversion_factor = sequence(outflow_conversion_factor)
+        self.max_storage_level = sequence(max_storage_level)
+        self.min_storage_level = sequence(min_storage_level)
+        self.fixed_costs = sequence(fixed_costs)
+        self.storage_costs = sequence(storage_costs)
+        self.invest_relation_input_output = sequence(
+            invest_relation_input_output
         )
-        self.outflow_conversion_factor = solph_sequence(
-            outflow_conversion_factor
+        self.invest_relation_input_capacity = sequence(
+            invest_relation_input_capacity
         )
-        self.max_storage_level = solph_sequence(max_storage_level)
-        self.min_storage_level = solph_sequence(min_storage_level)
-        self.fixed_costs = solph_sequence(fixed_costs)
-        self.storage_costs = solph_sequence(storage_costs)
-        self.invest_relation_input_output = invest_relation_input_output
-        self.invest_relation_input_capacity = invest_relation_input_capacity
-        self.invest_relation_output_capacity = invest_relation_output_capacity
+        self.invest_relation_output_capacity = sequence(
+            invest_relation_output_capacity
+        )
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
@@ -236,24 +254,22 @@ class GenericStorage(Node):
         coupled with storage capacity via invest relations
         """
         for flow in self.inputs.values():
-            if (
-                self.invest_relation_input_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_input_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_inflow)
         for flow in self.outputs.values():
-            if (
-                self.invest_relation_output_capacity is not None
-                and not isinstance(flow.investment, Investment)
-            ):
+            if self.invest_relation_output_capacity[
+                0
+            ] is not None and not isinstance(flow.investment, Investment):
                 flow.investment = Investment(lifetime=self.lifetime_outflow)
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
         if (
-            self.invest_relation_input_output is not None
-            and self.invest_relation_output_capacity is not None
-            and self.invest_relation_input_capacity is not None
+            self.invest_relation_input_output[0] is not None
+            and self.invest_relation_output_capacity[0] is not None
+            and self.invest_relation_input_capacity[0] is not None
         ):
             e2 = (
                 "Overdetermined. Three investment object will be coupled"
@@ -459,7 +475,9 @@ class GenericStorageBlock(ScalarBlock):
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -552,7 +570,7 @@ class GenericStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -580,7 +598,7 @@ class GenericStorageBlock(ScalarBlock):
 
         if m.es.periods is not None:
             for n in self.STORAGES:
-                if n.fixed_costs[0] is not None:
+                if valid_sequence(n.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         n.nominal_storage_capacity
                         * n.fixed_costs[pp]
@@ -592,7 +610,7 @@ class GenericStorageBlock(ScalarBlock):
         storage_costs = 0
 
         for n in self.STORAGES:
-            if n.storage_costs[0] is not None:
+            if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
                 # We actually want to iterate over all TIMEPOINTS except the
                 # 0th. As integers are used for the index, this is equicalent
                 # to iterating over the TIMESTEPS with one offset.
@@ -1143,7 +1161,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_capacity is not None
+                if n.invest_relation_input_capacity[0] is not None
             ]
         )
 
@@ -1151,13 +1169,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_output_capacity is not None
+                if n.invest_relation_output_capacity[0] is not None
             ]
         )
 
         self.INVEST_REL_IN_OUT = Set(
             initialize=[
-                n for n in group if n.invest_relation_input_output is not None
+                n
+                for n in group
+                if n.invest_relation_input_output[0] is not None
             ]
         )
 
@@ -1530,7 +1550,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output == (
+                    ) * n.invest_relation_input_output[p] == (
                         m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
@@ -1551,7 +1571,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[i[n], n, p]
-                        == self.total[n, p] * n.invest_relation_input_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_input_capacity[p]
                     )
                     self.storage_capacity_inflow.add((n, p), expr)
 
@@ -1573,7 +1594,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.InvestmentFlowBlock.total[n, o[n], p]
-                        == self.total[n, p] * n.invest_relation_output_capacity
+                        == self.total[n, p]
+                        * n.invest_relation_output_capacity[p]
                     )
                     self.storage_capacity_outflow.add((n, p), expr)
 
@@ -1844,7 +1866,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1862,7 +1884,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         )
 
             for n in self.EXISTING_INVESTSTORAGES:
-                if n.investment.fixed_costs[0] is not None:
+                if valid_sequence(n.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     range_limit = min(

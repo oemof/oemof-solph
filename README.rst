@@ -165,7 +165,8 @@ There are several solvers that can work with oemof, both open source and commerc
 Two open source solvers are widely used (CBC and GLPK), but oemof suggests CBC (Coin-or branch and cut).
 It may be useful to compare results of different solvers to see which performs best.
 Other commercial solvers, like Gurobi or Cplex, are also options.
-Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
+Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`_
+to learn about which solvers are supported.
 
 Check the solver installation by executing the test_installation example below (see section Installation Test).
 
@@ -188,7 +189,7 @@ Check the solver installation by executing the test_installation example (see th
 
 Please follow the installation instructions on the respective homepages for details.
 
-CBC-solver: https://projects.coin-or.org/Cbc
+CBC-solver: https://github.com/coin-or/Cbc
 
 GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
