@@ -15,8 +15,8 @@ you have any questions please reach out to the
     :maxdepth: 1
     :hidden:
 
-    introductory_tutorials/tutorial_1.rst
-    introductory_tutorials/tutorial_2.rst
+    introductory_tutorials/district_heating_supply.rst
+    introductory_tutorials/home_pv_battery_system.rst
     introductory_tutorials/tutorial_3.rst
     introductory_tutorials/tutorial_4.rst
 
@@ -35,7 +35,7 @@ you have any questions please reach out to the
             :class: only-dark
 
     .. grid-item-card::  Tutorial 2
-        :link: tutorial_2_label
+        :link: home_pv_battery_system_label
         :link-type: ref
 
         .. image:: /_files/example_network.svg
