@@ -1,4 +1,4 @@
-.. _tutorial_2_label:
+.. _home_pv_battery_system_label:
 
 Home PV installation with battery storage
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
