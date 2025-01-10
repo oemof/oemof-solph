@@ -127,10 +127,10 @@ def generic_integral_limit(
     ... )
     >>> bel = solph.buses.Bus(label='electricityBus')
     >>> flow1 = solph.flows.Flow(
-    ...     nominal_value=100,
+    ...     nominal_capacity=100,
     ...     custom_attributes={"my_factor": 0.8},
     ... )
-    >>> flow2 = solph.flows.Flow(nominal_value=50)
+    >>> flow2 = solph.flows.Flow(nominal_capacity=50)
     >>> src1 = solph.components.Source(label='source1', outputs={bel: flow1})
     >>> src2 = solph.components.Source(label='source2', outputs={bel: flow2})
     >>> energysystem.add(bel, src1, src2)

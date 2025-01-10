@@ -63,11 +63,6 @@ class Investment:
     age : int, :math:`a`
         Units start age, given in years at the beginning of the optimization;
         only applicable for multi-period models
-    interest_rate : float, :math:`ir`
-        Interest rate for calculating annuities when investing in a particular
-        unit; only applicable for multi-period models.
-        If nothing else is specified, the interest rate is the same as the
-        model discount rate of the multi-period model.
     fixed_costs : float or list of float, :math:`c_{fixed}(p)`
         Fixed costs in each period (given in nominal terms);
         only applicable for multi-period models
@@ -95,7 +90,6 @@ class Investment:
         overall_minimum=None,
         lifetime=None,
         age=0,
-        interest_rate=0,
         fixed_costs=None,
         custom_attributes=None,
     ):
@@ -111,7 +105,6 @@ class Investment:
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        self.interest_rate = interest_rate
         self.fixed_costs = sequence(fixed_costs)
 
         for attribute in custom_attributes.keys():
