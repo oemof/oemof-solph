@@ -102,3 +102,83 @@ plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
 plt.ylabel("Power (kW)")
 plt.gcf().autofmt_xdate()
 plt.show()
+
+# %%
+"""
+Now, let's assume the car battery is half full at the beginning and you want to 
+leave for your first trip with an almost fully charged battery (not regarding the 
+loss rate ). The trip demand will not be regarded. 
+"""
+
+def create_unidirectional_loading():
+    energy_system = solph.EnergySystem(
+        timeindex=time_index,
+        infer_last_interval=False,
+    )
+
+    b_el = solph.Bus(label="Car Electricity")
+    energy_system.add(b_el)
+
+    # To be able to load the battery a electric source e.g. electric grid is necessary
+    el_grid = solph.components.Source(
+        label="Electric Grid",
+        outputs={b_el: solph.Flow()}
+
+    )
+
+    energy_system.add(el_grid)
+
+
+    # The car is half full and has to be full when the car leaves the first time
+    # In this case before 7:10, e.g. timestep 86
+
+    timestep_loading_finished = len(ev_demand[:ev_demand.gt(0).idxmax()])
+
+    # We need a timeseries which represents the timesteps where loading is allowed (=1)
+    # In this case the first 86 timesteps
+
+    loading_allowed=pd.Series(0, index=time_index[:-1])
+    loading_allowed[:timestep_loading_finished]=1
+
+    # Assuming the maximal loading power is 10 kw (nominal_capacity = 10) and only within
+    # the first 87 timesteps is allowed to load the battery (max= loading_allowed)
+    # To define the battery has to be loaded 25 kWh.
+    # Only unidirectional loading is allowed, so the output nominal_capacity is set to 0
+    car_battery = solph.components.GenericStorage(
+        label="Car Battery",
+        nominal_capacity=50,  # kWh
+        inputs={b_el: solph.Flow(nominal_capacity=10, max=loading_allowed,full_load_time_min=2.5)},
+        outputs={b_el: solph.Flow(nominal_capacity=0)},
+        initial_storage_level=0.5,  # halffull in the beginning
+        loss_rate=0.001,  # 0.1 % / hr
+        balanced=False,  # True: content at beginning and end need to be equal
+    )
+    energy_system.add(car_battery)
+
+    return energy_system
+
+es = create_unidirectional_loading()
+
+# %%
+"""
+Solve the model and show results
+"""
+model = solph.Model(es)
+model.solve(solve_kwargs={"tee": False})
+results = solph.processing.results(model)
+
+battery_series = solph.views.node(results, "Car Battery")["sequences"]
+
+plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
+plt.ylabel("Energy (kWh)")
+plt.ylim(0, 51)
+plt.twinx()
+energy_leaves_battery = battery_series[
+    (( "Car Electricity","Car Battery"), "flow")
+]
+plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
+plt.ylabel("Power (kW)")
+plt.gcf().autofmt_xdate()
+plt.show()
+
+# %%
