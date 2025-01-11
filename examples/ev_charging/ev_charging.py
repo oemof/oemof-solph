@@ -105,9 +105,9 @@ plt.show()
 
 # %%
 """
-Now, let's assume the car battery is half full at the beginning and you want to 
+Now, let's assume the car battery is half fully loaded at the beginning and you want to 
 leave for your first trip with an almost fully charged battery (not regarding the 
-loss rate ). The trip demand will not be regarded. 
+loss rate). The trip demand will not be regarded. 
 """
 
 def create_unidirectional_loading():
