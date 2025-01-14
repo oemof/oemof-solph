@@ -12,13 +12,13 @@
 
 ------------------------------
 
-.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?branch=dev
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/actions/workflows/tox_pytests.yml/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?branch=dev
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/actions/workflows/tox_checks.yml/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?branch=dev
+.. |packaging| image:: https://github.com/oemof/oemof-solph/actions/workflows/packaging.yml/badge.svg
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
@@ -165,7 +165,8 @@ There are several solvers that can work with oemof, both open source and commerc
 Two open source solvers are widely used (CBC and GLPK), but oemof suggests CBC (Coin-or branch and cut).
 It may be useful to compare results of different solvers to see which performs best.
 Other commercial solvers, like Gurobi or Cplex, are also options.
-Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
+Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`_
+to learn about which solvers are supported.
 
 Check the solver installation by executing the test_installation example below (see section Installation Test).
 
@@ -188,7 +189,7 @@ Check the solver installation by executing the test_installation example (see th
 
 Please follow the installation instructions on the respective homepages for details.
 
-CBC-solver: https://projects.coin-or.org/Cbc
+CBC-solver: https://github.com/coin-or/Cbc
 
 GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 

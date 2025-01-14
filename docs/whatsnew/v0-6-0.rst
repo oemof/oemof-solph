@@ -10,6 +10,20 @@ API changes
   effectively the same) had double weight before. Also, if the
   initial storage level is defined, the costs just offset the
   objective value without changing anything else.
+* Tansitional wrappers that still allowed to use "Transformer" and
+  "OffsetTransformer" have been removed. Use of the new names
+  ("Converter" and "OffsetConverter") is now obligatory.
+* Tansitional wrappers that still allowed to use "investment",
+  "summed_min", and "summed_max" as arguments to initialise a Flow
+  have been removed. Use of the new names ("nominal_value",
+  "full_load_time_min", and "full_load_time_max") is now obligatory.
+* Rename custom_attributes to custom_properties for all Nodes.
+  Setting the oemof.network.Node.custom_properties
+  using an argument called "custom_attributes" was rather confusing.
+  Additionally, the class Bus already called the argument
+  "custom_properties".
+* The parameters `GenericStorage.nominal_storage_capacity` and
+  `Flow.nominal_value` are now both called `nominal_capacity`.
 
 New features
 ############
@@ -29,10 +43,9 @@ Other changes
 Known issues
 ############
 
-* Incompatible to numpy >= 2.0.0. This is because of Pyomo, but we have to
-  enforce a lower version in our package.
 
 Contributors
 ############
 
 * Patrik Schönfeldt
+* Johannes Kochems

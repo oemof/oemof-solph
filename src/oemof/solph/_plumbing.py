@@ -30,15 +30,15 @@ def sequence(iterable_or_scalar):
     --------
     >>> y = sequence([1,2,3,4,5,6,7,8,9,10,11])
     >>> y[0]
-    1
+    np.int64(1)
 
     >>> y[10]
-    11
+    np.int64(11)
 
     >>> import pandas as pd
     >>> s1 = sequence(pd.Series([1,5,9]))
     >>> s1[2]
-    9
+    np.int64(9)
 
     >>> x = sequence(10)
     >>> x[0]

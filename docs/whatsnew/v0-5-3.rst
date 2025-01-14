@@ -9,7 +9,7 @@ API changes
   to the `NonConvex` flow, and `normed_offsets` with the normed offsets
   relative to the `NonConvex` flow.
 * The `NonConvex` attribute must be specified for one of `Flow` at the inlets
-  or outlets of the `OffsetConverter`. `min`, `max` and `nominal_value` have to
+  or outlets of the `OffsetConverter`. `min`, `max` and `nominal_capacity` have to
   be specified for the same `Flow`.
 
 New features

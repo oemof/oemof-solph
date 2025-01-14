@@ -41,14 +41,14 @@ class Sink(Node):
 
     """
 
-    def __init__(self, label=None, *, inputs, custom_attributes=None):
+    def __init__(self, label=None, *, inputs, custom_properties=None):
         if inputs is None:
             inputs = {}
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
-            label=label, inputs=inputs, custom_properties=custom_attributes
+            label=label, inputs=inputs, custom_properties=custom_properties
         )
 
     def constraint_group(self):
