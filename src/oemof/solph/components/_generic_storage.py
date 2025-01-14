@@ -361,9 +361,9 @@ class GenericStorageBlock(ScalarBlock):
             &- \delta(t) \cdot {\tau(t)/(t_u)}
 
     Storage balance :attr:`om.Storage.balance[n, t]`
-        .. math:: E(t) = &E(t-1) - E_{loss}(t)
-            &- \frac{\dot{E}_o(p, t)}{\eta_o(t)} \cdot \tau(t)
-            + \dot{E}_i(p, t) \cdot \eta_i(t) \cdot \tau(t)
+        .. math:: E(t) = &E(t-1) - E_{loss}(t)\\
+            &- \frac{\dot{E}_o(p, t)}{\eta_o(t)} \cdot \tau(t)\\
+            &+ \dot{E}_i(p, t) \cdot \eta_i(t) \cdot \tau(t)
 
     Connect the invest variables of the input and the output flow.
         .. math::
