@@ -112,6 +112,7 @@ leave for your first trip with an almost fully charged battery (not regarding th
 loss rate). The trip demand will not be regarded. 
 """
 
+
 def create_unidirectional_loading_until_defined_timestep():
     energy_system = solph.EnergySystem(
         timeindex=time_index,
@@ -123,24 +124,21 @@ def create_unidirectional_loading_until_defined_timestep():
 
     # To be able to load the battery a electric source e.g. electric grid is necessary
     el_grid = solph.components.Source(
-        label="Electric Grid",
-        outputs={b_el: solph.Flow()}
-
+        label="Electric Grid", outputs={b_el: solph.Flow()}
     )
 
     energy_system.add(el_grid)
 
-
     # The car is half full and has to be full when the car leaves the first time
     # In this case before 7:10, e.g. timestep 86
 
-    timestep_loading_finished = len(ev_demand[:ev_demand.gt(0).idxmax()])
+    timestep_loading_finished = len(ev_demand[: ev_demand.gt(0).idxmax()])
 
     # We need a timeseries which represents the timesteps where loading is allowed (=1)
     # In this case the first 86 timesteps
 
-    loading_allowed=pd.Series(0, index=time_index[:-1])
-    loading_allowed[:timestep_loading_finished]=1
+    loading_allowed = pd.Series(0, index=time_index[:-1])
+    loading_allowed[:timestep_loading_finished] = 1
 
     # Assuming the maximal loading power is 10 kw (nominal_capacity = 10) and only within
     # the first 87 timesteps is allowed to load the battery (max= loading_allowed)
@@ -149,7 +147,13 @@ def create_unidirectional_loading_until_defined_timestep():
     car_battery = solph.components.GenericStorage(
         label="Car Battery",
         nominal_capacity=50,  # kWh
-        inputs={b_el: solph.Flow(nominal_capacity=10, max=loading_allowed,full_load_time_min=2.5)},
+        inputs={
+            b_el: solph.Flow(
+                nominal_capacity=10,
+                max=loading_allowed,
+                full_load_time_min=2.5,
+            )
+        },
         outputs={b_el: solph.Flow(nominal_capacity=0)},
         initial_storage_level=0.5,  # halffull in the beginning
         loss_rate=0.001,  # 0.1 % / hr
@@ -158,6 +162,7 @@ def create_unidirectional_loading_until_defined_timestep():
     energy_system.add(car_battery)
 
     return energy_system
+
 
 es = create_unidirectional_loading_until_defined_timestep()
 
@@ -176,13 +181,12 @@ plt.ylabel("Energy (kWh)")
 plt.ylim(0, 51)
 plt.twinx()
 energy_leaves_battery = battery_series[
-    (( "Car Electricity","Car Battery"), "flow")
+    (("Car Electricity", "Car Battery"), "flow")
 ]
 plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
 plt.ylabel("Power (kW)")
 plt.gcf().autofmt_xdate()
 plt.show()
-
 
 
 # %%
@@ -191,9 +195,8 @@ Assuming the car can be loaded at home and the car is always available to be loa
 The car is half loaded in the beginning and should be loaded when car is at home.
 """
 
-def create_unidirectional_loading():
 
-    
+def create_unidirectional_loading():
 
     # Again setting up the energy system
     energy_system = solph.EnergySystem(
@@ -206,30 +209,29 @@ def create_unidirectional_loading():
 
     # To be able to load the battery a electric source e.g. electric grid is necessary
     el_grid = solph.components.Source(
-        label="Electric Grid",
-        outputs={b_el: solph.Flow()}
-
+        label="Electric Grid", outputs={b_el: solph.Flow()}
     )
 
     energy_system.add(el_grid)
 
-
     # The car is half full and has to be full when the car leaves the first time
     # In this case before 7:10, e.g. timestep 86
 
-    timestep_loading_finished = len(ev_demand[:ev_demand.gt(0).idxmax()])
+    timestep_loading_finished = len(ev_demand[: ev_demand.gt(0).idxmax()])
 
     # We need a timeseries which represents the timesteps where loading is allowed (=1)
     # In this case the first 86 timesteps
 
-    loading_allowed=pd.Series(0, index=time_index[:-1])
-    loading_allowed[:timestep_loading_finished]=1
+    loading_allowed = pd.Series(0, index=time_index[:-1])
+    loading_allowed[:timestep_loading_finished] = 1
 
-    # The maximal charging_capacity is assumed to be 10 kW 
+    # The maximal charging_capacity is assumed to be 10 kW
     charging_cap = 10
 
     # The car can only be loaded if at home
-    loading_allowed = [charging_cap if demand==0 else 0 for demand in ev_demand ]
+    loading_allowed = [
+        charging_cap if demand == 0 else 0 for demand in ev_demand
+    ]
 
     # The is now regared as loss of the car battery
     # To make sure the car battery will be loaded, gain is added to the battery
@@ -239,16 +241,21 @@ def create_unidirectional_loading():
     car_battery = solph.components.GenericStorage(
         label="Car Battery",
         nominal_capacity=50,  # kWh
-        inputs={b_el: solph.Flow(nominal_capacity=1, max=loading_allowed, variable_costs=gain)},
+        inputs={
+            b_el: solph.Flow(
+                nominal_capacity=1, max=loading_allowed, variable_costs=gain
+            )
+        },
         outputs={b_el: solph.Flow(nominal_capacity=0)},
         initial_storage_level=0.5,  # halffull in the beginning
-        fixed_losses_absolute= ev_demand,
+        fixed_losses_absolute=ev_demand,
         loss_rate=0.001,  # 0.1 % / hr
         balanced=False,  # True: content at beginning and end need to be equal
     )
     energy_system.add(car_battery)
 
     return energy_system
+
 
 es = create_unidirectional_loading()
 
@@ -268,7 +275,7 @@ plt.ylabel("Energy (kWh)")
 plt.ylim(0, 51)
 plt.twinx()
 energy_leaves_battery = battery_series[
-    (( "Car Electricity","Car Battery"), "flow")
+    (("Car Electricity", "Car Battery"), "flow")
 ]
 plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
 plt.ylabel("Power (kW)")
