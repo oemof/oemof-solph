@@ -1,15 +1,15 @@
-# %%
+# %%[imports]
 """
 First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data right away and import solph
 """
 
-from copy import deepcopy
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import oemof.solph as solph
 
-# %%
+# %%[trip_data]
 
 time_index = pd.date_range(
     start="2025-01-01",
@@ -34,19 +34,20 @@ driving_start_evening = pd.Timestamp("2025-01-01 17:13:37")
 driving_end_evening = pd.Timestamp("2025-01-01 18:47:11")
 ev_demand.loc[driving_start_evening:driving_end_evening] = 9  # kW
 
-plt.figure(figsize=(5, 2))
+plt.figure()
 plt.plot(ev_demand)
 plt.ylabel("Power (kW)")
 plt.gcf().autofmt_xdate()
-plt.show()
 
-# %%
+# %%[base_system]
 """
 Now, let's create an energy system model of the electric vehicle that
 follows the driving pattern. It uses the same time index defined above
-and consists of a Battery (Charged in the beginning) and an electricity demand.
+and consists of a Battery (partly charged in the beginning)
+and an electricity demand.
 """
 
+b_el = solph.Bus(label="Car Electricity")
 
 def create_base_system():
     energy_system = solph.EnergySystem(
@@ -54,7 +55,6 @@ def create_base_system():
         infer_last_interval=False,
     )
 
-    b_el = solph.Bus(label="Car Electricity")
     energy_system.add(b_el)
 
     # As we have a demand time series which is actually in kW,
@@ -67,14 +67,21 @@ def create_base_system():
 
     energy_system.add(demand_driving)
 
+    # We define a "storage revenue" (negative costs) for the last time step,
+    # so that energy inside the storage in the last time step is worth
+    # something.
+    storage_revenue = np.zeros(len(time_index) - 1)
+    storage_revenue[-1] = -0.6  # 60ct/kWh in the last time step
+
     car_battery = solph.components.GenericStorage(
         label="Car Battery",
         nominal_capacity=50,  # kWh
         inputs={b_el: solph.Flow()},
         outputs={b_el: solph.Flow()},
-        initial_storage_level=1,  # full in the beginning
+        initial_storage_level=0.75,  # 75 % full in the beginning
         loss_rate=0.001,  # 0.1 % / hr
         balanced=False,  # True: content at beginning and end need to be equal
+        storage_costs=storage_revenue,  # Only has an effect on charging.
     )
     energy_system.add(car_battery)
 
@@ -83,36 +90,39 @@ def create_base_system():
 
 es = create_base_system()
 
-# %%
+# %%[solve_and_plot]
 """
 Solve the model and show results
 """
-model = solph.Model(es)
-model.solve(solve_kwargs={"tee": False})
-results = solph.processing.results(model)
 
-battery_series = solph.views.node(results, "Car Battery")["sequences"]
+def solve_and_plot():
+    model = solph.Model(es)
+    model.solve(solve_kwargs={"tee": False})
+    results = solph.processing.results(model)
 
-plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
-plt.ylabel("Energy (kWh)")
-plt.ylim(0, 51)
-plt.twinx()
-energy_leaves_battery = battery_series[
-    (("Car Battery", "Car Electricity"), "flow")
-]
-plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
-plt.ylabel("Power (kW)")
-plt.gcf().autofmt_xdate()
-plt.show()
+    battery_series = solph.views.node(results, "Car Battery")["sequences"]
 
-# %%
+    plt.figure()
+    plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
+    plt.ylabel("Energy (kWh)")
+    plt.ylim(0, 51)
+    plt.twinx()
+    energy_leaves_battery = battery_series[
+        (("Car Battery", "Car Electricity"), "flow")
+    ]
+    plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
+    plt.ylabel("Power (kW)")
+    plt.gcf().autofmt_xdate()
+    plt.show()
+
+solve_and_plot()
+
+
+# %%[charging]
 """
-Now, let's assume the car battery is half loaded at the beginning and you want to 
-leave for your first trip with an almost fully charged battery (not regarding the 
-loss rate). The trip demand will not be regarded. 
+Now, let's assume the car battery can be charged (11 kW).
+This, of course, can only happen while the car is present.
 """
-
-
 def create_unidirectional_loading_until_defined_timestep():
     energy_system = solph.EnergySystem(
         timeindex=time_index,
