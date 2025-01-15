@@ -35,6 +35,7 @@ driving_end_evening = pd.Timestamp("2025-01-01 18:47:11")
 ev_demand.loc[driving_start_evening:driving_end_evening] = 9  # kW
 
 plt.figure()
+plt.title("Driving pattern")
 plt.plot(ev_demand)
 plt.ylabel("Power (kW)")
 plt.gcf().autofmt_xdate()
@@ -54,16 +55,16 @@ def create_base_system():
         infer_last_interval=False,
     )
 
-    b_el = solph.Bus(label="Car Electricity")
+    b_car = solph.Bus(label="Car Electricity")
 
-    energy_system.add(b_el)
+    energy_system.add(b_car)
 
-    # As we have a demand time series which is actually in kW,
-    # we use a common "hack" here: We set the nominal capacity to 1 (kW),
-    # so that multiplication by the time series will just yield the correct result.
+    # As we have a demand time series which is actually in kW, we use a common
+    # "hack" here: We set the nominal capacity to 1 (kW), so that
+    # multiplication by the time series will just yield the correct result.
     demand_driving = solph.components.Sink(
         label="Driving Demand",
-        inputs={b_el: solph.Flow(nominal_capacity=1, fix=ev_demand)},
+        inputs={b_car: solph.Flow(nominal_capacity=1, fix=ev_demand)},
     )
 
     energy_system.add(demand_driving)
@@ -72,15 +73,16 @@ def create_base_system():
     # so that energy inside the storage in the last time step is worth
     # something.
     storage_revenue = np.zeros(len(time_index) - 1)
-    storage_revenue[-1] = -0.6  # 60ct/kWh in the last time step
+    storage_revenue[-1] = -0.6  # 60 ct/kWh in the last time step
 
     car_battery = solph.components.GenericStorage(
         label="Car Battery",
         nominal_capacity=50,  # kWh
-        inputs={b_el: solph.Flow()},
-        outputs={b_el: solph.Flow()},
+        inputs={b_car: solph.Flow()},
+        outputs={b_car: solph.Flow()},
         initial_storage_level=0.75,  # 75 % full in the beginning
         loss_rate=0.001,  # 0.1 % / hr
+        inflow_conversion_factor=0.9,  # 90 % charging efficiency
         balanced=False,  # True: content at beginning and end need to be equal
         storage_costs=storage_revenue,  # Only has an effect on charging.
     )
@@ -95,7 +97,7 @@ Solve the model and show results
 """
 
 
-def solve_and_plot():
+def solve_and_plot(plot_title):
     model = solph.Model(es)
     model.solve(solve_kwargs={"tee": False})
     results = solph.processing.results(model)
@@ -103,168 +105,183 @@ def solve_and_plot():
     battery_series = solph.views.node(results, "Car Battery")["sequences"]
 
     plt.figure()
+    plt.title(plot_title)
     plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
     plt.ylabel("Energy (kWh)")
     plt.ylim(0, 60)
     plt.twinx()
     plt.ylim(0, 12)
+    energy_enters_battery = battery_series[
+        (("Car Electricity", "Car Battery"), "flow")
+    ]
     energy_leaves_battery = battery_series[
         (("Car Battery", "Car Electricity"), "flow")
     ]
-    plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
+    plt.step(energy_leaves_battery.index, energy_leaves_battery, "r--")
+    plt.step(energy_enters_battery.index, energy_enters_battery, "r-")
     plt.grid()
     plt.ylabel("Power (kW)")
     plt.gcf().autofmt_xdate()
 
 
 es = create_base_system()
-solve_and_plot()
-plt.show()
+solve_and_plot("Driving demand only")
 
 
-# %%[charging]
+# %%[AC_30ct_charging]
 """
-Now, let's assume the car battery can be charged (230 V, 16 A).
-This, of course, can only happen while the car is present.
+Now, let's assume the car battery can be charged at home. Unfortunately, there
+is only a power so cket available, limiting the charging process to 16 A at
+230 V. This, of course, can only happen while the car is present.
 """
 
 
-def add_unidirectional_loading():
-    car_present = pd.Series(1, index=time_index[:-1])
-    car_present.loc[driving_start_morning:driving_end_evening] = 0  # kW
+def add_domestic_socket_charging():
+    car_at_home = pd.Series(1, index=time_index[:-1])
+    car_at_home.loc[driving_start_morning:driving_end_evening] = 0
 
-    b_el = es.node["Car Electricity"]
+    b_car = es.node["Car Electricity"]
 
-    # To be able to load the battery a electric source e.g. electric grid is necessary.
-    # We set the maximum use to 1 (so 3.68 kW are usable) if the car is present,
-    # while it is 0 between the morning start and the evening arrival back home.
+    # To be able to load the battery a electric source e.g. electric grid is
+    # necessary. We set the maximum use to 1 if the car is present, while it
+    # is 0 between the morning start and the evening arrival back home.
+    # While the car itself can potentially charge with at a higher power,
+    # we just add an AC source with 16 A at 230 V.
     charger230V = solph.components.Source(
-        label="230V charger",
-        outputs={b_el: solph.Flow(nominal_capacity=3.68, max=car_present)},
+        label="230V AC",
+        outputs={
+            b_car: solph.Flow(
+                nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
+                variable_costs=0.3,  # 30 ct/kWh
+                max=car_at_home,
+            )
+        },
     )
 
     es.add(charger230V)
 
 
 es = create_base_system()
-add_unidirectional_loading()
-solve_and_plot()
-plt.show()
-exit()
+add_domestic_socket_charging()
+solve_and_plot("Domestic power socket charging")
 
-# %%
+# %%[DC_charging]
 """
-Solve the model and show results
-"""
-model = solph.Model(es)
-model.solve(solve_kwargs={"tee": False})
-results = solph.processing.results(model)
-
-battery_series = solph.views.node(results, "Car Battery")["sequences"]
-
-plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
-plt.ylabel("Energy (kWh)")
-plt.ylim(0, 51)
-plt.twinx()
-energy_leaves_battery = battery_series[
-    (("Car Electricity", "Car Battery"), "flow")
-]
-plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
-plt.ylabel("Power (kW)")
-plt.gcf().autofmt_xdate()
-plt.show()
-
-
-# %%
-"""
-Assuming the car can be loaded at home and the car is always available to be loaded (at home), when not driven.
-The car is half loaded in the beginning and should be loaded when car is at home.
+Now, we add an 11 kW charger (no costs) which is available at work.
+This, of course, can only happen while the car is present at work.
 """
 
 
-def create_unidirectional_loading():
+def add_11kW_charging():
+    car_at_work = pd.Series(0, index=time_index[:-1])
+    car_at_work.loc[driving_end_morning:driving_start_evening] = 1
 
-    # Again setting up the energy system
+    b_car = es.node["Car Electricity"]
+
+    # variable_costs in the Flow default to 0, so it's free
+    charger11kW = solph.components.Source(
+        label="11kW",
+        outputs={
+            b_car: solph.Flow(
+                nominal_capacity=11,  # 11 kW
+                max=car_at_work,
+            )
+        },
+    )
+
+    es.add(charger11kW)
+
+
+es = create_base_system()
+add_domestic_socket_charging()
+add_11kW_charging()
+solve_and_plot("Home and work charging")
+
+
+# %%[DC_charging_fixed]
+"""
+To avoid the energy from looping in the battery, we introduce marginal costs
+to battery charging. This is a way to model cyclic aging of the battery.
+"""
+
+
+def create_base_system():
     energy_system = solph.EnergySystem(
         timeindex=time_index,
         infer_last_interval=False,
     )
 
-    b_el = solph.Bus(label="Car Electricity")
-    energy_system.add(b_el)
+    b_car = solph.Bus(label="Car Electricity")
 
-    # To be able to load the battery a electric source e.g. electric grid is necessary
-    el_grid = solph.components.Source(
-        label="Electric Grid", outputs={b_el: solph.Flow()}
+    energy_system.add(b_car)
+
+    demand_driving = solph.components.Sink(
+        label="Driving Demand",
+        inputs={b_car: solph.Flow(nominal_capacity=1, fix=ev_demand)},
     )
 
-    energy_system.add(el_grid)
+    energy_system.add(demand_driving)
 
-    # The car is half full and has to be full when the car leaves the first time
-    # In this case before 7:10, e.g. timestep 86
-
-    timestep_loading_finished = len(ev_demand[: ev_demand.gt(0).idxmax()])
-
-    # We need a timeseries which represents the timesteps where loading is allowed (=1)
-    # In this case the first 86 timesteps
-
-    loading_allowed = pd.Series(0, index=time_index[:-1])
-    loading_allowed[:timestep_loading_finished] = 1
-
-    # The maximal charging_capacity is assumed to be 10 kW
-    charging_cap = 10
-
-    # The car can only be loaded if at home
-    loading_allowed = [
-        charging_cap if demand == 0 else 0 for demand in ev_demand
-    ]
-
-    # The is now regared as loss of the car battery
-    # To make sure the car battery will be loaded, gain is added to the battery
-
-    gain = -1
+    storage_revenue = np.zeros(len(time_index) - 1)
+    storage_revenue[-1] = -0.6
 
     car_battery = solph.components.GenericStorage(
         label="Car Battery",
-        nominal_capacity=50,  # kWh
+        nominal_capacity=50,
         inputs={
-            b_el: solph.Flow(
-                nominal_capacity=1, max=loading_allowed, variable_costs=gain
+            b_car: solph.Flow(
+                variable_costs=1e-4,  # models cyclic aging
             )
         },
-        outputs={b_el: solph.Flow(nominal_capacity=0)},
-        initial_storage_level=0.5,  # halffull in the beginning
-        fixed_losses_absolute=ev_demand,
-        loss_rate=0.001,  # 0.1 % / hr
-        balanced=False,  # True: content at beginning and end need to be equal
+        outputs={b_car: solph.Flow()},
+        initial_storage_level=0.75,
+        loss_rate=0.001,
+        inflow_conversion_factor=0.9,
+        balanced=False,
+        storage_costs=storage_revenue,
     )
     energy_system.add(car_battery)
 
     return energy_system
 
 
-es = create_unidirectional_loading()
+es = create_base_system()
+add_domestic_socket_charging()
+add_11kW_charging()
+solve_and_plot("Home and work charging (fixed)")
 
-
-# %%
+# %%[AC_var_charging]
 """
-Solve the model and show results
+Now, we replace the home socket charging by a version with variable
+electricity prices.
 """
-model = solph.Model(es)
-model.solve(solve_kwargs={"tee": False})
-results = solph.processing.results(model)
 
-battery_series = solph.views.node(results, "Car Battery")["sequences"]
 
-plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
-plt.ylabel("Energy (kWh)")
-plt.ylim(0, 51)
-plt.twinx()
-energy_leaves_battery = battery_series[
-    (("Car Electricity", "Car Battery"), "flow")
-]
-plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
-plt.ylabel("Power (kW)")
-plt.gcf().autofmt_xdate()
+def add_domestic_socket_charging_var():
+    car_at_home = pd.Series(1, index=time_index[:-1])
+    car_at_home.loc[driving_start_morning:driving_end_evening] = 0
+
+    b_car = es.node["Car Electricity"]
+
+    # Same as above, but electricity is cheaper every other step.
+    # Thus, battery is only charged these steps.
+    charger230V = solph.components.Source(
+        label="230V AC",
+        outputs={
+            b_car: solph.Flow(
+                nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
+                variable_costs=[0.2, 0.3] * (len(time_index) // 2),
+                max=car_at_home,
+            )
+        },
+    )
+
+    es.add(charger230V)
+
+
+es = create_base_system()
+add_domestic_socket_charging_var()
+add_11kW_charging()
+solve_and_plot("Variable price charging")
+
 plt.show()
-# %%
