@@ -47,13 +47,14 @@ and consists of a Battery (partly charged in the beginning)
 and an electricity demand.
 """
 
-b_el = solph.Bus(label="Car Electricity")
 
 def create_base_system():
     energy_system = solph.EnergySystem(
         timeindex=time_index,
         infer_last_interval=False,
     )
+
+    b_el = solph.Bus(label="Car Electricity")
 
     energy_system.add(b_el)
 
@@ -88,12 +89,11 @@ def create_base_system():
     return energy_system
 
 
-es = create_base_system()
-
 # %%[solve_and_plot]
 """
 Solve the model and show results
 """
+
 
 def solve_and_plot():
     model = solph.Model(es)
@@ -105,76 +105,52 @@ def solve_and_plot():
     plt.figure()
     plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
     plt.ylabel("Energy (kWh)")
-    plt.ylim(0, 51)
+    plt.ylim(0, 60)
     plt.twinx()
+    plt.ylim(0, 12)
     energy_leaves_battery = battery_series[
         (("Car Battery", "Car Electricity"), "flow")
     ]
     plt.step(energy_leaves_battery.index, energy_leaves_battery, "r-")
+    plt.grid()
     plt.ylabel("Power (kW)")
     plt.gcf().autofmt_xdate()
-    plt.show()
 
+
+es = create_base_system()
 solve_and_plot()
+plt.show()
 
 
 # %%[charging]
 """
-Now, let's assume the car battery can be charged (11 kW).
+Now, let's assume the car battery can be charged (230 V, 16 A).
 This, of course, can only happen while the car is present.
 """
-def create_unidirectional_loading_until_defined_timestep():
-    energy_system = solph.EnergySystem(
-        timeindex=time_index,
-        infer_last_interval=False,
+
+
+def add_unidirectional_loading():
+    car_present = pd.Series(1, index=time_index[:-1])
+    car_present.loc[driving_start_morning:driving_end_evening] = 0  # kW
+
+    b_el = es.node["Car Electricity"]
+
+    # To be able to load the battery a electric source e.g. electric grid is necessary.
+    # We set the maximum use to 1 (so 3.68 kW are usable) if the car is present,
+    # while it is 0 between the morning start and the evening arrival back home.
+    charger230V = solph.components.Source(
+        label="230V charger",
+        outputs={b_el: solph.Flow(nominal_capacity=3.68, max=car_present)},
     )
 
-    b_el = solph.Bus(label="Car Electricity")
-    energy_system.add(b_el)
-
-    # To be able to load the battery a electric source e.g. electric grid is necessary
-    el_grid = solph.components.Source(
-        label="Electric Grid", outputs={b_el: solph.Flow()}
-    )
-
-    energy_system.add(el_grid)
-
-    # The car is half full and has to be full when the car leaves the first time
-    # In this case before 7:10, e.g. timestep 86
-
-    timestep_loading_finished = len(ev_demand[: ev_demand.gt(0).idxmax()])
-
-    # We need a timeseries which represents the timesteps where loading is allowed (=1)
-    # In this case the first 86 timesteps
-
-    loading_allowed = pd.Series(0, index=time_index[:-1])
-    loading_allowed[:timestep_loading_finished] = 1
-
-    # Assuming the maximal loading power is 10 kw (nominal_capacity = 10) and only within
-    # the first 87 timesteps is allowed to load the battery (max= loading_allowed)
-    # To define the battery has to be loaded 25 kWh.
-    # Only unidirectional loading is allowed, so the output nominal_capacity is set to 0
-    car_battery = solph.components.GenericStorage(
-        label="Car Battery",
-        nominal_capacity=50,  # kWh
-        inputs={
-            b_el: solph.Flow(
-                nominal_capacity=10,
-                max=loading_allowed,
-                full_load_time_min=2.5,
-            )
-        },
-        outputs={b_el: solph.Flow(nominal_capacity=0)},
-        initial_storage_level=0.5,  # halffull in the beginning
-        loss_rate=0.001,  # 0.1 % / hr
-        balanced=False,  # True: content at beginning and end need to be equal
-    )
-    energy_system.add(car_battery)
-
-    return energy_system
+    es.add(charger230V)
 
 
-es = create_unidirectional_loading_until_defined_timestep()
+es = create_base_system()
+add_unidirectional_loading()
+solve_and_plot()
+plt.show()
+exit()
 
 # %%
 """
