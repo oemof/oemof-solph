@@ -17,6 +17,7 @@ include = [
     "examples/",
     "src/",
     "tests/",
+    "tutorials/",
     ".bumpversion.cfg",
     ".coveragerc",
     ".editorconfig",
