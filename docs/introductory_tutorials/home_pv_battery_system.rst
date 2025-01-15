@@ -32,12 +32,12 @@ Step 1: PV installation without storage
 
 2. Import dependencies + setup EnergySystem (code snippet)
 
-.. literalinclude:: /../tutorial/introductory/pv_battery_system_1.py
+.. literalinclude:: /../tutorials/introductory/pv_battery_system_1.py
     :language: python
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
 
-:download:`pv_battery_system_1.py </../tutorial/introductory/pv_battery_system_1.py>`
+:download:`pv_battery_system_1.py </../tutorials/introductory/pv_battery_system_1.py>`
 
 .. attention::
 
