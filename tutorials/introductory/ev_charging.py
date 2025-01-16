@@ -189,7 +189,7 @@ def add_11kW_charging(energy_system, b_car):
         },
     )
 
-    es.add(charger11kW)
+    energy_system.add(charger11kW)
 
 
 es, b_car = create_base_system()
