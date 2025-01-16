@@ -25,7 +25,12 @@ def test_custom_attribut_with_numeric_value():
         inputs={bs: Flow()},
         custom_properties={"numpy-float": s1["a"]},
     )
-    energysystem.add(snk_custom_float, src_custom_int)
+    src_custom_str = Source(
+        label="source_with_custom_attribute_string",
+        outputs={bs: Flow(nominal_value=5, fix=[3] * 7)},
+        custom_attributes={"string": "name"},
+    )
+    energysystem.add(snk_custom_float, src_custom_int, src_custom_str)
 
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)
@@ -40,4 +45,8 @@ def test_custom_attribut_with_numeric_value():
     assert (
         parameter[src_custom_int, None]["scalars"]["custom_properties_integer"]
         == 9
+    )
+    assert (
+        parameter[src_custom_str, None]["scalars"]["custom_properties_string"]
+        == "name"
     )
