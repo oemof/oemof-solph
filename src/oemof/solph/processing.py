@@ -589,7 +589,7 @@ def __separate_attrs(
 
     def move_undetected_scalars(com):
         for ckey, value in list(com["sequences"].items()):
-            if isinstance(value, str):
+            if isinstance(value, (str, int, float, np.number)):
                 com["scalars"][ckey] = value
                 del com["sequences"][ckey]
             elif isinstance(value, _FakeSequence):
