@@ -53,7 +53,7 @@ To set up `oemof-solph` for local development:
 
 4. Create a branch for local development::
 
-    git checkout -b name-of-your-bugfix-or-feature
+    `git checkout -b features/name-of-your-feature` or  `git checkout -b fix/name-of-your-fix`
 
    Now you can make your changes locally.
 
