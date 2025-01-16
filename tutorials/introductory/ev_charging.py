@@ -134,7 +134,7 @@ solve_and_plot("Driving demand only")
 # %%[AC_30ct_charging]
 """
 Now, let's assume the car battery can be charged at home. Unfortunately, there
-is only a power so cket available, limiting the charging process to 16 A at
+is only a power socket available, limiting the charging process to 16 A at
 230 V. This, of course, can only happen while the car is present.
 """
 
