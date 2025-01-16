@@ -4,18 +4,19 @@
 Get support
 ###########
 
-Get online support
-==================
-
-There is a monthly online meeting, which you can join without registration.
-It takes place on every second Monday of a month at HH:MM CE(S)T. You can
-
 User forum
 ==========
 
-If you have a question and you cannot attend an online meeting you can also
-post your question to the `openmod forum <https://forum.openmod.org/>`__. Make
-sure to use the :code:`oemof` tag for your submission.
+The `openmod forum <https://forum.openmod.org/>`__ is the first resource for
+your questions on using oemof.solph. Make sure to use the :code:`oemof-solph`
+tag for your submission, so the community is notified of your question.
+
+Get online support
+==================
+
+Furthermore, there is a monthly online meeting, which you can join without
+registration. It takes place on every second Monday of a month at HH:MM CE(S)T.
+Just join the `jit.si meeting room <https://meet.jit.si/oemof-solph-users>`__.
 
 Join the user meetings
 ======================
