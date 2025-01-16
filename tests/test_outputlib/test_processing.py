@@ -1,7 +1,8 @@
 import pandas as pd
 
-from oemof.solph import EnergySystem, create_time_index
+from oemof.solph import EnergySystem
 from oemof.solph import Model
+from oemof.solph import create_time_index
 from oemof.solph import processing
 from oemof.solph.buses import Bus
 from oemof.solph.components import Sink
