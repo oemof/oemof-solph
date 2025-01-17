@@ -51,7 +51,9 @@ def sequence(iterable_or_scalar):
     if len(np.shape(iterable_or_scalar)) > 1:
         d = len(np.shape(iterable_or_scalar))
         raise ValueError(
-            f"Dimension too high ({d} > 1) for {iterable_or_scalar}"
+            f"Dimension too high ({d} > 1) for {iterable_or_scalar}\n"
+            "The dimension of a number is 0, of a list 1, of a table 2 and so "
+            "on."
         )
     if isinstance(iterable_or_scalar, str):
         return iterable_or_scalar
