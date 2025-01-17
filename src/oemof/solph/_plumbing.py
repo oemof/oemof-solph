@@ -48,6 +48,14 @@ def sequence(iterable_or_scalar):
     10
 
     """
+    if len(np.shape(iterable_or_scalar)) > 1:
+        d = len(np.shape(iterable_or_scalar))
+        raise ValueError(
+            f"Dimension too high ({d} > 1) for {iterable_or_scalar}\n"
+            "The dimension of a number is 0, of a list 1, of a table 2 and so "
+            "on.\nPlease notice that a table with one column is still a table "
+            "with 2 dimensions and not a Series."
+        )
     if isinstance(iterable_or_scalar, str):
         return iterable_or_scalar
     elif isinstance(iterable_or_scalar, abc.Iterable):
