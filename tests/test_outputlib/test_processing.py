@@ -18,7 +18,7 @@ def test_custom_attribut_with_numeric_value():
     src_custom_int = Source(
         label="source_with_custom_attribute_int",
         outputs={bs: Flow(nominal_value=5, fix=[3] * 7)},
-        custom_attributes={"integer": 9},
+        custom_properties={"integer": 9},
     )
     s1 = pd.Series([1.4, 2.3], index=["a", "b"])
     snk_custom_float = Sink(
