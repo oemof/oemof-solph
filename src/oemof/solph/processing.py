@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+import numbers
 import sys
 from collections import abc
 from itertools import groupby
