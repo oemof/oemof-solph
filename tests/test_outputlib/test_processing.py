@@ -29,7 +29,7 @@ def test_custom_attribut_with_numeric_value():
     src_custom_str = Source(
         label="source_with_custom_attribute_string",
         outputs={bs: Flow(nominal_value=5, fix=[3] * 7)},
-        custom_attributes={"string": "name"},
+        custom_properties={"string": "name"},
     )
     energysystem.add(snk_custom_float, src_custom_int, src_custom_str)
 
