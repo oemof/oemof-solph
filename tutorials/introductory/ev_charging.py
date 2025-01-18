@@ -286,17 +286,13 @@ def add_domestic_socket_charging_variable_costs(energy_system, b_car,dynamic_pri
 
     
 
-    # To be able to load the battery a electric source e.g. electric grid is
-    # necessary. We set the maximum use to 1 if the car is present, while it
-    # is 0 between the morning start and the evening arrival back home.
-    # While the car itself can potentially charge with at a higher power,
-    # we just add an AC source with 16 A at 230 V.
+    # use the configuration as before but use the dynamic prices
     charger230V = solph.components.Source(
         label="230V AC",
         outputs={
             b_car: solph.Flow(
                 nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
-                variable_costs=dynamic_price,  # 30 ct/kWh
+                variable_costs=dynamic_price,  
                 max=car_at_home,
             )
         },
@@ -309,8 +305,7 @@ def add_domestic_socket_discharging_variable_costs(energy_system, b_car,dynamic_
     car_at_home = pd.Series(1, index=time_index[:-1])
     car_at_home.loc[driving_start_morning:driving_end_evening] = 0
 
-    # Same as above, but electricity is cheaper every other step.
-    # Thus, battery is only charged these steps.
+    # use the configuration as before but use the dynamic prices as gain
     discharger230V = solph.components.Sink(
         label="230V AC discharge",
         inputs={
