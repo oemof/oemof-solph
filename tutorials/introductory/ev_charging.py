@@ -268,8 +268,7 @@ plt.show()
 
 # %%[AC_variable_costs]
 """ Now the energy system stays the same. But dynamic prices are avaiable at home,
-so the loading and unloading if the price is low or the gain is high. The prices are used
-at home"""
+so the loading and unloading if the price is low or the gain is high."""
 
 # assuming the prices are low in the night and early morning  (until 8 a.m. and after 4 p.m) and high ad later morning midday and afternoon (between 6 a.m. and 4 p.m.)
 
@@ -283,8 +282,6 @@ dynamic_price.loc[time_index[16*12]:]= 0.7
 def add_domestic_socket_charging_variable_costs(energy_system, b_car,dynamic_price):
     car_at_home = pd.Series(1, index=time_index[:-1])
     car_at_home.loc[driving_start_morning:driving_end_evening] = 0
-
-    
 
     # use the configuration as before but use the dynamic prices
     charger230V = solph.components.Source(
