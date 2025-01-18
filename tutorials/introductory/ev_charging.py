@@ -268,13 +268,13 @@ solve_and_plot("Bidirectional use")
 plt.show()
 
 # %%[AC_variable_costs]
-""" 
-Now the energy system stays the same. But dynamic prices 
+"""
+Now the energy system stays the same. But dynamic prices
 are avaiable at home, so the loading and unloading if the
 price is low or the gain is high."""
 
-# assuming the prices are low in the night and early morning 
-# (until 8 a.m. and after 4 p.m) and high at later morning, 
+# assuming the prices are low in the night and early morning
+# # (until 8 a.m. and after 4 p.m) and high at later morning,
 # midday and afternoon (between 6 a.m. and 4 p.m.)
 
 dynamic_price = pd.Series(0, index=time_index[:-1])
@@ -310,7 +310,7 @@ def add_domestic_socket_discharging_variable_costs(
     car_at_home = pd.Series(1, index=time_index[:-1])
     car_at_home.loc[driving_start_morning:driving_end_evening] = 0
 
-    # use the configuration as before but use the dynamic prices 
+    # use the configuration as before but use the dynamic prices
     # as gain
     discharger230V = solph.components.Sink(
         label="230V AC discharge",
