@@ -4,9 +4,10 @@ First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data right away and import solph
 """
 
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
+
 import oemof.solph as solph
 
 # %%[trip_data]
@@ -262,6 +263,62 @@ add_balanced_battery(es, b_car)
 add_domestic_socket_charging(es, b_car)
 add_domestic_socket_discharging(es, b_car)
 add_11kW_charging(es, b_car)
-solve_and_plot("Bidirectional use")
+solve_and_plot("Bidirectional use (constant costs)")
+
+# %%[AC_variable_costs]
+"""
+Now the energy system stays the same. But dynamic prices
+are avaiable at home, so the loading and unloading if the
+price is low or the gain is high."""
+
+# assuming the prices are low in the night and early morning
+# # (until 8 a.m. and after 4 p.m) and high at later morning,
+# midday and afternoon (between 6 a.m. and 4 p.m.)
+
+dynamic_price = pd.Series(0.5, index=time_index[:-1])
+dynamic_price.loc[: pd.Timestamp("2025-01-01 06:00")] = 0.05
+dynamic_price.loc[
+    pd.Timestamp("2025-01-01 06:00") : pd.Timestamp("2025-01-01 10:00")
+] = 0.5
+dynamic_price.loc[pd.Timestamp("2025-01-01 16:00") :] = 0.7
+
+
+def add_domestic_socket_variable_costs(energy_system, b_car, dynamic_price):
+    car_at_home = pd.Series(1, index=time_index[:-1])
+    car_at_home.loc[driving_start_morning:driving_end_evening] = 0
+
+    # use the configuration as before but use the dynamic prices
+    charger230V = solph.components.Source(
+        label="230V AC",
+        outputs={
+            b_car: solph.Flow(
+                nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
+                variable_costs=dynamic_price,
+                max=car_at_home,
+            )
+        },
+    )
+
+    # use the configuration as before but use the dynamic prices
+    # as gain
+    discharger230V = solph.components.Sink(
+        label="230V AC discharge",
+        inputs={
+            b_car: solph.Flow(
+                nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
+                variable_costs=-dynamic_price,
+                max=car_at_home,
+            )
+        },
+    )
+
+    energy_system.add(charger230V, discharger230V)
+
+
+es, b_car = create_base_system()
+add_balanced_battery(es, b_car)
+add_domestic_socket_variable_costs(es, b_car, dynamic_price)
+add_11kW_charging(es, b_car)
+solve_and_plot("Bidirectional use (variable costs)")
 
 plt.show()
