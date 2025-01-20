@@ -283,9 +283,7 @@ dynamic_price.loc[
 dynamic_price.loc[pd.Timestamp("2025-01-01 16:00") :] = 0.7
 
 
-def add_domestic_socket_variable_costs(
-    energy_system, b_car, dynamic_price
-):
+def add_domestic_socket_variable_costs(energy_system, b_car, dynamic_price):
     car_at_home = pd.Series(1, index=time_index[:-1])
     car_at_home.loc[driving_start_morning:driving_end_evening] = 0
 
