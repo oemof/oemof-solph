@@ -263,9 +263,7 @@ add_balanced_battery(es, b_car)
 add_domestic_socket_charging(es, b_car)
 add_domestic_socket_discharging(es, b_car)
 add_11kW_charging(es, b_car)
-solve_and_plot("Bidirectional use")
-
-plt.show()
+solve_and_plot("Bidirectional use (constant costs)")
 
 # %%[AC_variable_costs]
 """
@@ -277,13 +275,15 @@ price is low or the gain is high."""
 # # (until 8 a.m. and after 4 p.m) and high at later morning,
 # midday and afternoon (between 6 a.m. and 4 p.m.)
 
-dynamic_price = pd.Series(0, index=time_index[:-1])
-dynamic_price.loc[: time_index[8 * 12]] = 0.05
-dynamic_price.loc[time_index[8 * 12] : time_index[16 * 12]] = 0.5
-dynamic_price.loc[time_index[16 * 12] :] = 0.7
+dynamic_price = pd.Series(0.5, index=time_index[:-1])
+dynamic_price.loc[: pd.Timestamp("2025-01-01 06:00")] = 0.05
+dynamic_price.loc[
+    pd.Timestamp("2025-01-01 06:00") : pd.Timestamp("2025-01-01 10:00")
+] = 0.5
+dynamic_price.loc[pd.Timestamp("2025-01-01 16:00") :] = 0.7
 
 
-def add_domestic_socket_charging_variable_costs(
+def add_domestic_socket_variable_costs(
     energy_system, b_car, dynamic_price
 ):
     car_at_home = pd.Series(1, index=time_index[:-1])
@@ -301,15 +301,6 @@ def add_domestic_socket_charging_variable_costs(
         },
     )
 
-    energy_system.add(charger230V)
-
-
-def add_domestic_socket_discharging_variable_costs(
-    energy_system, b_car, dynamic_price
-):
-    car_at_home = pd.Series(1, index=time_index[:-1])
-    car_at_home.loc[driving_start_morning:driving_end_evening] = 0
-
     # use the configuration as before but use the dynamic prices
     # as gain
     discharger230V = solph.components.Sink(
@@ -323,15 +314,13 @@ def add_domestic_socket_discharging_variable_costs(
         },
     )
 
-    energy_system.add(discharger230V)
+    energy_system.add(charger230V, discharger230V)
 
 
 es, b_car = create_base_system()
 add_balanced_battery(es, b_car)
-add_domestic_socket_charging_variable_costs(es, b_car, dynamic_price)
-add_domestic_socket_discharging_variable_costs(es, b_car, dynamic_price)
+add_domestic_socket_variable_costs(es, b_car, dynamic_price)
 add_11kW_charging(es, b_car)
-solve_and_plot("Bidirectional use variable costs")
+solve_and_plot("Bidirectional use (variable costs)")
 
 plt.show()
-# %%
