@@ -34,11 +34,14 @@ def test_infeasible_model():
         )
     )
     m = solph.Model(es)
-        with pytest.warns(UserWarning, match="The solver did not return an optimal solution"):
-            m.solve(solver="cbc", allow_nonoptimal=True)
+    with pytest.warns(
+        UserWarning, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=True)
 
-
-    with pytest.raises(RuntimeError, match="The solver did not return an optimal solution"):
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
         m.solve(solver="cbc", allow_nonoptimal=False)
 
 
@@ -57,7 +60,9 @@ def test_unbounded_model():
     )
     m = solph.Model(es)
 
-    with pytest.raises(RuntimeError, match="The solver did not return an optimal solution"):
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
         m.solve(solver="cbc", allow_nonoptimal=False)
 
 
