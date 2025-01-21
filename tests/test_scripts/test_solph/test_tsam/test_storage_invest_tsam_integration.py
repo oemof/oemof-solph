@@ -54,7 +54,6 @@ tindex = pd.date_range("2022-01-01", periods=4, freq="H")
 
 energysystem = solph.EnergySystem(
     timeindex=tindex,
-    timeincrement=[1] * len(tindex),
     periods=[tindex],
     tsa_parameters=[
         {
@@ -98,7 +97,7 @@ storage = solph.components.GenericStorage(
     label="storage",
     inputs={bel: solph.Flow(lifetime=20)},
     outputs={bel: solph.Flow(lifetime=20)},
-    investment=solph.Investment(ep_costs=epc, lifetime=20),
+    nominal_capacity=solph.Investment(ep_costs=epc, lifetime=20),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
     outflow_conversion_factor=0.8,
