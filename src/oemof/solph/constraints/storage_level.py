@@ -24,7 +24,7 @@ def storage_level_constraint(
     As a GenericStorage just allows exactly one input and one output,
     an additional bus, the multiplexer_bus, is used for the connections.
     Note that all Flow objects connected to the multiplexer_bus have to have
-    a nominal_value.
+    a nominal_capacity.
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ def storage_level_constraint(
         def _constraint_output_rule(m, o, t):
             return (
                 m.flow[multiplexer_bus, o, t]
-                / m.flows[multiplexer_bus, o].nominal_value
+                / m.flows[multiplexer_bus, o].nominal_capacity
                 <= active_output[o, t]
             )
 
@@ -226,7 +226,7 @@ def storage_level_constraint(
         def _constraint_input_rule(m, i, t):
             return (
                 m.flow[i, multiplexer_bus, t]
-                / m.flows[i, multiplexer_bus].nominal_value
+                / m.flows[i, multiplexer_bus].nominal_capacity
                 <= 1 - inactive_input[i, t]
             )
 

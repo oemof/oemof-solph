@@ -27,6 +27,9 @@ class Source(Node):
     outputs: dict
         A dictionary mapping input nodes to corresponding outflows
         (i.e. output values).
+    custom_properties: dict
+        Additional keyword arguments for use in user-defined equations or for
+        information purposes.
 
     Examples
     --------
@@ -47,16 +50,23 @@ class Source(Node):
 
     >>> str(pv_plant.outputs[bel].output)
     'electricity'
+    >>> bgas = solph.buses.Bus(label='gas')
+    >>> gas_source = solph.components.Source(
+    ...    label='gas_import',
+    ...    outputs={bgas: solph.flows.Flow()},
+    ...    custom_properties={"emission": 201})  # g/kWh
+    >>> gas_source.custom_properties["emission"]
+    201
     """
 
-    def __init__(self, label=None, *, outputs, custom_attributes=None):
+    def __init__(self, label=None, *, outputs, custom_properties=None):
         if outputs is None:
             outputs = {}
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
-            label=label, outputs=outputs, custom_properties=custom_attributes
+            label=label, outputs=outputs, custom_properties=custom_properties
         )
 
     def constraint_group(self):

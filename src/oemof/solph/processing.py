@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
+import numbers
 import operator
 import sys
 from collections import abc
@@ -300,7 +301,7 @@ def results(model, remove_last_time_point=False):
 
     # add dual variables for bus constraints
     if model.dual is not None:
-        grouped = itertools.groupby(
+        grouped = groupby(
             sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
         )
         for bus, timestep in grouped:
@@ -876,7 +877,7 @@ def __separate_attrs(
 
     def move_undetected_scalars(com):
         for ckey, value in list(com["sequences"].items()):
-            if isinstance(value, str):
+            if isinstance(value, (str, numbers.Number)):
                 com["scalars"][ckey] = value
                 del com["sequences"][ckey]
             elif isinstance(value, _FakeSequence):

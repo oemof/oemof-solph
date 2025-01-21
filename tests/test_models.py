@@ -23,18 +23,47 @@ def test_infeasible_model():
     es.add(bel)
     es.add(
         solph.components.Sink(
-            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
+            inputs={bel: solph.flows.Flow(nominal_capacity=5, fix=[1])}
         )
     )
     es.add(
         solph.components.Source(
-            outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)}
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+            }
         )
     )
     m = solph.Model(es)
-    with warnings.catch_warnings(record=True) as w:
-        m.solve(solver="cbc")
-        assert "Optimization ended with status" in str(w[0].message)
+    with pytest.warns(
+        UserWarning, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=True)
+
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=False)
+
+
+def test_unbounded_model():
+    es = solph.EnergySystem(timeincrement=[1])
+    bel = solph.buses.Bus(label="bus")
+    es.add(bel)
+    # Add a Sink with a higher demand
+    es.add(solph.components.Sink(inputs={bel: solph.flows.Flow()}))
+
+    # Add a Source with a very high supply
+    es.add(
+        solph.components.Source(
+            outputs={bel: solph.flows.Flow(variable_costs=-5)}
+        )
+    )
+    m = solph.Model(es)
+
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=False)
 
 
 @pytest.mark.filterwarnings(
@@ -60,7 +89,7 @@ def test_multi_period_default_discount_rate():
             label="sink",
             inputs={
                 bel: solph.flows.Flow(
-                    nominal_value=5, fix=[1] * len(timeindex)
+                    nominal_capacity=5, fix=[1] * len(timeindex)
                 )
             },
         )
@@ -68,7 +97,9 @@ def test_multi_period_default_discount_rate():
     es.add(
         solph.components.Source(
             label="source",
-            outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)},
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+            },
         )
     )
     msg = (

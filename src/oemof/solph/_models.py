@@ -52,9 +52,6 @@ class Model(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
-    discount_rate : float or None
-        The rate used for discounting in a multi-period model.
-        A 2% discount rate needs to be defined as 0.02.
     objective_weighting : array like (optional)
         Weights used for temporal objective function
         expressions. If nothing is passed, `timeincrement` will be used which
@@ -83,17 +80,6 @@ class Model(po.ConcreteModel):
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
         Store the reduced costs of the model if pyomo suffix is set to IMPORT
-
-    Note
-    ----
-
-    * The discount rate is only applicable for a multi-period model.
-    * If you want to work with costs data in nominal terms,
-      you should specify a discount rate.
-    * By default, there is a discount rate of 2% in a multi-period model.
-    * If you want to provide your costs data in real terms,
-      just specify `discount_rate = 0`, i.e. effectively there will be
-      no discounting.
 
 
     **The following basic sets are created**:
@@ -134,7 +120,7 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, discount_rate=None, **kwargs):
+    def __init__(self, energysystem, **kwargs):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
@@ -190,9 +176,7 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if discount_rate is not None:
-            self.discount_rate = discount_rate
-        elif energysystem.periods is not None:
+        if energysystem.periods is not None:
             self._set_discount_rate_with_warning()
         else:
             pass
@@ -369,25 +353,25 @@ class Model(po.ConcreteModel):
         self.flow = po.Var(self.FLOWS, self.TIMESTEPS, within=po.Reals)
 
         for o, i in self.FLOWS:
-            if self.flows[o, i].nominal_value is not None:
+            if self.flows[o, i].nominal_capacity is not None:
                 if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_value
+                            * self.flows[o, i].nominal_capacity
                         )
                         self.flow[o, i, t].fix()
                 else:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
                             self.flows[o, i].max[t]
-                            * self.flows[o, i].nominal_value
+                            * self.flows[o, i].nominal_capacity
                         )
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
                                 self.flows[o, i].min[t]
-                                * self.flows[o, i].nominal_value
+                                * self.flows[o, i].nominal_capacity
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
                         for t in self.TIMESTEPS:
@@ -444,7 +428,9 @@ class Model(po.ConcreteModel):
         """
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+    def solve(
+        self, solver="cbc", solver_io="lp", allow_nonoptimal=False, **kwargs
+    ):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -470,8 +456,8 @@ class Model(po.ConcreteModel):
         """
         solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
-
         opt = SolverFactory(solver, solver_io=solver_io)
+
         # set command line options
         options = opt.options
         for k in solver_cmdline_options:
@@ -479,23 +465,28 @@ class Model(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        status = solver_results["Solver"][0]["Status"]
-        termination_condition = solver_results["Solver"][0][
-            "Termination condition"
-        ]
+        status = solver_results.Solver.Status
+        termination_condition = solver_results.Solver.Termination_condition
+
+        self.es.results = solver_results
+        self.solver_results = solver_results
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
         else:
             msg = (
-                "Optimization ended with status {0} and termination "
-                "condition {1}"
+                f"The solver did not return an optimal solution. "
+                f"Instead the optimization ended with\n "
+                f"      - status: {status}\n"
+                f"       - termination condition: {termination_condition}"
             )
-            warnings.warn(
-                msg.format(status, termination_condition), UserWarning
-            )
-        self.es.results = solver_results
-        self.solver_results = solver_results
+
+            if allow_nonoptimal:
+                warnings.warn(
+                    msg.format(status, termination_condition), UserWarning
+                )
+            else:
+                raise RuntimeError(msg)
 
         return solver_results
 
