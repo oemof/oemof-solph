@@ -119,7 +119,7 @@ results = solph.processing.results(om)
 
 # Concatenate flows:
 flows = pd.concat([flow["sequences"] for flow in results.values()], axis=1)
-flows = flows.drop(columns=['storage_losses'])
+flows = flows.drop("storage_losses", axis=1) #todo: why are storage losses not return of results.keys()?
 
 flows.columns = [
     f"{oemof_tuple[0]}-{oemof_tuple[1]}" for oemof_tuple in results.keys()
