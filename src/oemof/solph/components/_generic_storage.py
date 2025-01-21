@@ -1736,9 +1736,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             """
             t = m.get_timestep_from_tsam_timestep(p, k, g)
             expr = 0
-            expr += block.storage_content_intra[n, k, g + 1]
+            expr += block.storage_content_intra[n, p, k, g + 1]
             expr += (
-                -block.storage_content_intra[n, k, g]
+                -block.storage_content_intra[n, p, k, g]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
