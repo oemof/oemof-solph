@@ -517,9 +517,9 @@ class GenericStorageBlock(ScalarBlock):
             # set the initial intra storage content
             # first timestep in intra storage is always zero
             for n in group:
-                for k in m.TYPICAL_CLUSTERS:
-                    self.storage_content_intra[n, k, 0] = 0
-                    self.storage_content_intra[n, k, 0].fix()
+                for p, k in m.TYPICAL_CLUSTERS:
+                    self.storage_content_intra[n, p, k, 0] = 0
+                    self.storage_content_intra[n, p, k, 0].fix()
                 if n.initial_storage_level is not None:
                     self.storage_content_inter[n, 0] = (
                         n.initial_storage_level * n.nominal_storage_capacity
@@ -532,20 +532,25 @@ class GenericStorageBlock(ScalarBlock):
             # https://github.com/FZJ-IEK3-VSA/FINE/blob/
             # 57ec32561fb95e746c505760bd0d61c97d2fd2fb/FINE/storage.py#L1329
             for n in self.STORAGES:
-                for i, g in m.TIMEINDEX_CLUSTER:
-                    t = m.get_timestep_from_tsam_timestep(i, g)
+                for p, i, g in m.TIMEINDEX_CLUSTER:
+                    t = m.get_timestep_from_tsam_timestep(p, i, g)
                     lhs = n.nominal_storage_capacity * n.min_storage_level[t]
-                    k = m.es.tsa_parameters["order"][i]
-                    tk = m.get_timestep_from_tsam_timestep(k, g)
-                    inter_i = len(m.es.tsa_parameters["order"] + i)
-
+                    k = m.es.tsa_parameters[p]["order"][i]
+                    tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                    inter_i = (
+                        sum(
+                            len(m.es.tsa_parameters[ip]["order"])
+                            for ip in range(p)
+                        )
+                        + i
+                    )
                     rhs = (
                         self.storage_content_inter[n, inter_i]
                         * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
-                        + self.storage_content_intra[n, k, g]
+                        + self.storage_content_intra[n, p, k, g]
                     )
                     self.storage_inter_minimum_level.add(
-                        (n, i, g), lhs <= rhs
+                        (n, p, i, g), lhs <= rhs
                     )
 
         if m.TSAM_MODE:
@@ -559,20 +564,25 @@ class GenericStorageBlock(ScalarBlock):
 
         def _storage_inter_maximum_level_rule(block):
             for n in self.STORAGES:
-                for i, g in m.TIMEINDEX_CLUSTER:
-                    t = m.get_timestep_from_tsam_timestep(i, g)
-                    k = m.es.tsa_parameters["order"][i]
-                    tk = m.get_timestep_from_tsam_timestep(k, g)
-                    inter_i = len(m.es.tsa_parameters["order"] + i
+                for p, i, g in m.TIMEINDEX_CLUSTER:
+                    t = m.get_timestep_from_tsam_timestep(p, i, g)
+                    k = m.es.tsa_parameters[p]["order"][i]
+                    tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                    inter_i = (
+                        sum(
+                            len(m.es.tsa_parameters[ip]["order"])
+                            for ip in range(p)
+                        )
+                        + i
                     )
                     lhs = (
                         self.storage_content_inter[n, inter_i]
                         * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
-                        + self.storage_content_intra[n, k, g]
+                        + self.storage_content_intra[n, p, k, g]
                     )
                     rhs = n.nominal_storage_capacity * n.max_storage_level[t]
                     self.storage_inter_maximum_level.add(
-                        (n, i, g), lhs <= rhs
+                        (n, p, i, g), lhs <= rhs
                     )
 
         if m.TSAM_MODE:
@@ -617,16 +627,16 @@ class GenericStorageBlock(ScalarBlock):
             ) * m.timeincrement[t]
             return expr == block.storage_content[n, t + 1]
 
-        def _intra_storage_balance_rule(block, n, k, g):
+        def _intra_storage_balance_rule(block, n, p, k, g):
             """
             Rule definition for the storage balance of every storage n and
             every timestep.
             """
-            t = m.get_timestep_from_tsam_timestep(k, g)
+            t = m.get_timestep_from_tsam_timestep(p, k, g)
             expr = 0
-            expr += block.storage_content_intra[n, k, g + 1]
+            expr += block.storage_content_intra[n, p, k, g + 1]
             expr += (
-                -block.storage_content_intra[n, k, g]
+                -block.storage_content_intra[n, p, k, g]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -661,29 +671,29 @@ class GenericStorageBlock(ScalarBlock):
             """
             ii = 0
             for p in m.PERIODS:
-                ii += len(m.es.tsa_parameters["order"])
+                ii += len(m.es.tsa_parameters[p]["order"])
                 if ii > i:
-                    ii -= len(m.es.tsa_parameters["order"])
+                    ii -= len(m.es.tsa_parameters[p]["order"])
                     ii = i - ii
                     break
 
-            k = m.es.tsa_parameters["order"][ii]
+            k = m.es.tsa_parameters[p]["order"][ii]
 
             # Calculate inter losses over whole typical period
-            t0 = m.get_timestep_from_tsam_timestep(k, 0)
+            t0 = m.get_timestep_from_tsam_timestep(p, k, 0)
             losses = math.prod(
                 (1 - n.loss_rate[t0 + s])
-                ** m.es.tsa_parameters["segments"][(k, s)]
-                if "segments" in m.es.tsa_parameters
+                ** m.es.tsa_parameters[p]["segments"][(k, s)]
+                if "segments" in m.es.tsa_parameters[p]
                 else 1 - n.loss_rate[t0 + s]
-                for s in range(m.es.tsa_parameters["timesteps"])
+                for s in range(m.es.tsa_parameters[p]["timesteps"])
             )
 
             expr = 0
             expr += block.storage_content_inter[n, i + 1]
             expr += -block.storage_content_inter[n, i] * losses
             expr += -self.storage_content_intra[
-                n, k, m.es.tsa_parameters["timesteps"]
+                n, p, k, m.es.tsa_parameters[p]["timesteps"]
             ]
             return expr == 0
 

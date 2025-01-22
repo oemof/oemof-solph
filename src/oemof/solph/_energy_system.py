@@ -195,21 +195,29 @@ class EnergySystem(es.EnergySystem):
 
             if isinstance(tsa_parameters, dict):
                 # Set up tsa_parameters for single period:
-                tsa_parameters = tsa_parameters
+                tsa_parameters = [tsa_parameters]
 
-            tsa_parameters["occurrences"] = collections.Counter(
-                tsa_parameters["order"]
-            )
+            # Construct occurrences of typical periods
+            if periods is not None:
+                for p in range(len(periods)):
+                    tsa_parameters[p]["occurrences"] = collections.Counter(
+                        tsa_parameters[p]["order"]
+                    )
+            else:
+                tsa_parameters[0]["occurrences"] = collections.Counter(
+                    tsa_parameters[0]["order"]
+                )
 
             # If segmentation is used, timesteps is set to number of
             # segmentations per period.
             # Otherwise, default timesteps_per_period is used.
-            if "segments" in tsa_parameters:
-                tsa_parameters["timesteps"] = int(
-                    len(tsa_parameters["segments"]) / len(tsa_parameters["occurrences"])
-                )
-            else:
-                tsa_parameters["timesteps"] = tsa_parameters["timesteps_per_period"]
+            for params in tsa_parameters:
+                if "segments" in params:
+                    params["timesteps"] = int(
+                        len(params["segments"]) / len(params["occurrences"])
+                    )
+                else:
+                    params["timesteps"] = params["timesteps_per_period"]
         self.tsa_parameters = tsa_parameters
 
         timeincrement = self._init_timeincrement(
@@ -314,14 +322,23 @@ class EnergySystem(es.EnergySystem):
                 "TSAM will define timeincrement itself."
             )
             raise AttributeError(msg)
-
-        if tsa_parameters is not None and any(
+        if (
+            tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+            and not all("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You have to set up segmentation in all periods, "
+                "if you want to use segmentation in TSAM mode"
+            )
+            raise AttributeError(msg)
+        if tsa_parameters is not None and all(
             "segments" in params for params in tsa_parameters
         ):
             # Concatenate segments from TSAM parameters to get timeincrement
             return list(
                 itertools.chain(
-                    *[tsa_parameters["segments"].values()]
+                    *[params["segments"].values() for params in tsa_parameters]
                 )
             )
 

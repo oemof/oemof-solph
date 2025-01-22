@@ -250,10 +250,21 @@ def results(model, remove_last_time_point=False):
 
     # Define index
     if model.es.tsa_parameters:
-        timeindex = model.es.timeindex
-        result_index = _disaggregate_tsa_timeindex(
-            timeindex, model.es.tsa_parameters
-        )
+        for p, period_data in enumerate(model.es.tsa_parameters):
+            if p == 0:
+                if model.es.periods is None:
+                    timeindex = model.es.timeindex
+                else:
+                    timeindex = model.es.periods[0]
+                result_index = _disaggregate_tsa_timeindex(
+                    timeindex, period_data
+                )
+            else:
+                result_index = result_index.union(
+                    _disaggregate_tsa_timeindex(
+                        model.es.periods[p], period_data
+                    )
+                )
     else:
         if model.es.timeindex is None:
             result_index = list(range(len(model.es.timeincrement) + 1))
@@ -482,21 +493,22 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     for flow in flow_dict:
         disaggregated_flow_frames = []
         period_offset = 0
-        for k in tsa_parameters["order"]:
-            flow_k = flow_dict[flow].iloc[
-                period_offset
-                + k * tsa_parameters["timesteps"] : period_offset
-                + (k + 1) * tsa_parameters["timesteps"]
-            ]
-            # Disaggregate segmentation
-            if "segments" in tsa_parameters:
-                flow_k = _disaggregate_segmentation(
-                    flow_k, tsa_parameters["segments"], k
-                )
-            disaggregated_flow_frames.append(flow_k)
-        period_offset += tsa_parameters["timesteps"] * len(
-            tsa_parameters["occurrences"]
-        )
+        for tsa_period in tsa_parameters:
+            for k in tsa_period["order"]:
+                flow_k = flow_dict[flow].iloc[
+                    period_offset
+                    + k * tsa_period["timesteps"] : period_offset
+                    + (k + 1) * tsa_period["timesteps"]
+                ]
+                # Disaggregate segmentation
+                if "segments" in tsa_period:
+                    flow_k = _disaggregate_segmentation(
+                        flow_k, tsa_period["segments"], k
+                    )
+                disaggregated_flow_frames.append(flow_k)
+            period_offset += tsa_period["timesteps"] * len(
+                tsa_period["occurrences"]
+            )
         ts = pd.concat(disaggregated_flow_frames)
         ts.timestep = range(len(ts))
         ts = ts.set_index("timestep")  # Have to set and reset index as
@@ -564,65 +576,65 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     soc_frames = []
     i_offset = 0
     t_offset = 0
-    for i, k in enumerate(tsa_parameters["order"]):
-        inter_value = soc["inter"].iloc[i_offset + i]["value"]
-        # Self-discharge has to be taken into account for calculating
-        # inter SOC for each timestep in cluster
-        t0 = t_offset + i * tsa_parameters["timesteps"]
-        # Add last timesteps of simulation in order to interpolate SOC for
-        # last segment correctly:
-        #@todo add here investment logic of multiple investment periods
-        is_last_timestep = (
-             i == len(tsa_parameters["order"]) - 1
-        )
-
-        timesteps = (
-            tsa_parameters["timesteps"] + 1
-            if is_last_timestep
-            else tsa_parameters["timesteps"]
-        )
-        inter_series = (
-            pd.Series(
-                itertools.accumulate(
-                    (
-                        (1 - storage.loss_rate[t])
-                        ** tsa_parameters["segments"][(k, t - t0)]
-                        if "segments" in tsa_parameters
-                        else 1 - storage.loss_rate[t]
-                        for t in range(
-                            t0,
-                            t0 + timesteps - 1,
-                        )
-                    ),
-                    operator.mul,
-                    initial=1,
+    for p, tsa_period in enumerate(tsa_parameters):
+        for i, k in enumerate(tsa_period["order"]):
+            inter_value = soc["inter"].iloc[i_offset + i]["value"]
+            # Self-discharge has to be taken into account for calculating
+            # inter SOC for each timestep in cluster
+            t0 = t_offset + i * tsa_period["timesteps"]
+            # Add last timesteps of simulation in order to interpolate SOC for
+            # last segment correctly:
+            is_last_timestep = (
+                p == len(tsa_parameters) - 1
+                and i == len(tsa_period["order"]) - 1
+            )
+            timesteps = (
+                tsa_period["timesteps"] + 1
+                if is_last_timestep
+                else tsa_period["timesteps"]
+            )
+            inter_series = (
+                pd.Series(
+                    itertools.accumulate(
+                        (
+                            (1 - storage.loss_rate[t])
+                            ** tsa_period["segments"][(k, t - t0)]
+                            if "segments" in tsa_period
+                            else 1 - storage.loss_rate[t]
+                            for t in range(
+                                t0,
+                                t0 + timesteps - 1,
+                            )
+                        ),
+                        operator.mul,
+                        initial=1,
+                    )
                 )
+                * inter_value
             )
-            * inter_value
-        )
-        intra_series = soc["intra"][(k)].iloc[0:timesteps]
-        soc_frame = pd.DataFrame(
-            intra_series["value"].values
-            + inter_series.values,  # Neglect indexes, otherwise none
-            columns=["value"],
-        )
-
-        # Disaggregate segmentation
-        if "segments" in tsa_parameters:
-            soc_disaggregated = _disaggregate_segmentation(
-                soc_frame[:-1] if is_last_timestep else soc_frame,
-                tsa_parameters["segments"],
-                k,
+            intra_series = soc["intra"][(p, k)].iloc[0:timesteps]
+            soc_frame = pd.DataFrame(
+                intra_series["value"].values
+                + inter_series.values,  # Neglect indexes, otherwise none
+                columns=["value"],
             )
-            if is_last_timestep:
-                soc_disaggregated.loc[
-                    len(soc_disaggregated)
-                ] = soc_frame.iloc[-1]
-            soc_frame = soc_disaggregated
 
-        soc_frames.append(soc_frame)
-    i_offset += len(tsa_parameters["order"])
-    t_offset += i_offset * tsa_parameters["timesteps"]
+            # Disaggregate segmentation
+            if "segments" in tsa_period:
+                soc_disaggregated = _disaggregate_segmentation(
+                    soc_frame[:-1] if is_last_timestep else soc_frame,
+                    tsa_period["segments"],
+                    k,
+                )
+                if is_last_timestep:
+                    soc_disaggregated.loc[
+                        len(soc_disaggregated)
+                    ] = soc_frame.iloc[-1]
+                soc_frame = soc_disaggregated
+
+            soc_frames.append(soc_frame)
+        i_offset += len(tsa_period["order"])
+        t_offset += i_offset * tsa_period["timesteps"]
     soc_ts = pd.concat(soc_frames)
     soc_ts["variable_name"] = "soc"
     soc_ts["timestep"] = range(len(soc_ts))
@@ -653,25 +665,22 @@ def _get_storage_soc_flows_and_keys(flow_dict):
     storage_keys = []
     for oemof_tuple, data in flow_dict.items():
         if not isinstance(oemof_tuple[0], GenericStorage):
-            print("ddint worked:" + str(oemof_tuple))
             continue  # Skip components other than Storage
         if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
-            print("ddint worked:" + str(oemof_tuple))
             continue  # Skip storage output flows
-        print(f"Object: {oemof_tuple[0]}, Type: {type(oemof_tuple[0])}")
-        print("worked:" +str(oemof_tuple))
+
         # Here we have either inter or intra storage index,
         # depending on oemof tuple length
         storage_keys.append(oemof_tuple)
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
-        if oemof_tuple[1] is None:
+        if len(oemof_tuple) == 2:
             # Must be filtered for variable name "storage_content_inter", otherwise "init_content" variable
             # (in non-multi-period approach) interferes with SOC results
             storages[oemof_tuple[0]]["inter"] = data[data["variable_name"] == "storage_content_inter"]
-        if isinstance(oemof_tuple[1], int):
+        if len(oemof_tuple) == 3:
             storages[oemof_tuple[0]]["intra"][
-                (oemof_tuple[1])
+                (oemof_tuple[1], oemof_tuple[2])
             ] = data
     return storages, storage_keys
 
