@@ -109,7 +109,7 @@ def main():
     constraints.emission_limit(model, limit=100)
 
     # print out the emission constraint
-    model.integral_limit_emission_factor_constraint.pprint()
+    model.integral_limit_emission_factor_upper_limit.pprint()
     model.integral_limit_emission_factor.pprint()
 
     # solve the model

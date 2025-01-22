@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+import numbers
 import sys
 from collections import abc
 from itertools import groupby
@@ -589,7 +590,7 @@ def __separate_attrs(
 
     def move_undetected_scalars(com):
         for ckey, value in list(com["sequences"].items()):
-            if isinstance(value, str):
+            if isinstance(value, (str, numbers.Number)):
                 com["scalars"][ckey] = value
                 del com["sequences"][ckey]
             elif isinstance(value, _FakeSequence):
