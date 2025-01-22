@@ -281,7 +281,7 @@ def offset_converter_example():
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "gurobi"
+    solver = "cbc"
 
     model = solph.Model(energy_system)
     model.solve(

@@ -35,6 +35,7 @@ Documentation
 Bug fixes
 #########
 
+* Remove unneeded use of gurobi from examples.
 
 Other changes
 #############
