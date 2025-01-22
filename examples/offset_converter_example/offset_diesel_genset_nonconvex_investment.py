@@ -60,6 +60,15 @@ except ImportError:
     plt = None
 
 
+def get_data_from_file_path(file_path: str) -> pd.DataFrame:
+    try:
+        data = pd.read_csv(file_path)
+    except FileNotFoundError:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        data = pd.read_csv(dir + "/" + file_path)
+    return data
+
+
 def offset_converter_example():
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
@@ -84,9 +93,7 @@ def offset_converter_example():
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    filename = os.path.join(current_directory, "diesel_genset_data.csv")
-    data = pd.read_csv(filepath_or_buffer=filename)
+    data = get_data_from_file_path("diesel_genset_data.csv")
 
     # Change the index of data to be able to select data based on the time range.
     data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
