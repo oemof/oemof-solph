@@ -19,7 +19,7 @@ Download source code: :download:`saturating_storage.py </../examples/flexible_mo
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (v0.6.x), install by:
 
 .. code:: bash
 
@@ -86,21 +86,21 @@ def saturating_storage_example():
     model = solph.Model(es)
 
     def soc_limit_rule(m):
-        for p, ts in m.TIMEINDEX:
+        for ts in m.TIMESTEPS:
             soc = (
                 m.GenericStorageBlock.storage_content[battery, ts + 1]
                 / storage_capacity
             )
             expr = (1 - soc) / (1 - full_charging_limit) >= m.flow[
-                bel, battery, p, ts
+                bel, battery, ts
             ] / inflow_capacity
-            getattr(m, "soc_limit").add((p, ts), expr)
+            getattr(m, "soc_limit").add(ts, expr)
 
     setattr(
         model,
         "soc_limit",
         po.Constraint(
-            model.TIMEINDEX,
+            model.TIMESTEPS,
             noruleinit=True,
         ),
     )
@@ -116,17 +116,23 @@ def saturating_storage_example():
     # create result object
     results = solph.processing.results(model)
 
-    plt.plot(results[(battery, None)]["sequences"], "r--", label="content")
+    plt.plot(
+        results[(battery, None)]["sequences"]["storage_content"],
+        "r--",
+        label="content",
+    )
     plt.step(
-        20 * results[(bel, battery)]["sequences"], "b-", label="20*inflow"
+        20 * results[(bel, battery)]["sequences"]["flow"],
+        "b-",
+        label="20*inflow",
     )
     plt.legend()
     plt.grid()
 
     plt.figure()
     plt.plot(
-        results[(battery, None)]["sequences"][1:],
-        results[(bel, battery)]["sequences"][:-1],
+        results[(battery, None)]["sequences"]["storage_content"][1:],
+        results[(bel, battery)]["sequences"]["flow"][:-1],
         "b-",
     )
     plt.grid()
