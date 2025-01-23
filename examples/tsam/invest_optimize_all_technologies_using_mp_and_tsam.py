@@ -230,7 +230,9 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=wind_profile,
-                nominal_capacity=solph.Investment(ep_costs=epc_wind, lifetime=10),
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_wind, lifetime=10
+                ),
             )
         },
     )
@@ -253,7 +255,9 @@ def main():
                     ],
                     ignore_index=True,
                 ),
-                nominal_capacity=solph.Investment(ep_costs=epc_pv, lifetime=10),
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_pv, lifetime=10
+                ),
             )
         },
     )

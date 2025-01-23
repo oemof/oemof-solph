@@ -15,7 +15,6 @@ from oemof.solph.components._offset_converter import (
 
 
 def create_energysystem_stub(num_in, num_out):
-
     es = solph.EnergySystem(
         timeindex=solph.create_time_index(year=2023, number=9),
         infer_last_interval=True,
@@ -504,7 +503,6 @@ def test_two_OffsetConverters_with_and_without_investment():
 
 
 def test_OffsetConverter_05x_compatibility():
-
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
@@ -571,7 +569,6 @@ def test_OffsetConverter_05x_compatibility():
 
 
 def test_error_handling():
-
     input_bus = solph.Bus("bus1")
     output_bus = solph.Bus("bus2")
 

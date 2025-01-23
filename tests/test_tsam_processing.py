@@ -25,9 +25,7 @@ def test_disaggregate_timeindex():
             )
         else:
             result_index = result_index.union(
-                processing._disaggregate_tsa_timeindex(
-                    periods[p], period_data
-                )
+                processing._disaggregate_tsa_timeindex(periods[p], period_data)
             )
 
     assert all(result_index == ti)

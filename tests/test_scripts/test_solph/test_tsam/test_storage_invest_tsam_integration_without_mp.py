@@ -149,7 +149,9 @@ init_soc = 0
 
 def test_storage_investment():
     """Make sure that max SOC investment equals max load"""
-    assert results[storage, None]["scalars"]["invest"] == pytest.approx(first_input)
+    assert results[storage, None]["scalars"]["invest"] == pytest.approx(
+        first_input
+    )
 
 
 def test_storage_input():

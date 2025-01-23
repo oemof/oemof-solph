@@ -277,9 +277,7 @@ class Model(po.ConcreteModel):
                 self.es.tsa_parameters[p]["occurrences"][k]
                 for p in self.PERIODS
                 for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
-                for _ in range(
-                    self.es.tsa_parameters[p]["timesteps"]
-                )
+                for _ in range(self.es.tsa_parameters[p]["timesteps"])
             )
             self.CLUSTERS = po.Set(
                 initialize=list(
@@ -515,7 +513,5 @@ class Model(po.ConcreteModel):
             (p, k, t)
             for p in range(len(self.es.tsa_parameters))
             for k in range(len(self.es.tsa_parameters[p][cluster_type]))
-            for t in range(
-                self.es.tsa_parameters[p]["timesteps"] + offset
-            )
+            for t in range(self.es.tsa_parameters[p]["timesteps"] + offset)
         ]

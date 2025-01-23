@@ -594,7 +594,6 @@ class GenericStorageBlock(ScalarBlock):
                 rule=_storage_inter_maximum_level_rule
             )
 
-
         def _storage_losses_rule(block, n, t):
             expr = block.storage_content[n, t] * (
                 1 - (1 - n.loss_rate[t]) ** m.timeincrement[t]
@@ -607,6 +606,7 @@ class GenericStorageBlock(ScalarBlock):
             expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
 
             return expr == block.storage_losses[n, t]
+
         if not m.TSAM_MODE:
             self.losses = Constraint(
                 self.STORAGES, m.TIMESTEPS, rule=_storage_losses_rule
@@ -703,6 +703,7 @@ class GenericStorageBlock(ScalarBlock):
                 m.CLUSTERS,
                 rule=_inter_storage_balance_rule,
             )
+
         def _balanced_storage_rule(block, n):
             """
             Storage content of last time step == initial storage content
@@ -781,7 +782,8 @@ class GenericStorageBlock(ScalarBlock):
                 if not m.TSAM_MODE:
                     for t in m.TIMESTEPS:
                         storage_costs += (
-                            self.storage_content[n, t + 1] * n.storage_costs[t + 1]
+                            self.storage_content[n, t + 1]
+                            * n.storage_costs[t + 1]
                         )
                 else:
                     for t in m.TIMESTEPS_ORIGINAL:
@@ -1395,6 +1397,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p, k in m.TYPICAL_CLUSTERS:
                     self.storage_content_intra[n, p, k, 0] = 0
                     self.storage_content_intra[n, p, k, 0].fix()
+
         def _storage_investvar_bound_rule(_, n, p):
             """
             Rule definition to bound the invested storage capacity `invest`.
@@ -1643,6 +1646,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for n in self.INVESTSTORAGES:
                     expr = self.storage_content[n, 0] == 0
                     self.initially_empty.add((n, 0), expr)
+
             if not m.TSAM_MODE:
                 # inter and intra initial storage contents are handled above
                 self.initially_empty = Constraint(
@@ -1744,6 +1748,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 m.TIMEINDEX_TYPICAL_CLUSTER,
                 rule=_intra_storage_balance_rule,
             )
+
         def _inter_storage_balance_rule(block, n, i):
             """
             Rule definition for the storage balance of every storage n and
@@ -1765,10 +1770,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             expr += block.storage_content_inter[n, i + 1]
             expr += -block.storage_content_inter[n, i] * (
                 1 - n.loss_rate[t]
-            ) ** (
-                m.timeincrement[t]
-                * m.es.tsa_parameters[p]["timesteps"]
-            )
+            ) ** (m.timeincrement[t] * m.es.tsa_parameters[p]["timesteps"])
             expr += -self.storage_content_intra[
                 n, p, k, m.es.tsa_parameters[p]["timesteps"]
             ]
@@ -1782,6 +1784,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
         if m.es.periods is None and not m.TSAM_MODE:
+
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMESTEPS.at(-1)]
@@ -2063,13 +2066,14 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         self.storage_inter_minimum_level.add(
                             (n, p, i, g), lhs <= rhs
                         )
+
             self.storage_inter_minimum_level = Constraint(
                 self.INVESTSTORAGES, m.TIMEINDEX_CLUSTER, noruleinit=True
             )
 
             self.storage_inter_minimum_level_build = BuildAction(
                 rule=_storage_inter_minimum_level_rule
-                )
+            )
 
     def _objective_expression(self):
         """Objective expression with fixed and investment costs."""

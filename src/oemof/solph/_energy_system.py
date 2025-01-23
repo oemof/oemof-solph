@@ -172,7 +172,9 @@ class EnergySystem(es.EnergySystem):
                 # we want a series (squeeze)
                 # without the first item (no delta defined for first entry)
                 # but starting with index 0 (reset)
-                timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
+                timeincrement = timeincrement.squeeze()[1:].reset_index(
+                    drop=True
+                )
 
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
@@ -307,6 +309,7 @@ class EnergySystem(es.EnergySystem):
             - self.periods[period].min().year
             + 1
         )
+
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
         """Check and initialize timeincrement"""

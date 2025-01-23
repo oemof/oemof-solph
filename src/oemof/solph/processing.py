@@ -37,6 +37,7 @@ from .helpers import flatten
 
 PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
 
+
 def get_tuple(x):
     """Get oemof tuple within iterable or create it
 
@@ -644,20 +645,25 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     interpolated_soc = soc_ts.interpolate()
     return interpolated_soc.iloc[:-1]
 
+
 def _calculate_multiplexer_actives(values, multiplexer, tsa_parameters):
     """Calculate multiplexer actives"""
     actives_frames = []
     for p, tsa_period in enumerate(tsa_parameters):
         for i, k in enumerate(tsa_period["order"]):
             timesteps = tsa_period["timesteps"]
-            actives_frames.append(pd.DataFrame(
-                values[(p, k)].iloc[0:timesteps],
-                columns=["value"])
+            actives_frames.append(
+                pd.DataFrame(
+                    values[(p, k)].iloc[0:timesteps], columns=["value"]
                 )
+            )
     actives_frames_ts = pd.concat(actives_frames)
-    actives_frames_ts["variable_name"] = values[(p, k)]["variable_name"].values[0]
+    actives_frames_ts["variable_name"] = values[(p, k)][
+        "variable_name"
+    ].values[0]
     actives_frames_ts["timestep"] = range(len(actives_frames_ts))
     return actives_frames_ts
+
 
 def _get_storage_soc_flows_and_keys(flow_dict):
     """Detect storage flows in flow dict"""
@@ -677,7 +683,9 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         if len(oemof_tuple) == 2:
             # Must be filtered for variable name "storage_content_inter", otherwise "init_content" variable
             # (in non-multi-period approach) interferes with SOC results
-            storages[oemof_tuple[0]]["inter"] = data[data["variable_name"] == "storage_content_inter"]
+            storages[oemof_tuple[0]]["inter"] = data[
+                data["variable_name"] == "storage_content_inter"
+            ]
         if len(oemof_tuple) == 3:
             storages[oemof_tuple[0]]["intra"][
                 (oemof_tuple[1], oemof_tuple[2])
@@ -692,10 +700,12 @@ def _get_multiplexer_flows_and_keys(flow_dict):
     for oemof_tuple, data in flow_dict.items():
         if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
             continue
-        if 'multiplexer_active' in data['variable_name'].values[0]:
-            multiplexer.setdefault(oemof_tuple[0],{})
+        if "multiplexer_active" in data["variable_name"].values[0]:
+            multiplexer.setdefault(oemof_tuple[0], {})
             multiplexer_keys.append(oemof_tuple)
-            multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = data
+            multiplexer[oemof_tuple[0]][
+                (oemof_tuple[1], oemof_tuple[2])
+            ] = data
     return multiplexer, multiplexer_keys
 
 
@@ -722,7 +732,9 @@ def convert_keys_to_strings(result, keep_none_type=False):
             (
                 tuple([str(e) if e is not None else None for e in k])
                 if isinstance(k, tuple)
-                else str(k) if k is not None else None
+                else str(k)
+                if k is not None
+                else None
             ): v
             for k, v in result.items()
         }
