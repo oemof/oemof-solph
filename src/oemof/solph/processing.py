@@ -243,9 +243,9 @@ def results(model, remove_last_time_point=False):
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
-        k
-        if len(k) > 1
-        else (k[0], None): v[["timestep", "variable_name", "value"]]
+        k if len(k) > 1 else (k[0], None): v[
+            ["timestep", "variable_name", "value"]
+        ]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -598,10 +598,12 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                 pd.Series(
                     itertools.accumulate(
                         (
-                            (1 - storage.loss_rate[t])
-                            ** tsa_period["segments"][(k, t - t0)]
-                            if "segments" in tsa_period
-                            else 1 - storage.loss_rate[t]
+                            (
+                                (1 - storage.loss_rate[t])
+                                ** tsa_period["segments"][(k, t - t0)]
+                                if "segments" in tsa_period
+                                else 1 - storage.loss_rate[t]
+                            )
                             for t in range(
                                 t0,
                                 t0 + timesteps - 1,
@@ -628,9 +630,9 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                     k,
                 )
                 if is_last_timestep:
-                    soc_disaggregated.loc[
-                        len(soc_disaggregated)
-                    ] = soc_frame.iloc[-1]
+                    soc_disaggregated.loc[len(soc_disaggregated)] = (
+                        soc_frame.iloc[-1]
+                    )
                 soc_frame = soc_disaggregated
 
             soc_frames.append(soc_frame)
@@ -732,9 +734,7 @@ def convert_keys_to_strings(result, keep_none_type=False):
             (
                 tuple([str(e) if e is not None else None for e in k])
                 if isinstance(k, tuple)
-                else str(k)
-                if k is not None
-                else None
+                else str(k) if k is not None else None
             ): v
             for k, v in result.items()
         }

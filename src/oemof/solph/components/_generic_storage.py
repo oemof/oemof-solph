@@ -682,10 +682,12 @@ class GenericStorageBlock(ScalarBlock):
             # Calculate inter losses over whole typical period
             t0 = m.get_timestep_from_tsam_timestep(p, k, 0)
             losses = math.prod(
-                (1 - n.loss_rate[t0 + s])
-                ** m.es.tsa_parameters[p]["segments"][(k, s)]
-                if "segments" in m.es.tsa_parameters[p]
-                else 1 - n.loss_rate[t0 + s]
+                (
+                    (1 - n.loss_rate[t0 + s])
+                    ** m.es.tsa_parameters[p]["segments"][(k, s)]
+                    if "segments" in m.es.tsa_parameters[p]
+                    else 1 - n.loss_rate[t0 + s]
+                )
                 for s in range(m.es.tsa_parameters[p]["timesteps"])
             )
 
