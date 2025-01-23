@@ -14,9 +14,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-import calendar
 import collections
-import datetime
 import itertools
 import warnings
 
