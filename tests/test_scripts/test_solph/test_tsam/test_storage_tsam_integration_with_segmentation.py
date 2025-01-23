@@ -112,7 +112,6 @@ logging.info("Optimise the energy system")
 
 # initialise the operational model
 om = solph.Model(energysystem)
-om.write("model.lp", io_options={"symbolic_solver_labels": True})
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")
