@@ -97,18 +97,32 @@ class GenericCAES(Node):
     <class 'oemof.solph.components.experimental._generic_caes.GenericCAES'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label,
+        *,
+        electrical_input,
+        fuel_input,
+        electrical_output,
+        params,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs={},
+            outputs={},
+            custom_properties=custom_properties,
+        )
 
-        self.electrical_input = kwargs.get("electrical_input")
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.params = kwargs.get("params")
+        self.electrical_input = electrical_input
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.params = params
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get("electrical_input"))
-        self.inputs.update(kwargs.get("fuel_input"))
-        self.outputs.update(kwargs.get("electrical_output"))
+        self.inputs.update(electrical_input)
+        self.inputs.update(fuel_input)
+        self.outputs.update(electrical_output)
 
     def constraint_group(self):
         return GenericCAESBlock
@@ -430,14 +444,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # Compression: Capacity on markets
-        def cmp_p_constr_rule(block, n, p, t):
+        def cmp_p_constr_rule(block, n, t):
             expr = 0
             expr += -self.cmp_p[n, t]
-            expr += m.flow[list(n.electrical_input.keys())[0], n, p, t]
+            expr += m.flow[list(n.electrical_input.keys())[0], n, t]
             return expr == 0
 
         self.cmp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMEINDEX, rule=cmp_p_constr_rule
+            self.GENERICCAES, m.TIMESTEPS, rule=cmp_p_constr_rule
         )
 
         # Compression: Max. capacity depending on cavern filling level
@@ -520,14 +534,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # (10) Expansion: Capacity on markets
-        def exp_p_constr_rule(block, n, p, t):
+        def exp_p_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_p[n, t]
-            expr += m.flow[n, list(n.electrical_output.keys())[0], p, t]
+            expr += m.flow[n, list(n.electrical_output.keys())[0], t]
             return expr == 0
 
         self.exp_p_constr = Constraint(
-            self.GENERICCAES, m.TIMEINDEX, rule=exp_p_constr_rule
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_p_constr_rule
         )
 
         # (11-12) Expansion: Max. capacity depending on cavern filling level
@@ -591,14 +605,14 @@ class GenericCAESBlock(ScalarBlock):
         )
 
         # (17) Expansion: Fuel allocation
-        def exp_q_fuel_constr_rule(block, n, p, t):
+        def exp_q_fuel_constr_rule(block, n, t):
             expr = 0
             expr += -self.exp_q_fuel_in[n, t]
-            expr += m.flow[list(n.fuel_input.keys())[0], n, p, t]
+            expr += m.flow[list(n.fuel_input.keys())[0], n, t]
             return expr == 0
 
         self.exp_q_fuel_constr = Constraint(
-            self.GENERICCAES, m.TIMEINDEX, rule=exp_q_fuel_constr_rule
+            self.GENERICCAES, m.TIMESTEPS, rule=exp_q_fuel_constr_rule
         )
 
         # (18) Expansion: Definition of single heat flows

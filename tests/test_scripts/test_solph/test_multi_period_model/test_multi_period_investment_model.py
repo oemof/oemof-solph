@@ -15,6 +15,7 @@ Add wind source and demand sink for FR and links for exchange.
 """
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
@@ -26,14 +27,21 @@ from oemof.solph import processing
 from oemof.solph import views
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_multi_period_investment_model(solver="cbc"):
     """Test a simple multi_period investment model
     for multiple SinkDSM approaches"""
 
     for approach in ["oemof", "DLR", "DIW"]:
-        t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="H")
-        t_idx_2 = pd.date_range("1/1/2030", periods=3, freq="H")
-        t_idx_3 = pd.date_range("1/1/2040", periods=3, freq="H")
+        t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h")
+        t_idx_2 = pd.date_range("1/1/2030", periods=3, freq="h")
+        t_idx_3 = pd.date_range("1/1/2040", periods=3, freq="h")
 
         # Create an overall timeindex
         t_idx_1_series = pd.Series(index=t_idx_1, dtype="float64")
@@ -78,14 +86,14 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el: flows.Flow(
                     variable_costs=0,
                     fix=[110] + [90] * (len(timeindex) - 1),
-                    nominal_value=1,
+                    nominal_capacity=1,
                 )
             },
         )
         source_shortage = components.Source(
             label="DE_source_shortage",
             outputs={
-                bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)
+                bus_el: flows.Flow(variable_costs=1e10, nominal_capacity=1e10)
             },
         )
         source_wind_FR = components.Source(
@@ -94,14 +102,16 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el_FR: flows.Flow(
                     variable_costs=0,
                     fix=[45] * len(timeindex),
-                    nominal_value=1,
+                    nominal_capacity=1,
                 )
             },
         )
         source_shortage_FR = components.Source(
             label="FR_source_shortage",
             outputs={
-                bus_el_FR: flows.Flow(variable_costs=1e10, nominal_value=1e10)
+                bus_el_FR: flows.Flow(
+                    variable_costs=1e10, nominal_capacity=1e10
+                )
             },
         )
 
@@ -109,27 +119,31 @@ def test_multi_period_investment_model(solver="cbc"):
         sink_el = components.Sink(
             label="DE_sink_el",
             inputs={
-                bus_el: flows.Flow(fix=[80] * len(timeindex), nominal_value=1)
+                bus_el: flows.Flow(
+                    fix=[80] * len(timeindex), nominal_capacity=1
+                )
             },
         )
         sink_excess = components.Sink(
             label="DE_sink_excess",
             inputs={
-                bus_el: flows.Flow(variable_costs=1e10, nominal_value=1e10)
+                bus_el: flows.Flow(variable_costs=1e10, nominal_capacity=1e10)
             },
         )
         sink_el_FR = components.Sink(
             label="FR_sink_el",
             inputs={
                 bus_el_FR: flows.Flow(
-                    fix=[50] * len(timeindex), nominal_value=1
+                    fix=[50] * len(timeindex), nominal_capacity=1
                 )
             },
         )
         sink_excess_FR = components.Sink(
             label="FR_sink_excess",
             inputs={
-                bus_el_FR: flows.Flow(variable_costs=1e3, nominal_value=1e10)
+                bus_el_FR: flows.Flow(
+                    variable_costs=1e3, nominal_capacity=1e10
+                )
             },
         )
 
@@ -139,13 +153,12 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_lignite: flows.Flow()},
             outputs={
                 bus_el: flows.Flow(
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=1000,
                         ep_costs=2e6,
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=1,
                 )
@@ -158,13 +171,12 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_hardcoal: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=1000,
                         ep_costs=1.6e6,
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=2,
                 )
@@ -177,13 +189,12 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=1000,
                         ep_costs=1e6,
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                     ),
                     variable_costs=3,
                 )
@@ -196,13 +207,12 @@ def test_multi_period_investment_model(solver="cbc"):
             inputs={bus_natgas: flows.Flow()},  # )},
             outputs={
                 bus_el: flows.Flow(
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=1000,
                         ep_costs=[0.6e6, 0.5e6, 0.8e6, 0.4e6],
                         existing=0,
                         lifetime=20,
                         age=0,
-                        interest_rate=0.02,
                         fixed_costs=1000,
                     ),
                     variable_costs=4,
@@ -217,13 +227,12 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el: flows.Flow(
                     variable_costs=0,
                     max=1,
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=20,
                         ep_costs=1000,
                         existing=10,
                         lifetime=2,
                         age=1,
-                        interest_rate=0.02,
                     ),
                 )
             },
@@ -231,13 +240,12 @@ def test_multi_period_investment_model(solver="cbc"):
                 bus_el: flows.Flow(
                     variable_costs=0,
                     max=1,
-                    nominal_value=_options.Investment(
+                    nominal_capacity=_options.Investment(
                         maximum=20,
                         ep_costs=1000,
                         existing=10,
                         lifetime=2,
                         age=1,
-                        interest_rate=0.02,
                     ),
                 )
             },
@@ -251,13 +259,12 @@ def test_multi_period_investment_model(solver="cbc"):
             invest_relation_input_capacity=None,
             invest_relation_output_capacity=None,
             fixed_costs=10,
-            nominal_storage_capacity=_options.Investment(
+            nominal_capacity=_options.Investment(
                 maximum=20,
                 ep_costs=1000,
                 existing=10,
                 lifetime=2,
                 age=1,
-                interest_rate=0.02,
                 fixed_costs=10,
             ),
         )
@@ -266,10 +273,10 @@ def test_multi_period_investment_model(solver="cbc"):
             label="link_DE_FR",
             inputs={
                 bus_el: flows.Flow(
-                    nominal_value=10,
+                    nominal_capacity=10,
                 ),
                 bus_el_FR: flows.Flow(
-                    nominal_value=10,
+                    nominal_capacity=10,
                 ),
             },
             outputs={bus_el_FR: flows.Flow(), bus_el: flows.Flow()},
@@ -327,7 +334,6 @@ def test_multi_period_investment_model(solver="cbc"):
                 ep_costs=10,
                 lifetime=2,
                 age=1,
-                interest_rate=0.02,
             ),
         )
 

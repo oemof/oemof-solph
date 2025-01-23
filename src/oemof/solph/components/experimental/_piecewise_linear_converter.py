@@ -54,7 +54,7 @@ class PiecewiseLinearConverter(Node):
     >>> pwltf = solph.components.experimental.PiecewiseLinearConverter(
     ...    label='pwltf',
     ...    inputs={b_gas: solph.flows.Flow(
-    ...    nominal_value=100,
+    ...    nominal_capacity=100,
     ...    variable_costs=1)},
     ...    outputs={b_el: solph.flows.Flow()},
     ...    in_breakpoints=[0,25,50,75,100],
@@ -66,12 +66,27 @@ class PiecewiseLinearConverter(Node):
 PiecewiseLinearConverter'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label,
+        *,
+        inputs,
+        outputs,
+        conversion_function,
+        in_breakpoints,
+        pw_repn,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
 
-        self.in_breakpoints = list(kwargs.get("in_breakpoints"))
-        self.conversion_function = kwargs.get("conversion_function")
-        self.pw_repn = kwargs.get("pw_repn")
+        self.in_breakpoints = list(in_breakpoints)
+        self.conversion_function = conversion_function
+        self.pw_repn = pw_repn
 
         if len(self.inputs) > 1 or len(self.outputs) > 1:
             raise ValueError(
@@ -79,8 +94,10 @@ PiecewiseLinearConverter'>
                 + "more than 1 input and 1 output!"
             )
 
-        nominal_value = [a.nominal_value for a in self.inputs.values()][0]
-        if max(self.in_breakpoints) < nominal_value:
+        nominal_capacity = [a.nominal_capacity for a in self.inputs.values()][
+            0
+        ]
+        if max(self.in_breakpoints) < nominal_capacity:
             raise ValueError(
                 "Largest in_breakpoint must be larger or equal "
                 + "nominal value"
@@ -97,6 +114,7 @@ class PiecewiseLinearConverterBlock(ScalarBlock):
     **The following constraints are created:**
 
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -169,26 +187,26 @@ class PiecewiseLinearConverterBlock(ScalarBlock):
             self.PWLINEARCONVERTERS, m.TIMESTEPS, bounds=get_outflow_bounds
         )
 
-        def _in_equation(block, n, p, t):
+        def _in_equation(block, n, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[list(n.inputs.keys())[0], n, p, t]
+            expr += -m.flow[list(n.inputs.keys())[0], n, t]
             expr += self.inflow[n, t]
             return expr == 0
 
         self.equate_in = Constraint(
-            self.PWLINEARCONVERTERS, m.TIMEINDEX, rule=_in_equation
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, rule=_in_equation
         )
 
-        def _out_equation(block, n, p, t):
+        def _out_equation(block, n, t):
             """Link binary input and output flow to component outflow."""
             expr = 0
-            expr += -m.flow[n, list(n.outputs.keys())[0], p, t]
+            expr += -m.flow[n, list(n.outputs.keys())[0], t]
             expr += self.outflow[n, t]
             return expr == 0
 
         self.equate_out = Constraint(
-            self.PWLINEARCONVERTERS, m.TIMEINDEX, rule=_out_equation
+            self.PWLINEARCONVERTERS, m.TIMESTEPS, rule=_out_equation
         )
 
         self.piecewise = Piecewise(

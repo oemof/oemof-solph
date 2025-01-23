@@ -24,7 +24,7 @@ def storage_level_constraint(
     As a GenericStorage just allows exactly one input and one output,
     an additional bus, the multiplexer_bus, is used for the connections.
     Note that all Flow objects connected to the multiplexer_bus have to have
-    a nominal_value.
+    a nominal_capacity.
 
     Parameters
     ----------
@@ -88,10 +88,10 @@ def storage_level_constraint(
         )
 
         # Define constraints on the output flows
-        def _constraint_output_rule(m, o, p, t):
+        def _constraint_output_rule(m, o, t):
             return (
-                m.flow[multiplexer_bus, o, p, t]
-                / m.flows[multiplexer_bus, o].nominal_value
+                m.flow[multiplexer_bus, o, t]
+                / m.flows[multiplexer_bus, o].nominal_capacity
                 <= active_output[o, t]
             )
 
@@ -100,7 +100,7 @@ def storage_level_constraint(
             f"{name}_output_constraint",
             po.Constraint(
                 OUTPUTS,
-                model.TIMEINDEX,
+                model.TIMESTEPS,
                 rule=_constraint_output_rule,
             ),
         )
@@ -110,7 +110,10 @@ def storage_level_constraint(
         setattr(model, f"{name}_OUTPUTS", OUTPUTS)
 
         active_output = po.Var(
-            OUTPUTS, model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET, domain=po.Binary, bounds=(0, 1)
+            OUTPUTS,
+            model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET,
+            domain=po.Binary,
+            bounds=(0, 1),
         )
         setattr(model, f"{name}_active_output", active_output)
 
@@ -128,12 +131,16 @@ def storage_level_constraint(
                 for o in output_levels:
                     getattr(m, constraint_name).add(
                         (o, p, i, g),
-                        (m.GenericStorageBlock.storage_content_intra[
-                            storage_component,  p, k, g + 1
-                        ] + m.GenericStorageBlock.storage_content_inter[
-                            storage_component, i
-                        ] * (1 - storage_component.loss_rate[t]
-                             ) ** (g * m.timeincrement[tk]))
+                        (
+                            m.GenericStorageBlock.storage_content_intra[
+                                storage_component, p, k, g + 1
+                            ]
+                            + m.GenericStorageBlock.storage_content_inter[
+                                storage_component, i
+                            ]
+                            * (1 - storage_component.loss_rate[t])
+                            ** (g * m.timeincrement[tk])
+                        )
                         / storage_component.nominal_storage_capacity
                         >= active_output[o, p, k, g] * output_levels[o],
                     )
@@ -223,10 +230,10 @@ def storage_level_constraint(
         )
 
         # Define constraints on the input flows
-        def _constraint_input_rule(m, i, p, t):
+        def _constraint_input_rule(m, i, t):
             return (
-                m.flow[i, multiplexer_bus, p, t]
-                / m.flows[i, multiplexer_bus].nominal_value
+                m.flow[i, multiplexer_bus, t]
+                / m.flows[i, multiplexer_bus].nominal_capacity
                 <= 1 - inactive_input[i, t]
             )
 
@@ -235,7 +242,7 @@ def storage_level_constraint(
             f"{name}_input_constraint",
             po.Constraint(
                 INPUTS,
-                model.TIMEINDEX,
+                model.TIMESTEPS,
                 rule=_constraint_input_rule,
             ),
         )
@@ -245,7 +252,10 @@ def storage_level_constraint(
         setattr(model, f"{name}_INPUTS", INPUTS)
 
         inactive_input = po.Var(
-            INPUTS, model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET, domain=po.Binary, bounds=(0, 1)
+            INPUTS,
+            model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET,
+            domain=po.Binary,
+            bounds=(0, 1),
         )
         setattr(model, f"{name}_active_input", inactive_input)
 
@@ -263,12 +273,16 @@ def storage_level_constraint(
                 for inp in input_levels:
                     getattr(m, constraint_name).add(
                         (inp, p, i, g),
-                        (m.GenericStorageBlock.storage_content_intra[
-                            storage_component,  p, k, g + 1
-                        ] + m.GenericStorageBlock.storage_content_inter[
-                            storage_component, i
-                        ] * (1 - storage_component.loss_rate[t]
-                             ) ** (g * m.timeincrement[tk]))
+                        (
+                            m.GenericStorageBlock.storage_content_intra[
+                                storage_component, p, k, g + 1
+                            ]
+                            + m.GenericStorageBlock.storage_content_inter[
+                                storage_component, i
+                            ]
+                            * (1 - storage_component.loss_rate[t])
+                            ** (g * m.timeincrement[tk])
+                        )
                         / storage_component.nominal_storage_capacity
                         - input_levels[inp]
                         <= inactive_input[inp, p, k, g],

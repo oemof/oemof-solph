@@ -96,7 +96,7 @@ storage = solph.components.GenericStorage(
     label="storage",
     inputs={bel: solph.Flow(lifetime=20)},
     outputs={bel: solph.Flow(lifetime=20)},
-    investment=solph.Investment(ep_costs=epc, lifetime=20),
+    nominal_capacity=solph.Investment(ep_costs=epc, lifetime=20),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
     outflow_conversion_factor=0.8,
@@ -149,7 +149,9 @@ init_soc = 0
 
 def test_storage_investment():
     """Make sure that max SOC investment equals max load"""
-    assert results[storage, None]["scalars"]["invest"] == pytest.approx(first_input)
+    assert results[storage, None]["scalars"]["invest"] == pytest.approx(
+        first_input
+    )
 
 
 def test_storage_input():

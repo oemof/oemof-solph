@@ -230,7 +230,9 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=wind_profile,
-                investment=solph.Investment(ep_costs=epc_wind, lifetime=10),
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_wind, lifetime=10
+                ),
             )
         },
     )
@@ -253,7 +255,9 @@ def main():
                     ],
                     ignore_index=True,
                 ),
-                investment=solph.Investment(ep_costs=epc_pv, lifetime=10),
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_pv, lifetime=10
+                ),
             )
         },
     )
@@ -295,7 +299,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc_storage, lifetime=10),
+        nominal_capacity=solph.Investment(ep_costs=epc_storage, lifetime=10),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

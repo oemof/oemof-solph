@@ -16,8 +16,11 @@ SPDX-License-Identifier: MIT
 
 """
 import itertools
+import numbers
 import operator
 import sys
+from collections import abc
+from itertools import groupby
 from typing import Dict
 from typing import Tuple
 
@@ -29,6 +32,7 @@ from pyomo.core.base.var import Var
 
 from oemof.solph.components._generic_storage import GenericStorage
 
+from ._plumbing import _FakeSequence
 from .helpers import flatten
 
 PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
@@ -222,7 +226,7 @@ def results(model, remove_last_time_point=False):
 
     Parameters
     ----------
-    model : oemof.solph.BaseModel
+    model : oemof.solph.Model
         A solved oemof.solph model.
     remove_last_time_point : bool
         The last time point of all TIMEPOINT variables is removed to get the
@@ -239,9 +243,9 @@ def results(model, remove_last_time_point=False):
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
-        k
-        if len(k) > 1
-        else (k[0], None): v[["timestep", "variable_name", "value"]]
+        k if len(k) > 1 else (k[0], None): v[
+            ["timestep", "variable_name", "value"]
+        ]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -284,9 +288,12 @@ def results(model, remove_last_time_point=False):
 
     # Results extraction for a multi-period model
     else:
+        period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
+
         result = _extract_multi_period_model_result(
             model,
             df_dict,
+            period_indexed,
             result,
             result_index,
             remove_last_time_point,
@@ -295,13 +302,12 @@ def results(model, remove_last_time_point=False):
 
     # add dual variables for bus constraints
     if model.dual is not None:
-        grouped = itertools.groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda p: p[0]
+        grouped = groupby(
+            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
         )
-        for bus, timeindex in grouped:
+        for bus, timestep in grouped:
             duals = [
-                model.dual[model.BusBlock.balance[bus, p, t]]
-                for _, p, t in timeindex
+                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
             if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
@@ -374,6 +380,7 @@ def _extract_standard_model_result(
 def _extract_multi_period_model_result(
     model,
     df_dict,
+    period_indexed=None,
     result=None,
     result_index=None,
     remove_last_time_point=False,
@@ -389,6 +396,8 @@ def _extract_multi_period_model_result(
         The optimization model
     df_dict : dict
         dictionary of results DataFrames
+    period_indexed : list
+        list of variables that are indexed by periods
     result : dict
         dictionary to store the results
     result_index : pd.DatetimeIndex
@@ -406,7 +415,7 @@ def _extract_multi_period_model_result(
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         # Split data set
         period_cols = [
-            col for col in df_dict[k].columns if col in PERIOD_INDEXES
+            col for col in df_dict[k].columns if col in period_indexed
         ]
         # map periods to their start years for displaying period results
         d = {
@@ -589,10 +598,12 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                 pd.Series(
                     itertools.accumulate(
                         (
-                            (1 - storage.loss_rate[t])
-                            ** tsa_period["segments"][(k, t - t0)]
-                            if "segments" in tsa_period
-                            else 1 - storage.loss_rate[t]
+                            (
+                                (1 - storage.loss_rate[t])
+                                ** tsa_period["segments"][(k, t - t0)]
+                                if "segments" in tsa_period
+                                else 1 - storage.loss_rate[t]
+                            )
                             for t in range(
                                 t0,
                                 t0 + timesteps - 1,
@@ -619,9 +630,9 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                     k,
                 )
                 if is_last_timestep:
-                    soc_disaggregated.loc[
-                        len(soc_disaggregated)
-                    ] = soc_frame.iloc[-1]
+                    soc_disaggregated.loc[len(soc_disaggregated)] = (
+                        soc_frame.iloc[-1]
+                    )
                 soc_frame = soc_disaggregated
 
             soc_frames.append(soc_frame)
@@ -636,20 +647,25 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     interpolated_soc = soc_ts.interpolate()
     return interpolated_soc.iloc[:-1]
 
+
 def _calculate_multiplexer_actives(values, multiplexer, tsa_parameters):
     """Calculate multiplexer actives"""
     actives_frames = []
     for p, tsa_period in enumerate(tsa_parameters):
         for i, k in enumerate(tsa_period["order"]):
             timesteps = tsa_period["timesteps"]
-            actives_frames.append(pd.DataFrame(
-                values[(p, k)].iloc[0:timesteps],
-                columns=["value"])
+            actives_frames.append(
+                pd.DataFrame(
+                    values[(p, k)].iloc[0:timesteps], columns=["value"]
                 )
+            )
     actives_frames_ts = pd.concat(actives_frames)
-    actives_frames_ts["variable_name"] = values[(p, k)]["variable_name"].values[0]
+    actives_frames_ts["variable_name"] = values[(p, k)][
+        "variable_name"
+    ].values[0]
     actives_frames_ts["timestep"] = range(len(actives_frames_ts))
     return actives_frames_ts
+
 
 def _get_storage_soc_flows_and_keys(flow_dict):
     """Detect storage flows in flow dict"""
@@ -667,9 +683,12 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
         if len(oemof_tuple) == 2:
-            # Must be filtered for variable name "storage_content_inter", otherwise "init_content" variable
-            # (in non-multi-period approach) interferes with SOC results
-            storages[oemof_tuple[0]]["inter"] = data[data["variable_name"] == "storage_content_inter"]
+            # Must be filtered for variable name "storage_content_inter",
+            # otherwise "init_content" variable (in non-multi-period approach)
+            # interferes with SOC results
+            storages[oemof_tuple[0]]["inter"] = data[
+                data["variable_name"] == "storage_content_inter"
+            ]
         if len(oemof_tuple) == 3:
             storages[oemof_tuple[0]]["intra"][
                 (oemof_tuple[1], oemof_tuple[2])
@@ -684,10 +703,12 @@ def _get_multiplexer_flows_and_keys(flow_dict):
     for oemof_tuple, data in flow_dict.items():
         if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
             continue
-        if 'multiplexer_active' in data['variable_name'].values[0]:
-            multiplexer.setdefault(oemof_tuple[0],{})
+        if "multiplexer_active" in data["variable_name"].values[0]:
+            multiplexer.setdefault(oemof_tuple[0], {})
             multiplexer_keys.append(oemof_tuple)
-            multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = data
+            multiplexer[oemof_tuple[0]][
+                (oemof_tuple[1], oemof_tuple[2])
+            ] = data
     return multiplexer, multiplexer_keys
 
 
@@ -711,11 +732,11 @@ def convert_keys_to_strings(result, keep_none_type=False):
     """
     if keep_none_type:
         converted = {
-            tuple([str(e) if e is not None else None for e in k])
-            if isinstance(k, tuple)
-            else str(k)
-            if k is not None
-            else None: v
+            (
+                tuple([str(e) if e is not None else None for e in k])
+                if isinstance(k, tuple)
+                else str(k) if k is not None else None
+            ): v
             for k, v in result.items()
         }
     else:
@@ -792,7 +813,8 @@ def __separate_attrs(
     """
 
     def detect_scalars_and_sequences(com):
-        com_data = {"scalars": {}, "sequences": {}}
+        scalars = {}
+        sequences = {}
 
         default_exclusions = [
             "__",
@@ -820,13 +842,13 @@ def __separate_attrs(
             # "investment" prefix to component data:
             if attr_value.__class__.__name__ == "Investment":
                 invest_data = detect_scalars_and_sequences(attr_value)
-                com_data["scalars"].update(
+                scalars.update(
                     {
                         "investment_" + str(k): v
                         for k, v in invest_data["scalars"].items()
                     }
                 )
-                com_data["sequences"].update(
+                sequences.update(
                     {
                         "investment_" + str(k): v
                         for k, v in invest_data["sequences"].items()
@@ -835,7 +857,7 @@ def __separate_attrs(
                 continue
 
             if isinstance(attr_value, str):
-                com_data["scalars"][a] = attr_value
+                scalars[a] = attr_value
                 continue
 
             # If the label is a tuple it is iterable, therefore it should be
@@ -843,16 +865,19 @@ def __separate_attrs(
             if a == "label":
                 attr_value = str(attr_value)
 
-            # check if attribute is iterable
-            # see: https://stackoverflow.com/questions/1952464/
-            # in-python-how-do-i-determine-if-an-object-is-iterable
-            try:
-                _ = (e for e in attr_value)
-                com_data["sequences"][a] = attr_value
-            except TypeError:
-                com_data["scalars"][a] = attr_value
+            if isinstance(attr_value, abc.Iterable):
+                sequences[a] = attr_value
+            elif isinstance(attr_value, _FakeSequence):
+                scalars[a] = attr_value.value
+            else:
+                scalars[a] = attr_value
 
-        com_data["sequences"] = flatten(com_data["sequences"])
+        sequences = flatten(sequences)
+
+        com_data = {
+            "scalars": scalars,
+            "sequences": sequences,
+        }
         move_undetected_scalars(com_data)
         if exclude_none:
             remove_nones(com_data)
@@ -865,22 +890,14 @@ def __separate_attrs(
 
     def move_undetected_scalars(com):
         for ckey, value in list(com["sequences"].items()):
-            if isinstance(value, str):
+            if isinstance(value, (str, numbers.Number)):
                 com["scalars"][ckey] = value
                 del com["sequences"][ckey]
-                continue
-            try:
-                _ = (e for e in value)
-            except TypeError:
-                com["scalars"][ckey] = value
+            elif isinstance(value, _FakeSequence):
+                com["scalars"][ckey] = value.value
                 del com["sequences"][ckey]
-            else:
-                try:
-                    if not value.default_changed:
-                        com["scalars"][ckey] = value.default
-                        del com["sequences"][ckey]
-                except AttributeError:
-                    pass
+            elif len(value) == 0:
+                del com["sequences"][ckey]
 
     def remove_nones(com):
         for ckey, value in list(com["scalars"].items()):

@@ -28,50 +28,6 @@ def warning_fixture():
     warnings.simplefilter(action="ignore", category=FutureWarning)
 
 
-def test_that_the_sink_errors_actually_get_raised(warning_fixture):
-    """Sink doesn't warn about potentially erroneous usage."""
-    look_out = solph.Bus()
-    with pytest.raises(
-        TypeError, match="got an unexpected keyword argument 'outputs'"
-    ):
-        solph.components.Sink(label="test_sink", outputs={look_out: "A typo!"})
-
-    msg = (
-        "A Sink is designed to have one input but you provided 0."
-        " If this is intended and you know what you are doing you can "
-        "disable the SuspiciousUsageWarning globally."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.components.Sink(
-            label="no input",
-        )
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
-
-
-def test_that_the_source_warnings_actually_get_raised(warning_fixture):
-    """Source doesn't warn about potentially erroneous usage."""
-    look_out = solph.Bus()
-    with pytest.raises(
-        TypeError, match="got an unexpected keyword argument 'inputs'"
-    ):
-        solph.components.Source(
-            label="test_source", inputs={look_out: "A typo!"}
-        )
-
-    msg = (
-        "A Source is designed to have one output but you provided 0."
-        " If this is intended and you know what you are doing you can "
-        "disable the SuspiciousUsageWarning globally."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.components.Source(
-            label="no output",
-        )
-        assert len(w) == 1
-        assert msg in str(w[-1].message)
-
-
 def test_that_the_converter_warnings_actually_get_raised(warning_fixture):
     """Converter doesn't warn about potentially erroneous usage."""
     look_out = solph.Bus()
@@ -138,7 +94,7 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
             variable_costs=25,
             min=0.2,
             max=0.8,
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=500,  # no maximum is provided here
             ),
             nonconvex=solph.NonConvex(),
@@ -173,7 +129,7 @@ def test_link_raise_key_error_in_Linkblock(warning_fixture):
     """Link raises KeyError if conversion factors don't match the connected
     busses."""
 
-    date_time_index = pd.date_range("1/1/2012", periods=3, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
         infer_last_interval=True,
@@ -184,8 +140,8 @@ def test_link_raise_key_error_in_Linkblock(warning_fixture):
     link = solph.components.Link(
         label="transshipment_link",
         inputs={
-            bel0: solph.flows.Flow(nominal_value=4),
-            bel1: solph.flows.Flow(nominal_value=2),
+            bel0: solph.flows.Flow(nominal_capacity=4),
+            bel1: solph.flows.Flow(nominal_capacity=2),
         },
         outputs={bel0: solph.flows.Flow(), look_out: solph.flows.Flow()},
         conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.7},

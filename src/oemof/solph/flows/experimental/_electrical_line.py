@@ -25,7 +25,7 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 from oemof.solph.buses.experimental._electrical_bus import ElectricalBus
 from oemof.solph.flows._flow import Flow
 
@@ -60,7 +60,7 @@ class ElectricalLine(Flow):
 
     def __init__(self, **kwargs):
         super().__init__(
-            nominal_value=kwargs.get("nominal_value"),
+            nominal_capacity=kwargs.get("nominal_capacity"),
             variable_costs=kwargs.get("variable_costs", 0),
             min=kwargs.get("min"),
             max=kwargs.get("max"),
@@ -75,7 +75,7 @@ class ElectricalLine(Flow):
             nonconvex=kwargs.get("nonconvex"),
             custom_attributes=kwargs.get("costom_attributes"),
         )
-        self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+        self.reactance = sequence(kwargs.get("reactance", 0.00001))
 
         self.input = kwargs.get("input")
         self.output = kwargs.get("output")
@@ -170,13 +170,13 @@ class ElectricalLineBlock(ScalarBlock):
             bus.slack = True
 
         def _voltage_angle_relation(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n in group:
                     if n.input.slack is True:
                         self.voltage_angle[n.output, t].value = 0
                         self.voltage_angle[n.output, t].fix()
                     try:
-                        lhs = m.flow[n.input, n.output, p, t]
+                        lhs = m.flow[n.input, n.output, t]
                         rhs = (
                             1
                             / n.reactance[t]
@@ -190,8 +190,8 @@ class ElectricalLineBlock(ScalarBlock):
                             "Error in constraint creation",
                             "of node {}".format(n.label),
                         )
-                    block.electrical_flow.add((n, p, t), (lhs == rhs))
+                    block.electrical_flow.add((n, t), (lhs == rhs))
 
-        self.electrical_flow = Constraint(group, m.TIMEINDEX, noruleinit=True)
+        self.electrical_flow = Constraint(group, m.TIMESTEPS, noruleinit=True)
 
         self.electrical_flow_build = BuildAction(rule=_voltage_angle_relation)

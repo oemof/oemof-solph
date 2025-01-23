@@ -24,7 +24,9 @@ a detailed and complete description of all oemof-solph modules.
 How can I use solph?
 --------------------
 
-To use solph you have to install oemof.solph and at least one solver (see :ref:`installation_label`), which can be used together with pyomo (e.g. CBC, GLPK, Gurobi, Cplex). See the `pyomo installation guide <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ for all supported solvers.
+To use solph you have to install oemof.solph and at least one solver (see :ref:`installation_label`),
+which can be used together with `pyomo <https://pyomo.readthedocs.io/en/stable/getting_started/installation.html>`_
+(e.g. CBC, GLPK, Gurobi, Cplex).
 You can test it by executing one of the existing examples (see :ref:`examples_label`).
 Be aware that the examples require the CBC solver but you can change the solver name in the example files to your
 solver.
@@ -61,7 +63,7 @@ The model time is defined by the number of intervals and the length of intervals
 The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
 
 One can use the function
-:py:func:`~oemof.solph._energy_system/create_year_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc.. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
+:py:func:`create_time_index` to create an equidistant datetime index. By default the function creates an hourly index for one year, so online the year has to be passed to the function. But it is also possible to change the length of the interval to quarter hours etc. The default number of intervals is the number needed to cover the given year but the value can be overwritten by the user.
 
 It is also possible to define the datetime index using pandas. See `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_ for more information.
 
@@ -69,13 +71,13 @@ Both code blocks will create an hourly datetime index for 2011:
 
 .. code-block:: python
 
-    from oemof.solph import create_year_index
-    my_index = create_year_index(2011)
+    from oemof.solph import create_time_index
+    my_index = create_time_index(2011)
 
 .. code-block:: python
 
     import pandas as pd
-    my_index = pd.date_range('1/1/2011', periods=8761, freq='H')
+    my_index = pd.date_range('1/1/2011', periods=8761, freq='h')
 
 This index can be used to define the EnergySystem:
 
@@ -266,13 +268,13 @@ Sink (basic)
 A sink is normally used to define the demand within an energy model but it can also be used to detect excesses.
 
 The example shows the electricity demand of the electricity_bus defined above.
-The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_value'* is the maximum demand the normalised sequence is multiplied with.
+The *'my_demand_series'* should be sequence of normalised valueswhile the *'nominal_capacity'* is the maximum demand the normalised sequence is multiplied with.
 Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be changed by the solver.
 
 .. code-block:: python
 
     solph.components.Sink(label='electricity_demand', inputs={electricity_bus: solph.flows.Flow(
-        fix=my_demand_series, nominal_value=nominal_demand)})
+        fix=my_demand_series, nominal_capacity=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -290,21 +292,21 @@ Source (basic)
 
 A source can represent a pv-system, a wind power plant, an import of natural gas or a slack variable to avoid creating an in-feasible model.
 
-While a wind power plant will have as feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_value*) and an annual limit (*full_load_time_max*).
+While a wind power plant will have as feed-in depending on the weather conditions the natural_gas import might be restricted by maximum value (*nominal_capacity*) and an annual limit (*full_load_time_max*).
 As we do have to pay for imported gas we should set variable costs.
 Comparable to the demand series an *fix* is used to define a fixed the normalised output of a wind power plant.
 Alternatively, you might use *max* to allow for easy curtailment.
-The *nominal_value* sets the installed capacity.
+The *nominal_capacity* sets the installed capacity.
 
 .. code-block:: python
 
     solph.components.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
-            nominal_value=1000, full_load_time_max=1000000, variable_costs=50)})
+            nominal_capacity=1000, full_load_time_max=1000000, variable_costs=50)})
 
     solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
-        fix=wind_power_feedin_series, nominal_value=1000000)})
+        fix=wind_power_feedin_series, nominal_capacity=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -327,7 +329,7 @@ A condensing power plant can be defined by a converter with one input (fuel) and
     solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
-        outputs={b_el: solph.flows.Flow(nominal_value=10e10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=10e10)},
         conversion_factors={electricity_bus: 0.58})
 
 A CHP power plant would be defined in the same manner but with two outputs:
@@ -341,8 +343,8 @@ A CHP power plant would be defined in the same manner but with two outputs:
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow()},
-        outputs={b_el: Flow(nominal_value=30),
-                 b_th: Flow(nominal_value=40)},
+        outputs={b_el: Flow(nominal_capacity=30),
+                 b_th: Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
@@ -357,8 +359,8 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
-        outputs={b_el: Flow(nominal_value=30),
-                 b_th: Flow(nominal_value=40)},
+        outputs={b_el: Flow(nominal_capacity=30),
+                 b_th: Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
                             b_coal: 0.7, b_gas: 0.3})
 
@@ -428,7 +430,7 @@ applies when the second flow is zero (*`conversion_factor_full_condensation`*).
 
     solph.components._extractionTurbineCHP(
         label='variable_chp_gas',
-        inputs={b_gas: solph.flows.Flow(nominal_value=10e10)},
+        inputs={b_gas: solph.flows.Flow(nominal_capacity=10e10)},
         outputs={b_el: solph.flows.Flow(), b_th: solph.flows.Flow()},
         conversion_factors={b_el: 0.3, b_th: 0.5},
         conversion_factor_full_condensation={b_el: 0.5})
@@ -559,16 +561,16 @@ GenericStorage (component)
 A component to model a storage with its basic characteristics. The
 GenericStorage is designed for one input and one output.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity. You can either set it to the net capacity or to the gross capacity and limit it using the min/max attribute.
-To limit the input and output flows, you can define the ``nominal_value`` in the Flow objects.
+To limit the input and output flows, you can define the ``nominal_capacity`` in the Flow objects.
 Furthermore, an efficiency for loading, unloading and a loss rate can be defined.
 
 .. code-block:: python
 
     solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
+        loss_rate=0.001, nominal_capacity=50,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
 For initialising the state of charge before the first time step (time step zero) the parameter ``initial_storage_level`` (default value: ``None``) can be set by a numeric value as fraction of the storage capacity.
@@ -588,9 +590,9 @@ The following code block shows an example of the storage parametrization for the
 
     solph.components.GenericStorage(
         label='storage',
-        inputs={b_el: solph.flows.Flow(nominal_value=9, variable_costs=10)},
-        outputs={b_el: solph.flows.Flow(nominal_value=25, variable_costs=10)},
-        loss_rate=0.001, nominal_storage_capacity=50,
+        inputs={b_el: solph.flows.Flow(nominal_capacity=9, variable_costs=10)},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=25, variable_costs=10)},
+        loss_rate=0.001, nominal_capacity=50,
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
@@ -625,7 +627,7 @@ Based on the `GenericStorage` object the `GenericInvestmentStorageBlock` adds tw
     *	Invest into the flow parameters e.g. a turbine or a pump
     *	Invest into capacity of the storage  e.g. a basin or a battery cell
 
-Investment in this context refers to the value of the variable for the 'nominal_value' (installed capacity) in the investment mode.
+Investment in this context refers to the value of the variable for the 'nominal_capacity' (installed capacity) in the investment mode.
 
 As an addition to other flow-investments, the storage class implements the possibility to couple or decouple the flows
 with the capacity of the storage.
@@ -643,8 +645,8 @@ The following example pictures a Pumped Hydroelectric Energy Storage (PHES). Bot
 
     solph.components.GenericStorage(
         label='PHES',
-        inputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500))},
-        outputs={b_el: solph.flows.Flow(nominal_value=solph.Investment(ep_costs=500)},
+        inputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment(ep_costs=500))},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
         investment = solph.Investment(ep_costs=40))
@@ -682,70 +684,139 @@ The `Link` allows to model connections between two busses, e.g. modeling the tra
 OffsetConverter (component)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The `OffsetConverter` object makes it possible to create a Converter with different efficiencies in part load condition.
-For this object it is necessary to define the inflow as a nonconvex flow and to set a minimum load.
-The following example illustrates how to define an OffsetConverter for given information for the output:
+The `OffsetConverter` object makes it possible to create a Converter with efficiencies depending on the part load condition.
+For this it is necessary to define one flow as a nonconvex flow and to set a minimum load.
+The following example illustrates how to define an OffsetConverter for given
+information for an output, i.e. a combined heat and power plant. The plant
+generates up to 100 kW electric energy at an efficiency of 40 %. In minimal
+load the electric efficiency is at 30 %, and the minimum possible load is 50 %
+of the nominal load. At the same time, heat is produced with a constant
+efficiency. By using the `OffsetConverter` a linear relation of in- and output
+power with a power dependent efficiency is generated.
 
 .. code-block:: python
 
-    eta_min = 0.5       # efficiency at minimal operation point
-    eta_max = 0.8       # efficiency at nominal operation point
-    P_out_min = 20      # absolute minimal output power
-    P_out_max = 100     # absolute nominal output power
+    >>> from oemof import solph
 
-    # calculate limits of input power flow
-    P_in_min = P_out_min / eta_min
-    P_in_max = P_out_max / eta_max
+    >>> eta_el_min = 0.3                  # electrical efficiency at minimal operation point
+    >>> eta_el_max = 0.4                  # electrical efficiency at nominal operation point
+    >>> eta_th_min = 0.5                  # thermal efficiency at minimal operation point
+    >>> eta_th_max = 0.5                  # thermal efficiency at nominal operation point
+    >>> P_out_min = 20                    # absolute minimal output power
+    >>> P_out_max = 100                   # absolute nominal output power
 
-    # calculate coefficients of input-output line equation
-    c1 = (P_out_max-P_out_min)/(P_in_max-P_in_min)
-    c0 = P_out_max - c1*P_in_max
+As reference for our system we use the input and will mark that flow as
+nonconvex respectively. The efficiencies for electricity and heat output have
+therefore to be defined with respect to the input flow. The same is true for
+the minimal and maximal load. Therefore, we first calculate the minimum and
+maximum input of fuel and then derive the slope and offset for both outputs.
+
+.. code-block:: python
+
+    >>> P_in_max = P_out_max / eta_el_max
+    >>> P_in_min = P_out_min / eta_el_min
+    >>> P_in_max
+    250.0
+    >>> round(P_in_min, 2)
+    66.67
+
+With that information, we can derive the normed minimal and maximal load of the
+nonconvex flow, and calculate the slope and the offset for both outputs. Note,
+that the offset for the heat output is 0, because the thermal heat output
+efficiency is constant.
+
+.. code-block:: python
+
+    >>> l_max = 1
+    >>> l_min = P_in_min / P_in_max
+    >>> slope_el, offset_el = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_el_max, eta_el_min
+    ... )
+    >>> slope_th, offset_th = solph.components.slope_offset_from_nonconvex_input(
+    ...     l_max, l_min, eta_th_max, eta_th_min
+    ... )
+    >>> round(slope_el, 3)
+    0.436
+    >>> round(offset_el, 3)
+    -0.036
+    >>> round(slope_th, 3)
+    0.5
+    >>> round(offset_th, 3)
+    0.0
+
+Then we can create our component with the buses attached to it.
+
+.. code-block:: python
+
+    >>> bfuel = solph.Bus("fuel")
+    >>> bel = solph.Bus("electricity")
+    >>> bth = solph.Bus("heat")
 
     # define OffsetConverter
-    solph.components.OffsetConverter(
-        label='boiler',
-        inputs={bfuel: solph.flows.Flow(
-            nominal_value=P_in_max,
-            max=1,
-            min=P_in_min/P_in_max,
-            nonconvex=solph.NonConvex())},
-        outputs={bth: solph.flows.Flow()},
-        coefficients = [c0, c1])
+    >>> diesel_genset = solph.components.OffsetConverter(
+    ...     label='boiler',
+    ...     inputs={
+    ...         bfuel: solph.flows.Flow(
+    ...             nominal_capacity=P_out_max,
+    ...             max=l_max,
+    ...             min=l_min,
+    ...             nonconvex=solph.NonConvex()
+    ...         )
+    ...     },
+    ...     outputs={
+    ...         bel: solph.flows.Flow(),
+    ...         bth: solph.flows.Flow(),
+    ...     },
+    ...     conversion_factors={bel: slope_el, bth: slope_th},
+    ...     normed_offsets={bel: offset_el, bth: offset_th},
+    ... )
 
-This example represents a boiler, which is supplied by fuel and generates heat.
-It is assumed that the nominal thermal power of the boiler (output power) is 100 (kW) and the efficiency at nominal power is 80 %.
-The boiler cannot operate under 20 % of nominal power, in this case 20 (kW) and the efficiency at that part load is 50 %.
-Note that the nonconvex flow has to be defined for the input flow.
-By using the OffsetConverter a linear relation of in- and output power with a power dependent efficiency is generated.
-The following figures illustrate the relations:
+.. note::
 
-.. 	image:: _files/OffsetConverter_power_relation.svg
+    One of the inputs and outputs has to be a `NonConvex` flow and this flow
+    will serve as the reference for the `conversion_factors` and the
+    `normed_offsets`. The `NonConvex` flow also holds
+
+    - the `nominal_capacity` (can be `Investment` in case of investment optimization),
+    - the `min` and
+    - the `max` attributes.
+
+    The `conversion_factors` and `normed_offsets` are specified similar to the
+    `Converter` API with dictionaries referencing the respective input and
+    output buses. Note, that you cannot have the `conversion_factors` or
+    `normed_offsets` point to the `NonConvex` flow.
+
+The following figures show the power at the electrical and the thermal output
+and the resepctive ratios to the nonconvex flow (normalized). The efficiency
+becomes non-linear.
+
+.. 	image:: _files/OffsetConverter_relations_1.svg
    :width: 70 %
-   :alt: OffsetConverter_power_relation.svg
+   :alt: OffsetConverter_relations_1.svg
    :align: center
 
-Now, it becomes clear, why this object has been named `OffsetConverter`. The
-linear equation of in- and outflow does not hit the origin, but is offset. By multiplying
-the Offset :math:`C_{0}` with the binary status variable of the nonconvex flow, the origin (0, 0) becomes
-part of the solution space and the boiler is allowed to switch off:
+
+.. 	image:: _files/OffsetConverter_relations_2.svg
+   :width: 70 %
+   :alt: OffsetConverter_relations_2.svg
+   :align: center
+
+.. math::
+
+    \eta = P(t) / P_\text{ref}(t)
+
+It also becomes clear, why the component has been named `OffsetConverter`. The
+linear equation of inflow to electrical outflow does not hit the origin, but is
+offset. By multiplying the offset :math:`y_\text{0,normed}` with the binary
+status variable of the `NonConvex` flow, the origin (0, 0) becomes part of the
+solution space and the boiler is allowed to switch off.
 
 .. include:: ../src/oemof/solph/components/_offset_converter.py
   :start-after: _OffsetConverter-equations:
   :end-before: """
 
-The following figures shows the efficiency dependent on the output power,
-which results in a nonlinear relation:
-
-.. math::
-
-    \eta = C_1 \cdot P_{out}(t) / (P_{out}(t) - C_0)
-
-.. 	image:: _files/OffsetConverter_efficiency.svg
-   :width: 70 %
-   :alt: OffsetConverter_efficiency.svg
-   :align: center
-
-The parameters :math:`C_{0}` and :math:`C_{1}` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+The parameters :math:`y_\text{0,normed}` and :math:`m` can be given by scalars or by series in order to define a different efficiency equation for every timestep.
+It is also possible to define multiple outputs.
 
 .. note:: See the :py:class:`~oemof.solph.components._offset_converter.OffsetConverter` class for all parameters and the mathematical background.
 
@@ -813,7 +884,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     data = pd.DataFrame.from_dict(data_dict)
 
     # Do timestamp stuff
-    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='H')
+    datetimeindex = pd.date_range(start='1/1/2013', periods=len(data.index), freq='h')
     data['timestamp'] = datetimeindex
     data.set_index('timestamp', inplace=True)
 
@@ -828,7 +899,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
     grid = solph.components.Source(label='Grid',
                         outputs={
                             b_elec: solph.flows.Flow(
-                                nominal_value=10000,
+                                nominal_capacity=10000,
                                 variable_costs=50)}
                         )
     es.add(grid)
@@ -838,7 +909,7 @@ This small example of PV, grid and SinkDSM shows how to use the component
                           outputs={
                               b_elec: solph.flows.Flow(
                                   fix=data['pv'],
-                                  nominal_value=3.5)}
+                                  nominal_capacity=3.5)}
                           )
     es.add(s_wind)
 
@@ -887,7 +958,7 @@ The annual savings by building up new capacity must therefore compensate the ann
 See the API of the :py:class:`~oemof.solph.options.Investment` class to see all possible parameters.
 
 Basically, an instance of the Investment class can be added to a Flow, a
-Storage or a DSM Sink. All parameters that usually refer to the *nominal_value/capacity* will
+Storage or a DSM Sink. All parameters that usually refer to the *nominal_capacity* will
 now refer to the investment variables and existing capacity. It is also
 possible to set a maximum limit for the capacity that can be build.
 If existing capacity is considered for a component with investment mode enabled,
@@ -912,7 +983,7 @@ turbines.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	nominal_value=solph.Investment(ep_costs=epc, maximum=50000))})
+	nominal_capacity=solph.Investment(ep_costs=epc, maximum=50000))})
 
 Let's slightly alter the case and consider for already existing wind power
 capacity of 20,000 kW. We're still expecting the total wind power capacity, thus we
@@ -922,7 +993,7 @@ allow for 30,000 kW of new installations and formulate as follows.
 
     solph.components.Source(label='new_wind_pp', outputs={electricity: solph.flows.Flow(
         fix=wind_power_time_series,
-	    nominal_value=solph.Investment(ep_costs=epc,
+	    nominal_capacity=solph.Investment(ep_costs=epc,
 	                                maximum=30000,
 	                                existing=20000))})
 
@@ -957,7 +1028,7 @@ example of a converter:
         label='converter_nonconvex',
         inputs={bus_0: solph.flows.Flow()},
         outputs={bus_1: solph.flows.Flow(
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=4,
                 maximum=100,
                 minimum=20,
@@ -1027,10 +1098,10 @@ First, you start by defining your energy system as you might have done before, b
     import pandas as pd
     import oemof.solph as solph
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = [
-        pd.date_range('1/1/2013', periods=8760, freq='H'),
-        pd.date_range('1/1/2014', periods=8760, freq='H'),
+        pd.date_range('1/1/2013', periods=8760, freq='h'),
+        pd.date_range('1/1/2014', periods=8760, freq='h'),
     ]
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
@@ -1081,7 +1152,7 @@ So if you want to use this, the above would simplify to:
     def determine_periods(datetimeindex):
         ...
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='H')
+    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
     periods = determine_periods(my_index)  # Make use of method
     my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
 
@@ -1114,7 +1185,7 @@ Then you add all the *components* and *buses* to your energy system, just as you
         label="electricity_demand",
         inputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=1000, fix=[0.8] * len(my_index)
+                nominal_capacity=1000, fix=[0.8] * len(my_index)
             )
         },
     )
@@ -1130,8 +1201,6 @@ but with a few minor additions and modifications in the investment object itself
   free to reinvest or choose another option to fill up the missing capacity.
 * You can define an initial `age` if you have `existing` capacity. If you do not specify anything, the default value 0 will be used,
   meaning your `existing` capacity has just been newly invested.
-* You can define an `interest_rate` that the investor you model has, i.e. the return he desires expressed as the weighted
-  average osts of capital (wacc) and used for calculating annuities in the model itself.
 * You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage.
 
 Here is an example
@@ -1143,11 +1212,10 @@ Here is an example
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=100,
                 ),
                 variable_costs=3,
@@ -1177,11 +1245,10 @@ This would mean that for investments in the particular period, these values woul
         inputs={hydrogen_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
-                    interest_rate=0.06,
                     fixed_costs=[100, 110],
                 ),
                 variable_costs=3,
@@ -1204,7 +1271,7 @@ For components that is not invested into, you also can specify some additional a
         inputs={coal_bus: solph.flows.Flow()},
         outputs={
             electricity_bus: solph.flows.Flow(
-                nominal_value=600,
+                nominal_capacity=600,
                 max=1,
                 min=0.4,
                 lifetime=50,
@@ -1256,13 +1323,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
 
 .. note::
 
-    * You can specify a `discount_rate` for the model. If you do not do so, 0.02 will be used as a default, corresponding
-      to sort of a social discount rate. If you work with costs in real terms, discounting is obsolete, so define
-      `discount_rate = 0` in that case.
-    * You can specify an `interest_rate` for every investment object. If you do not do so, it will be chosen the same
-      as the model's `discount_rate`. You could use this default to model a perfect competition administered by some sort of
-      social planner, but even in a social planner setting, you might want to deviate from the `discount_rate`
-      value and/or discriminate among technologies with different risk profiles and hence different interest requirements.
     * For storage units, the `initial_content` is not allowed combined with multi-period investments.
       The storage inflow and outflow are forced to zero until the storage unit is invested into.
     * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
@@ -1278,130 +1338,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
-
-Modelling cellular energy systems and modularizing energy system models
------------------------------------------------------------------------
-
-The cellular approach is a concept proposed by the [VDE-ETG](https://shop.vde.com/en/vde-study-the-cellular-approach). It is
-related to smart-grids and multi-microgrid systems but extends both. The idea is to group the components of an energy system
-into a hierarchically aggregating structure of cells. For example, the sources, sinks, storages and converters of a household
-could be a single cell. Then a group of physically neighboring households could form another cell, consisting of household-cells.
-This behaviour can be scaled up. The real game-changer in the cellular approach is the way the cells are operated, which will
-not be covered here. Here, we focus on the way such cellular energy systems can be modeled.
-
-So far, the implementation in solph is just a neat way to group different parts of a larger energy system into cells. However,
-the implementation can also be regarded as a precursor for further functionality. Decomposition techniques such
-as [Benders](https://en.wikipedia.org/wiki/Benders_decomposition) or
-[Dantzig-Wolfe](https://en.wikipedia.org/wiki/Dantzig%E2%80%93Wolfe_decomposition) could be implemented in solph. These methods
-are dependent on a special constraint matrix structure, which the cellular modelling approach presented here is helping to obtain.
-
-Modelling procedure
-^^^^^^^^^^^^^^^^^^^
-
-Similar to the creation of regular energy systems, the creation of energy cells is the first step in model creation. Essentially,
-each energy cell is just an energy system, therefore we use the class :py:class:`oemof.solph.EnergySystem` to create energy cells.
-
-.. code-block:: python
-
-    from oemof.solph import EnergySystem
-
-    es = EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=False
-    )
-    ec_1 = EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=False
-    )
-    ec_2 = EnergySystem(
-        label="ec_2", timeindex=timeindex, inver_last_interval=False
-    )
-
-Now we can go on and add components to the energy cells just like we do with regular energy systems.
-
-.. code-block:: python
-
-    from oemof import solph
-
-    bus_el_es = solph.buses.Bus(label="bus_el_es")
-    es.add(bus_el_es)
-
-    bus_el_ec_1 = solph.buses.Bus(label="bus_el_ec_1")
-    sink_el_ec_1 = solph.components.Sink(
-        label="sink_el_ec_1",
-        inputs={bus_el_ec_1: flows.Flow(fix=10, nominal_value=1)},
-    )
-    source_el_ec_1 = solph.components.Source(
-        label="source_el_ec_1",
-        outputs={
-            bus_el_ec_1: flows.Flow(
-                max=30, nominal_value=1, variable_costs=10,
-            ),
-        },
-    )
-    ec_1.add(bus_el_ec_1, sink_el_ec_1, source_el_ec_1)
-
-.. note:: This is just an exemplary piece of code. A (little bit more interesting) working
-    example can be found in the examples.
-
-The next step would be to model the connections between cells. Here, we resort to the class
-:py:class:`oemof.solph.components.Link`. Each connection Link has two inputs (from the
-"parent cell" and the "child cell") and two outputs (to the "parent cell" and the "child
-cell"). A connection between the "parent cell" `es` and the "child cell" `ec_1` could look
-like this:
-
-.. code-block:: python
-
-    connector_el_ec_1 = solph.buses.Bus(
-        label="connector_el_ec_1",
-        inputs={
-            bus_el_es: flows.Flow(),
-            bus_el_ec_1: flows.Flow(),
-        },
-        outputs={
-            bus_el_es: flows.Flow(),
-            bus_el_ec_1: flows.Flow(),
-        },
-        conversion_factors={
-            (bus_el_es, bus_el_ec_1): 0.85,
-            (bus_el_ec_1, bus_el_es): 0.85
-        }
-    )
-    es.add(connector_el_ec_1)
-
-The `conversion_factors` can be used to model transmission losses. Here, a symmetrical
-loss of 15% is assumed.
-All connection Links are added to the upmost energy cell.
-
-.. note:: Note that we do not add the energy cells as components to their parent cells!
-    Instead, the hierarchical structure is flattened and all connections between the cells
-    are created as depicted above.
-
-The last step is to create (and solve) the model. Again, this is fairly similar to the
-regular model creation. However, instead of passing just one instance of
-:py:class:`oemof.solph.EnergySystem`, a list of energy systems is passed.
-
-.. warning::
-    By convention the first element of the list is assumed to be the upmost energy cell.
-    The ordering afterwards does not play a role.
-
-.. note:: The resulting model is monolithic. This means that all components of all energy
-    cells are actually grouped into one pyomo model. It would, therefore, also be possible
-    to model all the components in one :py:class:`oemof.solph.EnergySystem` instance and
-    the results would be identical.
-
-.. code-block:: python
-
-    cmodel = Model(
-        energysystem=[es, ec_1, ec_2, ...]
-    )
-    cmodel.solve()
-
-As pointed out above, the resulting model is monolithic. Nonetheless, this modelling approach
-holds some benefits:
-
-* Better overview through segmentation of the energy system
-* (Facilitated) opportunity to model cellular energy systems where the energy exchanged between cells
-  is of interest
-* Segmentation of the energy system is a necessary precursor for distributed optimization via Dantzig-Wolfe
 
 
 Mixed Integer (Linear) Problems
@@ -1432,9 +1368,9 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
         inputs={b_gas: solph.flows.Flow()},
         outputs={b_el: solph.flows.Flow(
             nonconvex=solph.NonConvex(),
-            nominal_value=30,
+            nominal_capacity=30,
             min=0.5),
-        b_th: solph.flows.Flow(nominal_value=40)},
+        b_th: solph.flows.Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created Converter (i.e., CHP)
@@ -1476,7 +1412,7 @@ This nonlinearity is linearised in the
                 min=0.2,
                 max=1,
                 nonconvex=solph.NonConvex(),
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=90,
                     maximum=150, # required for the linearization
                 ),

@@ -1,0 +1,49 @@
+v0.5.3 (June 25th, 2024)
+------------------------
+
+API changes
+###########
+
+* The `OffsetConverter` expects two dictionaries now instead of the
+  `coefficient` tuple. These are, `conversion_factors` with the slope relative
+  to the `NonConvex` flow, and `normed_offsets` with the normed offsets
+  relative to the `NonConvex` flow.
+* The `NonConvex` attribute must be specified for one of `Flow` at the inlets
+  or outlets of the `OffsetConverter`. `min`, `max` and `nominal_capacity` have to
+  be specified for the same `Flow`.
+
+New features
+############
+
+* `OffsetConverter` can now handle multiple inputs and outputs
+* There are two methods available for the `OffsetConverter` to calculate the
+  slope and normed offset relative to the `NonConvex` input given the `min`,
+  `max` and the respective efficiencies/ratios, i.e.
+  `slope_offset_from_nonconvex_input` and `slope_offset_from_nonconvex_output`.
+
+Bug fixes
+#########
+
+* Fix custom attributes of Sink, Source, GenericCHP and Converter components
+  not being properly passed to base Node class
+
+Other changes
+#############
+
+* Unified (usage) documentation for `OffsetConverter`
+* Remove approach to model cellular systems (was more confusing than it helped)
+* Refine indexing of flows (period index was not needed).
+
+Known issues
+############
+
+* Incompatible to numpy >= 2.0.0. This is because of Pyomo, but we have to
+  enforce a lower version in our package.
+
+Contributors
+############
+
+* Lennart Schürmann
+* Richard Keil
+* Francesco Witte
+* Patrik Schönfeldt

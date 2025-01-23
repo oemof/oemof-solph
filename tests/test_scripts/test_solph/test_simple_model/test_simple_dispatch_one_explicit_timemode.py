@@ -40,16 +40,16 @@ def test_dispatch_one_time_step(solver="cbc"):
 
     # sources
     wind = Source(
-        label="wind", outputs={bel: Flow(fix=0.5, nominal_value=66.3)}
+        label="wind", outputs={bel: Flow(fix=0.5, nominal_capacity=66.3)}
     )
 
     # demands (electricity/heat)
     demand_el = Sink(
-        label="demand_elec", inputs={bel: Flow(nominal_value=85, fix=0.3)}
+        label="demand_elec", inputs={bel: Flow(nominal_capacity=85, fix=0.3)}
     )
 
     demand_th = Sink(
-        label="demand_therm", inputs={bth: Flow(nominal_value=40, fix=0.2)}
+        label="demand_therm", inputs={bth: Flow(nominal_capacity=40, fix=0.2)}
     )
 
     # combined heat and power plant (chp)
@@ -57,8 +57,8 @@ def test_dispatch_one_time_step(solver="cbc"):
         label="pp_chp",
         inputs={bgas: Flow()},
         outputs={
-            bel: Flow(nominal_value=30, variable_costs=42),
-            bth: Flow(nominal_value=40),
+            bel: Flow(nominal_capacity=30, variable_costs=42),
+            bth: Flow(nominal_capacity=40),
         },
         conversion_factors={bel: 0.3, bth: 0.4},
     )
@@ -72,11 +72,11 @@ def test_dispatch_one_time_step(solver="cbc"):
     heat_pump = Converter(
         label="heat_pump",
         inputs={bel: Flow(), b_heat_source: Flow()},
-        outputs={bth: Flow(nominal_value=10)},
+        outputs={bth: Flow(nominal_capacity=10)},
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1], timemode="explicit")
+    energysystem = EnergySystem(timeincrement=[1])
     energysystem.add(
         bgas,
         bel,

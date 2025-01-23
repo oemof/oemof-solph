@@ -52,7 +52,7 @@ def main():
     # Calculate parameters and initialize the energy system and
     ##########################################################################
     periods = 24
-    time = pd.date_range("1/1/2018", periods=periods, freq="H")
+    time = pd.date_range("1/1/2018", periods=periods, freq="h")
 
     demand_heat = np.full(periods, 5)
     demand_heat[:4] = 0
@@ -69,14 +69,14 @@ def main():
 
     sink_heat = solph.components.Sink(
         label="demand",
-        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_value=1)},
+        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_capacity=1)},
     )
 
     fireplace = solph.components.Source(
         label="fireplace",
         outputs={
             b_heat: solph.Flow(
-                nominal_value=3,
+                nominal_capacity=3,
                 variable_costs=0,
                 nonconvex=solph.NonConvex(activity_costs=activity_costs),
             )
@@ -85,7 +85,7 @@ def main():
 
     boiler = solph.components.Source(
         label="boiler",
-        outputs={b_heat: solph.Flow(nominal_value=10, variable_costs=1)},
+        outputs={b_heat: solph.Flow(nominal_capacity=10, variable_costs=1)},
     )
 
     es.add(sink_heat, fireplace, boiler)

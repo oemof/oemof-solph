@@ -61,7 +61,6 @@ License
 import logging
 import os
 import pprint as pp
-import warnings
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -71,28 +70,48 @@ from oemof.tools import logger
 from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
-from oemof.solph import components as cmp
+from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
 from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
+STORAGE_LABEL = "battery_storage"
 
-def main():
+
+def get_data_from_file_path(file_path: str) -> pd.DataFrame:
+    dir = os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(dir + "/" + file_path)
+    return data
+
+
+def plot_figures_for(element: dict) -> None:
+    figure, axes = plt.subplots(figsize=(10, 5))
+    element["sequences"].plot(ax=axes, kind="line", drawstyle="steps-post")
+    plt.legend(
+        loc="upper center",
+        prop={"size": 8},
+        bbox_to_anchor=(0.5, 1.25),
+        ncol=2,
+    )
+    figure.subplots_adjust(top=0.8)
+    plt.show()
+
+
+def main(dump_and_restore=False):
+    # For models that need a long time to optimise, saving and loading the
+    # EnergySystem might be advised. By default, we do not do this here. Feel
+    # free to experiment with this once you understood the rest of the code.
+    dump_results = restore_results = dump_and_restore
+
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
 
     # Read data file
-
-    filename = os.path.join(os.getcwd(), "basic_example.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
+    file_name = "basic_example.csv"
+    data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
@@ -109,12 +128,13 @@ def main():
     logging.info("Initialize the energy system")
     date_time_index = create_time_index(2012, number=number_of_time_steps)
 
+    # create the energysystem and assign the time index
     energysystem = EnergySystem(
         timeindex=date_time_index, infer_last_interval=False
     )
 
     ##########################################################################
-    # Create oemof object
+    # Create oemof objects
     ##########################################################################
 
     logging.info("Create oemof objects")
@@ -123,66 +143,95 @@ def main():
     # connect components to these buses (see below).
 
     # create natural gas bus
-    bgas = buses.Bus(label="natural_gas")
+    bus_gas = buses.Bus(label="natural_gas")
 
     # create electricity bus
-    bel = buses.Bus(label="electricity")
+    bus_electricity = buses.Bus(label="electricity")
 
     # adding the buses to the energy system
-    energysystem.add(bgas, bel)
+    energysystem.add(bus_gas, bus_electricity)
 
     # create excess component for the electricity bus to allow overproduction
-    energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
-
-    # create source object representing the gas commodity (annual limit)
     energysystem.add(
-        cmp.Source(
+        components.Sink(
+            label="excess_bus_electricity",
+            inputs={bus_electricity: flows.Flow()},
+        )
+    )
+
+    # create source object representing the gas commodity
+    energysystem.add(
+        components.Source(
             label="rgas",
-            outputs={bgas: flows.Flow()},
+            outputs={bus_gas: flows.Flow()},
         )
     )
 
     # create fixed source object representing wind power plants
     energysystem.add(
-        cmp.Source(
+        components.Source(
             label="wind",
-            outputs={bel: flows.Flow(fix=data["wind"], nominal_value=1000000)},
+            outputs={
+                bus_electricity: flows.Flow(
+                    fix=data["wind"], nominal_capacity=1000000
+                )
+            },
         )
     )
 
     # create fixed source object representing pv power plants
     energysystem.add(
-        cmp.Source(
+        components.Source(
             label="pv",
-            outputs={bel: flows.Flow(fix=data["pv"], nominal_value=582000)},
+            outputs={
+                bus_electricity: flows.Flow(
+                    fix=data["pv"], nominal_capacity=582000
+                )
+            },
         )
     )
 
     # create simple sink object representing the electrical demand
+    # nominal_capacity is set to 1 because demand_el is not a normalised series
     energysystem.add(
-        cmp.Sink(
+        components.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=data["demand_el"], nominal_value=1)},
+            inputs={
+                bus_electricity: flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
+            },
         )
     )
 
     # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Converter(
+        components.Converter(
             label="pp_gas",
-            inputs={bgas: flows.Flow()},
-            outputs={bel: flows.Flow(nominal_value=10e10, variable_costs=50)},
-            conversion_factors={bel: 0.58},
+            inputs={bus_gas: flows.Flow()},
+            outputs={
+                bus_electricity: flows.Flow(
+                    nominal_capacity=10e10, variable_costs=50
+                )
+            },
+            conversion_factors={bus_electricity: 0.58},
         )
     )
 
     # create storage object representing a battery
-    storage = cmp.GenericStorage(
-        nominal_storage_capacity=10077997,
-        label="storage",
-        inputs={bel: flows.Flow(nominal_value=10077997 / 6)},
+    nominal_capacity = 10077997
+    nominal_capacity = nominal_capacity / 6
+
+    battery_storage = components.GenericStorage(
+        nominal_capacity=nominal_capacity,
+        label=STORAGE_LABEL,
+        inputs={
+            bus_electricity: flows.Flow(nominal_capacity=nominal_capacity)
+        },
         outputs={
-            bel: flows.Flow(nominal_value=10077997 / 6, variable_costs=0.001)
+            bus_electricity: flows.Flow(
+                nominal_capacity=nominal_capacity, variable_costs=0.001
+            )
         },
         loss_rate=0.00,
         initial_storage_level=None,
@@ -190,7 +239,7 @@ def main():
         outflow_conversion_factor=0.8,
     )
 
-    energysystem.add(storage)
+    energysystem.add(battery_storage)
 
     ##########################################################################
     # Optimise the energy system and plot the results
@@ -199,22 +248,25 @@ def main():
     logging.info("Optimise the energy system")
 
     # initialise the operational model
-    model = Model(energysystem)
+    energysystem_model = Model(energysystem)
 
     # This is for debugging only. It is not(!) necessary to solve the problem
     # and should be set to False to save time and disc space in normal use. For
     # debugging the timesteps should be set to 3, to increase the readability
     # of the lp-file.
     if debug:
-        filename = os.path.join(
+        file_path = os.path.join(
             helpers.extend_basic_path("lp_files"), "basic_example.lp"
         )
-        logging.info("Store lp-file in {0}.".format(filename))
-        model.write(filename, io_options={"symbolic_solver_labels": True})
+        logging.info(f"Store lp-file in {file_path}.")
+        io_option = {"symbolic_solver_labels": True}
+        energysystem_model.write(file_path, io_options=io_option)
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+    energysystem_model.solve(
+        solver=solver, solve_kwargs={"tee": solver_verbose}
+    )
 
     logging.info("Store the energy system with the results.")
 
@@ -222,74 +274,54 @@ def main():
     # from the model transfer them into a homogeneous structured dictionary.
 
     # add results to the energy system to make it possible to store them.
-    energysystem.results["main"] = processing.results(model)
-    energysystem.results["meta"] = processing.meta_results(model)
+    energysystem.results["main"] = processing.results(energysystem_model)
+    energysystem.results["meta"] = processing.meta_results(energysystem_model)
 
     # The default path is the '.oemof' folder in your $HOME directory.
     # The default filename is 'es_dump.oemof'.
     # You can omit the attributes (as None is the default value) for testing
     # cases. You should use unique names/folders for valuable results to avoid
     # overwriting.
-
-    # store energy system with results
-    energysystem.dump(dpath=None, filename=None)
+    if dump_results:
+        energysystem.dump(dpath=None, filename=None)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************
     # *************************************************************************
 
-    logging.info("**** The script can be divided into two parts here.")
-    logging.info("Restore the energy system and the results.")
-    energysystem = EnergySystem()
-    energysystem.restore(dpath=None, filename=None)
+    # Saved data can be restored in a second script. So you can work on the
+    # data analysis without re-running the optimisation every time. If you do
+    # so, make sure that you really load the results you want. For example,
+    # if dumping fails, you might exidentially load outdated results.
+    if restore_results:
+        logging.info("**** The script can be divided into two parts here.")
+        logging.info("Restore the energy system and the results.")
+
+        energysystem = EnergySystem()
+        energysystem.restore(dpath=None, filename=None)
 
     # define an alias for shorter calls below (optional)
     results = energysystem.results["main"]
-    storage = energysystem.groups["storage"]
+    storage = energysystem.groups[STORAGE_LABEL]
 
     # print a time slice of the state of charge
-    print("")
-    print("********* State of Charge (slice) *********")
-    print(
-        results[(storage, None)]["sequences"][
-            datetime(2012, 2, 25, 8, 0, 0) : datetime(2012, 2, 25, 17, 0, 0)
-        ]
-    )
-    print("")
+    start_time = datetime(2012, 2, 25, 8, 0, 0)
+    end_time = datetime(2012, 2, 25, 17, 0, 0)
+
+    print("\n********* State of Charge (slice) *********")
+    print(f"{results[(storage, None)]['sequences'][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
-    custom_storage = views.node(results, "storage")
+    custom_storage = views.node(results, STORAGE_LABEL)
     electricity_bus = views.node(results, "electricity")
 
     # plot the time series (sequences) of a specific component/bus
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-    custom_storage["sequences"].plot(
-        ax=ax, kind="line", drawstyle="steps-post"
-    )
-    plt.legend(
-        loc="upper center",
-        prop={"size": 8},
-        bbox_to_anchor=(0.5, 1.25),
-        ncol=2,
-    )
-    fig.subplots_adjust(top=0.8)
-    plt.show()
-
-    fig, ax = plt.subplots(figsize=(10, 5))
-    electricity_bus["sequences"].plot(
-        ax=ax, kind="line", drawstyle="steps-post"
-    )
-    plt.legend(
-        loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.3), ncol=2
-    )
-    fig.subplots_adjust(top=0.8)
-    plt.show()
+    plot_figures_for(custom_storage)
+    plot_figures_for(electricity_bus)
 
     # print the solver results
     print("********* Meta results *********")
-    pp.pprint(energysystem.results["meta"])
-    print("")
+    pp.pprint(f"{energysystem.results['meta']}\n")
 
     # print the sums of the flows around the electricity bus
     print("********* Main results *********")

@@ -12,13 +12,13 @@
 
 ------------------------------
 
-.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/workflows/tox%20pytests/badge.svg?branch=dev
+.. |tox-pytest| image:: https://github.com/oemof/oemof-solph/actions/workflows/tox_pytests.yml/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |tox-checks| image:: https://github.com/oemof/oemof-solph/workflows/tox%20checks/badge.svg?branch=dev
+.. |tox-checks| image:: https://github.com/oemof/oemof-solph/actions/workflows/tox_checks.yml/badge.svg?branch=dev
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3A%22tox+checks%22
 
-.. |packaging| image:: https://github.com/oemof/oemof-solph/workflows/packaging/badge.svg?branch=dev
+.. |packaging| image:: https://github.com/oemof/oemof-solph/actions/workflows/packaging.yml/badge.svg
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
@@ -61,9 +61,9 @@
     :alt: Supported implementations
     :target: https://pypi.org/project/oemof.solph
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/v0.5.1/dev
+.. |commits-since| image:: https://img.shields.io/github/commits-since/oemof/oemof-solph/latest/dev
     :alt: Commits since latest release
-    :target: https://github.com/oemof/oemof-solph/compare/v0.5.1...dev
+    :target: https://github.com/oemof/oemof-solph/compare/master...dev
 
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
@@ -165,7 +165,8 @@ There are several solvers that can work with oemof, both open source and commerc
 Two open source solvers are widely used (CBC and GLPK), but oemof suggests CBC (Coin-or branch and cut).
 It may be useful to compare results of different solvers to see which performs best.
 Other commercial solvers, like Gurobi or Cplex, are also options.
-Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`_ to learn about which solvers are supported.
+Have a look at the `pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`_
+to learn about which solvers are supported.
 
 Check the solver installation by executing the test_installation example below (see section Installation Test).
 
@@ -188,7 +189,7 @@ Check the solver installation by executing the test_installation example (see th
 
 Please follow the installation instructions on the respective homepages for details.
 
-CBC-solver: https://projects.coin-or.org/Cbc
+CBC-solver: https://github.com/coin-or/Cbc
 
 GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
@@ -252,19 +253,14 @@ The core ideas of oemof as a whole are described in
 (preprint at `arXiv:1808.0807 <https://arxiv.org/abs/1808.08070v1>`_).
 To allow citing specific versions, we use the zenodo project to get a DOI for each version.
 
-
-.. _solph_examples_label:
-
-Examples
-========
+Example Applications
+====================
 
 The combination of specific modules (often including other packages) is called an
 application (app). For example, it can depict a concrete energy system model.
 You can find a large variety of helpful examples in the documentation.
 The examples show the optimisation of different energy systems and are supposed
 to help new users to understand the framework's structure.
-There is some elaboration on the examples in the respective repository.
-The repository has sections for each major release.
 
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
 or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact information).
@@ -272,7 +268,7 @@ or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact informa
 License
 =======
 
-Copyright (c) 2023 oemof developer group
+Copyright (c) oemof developer group
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

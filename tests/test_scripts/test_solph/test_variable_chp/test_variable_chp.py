@@ -26,7 +26,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     logging.info("Initialize the energy system")
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
+    date_time_index = pd.date_range("5/5/2012", periods=5, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=True
     )
@@ -87,7 +87,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         solph.components.Sink(
             label=("demand", "elec1"),
             inputs={
-                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -95,7 +97,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         solph.components.Sink(
             label=("demand", "elec2"),
             inputs={
-                bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel2: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -106,7 +110,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
             label=("demand", "therm1"),
             inputs={
                 bth: solph.flows.Flow(
-                    fix=data["demand_th"], nominal_value=741000
+                    fix=data["demand_th"], nominal_capacity=741000
                 )
             },
         )
@@ -116,7 +120,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
             label=("demand", "therm2"),
             inputs={
                 bth2: solph.flows.Flow(
-                    fix=data["demand_th"], nominal_value=741000
+                    fix=data["demand_th"], nominal_capacity=741000
                 )
             },
         )
@@ -126,7 +130,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     energysystem.add(
         solph.components.Converter(
             label=("fixed_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel2: solph.flows.Flow(), bth2: solph.flows.Flow()},
             conversion_factors={bel2: 0.3, bth2: 0.5},
         )
@@ -136,7 +140,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     energysystem.add(
         solph.components.ExtractionTurbineCHP(
             label=("variable_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
@@ -195,8 +199,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)][
             "scalars"
         ]["conversion_factors_('electricity', 2)"]
-        == 0.3
-    )
+    ) == pytest.approx(0.3)
 
     # objective function
     assert solph.processing.meta_results(om)["objective"] == pytest.approx(

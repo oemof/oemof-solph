@@ -29,6 +29,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._plumbing import valid_sequence
+
 
 class InvestmentFlowBlock(ScalarBlock):
     r"""Block for all flows with :attr:`Investment` being not None.
@@ -141,11 +143,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
         self.MIN_INVESTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if (g[2].min[0] != 0 or len(g[2].min) > 1)
-            ]
+            initialize=[(g[0], g[1]) for g in group if g[2].min.min() != 0]
         )
 
         self.EXISTING_INVESTFLOWS = Set(
@@ -182,19 +180,19 @@ class InvestmentFlowBlock(ScalarBlock):
         * :math:`P(p, t)`
 
             Actual flow value
-            (created in :class:`oemof.solph.models.BaseModel`),
+            (created in :class:`oemof.solph.models.Model`),
             indexed by tuple of periods p and timestep t
 
         * :math:`P_{invest}(p)`
 
             Value of the investment variable in period p,
             equal to what is being invested and equivalent resp. similar to
-            the nominal value of the flows after optimization.
+            the nominal capacity of the flows after optimization.
 
         * :math:`P_{total}(p)`
 
             Total installed capacity / energy in period p,
-            equivalent to the nominal value of the flows after optimization.
+            equivalent to the nominal capacity of the flows after optimization.
 
         * :math:`P_{old}(p)`
 
@@ -629,7 +627,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.FIXED_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         == self.total[i, o, p] * m.flows[i, o].fix[t]
                     )
                     self.fixed.add((i, o, p, t), expr)
@@ -646,7 +644,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.NON_FIXED_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         <= self.total[i, o, p] * m.flows[i, o].max[t]
                     )
                     self.max.add((i, o, p, t), expr)
@@ -663,7 +661,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.MIN_INVESTFLOWS:
                 for p, t in m.TIMEINDEX:
                     expr = (
-                        m.flow[i, o, p, t]
+                        m.flow[i, o, t]
                         >= self.total[i, o, p] * m.flows[i, o].min[t]
                     )
                     self.min.add((i, o, p, t), expr)
@@ -678,7 +676,7 @@ class InvestmentFlowBlock(ScalarBlock):
             in investment case.
             """
             expr = sum(
-                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) <= (
                 m.flows[i, o].full_load_time_max
                 * sum(self.total[i, o, p] for p in m.PERIODS)
@@ -695,7 +693,7 @@ class InvestmentFlowBlock(ScalarBlock):
             in investment case.
             """
             expr = sum(
-                m.flow[i, o, p, t] * m.timeincrement[t] for p, t in m.TIMEINDEX
+                m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
                 sum(self.total[i, o, p] for p in m.PERIODS)
                 * m.flows[i, o].full_load_time_min
@@ -923,7 +921,7 @@ class InvestmentFlowBlock(ScalarBlock):
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -947,7 +945,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -966,7 +964,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -992,7 +990,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         * present_value_factor_remaining
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -1011,7 +1009,9 @@ class InvestmentFlowBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.INVESTFLOWS:
-                if m.flows[i, o].investment.fixed_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                ):
                     lifetime = m.flows[i, o].investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1021,15 +1021,13 @@ class InvestmentFlowBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
-                            for pp in range(
-                                m.es.periods_years[p],
-                                range_limit,
-                            )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                            for pp in range(m.es.periods_years[p], range_limit)
+                        )
 
             for i, o in self.EXISTING_INVESTFLOWS:
-                if m.flows[i, o].investment.fixed_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                ):
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
                     range_limit = min(
@@ -1038,7 +1036,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 
@@ -1114,17 +1111,13 @@ class InvestmentFlowBlock(ScalarBlock):
                     self.invest[i, o, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
                 if nonconvex:
                     return convex_investment_costs + self.invest_status[
                         i, o, p
                     ] * (
                         m.flows[i, o].investment.offset[-1]
                         - m.flows[i, o].investment.offset[p]
-                    ) * (
-                        1 + m.discount_rate
-                    ) ** (
-                        -end_year_of_optimization
                     )
                 else:
                     return convex_investment_costs

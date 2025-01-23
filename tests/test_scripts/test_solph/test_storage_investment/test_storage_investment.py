@@ -54,7 +54,7 @@ def test_optimise_storage_size(
     global PP_GAS
 
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=400, freq="h")
 
     es = solph.EnergySystem(
         timeindex=date_time_index,
@@ -80,7 +80,9 @@ def test_optimise_storage_size(
         solph.components.Sink(
             label="demand",
             inputs={
-                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -91,7 +93,8 @@ def test_optimise_storage_size(
             label="rgas",
             outputs={
                 bgas: solph.flows.Flow(
-                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                    nominal_capacity=194397000 * 400 / 8760,
+                    full_load_time_max=1,
                 )
             },
         )
@@ -101,7 +104,9 @@ def test_optimise_storage_size(
         solph.components.Source(
             label="wind",
             outputs={
-                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+                bel: solph.flows.Flow(
+                    fix=data["wind"], nominal_capacity=1000000
+                )
             },
         )
     )
@@ -110,7 +115,7 @@ def test_optimise_storage_size(
         solph.components.Source(
             label="pv",
             outputs={
-                bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)
+                bel: solph.flows.Flow(fix=data["pv"], nominal_capacity=582000)
             },
         )
     )
@@ -120,7 +125,7 @@ def test_optimise_storage_size(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={
-            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+            bel: solph.flows.Flow(nominal_capacity=1e11, variable_costs=50)
         },
         conversion_factors={bel: 0.58},
     )
@@ -139,7 +144,7 @@ def test_optimise_storage_size(
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            nominal_storage_capacity=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=epc,
                 existing=6851,
             ),
@@ -157,7 +162,7 @@ def test_optimise_storage_size(
     es.dump()
 
 
-def test_results_with_actual_dump():
+def test_results_with_recent_dump():
     test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
@@ -196,9 +201,9 @@ def test_results_with_actual_dump():
     # Problem results
     assert meta["problem"]["Lower bound"] == 4.231675777e17
     assert meta["problem"]["Upper bound"], 4.231675777e17
-    assert meta["problem"]["Number of variables"] == 2807
-    assert meta["problem"]["Number of constraints"] == 2808
-    assert meta["problem"]["Number of nonzeros"] == 1197
+    assert meta["problem"]["Number of variables"] == 2808
+    assert meta["problem"]["Number of constraints"] == 2809
+    assert meta["problem"]["Number of nonzeros"] == 1199
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
 

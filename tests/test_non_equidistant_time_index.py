@@ -24,7 +24,7 @@ from oemof.solph import processing
 class TestParameterResult:
     @classmethod
     def setup_class(cls):
-        dtindex1 = pd.date_range("1/1/2012", periods=24, freq="H")
+        dtindex1 = pd.date_range("1/1/2012", periods=24, freq="h")
         dtindex2 = pd.date_range("1/2/2012", periods=49, freq="30min")
         dtindex = dtindex1.union(dtindex2)
         es = EnergySystem(timeindex=dtindex, infer_last_interval=False)
@@ -40,7 +40,7 @@ class TestParameterResult:
             inputs={b_diesel: flows.Flow(variable_costs=2)},
             outputs={
                 b_el1: flows.Flow(
-                    variable_costs=1, nominal_value=Investment(ep_costs=500)
+                    variable_costs=1, nominal_capacity=Investment(ep_costs=500)
                 )
             },
             conversion_factors={b_el1: 0.5},
@@ -48,7 +48,7 @@ class TestParameterResult:
 
         batt = cmp.GenericStorage(
             label="storage",
-            nominal_storage_capacity=1000,
+            nominal_capacity=1000,
             inputs={b_el1: flows.Flow(variable_costs=3)},
             outputs={b_el1: flows.Flow(variable_costs=2.5)},
             loss_rate=0.00,
@@ -64,7 +64,7 @@ class TestParameterResult:
             label="demand_el",
             inputs={
                 b_el1: flows.Flow(
-                    nominal_value=1,
+                    nominal_capacity=1,
                     fix=demand_values,
                 )
             },

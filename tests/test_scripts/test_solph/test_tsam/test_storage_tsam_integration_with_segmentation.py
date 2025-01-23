@@ -51,14 +51,11 @@ tindex = pd.date_range("2022-01-01", periods=4, freq="H")
 
 energysystem = solph.EnergySystem(
     timeindex=tindex,
-    periods=[tindex],
-    tsa_parameters=[
-        {
-            "timesteps_per_period": 4,
-            "order": [0, 1, 1, 0],
-            "segments": {(0, 0): 1, (0, 1): 3, (1, 0): 2, (1, 1): 2},
-        },
-    ],
+    tsa_parameters={
+        "timesteps_per_period": 4,
+        "order": [0, 1, 1, 0],
+        "segments": {(0, 0): 1, (0, 1): 3, (1, 0): 2, (1, 1): 2},
+    },
     infer_last_interval=False,
 )
 
@@ -115,7 +112,6 @@ logging.info("Optimise the energy system")
 
 # initialise the operational model
 om = solph.Model(energysystem)
-om.write("model.lp", io_options={"symbolic_solver_labels": True})
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")

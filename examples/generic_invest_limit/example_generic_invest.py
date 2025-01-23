@@ -105,7 +105,7 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand_a",
-            inputs={bus_a_1: solph.Flow(fix=data, nominal_value=1)},
+            inputs={bus_a_1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
@@ -130,7 +130,7 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand_b",
-            inputs={bus_b_1: solph.Flow(fix=data, nominal_value=1)},
+            inputs={bus_b_1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
@@ -141,7 +141,7 @@ def main():
             inputs={bus_a_0: solph.Flow()},
             outputs={
                 bus_a_1: solph.Flow(
-                    nominal_value=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 2},
                     ),
@@ -158,7 +158,7 @@ def main():
             inputs={bus_b_0: solph.Flow()},
             outputs={
                 bus_b_1: solph.Flow(
-                    nominal_value=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 1},
                     ),

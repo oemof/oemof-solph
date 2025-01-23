@@ -1,21 +1,33 @@
-v0.6.0 (????)
--------------
+v0.6.0
+------
 
 API changes
 ###########
 
-* New attribute `tsa_paramters` of `oemof.solph.EnergySystem`
+* Costs for energy storage are now defined for N-1 points in time
+  (initial time step is neglected). This is because with a balanced
+  storage, content of the initial and the first time step (which is
+  effectively the same) had double weight before. Also, if the
+  initial storage level is defined, the costs just offset the
+  objective value without changing anything else.
+* Tansitional wrappers that still allowed to use "Transformer" and
+  "OffsetTransformer" have been removed. Use of the new names
+  ("Converter" and "OffsetConverter") is now obligatory.
+* Tansitional wrappers that still allowed to use "investment",
+  "summed_min", and "summed_max" as arguments to initialise a Flow
+  have been removed. Use of the new names ("nominal_value",
+  "full_load_time_min", and "full_load_time_max") is now obligatory.
+* Rename custom_attributes to custom_properties for all Nodes.
+  Setting the oemof.network.Node.custom_properties
+  using an argument called "custom_attributes" was rather confusing.
+  Additionally, the class Bus already called the argument
+  "custom_properties".
+* The parameters `GenericStorage.nominal_storage_capacity` and
+  `Flow.nominal_value` are now both called `nominal_capacity`.
 
 New features
 ############
 
-* Allow usage of aggregated timeseries by
-  [TSAM](https://github.com/FZJ-IEK3-VSA/tsam) module. Original timeseries is
-  reflected by weighting typical periods (output from TSAM) accordingly.
-  Thus, variable costs, full load hours, startup/shutdown costs are weighted
-  accordingly to occurrences of typical period in original timeseries.
-  Additionally, storage equations are adapted in order to respect
-  long-term/saisonal energy storage.
 
 Documentation
 #############
@@ -23,19 +35,20 @@ Documentation
 Bug fixes
 #########
 
-* Fix objective weighting for startup and shutdown costs in case of no
-  multi-period approach.
 
-Testing
-#######
+Other changes
+#############
 
-* Added test for comparison of TSAM mode versus original mode.
-  Including testing of storage behaviour, variable and investment costs.
+* `Model.solve()` will now fail, if solver status is nonoptimal. 
+  Added new keyword `allow_nonoptimal` to deactivate this behaviour.
+
+Known issues
+############
+
 
 Contributors
 ############
 
-* Hendrik Huyskens
-* Maximilian Hillen
 * Patrik Schönfeldt
+* Eva Schischke
 * Johannes Kochems

@@ -50,7 +50,7 @@ except ImportError:
 
 def main():
     energy_system = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=4, freq="H")
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h")
     )
 
     bel = solph.Bus(label="bel")
@@ -71,7 +71,7 @@ def main():
             outputs={
                 bel: solph.Flow(
                     nonconvex=solph.NonConvex(),
-                    nominal_value=210,
+                    nominal_capacity=210,
                     variable_costs=[-1, -5, -1, -1],
                     max=[1, 1, 1, 0],
                     custom_attributes={"my_keyword": True},
@@ -88,7 +88,7 @@ def main():
                 bel: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     variable_costs=[-2, -1, -2, -2],
-                    nominal_value=250,
+                    nominal_capacity=250,
                     max=[1, 1, 1, 0],
                     custom_attributes={"my_keyword": False},
                 )
@@ -105,7 +105,7 @@ def main():
                     variable_costs=1,
                     nonconvex=solph.NonConvex(),
                     max=[1, 1, 1, 0],
-                    nominal_value=145,
+                    nominal_capacity=145,
                 )
             },
         )
@@ -119,7 +119,7 @@ def main():
                 bel: solph.Flow(
                     custom_attributes={"my_keyword": True},
                     fix=[0, 1, 1, 0],
-                    nominal_value=130,
+                    nominal_capacity=130,
                 )
             },
         )

@@ -18,7 +18,7 @@ The system consists of the following components:
     - demand_el: ac electricity demand (given as a separate csv file)
     - excess_el: allows for some electricity overproduction
 
-    
+
 Code
 ----
 Download source code: :download:`offset_diesel_genset_nonconvex_investment.py </../examples/offset_converter_example/offset_diesel_genset_nonconvex_investment.py>`
@@ -44,11 +44,14 @@ This example requires the version v0.5.x of oemof. Install by:
 __copyright__ = "oemof developer group"
 __license__ = "MIT"
 
-import numpy as np
 import os
-import pandas as pd
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+from datetime import timedelta
+
+import numpy as np
+import pandas as pd
+
 from oemof import solph
 
 try:
@@ -86,7 +89,7 @@ def offset_converter_example():
     data = pd.read_csv(filepath_or_buffer=filename)
 
     # Change the index of data to be able to select data based on the time range.
-    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="H")
+    data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
 
     # Choose the range of the solar potential and demand
     # based on the selected simulation period.
@@ -97,7 +100,7 @@ def offset_converter_example():
 
     # Create the energy system.
     date_time_index = pd.date_range(
-        start=start_date, periods=n_days * 24, freq="H"
+        start=start_date, periods=n_days * 24, freq="h"
     )
     energy_system = solph.EnergySystem(timeindex=date_time_index)
 
@@ -127,7 +130,7 @@ def offset_converter_example():
         outputs={
             b_el_dc: solph.flows.Flow(
                 fix=solar_potential / peak_solar_potential,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_pv * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -154,11 +157,11 @@ def offset_converter_example():
     max_efficiency = 0.33
 
     # Calculate the two polynomial coefficients, i.e. the y-intersection and the
-    # slope of the linear equation.
-    c1 = (max_load / max_efficiency - min_load / min_efficiency) / (
-        max_load - min_load
+    # slope of the linear equation. There is a conveniece function for that
+    # in solph:
+    slope, offset = solph.components.slope_offset_from_nonconvex_output(
+        max_load, min_load, max_efficiency, min_efficiency
     )
-    c0 = min_load * (1 / min_efficiency - c1)
 
     epc_diesel_genset = 84.80  # currency/kW/year
     variable_cost_diesel_genset = 0.045  # currency/kWh
@@ -170,14 +173,15 @@ def offset_converter_example():
                 variable_costs=variable_cost_diesel_genset,
                 min=min_load,
                 max=max_load,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,
                 ),
                 nonconvex=solph.NonConvex(),
             ),
         },
-        coefficients=(c0, c1),
+        conversion_factors={b_diesel: slope},
+        normed_offsets={b_diesel: offset},
     )
 
     # The rectifier assumed to have a fixed efficiency of 98%.
@@ -186,7 +190,7 @@ def offset_converter_example():
         label="rectifier",
         inputs={
             b_el_ac: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_rectifier * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -204,7 +208,7 @@ def offset_converter_example():
         label="inverter",
         inputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_inverter * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -220,13 +224,13 @@ def offset_converter_example():
     epc_battery = 101.00  # currency/kWh/year
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
         outputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(ep_costs=0)
+                nominal_capacity=solph.Investment(ep_costs=0)
             )
         },
         initial_storage_level=0.0,
@@ -245,7 +249,7 @@ def offset_converter_example():
         inputs={
             b_el_ac: solph.flows.Flow(
                 fix=hourly_demand / peak_demand,
-                nominal_value=peak_demand,
+                nominal_capacity=peak_demand,
             )
         },
     )
@@ -277,7 +281,7 @@ def offset_converter_example():
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "cbc"
+    solver = "gurobi"
 
     model = solph.Model(energy_system)
     model.solve(
@@ -596,7 +600,6 @@ def offset_converter_example():
             ax.set_xlabel("diesel genset load [%]")
 
             ax.set_xlim(min_load * 100 - 5, max_load * 100 + 5)
-            ax.set_ylim(min_efficiency * 100 - 2, max_efficiency * 100 + 2)
 
             plt.show()
 

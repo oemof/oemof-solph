@@ -21,8 +21,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-from warnings import warn
-
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -99,26 +97,25 @@ class Converter(Node):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        self.label = label
-
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")
             outputs = {}
-
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
 
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_properties,
         )
+        if not inputs:
+            warn_if_missing_attribute(self, "inputs")
+        if not outputs:
+            warn_if_missing_attribute(self, "outputs")
 
         if conversion_factors is None:
             conversion_factors = {}
@@ -138,34 +135,6 @@ class Converter(Node):
         return ConverterBlock
 
 
-# --- BEGIN: To be removed for versions >= v0.6 ---
-class Transformer(Converter):
-    def __init__(
-        self,
-        label=None,
-        inputs=None,
-        outputs=None,
-        conversion_factors=None,
-        custom_attributes=None,
-    ):
-        super().__init__(
-            label=label,
-            inputs=inputs,
-            outputs=outputs,
-            conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
-        )
-        warn(
-            "solph.components.Transformer has been renamed to"
-            " solph.components.Converter. The transitional wrapper"
-            " will be deleted in the future.",
-            FutureWarning,
-        )
-
-
-# --- END ---
-
-
 class ConverterBlock(ScalarBlock):
     r"""Block for the linear relation of nodes with type
     :class:`~oemof.solph.components._converter.ConverterBlock`
@@ -181,9 +150,9 @@ class ConverterBlock(ScalarBlock):
 
     Linear relation :attr:`om.ConverterBlock.relation[i,o,t]`
         .. math::
-            P_{i}(p, t) \cdot \eta_{o}(t) =
-            P_{o}(p, t) \cdot \eta_{i}(t), \\
-            \forall p, t \in \textrm{TIMEINDEX}, \\
+            P_{i}(t) \cdot \eta_{o}(t) =
+            P_{o}(t) \cdot \eta_{i}(t), \\
+            \forall t \in \textrm{TIMESTEPS}, \\
             \forall n \in \textrm{CONVERTERS}, \\
             \forall i \in \textrm{INPUTS}, \\
             \forall o \in \textrm{OUTPUTS}
@@ -196,15 +165,15 @@ class ConverterBlock(ScalarBlock):
     constraints.
 
     The index :math: n is the index for the Transformer node itself. Therefore,
-    a `flow[i, n, p, t]` is a flow from the Bus i to the Transformer n at
+    a `flow[i, n, t]` is a flow from the Bus i to the Transformer n at
     time index p, t.
 
     ======================  ============================  ====================
     symbol                  attribute                     explanation
     ======================  ============================  ====================
-    :math:`P_{i,n}(p, t)`   `flow[i, n, p, t]`            Converter, inflow
+    :math:`P_{i,n}(p, t)`   `flow[i, n, t]`               Converter, inflow
 
-    :math:`P_{n,o}(p, t)`   `flow[n, o, p, t]`            Converter, outflow
+    :math:`P_{n,o}(p, t)`   `flow[n, o, t]`               Converter, outflow
 
     :math:`\eta_{i}(t)`     `conversion_factor[i, n, t]`  Inflow, efficiency
 
@@ -243,8 +212,8 @@ class ConverterBlock(ScalarBlock):
 
         self.relation = Constraint(
             [
-                (n, i, o, p, t)
-                for p, t in m.TIMEINDEX
+                (n, i, o, t)
+                for t in m.TIMESTEPS
                 for n in group
                 for o in out_flows[n]
                 for i in in_flows[n]
@@ -253,17 +222,17 @@ class ConverterBlock(ScalarBlock):
         )
 
         def _input_output_relation(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n in group:
                     for o in out_flows[n]:
                         for i in in_flows[n]:
                             try:
                                 lhs = (
-                                    m.flow[i, n, p, t]
+                                    m.flow[i, n, t]
                                     * n.conversion_factors[o][t]
                                 )
                                 rhs = (
-                                    m.flow[n, o, p, t]
+                                    m.flow[n, o, t]
                                     * n.conversion_factors[i][t]
                                 )
                             except ValueError:
@@ -273,6 +242,6 @@ class ConverterBlock(ScalarBlock):
                                         n.label, o.label
                                     ),
                                 )
-                            block.relation.add((n, i, o, p, t), (lhs == rhs))
+                            block.relation.add((n, i, o, t), (lhs == rhs))
 
         self.relation_build = BuildAction(rule=_input_output_relation)

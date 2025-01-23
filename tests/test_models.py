@@ -17,60 +17,64 @@ import pytest
 from oemof import solph
 
 
-def test_optimal_solution():
+def test_infeasible_model():
     es = solph.EnergySystem(timeincrement=[1])
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
     es.add(
         solph.components.Sink(
-            label="sink",
-            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])},
+            inputs={bel: solph.flows.Flow(nominal_capacity=5, fix=[1])}
         )
     )
     es.add(
         solph.components.Source(
-            label="source",
-            outputs={bel: solph.flows.Flow(variable_costs=5)},
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+            }
         )
     )
     m = solph.Model(es)
-    m.solve("cbc")
-    m.results()
-    solph.processing.meta_results(m)
+    with pytest.warns(
+        UserWarning, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=True)
+
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=False)
 
 
-def test_infeasible_model():
-    # FutureWarning is i.e. emitted by network Entity registry
-    warnings.simplefilter(action="ignore", category=FutureWarning)
+def test_unbounded_model():
+    es = solph.EnergySystem(timeincrement=[1])
+    bel = solph.buses.Bus(label="bus")
+    es.add(bel)
+    # Add a Sink with a higher demand
+    es.add(solph.components.Sink(inputs={bel: solph.flows.Flow()}))
 
-    with pytest.raises(ValueError, match=""):
-        with warnings.catch_warnings(record=True) as w:
-            es = solph.EnergySystem(timeincrement=[1])
-            bel = solph.buses.Bus(label="bus")
-            es.add(bel)
-            es.add(
-                solph.components.Sink(
-                    inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
-                )
-            )
-            es.add(
-                solph.components.Source(
-                    outputs={
-                        bel: solph.flows.Flow(
-                            nominal_value=4, variable_costs=5
-                        )
-                    }
-                )
-            )
-            m = solph.Model(es)
-            m.solve(solver="cbc")
-            assert "Optimization ended with status" in str(w[0].message)
-            solph.processing.meta_results(m)
+    # Add a Source with a very high supply
+    es.add(
+        solph.components.Source(
+            outputs={bel: solph.flows.Flow(variable_costs=-5)}
+        )
+    )
+    m = solph.Model(es)
+
+    with pytest.raises(
+        RuntimeError, match="The solver did not return an optimal solution"
+    ):
+        m.solve(solver="cbc", allow_nonoptimal=False)
 
 
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
 def test_multi_period_default_discount_rate():
     """Test error being thrown for default multi-period discount rate"""
-    warnings.filterwarnings("ignore", category=FutureWarning)
     timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
     es = solph.EnergySystem(
         timeindex=timeindex,
@@ -85,7 +89,7 @@ def test_multi_period_default_discount_rate():
             label="sink",
             inputs={
                 bel: solph.flows.Flow(
-                    nominal_value=5, fix=[1] * len(timeindex)
+                    nominal_capacity=5, fix=[1] * len(timeindex)
                 )
             },
         )
@@ -93,7 +97,9 @@ def test_multi_period_default_discount_rate():
     es.add(
         solph.components.Source(
             label="source",
-            outputs={bel: solph.flows.Flow(nominal_value=4, variable_costs=5)},
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+            },
         )
     )
     msg = (
@@ -102,75 +108,3 @@ def test_multi_period_default_discount_rate():
     with warnings.catch_warnings(record=True) as w:
         solph.Model(es)
         assert msg in str(w[0].message)
-
-
-def test_cellular_structure_detection():
-    """Test flag creation if list is passed as energysystem to model"""
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
-    es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
-    )
-    ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
-    )
-    ec_2 = solph.EnergySystem(
-        label="ec_2", timeindex=timeindex, infer_last_interval=True
-    )
-    m = solph.Model(energysystem=[es, ec_1, ec_2])
-    assert m.is_cellular
-
-
-def test_sub_cell_node_consideration():
-    """
-    Test if the nodes of sub-cells are considered for cellular
-    energysystems.
-    """
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
-    es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
-    )
-    ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
-    )
-    bus_es = solph.buses.Bus(label="bus_es")
-    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
-    es.add(bus_es)
-    ec_1.add(bus_ec_1)
-    m = solph.Model(energysystem=[es, ec_1])
-    assert bus_ec_1 in m.nodes
-
-
-def test_sub_cell_flow_consideration():
-    """
-    Test if the flows of sub-cells are considered for cellular
-    energysystems.
-    """
-    timeindex = pd.date_range(start="2020-01-01", periods=1, freq="H")
-    es = solph.EnergySystem(
-        label="es", timeindex=timeindex, infer_last_interval=True
-    )
-    ec_1 = solph.EnergySystem(
-        label="ec_1", timeindex=timeindex, infer_last_interval=True
-    )
-    bus_es = solph.buses.Bus(label="bus_es")
-    bus_ec_1 = solph.buses.Bus(label="bus_ec_1")
-    es.add(bus_es)
-    ec_1.add(bus_ec_1)
-
-    connector_ec_1 = solph.buses.Bus(
-        label="connector_ec_1",
-        inputs={
-            bus_es: solph.flows.Flow(),
-            bus_ec_1: solph.flows.Flow(),
-        },
-        outputs={
-            bus_es: solph.flows.Flow(),
-            bus_ec_1: solph.flows.Flow(),
-        },
-    )
-    es.add(connector_ec_1)
-
-    test_flow = [io for io in ec_1.flows().keys()][0]
-
-    m = solph.Model(energysystem=[es, ec_1])
-    assert test_flow in m.FLOWS

@@ -23,8 +23,8 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.components._converter import Converter
+from oemof.solph._plumbing import sequence
+from oemof.solph.components import Converter
 
 
 class ExtractionTurbineCHP(Converter):
@@ -64,7 +64,7 @@ class ExtractionTurbineCHP(Converter):
     >>> bgas = solph.buses.Bus(label='commodityBus')
     >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+    ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
     ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
@@ -77,17 +77,17 @@ class ExtractionTurbineCHP(Converter):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
             conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_properties,
         )
         self.conversion_factor_full_condensation = {
-            k: solph_sequence(v)
+            k: sequence(v)
             for k, v in conversion_factor_full_condensation.items()
         }
 
@@ -105,17 +105,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
     * :math:`\dot H_{Fuel}`
 
-        Fuel input flow, represented in code as `flow[i, n, p, t]`
+        Fuel input flow, represented in code as `flow[i, n, t]`
 
     * :math:`P_{el}`
 
         Electric power outflow, represented in code as
-        `flow[n, main_output, p, t]`
+        `flow[n, main_output, t]`
 
     * :math:`\dot Q_{th}`
 
         Thermal output flow, represented in code as
-        `flow[n, tapped_output, p, t]`
+        `flow[n, tapped_output, t]`
 
     **Parameters**
 
@@ -242,18 +242,18 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _input_output_relation_rule(block):
             """Connection between input, main output and tapped output."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
                     rhs = (
-                        m.flow[g, g.main_output, p, t]
-                        + m.flow[g, g.tapped_output, p, t]
+                        m.flow[g, g.main_output, t]
+                        + m.flow[g, g.tapped_output, t]
                         * g.main_flow_loss_index[t]
                     ) / g.conversion_factor_full_condensation_sq[t]
-                    block.input_output_relation.add((g, p, t), (lhs == rhs))
+                    block.input_output_relation.add((g, t), (lhs == rhs))
 
         self.input_output_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.input_output_relation_build = BuildAction(
             rule=_input_output_relation_rule
@@ -261,17 +261,17 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
         def _out_flow_relation_rule(block):
             """Relation between main and tapped output in full chp mode."""
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for g in group:
-                    lhs = m.flow[g, g.main_output, p, t]
+                    lhs = m.flow[g, g.main_output, t]
                     rhs = (
-                        m.flow[g, g.tapped_output, p, t]
+                        m.flow[g, g.tapped_output, t]
                         * g.flow_relation_index[t]
                     )
-                    block.out_flow_relation.add((g, p, t), (lhs >= rhs))
+                    block.out_flow_relation.add((g, t), (lhs >= rhs))
 
         self.out_flow_relation = Constraint(
-            group, m.TIMEINDEX, noruleinit=True
+            group, m.TIMESTEPS, noruleinit=True
         )
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule

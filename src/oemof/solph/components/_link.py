@@ -60,8 +60,8 @@ class Link(Node):
 
     >>> link = solph.components.Link(
     ...    label="transshipment_link",
-    ...    inputs={bel0: solph.flows.Flow(nominal_value=4),
-    ...            bel1: solph.flows.Flow(nominal_value=2)},
+    ...    inputs={bel0: solph.flows.Flow(nominal_capacity=4),
+    ...            bel1: solph.flows.Flow(nominal_capacity=2)},
     ...    outputs={bel0: solph.flows.Flow(),
     ...             bel1: solph.flows.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
@@ -86,23 +86,26 @@ class Link(Node):
         conversion_factors=None,
         custom_attributes=None,
     ):
+        # compatibility with omeof.network w/o explicit named arguments
         if inputs is None:
-            warn_if_missing_attribute(self, "inputs")
             inputs = {}
         if outputs is None:
-            warn_if_missing_attribute(self, "outputs")
             outputs = {}
-        if conversion_factors is None:
-            warn_if_missing_attribute(self, "conversion_factors")
-            conversion_factors = {}
         if custom_attributes is None:
             custom_attributes = {}
         super().__init__(
-            label=label,
+            label,
             inputs=inputs,
             outputs=outputs,
-            **custom_attributes,
+            custom_properties=custom_attributes,
         )
+        if not inputs:
+            warn_if_missing_attribute(self, "inputs")
+        if not outputs:
+            warn_if_missing_attribute(self, "outputs")
+        if conversion_factors is None:
+            warn_if_missing_attribute(self, "conversion_factors")
+            conversion_factors = {}
         self.conversion_factors = {
             k: sequence(v) for k, v in conversion_factors.items()
         }
@@ -142,6 +145,7 @@ class LinkBlock(ScalarBlock):
         &
 
     """
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -173,13 +177,13 @@ class LinkBlock(ScalarBlock):
         self.LINKS = Set(initialize=[g for g in group])
 
         def _input_output_relation(block):
-            for p, t in m.TIMEINDEX:
+            for t in m.TIMESTEPS:
                 for n, conversion in all_conversions.items():
                     for cidx, c in conversion.items():
                         try:
                             expr = (
-                                m.flow[n, cidx[1], p, t]
-                                == c[t] * m.flow[cidx[0], n, p, t]
+                                m.flow[n, cidx[1], t]
+                                == c[t] * m.flow[cidx[0], n, t]
                             )
                         except KeyError:
                             raise KeyError(
@@ -188,12 +192,12 @@ class LinkBlock(ScalarBlock):
                                 "Check if all connected buses match "
                                 "the conversion factors.",
                             )
-                        block.relation.add((n, cidx[0], cidx[1], p, t), expr)
+                        block.relation.add((n, cidx[0], cidx[1], t), expr)
 
         self.relation = Constraint(
             [
-                (n, cidx[0], cidx[1], p, t)
-                for p, t in m.TIMEINDEX
+                (n, cidx[0], cidx[1], t)
+                for t in m.TIMESTEPS
                 for n, conversion in all_conversions.items()
                 for cidx, c in conversion.items()
             ],

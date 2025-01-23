@@ -38,6 +38,7 @@ from pyomo.environ import Var
 
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import valid_sequence
 from oemof.solph.components._sink import Sink
 
 
@@ -270,12 +271,12 @@ class SinkDSM(Sink):
         shift_eligibility=True,
         fixed_costs=0,
         investment=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
         super().__init__(
-            label=label, inputs=inputs, custom_attributes=custom_attributes
+            label=label, inputs=inputs, custom_properties=custom_properties
         )
 
         self.capacity_up = sequence(capacity_up)
@@ -494,6 +495,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -564,7 +566,7 @@ class SinkDSMOemofBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # Inflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
@@ -691,22 +693,16 @@ class SinkDSMOemofBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
-                        (
-                            self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                        )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -894,6 +890,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1191,7 +1188,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # Inflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand + DSM_up - DSM_down
                     rhs = (
@@ -1372,7 +1369,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
@@ -1395,7 +1392,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
                         remaining_value_difference = (
                             self._evaluate_remaining_value_difference(
                                 m,
@@ -1421,18 +1418,13 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
-                        (
-                            self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                        )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        self.dsm_do_shift[g, t] * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -1440,26 +1432,22 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
-                            self.invest[g, p]
-                            * g.investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
+                            self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
                         m.es.end_year_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
-                        g.investment.existing
-                        * g.investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
+                        g.investment.existing * g.investment.fixed_costs[pp]
                         for pp in range(range_limit)
                     )
 
@@ -1530,7 +1518,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     self.invest[g, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
             else:
                 return 0
         else:
@@ -1666,6 +1654,7 @@ class SinkDSMDIWBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa E:501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -1742,7 +1731,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -1762,7 +1751,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -1784,7 +1773,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                     # last time steps: end - delay time
                     else:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2180,26 +2169,17 @@ class SinkDSMDIWBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in m.TIMESTEPS
-                            )
-                            * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                        )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        sum(self.dsm_do_shift[g, tt, t] for tt in m.TIMESTEPS)
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -2414,6 +2394,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -2717,7 +2698,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # first time steps: 0 + delay time
                     if t <= g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2737,7 +2718,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # main use case
                     elif g.delay_time < t <= m.TIMESTEPS.at(-1) - g.delay_time:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -2759,7 +2740,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     # last time steps: end - delay time
                     else:
                         # Inflow from bus
-                        lhs = m.flow[g.inflow, g, p, t]
+                        lhs = m.flow[g.inflow, g, t]
                         # Demand +- DSM
                         rhs = (
                             g.demand[t] * g.max_demand[p]
@@ -3222,7 +3203,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             for g in self.investdsm:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
@@ -3245,7 +3226,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
                         remaining_value_difference = (
                             self._evaluate_remaining_value_difference(
                                 m,
@@ -3271,22 +3252,14 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         self.dsm_up[g, t]
                         * m.objective_weighting[t]
                         * g.cost_dsm_up[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
                     )
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_do_shift[g, tt, t]
-                                for tt in m.TIMESTEPS
-                            )
-                            * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
-                        )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        sum(self.dsm_do_shift[g, tt, t] for tt in m.TIMESTEPS)
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -3294,26 +3267,22 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
-                            self.invest[g, p]
-                            * g.investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
+                            self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
                         m.es.end_year_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
-                        g.investment.existing
-                        * g.investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
+                        g.investment.existing * g.investment.fixed_costs[pp]
                         for pp in range(range_limit)
                     )
 
@@ -3384,7 +3353,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     self.invest[g, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
             else:
                 return 0
         else:
@@ -3610,6 +3579,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             =========================================== ================================= ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -3717,7 +3687,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # outflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand +- DR
                     rhs = (
@@ -4361,36 +4331,26 @@ class SinkDSMDLRBlock(ScalarBlock):
             for g in self.DR:
                 for p, t in m.TIMEINDEX:
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_up[g, h, t]
-                                + self.balance_dsm_do[g, h, t]
-                                for h in g.delay_time
-                            )
-                            * g.cost_dsm_up[t]
+                        sum(
+                            self.dsm_up[g, h, t] + self.balance_dsm_do[g, h, t]
+                            for h in g.delay_time
                         )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        * g.cost_dsm_up[t]
+                    ) * m.objective_weighting[t]
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_do_shift[g, h, t]
-                                + self.balance_dsm_up[g, h, t]
-                                for h in g.delay_time
-                            )
-                            * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                        sum(
+                            self.dsm_do_shift[g, h, t]
+                            + self.balance_dsm_up[g, h, t]
+                            for h in g.delay_time
                         )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.fixed_costs[0] is not None:
+                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -4681,6 +4641,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         ================================= ======================== ==== =======================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -5018,7 +4979,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for p, t in m.TIMEINDEX:
                 for g in group:
                     # outflow from bus
-                    lhs = m.flow[g.inflow, g, p, t]
+                    lhs = m.flow[g.inflow, g, t]
 
                     # Demand +- DR
                     rhs = (
@@ -5714,7 +5675,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             for g in self.INVESTDR:
                 if g.investment.ep_costs is not None:
                     lifetime = g.investment.lifetime
-                    interest = g.investment.interest_rate
+                    interest = 0
                     if interest == 0:
                         warn(
                             msg.format(m.discount_rate),
@@ -5737,7 +5698,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         )
                         investment_costs_increment = (
                             self.invest[g, p] * annuity * present_value_factor
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
                         remaining_value_difference = (
                             self._evaluate_remaining_value_difference(
                                 m,
@@ -5760,32 +5721,23 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
                 for p, t in m.TIMEINDEX:
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_up[g, h, t]
-                                + self.balance_dsm_do[g, h, t]
-                                for h in g.delay_time
-                            )
-                            * g.cost_dsm_up[t]
+                        sum(
+                            self.dsm_up[g, h, t] + self.balance_dsm_do[g, h, t]
+                            for h in g.delay_time
                         )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        * g.cost_dsm_up[t]
+                    ) * m.objective_weighting[t]
                     variable_costs += (
-                        (
-                            sum(
-                                self.dsm_do_shift[g, h, t]
-                                + self.balance_dsm_up[g, h, t]
-                                for h in g.delay_time
-                            )
-                            * g.cost_dsm_down_shift[t]
-                            + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                        sum(
+                            self.dsm_do_shift[g, h, t]
+                            + self.balance_dsm_up[g, h, t]
+                            for h in g.delay_time
                         )
-                        * m.objective_weighting[t]
-                        * (1 + m.discount_rate) ** (-m.es.periods_years[p])
-                    )
+                        * g.cost_dsm_down_shift[t]
+                        + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
+                    ) * m.objective_weighting[t]
 
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     for p in m.PERIODS:
                         range_limit = min(
@@ -5793,26 +5745,22 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             m.es.periods_years[p] + lifetime,
                         )
                         fixed_costs += sum(
-                            self.invest[g, p]
-                            * g.investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
+                            self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
                                 m.es.periods_years[p],
                                 range_limit,
                             )
-                        ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                        )
 
             for g in self.EXISTING_INVESTDSM:
-                if g.investment.fixed_costs[0] is not None:
+                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
                         m.es.end_year_of_optimization, lifetime - age
                     )
                     fixed_costs += sum(
-                        g.investment.existing
-                        * g.investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
+                        g.investment.existing * g.investment.fixed_costs[pp]
                         for pp in range(range_limit)
                     )
 
@@ -5883,7 +5831,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     self.invest[g, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
             else:
                 return 0
         else:

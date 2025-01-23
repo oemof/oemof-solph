@@ -60,7 +60,7 @@ def main():
     logger.define_logging()
 
     date_time_index = pd.date_range(
-        "1/1/2012", periods=number_of_time_steps, freq="H"
+        "1/1/2012", periods=number_of_time_steps, freq="h"
     )
 
     energysystem = EnergySystem(
@@ -198,7 +198,7 @@ def main():
     energysystem.add(
         cmp.Source(
             label="pv",
-            outputs={bus_elec: flows.Flow(fix=pv, nominal_value=700)},
+            outputs={bus_elec: flows.Flow(fix=pv, nominal_capacity=700)},
         )
     )
 
@@ -206,7 +206,7 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bus_elec: flows.Flow(fix=demand, nominal_value=1)},
+            inputs={bus_elec: flows.Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
@@ -215,7 +215,7 @@ def main():
         cmp.Converter(
             label="pp_gas",
             inputs={bus_gas: flows.Flow()},
-            outputs={bus_elec: flows.Flow(nominal_value=400)},
+            outputs={bus_elec: flows.Flow(nominal_capacity=400)},
             conversion_factors={bus_elec: 0.5},
         )
     )
@@ -223,11 +223,13 @@ def main():
     # create storage object representing a battery
     cap = 400
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=cap,
+        nominal_capacity=cap,
         label="storage",
-        inputs={bus_elec: flows.Flow(nominal_value=cap / 6)},
+        inputs={bus_elec: flows.Flow(nominal_capacity=cap / 6)},
         outputs={
-            bus_elec: flows.Flow(nominal_value=cap / 6, variable_costs=0.001)
+            bus_elec: flows.Flow(
+                nominal_capacity=cap / 6, variable_costs=0.001
+            )
         },
         loss_rate=0.00,
         initial_storage_level=0,

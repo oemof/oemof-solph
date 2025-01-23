@@ -26,6 +26,8 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
+from oemof.solph._plumbing import valid_sequence
+
 
 class SimpleFlowBlock(ScalarBlock):
     r"""Flow block with definitions for standard flows.
@@ -75,7 +77,7 @@ class SimpleFlowBlock(ScalarBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_max is not None
-                and g[2].nominal_value is not None
+                and g[2].nominal_capacity is not None
             ]
         )
 
@@ -84,7 +86,7 @@ class SimpleFlowBlock(ScalarBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_min is not None
-                and g[2].nominal_value is not None
+                and g[2].nominal_capacity is not None
             ]
         )
 
@@ -172,15 +174,19 @@ class SimpleFlowBlock(ScalarBlock):
         )
         # set upper bound of gradient variable
         for i, o, f in group:
-            if m.flows[i, o].positive_gradient_limit[0] is not None:
+            if valid_sequence(
+                m.flows[i, o].positive_gradient_limit, len(m.TIMESTEPS)
+            ):
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient_limit[t] * f.nominal_value
+                        f.positive_gradient_limit[t] * f.nominal_capacity
                     )
-            if m.flows[i, o].negative_gradient_limit[0] is not None:
+            if valid_sequence(
+                m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
+            ):
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient_limit[t] * f.nominal_value
+                        f.negative_gradient_limit[t] * f.nominal_capacity
                     )
 
     def _create_constraints(self):
@@ -215,14 +221,14 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts]
+                    m.flow[inp, out, ts]
                     * m.timeincrement[ts]
                     * m.tsam_weighting[ts]
-                    for p, ts in m.TIMEINDEX
+                    for ts in m.TIMESTEPS
                 )
                 rhs = (
                     m.flows[inp, out].full_load_time_max
-                    * m.flows[inp, out].nominal_value
+                    * m.flows[inp, out].nominal_capacity
                 )
                 self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
@@ -233,18 +239,18 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_max_rule
         )
 
-        def _flow_full_load_time_min_rule(model):
+        def _flow_full_load_time_min_rule(_):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, p, ts]
+                    m.flow[inp, out, ts]
                     * m.timeincrement[ts]
                     * m.tsam_weighting[ts]
-                    for p, ts in m.TIMEINDEX
+                    for ts in m.TIMESTEPS
                 )
                 rhs = (
                     m.flows[inp, out].full_load_time_min
-                    * m.flows[inp, out].nominal_value
+                    * m.flows[inp, out].nominal_capacity
                 )
                 self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
@@ -255,52 +261,40 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_min_rule
         )
 
-        def _positive_gradient_flow_rule(model):
+        def _positive_gradient_flow_rule(_):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
-                for index in range(1, len(m.TIMEINDEX) + 1):
-                    if m.TIMEINDEX.at(index)[1] > 0:
+                for index in range(1, len(m.TIMESTEPS) + 1):
+                    if m.TIMESTEPS.at(index) > 0:
                         lhs = (
                             m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
+                                m.TIMESTEPS.at(index),
                             ]
                             - m.flow[
                                 inp,
                                 out,
-                                m.TIMEINDEX.at(index - 1)[0],
-                                m.TIMEINDEX.at(index - 1)[1],
+                                m.TIMESTEPS.at(index - 1),
                             ]
                         )
                         rhs = self.positive_gradient[
-                            inp, out, m.TIMEINDEX.at(index)[1]
+                            inp, out, m.TIMESTEPS.at(index)
                         ]
                         self.positive_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
-                            ),
+                            (inp, out, m.TIMESTEPS.at(index)),
                             lhs <= rhs,
                         )
                     else:
                         lhs = self.positive_gradient[inp, out, 0]
                         rhs = 0
                         self.positive_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
-                            ),
+                            (inp, out, m.TIMESTEPS.at(index)),
                             lhs == rhs,
                         )
 
         self.positive_gradient_constr = Constraint(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
+            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
         )
         self.positive_gradient_build = BuildAction(
             rule=_positive_gradient_flow_rule
@@ -309,70 +303,50 @@ class SimpleFlowBlock(ScalarBlock):
         def _negative_gradient_flow_rule(model):
             """Rule definition for negative gradient constraint."""
             for inp, out in self.NEGATIVE_GRADIENT_FLOWS:
-                for index in range(1, len(m.TIMEINDEX) + 1):
-                    if m.TIMEINDEX.at(index)[1] > 0:
+                for index in range(1, len(m.TIMESTEPS) + 1):
+                    if m.TIMESTEPS.at(index) > 0:
                         lhs = (
-                            m.flow[
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index - 1)[0],
-                                m.TIMEINDEX.at(index - 1)[1],
-                            ]
-                            - m.flow[
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
-                            ]
+                            m.flow[inp, out, m.TIMESTEPS.at(index - 1)]
+                            - m.flow[inp, out, m.TIMESTEPS.at(index)]
                         )
                         rhs = self.negative_gradient[
-                            inp, out, m.TIMEINDEX.at(index)[1]
+                            inp, out, m.TIMESTEPS.at(index)
                         ]
                         self.negative_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
-                            ),
+                            (inp, out, m.TIMESTEPS.at(index)),
                             lhs <= rhs,
                         )
                     else:
                         lhs = self.negative_gradient[inp, out, 0]
                         rhs = 0
                         self.negative_gradient_constr.add(
-                            (
-                                inp,
-                                out,
-                                m.TIMEINDEX.at(index)[0],
-                                m.TIMEINDEX.at(index)[1],
-                            ),
+                            (inp, out, m.TIMESTEPS.at(index)),
                             lhs == rhs,
                         )
 
         self.negative_gradient_constr = Constraint(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMEINDEX, noruleinit=True
+            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
         )
         self.negative_gradient_build = BuildAction(
             rule=_negative_gradient_flow_rule
         )
 
-        def _integer_flow_rule(block, ii, oi, pi, ti):
+        def _integer_flow_rule(_, ii, oi, ti):
             """Force flow variable to NonNegativeInteger values."""
-            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, pi, ti]
+            return self.integer_flow[ii, oi, ti] == m.flow[ii, oi, ti]
 
         self.integer_flow_constr = Constraint(
-            self.INTEGER_FLOWS, m.TIMEINDEX, rule=_integer_flow_rule
+            self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
         )
 
         if m.es.periods is not None:
 
-            def _lifetime_output_rule(block):
+            def _lifetime_output_rule(_):
                 """Force flow value to zero when lifetime is reached"""
                 for inp, out in self.LIFETIME_FLOWS:
                     for p, ts in m.TIMEINDEX:
                         if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
-                            lhs = m.flow[inp, out, p, ts]
+                            lhs = m.flow[inp, out, ts]
                             rhs = 0
                             self.lifetime_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
@@ -395,7 +369,7 @@ class SimpleFlowBlock(ScalarBlock):
                             m.flows[inp, out].lifetime - m.flows[inp, out].age
                             <= m.es.periods_years[p]
                         ):
-                            lhs = m.flow[inp, out, p, ts]
+                            lhs = m.flow[inp, out, ts]
                             rhs = 0
                             self.lifetime_age_output.add(
                                 (inp, out, p, ts), (lhs == rhs)
@@ -465,11 +439,12 @@ class SimpleFlowBlock(ScalarBlock):
 
         if m.es.periods is None:
             for i, o in m.FLOWS:
-                if m.flows[i, o].variable_costs[0] is not None:
-                    for p, t in m.TIMEINDEX:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
+                    for t in m.TIMESTEPS:
                         variable_costs += (
-                            m.flow[i, o, p, t]
-                            * m.timeincrement[t]
+                            m.flow[i, o, t]
                             * m.objective_weighting[t]
                             * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
@@ -477,11 +452,12 @@ class SimpleFlowBlock(ScalarBlock):
 
         else:
             for i, o in m.FLOWS:
-                if m.flows[i, o].variable_costs[0] is not None:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
                     for p, t in m.TIMEINDEX:
                         variable_costs += (
-                            m.flow[i, o, p, t]
-                            * m.timeincrement[t]
+                            m.flow[i, o, t]
                             * m.objective_weighting[t]
                             * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
@@ -491,41 +467,38 @@ class SimpleFlowBlock(ScalarBlock):
                 # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None
-                    and m.flows[i, o].nominal_value is not None
+                    and m.flows[i, o].nominal_capacity is not None
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
                 ):
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
             # Fixed costs for units with limited lifetime
             for i, o in self.LIFETIME_FLOWS:
-                if m.flows[i, o].fixed_costs[0] is not None:
+                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
                     range_limit = min(
                         m.es.end_year_of_optimization,
                         m.flows[i, o].lifetime,
                     )
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 
             for i, o in self.LIFETIME_AGE_FLOWS:
-                if m.flows[i, o].fixed_costs[0] is not None:
+                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
                     range_limit = min(
                         m.es.end_year_of_optimization,
                         m.flows[i, o].lifetime - m.flows[i, o].age,
                     )
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 

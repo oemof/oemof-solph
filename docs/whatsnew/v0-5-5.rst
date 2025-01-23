@@ -1,0 +1,12 @@
+v0.5.5 (August 29th, 2024)
+--------------------------
+
+Bug fixes
+#########
+
+* Fix iterating over _FakeSequence objects
+
+Contributors
+############
+
+* Patrik Schönfeldt
