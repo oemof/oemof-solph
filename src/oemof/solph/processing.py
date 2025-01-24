@@ -714,7 +714,7 @@ def process_results(om):
                 block[["component", "timepoints"]] = indices
 
                 _state.append(block)
-            case (idx, om.PERIODS) if (is_component_index(idx) or is_flow_index(idx)):
+            case (idx, om.PERIODS) if is_component_index(idx) or is_flow_index(idx):
                 # This block is period indexed, i.e. an invest block
                 xs, ts = np.split(indices, [-1], axis=1)
                 if idx.dimen == 1:
@@ -774,3 +774,36 @@ def process_results(om):
             _not_timeindexed, index=["variable", "identifier"]
         ),
     )
+
+
+def extract_results(timeindex: Optional[str], var_names: Optional[list[str]], om):
+    # Get variable blocks from solved model
+    blocks = set([bv.parent_component() for bv in om.component_data_objects(Var)])
+    _resdfs = []
+    for var_block in blocks:
+        if not var_block.getname() in var_names:
+            # this block is not in focus
+            continue
+
+        _idx, values = zip(*var_block.extract_values().items())
+        indices = np.array(_idx)
+        *_, t_idx = var_block.index_set().subsets()
+
+        if not t_idx == getattr(om, timeindex):
+            # not correct time index
+            continue
+
+        block = pd.DataFrame(
+            index=range(len(indices)),
+            data={"value": values, "variable": var_block.getname()},
+        )
+
+        # timeindex hinzufügen
+        # sonstige identifier in block packen
+        # in liste packen
+
+    return _concat_and_pivot(_resdfs, ...)
+
+
+extract_flows = partial(extract_results, index_structure=("flows", "timesteps"))
+extract_states = partial(extract_results, index_structure=("compoment", "timepoints"))
