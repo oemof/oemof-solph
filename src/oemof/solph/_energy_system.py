@@ -92,7 +92,6 @@ class EnergySystem(network.energy_system.EnergySystem):
             timeincrement=timeincrement,
         )
 
-        self.periods = None
         self.end_year_of_optimization = 1
 
     @staticmethod
@@ -133,9 +132,8 @@ class EnergySystem(network.energy_system.EnergySystem):
                 )
             tsa_parameters = {
                 "occurrences": [1],
-                "timesteps": range(len(timeindex)),
                 "order": [0],
-                "timesteps_per_period": range(len(timeindex)),
+                "timesteps_per_period": len(timeindex),
             }
             time_increment = EnergySystem._calculate_timeincrement(
                 plain_timeindex
