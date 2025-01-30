@@ -77,33 +77,13 @@ class EnergySystem(network.energy_system.EnergySystem):
             groupings = []
         groupings = GROUPINGS + groupings
 
-        timeincrement, plain_timeindex = self._organise_timeaxis(
-            timeindex,
-            infer_last_interval,
+        (timeincrement, plain_timeindex, tsa_parameters) = (
+            self._organise_timeaxis(
+                timeindex,
+                infer_last_interval,
+            )
         )
 
-        if tsa_parameters is None:
-
-            if isinstance(tsa_parameters, dict):
-                # Set up tsa_parameters for single period:
-                tsa_parameters = [tsa_parameters]
-
-            # Construct occurrences of typical periods
-
-            tsa_parameters[0]["occurrences"] = collections.Counter(
-                tsa_parameters[0]["order"]
-            )
-
-            # If segmentation is used, timesteps is set to number of
-            # segmentations per period.
-            # Otherwise, default timesteps_per_period is used.
-            for params in tsa_parameters:
-                if "segments" in params:
-                    params["timesteps"] = int(
-                        len(params["segments"]) / len(params["occurrences"])
-                    )
-                else:
-                    params["timesteps"] = params["timesteps_per_period"]
         self.tsa_parameters = tsa_parameters
 
         super().__init__(
@@ -151,6 +131,12 @@ class EnergySystem(network.energy_system.EnergySystem):
                         freq=plain_timeindex.freq,
                     )
                 )
+            tsa_parameters = {
+                "occurrences": [1],
+                "timesteps": range(len(timeindex)),
+                "order": [0],
+                "timesteps_per_period": range(len(timeindex)),
+            }
             time_increment = EnergySystem._calculate_timeincrement(
                 plain_timeindex
             )
@@ -167,11 +153,24 @@ class EnergySystem(network.energy_system.EnergySystem):
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
             try:
                 plain_timeindex = timeindex.timeIndex
+
                 time_increment = (
-                    timeindex.segmentDurationDict.segmentDurationDict[
-                        "Segment Duration"
-                    ].values()
+                    np.array(
+                        timeindex.segmentDurationDict.segmentDurationDict[
+                            "Segment Duration"
+                        ].values()
+                    )
+                    * timeindex.resolution
                 )
+
+                tsa_parameters = {
+                    "occurrences": collections.Counter(timeindex.clusterOrder),
+                    "order": timeindex.clusterOrder,
+                    "timesteps_per_period": (
+                        timeindex.hoursPerPeriod / timeindex.resolution
+                    ),
+                }
+
                 if infer_last_interval is not None:
                     msg = (
                         "You cannot infer the last interval "
@@ -184,4 +183,4 @@ class EnergySystem(network.energy_system.EnergySystem):
                     "of type TimeSeriesAggregation (or compatible)."
                 )
 
-        return time_increment, plain_timeindex
+        return time_increment, plain_timeindex, tsa_parameters
