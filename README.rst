@@ -267,11 +267,13 @@ or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact informa
 
 To get the example applications set up do the following:
 
-Requirements: `Poetry <https://python-poetry.org/docs/#installation>`_
+Requirements:
+`Poetry <https://python-poetry.org/docs/#installation>`_
+Python 3.10
 
-1. Clone the repo, then open the repo in your terminal
+1. Clone the repo, then open the file location in your terminal
 
-2. Install core dependencies
+2. Install core dependencies using poetry
 
 .. code:: console
 
