@@ -265,6 +265,31 @@ to help new users to understand the framework's structure.
 You are welcome to contribute your own examples via a `pull request <https://github.com/oemof/oemof-solph/pulls>`_
 or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact information).
 
+To get the example applications set up do the following:
+
+1. Git clone the repo
+
+2. Install core dependencies
+.. code:: console
+
+  (venv) poetry install --no-root
+
+3. Install extra dependencies required for development
+.. code:: console
+
+  (venv) poetry install --extras "dev" --no-root
+
+Note:
+if --no-root is not used, the following error may be thrown "Error: The current project could not be installed: No file/folder found for package oemof-solph
+"
+
+4. Install Oemof.solph
+.. code:: console
+
+  (venv) pip install oemof.solph
+
+5. Run the "check_examples.py" file
+
 License
 =======
 
