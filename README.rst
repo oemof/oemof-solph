@@ -267,14 +267,18 @@ or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact informa
 
 To get the example applications set up do the following:
 
-1. Git clone the repo
+Requirements: `Poetry <https://python-poetry.org/docs/#installation>`_
+
+1. Clone the repo, then open the repo in your terminal
 
 2. Install core dependencies
+
 .. code:: console
 
   (venv) poetry install --no-root
 
 3. Install extra dependencies required for development
+
 .. code:: console
 
   (venv) poetry install --extras "dev" --no-root
@@ -284,6 +288,7 @@ if --no-root is not used, the following error may be thrown "Error: The current 
 "
 
 4. Install Oemof.solph
+
 .. code:: console
 
   (venv) pip install oemof.solph

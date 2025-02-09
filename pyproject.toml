@@ -79,6 +79,7 @@ dev = [
     "flit",
     "matplotlib",
     "nbformat",
+    "openpyxl",
     "pytest",
     "sphinx",
     "sphinx_rtd_theme",
