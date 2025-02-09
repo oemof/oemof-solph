@@ -40,7 +40,7 @@ class TestParameterResult:
             inputs={b_diesel: flows.Flow(variable_costs=2)},
             outputs={
                 b_el1: flows.Flow(
-                    variable_costs=1, nominal_capacity=Investment(ep_costs=500)
+                    variable_costs=1, nominal_value=Investment(ep_costs=500)
                 )
             },
             conversion_factors={b_el1: 0.5},
@@ -48,7 +48,7 @@ class TestParameterResult:
 
         batt = cmp.GenericStorage(
             label="storage",
-            nominal_capacity=1000,
+            nominal_storage_capacity=1000,
             inputs={b_el1: flows.Flow(variable_costs=3)},
             outputs={b_el1: flows.Flow(variable_costs=2.5)},
             loss_rate=0.00,
@@ -64,7 +64,7 @@ class TestParameterResult:
             label="demand_el",
             inputs={
                 b_el1: flows.Flow(
-                    nominal_capacity=1,
+                    nominal_value=1,
                     fix=demand_values,
                 )
             },

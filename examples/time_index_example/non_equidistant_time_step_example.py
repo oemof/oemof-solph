@@ -75,7 +75,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_capacity=16,
+                nominal_value=16,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
@@ -87,7 +87,7 @@ def main():
         label="storage_fixed",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_capacity=8,
+        nominal_storage_capacity=8,
         initial_storage_level=1,
         fixed_losses_absolute=1,  # 1 energy unit loss per hour
     )
@@ -99,10 +99,10 @@ def main():
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_value=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
-        nominal_capacity=8,
+        nominal_storage_capacity=8,
         initial_storage_level=1,
         loss_rate=0.5,  # 50 % losses per hour
     )
@@ -110,7 +110,7 @@ def main():
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_capacity=8,
+                nominal_value=8,
                 variable_costs=0.1,
                 fix=[0.75, 0.5, 0, 0, 1, 0, 0, 0, 0],
             )

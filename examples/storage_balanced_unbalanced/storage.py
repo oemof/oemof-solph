@@ -90,7 +90,7 @@ def storage_example():
                 label="pv_el_{0}".format(name),
                 outputs={
                     bel: solph.Flow(
-                        fix=timeseries["pv_el"], nominal_capacity=1
+                        fix=timeseries["pv_el"], nominal_value=1
                     )
                 },
             )
@@ -101,7 +101,7 @@ def storage_example():
                 label="demand_el_{0}".format(name),
                 inputs={
                     bel: solph.Flow(
-                        fix=timeseries["demand_el"], nominal_capacity=1
+                        fix=timeseries["demand_el"], nominal_value=1
                     )
                 },
             )
@@ -118,7 +118,7 @@ def storage_example():
         es.add(
             solph.components.GenericStorage(
                 label="storage_elec_{0}".format(name),
-                nominal_capacity=PARAMETER["nominal_storage_capacity"],
+                nominal_storage_capacity=PARAMETER["nominal_storage_capacity"],
                 inputs={bel: solph.Flow()},
                 outputs={bel: solph.Flow()},
                 initial_storage_level=data_set["initial_storage_level"],

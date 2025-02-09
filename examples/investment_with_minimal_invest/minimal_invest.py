@@ -66,7 +66,7 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand",
-            inputs={bus_1: solph.Flow(fix=data, nominal_capacity=1)},
+            inputs={bus_1: solph.Flow(fix=data, nominal_value=1)},
         )
     )
 
@@ -86,7 +86,7 @@ def main():
         inputs={bus_0: solph.Flow()},
         outputs={
             bus_1: solph.Flow(
-                nominal_capacity=solph.Investment(
+                nominal_value=solph.Investment(
                     ep_costs=c_var,
                     maximum=p_install_max,
                     minimum=p_install_min,

@@ -51,7 +51,7 @@ class TestParameterResult:
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
                 b_el1: Flow(
-                    variable_costs=1, nominal_capacity=Investment(ep_costs=0.5)
+                    variable_costs=1, nominal_value=Investment(ep_costs=0.5)
                 )
             },
             conversion_factors={b_el1: 2},
@@ -67,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            nominal_capacity=Investment(ep_costs=0.4),
+            nominal_storage_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23
@@ -75,7 +75,7 @@ class TestParameterResult:
             label="demand_el",
             inputs={
                 b_el2: Flow(
-                    nominal_capacity=1,
+                    nominal_value=1,
                     fix=cls.demand_values,
                 )
             },
@@ -170,7 +170,6 @@ class TestParameterResult:
                     "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
-                    "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
                     "fixed_costs": 0,
@@ -209,7 +208,6 @@ class TestParameterResult:
                     "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
-                    "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
                     "fixed_costs": 0,

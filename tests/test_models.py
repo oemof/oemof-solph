@@ -23,13 +23,13 @@ def test_infeasible_model():
     es.add(bel)
     es.add(
         solph.components.Sink(
-            inputs={bel: solph.flows.Flow(nominal_capacity=5, fix=[1])}
+            inputs={bel: solph.flows.Flow(nominal_value=5, fix=[1])}
         )
     )
     es.add(
         solph.components.Source(
             outputs={
-                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+                bel: solph.flows.Flow(nominal_value=4, variable_costs=5)
             }
         )
     )
@@ -89,7 +89,7 @@ def test_multi_period_default_discount_rate():
             label="sink",
             inputs={
                 bel: solph.flows.Flow(
-                    nominal_capacity=5, fix=[1] * len(timeindex)
+                    nominal_value=5, fix=[1] * len(timeindex)
                 )
             },
         )
@@ -98,7 +98,7 @@ def test_multi_period_default_discount_rate():
         solph.components.Source(
             label="source",
             outputs={
-                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+                bel: solph.flows.Flow(nominal_value=4, variable_costs=5)
             },
         )
     )

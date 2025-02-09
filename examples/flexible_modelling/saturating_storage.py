@@ -50,7 +50,7 @@ def saturating_storage_example():
     es.add(
         solph.components.Source(
             label="source_el",
-            outputs={bel: solph.Flow(nominal_capacity=1, fix=1)},
+            outputs={bel: solph.Flow(nominal_value=1, fix=1)},
         )
     )
 
@@ -59,7 +59,7 @@ def saturating_storage_example():
             label="sink_el",
             inputs={
                 bel: solph.Flow(
-                    nominal_capacity=1,
+                    nominal_value=1,
                     variable_costs=1,
                 )
             },
@@ -73,8 +73,8 @@ def saturating_storage_example():
     storage_capacity = 10
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_capacity=storage_capacity,
-        inputs={bel: solph.Flow(nominal_capacity=inflow_capacity)},
+        nominal_storage_capacity=storage_capacity,
+        inputs={bel: solph.Flow(nominal_value=inflow_capacity)},
         outputs={bel: solph.Flow(variable_costs=2)},
         initial_storage_level=0,
         balanced=False,

@@ -176,7 +176,7 @@ def main(dump_and_restore=False):
             label="wind",
             outputs={
                 bus_electricity: flows.Flow(
-                    fix=data["wind"], nominal_capacity=1000000
+                    fix=data["wind"], nominal_value=1000000
                 )
             },
         )
@@ -188,20 +188,20 @@ def main(dump_and_restore=False):
             label="pv",
             outputs={
                 bus_electricity: flows.Flow(
-                    fix=data["pv"], nominal_capacity=582000
+                    fix=data["pv"], nominal_value=582000
                 )
             },
         )
     )
 
     # create simple sink object representing the electrical demand
-    # nominal_capacity is set to 1 because demand_el is not a normalised series
+    # nominal_value is set to 1 because demand_el is not a normalised series
     energysystem.add(
         components.Sink(
             label="demand",
             inputs={
                 bus_electricity: flows.Flow(
-                    fix=data["demand_el"], nominal_capacity=1
+                    fix=data["demand_el"], nominal_value=1
                 )
             },
         )
@@ -214,7 +214,7 @@ def main(dump_and_restore=False):
             inputs={bus_gas: flows.Flow()},
             outputs={
                 bus_electricity: flows.Flow(
-                    nominal_capacity=10e10, variable_costs=50
+                    nominal_value=10e10, variable_costs=50
                 )
             },
             conversion_factors={bus_electricity: 0.58},
@@ -222,18 +222,18 @@ def main(dump_and_restore=False):
     )
 
     # create storage object representing a battery
-    nominal_capacity = 10077997
-    nominal_capacity = nominal_capacity / 6
+    nominal_storage_capacity = 10077997
+    nominal_storage_capacity = nominal_storage_capacity / 6
 
     battery_storage = components.GenericStorage(
-        nominal_capacity=nominal_capacity,
+        nominal_storage_capacity=nominal_storage_capacity,
         label=STORAGE_LABEL,
         inputs={
-            bus_electricity: flows.Flow(nominal_capacity=nominal_capacity)
+            bus_electricity: flows.Flow(nominal_value=nominal_storage_capacity)
         },
         outputs={
             bus_electricity: flows.Flow(
-                nominal_capacity=nominal_capacity, variable_costs=0.001
+                nominal_value=nominal_storage_capacity, variable_costs=0.001
             )
         },
         loss_rate=0.00,
@@ -300,7 +300,7 @@ def main(dump_and_restore=False):
         logging.info("**** The script can be divided into two parts here.")
         logging.info("Restore the energy system and the results.")
 
-        energysystem = EnergySystem()
+        energysystem = EnergySystem(infer_last_interval=False)
         energysystem.restore(dpath=None, filename=None)
 
     # define an alias for shorter calls below (optional)

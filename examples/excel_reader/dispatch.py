@@ -178,7 +178,7 @@ def create_nodes(nd=None):
     for i, re in nd["renewables"].iterrows():
         if re["active"]:
             # set static outflow values
-            outflow_args = {"nominal_capacity": re["capacity"]}
+            outflow_args = {"nominal_value": re["capacity"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == re["label"]:
@@ -196,7 +196,7 @@ def create_nodes(nd=None):
     for i, de in nd["demand"].iterrows():
         if de["active"]:
             # set static inflow values
-            inflow_args = {"nominal_capacity": de["nominal value"]}
+            inflow_args = {"nominal_value": de["nominal value"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == de["label"]:
@@ -226,7 +226,7 @@ def create_nodes(nd=None):
                     inputs={busd[t["from"]]: solph.Flow(**inflow_args)},
                     outputs={
                         busd[t["to"]]: solph.Flow(
-                            nominal_capacity=t["capacity"]
+                            nominal_value=t["capacity"]
                         )
                     },
                     conversion_factors={busd[t["to"]]: t["efficiency"]},
@@ -240,17 +240,17 @@ def create_nodes(nd=None):
                     label=s["label"],
                     inputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_capacity=s["capacity inflow"],
+                            nominal_value=s["capacity inflow"],
                             variable_costs=s["variable input costs"],
                         )
                     },
                     outputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_capacity=s["capacity outflow"],
+                            nominal_value=s["capacity outflow"],
                             variable_costs=s["variable output costs"],
                         )
                     },
-                    nominal_capacity=s["nominal capacity"],
+                    nominal_storage_capacity=s["nominal capacity"],
                     loss_rate=s["capacity loss"],
                     initial_storage_level=s["initial capacity"],
                     max_storage_level=s["capacity max"],

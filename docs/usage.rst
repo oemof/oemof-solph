@@ -274,7 +274,7 @@ Giving *'my_demand_series'* as parameter *'fix'* means that the demand cannot be
 .. code-block:: python
 
     solph.components.Sink(label='electricity_demand', inputs={electricity_bus: solph.flows.Flow(
-        fix=my_demand_series, nominal_capacity=nominal_demand)})
+        fix=my_demand_series, nominal_value=nominal_demand)})
 
 In contrast to the demand sink the excess sink has normally less restrictions but is open to take the whole excess.
 
@@ -303,10 +303,10 @@ The *nominal_capacity* sets the installed capacity.
     solph.components.Source(
         label='import_natural_gas',
         outputs={my_energysystem.groups['natural_gas']: solph.flows.Flow(
-            nominal_capacity=1000, full_load_time_max=1000000, variable_costs=50)})
+            nominal_value=1000, full_load_time_max=1000000, variable_costs=50)})
 
     solph.components.Source(label='wind', outputs={electricity_bus: solph.flows.Flow(
-        fix=wind_power_feedin_series, nominal_capacity=1000000)})
+        fix=wind_power_feedin_series, nominal_value=1000000)})
 
 .. note:: The Source class is only a plug and provides no additional constraints or variables.
 
@@ -329,7 +329,7 @@ A condensing power plant can be defined by a converter with one input (fuel) and
     solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
-        outputs={b_el: solph.flows.Flow(nominal_capacity=10e10)},
+        outputs={b_el: solph.flows.Flow(nominal_value=10e10)},
         conversion_factors={electricity_bus: 0.58})
 
 A CHP power plant would be defined in the same manner but with two outputs:
@@ -343,8 +343,8 @@ A CHP power plant would be defined in the same manner but with two outputs:
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow()},
-        outputs={b_el: Flow(nominal_capacity=30),
-                 b_th: Flow(nominal_capacity=40)},
+        outputs={b_el: Flow(nominal_value=30),
+                 b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 A CHP power plant with 70% coal and 30% natural gas can be defined with two inputs and two outputs:
@@ -359,8 +359,8 @@ A CHP power plant with 70% coal and 30% natural gas can be defined with two inpu
     solph.components.Converter(
         label='pp_chp',
         inputs={b_gas: Flow(), b_coal: Flow()},
-        outputs={b_el: Flow(nominal_capacity=30),
-                 b_th: Flow(nominal_capacity=40)},
+        outputs={b_el: Flow(nominal_value=30),
+                 b_th: Flow(nominal_value=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4,
                             b_coal: 0.7, b_gas: 0.3})
 

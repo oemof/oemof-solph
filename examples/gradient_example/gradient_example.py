@@ -131,7 +131,7 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=demand, nominal_capacity=1)},
+            inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
         )
     )
 
@@ -142,7 +142,7 @@ def main():
             inputs={bgas: flows.Flow()},
             outputs={
                 bel: flows.Flow(
-                    nominal_capacity=10e5,
+                    nominal_value=10e5,
                     negative_gradient_limit=gradient,
                     positive_gradient_limit=gradient,
                 )
@@ -153,7 +153,7 @@ def main():
 
     # create storage object representing a battery
     storage = cmp.GenericStorage(
-        nominal_capacity=999999999,
+        nominal_storage_capacity=999999999,
         label="storage",
         inputs={bel: flows.Flow()},
         outputs={bel: flows.Flow()},
