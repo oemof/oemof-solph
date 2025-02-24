@@ -152,9 +152,9 @@ class EnergySystem(network.energy_system.EnergySystem):
             try:
                 plain_timeindex = timeindex.timeIndex
 
-                time_increment = list(timeindex.segmentDurationDict[
-                    "Segment Duration"
-                ].values())
+                time_increment = list(
+                    timeindex.segmentDurationDict["Segment Duration"].values()
+                )
 
                 time_increment = (
                     np.array(time_increment) * timeindex.resolution
@@ -163,9 +163,9 @@ class EnergySystem(network.energy_system.EnergySystem):
                 tsa_parameters = {
                     "occurrences": collections.Counter(timeindex.clusterOrder),
                     "order": timeindex.clusterOrder,
-                    "timesteps_per_period": int(round(
-                        timeindex.hoursPerPeriod // timeindex.resolution
-                    )),
+                    "timesteps_per_period": int(
+                        round(timeindex.hoursPerPeriod // timeindex.resolution)
+                    ),
                 }
 
             except:
@@ -174,10 +174,10 @@ class EnergySystem(network.energy_system.EnergySystem):
                     "of type TimeSeriesAggregation (or compatible)."
                 )
             if infer_last_interval is True:
-                    msg = (
-                        "You cannot infer the last interval "
-                        "for aggregated time series."
-                    )
-                    raise AttributeError(msg)
+                msg = (
+                    "You cannot infer the last interval "
+                    "for aggregated time series."
+                )
+                raise AttributeError(msg)
 
         return time_increment, plain_timeindex, tsa_parameters

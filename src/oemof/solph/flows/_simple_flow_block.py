@@ -395,9 +395,7 @@ class SimpleFlowBlock(ScalarBlock):
         fixed_costs = 0
 
         for i, o in m.FLOWS:
-            if valid_sequence(
-                m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-            ):
+            if valid_sequence(m.flows[i, o].variable_costs, len(m.TIMESTEPS)):
                 for t in m.TIMESTEPS:
                     variable_costs += (
                         m.flow[i, o, t]

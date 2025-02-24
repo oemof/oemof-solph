@@ -526,15 +526,13 @@ class GenericStorageBlock(ScalarBlock):
                     lhs = n.nominal_storage_capacity * n.min_storage_level[t]
                     k = m.es.tsa_parameters["order"][i]
                     tk = m.get_timestep_from_tsam_timestep(k, g)
-                    inter_i = (len(m.es.tsa_parameters["order"]) + i)
+                    inter_i = len(m.es.tsa_parameters["order"]) + i
                     rhs = (
                         self.storage_content_inter[n, inter_i]
                         * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
                         + self.storage_content_intra[n, k, g]
                     )
-                    self.storage_inter_minimum_level.add(
-                        (n, i, g), lhs <= rhs
-                    )
+                    self.storage_inter_minimum_level.add((n, i, g), lhs <= rhs)
 
         self.storage_inter_minimum_level = Constraint(
             self.STORAGES, m.TIMEINDEX_CLUSTER, noruleinit=True
