@@ -68,31 +68,42 @@ data_hnw = solph.views.node(results, 'heat network')['sequences']
 # %%[sec_7_end]
 
 # %%[sec_8_start]
-i = 0.05
-n = 20
+def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
+    q = 1 + i
+    pvf = (q**n - 1)/(q**n * (q - 1))
+
+    return (invest_cost + pvf * (operation_cost - revenue))/(pvf * heat_produced)
+# %%[sec_8_end]
+
+# %%[sec_9_start]
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
 var_cost_gas_boiler = 0.50
 
-q = 1 + i
-# pvf = present value factor
-pvf = (q**n - 1)/(q**n * (q - 1))
-invest = spec_inv_gas_boiler * cap_gas_boiler
-cost = (
+invest_cost = spec_inv_gas_boiler * cap_gas_boiler
+operation_cost = (
     var_cost_gas_boiler * data_hnw[(('gas boiler', 'heat network'), 'flow')].sum()
     + (data['gas price'] * data_gnw[(('gas network', 'gas boiler'), 'flow')]).sum()
 )
-Q = data_hnw[(('heat network', 'heat sink'), 'flow')].sum()
+heat_produced = data_hnw[(('heat network', 'heat sink'), 'flow')].sum()
 
-LCOH = (invest + pvf * cost)/(pvf * Q)
-# %%[sec_8_end]
-
-# %%[sec_9_start]
-co2 = 
+lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 # %%[sec_9_end]
+print(f'LCOH: {lcoh:.2f} €/MWh')
 
 # %%[sec_10_start]
+co2 = data_gnw[(('gas network', 'gas boiler'), 'flow')].sum() * 201.2
+# %%[sec_10_end]
+print(f'CO2-emissions: {co2:.0f} kg')
+
+# %%[sec_11_start]
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplot(figsize=[10, 6])
-# %%[sec_10_end]
+# %%[sec_11_end]
+
+# %%[sec_12_start]
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplot(figsize=[10, 6])
+# %%[sec_12_end]
