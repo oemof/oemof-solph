@@ -250,55 +250,22 @@ def results(model, remove_last_time_point=False):
     }
 
     # Define index
-    if model.es.tsa_parameters:
-        for p, period_data in enumerate(model.es.tsa_parameters):
-            if p == 0:
-                if model.es.periods is None:
-                    timeindex = model.es.timeindex
-                else:
-                    timeindex = model.es.periods[0]
-                result_index = _disaggregate_tsa_timeindex(
-                    timeindex, period_data
-                )
-            else:
-                result_index = result_index.union(
-                    _disaggregate_tsa_timeindex(
-                        model.es.periods[p], period_data
-                    )
-                )
-    else:
-        if model.es.timeindex is None:
-            result_index = list(range(len(model.es.timeincrement) + 1))
-        else:
-            result_index = model.es.timeindex
 
-    if model.es.tsa_parameters is not None:
-        df_dict = _disaggregate_tsa_result(df_dict, model.es.tsa_parameters)
+    timeindex = model.es.timeindex
+    result_index = _disaggregate_tsa_timeindex(
+        timeindex, model.es.tsa_parameters
+    )
+
+    df_dict = _disaggregate_tsa_result(df_dict, model.es.tsa_parameters)
 
     # create final result dictionary by splitting up the dataframes in the
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
 
-    # Standard model results extraction
-    if model.es.periods is None:
-        result = _extract_standard_model_result(
-            df_dict, result, result_index, remove_last_time_point
-        )
-        scalars_col = "scalars"
-
-    # Results extraction for a multi-period model
-    else:
-        period_indexed = ["invest", "total", "old", "old_end", "old_exo"]
-
-        result = _extract_multi_period_model_result(
-            model,
-            df_dict,
-            period_indexed,
-            result,
-            result_index,
-            remove_last_time_point,
-        )
-        scalars_col = "period_scalars"
+    result = _extract_standard_model_result(
+        df_dict, result, result_index, remove_last_time_point
+    )
+    scalars_col = "scalars"
 
     # add dual variables for bus constraints
     if model.dual is not None:
@@ -493,23 +460,18 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     # Disaggregate flows
     for flow in flow_dict:
         disaggregated_flow_frames = []
-        period_offset = 0
-        for tsa_period in tsa_parameters:
-            for k in tsa_period["order"]:
-                flow_k = flow_dict[flow].iloc[
-                    period_offset
-                    + k * tsa_period["timesteps"] : period_offset
-                    + (k + 1) * tsa_period["timesteps"]
-                ]
-                # Disaggregate segmentation
-                if "segments" in tsa_period:
-                    flow_k = _disaggregate_segmentation(
-                        flow_k, tsa_period["segments"], k
-                    )
-                disaggregated_flow_frames.append(flow_k)
-            period_offset += tsa_period["timesteps"] * len(
-                tsa_period["occurrences"]
-            )
+        for k in tsa_parameters["order"]:
+            flow_k = flow_dict[flow].iloc[
+                k
+                * tsa_parameters["timesteps_per_period"] : (k + 1)
+                * tsa_parameters["timesteps_per_period"]
+            ]
+            # Disaggregate segmentation
+            if "segments" in tsa_parameters:
+                flow_k = _disaggregate_segmentation(
+                    flow_k, tsa_parameters["segments"], k
+                )
+            disaggregated_flow_frames.append(flow_k)
         ts = pd.concat(disaggregated_flow_frames)
         ts.timestep = range(len(ts))
         ts = ts.set_index("timestep")  # Have to set and reset index as

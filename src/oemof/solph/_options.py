@@ -23,12 +23,10 @@ class Investment:
     Parameters
     ----------
     maximum : float, :math:`P_{invest,max}(p)` or :math:`E_{invest,max}(p)`
-        Maximum of the additional invested capacity;
-        defined per period p for a multi-period model.
+        Maximum of the additional invested capacity.
     minimum : float, :math:`P_{invest,min}(p)` or :math:`E_{invest,min}(p)`
         Minimum of the additional invested capacity. If `nonconvex` is `True`,
-        `minimum` defines the threshold for the invested capacity;
-        defined per period p for a multi-period model.
+        `minimum` defines the threshold for the invested capacity.
     ep_costs : float, :math:`c_{invest,var}`
         Equivalent periodical costs or investment expenses for the investment
 
@@ -95,17 +93,17 @@ class Investment:
     ):
         if custom_attributes is None:
             custom_attributes = {}
-        self.maximum = sequence(maximum)
-        self.minimum = sequence(minimum)
-        self.ep_costs = sequence(ep_costs)
+        self.maximum = maximum
+        self.minimum = minimum
+        self.ep_costs = ep_costs
         self.existing = existing
         self.nonconvex = nonconvex
-        self.offset = sequence(offset)
+        self.offset = offset
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        self.fixed_costs = sequence(fixed_costs)
+        self.fixed_costs = fixed_costs
 
         for attribute in custom_attributes.keys():
             value = custom_attributes.get(attribute)
@@ -128,7 +126,7 @@ class Investment:
 
     def _check_invest_attributes_maximum(self):
         """Throw an error if maximum is infinite and nonconvex is True"""
-        if (self.maximum[0] == float("+inf")) and (self.nonconvex is True):
+        if (self.maximum == float("+inf")) and (self.nonconvex is True):
             e2 = (
                 "Please provide a maximum investment value in case of"
                 " nonconvex investment (nonconvex=True), which is in the"
@@ -141,7 +139,7 @@ class Investment:
 
     def _check_invest_attributes_offset(self):
         """Throw an error if offset is given without nonconvex=True"""
-        if (self.offset[0] != 0) and (self.nonconvex is False):
+        if (self.offset != 0) and (self.nonconvex is False):
             e3 = (
                 "If `nonconvex` is `False`, the `offset` parameter will be"
                 " ignored."
