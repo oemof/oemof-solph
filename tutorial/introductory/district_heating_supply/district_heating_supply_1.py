@@ -36,7 +36,6 @@ heat_sink = solph.components.Sink(
 )
 
 district_heating_system.add(heat_sink, gas_source)
-
 # %%[sec_4_end]
 
 # %%[sec_5_start]
