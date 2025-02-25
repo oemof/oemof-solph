@@ -3,14 +3,18 @@
 District heating portfolio optimization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-In this tutorial we will optimize the portfolio of an existing heat supply.
+In this tutorial, we will optimize the portfolio of a district heating supply system.
 
-The tutorial is set up in 4 different steps
+The tutorial is set up in three main steps:
 
-- The existing system delivering heat with a gas boiler
-- The optimization of a heat pump capacity utilizing waste heat from datacenter
-  with heat storage (ad-hoc dimensioning, ~2 days of maximum heat demand)
-- Introduce minimal load with converter concept (just minimal load)
+1. Modeling the existing system delivering heat with a gas boiler
+2. Adding a heat pump utilizing waste heat from datacenter and a thermal storage
+3. Introducing a minimal load constraint to the heat production units
+
+Each section contains a step by step explanation of how the district heating supply
+system is build using oemof.solph. Additionally, the repository contains a fully
+functional python file of all three main steps for you to execute yourself or
+modify and play around with.
 
 .. figure:: /_files/example_network.svg
     :align: center
