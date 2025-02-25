@@ -101,14 +101,14 @@ def test_connect_invest():
 
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2, 0],
-        om.InvestmentFlowBlock.invest[line21, bel1, 0],
+        om.InvestmentFlowBlock.added_capacity[line12, bel2, 0],
+        om.InvestmentFlowBlock.added_capacity[line21, bel1, 0],
         2,
     )
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2, 0],
-        om.GenericInvestmentStorageBlock.invest[storage, 0],
+        om.InvestmentFlowBlock.added_capacity[line12, bel2, 0],
+        om.GenericInvestmentStorageBlock.added_capacity[storage, 0],
     )
 
     # if tee_switch is true solver messages will be displayed

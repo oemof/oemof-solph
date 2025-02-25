@@ -193,7 +193,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 return 0, m.flows[i, o].investment.maximum
 
         # create invest variable for an investment flow
-        self.invest = Var(
+        self.added_capacity = Var(
             self.INVESTFLOWS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
@@ -388,7 +388,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.INVESTFLOWS:
                 expr = (
                     self.total_capacity[i, o]
-                    == self.invest[i, o] + m.flows[i, o].investment.existing
+                    == self.added_capacity[i, o] + m.flows[i, o].investment.existing
                 )
                 self.total_rule.add((i, o), expr)
 
@@ -626,12 +626,12 @@ class InvestmentFlowBlock(ScalarBlock):
 
         for i, o in self.CONVEX_INVESTFLOWS:
             investment_costs += (
-                self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                self.added_capacity[i, o] * m.flows[i, o].investment.ep_costs
             )
 
         for i, o in self.NON_CONVEX_INVESTFLOWS:
             investment_costs += (
-                self.invest[i, o] * m.flows[i, o].investment.ep_costs
+                self.added_capacity[i, o] * m.flows[i, o].investment.ep_costs
                 + self.invest_status[i, o] * m.flows[i, o].investment.offset
             )
 
@@ -650,7 +650,7 @@ class InvestmentFlowBlock(ScalarBlock):
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 expr = (
                     m.flows[i, o].investment.minimum * self.invest_status[i, o]
-                    <= self.invest[i, o]
+                    <= self.added_capacity[i, o]
                 )
                 self.minimum_rule.add((i, o), expr)
 
@@ -668,7 +668,7 @@ class InvestmentFlowBlock(ScalarBlock):
         def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
-                expr = self.invest[i, o, p] <= (
+                expr = self.added_capacity[i, o, p] <= (
                     m.flows[i, o].investment.maximum * self.invest_status[i, o]
                 )
                 self.maximum_rule.add((i, o), expr)

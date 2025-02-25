@@ -192,8 +192,10 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
 
     # generate results to be evaluated in tests
     comp_results = data["sequences"].sum(axis=0).to_dict()
-    comp_results["pv_capacity"] = results[(pv, bel)]["scalars"].invest
-    comp_results["wind_capacity"] = results[(wind, bel)]["scalars"].invest
+    comp_results["pv_capacity"] = results[(pv, bel)]["scalars"].added_capacity
+    comp_results["wind_capacity"] = results[(wind, bel)][
+        "scalars"
+    ].added_capacity
 
     test_results = {
         (("wind", "b_el"), "flow"): 9239,

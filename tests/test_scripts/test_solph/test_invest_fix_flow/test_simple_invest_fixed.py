@@ -92,6 +92,6 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
 
     # generate results to be evaluated in tests
     comp_results = data["sequences"].sum(axis=0).to_dict()
-    comp_results["pv_capacity"] = results[(pv, bel)]["scalars"].invest
+    comp_results["pv_capacity"] = results[(pv, bel)]["scalars"].added_capacity
 
     assert comp_results[(("pv", "b_el"), "flow")] > 0
