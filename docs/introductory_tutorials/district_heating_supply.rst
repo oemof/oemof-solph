@@ -62,35 +62,77 @@ like this, we opt to writing those values directly into the code.
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
 
-2. Import dependencies + setup EnergySystem (code snippet)
+Now we can begin the modeling process of our district heating supply system. Every
+oemof.solph model starts be creating (also called "initializing") the ``EnergySystem``.
+To create an instance of the :py:class:`solph.EnergySystem` class, we have to import the solph
+package at first. To enforce our simulation time period and resolution, we set its
+:py:attr:`timeindex` keyword argument to the index of the input DataFrame.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_2_start]
     :end-before: [sec_2_end]
 
-3. Description of which buses are required + setup? (code snippet)
+After that, we need to set up the two energy carrying buses, i.e. the heat and gas
+network. We make sure to set a label for the two to reference them later when we
+analyze the results. After initialization, we add them to the ``district_heating_system``
+object.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_3_start]
     :end-before: [sec_3_end]
 
-4. Description which sinks and sources are required, load the necessary data, setup (code snippet)
+Now we add a gas source for our boiler. We initialize a :py:class:`solph.components.Source`
+instance, give it a label and set the output to be the gas network, by setting it
+to a dictionary with the ``gnw`` variable as key and the value to be a new :py:class:`solph.flows.Flow`
+instance. To define the cost for using the gas source, we set the :py:attr:`variable_cost`
+keyword argument to the 'gas price' column of our input data time series.
+
+Defining the heat sink works very similar, but we use a :py:class:`solph.components.Sink`
+and set its :py:attr:`inputs` argument instead. Also, we do not impose any costs
+(even though we could set the :py:attr:`variable_cost` to a negative value to imply
+a revenue). In order to enforce the heat demand to be covered at any point in time,
+we use the :py:attr:`fix` argument. It takes a normalized time series that gets
+multiplied with the :py:attr:`nominal_value`. Therefore, we set the latter to be
+the maximum value of the time series and divide the whole time series by it when
+setting the :py:attr:`fix` parameter.
+
+Finally, both components get added to the energy system.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_4_start]
     :end-before: [sec_4_end]
 
-5. Converter setup (gas boiler), how to connect buses, variable costs, capacity (code snippet)
+Last, but not least, we will depict the gas boiler itself, using a simple linear
+model with the :py:class:`solph.components.Converter` class. In contrast to the
+components before, we have to define at least one input *and* one output, which in
+case of the gas boiler is the natural gas burnt and the heat produced from it.
+The connection from the gas network does not need any parametrization. We set the
+:py:attr:`nominal_value` of the heat output to 20 MW (see note on units below) and
+add :py:attr:`variable_cost` of 0.50 €/MWh. To depict energy losses due to thermodynamic
+inefficiencies, we can set the :py:attr:`conversion_factors` keyword argument of
+the :py:class:`solph.components.Converter`. It expects a dictionary, with a key
+corresponding to the bus to which the value (scalar or iterable) is applied. So,
+to model a constant efficiency of 95 %, we set it to 0.95. Do not forget to add
+the gas boiler to the district heating supply system.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_5_start]
     :end-before: [sec_5_end]
 
-6. "Optimization" of dispatch, has to follow load (code snippet)
+.. note::
+    Keep in mind that the units used in your energy system model are only implicit
+    and that you have to check their consistency yourself.
+
+As our system is complete for this step, its time to start the unit commitment
+optimization. For that, we first have to create a :py:class:`solph.Model` instance
+from our ``district_heating_system``. Then we can use its :py:func:`solve` method
+to run the optimization. We decide to use the open source solver CBC and add the
+additional :py:attr:`solve_kwargs` parameter ``'tee'`` to ``True``, in order to
+get a more verbose solver logging output in the console.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
