@@ -142,10 +142,11 @@ def divide_scalars_sequences(df_dict, k):
     k: tuple
         oemof tuple for results processing
     """
+    df = df_dict[k]
     try:
-        condition = df_dict[k][:-1].isnull().any()
-        scalars = df_dict[k].loc[:, condition].dropna().iloc[0]
-        sequences = df_dict[k].loc[:, ~condition]
+        condition = df[:-1].isnull().any()
+        scalars = df.loc[:, condition].dropna().iloc[0]
+        sequences = df.loc[:, ~condition]
         return {"scalars": scalars, "sequences": sequences}
     except IndexError:
         error_message = (
@@ -340,78 +341,6 @@ def _extract_standard_model_result(
             df_dict[k].loc[df_dict[k].index[-1] + 1, :] = np.nan
             set_result_index(df_dict, k, result_index)
             result[k] = divide_scalars_sequences(df_dict, k)
-
-    return result
-
-
-def _extract_multi_period_model_result(
-    model,
-    df_dict,
-    period_indexed=None,
-    result=None,
-    result_index=None,
-    remove_last_time_point=False,
-):
-    """Extract and return the results of a multi-period model
-
-    Difference to standard model is in the way, scalar values are extracted
-    since they now depend on periods.
-
-    Parameters
-    ----------
-    model : oemof.solph.models.Model
-        The optimization model
-    df_dict : dict
-        dictionary of results DataFrames
-    period_indexed : list
-        list of variables that are indexed by periods
-    result : dict
-        dictionary to store the results
-    result_index : pd.DatetimeIndex
-        timeindex to use for the results (derived from EnergySystem)
-    remove_last_time_point : bool
-        if True, remove the last time point
-
-    Returns
-    -------
-    result : dict
-        dictionary with results stored
-    """
-    for k in df_dict:
-        df_dict[k].set_index("timestep", inplace=True)
-        df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
-        # Split data set
-        period_cols = [
-            col for col in df_dict[k].columns if col in period_indexed
-        ]
-        # map periods to their start years for displaying period results
-        d = {
-            key: val + model.es.periods[0].min().year
-            for key, val in enumerate(model.es.periods_years)
-        }
-        period_scalars = df_dict[k].loc[:, period_cols].dropna()
-        sequences = df_dict[k].loc[
-            :, [col for col in df_dict[k].columns if col not in period_cols]
-        ]
-        if remove_last_time_point:
-            set_sequences_index(sequences, result_index[:-1])
-        else:
-            set_sequences_index(sequences, result_index)
-        if period_scalars.empty:
-            period_scalars = pd.DataFrame(index=d.values())
-        try:
-            period_scalars.rename(index=d, inplace=True)
-            period_scalars.index.name = "period"
-            result[k] = {
-                "period_scalars": period_scalars,
-                "sequences": sequences,
-            }
-        except IndexError:
-            error_message = (
-                "Some indices seem to be not matching.\n"
-                "Cannot properly extract model results."
-            )
-            raise IndexError(error_message)
 
     return result
 
