@@ -33,11 +33,29 @@ modify and play around with.
 Step 1: Status-Quo system
 -------------------------
 
-1. Which information is required? (no code)
+As described above, we want to start by building the existing district heating
+supply systems, which in our simple example only contains a single gas boiler.
+But before we start modeling the energy system, we should give some thought about
+what kind of input data we need for the simulation.
 
-  - heat demand time series
-  - gas price
-  - gas boiler capactiy and technical specifications
+Maybe the first that comes to mind is the heat demand our system should supply.
+As the demand varies throughout the seasons, it makes sense to simulate a full
+year. Typically, this is done with an hourly time resolution. Furthermore, we have
+to know the technical specifications of our gas boiler. This includes the existing
+capacity (i.e. the nominal heat output of the unit), its efficiency as well as
+variable cost arising with its operation. For simplicity and in good approximation
+of the real behavior of gas boilers, we make the assumption that the efficiency is
+constant. Finally, we need the price of the natural gas we burn inside the boiler.
+This could be a constant value if the price is contractually fixed or a time series
+of differing values if the gas is bought at an auction. For this tutorial, we assume
+the latter case.
+
+To get started with our model, we first import the pandas package to read in a
+CSV file containing our time series input data. In this case, it includes the hourly
+heat demand and gas prices. The first column however contains the time index we make
+sure to be properly parsed. Generally, it is also recommended to use a parameter
+file (e.g. in the JSON format) for the constant input data, but in a small example
+like this, we opt to writing those values directly into the code.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
