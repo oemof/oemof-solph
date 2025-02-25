@@ -18,13 +18,15 @@ SPDX-License-Identifier: MIT
 
 import numbers
 import sys
-from collections import abc
+from collections import abc, namedtuple
 from itertools import groupby
+from typing import Iterable, Optional
 
 import numpy as np
 import pandas as pd
-from oemof.network.network import Entity
+from oemof.network.network import Entity, Node
 from pyomo.core.base.piecewise import IndexedPiecewise
+from pyomo.core.base.set import OrderedScalarSet
 from pyomo.core.base.var import Var
 
 from ._plumbing import _FakeSequence
@@ -172,9 +174,9 @@ def set_result_index(df_dict, k, result_index):
                 "\nFlow: {0}-{1}. This could be caused by NaN-values "
                 "in your input data."
             )
-            raise type(e)(
-                str(e) + msg.format(k[0].label, k[1].label)
-            ).with_traceback(sys.exc_info()[2])
+            raise type(e)(str(e) + msg.format(k[0].label, k[1].label)).with_traceback(
+                sys.exc_info()[2]
+            )
 
 
 def set_sequences_index(df, result_index):
@@ -236,9 +238,7 @@ def results(model, remove_last_time_point=False):
 
     # create a dict of dataframes keyed by oemof tuples
     df_dict = {
-        k if len(k) > 1 else (k[0], None): v[
-            ["timestep", "variable_name", "value"]
-        ]
+        k if len(k) > 1 else (k[0], None): v[["timestep", "variable_name", "value"]]
         for k, v in df.groupby("oemof_tuple")
     }
 
@@ -275,13 +275,9 @@ def results(model, remove_last_time_point=False):
 
     # add dual variables for bus constraints
     if model.dual is not None:
-        grouped = groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
-        )
+        grouped = groupby(sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0])
         for bus, timestep in grouped:
-            duals = [
-                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
-            ]
+            duals = [model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep]
             if model.es.periods is None:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             # TODO: Align with standard model
@@ -330,17 +326,13 @@ def _extract_standard_model_result(
         # interval.
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)
-            df_dict[k] = df_dict[k].pivot(
-                columns="variable_name", values="value"
-            )
+            df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
             set_result_index(df_dict, k, result_index[:-1])
             result[k] = divide_scalars_sequences(df_dict, k)
     else:
         for k in df_dict:
             df_dict[k].set_index("timestep", inplace=True)
-            df_dict[k] = df_dict[k].pivot(
-                columns="variable_name", values="value"
-            )
+            df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
             # Add empty row with nan at the end of the table by adding 1 to the
             # last value of the numeric index.
             df_dict[k].loc[df_dict[k].index[-1] + 1, :] = np.nan
@@ -387,9 +379,7 @@ def _extract_multi_period_model_result(
         df_dict[k].set_index("timestep", inplace=True)
         df_dict[k] = df_dict[k].pivot(columns="variable_name", values="value")
         # Split data set
-        period_cols = [
-            col for col in df_dict[k].columns if col in period_indexed
-        ]
+        period_cols = [col for col in df_dict[k].columns if col in period_indexed]
         # map periods to their start years for displaying period results
         d = {
             key: val + model.es.periods[0].min().year
@@ -435,7 +425,9 @@ def convert_keys_to_strings(result, keep_none_type=False):
             (
                 tuple([str(e) if e is not None else None for e in k])
                 if isinstance(k, tuple)
-                else str(k) if k is not None else None
+                else str(k)
+                if k is not None
+                else None
             ): v
             for k, v in result.items()
         }
@@ -479,16 +471,12 @@ def meta_results(om, undefined=False):
             except TypeError:
                 if undefined:
                     msg = "Cannot fetch meta results of type {0}"
-                    meta_res[k1][k2] = msg.format(
-                        type(om.es.results[k1][0][k2])
-                    )
+                    meta_res[k1][k2] = msg.format(type(om.es.results[k1][0][k2]))
 
     return meta_res
 
 
-def __separate_attrs(
-    system, exclude_attrs, get_flows=False, exclude_none=True
-):
+def __separate_attrs(system, exclude_attrs, get_flows=False, exclude_none=True):
     """
     Create a dictionary with flow scalars and series.
 
@@ -659,3 +647,164 @@ def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
 
     flow_data.update(node_data)
     return flow_data
+
+
+SolphResults = namedtuple(
+    typename="SolphResults",
+    field_names=["flows", "states", "invest", "other_timeindexed", "not_timeindexed"],
+)
+
+
+def _concat_and_pivot(
+    dfs: Iterable[pd.DataFrame],
+    index: list[str],
+    columns: Optional[list[str]] = None,
+):
+    """Concatenate DataFrames and pivot the result."""
+    if len(dfs) > 0:
+        if columns is not None:
+            return pd.concat(dfs).pivot(index=index, columns=columns, values="value")
+        else:
+            # We have only the value column
+            return pd.concat(dfs).set_index(keys=index)
+    else:
+        # No DataFrames to concatenate, return an empty one
+        return pd.DataFrame()
+
+
+def is_component_index(idx: OrderedScalarSet) -> bool:
+    return idx.dimen == 1 and isinstance(idx.first(), Node)
+
+
+def is_flow_index(idx: OrderedScalarSet) -> bool:
+    return idx.dimen == 2 and all(map(lambda x: isinstance(x, Node), idx.first()))
+
+
+def process_results(om):
+    """
+    Get results from solved model.
+    """
+    # Lists of variable blocks
+    _flow = []
+    _state = []
+    _invest = []
+
+    _other_timeindexed = {}
+    _not_timeindexed = []
+
+    # Get variable blocks from solved model
+    blocks = set([bv.parent_component() for bv in om.component_data_objects(Var)])
+
+    for var_block in blocks:
+        _idx, values = zip(*var_block.extract_values().items())
+        indices = np.array(_idx)
+
+        block = pd.DataFrame(
+            index=range(len(indices)),
+            data={"value": values, "variable": var_block.getname()},
+        )
+
+        match tuple(var_block.index_set().subsets()):
+            case (om.FLOWS, om.TIMESTEPS):
+                # This is the flow block
+                block[["from", "to", "timesteps"]] = indices
+
+                _flow.append(block)
+            case (idx, om.TIMEPOINTS) if is_component_index(idx):
+                # This is a block of component state variables at timepoints
+                block[["component", "timepoints"]] = indices
+
+                _state.append(block)
+            case (idx, om.PERIODS) if is_component_index(idx) or is_flow_index(idx):
+                # This block is period indexed, i.e. an invest block
+                xs, ts = np.split(indices, [-1], axis=1)
+                if idx.dimen == 1:
+                    xs = np.reshape(xs, (len(xs),))
+                elif idx.dimen == 2:
+                    xs = np.array(map(tuple, xs))
+
+                block[["component"]] = xs
+                block[["periods"]] = ts
+
+                _invest.append(block)
+            case (
+                *_,
+                (om.TIMESTEPS | om.TIMEPOINTS | om.PERIODS) as t_idx,
+            ):
+                # These are some other time indexed variables
+                # Split indices into generic identifier and time index
+                xs, ts = np.split(indices, [-t_idx.dimen], axis=1)
+
+                block["identifier"] = list(map(tuple, xs))
+
+                t_idx_name = str(t_idx).lower()
+                block[t_idx_name] = ts
+
+                _other_timeindexed[t_idx_name].append(block)
+            case _:
+                # These are variables which are not time indexed
+                block["identifier"] = indices
+
+                _not_timeindexed.append(block)
+
+    return SolphResults(
+        flows=_concat_and_pivot(
+            _flow,
+            index="timesteps",
+            columns=["from", "to"],
+        ),
+        states=_concat_and_pivot(
+            _state,
+            index="timepoints",
+            columns=["component", "variable"],
+        ),
+        invest=_concat_and_pivot(
+            _invest,
+            index="periods",
+            columns=["component", "variable"],
+        ),
+        other_timeindexed={
+            index: _concat_and_pivot(
+                _other_timeindexed[index],
+                index=index,
+                columns=["identifier", "variable"],
+            )
+            for index in _other_timeindexed
+        },
+        not_timeindexed=_concat_and_pivot(
+            _not_timeindexed, index=["variable", "identifier"]
+        ),
+    )
+
+
+def extract_results(timeindex: Optional[str], var_names: Optional[list[str]], om):
+    # Get variable blocks from solved model
+    blocks = set([bv.parent_component() for bv in om.component_data_objects(Var)])
+    _resdfs = []
+    for var_block in blocks:
+        if not var_block.getname() in var_names:
+            # this block is not in focus
+            continue
+
+        _idx, values = zip(*var_block.extract_values().items())
+        indices = np.array(_idx)
+        *_, t_idx = var_block.index_set().subsets()
+
+        if not t_idx == getattr(om, timeindex):
+            # not correct time index
+            continue
+
+        block = pd.DataFrame(
+            index=range(len(indices)),
+            data={"value": values, "variable": var_block.getname()},
+        )
+
+        # timeindex hinzufügen
+        # sonstige identifier in block packen
+        # in liste packen
+
+    return _concat_and_pivot(_resdfs, ...)
+
+
+extract_flows = partial(extract_results, index_structure=("flows", "timesteps"))
+extract_states = partial(extract_results, index_structure=("compoment", "timepoints"))
