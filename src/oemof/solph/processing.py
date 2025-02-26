@@ -471,69 +471,61 @@ def _disaggregate_segmentation(
 def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
     """Calculate resulting SOC from inter and intra SOC flows"""
     soc_frames = []
-    i_offset = 0
-    t_offset = 0
-    for p, tsa_period in enumerate(tsa_parameters):
-        for i, k in enumerate(tsa_period["order"]):
-            inter_value = soc["inter"].iloc[i_offset + i]["value"]
-            # Self-discharge has to be taken into account for calculating
-            # inter SOC for each timestep in cluster
-            t0 = t_offset + i * tsa_period["timesteps"]
-            # Add last timesteps of simulation in order to interpolate SOC for
-            # last segment correctly:
-            is_last_timestep = (
-                p == len(tsa_parameters) - 1
-                and i == len(tsa_period["order"]) - 1
-            )
-            timesteps = (
-                tsa_period["timesteps"] + 1
-                if is_last_timestep
-                else tsa_period["timesteps"]
-            )
-            inter_series = (
-                pd.Series(
-                    itertools.accumulate(
+    for i, k in enumerate(tsa_parameters["order"]):
+        inter_value = soc["inter"].iloc[i]["value"]
+        # Self-discharge has to be taken into account for calculating
+        # inter SOC for each timestep in cluster
+        t0 = i * tsa_parameters["timesteps"]
+        # Add last timesteps of simulation in order to interpolate SOC for
+        # last segment correctly:
+        is_last_timestep = (i == len(tsa_parameters["order"]) - 1)
+        timesteps = (
+            tsa_parameters["timesteps"] + 1
+            if is_last_timestep
+            else tsa_parameters["timesteps"]
+        )
+        inter_series = (
+            pd.Series(
+                itertools.accumulate(
+                    (
                         (
-                            (
-                                (1 - storage.loss_rate[t])
-                                ** tsa_period["segments"][(k, t - t0)]
-                                if "segments" in tsa_period
-                                else 1 - storage.loss_rate[t]
-                            )
-                            for t in range(
-                                t0,
-                                t0 + timesteps - 1,
-                            )
-                        ),
-                        operator.mul,
-                        initial=1,
-                    )
+                            (1 - storage.loss_rate[t])
+                            ** tsa_parameters["segments"][(k, t - t0)]
+                            if "segments" in tsa_parameters
+                            else 1 - storage.loss_rate[t]
+                        )
+                        for t in range(
+                            t0,
+                            t0 + timesteps - 1,
+                        )
+                    ),
+                    operator.mul,
+                    initial=1,
                 )
-                * inter_value
             )
-            intra_series = soc["intra"][(p, k)].iloc[0:timesteps]
-            soc_frame = pd.DataFrame(
-                intra_series["value"].values
-                + inter_series.values,  # Neglect indexes, otherwise none
-                columns=["value"],
-            )
+            * inter_value
+        )
+        intra_series = soc["intra"][(p, k)].iloc[0:timesteps]
+        soc_frame = pd.DataFrame(
+            intra_series["value"].values
+            + inter_series.values,  # Neglect indexes, otherwise none
+            columns=["value"],
+        )
 
-            # Disaggregate segmentation
-            if "segments" in tsa_period:
-                soc_disaggregated = _disaggregate_segmentation(
-                    soc_frame[:-1] if is_last_timestep else soc_frame,
-                    tsa_period["segments"],
-                    k,
+        # Disaggregate segmentation
+        if "segments" in tsa_parameters:
+            soc_disaggregated = _disaggregate_segmentation(
+                soc_frame[:-1] if is_last_timestep else soc_frame,
+                tsa_parameters["segments"],
+                k,
+            )
+            if is_last_timestep:
+                soc_disaggregated.loc[len(soc_disaggregated)] = (
+                    soc_frame.iloc[-1]
                 )
-                if is_last_timestep:
-                    soc_disaggregated.loc[len(soc_disaggregated)] = (
-                        soc_frame.iloc[-1]
-                    )
-                soc_frame = soc_disaggregated
+            soc_frame = soc_disaggregated
 
-            soc_frames.append(soc_frame)
-        i_offset += len(tsa_period["order"])
-        t_offset += i_offset * tsa_period["timesteps"]
+        soc_frames.append(soc_frame)
     soc_ts = pd.concat(soc_frames)
     soc_ts["variable_name"] = "soc"
     soc_ts["timestep"] = range(len(soc_ts))
