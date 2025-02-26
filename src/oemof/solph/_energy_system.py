@@ -135,7 +135,7 @@ class EnergySystem(network.energy_system.EnergySystem):
             tsa_parameters = {
                 "occurrences": [1],
                 "order": [0],
-                "timesteps_per_period": len(timeindex),
+                "timesteps_per_period": len(timeindex) - 1,  # points -> steps
             }
             time_increment = EnergySystem._calculate_timeincrement(
                 plain_timeindex
