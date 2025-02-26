@@ -93,17 +93,17 @@ class Investment:
     ):
         if custom_attributes is None:
             custom_attributes = {}
-        self.maximum = maximum
-        self.minimum = minimum
-        self.ep_costs = ep_costs
+        self.maximum = sequence(maximum)
+        self.minimum = sequence(minimum)
+        self.ep_costs = sequence(ep_costs)
         self.existing = existing
         self.nonconvex = nonconvex
-        self.offset = offset
+        self.offset = sequence(offset)
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        self.fixed_costs = fixed_costs
+        self.fixed_costs = sequence(fixed_costs)
 
         for attribute in custom_attributes.keys():
             value = custom_attributes.get(attribute)
@@ -139,7 +139,7 @@ class Investment:
 
     def _check_invest_attributes_offset(self):
         """Throw an error if offset is given without nonconvex=True"""
-        if (self.offset != 0) and (self.nonconvex is False):
+        if (self.offset[0] != 0) and (self.nonconvex is False):
             e3 = (
                 "If `nonconvex` is `False`, the `offset` parameter will be"
                 " ignored."

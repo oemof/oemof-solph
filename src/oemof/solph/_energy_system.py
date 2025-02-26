@@ -84,6 +84,8 @@ class EnergySystem(network.energy_system.EnergySystem):
             )
         )
 
+        self.investment_steps = [0]
+
         self.tsa_parameters = tsa_parameters
 
         super().__init__(
