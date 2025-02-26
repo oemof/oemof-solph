@@ -279,17 +279,17 @@ def main():
     meta_results = solph.processing.meta_results(om)
     pp.pprint(meta_results)
 
-    my_results = electricity_bus["period_scalars"]
+    my_results = electricity_bus["scalars"]
 
     if storage:
         # installed capacity of storage in GWh
         my_results["storage_invest_GWh"] = (
-            results[(storage, None)]["period_scalars"]["invest"] / 1e6
+            results[(storage, None)]["period_scalars"]["capacity"] / 1e6
         )
 
     # installed capacity of wind power plant in MW
     my_results["wind_invest_MW"] = (
-        results[(wind, bel)]["period_scalars"]["invest"] / 1e3
+        results[(wind, bel)]["scalars"]["capacity"] / 1e3
     )
 
     # resulting renewable energy share
