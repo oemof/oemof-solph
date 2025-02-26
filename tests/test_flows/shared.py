@@ -27,4 +27,6 @@ def _run_flow_model(flow):
     model = solph.Model(energysystem)
     model.solve()
 
-    return solph.processing.results(model)[(bus, bus)]["sequences"]
+    results = solph.processing.results(model)
+
+    return results[(bus, bus)]["sequences"]
