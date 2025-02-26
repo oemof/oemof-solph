@@ -539,9 +539,7 @@ class GenericStorageBlock(ScalarBlock):
                         + self.storage_content_intra[n, k, g]
                     )
                     rhs = n.nominal_storage_capacity * n.max_storage_level[t]
-                    self.storage_inter_maximum_level.add(
-                        (n, i, g), lhs <= rhs
-                    )
+                    self.storage_inter_maximum_level.add((n, i, g), lhs <= rhs)
 
         self.storage_inter_maximum_level = Constraint(
             self.STORAGES, m.TIMEINDEX_CLUSTER, noruleinit=True
@@ -685,8 +683,7 @@ class GenericStorageBlock(ScalarBlock):
                 # to iterating over the TIMESTEPS with one offset.
                 for t in m.TIMESTEPS_ORIGINAL:
                     storage_costs += (
-                        self.storage_content[n, t + 1]
-                        * n.storage_costs[t + 1]
+                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
@@ -1315,9 +1312,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=0,
         )
 
-        self.init_content = Var(
-            self.INVESTSTORAGES, within=NonNegativeReals
-        )
+        self.init_content = Var(self.INVESTSTORAGES, within=NonNegativeReals)
 
         # create status variable for a non-convex investment storage
         self.invest_status = Var(
@@ -1749,7 +1744,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 """
                 for n in self.OVERALL_MAXIMUM_INVESTSTORAGES:
                     for p in m.INVESTMENT_PERIODS:
-                        expr = self.total_capacity[n, p] <= n.investment.overall_maximum
+                        expr = (
+                            self.total_capacity[n, p]
+                            <= n.investment.overall_maximum
+                        )
                         self.overall_storage_maximum.add((n, p), expr)
 
             self.overall_storage_maximum = Constraint(
@@ -1895,7 +1893,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.INVESTSTORAGES:
-                if valid_sequence(n.investment.fixed_costs, len(m.INVESTMENT_PERIODS)):
+                if valid_sequence(
+                    n.investment.fixed_costs, len(m.INVESTMENT_PERIODS)
+                ):
                     lifetime = n.investment.lifetime
                     for p in m.INVESTMENT_PERIODS:
                         range_limit = min(
@@ -1911,7 +1911,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         )
 
             for n in self.EXISTING_INVESTSTORAGES:
-                if valid_sequence(n.investment.fixed_costs, len(m.INVESTMENT_PERIODS)):
+                if valid_sequence(
+                    n.investment.fixed_costs, len(m.INVESTMENT_PERIODS)
+                ):
                     lifetime = n.investment.lifetime
                     age = n.investment.age
                     range_limit = min(

@@ -478,7 +478,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
         t0 = i * tsa_parameters["timesteps"]
         # Add last timesteps of simulation in order to interpolate SOC for
         # last segment correctly:
-        is_last_timestep = (i == len(tsa_parameters["order"]) - 1)
+        is_last_timestep = i == len(tsa_parameters["order"]) - 1
         timesteps = (
             tsa_parameters["timesteps"] + 1
             if is_last_timestep
@@ -520,9 +520,9 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                 k,
             )
             if is_last_timestep:
-                soc_disaggregated.loc[len(soc_disaggregated)] = (
-                    soc_frame.iloc[-1]
-                )
+                soc_disaggregated.loc[len(soc_disaggregated)] = soc_frame.iloc[
+                    -1
+                ]
             soc_frame = soc_disaggregated
 
         soc_frames.append(soc_frame)

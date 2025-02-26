@@ -81,11 +81,8 @@ STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    try:
-        data = pd.read_csv(file_path)
-    except FileNotFoundError:
-        dir = os.path.dirname(os.path.abspath(__file__))
-        data = pd.read_csv(dir + "/" + file_path)
+    dir = os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(dir + "/" + file_path)
     return data
 
 
@@ -118,7 +115,7 @@ def main(dump_and_restore=False):
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
-    number_of_time_steps = len(data)
+    number_of_time_steps = 24  # len(data)
     solver_verbose = False  # show/hide solver output
 
     # initiate the logger (see the API docs for more information)
