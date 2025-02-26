@@ -145,11 +145,14 @@ def divide_scalars_sequences(df_dict, k):
         oemof tuple for results processing
     """
     df = df_dict[k]
+    rv = {}
     try:
         condition = df[:-1].isnull().any()
-        scalars = df.loc[:, condition].dropna().iloc[0]
-        sequences = df.loc[:, ~condition]
-        return {"scalars": scalars, "sequences": sequences}
+        scalars = df.loc[:, condition].dropna()
+        if scalars.size > 0:
+            rv["scalars"] = scalars.iloc[0]
+        rv["sequences"] = df.loc[:, ~condition]
+        return rv
     except IndexError:
         error_message = (
             "Cannot access index on result data. "
