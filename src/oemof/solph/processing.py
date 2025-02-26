@@ -35,7 +35,9 @@ from oemof.solph.components._generic_storage import GenericStorage
 from ._plumbing import _FakeSequence
 from .helpers import flatten
 
-PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
+# FIXME: We should not rely on variable names to be repeated.
+# This will cause problems when refactoring. (It already did.)
+PERIOD_INDEXES = ["capacity", "invest_status"]
 
 
 def get_tuple(x):
