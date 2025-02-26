@@ -81,8 +81,11 @@ STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    dir = os.path.dirname(os.path.abspath(__file__))
-    data = pd.read_csv(dir + "/" + file_path)
+    try:
+        data = pd.read_csv(file_path)
+    except FileNotFoundError:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        data = pd.read_csv(dir + "/" + file_path)
     return data
 
 
