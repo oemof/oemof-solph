@@ -79,7 +79,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         Status variable (binary) `om.InvestNonConvexFlowBlock.status`:
             Variable indicating if flow is >= 0 indexed by FLOWS
 
-        :math::`P_{invest}` `InvestNonConvexFlowBlock.added_capacity`
+        :math::`P_{invest}` `InvestNonConvexFlowBlock.invest`
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
 
@@ -112,7 +112,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                 return 0, m.flows[i, o].investment.maximum[p]
 
         # Create the `invest` variable for the nonconvex investment flow.
-        self.added_capacity = Var(
+        self.invest = Var(
             self.INVEST_NON_CONVEX_FLOWS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
@@ -211,7 +211,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         m = self.parent_block()
 
         def _linearization_rule_invest_non_convex_two(_, i, o, p, t):
-            expr = self.added_capacity[i, o, p] >= self.status_nominal[i, o, t]
+            expr = self.invest[i, o, p] >= self.status_nominal[i, o, t]
             return expr
 
         return Constraint(
@@ -231,7 +231,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         def _linearization_rule_invest_non_convex_three(_, i, o, p, t):
             expr = (
-                self.added_capacity[i, o, p]
+                self.invest[i, o, p]
                 - (1 - self.status[i, o, t])
                 * m.flows[i, o].investment.maximum[p]
                 <= self.status_nominal[i, o, t]
@@ -274,8 +274,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         for i, o in self.INVEST_NON_CONVEX_FLOWS:
             for p in m.PERIODS:
                 investment_costs += (
-                    self.added_capacity[i, o, p]
-                    * m.flows[i, o].investment.ep_costs[p]
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                     + m.flows[i, o].investment.offset[p]
                 )
 
@@ -302,7 +301,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
-                        <= self.added_capacity[i, o, p]
+                        <= self.invest[i, o, p]
                     )
                     self.minimum_investment.add((i, o, p), expr)
 
@@ -325,7 +324,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             for i, o in self.INVEST_NON_CONVEX_FLOWS:
                 for p in m.PERIODS:
                     expr = (
-                        self.added_capacity[i, o, p]
+                        self.invest[i, o, p]
                         <= m.flows[i, o].investment.maximum[p]
                     )
                     self.maximum_investment.add((i, o, p), expr)
