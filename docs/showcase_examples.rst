@@ -12,26 +12,13 @@ learn from your project.
 
 .. card::
 
-    **Example showcase how to build an example**
+    **open-plan-tool**
     ^^^
 
-    .. image:: /_static/_logo/logo_oemof_solph_COMPACT.svg
+    .. image:: /_files/open-plant-tool-screenshot.png
       :align: center
-      :alt: Example Caption
-      :class: only-light
-      :target: https://github.com/oemof/oemof-solph
+      :alt: open-plan-tool
+      :target: https://open-plan-tool.org
 
-    .. image:: /_static/_logo/logo_oemof_solph_COMPACT_darkmode.svg
-      :align: center
-      :alt: Example Caption
-      :class: only-dark
-      :target: https://github.com/oemof/oemof-solph
-
-    Your description of your project should be here
-
-    +++
-    Title: example
-
-    Authors: oemof developer 1, oemof developer 2
-
-    Reference: :cite:`oemof`
+    The open plan tool is an online app with a grafical user interface, that
+    let's you create your :code:`EnergySystem` interactively.
