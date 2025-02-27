@@ -4,6 +4,9 @@
 Dispatch vs. Investment Optimization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. _optimization_dispatch_label:
+
+
 Dispatch Optimization
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -42,6 +45,8 @@ if corresponding attributes of the class are provided. For more information, see
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
 
+
+.. _optimization_invest_label:
 
 Investment optimization
 ^^^^^^^^^^^^^^^^^^^^^^^

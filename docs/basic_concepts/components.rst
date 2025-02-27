@@ -4,11 +4,11 @@
 Components
 ~~~~~~~~~~
 
-Components are divided in two categories. Well-tested components (solph.components) and experimental components (solph.components.experimental). The experimental section was created to lower the entry barrier for new components. Be aware that these components might not be properly documented or even sometimes do not even work as intended. Let us know if you have successfully used and tested these components. This is the first step to move them to the regular components section.
+The components are the core of the underlying network of the energy system. All component can be assigned a user-label when created. The user has to provide information regarding connections between busses and in/out of the component. A component which has only inputs defined is referred to as a *sink*. A component with only outputs is referred to as a *source*. A component with both input and outputs is a *converter*. These three very basic type of components are provided by the classes :ref:`oemof_solph_components_sink_label`, :ref:`oemof_solph_components_source_label` and :ref:`oemof_solph_components_converter_label`.
 
-See :ref:`oemof_solph_components_label` for a list of all components.
+Components are divided in two categories. Well-tested components (:ref:`oemof_solph_components_label`) and experimental components (:ref:`oemof_experimental_components_label`), listed below
 
-
+.. _oemof_solph_components_label:
 
 Solph components
 ----------------
@@ -16,12 +16,21 @@ Solph components
  * :ref:`oemof_solph_components_sink_label`
  * :ref:`oemof_solph_components_source_label`
  * :ref:`oemof_solph_components_converter_label`
- * :ref:`oemof_solph_components_extraction_turbine_chp_label`
- * :ref:`oemof_solph_components_generic_caes_label`
- * :ref:`oemof_solph_components_generic_chp_label`
  * :ref:`oemof_solph_components_generic_storage_label`
- * :ref:`oemof_solph_custom_electrical_line_label`
+ * :ref:`oemof_solph_components_extraction_turbine_chp_label`
+ * :ref:`oemof_solph_components_generic_chp_label`
+
+
+.. _oemof_experimental_components_label:
+
+Experimental components
+-----------------------
+
+The experimental section was created to lower the entry barrier to bring new components into oemof-solph. Be aware that these components might not be properly documented or even sometimes do not even work as intended. Let us know if you have successfully used and tested these components. This is the first step to move them to the regular components section.
+
  * :ref:`oemof_solph_custom_link_label`
+ * :ref:`oemof_solph_components_generic_caes_label`
+ * :ref:`oemof_solph_custom_electrical_line_label`
  * :ref:`oemof_solph_custom_sinkdsm_label`
 
 .. _oemof_solph_components_sink_label:
@@ -455,8 +464,8 @@ The following example describes a battery with flows coupled to the capacity of 
 
 .. _oemof_solph_custom_link_label:
 
-Link
-^^^^
+Link (experimental)
+^^^^^^^^^^^^^^^^^^^
 
 The `Link` allows to model connections between two busses, e.g. modeling the transshipment of electric energy between two regions.
 

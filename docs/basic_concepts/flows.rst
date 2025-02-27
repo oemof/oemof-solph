@@ -10,9 +10,10 @@ For all parameters see the API documentation of the :py:class:`~oemof.solph.flow
 
 .. code-block:: python
 
-    solph.flows.Flow()
+    blank_flow = solph.flows.Flow()
 
-oemof.solph has different types of *flows* but you should be aware that you cannot connect every *flow* type with every *component*.
+
+The flow connecting a bus and a component should be provided within the `inputs` and/or `outputs` attributes of a component. Examples are provided in the next section.
 
 .. note:: See the :py:class:`~oemof.solph.flows._flow.Flow` class for all parameters and the mathematical background.
 .
