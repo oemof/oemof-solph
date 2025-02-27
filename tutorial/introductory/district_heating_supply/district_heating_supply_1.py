@@ -12,23 +12,23 @@ district_heating_system = solph.EnergySystem(timeindex=data.index)
 
 # %%[sec_3_start]
 # Question: How to name the variables?
-hnw = solph.Bus(label='heat network')
-gnw = solph.Bus(label='gas network')
+heat_bus = solph.Bus(label='heat network')
+gas_bus = solph.Bus(label='gas network')
 
-district_heating_system.add(hnw, gnw)
+district_heating_system.add(heat_bus, gas_bus)
 # %%[sec_3_end]
 
 # %%[sec_4_start]
 gas_source = solph.components.Source(
     label='gas source',
-    outputs={gnw: solph.flows.Flow(variable_costs=data['gas price'])}
+    outputs={gas_bus: solph.flows.Flow(variable_costs=data['gas price'])}
 )
 
 # nominal_value -> nominal_capacity
 heat_sink = solph.components.Sink(
     label='heat sink',
     inputs={
-        hnw: solph.flows.Flow(
+        heat_bus: solph.flows.Flow(
             nominal_value=data['heat demand'].max(),
             fix=data['heat demand']/data['heat demand'].max()
         )
@@ -41,14 +41,14 @@ district_heating_system.add(heat_sink, gas_source)
 # %%[sec_5_start]
 gas_boiler = solph.components.Converter(
     label='gas boiler',
-    inputs={gnw: solph.flows.Flow()},
+    inputs={gas_bus: solph.flows.Flow()},
     outputs={
-        hnw: solph.flows.Flow(
+        heat_bus: solph.flows.Flow(
             nominal_value=20,
             variable_costs=0.50
         )
     },
-    conversion_factors={gnw: 0.95}
+    conversion_factors={gas_bus: 0.95}
 )
 
 district_heating_system.add(gas_boiler)
@@ -62,8 +62,8 @@ model.solve(solver="cbc", solve_kwargs={"tee": True})
 # %%[sec_7_start]
 results = solph.processing.results(model)
 
-data_gnw = solph.views.node(results, 'gas network')['sequences']
-data_hnw = solph.views.node(results, 'heat network')['sequences']
+data_gas_bus = solph.views.node(results, 'gas network')['sequences']
+data_heat_bus = solph.views.node(results, 'heat network')['sequences']
 # %%[sec_7_end]
 
 # %%[sec_8_start]
@@ -81,17 +81,17 @@ var_cost_gas_boiler = 0.50
 
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
-    var_cost_gas_boiler * data_hnw[(('gas boiler', 'heat network'), 'flow')].sum()
-    + (data['gas price'] * data_gnw[(('gas network', 'gas boiler'), 'flow')]).sum()
+    var_cost_gas_boiler * data_heat_bus[(('gas boiler', 'heat network'), 'flow')].sum()
+    + (data['gas price'] * data_gas_bus[(('gas network', 'gas boiler'), 'flow')]).sum()
 )
-heat_produced = data_hnw[(('heat network', 'heat sink'), 'flow')].sum()
+heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 # %%[sec_9_end]
 print(f'LCOH: {lcoh:.2f} €/MWh')
 
 # %%[sec_10_start]
-co2 = data_gnw[(('gas network', 'gas boiler'), 'flow')].sum() * 201.2
+co2 = data_gas_bus[(('gas network', 'gas boiler'), 'flow')].sum() * 201.2
 # %%[sec_10_end]
 print(f'CO2-emissions: {co2:.0f} kg')
 
