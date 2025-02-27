@@ -3,29 +3,33 @@
 Examples
 ========
 
+This page features a list of example scripts, that showcase a variety of
+functionalities of oemof.solph. In contrast to the tutorials, these examples
+are mostly standalone examples, that are not commented in detail.
+
 .. toctree::
     :glob:
     :maxdepth: 2
 
-    basic_example.rst
-    time_index.rst
-    nametuple.rst
-    simple_dispatch.rst
-    activity_costs.rst
-    min_max_runtimes.rst
-    startup_costs.rst
-    flow_gradient.rst
-    variable_chp.rst
-    unbalanced_storage.rst
-    storage_costs.rst
-    emission_constraint.rst
-    flow_count_limit.rst
-    storage_level_constraint.rst
-    electrical.transshipment.rst
-    excel_reader.rst
-    storage_investment.rst
-    shared_invest_limit.rst
-    minimal_investment.rst
-    invest_nonconvex.rst
-    offset_converter.rst
-    custom_constraints.rst
+    examples/basic_example.rst
+    examples/time_index.rst
+    examples/nametuple.rst
+    examples/simple_dispatch.rst
+    examples/activity_costs.rst
+    examples/min_max_runtimes.rst
+    examples/startup_costs.rst
+    examples/flow_gradient.rst
+    examples/variable_chp.rst
+    examples/unbalanced_storage.rst
+    examples/storage_costs.rst
+    examples/emission_constraint.rst
+    examples/flow_count_limit.rst
+    examples/storage_level_constraint.rst
+    examples/electrical.transshipment.rst
+    examples/excel_reader.rst
+    examples/storage_investment.rst
+    examples/shared_invest_limit.rst
+    examples/minimal_investment.rst
+    examples/invest_nonconvex.rst
+    examples/offset_converter.rst
+    examples/custom_constraints.rst
