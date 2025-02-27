@@ -23,6 +23,7 @@
     :hidden:
 
     basic_concepts
+    optimization
     advanced_concepts
     api
     changelog
