@@ -108,7 +108,7 @@ Documentation
 * Large parts of the documentation have been proofread and improved since
   the last developer meeting in Flensburg.
 * The solph documentation has got an extra section with all existing components
-  (:ref:`oemof_solph_components_label`).
+  (:ref:`basic_concepts_components_label`).
 * The developer documentation has been developed to lower the barriers for new
   developers. Furthermore, a template for pull request was created.
 
