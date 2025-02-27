@@ -44,6 +44,16 @@ you have by using oemof.solph.
 .. grid:: 2
     :gutter: 1
 
+    .. grid-item-card::  Dispatch vs. Investment Optimization
+        :link: optimization_dispatch_vs_invest_label
+        :link-type: ref
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+            :class: only-light
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+            :class: only-dark
+
     .. grid-item-card::  Multi Period Optimization
         :link: optimization_mutli_period_label
         :link-type: ref
