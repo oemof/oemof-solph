@@ -12,6 +12,7 @@ you have by using oemof.solph.
     :glob:
     :hidden:
 
+    optimization/additional_constraints.rst
     optimization/dispatch_vs_invest.rst
     optimization/linear_vs_mixed_integer.rst
     optimization/multi_period_invest.rst
@@ -19,6 +20,16 @@ you have by using oemof.solph.
 
 .. grid:: 2
     :gutter: 1
+
+    .. grid-item-card::  Adding additional constraints to your model
+        :link: additional_constraints_label
+        :link-type: ref
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+            :class: only-light
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+            :class: only-dark
 
     .. grid-item-card::  Linear vs. Mixed Integer Linear Optimization
         :link: optimization_linear_vs_mixed_integer_label
@@ -30,6 +41,9 @@ you have by using oemof.solph.
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
             :class: only-dark
 
+.. grid:: 2
+    :gutter: 1
+
     .. grid-item-card::  Dispatch vs. Investment Optimization
         :link: optimization_dispatch_vs_invest_label
         :link-type: ref
@@ -39,9 +53,6 @@ you have by using oemof.solph.
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
             :class: only-dark
-
-.. grid:: 2
-    :gutter: 1
 
     .. grid-item-card::  Multi Period Opzimization
         :link: optimization_mutli_period_label
