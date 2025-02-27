@@ -1,7 +1,7 @@
 .. _optimization_linear_vs_mixed_integer_label:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Mixed Integer (Linear) Problems
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Linear vs. Mixed Integer Linear Problems
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Solph also allows you to model components with respect to more technical details,

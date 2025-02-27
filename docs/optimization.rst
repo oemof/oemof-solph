@@ -1,7 +1,7 @@
 .. _basic_concepts_label:
 
 ~~~~~~~~~~~~~~
-Opimization
+Optimization
 ~~~~~~~~~~~~~~
 
 The following sections give a detailed overview on the optimization options
@@ -21,8 +21,8 @@ you have by using oemof.solph.
 .. grid:: 2
     :gutter: 1
 
-    .. grid-item-card::  Adding additional constraints to your model
-        :link: additional_constraints_label
+    .. grid-item-card::  Dispatch vs. Investment Optimization
+        :link: optimization_dispatch_vs_invest_label
         :link-type: ref
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
@@ -44,8 +44,8 @@ you have by using oemof.solph.
 .. grid:: 2
     :gutter: 1
 
-    .. grid-item-card::  Dispatch vs. Investment Optimization
-        :link: optimization_dispatch_vs_invest_label
+    .. grid-item-card::  Multi Period Optimization
+        :link: optimization_mutli_period_label
         :link-type: ref
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
@@ -54,8 +54,8 @@ you have by using oemof.solph.
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
             :class: only-dark
 
-    .. grid-item-card::  Multi Period Opzimization
-        :link: optimization_mutli_period_label
+    .. grid-item-card::  Add additional constraints to your model
+        :link: additional_constraints_label
         :link-type: ref
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg

@@ -1,8 +1,11 @@
 .. _optimization_dispatch_vs_invest_label:
 
-~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Dispatch vs. Investment Optimization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Dispatch Optimization
-~~~~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^^^^
 
 In dispatch optimization, it is assumed that the capacities of the assets are already known,
 but the optimal dispatch strategy must be obtained.
@@ -39,13 +42,13 @@ if corresponding attributes of the class are provided. For more information, see
           check out the examples and do not hesitate to ask the developers if your model does
           not work as expected.
 
-~~~~~~~~~~~~~~~~~~~~~~~
-Investment optimization
-~~~~~~~~~~~~~~~~~~~~~~~
 
-As described in :ref:`basic_concept_model_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
+Investment optimization
+^^^^^^^^^^^^^^^^^^^^^^^
+
+As described in :ref:`optimization_mutli_period_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
 This standard investment mode is limited to one period where all investments happen at the start of the optimization time frame. If you want to optimize longer-term horizons and allow investments at the beginning
-of each of multiple periods, also taking into account units lifetimes, you can try the :ref:`multi_period_mode_label`. Please be aware that the multi-period feature is experimental. If you experience any bugs or unexpected
+of each of multiple periods, also taking into account units lifetimes, you can try the :ref:`optimization_mutli_period_label`. Please be aware that the multi-period feature is experimental. If you experience any bugs or unexpected
 behaviour, please report them.
 
 In the standard investment mode, based on investment costs you can compare the usage of existing components against building up new capacity.
@@ -183,9 +186,8 @@ mathematical background, like variables and constraints, which are used.
 .. note:: At the moment the investment class is not compatible with the MIP classes :py:class:`~oemof.solph.options.NonConvex`.
 
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Combination of Dispatch and Investment Optimisation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Combination of Dispatch and Investment Optimization
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Since version 'v0.5', it is also possilbe to combine the investment and nonconvex option.
 Therefore, a new constraint block for flows, called :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` has been developed,
