@@ -43,7 +43,7 @@ if corresponding attributes of the class are provided. For more information, see
 Investment optimization
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-As described in :ref:`oemof_solph_optimise_es_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
+As described in :ref:`basic_concept_model_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
 This standard investment mode is limited to one period where all investments happen at the start of the optimization time frame. If you want to optimize longer-term horizons and allow investments at the beginning
 of each of multiple periods, also taking into account units lifetimes, you can try the :ref:`multi_period_mode_label`. Please be aware that the multi-period feature is experimental. If you experience any bugs or unexpected
 behaviour, please report them.
@@ -62,7 +62,7 @@ the *ep_costs* still apply only to the newly built capacity, i.e. the existing c
 comes at no costs.
 
 The investment object can be used in Flows and some components. See the
-:ref:`oemof_solph_components_label` section for detailed information of each
+:ref:`basic_concepts_components_label` section for detailed information of each
 component. Besides the flows, it can be invested into
 
 * :ref:`oemof_solph_components_generic_storage_label` and
