@@ -45,6 +45,50 @@ for providing a quick access to your results (:ref:`results_easy_access_label`).
 Especially for larger energy systems the general approach will help you to
 write your own results processing functions.
 
+Easy access
+^^^^^^^^^^^
+
+The solph package provides some functions which will help you to access your
+results directly via labels, which is helpful especially for small energy
+systems.
+So, if you want to address objects by their label, you can convert the results
+dictionary such that the keys are changed to strings given by the labels:
+
+.. code-block:: python
+
+    views.convert_keys_to_strings(results)
+    print(results[('wind', 'bus_electricity')]['sequences']
+
+
+Another option is to access data belonging to a grouping by the name of the grouping
+(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
+Given the label of an object, e.g. 'wind' you can access the grouping by its label
+and use this to extract data from the results dictionary.
+
+.. code-block:: python
+
+    node_wind = energysystem.groups['wind']
+    print(results[(node_wind, bus_electricity)])
+
+
+However, in many situations it might be convenient to use the views module to
+collect information on a specific node. You can request all data related to a
+specific node by using either the node's variable name or its label:
+
+.. code-block:: python
+
+    data_wind = solph.views.node(results, 'wind')
+
+
+A function for collecting and printing meta results, i.e. information on the objective function,
+the problem and the solver, is provided as well:
+
+.. code-block:: python
+
+    meta_results = solph.processing.meta_results(om)
+    pp.pprint(meta_results)
+
+
 .. _results_collect_results_label:
 
 Collecting results
@@ -131,47 +175,5 @@ Getting all labels of the starting node of your investment flows:
 
 .. _results_easy_access_label:
 
-Easy access
-^^^^^^^^^^^
-
-The solph package provides some functions which will help you to access your
-results directly via labels, which is helpful especially for small energy
-systems.
-So, if you want to address objects by their label, you can convert the results
-dictionary such that the keys are changed to strings given by the labels:
-
-.. code-block:: python
-
-    views.convert_keys_to_strings(results)
-    print(results[('wind', 'bus_electricity')]['sequences']
 
 
-Another option is to access data belonging to a grouping by the name of the grouping
-(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
-Given the label of an object, e.g. 'wind' you can access the grouping by its label
-and use this to extract data from the results dictionary.
-
-.. code-block:: python
-
-    node_wind = energysystem.groups['wind']
-    print(results[(node_wind, bus_electricity)])
-
-
-However, in many situations it might be convenient to use the views module to
-collect information on a specific node. You can request all data related to a
-specific node by using either the node's variable name or its label:
-
-.. code-block:: python
-
-    data_wind = solph.views.node(results, 'wind')
-
-
-A function for collecting and printing meta results, i.e. information on the objective function,
-the problem and the solver, is provided as well:
-
-.. code-block:: python
-
-    meta_results = solph.processing.meta_results(om)
-    pp.pprint(meta_results)
-
-.
