@@ -45,6 +45,8 @@ for providing a quick access to your results (:ref:`results_easy_access_label`).
 Especially for larger energy systems the general approach will help you to
 write your own results processing functions.
 
+.. _results_easy_access_label:
+
 Easy access
 ^^^^^^^^^^^
 
@@ -173,7 +175,7 @@ Getting all labels of the starting node of your investment flows:
         results[x]['scalars'], 'invest')]
 
 
-.. _results_easy_access_label:
+
 
 
 

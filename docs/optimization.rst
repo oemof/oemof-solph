@@ -55,7 +55,7 @@ you have by using oemof.solph.
             :class: only-dark
 
     .. grid-item-card::  Multi Period Optimization
-        :link: optimization_mutli_period_label
+        :link: optimization_multi_period_label
         :link-type: ref
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg

@@ -51,9 +51,9 @@ if corresponding attributes of the class are provided. For more information, see
 Investment optimization
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-As described in :ref:`optimization_mutli_period_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
+As described in :ref:`optimization_multi_period_label` the typical way to optimise an energy system is the dispatch optimisation based on marginal costs. Solph also provides a combined dispatch and investment optimisation.
 This standard investment mode is limited to one period where all investments happen at the start of the optimization time frame. If you want to optimize longer-term horizons and allow investments at the beginning
-of each of multiple periods, also taking into account units lifetimes, you can try the :ref:`optimization_mutli_period_label`. Please be aware that the multi-period feature is experimental. If you experience any bugs or unexpected
+of each of multiple periods, also taking into account units lifetimes, you can try the :ref:`optimization_multi_period_label`. Please be aware that the multi-period feature is experimental. If you experience any bugs or unexpected
 behaviour, please report them.
 
 In the standard investment mode, based on investment costs you can compare the usage of existing components against building up new capacity.

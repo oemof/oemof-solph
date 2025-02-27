@@ -1,4 +1,4 @@
-.. _optimization_mutli_period_label:
+.. _optimization_multi_period_label:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Multi-period optimization (experimental)
@@ -7,7 +7,7 @@ Multi-period optimization (experimental)
 Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
-While in principle, you could try to model this in oemof.solph using the standard investment mode described above (see :ref:`investment_mode_label`),
+While in principle, you could try to model this in oemof.solph using the standard investment mode described above (see :ref:`optimization_invest_label`),
 you would make the implicit assumption that your entire system is built at the start of your optimization and doesn't change over time.
 To address this shortcoming, the multi-period (investment) feature has been introduced. Be aware that it is still experimental.
 So feel free to report any bugs or unexpected behaviour if you come across them.
@@ -120,7 +120,7 @@ Then you add all the *components* and *buses* to your energy system, just as you
 So defining buses is the same as for standard models. Also defining components that do not have any investments associated with
 them or any lifetime limitations is the same.
 
-Now if you want to have components that can be invested into, you use the investment option, just as in :ref:`investment_mode_label`,
+Now if you want to have components that can be invested into, you use the investment option, just as in :ref:`optimization_invest_label`,
 but with a few minor additions and modifications in the investment object itself which you specify by additional attributes:
 
 * You have to specify a `lifetime` attribute. This is the components assumed technical lifetime in years. If it is 20 years,
