@@ -78,11 +78,6 @@ ev_energy_system.add(car_battery)
 car_at_home = pd.Series(1, index=time_index[:-1])
 car_at_home.loc[driving_start_morning:driving_end_evening] = 0
 
-# To be able to load the battery a electric source e.g. electric grid is
-# necessary. We set the maximum use to 1 if the car is present, while it
-# is 0 between the morning start and the evening arrival back home.
-# While the car itself can potentially charge with at a higher power,
-# we just add an AC source with 16 A at 230 V.
 charger230V = solph.components.Source(
     label="230V AC",
     outputs={
