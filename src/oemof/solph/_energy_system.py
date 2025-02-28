@@ -20,8 +20,9 @@ import warnings
 
 import numpy as np
 import pandas as pd
-from oemof import network
 from oemof.tools import debugging
+
+from oemof import network
 
 
 class EnergySystem(network.energy_system.EnergySystem):

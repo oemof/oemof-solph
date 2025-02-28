@@ -1,14 +1,12 @@
-import pytest
-
-from oemof.solph import processing
-from oemof.solph import views
-
 import os
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Model
+from oemof.solph import processing
+from oemof.solph import views
 from oemof.solph.buses import Bus
 from oemof.solph.components import Converter
 from oemof.solph.components import Sink
