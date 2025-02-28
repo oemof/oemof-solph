@@ -26,6 +26,7 @@
     basic_concepts
     optimization
     advanced_concepts
+    best_practices
     api
     changelog
     zliterature
