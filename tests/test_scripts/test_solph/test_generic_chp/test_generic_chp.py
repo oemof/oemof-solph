@@ -15,8 +15,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
-from nose.tools import eq_
-from oemof.network.network import Node
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -29,58 +28,85 @@ def test_gen_chp():
     data = pd.read_csv(full_filename)
 
     # select periods
-    periods = len(data) - 1
+    periods = len(data)
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=periods, freq="H")
-    es = solph.EnergySystem(timeindex=idx)
-    Node.registry = es
+    idx = pd.date_range("1/1/2017", periods=periods, freq="h")
+    es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
 
     # resources
     bgas = solph.buses.Bus(label="bgas")
+    es.add(bgas)
 
-    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
+    es.add(
+        solph.components.Source(
+            label="rgas", outputs={bgas: solph.flows.Flow()}
+        )
+    )
 
     # heat
     bth = solph.buses.Bus(label="bth")
+    es.add(bth)
 
-    solph.components.Source(
-        label="source_th", outputs={bth: solph.flows.Flow(variable_costs=1000)}
+    es.add(
+        solph.components.Source(
+            label="source_th",
+            outputs={bth: solph.flows.Flow(variable_costs=1000)},
+        )
     )
 
-    solph.components.Sink(
-        label="demand_th",
-        inputs={
-            bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=200)
-        },
+    es.add(
+        solph.components.Sink(
+            label="demand_th",
+            inputs={
+                bth: solph.flows.Flow(
+                    fix=data["demand_th"], nominal_capacity=200
+                )
+            },
+        )
     )
 
     # power
     bel = solph.buses.Bus(label="bel")
+    es.add(bel)
 
-    solph.components.Sink(
-        label="demand_el",
-        inputs={bel: solph.flows.Flow(variable_costs=data["price_el"])},
+    es.add(
+        solph.components.Sink(
+            label="demand_el",
+            inputs={bel: solph.flows.Flow(variable_costs=data["price_el"])},
+        )
     )
 
     # generic chp
     # (for back pressure characteristics Q_CW_min=0 and back_pressure=True)
-    solph.components.GenericCHP(
-        label="combined_cycle_extraction_turbine",
-        fuel_input={
-            bgas: solph.flows.Flow(H_L_FG_share_max=data["H_L_FG_share_max"])
-        },
-        electrical_output={
-            bel: solph.flows.Flow(
-                P_max_woDH=data["P_max_woDH"],
-                P_min_woDH=data["P_min_woDH"],
-                Eta_el_max_woDH=data["Eta_el_max_woDH"],
-                Eta_el_min_woDH=data["Eta_el_min_woDH"],
-            )
-        },
-        heat_output={bth: solph.flows.Flow(Q_CW_min=data["Q_CW_min"])},
-        Beta=data["Beta"],
-        back_pressure=False,
+    es.add(
+        solph.components.GenericCHP(
+            label="combined_cycle_extraction_turbine",
+            fuel_input={
+                bgas: solph.flows.Flow(
+                    custom_attributes={
+                        "H_L_FG_share_max": data["H_L_FG_share_max"]
+                    }
+                )
+            },
+            electrical_output={
+                bel: solph.flows.Flow(
+                    custom_attributes={
+                        "P_max_woDH": data["P_max_woDH"],
+                        "P_min_woDH": data["P_min_woDH"],
+                        "Eta_el_max_woDH": data["Eta_el_max_woDH"],
+                        "Eta_el_min_woDH": data["Eta_el_min_woDH"],
+                    }
+                )
+            },
+            heat_output={
+                bth: solph.flows.Flow(
+                    custom_attributes={"Q_CW_min": data["Q_CW_min"]}
+                )
+            },
+            beta=data["beta"],
+            back_pressure=False,
+        )
     )
 
     # create an optimization problem and solve it
@@ -101,4 +127,4 @@ def test_gen_chp():
     }
 
     for key in test_dict.keys():
-        eq_(int(round(data[key])), int(round(test_dict[key])))
+        assert data[key] == pytest.approx(test_dict[key])

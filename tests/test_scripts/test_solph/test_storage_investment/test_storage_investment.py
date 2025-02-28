@@ -18,7 +18,7 @@ The example models the following energy system:
  demand(Sink)        |<------------------|       |
                      |          |        |       |
                      |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
+ pp_gas(Converter) |<---------|        |       |
                      |------------------>|       |
                      |          |        |       |
  storage(Storage)    |<------------------|       |
@@ -38,8 +38,7 @@ import logging
 import os
 
 import pandas as pd
-from nose.tools import eq_
-from oemof.network.network import Node
+import pytest
 from oemof.tools import economics
 
 from oemof import solph
@@ -55,10 +54,12 @@ def test_optimise_storage_size(
     global PP_GAS
 
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=400, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=400, freq="h")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
-    Node.registry = energysystem
+    es = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -66,74 +67,103 @@ def test_optimise_storage_size(
     # Buses
     bgas = solph.buses.Bus(label="natural_gas")
     bel = solph.buses.Bus(label="electricity")
+    es.add(bgas, bel)
 
     # Sinks
-    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
+    es.add(
+        solph.components.Sink(
+            label="excess_bel", inputs={bel: solph.flows.Flow()}
+        )
+    )
 
-    solph.components.Sink(
-        label="demand",
-        inputs={bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)},
+    es.add(
+        solph.components.Sink(
+            label="demand",
+            inputs={
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
+            },
+        )
     )
 
     # Sources
-    solph.components.Source(
-        label="rgas",
-        outputs={
-            bgas: solph.flows.Flow(
-                nominal_value=194397000 * 400 / 8760, full_load_time_max=1
-            )
-        },
+    es.add(
+        solph.components.Source(
+            label="rgas",
+            outputs={
+                bgas: solph.flows.Flow(
+                    nominal_capacity=194397000 * 400 / 8760,
+                    full_load_time_max=1,
+                )
+            },
+        )
     )
 
-    solph.components.Source(
-        label="wind",
-        outputs={
-            bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
-        },
+    es.add(
+        solph.components.Source(
+            label="wind",
+            outputs={
+                bel: solph.flows.Flow(
+                    fix=data["wind"], nominal_capacity=1000000
+                )
+            },
+        )
     )
 
-    solph.components.Source(
-        label="pv",
-        outputs={bel: solph.flows.Flow(fix=data["pv"], nominal_value=582000)},
+    es.add(
+        solph.components.Source(
+            label="pv",
+            outputs={
+                bel: solph.flows.Flow(fix=data["pv"], nominal_capacity=582000)
+            },
+        )
     )
 
-    # Transformer
-    PP_GAS = solph.components.Transformer(
+    # Converter
+    PP_GAS = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.flows.Flow()},
         outputs={
-            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+            bel: solph.flows.Flow(nominal_capacity=1e11, variable_costs=50)
         },
         conversion_factors={bel: 0.58},
     )
+    es.add(PP_GAS)
 
     # Investment storage
     epc = economics.annuity(capex=1000, n=20, wacc=0.05)
-    solph.components.GenericStorage(
-        label="storage",
-        inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        outputs={bel: solph.flows.Flow(variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc, existing=6851),
+    es.add(
+        solph.components.GenericStorage(
+            label="storage",
+            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            loss_rate=0.00,
+            initial_storage_level=0,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+            nominal_capacity=solph.Investment(
+                ep_costs=epc,
+                existing=6851,
+            ),
+        )
     )
 
     # Solve model
-    om = solph.Model(energysystem)
+    om = solph.Model(es)
     om.receive_duals()
     om.solve(solver=solver)
-    energysystem.results["main"] = processing.results(om)
-    energysystem.results["meta"] = processing.meta_results(om)
+    es.results["main"] = processing.results(om)
+    es.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    energysystem.dump()
+    es.dump()
 
 
-def test_results_with_actual_dump():
+def test_results_with_recent_dump():
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -161,7 +191,7 @@ def test_results_with_actual_dump():
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
@@ -171,19 +201,20 @@ def test_results_with_actual_dump():
     # Problem results
     assert meta["problem"]["Lower bound"] == 4.231675777e17
     assert meta["problem"]["Upper bound"], 4.231675777e17
-    assert meta["problem"]["Number of variables"] == 2805
-    assert meta["problem"]["Number of constraints"] == 2806
-    assert meta["problem"]["Number of nonzeros"] == 1197
+    assert meta["problem"]["Number of variables"] == 2808
+    assert meta["problem"]["Number of constraints"] == 2809
+    assert meta["problem"]["Number of nonzeros"] == 1199
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert round(meta["objective"]) == 423167578261115584
+    assert meta["objective"] == pytest.approx(423167578261115584, abs=0.5)
 
 
-def test_solph_transformer_attributes_before_dump_and_after_restore():
+def test_solph_converter_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
-    of `solph.components.Transformer`"""
+    of `solph.components.Converter`"""
+    test_optimise_storage_size()
     energysystem = solph.EnergySystem()
     energysystem.restore()
 
@@ -194,4 +225,4 @@ def test_solph_transformer_attributes_before_dump_and_after_restore():
     )
 
     # Compare attributes before dump and after restore
-    eq_(trsf_attr_before_dump, trsf_attr_after_restore)
+    assert trsf_attr_before_dump == trsf_attr_after_restore

@@ -1,8 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
+import matplotlib
 from sphinx.ext.autodoc import between
+
+from oemof.solph import __version__
+
+
+matplotlib.use("agg")
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 
 def setup(app):
@@ -21,16 +29,17 @@ extensions = [
     "sphinx.ext.ifconfig",
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
-    "sphinx.ext.imgmath",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
 ]
 source_suffix = ".rst"
 master_doc = "index"
 project = "oemof.solph"
-year = "2014-2021"
+year = "2014-2023"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.4.5.dev0"
+version = release = __version__
 
 pygments_style = "trac"
 templates_path = ["."]
@@ -60,11 +69,12 @@ nitpicky = False
 
 exclude_patterns = ["_build", "whatsnew/*"]
 
-linkcheck_ignore = [r"https://requires.io/.*", r"https://matrix.to/*"] + (
-    [
-        r"https://github.com/oemof/oemof-solph/issues/*",
-        r"https://github.com/oemof/oemof-solph/pull/*",
-    ]
-    if "TRAVIS" not in os.environ
-    else []
-)
+linkcheck_ignore = [
+    r"https://requires.io/.*",
+    r"https://matrix.to/*",
+    r"https://forum.openmod-initiative.org/*",
+    r"https://github.com/oemof/oemof-solph/issues/*",
+    r"https://github.com/oemof/oemof-solph/pull/*",
+    # Due to traffic limitation, the folowwing creates a 403 in CI pipeline:
+    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",
+]

@@ -2,13 +2,14 @@
 
 """Modules for providing convenient views for solph results.
 
-Information about the possible usage is provided within the examples.
+See examples for to learn about the possible usage of the provided functions.
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: henhuy
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -29,8 +30,10 @@ def node(results, node, multiindex=False, keep_none_type=False):
     Obtain results for a single node e.g. a Bus or Component.
 
     Either a node or its label string can be passed.
-    Results are written into a dictionary which is keyed by 'scalars' and
-    'sequences' holding respective data in a pandas Series and DataFrame.
+    Results are written into a dictionary which is keyed by 'scalars'
+    (resp. 'periods_scalars' for a multi-period model) and
+    'sequences' holding respective data in a pandas Series (resp. DataFrame)
+    and DataFrame.
     """
 
     def replace_none(col_list, reverse=False):
@@ -58,45 +61,50 @@ def node(results, node, multiindex=False, keep_none_type=False):
     filtered = {}
 
     # create a series with tuples as index labels for scalars
+    scalars_col = "scalars"
+    # Check for multi-period model (different naming)
+    if "period_scalars" in list(list(results.values())[0].keys()):
+        scalars_col = "period_scalars"
+
     scalars = {
-        k: v["scalars"]
+        k: v[scalars_col]
         for k, v in results.items()
-        if node in k and not v["scalars"].empty
+        if node in k and not v[scalars_col].empty
     }
     if scalars:
         # aggregate data
-        filtered["scalars"] = pd.concat(scalars.values(), axis=0)
+        filtered[scalars_col] = pd.concat(scalars.values(), axis=0)
         # assign index values
         idx = {
-            k: [c for c in v["scalars"].index]
+            k: [c for c in v[scalars_col].index]
             for k, v in results.items()
-            if node in k and not v["scalars"].empty
+            if node in k and not v[scalars_col].empty
         }
         idx = [tuple((k, m) for m in v) for k, v in idx.items()]
         idx = [i for sublist in idx for i in sublist]
-        filtered["scalars"].index = idx
+        filtered[scalars_col].index = idx
 
         # Sort index
         # (if Nones are present, they have to be replaced while sorting)
         if keep_none_type:
-            filtered["scalars"].index = replace_none(
-                filtered["scalars"].index.tolist()
+            filtered[scalars_col].index = replace_none(
+                filtered[scalars_col].index.tolist()
             )
-        filtered["scalars"].sort_index(axis=0, inplace=True)
+        filtered[scalars_col].sort_index(axis=0, inplace=True)
         if keep_none_type:
-            filtered["scalars"].index = replace_none(
-                filtered["scalars"].index.tolist(), True
+            filtered[scalars_col].index = replace_none(
+                filtered[scalars_col].index.tolist(), True
             )
 
         if multiindex:
             idx = pd.MultiIndex.from_tuples(
                 [
                     tuple([row[0][0], row[0][1], row[1]])
-                    for row in filtered["scalars"].index
+                    for row in filtered[scalars_col].index
                 ]
             )
             idx.set_names(["from", "to", "type"], inplace=True)
-            filtered["scalars"].index = idx
+            filtered[scalars_col].index = idx
 
     # create a dataframe with tuples as column labels for sequences
     sequences = {
@@ -150,9 +158,9 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
 
         * :attr:`NodeOption.All`: `'all'`: Returns all nodes
         * :attr:`NodeOption.HasOutputs`: `'has_outputs'`:
-            Returns nodes with an output flow (eg. Transformer, Source)
+            Returns nodes with an output flow (eg. Converter, Source)
         * :attr:`NodeOption.HasInputs`: `'has_inputs'`:
-            Returns nodes with an input flow (eg. Transformer, Sink)
+            Returns nodes with an input flow (eg. Converter, Sink)
         * :attr:`NodeOption.HasOnlyOutputs`: `'has_only_outputs'`:
             Returns nodes having only output flows (eg. Source)
         * :attr:`NodeOption.HasOnlyInputs`: `'has_only_inputs'`:
@@ -225,6 +233,19 @@ def node_weight_by_type(results, node_type):
     node_type: oemof.solph class
         Specifies the type for which node weights should be collected,
         e.g. solph.components.GenericStorage
+
+    Example
+    --------
+    ::
+
+        from oemof.solph import views
+
+        # solve oemof model 'm'
+        # Then collect node weights
+        views.node_weight_by_type(
+            m.results(),
+           node_type=solph.components.GenericStorage
+        )
     """
 
     group = {
@@ -256,6 +277,20 @@ def node_input_by_type(results, node_type, droplevel=None):
         Specifies the type of the node for that inputs are selected,
         e.g. solph.components.Sink
     droplevel: list
+
+    Examples
+    -----
+    ::
+
+        from oemof import solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.node_input_by_type(
+            m.results(),
+            node_type=solph.components.Sink
+        )
     """
     if droplevel is None:
         droplevel = []
@@ -284,8 +319,22 @@ def node_output_by_type(results, node_type, droplevel=None):
         A result dictionary from a solved oemof.solph.Model object
     node_type: oemof.solph class
         Specifies the type of the node for that outputs are selected,
-        e.g. solph.components.Transformer
+        e.g. solph.components.Converter
     droplevel: list
+
+    Examples
+    --------
+    ::
+
+        import oemof.solph as solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.node_output_by_type(
+            m.results(),
+            node_type=solph.components.Converter
+        )
     """
     if droplevel is None:
         droplevel = []
@@ -319,7 +368,21 @@ def net_storage_flow(results, node_type):
     Returns
     -------
     pandas.DataFrame object with multiindex colums. Names of levels of columns
-    are: from, to, net_flow.
+        are: from, to, net_flow.
+
+    Examples
+    --------
+    ::
+
+        import oemof.solph as solph
+        from oemof.solph import views
+
+        # solve oemof solph model 'm'
+        # Then collect node weights
+        views.net_storage_flow(
+            m.results(),
+            node_type=solph.components.GenericStorage
+        )
     """
 
     group = {
@@ -343,18 +406,27 @@ def net_storage_flow(results, node_type):
     dataframes = []
 
     for lb in labels:
-        subset = df.groupby(
-            lambda x1: (
-                lambda fr, to, ty: "output"
-                if (fr == lb and ty == "flow")
-                else "input"
-                if (to == lb and ty == "flow")
-                else "level"
-                if (fr == lb and ty != "flow")
-                else None
-            )(*x1),
-            axis=1,
-        ).sum()
+        subset = (
+            df.T.groupby(
+                lambda x1: (
+                    lambda fr, to, ty: (
+                        "output"
+                        if (fr == lb and ty == "flow")
+                        else (
+                            "input"
+                            if (to == lb and ty == "flow")
+                            else (
+                                "level"
+                                if (fr == lb and ty != "flow")
+                                else None
+                            )
+                        )
+                    )
+                )(*x1)
+            )
+            .sum()
+            .T
+        )
 
         subset["net_flow"] = subset["output"] - subset["input"]
 

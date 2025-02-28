@@ -12,13 +12,14 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -26,10 +27,10 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 
 
-class GenericCHP(network.Transformer):
+class GenericCHP(Node):
     r"""
     Component `GenericCHP` to model combined heat and power plants.
 
@@ -55,32 +56,34 @@ class GenericCHP(network.Transformer):
 
     Note
     ----
-    An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
-    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
-    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum heat extraction `H_L_FG_min` as share of
-    the fuel flow `H_F` e.g. for motoric CHPs.
-    The boolean component parameter `back_pressure` can be set to model
-    back-pressure characteristics.
+    * An adaption for the flow parameter `H_L_FG_share_max` has been made to
+      set the flue gas losses at maximum heat extraction `H_L_FG_max` as share
+      of the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    * The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+      losses at minimum heat extraction `H_L_FG_min` as share of
+      the fuel flow `H_F` e.g. for motoric CHPs.
+    * The boolean component parameter `back_pressure` can be set to model
+      back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
     Parameters
     ----------
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output. Related parameters like `P_max_woDH` are
-        passed as attributes of the `oemof.Flow` object.
-    heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the heat output. Related parameters like `Q_CW_min` are passed as
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the electrical output.
+        Related parameters like `P_max_woDH` are passed as
         attributes of the `oemof.Flow` object.
-    Beta : list of numerical values
-        Beta values in same dimension as all other parameters (length of
+    heat_output : dict
+        Dictionary with key-value-pair of `oemof.solph.Bus`
+        and `oemof.solph.Flow` objects for the heat output.
+        Related parameters like `Q_CW_min` are passed as
+        attributes of the `oemof.Flow` object.
+    beta : list of numerical values
+        beta values in same dimension as all other parameters (length of
         optimization period).
     back_pressure : boolean
         Flag to use back-pressure characteristics. Set to `True` and
@@ -101,27 +104,40 @@ class GenericCHP(network.Transformer):
     >>> ccet = solph.components.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
     ...    fuel_input={bgas: solph.flows.Flow(
-    ...        H_L_FG_share_max=[0.183])},
+    ...        custom_attributes={"H_L_FG_share_max": [0.183]})},
     ...    electrical_output={bel: solph.flows.Flow(
-    ...        P_max_woDH=[155.946],
-    ...        P_min_woDH=[68.787],
-    ...        Eta_el_max_woDH=[0.525],
-    ...        Eta_el_min_woDH=[0.444])},
+    ...        custom_attributes={
+    ...            "P_max_woDH": [155.946],
+    ...            "P_min_woDH": [68.787],
+    ...            "Eta_el_max_woDH": [0.525],
+    ...            "Eta_el_min_woDH": [0.444],
+    ...        })},
     ...    heat_output={bth: solph.flows.Flow(
-    ...        Q_CW_min=[10.552])},
-    ...    Beta=[0.122], back_pressure=False)
+    ...        custom_attributes={"Q_CW_min": [10.552]})},
+    ...    beta=[0.122], back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        fuel_input,
+        electrical_output,
+        heat_output,
+        beta,
+        back_pressure,
+        label=None,
+        custom_properties=None,
+    ):
+        if custom_properties is None:
+            custom_properties = {}
+        super().__init__(label, custom_properties=custom_properties)
 
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.heat_output = kwargs.get("heat_output")
-        self.Beta = solph_sequence(kwargs.get("Beta"))
-        self.back_pressure = kwargs.get("back_pressure")
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.heat_output = heat_output
+        self.beta = sequence(beta)
+        self.back_pressure = back_pressure
         self._alphas = None
 
         # map specific flows to standard API
@@ -129,8 +145,8 @@ class GenericCHP(network.Transformer):
         fuel_flow = list(self.fuel_input.values())[0]
         fuel_bus.outputs.update({self: fuel_flow})
 
-        self.outputs.update(kwargs.get("electrical_output"))
-        self.outputs.update(kwargs.get("heat_output"))
+        self.outputs.update(electrical_output)
+        self.outputs.update(heat_output)
 
     def _calculate_alphas(self):
         """
@@ -260,46 +276,30 @@ class GenericCHPBlock(ScalarBlock):
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
-    =============================== ======================= ==== =======================
+    =============================== ======================= ==== =============================================
     math. symbol                    attribute               type explanation
-    =============================== ======================= ==== =======================
-    :math:`\dot{H}_{F}`             `H_F[n,t]`              V    input of enthalpy
-                                                                         through fuel input
-    :math:`P_{el}`                  `P[n,t]`                V    provided
-                                                                         electric power
-    :math:`P_{el,woDH}`             `P_woDH[n,t]`           V    electric power without
-                                                                         district heating
-    :math:`P_{el,min,woDH}`         `P_min_woDH[n,t]`       P    min. electric power
-                                                                         without district heating
-    :math:`P_{el,max,woDH}`         `P_max_woDH[n,t]`       P    max. electric power
-                                                                         without district heating
+    =============================== ======================= ==== =============================================
+    :math:`\dot{H}_{F}`             `H_F[n,t]`              V    input of enthalpy through fuel input
+    :math:`P_{el}`                  `P[n,t]`                V    provided electric power
+    :math:`P_{el,woDH}`             `P_woDH[n,t]`           V    electric power without district heating
+    :math:`P_{el,min,woDH}`         `P_min_woDH[n,t]`       P    min. electric power without district heating
+    :math:`P_{el,max,woDH}`         `P_max_woDH[n,t]`       P    max. electric power without district heating
     :math:`\dot{Q}`                 `Q[n,t]`                V    provided heat
-
-    :math:`\dot{Q}_{CW, min}`       `Q_CW_min[n,t]`         P    minimal therm. condenser
-                                                                         load to cooling water
-    :math:`\dot{H}_{L,FG,min}`      `H_L_FG_min[n,t]`       V    flue gas enthalpy loss
-                                                                         at min heat extraction
-    :math:`\dot{H}_{L,FG,max}`      `H_L_FG_max[n,t]`       V    flue gas enthalpy loss
-                                                                         at max heat extraction
-    :math:`\dot{H}_{L,FG,sharemin}` `H_L_FG_share_min[n,t]` P    share of flue gas loss
-                                                                         at min heat extraction
-    :math:`\dot{H}_{L,FG,sharemax}` `H_L_FG_share_max[n,t]` P    share of flue gas loss
-                                                                         at max heat extraction
-    :math:`Y`                       `Y[n,t]`                V    status variable
-                                                                         on/off
-    :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient
-                                                                         describing efficiency
-    :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient
-                                                                         describing efficiency
-    :math:`\beta`                   `Beta[n,t]`             P    power loss index
-
-    :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel
-                                                                         flow w/o distr. heating
-    :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel
-                                                                         flow w/o distr. heating
-    =============================== ======================= ==== =======================
+    :math:`\dot{Q}_{CW, min}`       `Q_CW_min[n,t]`         P    minimal therm. condenser load to cooling water
+    :math:`\dot{H}_{L,FG,min}`      `H_L_FG_min[n,t]`       V    flue gas enthalpy loss at min heat extraction
+    :math:`\dot{H}_{L,FG,max}`      `H_L_FG_max[n,t]`       V    flue gas enthalpy loss at max heat extraction
+    :math:`\dot{H}_{L,FG,sharemin}` `H_L_FG_share_min[n,t]` P    share of flue gas loss at min heat extraction
+    :math:`\dot{H}_{L,FG,sharemax}` `H_L_FG_share_max[n,t]` P    share of flue gas loss at max heat extraction
+    :math:`Y`                       `Y[n,t]`                V    status variable on/off
+    :math:`\alpha_0`                `n.alphas[0][n,t]`      P    coefficient describing efficiency
+    :math:`\alpha_1`                `n.alphas[1][n,t]`      P    coefficient describing efficiency
+    :math:`\beta`                   `beta[n,t]`             P    power loss index
+    :math:`\eta_{el,min,woDH}`      `Eta_el_min_woDH[n,t]`  P    el. eff. at min. fuel flow w/o distr. heating
+    :math:`\eta_{el,max,woDH}`      `Eta_el_max_woDH[n,t]`  P    el. eff. at max. fuel flow w/o distr. heating
+    =============================== ======================= ==== =============================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
@@ -388,7 +388,7 @@ class GenericCHPBlock(ScalarBlock):
             expr = 0
             expr += -self.H_F[n, t]
             expr += n.alphas[0][t] * self.Y[n, t]
-            expr += n.alphas[1][t] * (self.P[n, t] + n.Beta[t] * self.Q[n, t])
+            expr += n.alphas[1][t] * (self.P[n, t] + n.beta[t] * self.Q[n, t])
             return expr == 0
 
         self.H_F_2 = Constraint(
@@ -497,7 +497,7 @@ class GenericCHPBlock(ScalarBlock):
         r"""Objective expression for generic CHPs with no investment.
 
         Note: This adds nothing as variable costs are already
-        added in the Block :class:`FlowBlock`.
+        added in the Block :class:`SimpleFlowBlock`.
         """
         if not hasattr(self, "GENERICCHPS"):
             return 0

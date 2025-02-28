@@ -17,8 +17,6 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
-from nose.tools import ok_
-from oemof.network.network import Node
 from pyomo import environ as po
 
 from oemof.solph import EnergySystem
@@ -33,28 +31,38 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
-    es = EnergySystem(timeindex=pd.date_range("1/1/2012", periods=4, freq="H"))
-    Node.registry = es
+    es = EnergySystem(
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h"),
+        infer_last_interval=True,
+    )
+
     # add some nodes
     boil = Bus(label="oil", balanced=False)
     blig = Bus(label="lignite", balanced=False)
     b_el = Bus(label="b_el")
+    es.add(boil, blig, b_el)
 
-    components.Sink(
-        label="Sink",
-        inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
+    es.add(
+        components.Sink(
+            label="Sink",
+            inputs={b_el: Flow(nominal_capacity=40, fix=[0.5, 0.4, 0.3, 1])},
+        )
     )
-    pp_oil = components.Transformer(
+    pp_oil = components.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
+        outputs={b_el: Flow(nominal_capacity=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    components.Transformer(
-        label="pp_lig",
-        inputs={blig: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
-        conversion_factors={b_el: 0.41},
+
+    es.add(pp_oil)
+    es.add(
+        components.Converter(
+            label="pp_lig",
+            inputs={blig: Flow()},
+            outputs={b_el: Flow(nominal_capacity=50, variable_costs=10)},
+            conversion_factors={b_el: 0.41},
+        )
     )
 
     # create the model
@@ -121,5 +129,5 @@ def test_add_constraints_example(solver="cbc", nologg=False):
 
     # solve and write results to dictionary
     # you may print the model with om.pprint()
-    ok_(om.solve(solver=solver))
+    assert om.solve(solver=solver)
     logging.info("Successfully finished.")

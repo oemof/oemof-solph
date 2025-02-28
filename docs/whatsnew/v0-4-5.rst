@@ -1,0 +1,34 @@
+v0.4.5 (January 23th, 2023)
+---------------------------
+
+New features
+############
+
+* Allow to exclude attrs from `parameter_as_dict`
+  `#825 <https://github.com/oemof/oemof-solph/pull/825>`_
+
+Bug fixes
+#########
+
+* Remove not working `gradient_cost` from Flow
+* Exclude attrs `from parameter_as_dict` `#824 <https://github.com/oemof/oemof-solph/pull/824>`_
+* Fixed check for callables in `processing.parameter_as_dict` `#823 <https://github.com/oemof/oemof-solph/pull/823>`_
+* Refactored assertion error in `Link` component into suspicious warning `#834 <https://github.com/oemof/oemof-solph/pull/834>`_
+* Remove `Link` limit direction `#896 <https://github.com/oemof/oemof-solph/pull/896>`_
+* Fix links in setup.py `#803 <https://github.com/oemof/oemof-solph/pull/803>`_
+
+Testing
+#######
+
+* `Node.registry` has been removed from `oemof.network`. All nodes have to be
+  added to the energysystem explicitely. The tests have been adapted.
+
+Contributors
+############
+
+* Hendrik Huyskens
+* Uwe Krien
+* Jann Launer
+* Patrik Schönfeld
+* Francesco Witte
+

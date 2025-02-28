@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.bus
-
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
@@ -11,33 +9,57 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
 
-class Bus(on.Bus):
-    """A balance object. Every node has to be connected to BusBlock.
+class Bus(Node):
+    """A balance object. Every component has to be connected to buses.
 
     The sum of all inputs of a Bus object must equal the sum of all outputs
     within one time step.
 
+    Attributes
+    ----------
+    balanced: boolean
+        Indicates if bus is balanced, i.e. if the sum of inflows equals to
+        the sum of outflows for each timestep; defaults to True
+
     Notes
     -----
     The following sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.buses.bus.BusBlock`
+     * :py:class:`~oemof.solph.buses._bus.BusBlock`
 
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.balanced = kwargs.get("balanced", True)
+    def __init__(
+        self,
+        label=None,
+        *,
+        inputs=None,
+        outputs=None,
+        balanced=True,
+        custom_properties=None,
+    ):
+        if inputs is None:
+            inputs = {}
+        if outputs is None:
+            outputs = {}
+        super().__init__(
+            label,
+            inputs=inputs,
+            outputs=outputs,
+            custom_properties=custom_properties,
+        )
+        self.balanced = balanced
 
     def constraint_group(self):
         if self.balanced:
@@ -68,16 +90,16 @@ class BusBlock(ScalarBlock):
 
      The index :math:`n` is the index for the Bus node itself. Therefore,
      a :math:`flow[i, n, t]` is a flow from the Component i to the Bus n at
-     time step t.
+     time index p, t.
 
-     ======================  ============================  ====================
-     symbol                  attribute                     explanation
-     ======================  ============================  ====================
-     :math:`P_{i}(t)`        `flow[i, n, t]`               Bus, inflow
+     ======================  =========================  ====================
+     symbol                  attribute                  explanation
+     ======================  =========================  ====================
+     :math:`P_{i}(p, t)`     `flow[i, n, t]`            Bus, inflow
 
-     :math:`P_{o}(t)`        `flow[n, o, t]`               Bus, outflow
+     :math:`P_{o}(p, t)`     `flow[n, o, t]`            Bus, outflow
 
-     ======================  ============================  ====================
+     ======================  =========================  ====================
      """
 
     def __init__(self, *args, **kwargs):

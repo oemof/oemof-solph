@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Example that illustrates how to use custom component
-`PiecewiseLinearTransformer` can be used.
+`PiecewiseLinearConverter` can be used.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
 by the contributors recorded in the version control history of the file,
@@ -26,17 +26,19 @@ from oemof.solph.flows import Flow
 def test_pwltf():
     # Set timeindex and create data
     periods = 20
-    datetimeindex = pd.date_range("1/1/2019", periods=periods, freq="H")
+    datetimeindex = pd.date_range("1/1/2019", periods=periods, freq="h")
     step = 5
     demand = np.arange(0, step * periods, step)
 
     # Set up EnergySystem, buses and sink
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(
+        timeindex=datetimeindex, infer_last_interval=True
+    )
     b_gas = Bus(label="biogas", balanced=False)
     b_el = Bus(label="electricity")
     demand_el = Sink(
         label="demand",
-        inputs={b_el: Flow(nominal_value=1, fix=demand)},
+        inputs={b_el: Flow(nominal_capacity=1, fix=demand)},
     )
 
     energysystem.add(b_gas, b_el, demand_el)
@@ -46,15 +48,15 @@ def test_pwltf():
         return 0.01 * x**2
 
     in_breakpoints = np.arange(0, 110, 25)
-    out_breakpoints = conv_func(in_breakpoints)
 
-    # Create and add PiecewiseLinearTransformer
-    pwltf = solph.components.experimental.PiecewiseLinearTransformer(
+    # Create and add PiecewiseLinearConverter
+    pwltf = solph.components.experimental.PiecewiseLinearConverter(
         label="pwltf",
-        inputs={b_gas: solph.flows.Flow(nominal_value=100, variable_costs=1)},
+        inputs={
+            b_gas: solph.flows.Flow(nominal_capacity=100, variable_costs=1)
+        },
         outputs={b_el: solph.flows.Flow()},
         in_breakpoints=in_breakpoints,
-        out_breakpoints=out_breakpoints,
         conversion_function=conv_func,
         pw_repn="CC",
     )
