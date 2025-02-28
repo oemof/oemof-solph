@@ -8,7 +8,7 @@ In this tutorial we will optimize the loading of an EV.
 The tutorial is set up in 5 different steps
 
 - Step 1: Plugged EV as load 
-- Step 2: Unidirektional charging (learning: incentive to re-charge)
+- Step 2: Unidircetional charging 
 - Step 3: Free charging with PV system at work (learning: dispatch with shifting under simple constraint)
 - Step 4: Fix free charging artefact and allow bidirectional use of the battery (learning: looped energy flow as indicator for flawed model and understand the "balanced" keyword)
 - Step 5: Variable electricity prices (learning: how to include time series for costs)
@@ -155,3 +155,19 @@ Now plot the results using the helper function from helpers.py.
 
     The learning should be: Understanding the trivial electric vehicle dispatch from battery
 
+Step 2: Plugged EV as load
+-------------------------
+
+
+
+
+
+
+
+
+
+
+.. admonition:: Learning 
+    :class: important
+
+    The learning should be: Incentive to re-charge the battery
