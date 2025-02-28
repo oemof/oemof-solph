@@ -27,24 +27,31 @@ def _check_oemof_installation(solvers):
         infer_last_interval=False,
     )
 
-    bgas = solph.buses.Bus(label="natural_gas")
-    bel = solph.buses.Bus(label="electricity")
-    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
-    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
-    solph.components.Sink(
+    b_gas = solph.buses.Bus(label="natural_gas")
+    b_el = solph.buses.Bus(label="electricity")
+    sink_el = solph.components.Sink(
+        label="excess_bel", inputs={b_el: solph.flows.Flow()}
+    )
+    source_gas = solph.components.Source(
+        label="rgas", outputs={b_gas: solph.flows.Flow()}
+    )
+    demand_el = solph.components.Sink(
         label="demand",
         inputs={
-            bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_capacity=1)
+            b_el: solph.flows.Flow(
+                fix=[10, 20, 30, 40, 50], nominal_capacity=1
+            )
         },
     )
-    solph.components.Converter(
+    pp = solph.components.Converter(
         label="pp_gas",
-        inputs={bgas: solph.flows.Flow()},
+        inputs={b_gas: solph.flows.Flow()},
         outputs={
-            bel: solph.flows.Flow(nominal_capacity=10e10, variable_costs=50)
+            b_el: solph.flows.Flow(nominal_capacity=10e10, variable_costs=50)
         },
-        conversion_factors={bel: 0.58},
+        conversion_factors={b_el: 0.58},
     )
+    energysystem.add(b_gas, b_el, source_gas, sink_el, demand_el, pp)
     om = solph.Model(energysystem)
 
     # check solvers
@@ -61,7 +68,7 @@ def _check_oemof_installation(solvers):
 
 def check_oemof_installation():
 
-    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex"]
+    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex", "scip"]
 
     solver_status = _check_oemof_installation(solvers_to_test)
 
