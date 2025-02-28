@@ -8,11 +8,9 @@ Further for plotting we use a helper function from helpers.py
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-
-import oemof.solph as solph
-
 from helpers import plot_results
 
+import oemof.solph as solph
 
 # %%[imports_end]
 
