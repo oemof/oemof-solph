@@ -23,7 +23,7 @@ stop_at_error = False  # If True script will stop if error is raised
 exclude_notebooks = False
 exclude_python_scripts = False
 has_main_function = True
-test_optimize = False
+test_optimize = True
 
 
 def notebook_run(path):
