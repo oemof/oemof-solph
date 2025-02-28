@@ -505,7 +505,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
             )
             * inter_value
         )
-        intra_series = soc["intra"][(p, k)].iloc[0:timesteps]
+        intra_series = soc["intra"][(0, k)].iloc[0:timesteps]
         soc_frame = pd.DataFrame(
             intra_series["value"].values
             + inter_series.values,  # Neglect indexes, otherwise none

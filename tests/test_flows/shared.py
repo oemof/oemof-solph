@@ -28,5 +28,6 @@ def _run_flow_model(flow):
     model.solve()
 
     results = solph.processing.results(model)
+    results = results[(bus, bus)]["sequences"]
 
-    return results[(bus, bus)]["sequences"]
+    return results
