@@ -62,7 +62,7 @@ from oemof import solph
 
 # import oemof plots
 try:
-    from oemof_visio import plot as oeplot
+    from oemof.visio import plot as oeplot
 except ImportError:
     oeplot = None
 
