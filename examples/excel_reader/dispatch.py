@@ -358,7 +358,7 @@ def draw_graph(
         plt.show()
 
 
-def optimise_scenario():
+def main(optimize=True):
     logger.define_logging()
     datetime_index = pd.date_range(
         "2016-01-01 00:00:00", "2016-01-01 23:00:00", freq="60min"
@@ -394,6 +394,9 @@ def optimise_scenario():
         )
         print(oobj + ":", n.label)
     print("*********************************************************")
+
+    if optimize is False:
+        return esys
 
     # creation of a least cost model from the energy system
     om = solph.Model(esys)
@@ -436,4 +439,4 @@ def optimise_scenario():
 
 
 if __name__ == "__main__":
-    optimise_scenario()
+    main()

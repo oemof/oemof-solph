@@ -38,7 +38,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def saturating_storage_example():
+def main(optimize=True):
     # create an energy system
     idx = pd.date_range("1/1/2023", periods=100, freq="h")
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
@@ -81,6 +81,9 @@ def saturating_storage_example():
         loss_rate=0.0001,
     )
     es.add(battery)
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     model = solph.Model(es)
@@ -143,4 +146,4 @@ def saturating_storage_example():
 
 
 if __name__ == "__main__":
-    saturating_storage_example()
+    main()

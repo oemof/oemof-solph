@@ -35,7 +35,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     demand_el = [
         0,
         0,
@@ -101,6 +101,9 @@ def main():
         },
     )
     es.add(bel, demand_el, pp1, pp2)
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

@@ -128,7 +128,7 @@ def draw_graph(
         plt.show()
 
 
-def main():
+def main(optimize=True):
     datetimeindex = pd.date_range("1/1/2017", periods=3, freq="h")
 
     es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
@@ -178,6 +178,9 @@ def main():
             inputs={b_1: Flow(nominal_capacity=150, fix=[1, 0])},
         )
     )
+
+    if optimize is False:
+        return es
 
     m = Model(energysystem=es)
 

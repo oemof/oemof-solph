@@ -59,7 +59,7 @@ from oemof.solph.components import Source
 from oemof.solph.components import Converter
 
 
-def main():
+def main(optimize=True):
     # Read data file
     filename = os.path.join(os.getcwd(), "input_data.csv")
     try:
@@ -203,6 +203,9 @@ def main():
     )
 
     # ################################ optimization ###########################
+
+    if optimize is False:
+        return energysystem
 
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)
