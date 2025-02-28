@@ -7,25 +7,38 @@ General description
 An example to show how non-equidistant time steps work.
 In addition to the comments in the simple example, note that:
 
-*   Time steps in the beginning are 15 minutes.
-*   Time steps in the end are hourly.
-*   In the middle, there is a very short demand peak of one minute.
-    This, however, does barely influence the storage contents.
-*   Storage losses are defined per hour.
-    *   storage_fixed looses 1 energy unit per hour
-    *   storage_relative looses 50 % of its contents per hour
-*   If possible, energy is transferred from storage with
-    relative losses to the one with fixed losses to minimise total
-    losses.
+- Time steps in the beginning are 15 minutes.
+- Time steps in the end are hourly.
+- In the middle, there is a very short demand peak of one minute. This, however,
+  does barely influence the storage contents.
+- Storage losses are defined per hour.
+  - storage_fixed looses 1 energy unit per hour
+  - storage_relative looses 50 % of its contents per hour
+- If possible, energy is transferred from storage with relative losses to the
+  one with fixed losses to minimise total losses.
+
+Code
+----
+Download source code: :download:`non_equidistant_time_step_example.py </../examples/time_index_example/non_equidistant_time_step_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/time_index_example/non_equidistant_time_step_example.py
+        :language: python
+        :lines: 40-
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph, install by:
 
+.. code:: bash
+
     pip install oemof.solph
+
 """
 import pandas as pd
+
 from oemof import solph
 
 try:
@@ -62,7 +75,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=16,
+                nominal_capacity=16,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
@@ -74,7 +87,7 @@ def main():
         label="storage_fixed",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         fixed_losses_absolute=1,  # 1 energy unit loss per hour
     )
@@ -86,10 +99,10 @@ def main():
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         loss_rate=0.5,  # 50 % losses per hour
     )
@@ -97,7 +110,7 @@ def main():
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_value=8,
+                nominal_capacity=8,
                 variable_costs=0.1,
                 fix=[0.75, 0.5, 0, 0, 1, 0, 0, 0, 0],
             )
@@ -122,7 +135,7 @@ def main():
     ]["flow"]
     results_df["storage_relative"] = results[(storage_relative, None)][
         "sequences"
-    ]
+    ]["storage_content"]
     results_df["storage_relative_inflow"] = results[(bus, storage_relative)][
         "sequences"
     ]["flow"]

@@ -9,25 +9,38 @@ Following the example one can customise the excel reader to ones own needs.
 
 The pandas package supports the '.xls' and the '.xlsx' format but one can
 create read and adept the files with open source software such as libreoffice,
-openoffice, gnumeric,...
+openoffice, gnumeric, ...
+
+Code
+----
+Download source code: :download:`dispatch.py </../examples/excel_reader/dispatch.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/excel_reader/dispatch.py
+        :language: python
+        :lines: 57-437
 
 Data
 ----
-scenario.xlsx
+Download data: :download:`scenario.xlsx </../examples/excel_reader/scenario.xlsx>`
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
-    pip install oemof.solph[examples]
+.. code:: bash
 
-    pip3 install openpyxl
+    pip install oemof.solph[examples]
+    pip install openpyxl
 
 
 If you want to plot the energy system's graph, you have to install pygraphviz
 using:
 
-    pip3 install pygraphviz
+.. code:: bash
+
+    pip install pygraphviz
 
 For pygraphviz under Windows, some hints are available in the oemof Wiki:
 https://github.com/oemof/oemof/wiki/Windows---general
@@ -41,16 +54,16 @@ Jonathan Amme <jonathan.amme@rl-institut.de>
 
 """
 
-import os
 import logging
-import pandas as pd
+import os
 
-from oemof.tools import logger
-from oemof import solph
-
-from oemof.network.graph import create_nx_graph
-from matplotlib import pyplot as plt
 import networkx as nx
+import pandas as pd
+from matplotlib import pyplot as plt
+from oemof.network.graph import create_nx_graph
+from oemof.tools import logger
+
+from oemof import solph
 
 
 def nodes_from_excel(filename):
@@ -78,7 +91,7 @@ def nodes_from_excel(filename):
     nodes_data = {
         "buses": xls.parse("buses"),
         "commodity_sources": xls.parse("commodity_sources"),
-        "transformers": xls.parse("transformers"),
+        "converters": xls.parse("converters"),
         "renewables": xls.parse("renewables"),
         "demand": xls.parse("demand"),
         "storages": xls.parse("storages"),
@@ -165,7 +178,7 @@ def create_nodes(nd=None):
     for i, re in nd["renewables"].iterrows():
         if re["active"]:
             # set static outflow values
-            outflow_args = {"nominal_value": re["capacity"]}
+            outflow_args = {"nominal_capacity": re["capacity"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == re["label"]:
@@ -183,7 +196,7 @@ def create_nodes(nd=None):
     for i, de in nd["demand"].iterrows():
         if de["active"]:
             # set static inflow values
-            inflow_args = {"nominal_value": de["nominal value"]}
+            inflow_args = {"nominal_capacity": de["nominal value"]}
             # get time series for node and parameter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == de["label"]:
@@ -197,22 +210,24 @@ def create_nodes(nd=None):
                 )
             )
 
-    # Create Transformer objects from 'transformers' table
-    for i, t in nd["transformers"].iterrows():
+    # Create Converter objects from 'converters' table
+    for i, t in nd["converters"].iterrows():
         if t["active"]:
             # set static inflow values
             inflow_args = {"variable_costs": t["variable input costs"]}
-            # get time series for inflow of transformer
+            # get time series for inflow of converter
             for col in nd["timeseries"].columns.values:
                 if col.split(".")[0] == t["label"]:
                     inflow_args[col.split(".")[1]] = nd["timeseries"][col]
             # create
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label=t["label"],
                     inputs={busd[t["from"]]: solph.Flow(**inflow_args)},
                     outputs={
-                        busd[t["to"]]: solph.Flow(nominal_value=t["capacity"])
+                        busd[t["to"]]: solph.Flow(
+                            nominal_capacity=t["capacity"]
+                        )
                     },
                     conversion_factors={busd[t["to"]]: t["efficiency"]},
                 )
@@ -225,17 +240,17 @@ def create_nodes(nd=None):
                     label=s["label"],
                     inputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_value=s["capacity inflow"],
+                            nominal_capacity=s["capacity inflow"],
                             variable_costs=s["variable input costs"],
                         )
                     },
                     outputs={
                         busd[s["bus"]]: solph.Flow(
-                            nominal_value=s["capacity outflow"],
+                            nominal_capacity=s["capacity outflow"],
                             variable_costs=s["variable output costs"],
                         )
                     },
-                    nominal_storage_capacity=s["nominal capacity"],
+                    nominal_capacity=s["nominal capacity"],
                     loss_rate=s["capacity loss"],
                     initial_storage_level=s["initial capacity"],
                     max_storage_level=s["capacity max"],
@@ -250,7 +265,7 @@ def create_nodes(nd=None):
             bus1 = busd[p["bus_1"]]
             bus2 = busd[p["bus_2"]]
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label="powerline" + "_" + p["bus_1"] + "_" + p["bus_2"],
                     inputs={bus1: solph.Flow()},
                     outputs={bus2: solph.Flow()},
@@ -258,7 +273,7 @@ def create_nodes(nd=None):
                 )
             )
             nodes.append(
-                solph.components.Transformer(
+                solph.components.Converter(
                     label="powerline" + "_" + p["bus_2"] + "_" + p["bus_1"],
                     inputs={bus2: solph.Flow()},
                     outputs={bus1: solph.Flow()},
@@ -286,7 +301,7 @@ def draw_graph(
     grph : networkxGraph
         A graph to draw.
     edge_labels : boolean
-        Use nominal values of flow as edge label
+        Use nominal capacities of flow as edge label
     node_color : dict or string
         Hex color code oder matplotlib color for each node. If string, all
         colors are the same.

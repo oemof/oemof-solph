@@ -17,7 +17,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import network as on
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -26,7 +26,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 
-class GenericCAES(on.Transformer):
+class GenericCAES(Node):
     """
     Component `GenericCAES` to model arbitrary compressed air energy storages.
 
@@ -92,23 +92,37 @@ class GenericCAES(on.Transformer):
     ...    electrical_input={bel: solph.flows.Flow()},
     ...    fuel_input={bgas: solph.flows.Flow()},
     ...    electrical_output={bel: solph.flows.Flow()},
-    ...    params=concept, fixed_costs=0)
+    ...    params=concept)
     >>> type(caes)
     <class 'oemof.solph.components.experimental._generic_caes.GenericCAES'>
     """
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(
+        self,
+        label,
+        *,
+        electrical_input,
+        fuel_input,
+        electrical_output,
+        params,
+        custom_properties=None,
+    ):
+        super().__init__(
+            label=label,
+            inputs={},
+            outputs={},
+            custom_properties=custom_properties,
+        )
 
-        self.electrical_input = kwargs.get("electrical_input")
-        self.fuel_input = kwargs.get("fuel_input")
-        self.electrical_output = kwargs.get("electrical_output")
-        self.params = kwargs.get("params")
+        self.electrical_input = electrical_input
+        self.fuel_input = fuel_input
+        self.electrical_output = electrical_output
+        self.params = params
 
         # map specific flows to standard API
-        self.inputs.update(kwargs.get("electrical_input"))
-        self.inputs.update(kwargs.get("fuel_input"))
-        self.outputs.update(kwargs.get("electrical_output"))
+        self.inputs.update(electrical_input)
+        self.inputs.update(fuel_input)
+        self.outputs.update(electrical_output)
 
     def constraint_group(self):
         return GenericCAESBlock
@@ -305,13 +319,13 @@ class GenericCAESBlock(ScalarBlock):
         | Temporal efficiency
         | (loss factor to take intertemporal losses into account)"
         ":math:`electrical\_input`", "
-        `flow[list(n.electrical_input.keys())[0], n, t]`", "P", "
+        `flow[list(n.electrical_input.keys())[0], p, n, t]`", "P", "
         Electr. power input into compression"
         ":math:`electrical\_output`", "
-        `flow[n, list(n.electrical_output.keys())[0], t]`", "P", "
+        `flow[n, list(n.electrical_output.keys())[0], p, t]`", "P", "
         Electr. power output of expansion"
         ":math:`fuel\_input`", "
-        `flow[list(n.fuel_input.keys())[0], n, t]`", "P", "Heat input
+        `flow[list(n.fuel_input.keys())[0], n, p, t]`", "P", "Heat input
         (external) into Expansion"
 
     """

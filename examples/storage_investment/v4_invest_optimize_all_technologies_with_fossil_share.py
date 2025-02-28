@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -30,20 +30,38 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 4:
 
-    - optimize wind, pv, and storage
-    - set investment cost for wind, pv and storage
-    - set a fossil share
+- optimize wind, pv, and storage
+- set investment cost for wind, pv and storage
+- set a fossil share
 
-    Results show now the achievement of 80% renewable energy share
-    by solely installing a little more wind and pv (compared to
-    variation 2). Storage is not installed.
+Results show now the achievement of 80% renewable energy share
+by solely installing a little more wind and pv (compared to
+variation 2). Storage is not installed.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
 
+Code
+----
+Download source code: :download:`v4_invest_optimize_all_technologies_with_fossil_share.py </../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v4_invest_optimize_all_technologies_with_fossil_share.py
+        :language: python
+        :lines: 79-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -64,8 +82,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -130,7 +146,7 @@ def main():
         label="rgas",
         outputs={
             bgas: solph.Flow(
-                nominal_value=fossil_share
+                nominal_capacity=fossil_share
                 * consumption_total
                 / 0.58
                 * number_timesteps
@@ -146,7 +162,7 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=data["wind"],
-                investment=solph.Investment(ep_costs=epc_wind),
+                nominal_capacity=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
@@ -156,7 +172,8 @@ def main():
         label="pv",
         outputs={
             bel: solph.Flow(
-                fix=data["pv"], investment=solph.Investment(ep_costs=epc_pv)
+                fix=data["pv"],
+                nominal_capacity=solph.Investment(ep_costs=epc_pv),
             )
         },
     )
@@ -164,14 +181,14 @@ def main():
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_capacity=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 
@@ -186,7 +203,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc_storage),
+        nominal_capacity=solph.Investment(ep_costs=epc_storage),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

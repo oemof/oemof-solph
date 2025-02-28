@@ -36,39 +36,20 @@ def test_generic_storage_1():
             invest_relation_input_output=1,
             invest_relation_output_capacity=1,
             invest_relation_input_capacity=1,
-            investment=Investment(),
+            nominal_capacity=Investment(),
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-        )
-
-
-def test_generic_storage_2():
-    """Nominal value defined with investment model."""
-    bel = Bus()
-    with pytest.raises(AttributeError, match="If an investment object"):
-        components.GenericStorage(
-            label="storage3",
-            nominal_storage_capacity=45,
-            inputs={bel: Flow(variable_costs=10e10)},
-            outputs={bel: Flow(variable_costs=10e10)},
-            loss_rate=0.00,
-            initial_storage_level=0,
-            invest_relation_input_capacity=1 / 6,
-            invest_relation_output_capacity=1 / 6,
-            inflow_conversion_factor=1,
-            outflow_conversion_factor=0.8,
-            investment=Investment(ep_costs=23),
         )
 
 
 def test_generic_storage_3():
-    """Nominal value defined with investment model."""
+    """Nominal capacity defined with investment model."""
     bel = Bus()
     components.GenericStorage(
         label="storage4",
-        nominal_storage_capacity=45,
-        inputs={bel: Flow(nominal_value=23, variable_costs=10e10)},
-        outputs={bel: Flow(nominal_value=7.5, variable_costs=10e10)},
+        nominal_capacity=45,
+        inputs={bel: Flow(nominal_capacity=23, variable_costs=10e10)},
+        outputs={bel: Flow(nominal_capacity=7.5, variable_costs=10e10)},
         loss_rate=0.00,
         initial_storage_level=0,
         inflow_conversion_factor=1,
@@ -84,7 +65,7 @@ def test_generic_storage_4():
     ):
         components.GenericStorage(
             label="storage4",
-            nominal_storage_capacity=10,
+            nominal_capacity=10,
             inputs={bel: Flow(variable_costs=10e10)},
             outputs={bel: Flow(variable_costs=10e10)},
             loss_rate=0.00,
@@ -109,14 +90,16 @@ def test_generic_storage_with_non_convex_investment():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(nonconvex=True, existing=5, maximum=25),
+            nominal_capacity=Investment(
+                nonconvex=True, existing=5, maximum=25
+            ),
         )
 
 
 def test_generic_storage_with_non_convex_invest_maximum():
     """No investment maximum at nonconvex investment."""
     with pytest.raises(
-        AttributeError, match=r"Please provide an maximum investment value"
+        AttributeError, match=r"Please provide a maximum investment value"
     ):
         bel = Bus()
         components.GenericStorage(
@@ -125,7 +108,7 @@ def test_generic_storage_with_non_convex_invest_maximum():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(nonconvex=True),
+            nominal_capacity=Investment(nonconvex=True),
         )
 
 
@@ -141,7 +124,7 @@ def test_generic_storage_with_convex_invest_offset():
             outputs={bel: Flow()},
             invest_relation_input_capacity=1 / 6,
             invest_relation_output_capacity=1 / 6,
-            investment=Investment(offset=10),
+            nominal_capacity=Investment(offset=10),
         )
 
 
@@ -161,13 +144,14 @@ def test_generic_storage_with_invest_and_fixed_losses_absolute():
             label="storage4",
             inputs={bel: Flow()},
             outputs={bel: Flow()},
-            investment=Investment(ep_costs=23, minimum=0, existing=0),
+            nominal_capacity=Investment(ep_costs=23, minimum=0, existing=0),
             fixed_losses_absolute=[0, 0, 4],
         )
 
 
 def test_generic_storage_without_inputs():
-    components.GenericStorage(label="storage5")
+    with pytest.warns(SuspiciousUsageWarning):
+        components.GenericStorage(label="storage5")
 
 
 def test_generic_storage_too_many_inputs():
@@ -176,7 +160,9 @@ def test_generic_storage_too_many_inputs():
     bel2 = Bus()
     with pytest.raises(AttributeError, match=msg):
         components.GenericStorage(
-            label="storage6", inputs={bel1: Flow(), bel2: Flow()}
+            label="storage6",
+            inputs={bel1: Flow(), bel2: Flow()},
+            outputs={bel2: Flow()},
         )
 
 
@@ -186,94 +172,64 @@ def test_generic_storage_too_many_outputs():
     bel2 = Bus()
     with pytest.raises(AttributeError, match=msg):
         components.GenericStorage(
-            label="storage7", outputs={bel1: Flow(), bel2: Flow()}
+            label="storage7",
+            inputs={bel1: Flow()},
+            outputs={bel1: Flow(), bel2: Flow()},
         )
 
 
-# ********* OffsetTransformer *********
+# ********* OffsetConverter *********
 
 
-def test_offsettransformer_wrong_flow_type():
-    """No NonConvexFlow for Inflow defined."""
-    with pytest.raises(
-        TypeError, match=r"Input flows must have NonConvex attribute!"
-    ):
-        bus = Bus(label="Bus")
-        components.OffsetTransformer(
-            label="gasboiler",
-            inputs={bus: Flow()},
-            outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients=(-17, 0.9),
-        )
-
-
-def test_offsettransformer_not_enough_coefficients():
+def test_offsetconverter_without_nonconvex():
+    """No NonConvex attribute is defined for any of the attached flows."""
     with pytest.raises(
         ValueError,
-        match=r"Two coefficients or coefficient series have to be given.",
+        match=(
+            "Exactly one flow of the `OffsetConverter` must have the "
+            "`NonConvex` attribute."
+        ),
     ):
-        bus = Bus(label="Bus")
-        components.OffsetTransformer(
-            label="of1",
-            inputs={bus: Flow(nonconvex=NonConvex())},
-            outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients=([1, 4, 7]),
+        b_diesel = Bus(label="bus_diesel")
+        b_el = Bus(label="bus_electricity")
+        components.OffsetConverter(
+            label="diesel_genset",
+            inputs={b_diesel: Flow()},
+            outputs={b_el: Flow()},
         )
 
 
-def test_offsettransformer_too_many_coefficients():
+def test_offsetconverter_multiple_nonconvex():
+    """NonConvex attribute is defined for more than one flow."""
     with pytest.raises(
         ValueError,
-        match=r"Two coefficients or coefficient series have to be given.",
+        match=(
+            "Exactly one flow of the `OffsetConverter` must have the "
+            "`NonConvex` attribute."
+        ),
     ):
-        bus = Bus(label="Bus")
-        components.OffsetTransformer(
-            label="of2",
-            inputs={bus: Flow(nonconvex=NonConvex())},
-            outputs={bus: Flow(nonconvex=NonConvex())},
-            coefficients=(1, 4, 7),
+        b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
+        components.OffsetConverter(
+            inputs={b_diesel: Flow(nonconvex=NonConvex())},
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 
-def test_offsettransformer__too_many_input_flows():
-    """Too many Input Flows defined."""
+def test_offsetconverter_investment_not_on_nonconvex():
+    """Investment attribute is defined for a not NonConvex flow."""
     with pytest.raises(
-        ValueError, match=r"OffsetTransformer` must not have more than 1"
+        TypeError,
+        match=(
+            "`Investment` attribute must be defined only for the NonConvex "
+            "flow!"
+        ),
     ):
-        bgas = Bus(label="GasBus")
-        bcoal = Bus(label="CoalBus")
-        components.OffsetTransformer(
-            label="ostf_2_in",
-            inputs={
-                bgas: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                ),
-                bcoal: Flow(
-                    nominal_value=30, min=0.3, max=1.0, nonconvex=NonConvex()
-                ),
-            },
-            outputs={bcoal: Flow(nonconvex=NonConvex())},
-            coefficients=(20, 0.5),
-        )
-
-
-def test_offsettransformer_too_many_output_flows():
-    """Too many Output Flows defined."""
-    with pytest.raises(
-        ValueError, match="OffsetTransformer` must not have more than 1"
-    ):
-        bm1 = Bus(label="my_offset_Bus1")
-        bm2 = Bus(label="my_offset_Bus2")
-
-        components.OffsetTransformer(
-            label="ostf_2_out",
-            inputs={
-                bm1: Flow(
-                    nominal_value=60, min=0.5, max=1.0, nonconvex=NonConvex()
-                )
-            },
-            outputs={bm1: Flow(), bm2: Flow()},
-            coefficients=(20, 0.5),
+        b_diesel = Bus(label="bus_diesel")
+        b_heat = Bus(label="bus_heat")
+        components.OffsetConverter(
+            inputs={b_diesel: Flow(nominal_capacity=Investment(maximum=1))},
+            outputs={b_heat: Flow(nonconvex=NonConvex())},
         )
 
 

@@ -6,9 +6,21 @@ General description
 Example that illustrates how to model startup and shutdown costs attributed
 to a binary flow.
 
+Code
+----
+Download source code: :download:`startup_shutdown.py </../examples/start_and_shutdown_costs/startup_shutdown.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/start_and_shutdown_costs/startup_shutdown.py
+        :language: python
+        :lines: 32-
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -17,9 +29,10 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
-import pandas as pd
-from oemof import solph
 import matplotlib.pyplot as plt
+import pandas as pd
+
+from oemof import solph
 
 
 def main():
@@ -58,7 +71,7 @@ def main():
 
     demand_el = solph.components.Sink(
         label="demand_el",
-        inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
+        inputs={bel: solph.Flow(fix=demand_el, nominal_capacity=10)},
     )
 
     # pp1 and pp2 are competing to serve overall 12 units load at lowest cost
@@ -68,7 +81,7 @@ def main():
     #    the start and shutdown costs of pp2 change its marginal costs
     pp1 = solph.components.Source(
         label="power_plant1",
-        outputs={bel: solph.Flow(nominal_value=10, variable_costs=10.25)},
+        outputs={bel: solph.Flow(nominal_capacity=10, variable_costs=10.25)},
     )
 
     # shutdown costs only work in combination with a minimum load
@@ -79,7 +92,7 @@ def main():
         label="power_plant2",
         outputs={
             bel: solph.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.5,
                 max=1.0,
                 variable_costs=10,

@@ -31,7 +31,10 @@ def test_add_constraints_example(solver="cbc", nologg=False):
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
-    es = EnergySystem(timeindex=pd.date_range("1/1/2012", periods=4, freq="H"))
+    es = EnergySystem(
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h"),
+        infer_last_interval=True,
+    )
 
     # add some nodes
     boil = Bus(label="oil", balanced=False)
@@ -42,21 +45,22 @@ def test_add_constraints_example(solver="cbc", nologg=False):
     es.add(
         components.Sink(
             label="Sink",
-            inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
+            inputs={b_el: Flow(nominal_capacity=40, fix=[0.5, 0.4, 0.3, 1])},
         )
     )
-    pp_oil = components.Transformer(
+    pp_oil = components.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
+        outputs={b_el: Flow(nominal_capacity=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
+
     es.add(pp_oil)
     es.add(
-        components.Transformer(
+        components.Converter(
             label="pp_lig",
             inputs={blig: Flow()},
-            outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
+            outputs={b_el: Flow(nominal_capacity=50, variable_costs=10)},
             conversion_factors={b_el: 0.41},
         )
     )

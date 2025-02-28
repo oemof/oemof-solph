@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -22,18 +23,19 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph._plumbing import sequence as solph_sequence
-from oemof.solph.components._transformer import Transformer
+from oemof.solph._plumbing import sequence
+from oemof.solph.components import Converter
 
 
-class ExtractionTurbineCHP(Transformer):
+class ExtractionTurbineCHP(Converter):
     r"""
-    A CHP with an extraction turbine in a linear model. For more options see
-    the :class:`~oemof.solph.components.GenericCHP` class.
+    A CHP with an extraction turbine in a linear model. For a more
+    detailled modelling approach providing more options, also see
+    the :class:`.GenericCHP` class.
 
     One main output flow has to be defined and is tapped by the remaining flow.
     The conversion factors have to be defined for the maximum tapped flow (
-    full CHP mode) and for no tapped flow (full condensing mode). Even though
+    full CHP mode) and for no tapped flow (full condensing mode). Even though,
     it is possible to limit the variability of the tapped flow, so that the
     full condensing mode will never be reached.
 
@@ -62,7 +64,7 @@ class ExtractionTurbineCHP(Transformer):
     >>> bgas = solph.buses.Bus(label='commodityBus')
     >>> et_chp = solph.components.ExtractionTurbineCHP(
     ...    label='variable_chp_gas',
-    ...    inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+    ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
     ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
     ...    conversion_factors={bel: 0.3, bth: 0.5},
     ...    conversion_factor_full_condensation={bel: 0.5})
@@ -75,17 +77,17 @@ class ExtractionTurbineCHP(Transformer):
         inputs=None,
         outputs=None,
         conversion_factors=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         super().__init__(
             label=label,
             inputs=inputs,
             outputs=outputs,
             conversion_factors=conversion_factors,
-            custom_attributes=custom_attributes,
+            custom_properties=custom_properties,
         )
         self.conversion_factor_full_condensation = {
-            k: solph_sequence(v)
+            k: sequence(v)
             for k, v in conversion_factor_full_condensation.items()
         }
 
@@ -95,7 +97,7 @@ class ExtractionTurbineCHP(Transformer):
 
 class ExtractionTurbineCHPBlock(ScalarBlock):
     r"""Block for all instances of
-    :class:`~oemof.solph.components.ExtractionTurbineCHP`
+    :class:`~oemof.solph.components.experimental._ExtractionTurbineCHP`
 
     **Variables**
 
@@ -103,7 +105,7 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
     * :math:`\dot H_{Fuel}`
 
-        Fuel input flow, represented in code as `flow[i,n,t]`
+        Fuel input flow, represented in code as `flow[i, n, t]`
 
     * :math:`P_{el}`
 
@@ -145,8 +147,8 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
         .. math::
             &
             (1)\dot H_{Fuel}(t) =
-                \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
-                    {\eta_{el,woExtr}(t)} \\
+               \frac{P_{el}(t) + \dot Q_{th}(t) \cdot \beta(t)}
+                 {\eta_{el,woExtr}(t)} \\
             &
             (2)P_{el}(t) \geq \dot Q_{th}(t) \cdot C_b
 
@@ -165,7 +167,27 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
 
     The first equation is the result of the relation between the input
     flow and the two output flows, the second equation stems from how the two
-    output flows relate to each other.
+    output flows relate to each other, and the symbols used are defined as
+    follows (with Variables (V) and Parameters (P)):
+
+    ========================= ============================================ ==== =========
+    symbol                    attribute                                    type explanation
+    ========================= ============================================ ==== =========
+    :math:`\dot H_{Fuel}`     `flow[i, n, t]`                              V    fuel input flow
+
+    :math:`P_{el}`            `flow[n, main_output, t]`                    V    electric power
+
+    :math:`\dot Q_{th}`       `flow[n, tapped_output, t]`                  V    thermal output
+
+    :math:`\beta`             `main_flow_loss_index[n, t]`                 P    power loss index
+
+    :math:`\eta_{el,woExtr}`  `conversion_factor_full_condensation[n, t]`  P    electric efficiency
+                                                                                        without heat extraction
+    :math:`\eta_{el,maxExtr}` `conversion_factors[main_output][n, t]`      P    electric efficiency
+                                                                                        with max heat extraction
+    :math:`\eta_{th,maxExtr}` `conversion_factors[tapped_output][n, t]`    P    thermal efficiency with
+                                                                                        maximal heat extraction
+    ========================= ============================================ ==== =========
 
     """  # noqa: E501
 
@@ -175,18 +197,19 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
         super().__init__(*args, **kwargs)
 
     def _create(self, group=None):
-        """Creates the linear constraint for the
-        :class:`oemof.solph.components.TransformerBlock` block.
+        """Creates the constraints for
+        :class:`oemof.solph.components.experimental._extraction_turbine_chp.ExtractionTurbineCHPBlock`.
 
         Parameters
         ----------
         group : list
-            List of :class:`oemof.solph.components.ExtractionTurbineCHP`
-            (trsf) objects for which the linear relation of inputs and outputs
-            is created e.g. group = [trsf1, trsf2, trsf3, ...]. Note that the
-            relation is created for all existing relations of the inputs and
-            all outputs of the transformer. The components inside the list need
-            to hold all needed attributes.
+            List of
+            :class:`oemof.solph.components.experimental._extraction_turbine_chp.ExtractionTurbineCHP`
+            (trsf) objects for which the linear relation of inputs
+            and outputs is created e.g. group = [trsf1, trsf2, trsf3, ...].
+            Note that the relation is created for all existing relations
+            of the inputs and all outputs of the converter-like object.
+            The components inside the list need to hold all needed attributes.
         """
         if group is None:
             return None

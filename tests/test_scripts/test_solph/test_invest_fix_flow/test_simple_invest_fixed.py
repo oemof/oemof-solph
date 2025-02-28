@@ -50,19 +50,23 @@ def test_dispatch_fix_example(solver="cbc", periods=10):
     pv = Source(
         label="pv",
         outputs={
-            bel: Flow(fix=data["pv"], investment=Investment(ep_costs=ep_pv))
+            bel: Flow(
+                fix=data["pv"], nominal_capacity=Investment(ep_costs=ep_pv)
+            )
         },
     )
 
     # demands (electricity/heat)
     demand_el = Sink(
         label="demand_elec",
-        inputs={bel: Flow(nominal_value=85, fix=data["demand_el"])},
+        inputs={bel: Flow(nominal_capacity=85, fix=data["demand_el"])},
     )
 
-    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="H")
+    datetimeindex = pd.date_range("1/1/2012", periods=periods, freq="h")
 
-    energysystem = EnergySystem(timeindex=datetimeindex)
+    energysystem = EnergySystem(
+        timeindex=datetimeindex, infer_last_interval=True
+    )
 
     energysystem.add(bel, excess_el, pv, demand_el)
 

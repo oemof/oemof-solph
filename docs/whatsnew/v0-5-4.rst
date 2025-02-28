@@ -1,0 +1,32 @@
+v0.5.4 (August 19th, 2024)
+--------------------------
+
+New features
+############
+
+* Explicitly allow to have multiple inputs or outputs for Sinks and Sources,
+  respectively.
+* Allow to set lower limits for generic_integral_limit constraint.
+
+
+Documentation
+#############
+
+* Improve documentation of full load time.
+
+Other changes
+#############
+
+* Refined internal sequence generation. (For e.g. constraint formulations,
+  Scalars are internally mapped to fake sequences without a defined length.)
+
+Known issues
+############
+
+* Incompatible to numpy >= 2.0.0. This is because of Pyomo, but we have to
+  enforce a lower version in our package.
+
+Contributors
+############
+
+* Patrik Schönfeldt

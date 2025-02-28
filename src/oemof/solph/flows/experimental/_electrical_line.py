@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Johannes Röder
 SPDX-FileCopyrightText: jakob-wo
 SPDX-FileCopyrightText: gplssm
 SPDX-FileCopyrightText: jnnr
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
@@ -24,7 +25,7 @@ from pyomo.environ import Constraint
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import sequence as solph_sequence
+from oemof.solph._plumbing import sequence
 from oemof.solph.buses.experimental._electrical_bus import ElectricalBus
 from oemof.solph.flows._flow import Flow
 
@@ -59,7 +60,7 @@ class ElectricalLine(Flow):
 
     def __init__(self, **kwargs):
         super().__init__(
-            nominal_value=kwargs.get("nominal_value"),
+            nominal_capacity=kwargs.get("nominal_capacity"),
             variable_costs=kwargs.get("variable_costs", 0),
             min=kwargs.get("min"),
             max=kwargs.get("max"),
@@ -74,7 +75,7 @@ class ElectricalLine(Flow):
             nonconvex=kwargs.get("nonconvex"),
             custom_attributes=kwargs.get("costom_attributes"),
         )
-        self.reactance = solph_sequence(kwargs.get("reactance", 0.00001))
+        self.reactance = sequence(kwargs.get("reactance", 0.00001))
 
         self.input = kwargs.get("input")
         self.output = kwargs.get("output")
@@ -106,10 +107,10 @@ class ElectricalLineBlock(ScalarBlock):
 
     Linear relation :attr:`om.ElectricalLine.electrical_flow[n,t]`
         .. math::
-            flow(n, o, t) =  1 / reactance(n, t) \\cdot ()
-            voltage_angle(i(n), t) - volatage_angle(o(n), t), \\
-            \forall t \\in \\textrm{TIMESTEPS}, \\
-            \forall n \\in \\textrm{ELECTRICAL\_LINES}.
+            flow(n, o, p, t) =  1 / reactance(n, t) \cdot
+            voltage\_angle(i(n), t) - voltage\_angle(o(n), t), \\
+            \forall p, t \in \textrm{TIMEINDEX}, \\
+            \forall n \in \textrm{ELECTRICAL\_LINES}.
 
     TODO: Add equate constraint of flows
 

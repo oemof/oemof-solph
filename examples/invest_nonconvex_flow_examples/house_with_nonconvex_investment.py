@@ -9,17 +9,25 @@ component of the energy system.
 
 There are the following components:
 
-    - demand_heat: heat demand (high in winter, low in summer)
-    - fireplace: wood firing, has a minimum heat and
-                 will burn for a minimum time if lit.
-    - boiler: gas firing, more flexible but still
-              with minimal load and also with
-              higher cost than wood firing
+- demand_heat: heat demand (high in winter, low in summer)
+- fireplace: wood firing, has a minimum heat and will burn for a minimum time if lit.
+- boiler: gas firing, more flexible but still with minimal load and also with higher cost than wood firing
 
+Code
+----
+Download source code: :download:`house_with_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/house_with_nonconvex_investment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/house_with_nonconvex_investment.py
+        :language: python
+        :lines: 37-
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 
@@ -30,8 +38,9 @@ __license__ = "MIT"
 
 import numpy as np
 import pandas as pd
-from oemof import solph
 from oemof.tools import economics
+
+from oemof import solph
 
 try:
     import matplotlib.pyplot as plt
@@ -62,7 +71,7 @@ def main():
         inputs={
             b_heat: solph.flows.Flow(
                 fix=[heat_demand(day) for day in range(0, periods)],
-                nominal_value=10,
+                nominal_capacity=10,
             )
         },
     )
@@ -82,7 +91,7 @@ def main():
                     minimum_uptime=5,
                     initial_status=1,
                 ),
-                investment=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc,
                     minimum=1.0,
                     maximum=10.0,
@@ -95,14 +104,14 @@ def main():
         label="boiler",
         outputs={
             b_heat: solph.flows.Flow(
-                nominal_value=10, min=0.3, variable_costs=0.2
+                nominal_capacity=10, min=0.3, variable_costs=0.2
             )
         },
     )
 
     excess_heat = solph.components.Sink(
         label="excess_heat",
-        inputs={b_heat: solph.flows.Flow(nominal_value=10)},
+        inputs={b_heat: solph.flows.Flow(nominal_capacity=10)},
     )
 
     es.add(demand_heat, fireplace, boiler, excess_heat)

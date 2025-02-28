@@ -8,18 +8,29 @@ This example illustrates the effect of activity_costs.
 
 There are the following components:
 
-    - demand_heat: heat demand (constant, for the sake of simplicity)
-    - fireplace: wood firing, burns "for free" if somebody is around
-    - boiler: gas firing, consumes (paid) gas
+- demand_heat: heat demand (constant, for the sake of simplicity)
+- fireplace: wood firing, burns "for free" if somebody is around
+- boiler: gas firing, consumes (paid) gas
 
 Notice that activity_costs is an attribute to NonConvex.
 This is because it relies on the activity status of a component
 which is only available for nonconvex flows.
 
+Code
+----
+Download source code: :download:`activity_costs.py </../examples/activity_costs/activity_costs.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/activity_costs/activity_costs.py
+        :language: python
+        :lines: 43-118
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -41,7 +52,7 @@ def main():
     # Calculate parameters and initialize the energy system and
     ##########################################################################
     periods = 24
-    time = pd.date_range("1/1/2018", periods=periods, freq="H")
+    time = pd.date_range("1/1/2018", periods=periods, freq="h")
 
     demand_heat = np.full(periods, 5)
     demand_heat[:4] = 0
@@ -58,14 +69,14 @@ def main():
 
     sink_heat = solph.components.Sink(
         label="demand",
-        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_value=1)},
+        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_capacity=1)},
     )
 
     fireplace = solph.components.Source(
         label="fireplace",
         outputs={
             b_heat: solph.Flow(
-                nominal_value=3,
+                nominal_capacity=3,
                 variable_costs=0,
                 nonconvex=solph.NonConvex(activity_costs=activity_costs),
             )
@@ -74,7 +85,7 @@ def main():
 
     boiler = solph.components.Source(
         label="boiler",
-        outputs={b_heat: solph.Flow(nominal_value=10, variable_costs=1)},
+        outputs={b_heat: solph.Flow(nominal_capacity=10, variable_costs=1)},
     )
 
     es.add(sink_heat, fireplace, boiler)

@@ -8,10 +8,21 @@ more flexible the power plant can be run the less the storage will be used.
 Change the GRADIENT variable in the example to see the effect on the usage of
 the storage.
 
+Code
+----
+Download source code: :download:`gradient_example.py </../examples/gradient_example/gradient_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/gradient_example/gradient_example.py
+        :language: python
+        :lines: 35-211
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -39,9 +50,11 @@ def main():
     # used.
     gradient = 0.01
 
-    date_time_index = pd.date_range("1/1/2012", periods=48, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=48, freq="h")
     print(date_time_index)
-    energysystem = EnergySystem(timeindex=date_time_index, timemode="explicit")
+    energysystem = EnergySystem(
+        timeindex=date_time_index, infer_last_interval=True
+    )
 
     demand = [
         209643,
@@ -118,18 +131,18 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
+            inputs={bel: flows.Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple Converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bgas: flows.Flow()},
             outputs={
                 bel: flows.Flow(
-                    nominal_value=10e5,
+                    nominal_capacity=10e5,
                     negative_gradient_limit=gradient,
                     positive_gradient_limit=gradient,
                 )
@@ -140,7 +153,7 @@ def main():
 
     # create storage object representing a battery
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=999999999,
+        nominal_capacity=999999999,
         label="storage",
         inputs={bel: flows.Flow()},
         outputs={bel: flows.Flow()},

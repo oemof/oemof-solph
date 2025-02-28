@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 import os
 
 import pandas as pd
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -27,11 +28,11 @@ def test_gen_chp():
     data = pd.read_csv(full_filename)
 
     # select periods
-    periods = len(data) - 1
+    periods = len(data)
 
     # create an energy system
-    idx = pd.date_range("1/1/2017", periods=periods, freq="H")
-    es = solph.EnergySystem(timeindex=idx)
+    idx = pd.date_range("1/1/2017", periods=periods, freq="h")
+    es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
 
     # resources
     bgas = solph.buses.Bus(label="bgas")
@@ -58,7 +59,9 @@ def test_gen_chp():
         solph.components.Sink(
             label="demand_th",
             inputs={
-                bth: solph.flows.Flow(fix=data["demand_th"], nominal_value=200)
+                bth: solph.flows.Flow(
+                    fix=data["demand_th"], nominal_capacity=200
+                )
             },
         )
     )
@@ -124,4 +127,4 @@ def test_gen_chp():
     }
 
     for key in test_dict.keys():
-        assert int(round(data[key])) == int(round(test_dict[key]))
+        assert data[key] == pytest.approx(test_dict[key])

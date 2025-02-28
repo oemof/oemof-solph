@@ -7,11 +7,23 @@ General description
 A basic example to show how to get the dual variables from the system. Try
 to understand the plot.
 
+Code
+----
+Download source code: :download:`dual_variable_example.py </../examples/dual_variable_example/dual_variable_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/dual_variable_example/dual_variable_example.py
+        :language: python
+        :lines: 34-297
+
 
 Installation requirements
 -------------------------
 
 This example requires the version v0.5.x of oemof.solph:
+
+.. code:: bash
 
     pip install 'oemof.solph[examples]>=0.5,<0.6'
 
@@ -19,27 +31,26 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
+###########################################################################
+# imports
+###########################################################################
+
+import pandas as pd
+from matplotlib import pyplot as plt
+from oemof.tools import logger
+
+from oemof.solph import EnergySystem
+from oemof.solph import Model
+from oemof.solph import buses
+from oemof.solph import components as cmp
+from oemof.solph import flows
+from oemof.solph import processing
 
 
 def main():
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
-
-    ###########################################################################
-    # imports
-    ###########################################################################
-
-    import pandas as pd
-    from matplotlib import pyplot as plt
-    from oemof.tools import logger
-
-    from oemof.solph import EnergySystem
-    from oemof.solph import Model
-    from oemof.solph import buses
-    from oemof.solph import components as cmp
-    from oemof.solph import flows
-    from oemof.solph import processing
 
     solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 48
@@ -49,7 +60,7 @@ def main():
     logger.define_logging()
 
     date_time_index = pd.date_range(
-        "1/1/2012", periods=number_of_time_steps, freq="H"
+        "1/1/2012", periods=number_of_time_steps, freq="h"
     )
 
     energysystem = EnergySystem(
@@ -187,7 +198,7 @@ def main():
     energysystem.add(
         cmp.Source(
             label="pv",
-            outputs={bus_elec: flows.Flow(fix=pv, nominal_value=700)},
+            outputs={bus_elec: flows.Flow(fix=pv, nominal_capacity=700)},
         )
     )
 
@@ -195,16 +206,16 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bus_elec: flows.Flow(fix=demand, nominal_value=1)},
+            inputs={bus_elec: flows.Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        cmp.Transformer(
+        cmp.Converter(
             label="pp_gas",
             inputs={bus_gas: flows.Flow()},
-            outputs={bus_elec: flows.Flow(nominal_value=400)},
+            outputs={bus_elec: flows.Flow(nominal_capacity=400)},
             conversion_factors={bus_elec: 0.5},
         )
     )
@@ -212,11 +223,13 @@ def main():
     # create storage object representing a battery
     cap = 400
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=cap,
+        nominal_capacity=cap,
         label="storage",
-        inputs={bus_elec: flows.Flow(nominal_value=cap / 6)},
+        inputs={bus_elec: flows.Flow(nominal_capacity=cap / 6)},
         outputs={
-            bus_elec: flows.Flow(nominal_value=cap / 6, variable_costs=0.001)
+            bus_elec: flows.Flow(
+                nominal_capacity=cap / 6, variable_costs=0.001
+            )
         },
         loss_rate=0.00,
         initial_storage_level=0,

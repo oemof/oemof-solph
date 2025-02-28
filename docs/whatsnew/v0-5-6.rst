@@ -1,0 +1,17 @@
+v0.5.6 (November 26th, 2024)
+----------------------------
+
+Bug fixes
+#########
+
+* Update required Pyomo version to allow working with numpy >= 2.0.0.
+
+Known issues
+############
+
+* Indexing of Storage with capacity investment is off by one.
+
+Contributors
+############
+
+* Patrik Schönfeldt

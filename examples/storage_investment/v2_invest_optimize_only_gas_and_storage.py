@@ -21,7 +21,7 @@ an energy system with storage. The following energy system is modeled:
      demand(Sink)        |<------------------|
                          |          |        |
                          |          |        |
-     pp_gas(Transformer) |<---------|        |
+     pp_gas(Converter)   |<---------|        |
                          |------------------>|
                          |          |        |
      storage(Storage)    |<------------------|
@@ -31,22 +31,40 @@ an energy system with storage. The following energy system is modeled:
 The example exists in four variations. The following parameters describe
 the main setting for the optimization variation 2:
 
-    - optimize gas_resource and storage
-    - set installed capacities for wind and pv
-    - set investment cost for storage
-    - set gas price for kWh
+- optimize gas_resource and storage
+- set installed capacities for wind and pv
+- set investment cost for storage
+- set gas price for kWh
 
-    Results show a higher renewable energy share than in variation 1
-    (78% compared to 51%) due to preinstalled renewable capacities.
-    Storage is not installed as the gas resource is cheaper.
+Results show a higher renewable energy share than in variation 1
+(78% compared to 51%) due to preinstalled renewable capacities.
+Storage is not installed as the gas resource is cheaper.
+
+.. tip::
 
     Have a look at different parameter settings. There are four variations
     of this example in the same folder.
+
+Code
+----
+Download source code: :download:`v2_invest_optimize_only_gas_and_storage.py </../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/storage_investment/v2_invest_optimize_only_gas_and_storage.py
+        :language: python
+        :lines: 83-
+
+Data
+----
+Download data: :download:`storage_investment.csv </../examples/storage_investment/storage_investment.csv>`
 
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -68,8 +86,6 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-
-# Default logger of oemof
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -134,26 +150,26 @@ def main():
     # create fixed source object representing wind power plants
     wind = solph.components.Source(
         label="wind",
-        outputs={bel: solph.Flow(fix=data["wind"], nominal_value=1000000)},
+        outputs={bel: solph.Flow(fix=data["wind"], nominal_capacity=1000000)},
     )
 
     # create fixed source object representing pv power plants
     pv = solph.components.Source(
         label="pv",
-        outputs={bel: solph.Flow(fix=data["pv"], nominal_value=600000)},
+        outputs={bel: solph.Flow(fix=data["pv"], nominal_capacity=600000)},
     )
 
     # create simple sink object representing the electrical demand
     demand = solph.components.Sink(
         label="demand",
-        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_value=1)},
+        inputs={bel: solph.Flow(fix=data["demand_el"], nominal_capacity=1)},
     )
 
-    # create simple transformer object representing a gas power plant
-    pp_gas = solph.components.Transformer(
+    # create simple Converter object representing a gas power plant
+    pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 
@@ -168,7 +184,7 @@ def main():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=solph.Investment(ep_costs=epc_storage),
+        nominal_capacity=solph.Investment(ep_costs=epc_storage),
     )
 
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)

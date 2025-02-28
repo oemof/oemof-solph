@@ -51,6 +51,8 @@ authors:
     given-names: Hendrik
     alias: "@henhuy"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@steffenGit"
   -
     family-names: Schachler
@@ -81,10 +83,12 @@ authors:
     given-names: David
     alias: "@DFuh"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@gplssm"
   -
-    family-names: Francesco
-    given-names: Witte
+    family-names: Witte
+    given-names: Francesco
     alias: "@fwitte"
   -
     family-names: Kassing
@@ -103,45 +107,71 @@ authors:
     given-names: Bryan
     alias: "@bmlancien"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@nesnoj"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@lmilletb"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@mloenneberga"
   -
     family-names: "Schürmann"
     given-names: Lennart
     alias: "@lensum"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@RD-OTH"
   -
     family-names: Delfs
     given-names: Jens-Olaf
     alias: "@drjod"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@stefansc1"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@escalacjo"
   -
     family-names: Smalla
     given-names: Tjark
     alias: "@ChillkroeteTTS"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@ajimenezUCLA"
   -
     family-names: Wolf
     given-names: Jakob
     alias: "@jakob-wo"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@elisapap"
   -
     family-names: Gaudchau
     given-names: Elisa
     alias: "@elisagaudchau"
   -
+    family-names: Developer
+    given-names: Anonymous
     alias: "@chrisflei"
   -
     family-names: Rohrer
     given-names: Tobi
     alias: "@tobirohrer"
+  -
+    family-names: Gering
+    given-names: Marie-Claire
+    alias: "@MaGering"
+  -
+    family-names: Schischke
+    given-names: Eva
+    alias: "@esske"
 ...

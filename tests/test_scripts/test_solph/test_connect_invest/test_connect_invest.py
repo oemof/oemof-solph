@@ -14,6 +14,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -27,9 +28,9 @@ from oemof.solph.flows import Flow
 
 
 def test_connect_invest():
-    date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=24 * 7, freq="h")
 
-    es = EnergySystem(timeindex=date_time_index)
+    es = EnergySystem(timeindex=date_time_index, infer_last_interval=True)
 
     # Read data file
     full_filename = os.path.join(
@@ -56,7 +57,7 @@ def test_connect_invest():
     es.add(
         components.Source(
             label="wind",
-            outputs={bel1: Flow(fix=data["wind"], nominal_value=1000000)},
+            outputs={bel1: Flow(fix=data["wind"], nominal_capacity=1000000)},
         )
     )
 
@@ -64,7 +65,7 @@ def test_connect_invest():
     es.add(
         components.Sink(
             label="demand",
-            inputs={bel1: Flow(fix=data["demand_el"], nominal_value=1)},
+            inputs={bel1: Flow(fix=data["demand_el"], nominal_capacity=1)},
         )
     )
 
@@ -78,21 +79,21 @@ def test_connect_invest():
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
-        investment=Investment(ep_costs=0.2),
+        nominal_capacity=Investment(ep_costs=0.2),
     )
     es.add(storage)
 
-    line12 = components.Transformer(
+    line12 = components.Converter(
         label="line12",
         inputs={bel1: Flow()},
-        outputs={bel2: Flow(investment=Investment(ep_costs=20))},
+        outputs={bel2: Flow(nominal_capacity=Investment(ep_costs=20))},
     )
     es.add(line12)
 
-    line21 = components.Transformer(
+    line21 = components.Converter(
         label="line21",
         inputs={bel2: Flow()},
-        outputs={bel1: Flow(investment=Investment(ep_costs=20))},
+        outputs={bel1: Flow(nominal_capacity=Investment(ep_costs=20))},
     )
     es.add(line21)
 
@@ -100,34 +101,44 @@ def test_connect_invest():
 
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.InvestmentFlowBlock.invest[line21, bel1],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.InvestmentFlowBlock.invest[line21, bel1, 0],
         2,
     )
     constraints.equate_variables(
         om,
-        om.InvestmentFlowBlock.invest[line12, bel2],
-        om.GenericInvestmentStorageBlock.invest[storage],
+        om.InvestmentFlowBlock.invest[line12, bel2, 0],
+        om.GenericInvestmentStorageBlock.invest[storage, 0],
     )
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc")
+    om.solve(solver="cbc", tee=True)
 
     # check if the new result object is working for custom components
     results = processing.results(om)
 
     my_results = dict()
-    my_results["line12"] = float(views.node(results, "line12")["scalars"])
-    my_results["line21"] = float(views.node(results, "line21")["scalars"])
+    my_results["line12"] = (
+        views.node(results, "line12")["scalars"]
+        .loc[[(("line12", "electricity2"), "invest")]]
+        .iloc[0]
+    )
+
+    my_results["line21"] = (
+        views.node(results, "line21")["scalars"]
+        .loc[[(("line21", "electricity1"), "invest")]]
+        .iloc[0]
+    )
+
     stor_res = views.node(results, "storage")["scalars"]
     my_results["storage_in"] = stor_res[
         [(("electricity1", "storage"), "invest")]
-    ]
-    my_results["storage"] = stor_res[[(("storage", "None"), "invest")]]
+    ].iloc[0]
+    my_results["storage"] = stor_res[[(("storage", "None"), "invest")]].iloc[0]
     my_results["storage_out"] = stor_res[
         [(("storage", "electricity1"), "invest")]
-    ]
+    ].iloc[0]
 
     connect_invest_dict = {
         "line12": 814705,
@@ -138,6 +149,6 @@ def test_connect_invest():
     }
 
     for key in connect_invest_dict.keys():
-        assert int(round(my_results[key])) == int(
-            round(connect_invest_dict[key])
+        assert my_results[key] == pytest.approx(
+            connect_invest_dict[key], abs=0.5
         )

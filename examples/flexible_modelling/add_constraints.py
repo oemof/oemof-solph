@@ -8,13 +8,27 @@ OperationalModel.
 The constraint we add forces a flow to be greater or equal a certain share
 of all inflows of its target bus. Moreover we will set an emission constraint.
 
+Code
+----
+Download source code: :download:`add_constraints.py </../examples/flexible_modelling/add_constraints.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/flexible_modelling/add_constraints.py
+        :language: python
+        :lines: 41-158
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
 
+.. code:: bash
+
     pip install oemof.solph[examples]
 
 To draw the graph pygraphviz is required, installed by:
+
+.. code:: bash
 
     pip install pygraphviz
 
@@ -24,10 +38,6 @@ Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
-
-__copyright__ = "oemof developer group"
-__license__ = "GPLv3"
-
 import logging
 
 import pandas as pd
@@ -46,7 +56,7 @@ def run_add_constraints_example(solver="cbc", nologg=False):
     # ##### creating an oemof solph optimization model, nothing special here ##
     # create an energy system object for the oemof solph nodes
     es = EnergySystem(
-        timeindex=pd.date_range("1/1/2017", periods=5, freq="H"),
+        timeindex=pd.date_range("1/1/2017", periods=5, freq="h"),
         infer_last_interval=False,
     )
     # add some nodes
@@ -59,18 +69,18 @@ def run_add_constraints_example(solver="cbc", nologg=False):
 
     sink = cmp.Sink(
         label="Sink",
-        inputs={b_el: Flow(nominal_value=40, fix=[0.5, 0.4, 0.3, 1])},
+        inputs={b_el: Flow(nominal_capacity=40, fix=[0.5, 0.4, 0.3, 1])},
     )
-    pp_oil = cmp.Transformer(
+    pp_oil = cmp.Converter(
         label="pp_oil",
         inputs={boil: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=25)},
+        outputs={b_el: Flow(nominal_capacity=50, variable_costs=25)},
         conversion_factors={b_el: 0.39},
     )
-    pp_lig = cmp.Transformer(
+    pp_lig = cmp.Converter(
         label="pp_lig",
         inputs={blig: Flow()},
-        outputs={b_el: Flow(nominal_value=50, variable_costs=10)},
+        outputs={b_el: Flow(nominal_capacity=50, variable_costs=10)},
         conversion_factors={b_el: 0.41},
     )
 

@@ -9,23 +9,27 @@ components of the energy system.
 
 There are the following components:
 
-    - demand_heat: heat demand (high in winter, low in summer)
-    - fireplace: wood firing, has a minimum heat and
-                 will burn for a minimum time if lit
-    - boiler: gas firing, more flexible but with
-              higher (flexible) cost than wood firing
-    - thermal_collector: solar thermal collector,
-                         size is to be optimized in this example
-                         (high gain in summer, low in winter)
-    - excess_heat: allow for some heat overproduction
-                   (solution would be trivial without,
-                   as the collector size would be given
-                   by the demand in summer)
+- demand_heat: heat demand (high in winter, low in summer)
+- fireplace: wood firing, has a minimum heat and will burn for a minimum time if lit
+- boiler: gas firing, more flexible but with higher (flexible) cost than wood firing
+- thermal_collector: solar thermal collector, size is to be optimized in this example (high gain in summer, low in winter)
+- excess_heat: allow for some heat overproduction (solution would be trivial without, as the collector size would be given by the demand in summer)
 
+Code
+----
+Download source code: :download:`house_without_nonconvex_investment.py </../examples/invest_nonconvex_flow_examples/house_without_nonconvex_investment.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/invest_nonconvex_flow_examples/house_without_nonconvex_investment.py
+        :language: python
+        :lines: 43-
 
 Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof.solph. Install by:
+
+.. code:: bash
 
     pip install 'oemof.solph>=0.5,<0.6'
 
@@ -36,8 +40,9 @@ __license__ = "MIT"
 
 import numpy as np
 import pandas as pd
-from oemof import solph
 from oemof.tools import economics
+
+from oemof import solph
 
 try:
     import matplotlib.pyplot as plt
@@ -75,7 +80,7 @@ def main():
         inputs={
             b_heat: solph.flows.Flow(
                 fix=[heat_demand(day) for day in range(0, periods)],
-                nominal_value=10,
+                nominal_capacity=10,
             )
         },
     )
@@ -84,7 +89,7 @@ def main():
         label="fireplace",
         outputs={
             b_heat: solph.flows.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.4,
                 max=1.0,
                 variable_costs=0.1,
@@ -99,7 +104,7 @@ def main():
     boiler = solph.components.Source(
         label="boiler",
         outputs={
-            b_heat: solph.flows.Flow(nominal_value=10, variable_costs=0.2)
+            b_heat: solph.flows.Flow(nominal_capacity=10, variable_costs=0.2)
         },
     )
 
@@ -112,7 +117,7 @@ def main():
         outputs={
             b_heat: solph.flows.Flow(
                 fix=[solar_thermal(day) for day in range(0, periods)],
-                investment=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc, minimum=1.0, maximum=5.0
                 ),
             )
@@ -121,7 +126,7 @@ def main():
 
     excess_heat = solph.components.Sink(
         label="excess_heat",
-        inputs={b_heat: solph.flows.Flow(nominal_value=10)},
+        inputs={b_heat: solph.flows.Flow(nominal_capacity=10)},
     )
 
     es.add(demand_heat, fireplace, boiler, thermal_collector, excess_heat)

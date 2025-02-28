@@ -43,7 +43,7 @@ To set up `oemof-solph` for local development:
    (look for the "Fork" button).
 2. Clone your fork locally::
 
-    git clone git@github.com:oemof/oemof-solph.git
+    git clone git@github.com:$(your_github_account)/oemof-solph.git
 
 3. Create a branch for local development::
 
@@ -55,11 +55,11 @@ To set up `oemof-solph` for local development:
 
     tox
 
-5. Commit your changes and push your branch to GitHub::
+5. Commit your changes and push your branch to GitHub. Please do not forget to write a descriptive commit message that eventually explains design decisions::
 
-    git add .
-    git commit -m "Your detailed description of your changes."
-    git push origin name-of-your-bugfix-or-feature
+    git add $(changed_files)
+    git commin
+    git push origin name-of-your-bugfix-or-feature 
 
 6. Submit a pull request through the GitHub website.
 
@@ -75,8 +75,8 @@ For merging, you should:
 3. Add a note about the changes to ``docs/whatsnew/next_version.rst``.
 4. Add your name to ``AUTHORS.rst`` and ``CITATION.cff``.
 
-.. [1] If you don't have all the necessary python versions available locally you can rely on Travis - it will
-       `run the tests <https://travis-ci.org/oemof/oemof-solph/pull_requests>`_ for each change you add in the pull request.
+.. [1] If you don't have all the necessary python versions available locally,
+       you can rely on the CI pipeline at GitHub.
 
        It will be slower though ...
 
@@ -119,9 +119,9 @@ Available standard environments are::
     clean
     check
     docs
-    py37
-    py38
     py39
+    py310
+    py311
 
 To run a subset of tests::
 

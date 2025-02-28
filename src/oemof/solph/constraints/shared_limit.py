@@ -33,7 +33,7 @@ def shared_limit(
     Parameters
     ----------
     model : oemof.solph.Model
-        Model to which the constraint is added
+        Model to which the constraint is added.
     limit_name : string
         Name of the constraint to create
     quantity : pyomo.core.base.var.IndexedVar
@@ -47,7 +47,7 @@ def shared_limit(
     lower_limit : numeric
         the lower limit (:math:`l_\mathrm{low}`)
     upper_limit : numeric
-        the lower limit (:math:`l_\mathrm{up}`)
+        the upper limit (:math:`l_\mathrm{up}`)
 
     Examples
     --------
@@ -60,19 +60,22 @@ def shared_limit(
 
     >>> import pandas as pd
     >>> from oemof import solph
-    >>> date_time_index = pd.date_range('1/1/2012', periods=5, freq='H')
-    >>> energysystem = solph.EnergySystem(timeindex=date_time_index)
+    >>> date_time_index = pd.date_range('1/1/2012', periods=6, freq='h')
+    >>> energysystem = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
     >>> b1 = solph.buses.Bus(label="Party1Bus")
     >>> b2 = solph.buses.Bus(label="Party2Bus")
     >>> storage1 = solph.components.GenericStorage(
     ...     label="Party1Storage",
-    ...     nominal_storage_capacity=5,
+    ...     nominal_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
     ...     outputs={b1: solph.flows.Flow()}
     ... )
     >>> storage2 = solph.components.GenericStorage(
     ...     label="Party2Storage",
-    ...     nominal_storage_capacity=5,
+    ...     nominal_capacity=5,
     ...     inputs={b1: solph.flows.Flow()},
     ...     outputs={b1: solph.flows.Flow()}
     ... )

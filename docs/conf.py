@@ -6,6 +6,9 @@ import sys
 import matplotlib
 from sphinx.ext.autodoc import between
 
+from oemof.solph import __version__
+
+
 matplotlib.use("agg")
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
@@ -27,14 +30,16 @@ extensions = [
     "sphinx.ext.napoleon",
     "sphinx.ext.todo",
     "sphinx.ext.viewcode",
+    "sphinx_copybutton",
+    "sphinx_design",
 ]
 source_suffix = ".rst"
 master_doc = "index"
 project = "oemof.solph"
-year = "2014-2022"
+year = "2014-2023"
 author = "oemof-developer-group"
 copyright = "{0}, {1}".format(year, author)
-version = release = "0.5.1.dev0"
+version = release = __version__
 
 pygments_style = "trac"
 templates_path = ["."]
@@ -68,11 +73,8 @@ linkcheck_ignore = [
     r"https://requires.io/.*",
     r"https://matrix.to/*",
     r"https://forum.openmod-initiative.org/*",
-] + (
-    [
-        r"https://github.com/oemof/oemof-solph/issues/*",
-        r"https://github.com/oemof/oemof-solph/pull/*",
-    ]
-    if "TRAVIS" not in os.environ
-    else []
-)
+    r"https://github.com/oemof/oemof-solph/issues/*",
+    r"https://github.com/oemof/oemof-solph/pull/*",
+    # Due to traffic limitation, the folowwing creates a 403 in CI pipeline:
+    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",
+]

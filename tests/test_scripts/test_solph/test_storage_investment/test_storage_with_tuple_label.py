@@ -18,7 +18,7 @@ The example models the following energy system:
  demand(Sink)        |<------------------|       |
                      |          |        |       |
                      |          |        |       |
- pp_gas(Transformer) |<---------|        |       |
+ pp_gas(Converter) |<---------|        |       |
                      |------------------>|       |
                      |          |        |       |
  storage(Storage)    |<------------------|       |
@@ -39,6 +39,7 @@ import os
 from collections import namedtuple
 
 import pandas as pd
+import pytest
 
 from oemof import solph as solph
 from oemof.solph import processing
@@ -62,9 +63,12 @@ def test_tuples_as_labels_example(
     filename="storage_investment.csv", solver="cbc"
 ):
     logging.info("Initialize the energy system")
-    date_time_index = pd.date_range("1/1/2012", periods=40, freq="H")
+    date_time_index = pd.date_range("1/1/2012", periods=40, freq="h")
 
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index,
+        infer_last_interval=True,
+    )
 
     full_filename = os.path.join(os.path.dirname(__file__), filename)
     data = pd.read_csv(full_filename, sep=",")
@@ -86,7 +90,9 @@ def test_tuples_as_labels_example(
         solph.components.Sink(
             label=Label("sink", "electricity", "demand"),
             inputs={
-                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -97,7 +103,8 @@ def test_tuples_as_labels_example(
             label=Label("source", "natural_gas", "commodity"),
             outputs={
                 bgas: solph.flows.Flow(
-                    nominal_value=194397000 * 400 / 8760, full_load_time_max=1
+                    nominal_capacity=194397000 * 400 / 8760,
+                    full_load_time_max=1,
                 )
             },
         )
@@ -107,7 +114,9 @@ def test_tuples_as_labels_example(
         solph.components.Source(
             label=Label("renewable", "electricity", "wind"),
             outputs={
-                bel: solph.flows.Flow(fix=data["wind"], nominal_value=1000000)
+                bel: solph.flows.Flow(
+                    fix=data["wind"], nominal_capacity=1000000
+                )
             },
         )
     )
@@ -118,19 +127,21 @@ def test_tuples_as_labels_example(
             outputs={
                 bel: solph.flows.Flow(
                     fix=data["pv"],
-                    nominal_value=582000,
+                    nominal_capacity=582000,
                 )
             },
         )
     )
 
-    # Transformer
+    # Converter
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label=Label("pp", "electricity", "natural_gas"),
             inputs={bgas: solph.flows.Flow()},
             outputs={
-                bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+                bel: solph.flows.Flow(
+                    nominal_capacity=10e10, variable_costs=50
+                )
             },
             conversion_factors={bel: 0.58},
         )
@@ -140,7 +151,7 @@ def test_tuples_as_labels_example(
     energysystem.add(
         solph.components.GenericStorage(
             label=Label("storage", "electricity", "battery"),
-            nominal_storage_capacity=204685,
+            nominal_capacity=204685,
             inputs={bel: solph.flows.Flow(variable_costs=10e10)},
             outputs={bel: solph.flows.Flow(variable_costs=10e10)},
             loss_rate=0.00,
@@ -171,9 +182,11 @@ def test_tuples_as_labels_example(
     my_results = electricity_bus["sequences"].sum(axis=0).to_dict()
     storage = es.groups["storage_electricity_battery"]
     storage_node = views.node(results, storage)
-    my_results["max_load"] = storage_node["sequences"].max()[
-        [((storage, None), "storage_content")]
-    ]
+    my_results["max_load"] = (
+        storage_node["sequences"]
+        .max()[[((storage, None), "storage_content")]]
+        .iloc[0]
+    )
     commodity_bus = views.node(results, "bus_natural_gas_None")
 
     gas_usage = commodity_bus["sequences"][
@@ -201,7 +214,7 @@ def test_tuples_as_labels_example(
     }
 
     for key in stor_invest_dict.keys():
-        assert int(round(my_results[key])) == int(round(stor_invest_dict[key]))
+        assert my_results[key] == pytest.approx(stor_invest_dict[key])
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
@@ -211,11 +224,11 @@ def test_tuples_as_labels_example(
     # Problem results
     assert int(meta["problem"]["Lower bound"]) == 37819254
     assert int(meta["problem"]["Upper bound"]) == 37819254
-    assert meta["problem"]["Number of variables"] == 281
-    assert meta["problem"]["Number of constraints"] == 163
+    assert meta["problem"]["Number of variables"] == 320
+    assert meta["problem"]["Number of constraints"] == 202
     assert meta["problem"]["Number of nonzeros"] == 116
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert round(meta["objective"]) == 37819254
+    assert meta["objective"] == pytest.approx(37819254, abs=0.5)

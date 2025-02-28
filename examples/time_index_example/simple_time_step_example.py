@@ -6,21 +6,32 @@ General description
 
 A minimal example to show how time steps work.
 
-*   Flows are defined in time intervals, storage content at points in time.
-    Thus, there is one more value for storage contents then for the
-    flow values.
-*   Time intervals are named by the time at the beginning of that interval.
-    The quantity changes to the given value at the given point in time.
-*   The initial_storage_level of a GenericStorage is given
-    at the first time step. If the storage is balanced,
-    this is the same storage level as in the last time step.
-*   The nominal_value in Flows has to be interpreted in means of power:
-    We have nominal_value=0.5, but the maximum change of the storage content
-    of an ideal storage is 0.125.
+* Flows are defined in time intervals, storage content at points in time. Thus,
+  there is one more value for storage contents then for the flow values.
+* Time intervals are named by the time at the beginning of that interval. The
+  quantity changes to the given value at the given point in time.
+* The initial_storage_level of a GenericStorage is given at the first time step.
+  If the storage is balanced, this is the same storage level as in the last time
+  step.
+* The nominal_capacity in Flows has to be interpreted in means of power: We have
+  nominal_capacity=0.5, but the maximum change of the storage content of an ideal
+  storage is 0.125.
+
+Code
+----
+Download source code: :download:`non_equidistant_time_step_example.py </../examples/time_index_example/simple_time_step_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/time_index_example/simple_time_step_example.py
+        :language: python
+        :lines: 43-
 
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -49,7 +60,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=2,
+                nominal_capacity=2,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
             )
@@ -59,14 +70,14 @@ def main():
         label="storage",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_storage_capacity=4,
+        nominal_capacity=4,
         initial_storage_level=0.5,
     )
     sink = solph.components.Sink(
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_value=2,
+                nominal_capacity=2,
                 variable_costs=0.1,
                 fix=[1, 1, 0.5, 0.5, 0, 0, 0, 0],
             )

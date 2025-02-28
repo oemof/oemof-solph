@@ -5,10 +5,22 @@ General description
 -------------------
 Example that illustrates how to model min and max runtimes.
 
+Code
+----
+Download source code: :download:`min_max_runtimes.py </../examples/min_max_runtimes/min_max_runtimes.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/min_max_runtimes/min_max_runtimes.py
+        :language: python
+        :lines: 33-
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -38,7 +50,7 @@ def main():
 
     demand_el = solph.components.Sink(
         label="demand_el",
-        inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
+        inputs={bel: solph.Flow(fix=demand_el, nominal_capacity=10)},
     )
 
     dummy_el = solph.components.Sink(
@@ -49,7 +61,7 @@ def main():
         label="plant_min_down_constraints",
         outputs={
             bel: solph.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.5,
                 max=1.0,
                 variable_costs=10,
@@ -64,7 +76,7 @@ def main():
         label="plant_min_up_constraints",
         outputs={
             bel: solph.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.5,
                 max=1.0,
                 variable_costs=10,

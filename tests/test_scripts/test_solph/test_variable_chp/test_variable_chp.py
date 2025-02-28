@@ -16,6 +16,7 @@ import logging
 import os
 
 import pandas as pd
+import pytest
 
 from oemof import solph
 from oemof.solph import views
@@ -25,8 +26,10 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
     logging.info("Initialize the energy system")
 
     # create time index for 192 hours in May.
-    date_time_index = pd.date_range("5/5/2012", periods=5, freq="H")
-    energysystem = solph.EnergySystem(timeindex=date_time_index)
+    date_time_index = pd.date_range("5/5/2012", periods=5, freq="h")
+    energysystem = solph.EnergySystem(
+        timeindex=date_time_index, infer_last_interval=True
+    )
 
     # Read data file with heat and electrical demand (192 hours)
     full_filename = os.path.join(os.path.dirname(__file__), filename)
@@ -84,7 +87,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         solph.components.Sink(
             label=("demand", "elec1"),
             inputs={
-                bel: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -92,7 +97,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         solph.components.Sink(
             label=("demand", "elec2"),
             inputs={
-                bel2: solph.flows.Flow(fix=data["demand_el"], nominal_value=1)
+                bel2: solph.flows.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
             },
         )
     )
@@ -103,7 +110,7 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
             label=("demand", "therm1"),
             inputs={
                 bth: solph.flows.Flow(
-                    fix=data["demand_th"], nominal_value=741000
+                    fix=data["demand_th"], nominal_capacity=741000
                 )
             },
         )
@@ -113,27 +120,27 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
             label=("demand", "therm2"),
             inputs={
                 bth2: solph.flows.Flow(
-                    fix=data["demand_th"], nominal_value=741000
+                    fix=data["demand_th"], nominal_capacity=741000
                 )
             },
         )
     )
 
-    # create a fixed transformer to distribute to the heat_2 and elec_2 buses
+    # create a fixed converter to distribute to the heat_2 and elec_2 buses
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label=("fixed_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel2: solph.flows.Flow(), bth2: solph.flows.Flow()},
             conversion_factors={bel2: 0.3, bth2: 0.5},
         )
     )
 
-    # create a fixed transformer to distribute to the heat and elec buses
+    # create a fixed converter to distribute to the heat and elec buses
     energysystem.add(
         solph.components.ExtractionTurbineCHP(
             label=("variable_chp", "gas"),
-            inputs={bgas: solph.flows.Flow(nominal_value=10e10)},
+            inputs={bgas: solph.flows.Flow(nominal_capacity=1e11)},
             outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
             conversion_factors={bel: 0.3, bth: 0.5},
             conversion_factor_full_condensation={bel: 0.5},
@@ -172,14 +179,14 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     for key in variable_chp_dict_max.keys():
         logging.debug("Test the maximum value of {0}".format(key))
-        assert int(round(maxresults[[key]])) == int(
-            round(variable_chp_dict_max[key])
+        assert maxresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_max[key]
         )
 
     for key in variable_chp_dict_sum.keys():
         logging.debug("Test the summed up value of {0}".format(key))
-        assert int(round(sumresults[[key]])) == int(
-            round(variable_chp_dict_sum[key])
+        assert sumresults[[key]].iloc[0] == pytest.approx(
+            variable_chp_dict_sum[key]
         )
 
     assert (
@@ -192,8 +199,9 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
         parameter[(energysystem.groups["('fixed_chp', 'gas')"], None)][
             "scalars"
         ]["conversion_factors_('electricity', 2)"]
-        == 0.3
-    )
+    ) == pytest.approx(0.3)
 
     # objective function
-    assert round(solph.processing.meta_results(om)["objective"]) == 326661590
+    assert solph.processing.meta_results(om)["objective"] == pytest.approx(
+        326661590, abs=0.5
+    )

@@ -1,0 +1,49 @@
+v0.5.2 (January 12th, 2024)
+---------------------------
+
+API changes
+###########
+
+* New bool attribute `use_remaining_value` of `oemof.solph.EnergySystem`
+* Use list for period definition in multi-period investment optimization.
+
+New features
+############
+
+* Allow for evaluating differences in the remaining vs. the original value
+  for multi-period investments.
+* Allow to define minimum up- and down-time per time step
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+* Fix handling of investment annuities and fixed costs for multi-period models:
+  Limit to costs that occur within the optimization horizon to prevent a
+  bias towards investments happening earlier in the optimization horizon.
+* Fix bugs in multi-period documentation.
+* Fix y intersect of OffsetConverter
+* Fix minimum uptime being relevant for initial downtime (and vice versa).
+* Fix duplicated discounting of fixed costs for multi-period investment
+
+Other changes
+#############
+
+* Improved compatibility with upcoming oemof.network
+
+Known issues
+############
+
+* Documentation, example and API of OffsetConverter are inconsistent
+  and might not work as expected.
+
+Contributors
+############
+
+* Patrik Schönfeldt
+* Johannes Kochems
+* Julian Endres
+* Hendrik Huyskens
+* Raul Ciria Aylagas

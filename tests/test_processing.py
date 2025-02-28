@@ -20,9 +20,9 @@ from oemof.solph import Model
 from oemof.solph import processing
 from oemof.solph import views
 from oemof.solph.buses import Bus
+from oemof.solph.components import Converter
 from oemof.solph.components import GenericStorage
 from oemof.solph.components import Sink
-from oemof.solph.components import Transformer
 from oemof.solph.flows import Flow
 
 
@@ -32,8 +32,11 @@ class TestParameterResult:
         cls.period = 24
         cls.es = EnergySystem(
             timeindex=pandas.date_range(
-                "2016-01-01", periods=cls.period, freq="H"
-            )
+                "2016-01-01",
+                periods=cls.period,
+                freq="h",
+            ),
+            infer_last_interval=True,
         )
 
         # BUSSES
@@ -43,12 +46,12 @@ class TestParameterResult:
         cls.es.add(b_el1, b_el2, b_diesel)
 
         # TEST DIESEL:
-        dg = Transformer(
+        dg = Converter(
             label="diesel",
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
                 b_el1: Flow(
-                    variable_costs=1, investment=Investment(ep_costs=0.5)
+                    variable_costs=1, nominal_capacity=Investment(ep_costs=0.5)
                 )
             },
             conversion_factors={b_el1: 2},
@@ -64,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            investment=Investment(ep_costs=0.4),
+            nominal_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23
@@ -72,7 +75,7 @@ class TestParameterResult:
             label="demand_el",
             inputs={
                 b_el2: Flow(
-                    nominal_value=1,
+                    nominal_capacity=1,
                     fix=cls.demand_values,
                 )
             },
@@ -96,7 +99,7 @@ class TestParameterResult:
                 {
                     "bidirectional": False,
                     "integer": False,
-                    "nominal_value": 1,
+                    "nominal_capacity": 1,
                     "max": 1,
                     "min": 0,
                     "variable_costs": 0,
@@ -116,10 +119,12 @@ class TestParameterResult:
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=False
         )
-        scalar_attributes = {
+        default_attributes = {
+            "age": None,
+            "lifetime": None,
             "integer": False,
             "investment": None,
-            "nominal_value": 1,
+            "nominal_capacity": 1,
             "nonconvex": None,
             "bidirectional": False,
             "full_load_time_max": None,
@@ -129,13 +134,14 @@ class TestParameterResult:
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
+            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),
         }
         assert_series_equal(
             param_results[(b_el2, demand)]["scalars"].sort_index(),
-            pandas.Series(scalar_attributes).sort_index(),
+            pandas.Series(default_attributes).sort_index(),
         )
         sequences_attributes = {
             "fix": self.demand_values,
@@ -158,18 +164,21 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
-                    "investment_ep_costs": 0.4,
+                    "investment_age": 0,
                     "investment_existing": 0,
+                    "investment_nonconvex": False,
+                    "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
+                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
@@ -194,18 +203,21 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
-                    "investment_ep_costs": 0.4,
+                    "investment_age": 0,
                     "investment_existing": 0,
+                    "investment_nonconvex": False,
+                    "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
+                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
@@ -290,23 +302,25 @@ class TestParameterResult:
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
-        assert round(float(storage_content.sum()), 6) == 1437.500003
+        assert (
+            storage_content.sum().iloc[0] == pytest.approx(1437.5, abs=0.1)
+        ).all()
 
     def test_output_by_type_view(self):
         results = processing.results(self.om)
-        transformer_output = views.node_output_by_type(
-            results, node_type=Transformer
+        converter_output = views.node_output_by_type(
+            results, node_type=Converter
         )
         compare = views.node(results, "diesel", multiindex=True)["sequences"][
             ("diesel", "b_el1", "flow")
         ]
-        assert int(transformer_output.sum()) == int(compare.sum())
+        assert converter_output.sum().iloc[0] == pytest.approx(compare.sum())
 
     def test_input_by_type_view(self):
         results = processing.results(self.om)
         sink_input = views.node_input_by_type(results, node_type=Sink)
         compare = views.node(results, "demand_el", multiindex=True)
-        assert int(sink_input.sum()) == int(
+        assert sink_input.sum().iloc[0] == pytest.approx(
             compare["sequences"][("b_el2", "demand_el", "flow")].sum()
         )
 
@@ -320,13 +334,17 @@ class TestParameterResult:
 
         assert (
             (
-                compare[("storage", "b_el2", "flow")]
-                - compare[("b_el1", "storage", "flow")]
+                (
+                    compare[("storage", "b_el2", "flow")]
+                    - compare[("b_el1", "storage", "flow")]
+                )
+                .to_frame()
+                .fillna(0)
+                == storage_flow.values
             )
-            .to_frame()
-            .fillna(0)
-            == storage_flow.values
-        ).all()[0]
+            .all()
+            .iloc[0]
+        )
 
     def test_output_by_type_view_empty(self):
         results = processing.results(self.om)

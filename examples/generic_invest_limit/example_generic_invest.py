@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
+General description
+-------------------
 Example that shows how to use "Generic Investment Limit".
 
 There are two supply chains. The energy systems looks like that:
@@ -21,20 +23,32 @@ There are two supply chains. The energy systems looks like that:
                                      |
 
 Everything is identical - the costs for the sources, the demand, the efficiency
-of the Transformer. And both Transformer have an investment at the output.
+of the Converter. And both Converter have an investment at the output.
 The source '\*_1' is in both cases very expensive, so that
-a investment is probably done in the transformer.
+a investment is probably done in the converter.
 Now, both investments share a third resource, which is called "space" in this
 example. (This could be anything, and you could use as many additional
 resources as you want.) And this resource is limited. In this case, every
-Transformer capacity unit, which might be installed, needs 2 space for
+converter capacity unit, which might be installed, needs 2 space for
 'trafo a', and 1 space per installed capacity for 'trafo b'.
 And the total space is limited to 24.
 See what happens, have fun ;)
 
+Code
+----
+Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
+        :language: python
+        :lines: 62-
+
 Installation requirements
 -------------------------
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -43,8 +57,6 @@ License
 Johannes Röder <johannes.roeder@uni-bremen.de>
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
-
-
 """
 
 import logging
@@ -93,7 +105,7 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand_a",
-            inputs={bus_a_1: solph.Flow(fix=data, nominal_value=1)},
+            inputs={bus_a_1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
@@ -118,19 +130,18 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand_b",
-            inputs={bus_b_1: solph.Flow(fix=data, nominal_value=1)},
+            inputs={bus_b_1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
-    # transformer a
+    # Converter a
     es.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="trafo_a",
             inputs={bus_a_0: solph.Flow()},
             outputs={
                 bus_a_1: solph.Flow(
-                    nominal_value=None,
-                    investment=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 2},
                     ),
@@ -140,15 +151,14 @@ def main():
         )
     )
 
-    # transformer b
+    # Converter b
     es.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="trafo_b",
             inputs={bus_b_0: solph.Flow()},
             outputs={
                 bus_b_1: solph.Flow(
-                    nominal_value=None,
-                    investment=solph.Investment(
+                    nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": 1},
                     ),

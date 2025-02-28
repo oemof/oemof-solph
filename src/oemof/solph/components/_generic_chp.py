@@ -12,13 +12,14 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: FabianTU
 SPDX-FileCopyrightText: Johannes Röder
+SPDX-FileCopyrightText: Johannes Kochems
 
 SPDX-License-Identifier: MIT
 
 """
 
 import numpy as np
-from oemof.network import network
+from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -29,7 +30,7 @@ from pyomo.environ import Var
 from oemof.solph._plumbing import sequence
 
 
-class GenericCHP(network.Transformer):
+class GenericCHP(Node):
     r"""
     Component `GenericCHP` to model combined heat and power plants.
 
@@ -55,29 +56,31 @@ class GenericCHP(network.Transformer):
 
     Note
     ----
-    An adaption for the flow parameter `H_L_FG_share_max` has been made to
-    set the flue gas losses at maximum heat extraction `H_L_FG_max` as share of
-    the fuel flow `H_F` e.g. for combined cycle extraction turbines.
-    The flow parameter `H_L_FG_share_min` can be used to set the flue gas
-    losses at minimum heat extraction `H_L_FG_min` as share of
-    the fuel flow `H_F` e.g. for motoric CHPs.
-    The boolean component parameter `back_pressure` can be set to model
-    back-pressure characteristics.
+    * An adaption for the flow parameter `H_L_FG_share_max` has been made to
+      set the flue gas losses at maximum heat extraction `H_L_FG_max` as share
+      of the fuel flow `H_F` e.g. for combined cycle extraction turbines.
+    * The flow parameter `H_L_FG_share_min` can be used to set the flue gas
+      losses at minimum heat extraction `H_L_FG_min` as share of
+      the fuel flow `H_F` e.g. for motoric CHPs.
+    * The boolean component parameter `back_pressure` can be set to model
+      back-pressure characteristics.
 
     Also have a look at the examples on how to use it.
 
     Parameters
     ----------
     fuel_input : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the fuel input.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the fuel input.
     electrical_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the electrical output. Related parameters like `P_max_woDH` are
-        passed as attributes of the `oemof.Flow` object.
+        Dictionary with key-value-pair of `oemof.solph.Bus` and
+        `oemof.solph.Flow` objects for the electrical output.
+        Related parameters like `P_max_woDH` are passed as
+        attributes of the `oemof.Flow` object.
     heat_output : dict
-        Dictionary with key-value-pair of `oemof.Bus` and `oemof.Flow` object
-        for the heat output. Related parameters like `Q_CW_min` are passed as
+        Dictionary with key-value-pair of `oemof.solph.Bus`
+        and `oemof.solph.Flow` objects for the heat output.
+        Related parameters like `Q_CW_min` are passed as
         attributes of the `oemof.Flow` object.
     beta : list of numerical values
         beta values in same dimension as all other parameters (length of
@@ -124,11 +127,11 @@ class GenericCHP(network.Transformer):
         beta,
         back_pressure,
         label=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
-        super().__init__(label, **custom_attributes)
+        if custom_properties is None:
+            custom_properties = {}
+        super().__init__(label, custom_properties=custom_properties)
 
         self.fuel_input = fuel_input
         self.electrical_output = electrical_output
@@ -296,6 +299,7 @@ class GenericCHPBlock(ScalarBlock):
     =============================== ======================= ==== =============================================
 
     """  # noqa: E501
+
     CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):

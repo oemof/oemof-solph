@@ -5,10 +5,22 @@ General description
 -------------------
 Example that shows how to add an emission constraint in a model.
 
+Code
+----
+Download source code: :download:`emission_constraint.py </../examples/emission_constraint/emission_constraint.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/emission_constraint/emission_constraint.py
+        :language: python
+        :lines: 32-129
+
 Installation requirements
 -------------------------
 
 This example requires oemof.solph (v0.5.x), install by:
+
+.. code:: bash
 
     pip install oemof.solph[examples]
 
@@ -27,7 +39,7 @@ from oemof.solph import constraints
 def main():
     # create energy system
     energysystem = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=3, freq="H")
+        timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
     )
 
     # create gas bus
@@ -45,7 +57,7 @@ def main():
             label="biomass",
             outputs={
                 bel: solph.Flow(
-                    nominal_value=100,
+                    nominal_capacity=100,
                     variable_costs=10,
                     fix=[0.1, 0.2, 0.3],
                     custom_attributes={"emission_factor": 0.01},
@@ -72,18 +84,20 @@ def main():
             label="demand",
             inputs={
                 bel: solph.Flow(
-                    nominal_value=200, variable_costs=10, fix=[0.1, 0.2, 0.3]
+                    nominal_capacity=200,
+                    variable_costs=10,
+                    fix=[0.1, 0.2, 0.3],
                 )
             },
         )
     )
 
-    # create simple transformer object representing a gas power plant
+    # create simple converter object representing a gas power plant
     energysystem.add(
-        solph.components.Transformer(
+        solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.Flow()},
-            outputs={bel: solph.Flow(nominal_value=200)},
+            outputs={bel: solph.Flow(nominal_capacity=200)},
             conversion_factors={bel: 0.58},
         )
     )
@@ -95,7 +109,7 @@ def main():
     constraints.emission_limit(model, limit=100)
 
     # print out the emission constraint
-    model.integral_limit_emission_factor_constraint.pprint()
+    model.integral_limit_emission_factor_upper_limit.pprint()
     model.integral_limit_emission_factor.pprint()
 
     # solve the model
