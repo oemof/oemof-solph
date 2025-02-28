@@ -29,12 +29,18 @@ def _check_oemof_installation(solvers):
 
     b_gas = solph.buses.Bus(label="natural_gas")
     b_el = solph.buses.Bus(label="electricity")
-    sink_el = solph.components.Sink(label="excess_bel", inputs={b_el: solph.flows.Flow()})
-    source_gas = solph.components.Source(label="rgas", outputs={b_gas: solph.flows.Flow()})
+    sink_el = solph.components.Sink(
+        label="excess_bel", inputs={b_el: solph.flows.Flow()}
+    )
+    source_gas = solph.components.Source(
+        label="rgas", outputs={b_gas: solph.flows.Flow()}
+    )
     demand_el = solph.components.Sink(
         label="demand",
         inputs={
-            b_el: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_capacity=1)
+            b_el: solph.flows.Flow(
+                fix=[10, 20, 30, 40, 50], nominal_capacity=1
+            )
         },
     )
     pp = solph.components.Converter(
