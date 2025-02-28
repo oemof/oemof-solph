@@ -19,6 +19,8 @@ modify and play around with.
 
 Step 1: Plugged EV as load
 -------------------------
+The script for this step you can find `/tutorial/introductory/ev_charging/ev_charging_1.py``
+
 Within the first step we want to simulate a plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load.
 First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data.
@@ -124,7 +126,7 @@ additional :py:attr:`solve_kwargs` parameter ``'tee'`` to ``True``, in order to
 get a more verbose solver logging output in the console.
 
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [solve_start]
     :end-before: [solve_end]
@@ -132,7 +134,7 @@ get a more verbose solver logging output in the console.
 
 Now plot the results using the helper function from helpers.py.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [plot_results_start]
     :end-before: [plot_results_end]
@@ -158,14 +160,34 @@ Now plot the results using the helper function from helpers.py.
 Step 2: Plugged EV as load
 -------------------------
 
+The script for this step you can find `/tutorial/introductory/ev_charging/ev_charging_2.py``
+
+Now, let's assume the car battery can be charged at home.
+To be able to load the battery a charger is necessary.  Unfortunately, there
+is only a power socket available, limiting the charging process to 16 A at
+230 V. The costs for charging are 30 ct/kWh.
+This, of course, can only happen while the car is present at home. 
+To connect the car while it is at home, we create avalibility data series. 
+1 means that the car is at home, chargable. When it is set to 0, car is not present (between morning departure and the arrival back home in the evening). 
+
+.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_2.py
+    :language: python
+    :start-after: [AC_30ct_charging_start]
+    :end-before: [AC_30ct_charging_end]
 
 
+Now we are looking at the results:
+The EV will be loaded just before the first leaving and right after the arriving of the second drive.
 
+.. figure:: /./_files/driving_domestic_power_socket.svg
+    :align: center
+    :alt: Driving pattern
+    :figclass: only-light
 
-
-
-
-
+.. figure:: /./_files/driving_domestic_power_socket_dark_mode.svg
+    :align: center
+    :alt: Driving pattern
+    :figclass: only-dark
 
 .. admonition:: Learning 
     :class: important

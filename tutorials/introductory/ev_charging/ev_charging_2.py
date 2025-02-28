@@ -1,20 +1,13 @@
 # %%[imports_start]
-"""
-First of all, we create some input data. We use Pandas to do so and will also
-import matplotlib to plot the data right away and import solph
-Further for plotting we use a helper function from helpers.py
-"""
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from helpers import plot_results
 
-import oemof.solph as solph
-
 # %%[imports_end]
-
-# %%[create_time_index_start]
+# %%[create_time_index_set_up_energysystem_start]
+import oemof.solph as solph
 
 time_index = pd.date_range(
     start="2025-01-01",
@@ -23,70 +16,44 @@ time_index = pd.date_range(
     inclusive="both",
 )
 
-# %%[create_time_index_end]
-
-
+ev_energy_system = solph.EnergySystem(
+    timeindex=time_index,
+    infer_last_interval=False,
+)
+# %%[create_time_index_set_up_energysystem_end]
 # %%[trip_data_start]
-
-# Define the trip demand series for the real trip scenario.
-# As the demand is a power time series, it has N-1 entries
-# when compared to the N entires of time axis for the energy.
 ev_demand = pd.Series(0, index=time_index[:-1])
 
-# Morning Driving: 07:00 to 08:00
 driving_start_morning = pd.Timestamp("2025-01-01 07:10")
 driving_end_morning = pd.Timestamp("2025-01-01 08:10")
 ev_demand.loc[driving_start_morning:driving_end_morning] = 10  # kW
 
-# Evening Driving: 17:00 to 18:00.
-# Note that time points work even if they are not in the index.
+
 driving_start_evening = pd.Timestamp("2025-01-01 16:13:37")
 driving_end_evening = pd.Timestamp("2025-01-01 17:45:11")
 ev_demand.loc[driving_start_evening:driving_end_evening] = 9  # kW
-
+# %%[trip_data_end]
+## %%[plot_trip_data_start]
 plt.figure()
+# plt.style.use("dark_background")
 plt.title("Driving pattern")
 plt.plot(ev_demand)
 plt.ylabel("Power (kW)")
 plt.gcf().autofmt_xdate()
-# %%[trip_data_end]
-
+## %%[plot_trip_data_end]
 # %%[energysystem_and_bus_start]
-"""
-Now, let's create an energy system model of the electric vehicle that
-follows the driving pattern. It uses the same time index defined above
-and consists of a Battery (partly charged in the beginning)
-and an electricity demand.
-"""
-
-
-energy_system = solph.EnergySystem(
-    timeindex=time_index,
-    infer_last_interval=False,
-)
-
 bus_car = solph.Bus(label="Car Electricity")
 
-energy_system.add(bus_car)
-
-
+ev_energy_system.add(bus_car)
 # %%[energysystem_and_bus_end]
-
 # %%[car_start]
-# As we have a demand time series which is actually in kW, we use a common
-# "hack" here: We set the nominal capacity to 1 (kW), so that
-# multiplication by the time series will just yield the correct result.
 demand_driving = solph.components.Sink(
     label="Driving Demand",
     inputs={bus_car: solph.Flow(nominal_capacity=1, fix=ev_demand)},
 )
 
-energy_system.add(demand_driving)
+ev_energy_system.add(demand_driving)
 
-
-# We define a "storage revenue" (negative costs) for the last time step,
-# so that energy inside the storage in the last time step is worth
-# something.
 storage_revenue = np.zeros(len(time_index) - 1)
 storage_revenue[-1] = -0.6  # 60 ct/kWh in the last time step
 
@@ -101,17 +68,12 @@ car_battery = solph.components.GenericStorage(
     balanced=False,  # True: content at beginning and end need to be equal
     storage_costs=storage_revenue,  # Only has an effect on charging.
 )
-energy_system.add(car_battery)
+
+ev_energy_system.add(car_battery)
 # %%[car_end]
 
 
 # %%[AC_30ct_charging_start]
-"""
-Now, let's assume the car battery can be charged at home. Unfortunately, there
-is only a power socket available, limiting the charging process to 16 A at
-230 V. This, of course, can only happen while the car is present.
-"""
-
 
 car_at_home = pd.Series(1, index=time_index[:-1])
 car_at_home.loc[driving_start_morning:driving_end_evening] = 0
@@ -132,21 +94,20 @@ charger230V = solph.components.Source(
     },
 )
 
-energy_system.add(charger230V)
+ev_energy_system.add(charger230V)
 
 # %%[AC_30ct_charging_end]
 
 
-# %%[solve_and_plot_start]
-"""
-Solve the model and show results
-"""
-
-
-model = solph.Model(energy_system)
-model.solve(solve_kwargs={"tee": False})
+# %%[solve_start]
+model = solph.Model(ev_energy_system)
+model.solve(solve_kwargs={"tee": True})
 results = solph.processing.results(model)
-
-
-plot_results(results=results, plot_title="Domestic power socket charging")
-# %%[solve_and_plot_end]
+# %%[solve_end]
+# %%[plot_results_start]
+plot_results(
+    results=results,
+    plot_title="Domestic power socket charging",
+    dark_mode=False,
+)
+# %%[plot_results_end]
