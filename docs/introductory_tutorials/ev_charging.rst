@@ -7,11 +7,11 @@ In this tutorial we will optimize the loading of an EV.
 
 The tutorial is set up in 5 different steps
 
-1: Plugged EV as load 
-2: Unidirektional charging (learning: incentive to re-charge)
-3: Free charging with PV system at work (learning: dispatch with shifting under simple constraint)
-4: Fix free charging artefact and allow bidirectional use of the battery (learning: looped energy flow as indicator for flawed model and understand the "balanced" keyword)
-5: Variable electricity prices (learning: how to include time series for costs)
+- Step 1: Plugged EV as load 
+- Step 2: Unidirektional charging (learning: incentive to re-charge)
+- Step 3: Free charging with PV system at work (learning: dispatch with shifting under simple constraint)
+- Step 4: Fix free charging artefact and allow bidirectional use of the battery (learning: looped energy flow as indicator for flawed model and understand the "balanced" keyword)
+- Step 5: Variable electricity prices (learning: how to include time series for costs)
 
 Each section contains a step by step explanation of how the a management of an ev loading can be done is using oemof.solph. Additionally, the repository contains a fully
 functional python file of all five main steps for you to execute yourself or
@@ -65,12 +65,12 @@ Lets look at the driving pattern
     :start-after: [plot_trip_data_start]
     :end-before: [plot_trip_data_end]
 
-.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern.png
+.. figure:: /./_files/driving_pattern.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern.png
+.. figure::/./_files/driving_pattern_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -98,15 +98,18 @@ The driving demand input is connected with the the electric energy carrying bus.
 
 The car battery is added as :py:class:`solph.components.GenericStorage`.
 The following parameters are set:
+
 - :py:attr:`nominal_capacity` is set to 50 (kWh), which is the capacity of the battery.
-- :py:attr:`capacity_loss` is set to 0.001. This means the battery loss per hour is one percent.
+- :py:attr:`capacity_loss` is set to 0.001. This means the battery loss per hour is 0.1% percent.
 - :py:attr:`initial_capacity` is set to 1. This indicates that the battery is full at the beginning of the simulation.
 - :py:attr:`inflow_conversion_factor`is set to 0.9, so the charging efficency is 90%.
 - :py:attr:`balanced` is set to False. This means the battery storage level at the end has not to be the same as at the beginning.
 - :py:attr:`storage_costs` is set to the defined storage revenue. Where "storage revenue" is defined as list with negative costs (of 60 ct/kWh) for the last time step, so that energy inside the storage in the last time step is worth something.
+
 This leads to the fact that the battery is not necessary emptied at the end of the simulation. 
 
 The car battery inputs and outputs are connected with the the electric energy carrying bus.
+
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [car_start]
@@ -134,12 +137,12 @@ Now plot the results using the helper function from helpers.py.
     :start-after: [plot_results_start]
     :end-before: [plot_results_end]
 
-.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern.png
+.. figure:: /./_files/driving_demand_only.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern_dark_mode.png
+.. figure:: /./_files/driving_demand_only_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -147,6 +150,8 @@ Now plot the results using the helper function from helpers.py.
     Driving pattern
 
     
-.. hint:: 
-    The learning should be: understandig trivial dispatch but from battery
+.. admonition:: Learning 
+    :class: important
+
+    The learning should be: Understanding the trivial electric vehicle dispatch from battery
 

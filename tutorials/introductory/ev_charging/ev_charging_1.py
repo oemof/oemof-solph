@@ -35,7 +35,7 @@ ev_demand.loc[driving_start_evening:driving_end_evening] = 9  # kW
 # %%[trip_data_end]
 ## %%[plot_trip_data_start]
 plt.figure()
-plt.style.use("dark_background")
+# plt.style.use("dark_background")
 plt.title("Driving pattern")
 plt.plot(ev_demand)
 plt.ylabel("Power (kW)")
