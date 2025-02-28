@@ -2,12 +2,19 @@ import os
 import subprocess
 import tempfile
 import warnings
+import importlib
 from datetime import datetime
 
 import matplotlib
 import nbformat
-from matplotlib import pyplot as plt
 from termcolor import colored
+
+try:
+    from oemof.visio import ESGraphRenderer
+
+    oemof_visio = True
+except ImportError:
+    oemof_visio = False
 
 warnings.filterwarnings("ignore", "", UserWarning)
 matplotlib.use("Agg")
@@ -15,6 +22,8 @@ matplotlib.use("Agg")
 stop_at_error = False  # If True script will stop if error is raised
 exclude_notebooks = False
 exclude_python_scripts = False
+has_main_function = True
+test_optimize = False
 
 
 def notebook_run(path):
@@ -52,7 +61,8 @@ def notebook_run(path):
     return nb, errors
 
 
-fullpath = os.path.join(os.getcwd())
+fullpath = os.path.dirname(__file__)
+doc_path = os.path.join(os.path.dirname(fullpath), "docs", "_files")
 
 checker = {}
 number = 0
@@ -60,42 +70,47 @@ number = 0
 start_check = datetime.now()
 
 for root, dirs, files in sorted(os.walk(fullpath)):
-    for name in sorted(files):
-        if (
-            name[-3:] == ".py"
-            and not exclude_python_scripts
-            and not name == "check_examples.py"
-        ):
-            fn = os.path.join(root, name)
-            os.chdir(root)
-            number += 1
-            if stop_at_error is True:
-                print(fn)
-                exec(open(fn).read())
-                checker[name] = "okay"
-            else:
+    if root != fullpath:
+        for name in sorted(files):
+            if name.endswith(".py"):
+                number += 1
+                module_name = name[:-3]
                 try:
-                    exec(open(fn).read())
+                    file_module = importlib.import_module(
+                        f"{os.path.basename(root)}.{module_name}"
+                    )
+                    main = file_module.main
+                    has_main_function = True
+                except AttributeError:
+                    print(
+                        f"{os.path.basename(root)}.{name} does not have main() function"
+                    )
+                    has_main_function = False
+
+                if stop_at_error is True:
+                    es = main(optimize=test_optimize)
                     checker[name] = "okay"
-                except Exception as e:
-                    print(e)
-                    checker[name] = "failed"
-        elif name[-6:] == ".ipynb" and not exclude_notebooks:
-            fn = os.path.join(root, name)
-            os.chdir(root)
-            number += 1
-            if stop_at_error is True:
-                print(fn)
-                notebook_run(fn)
-                checker[name] = "okay"
-            else:
-                try:
-                    notebook_run(fn)
-                    checker[name] = "okay"
-                except Exception as e:
-                    print(e)
-                    checker[name] = "failed"
-        plt.close()
+                else:
+                    try:
+                        es = main(optimize=test_optimize)
+                        checker[name] = "okay"
+                    except Exception as e:
+                        print(e)
+                        if has_main_function is False:
+                            checker[name] = "failed because no main() function"
+                        else:
+                            checker[name] = "failed"
+                        es = None
+
+                if es is not None and oemof_visio is True:
+                    esgr = ESGraphRenderer(
+                        es,
+                        legend=False,
+                        filepath=os.path.join(doc_path, f"{module_name}"),
+                        img_format="svg",
+                    )
+                    esgr.render()
+
 
 print("******* TEST RESULTS ***********************************")
 
@@ -107,7 +122,7 @@ print(
 
 f = 0
 for k, v in checker.items():
-    if v == "failed":
+    if "failed" in v:
         print(k, colored(v, "red"))
         f += 1
     else:
