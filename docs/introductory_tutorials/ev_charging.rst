@@ -19,16 +19,12 @@ modify and play around with.
 
 Step 1: Plugged EV as load
 -------------------------
-
-Plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load (learning: trivial dispatch, but from battery)
-
-.. TODO :: Add explanation
-
+Within the first step we want to simulate a plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load.
 First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data.
 Further for plotting we use a helper function from helpers.py (within this folder)
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [imports_start]
     :end-before: [imports_end]
@@ -41,7 +37,7 @@ package at first. Further we need a timeindex for the simulation.Within this exa
 We will use the ``date_range`` function from the ``pandas``package to create a timeindex with 5 minute resolution for one day.
 
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [create_time_index_set_up_energysystem_start]
     :end-before: [create_time_index_set_up_energysystem_end]
@@ -52,7 +48,7 @@ when compared to the N entires of time axis for the energy.
 There is a morning drive from 07:10 to 08:10. The power of 10 kW is required.
 Further there is an evening drive from 16:13 to 17:45. The power of 9 kW is required.
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [trip_data_start]
     :end-before: [trip_data_end]
@@ -64,7 +60,7 @@ Further there is an evening drive from 16:13 to 17:45. The power of 9 kW is requ
 
 Lets look at the driving pattern
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [plot_trip_data_start]
     :end-before: [plot_trip_data_end]
@@ -85,19 +81,33 @@ Lets look at the driving pattern
 Now we need to set up the electric energy carrying bus. We make sure to set a label to reference them later when we
 analyze the results. After initialization, we add them to the ``ev_energy_system`` object.
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [energysystem_and_bus_start]
     :end-before: [energysystem_and_bus_end]
 
+After setting up the energy system and the buses, we can now add the components to the energy system.
+We adding the driving demand as :py:class:`solph.components.Sink`, where the loading profile is added as 
+:py:attr:`fix` and :py:attr:`nominal_capacity` is set to one, because the loading profile is absolute.
 As we have a demand time series which is actually in kW, we use a common
 "hack" here: We set the nominal capacity to 1 (kW), so that
 multiplication by the time series will just yield the correct result.
-We define a "storage revenue" (negative costs) for the last time step,
-so that energy inside the storage in the last time step is worth
-something. 
 
-.. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
+The driving demand input is connected with the the electric energy carrying bus.
+
+
+The car battery is added as :py:class:`solph.components.GenericStorage`.
+The following parameters are set:
+- :py:attr:`nominal_capacity` is set to 50 (kWh), which is the capacity of the battery.
+- :py:attr:`capacity_loss` is set to 0.001. This means the battery loss per hour is one percent.
+- :py:attr:`initial_capacity` is set to 1. This indicates that the battery is full at the beginning of the simulation.
+- :py:attr:`inflow_conversion_factor`is set to 0.9, so the charging efficency is 90%.
+- :py:attr:`balanced` is set to False. This means the battery storage level at the end has not to be the same as at the beginning.
+- :py:attr:`storage_costs` is set to the defined storage revenue. Where "storage revenue" is defined as list with negative costs (of 60 ct/kWh) for the last time step, so that energy inside the storage in the last time step is worth something.
+This leads to the fact that the battery is not necessary emptied at the end of the simulation. 
+
+The car battery inputs and outputs are connected with the the electric energy carrying bus.
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [car_start]
     :end-before: [car_end]
@@ -129,9 +139,14 @@ Now plot the results using the helper function from helpers.py.
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern.png
+.. figure:: /../tutorial/introductory/ev_charging/figures/driving_pattern_dark_mode.png
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
 
     Driving pattern
+
+    
+.. hint:: 
+    The learning should be: understandig trivial dispatch but from battery
+
