@@ -134,6 +134,8 @@ get a more verbose solver logging output in the console.
 
 Now plot the results using the helper function from helpers.py.
 
+The results are showing that the EV is loaded by the battery while driving.
+
 .. literalinclude:: /../tutorial/introductory/ev_charging/ev_charging_1.py
     :language: python
     :start-after: [plot_results_start]
@@ -177,7 +179,8 @@ To connect the car while it is at home, we create avalibility data series.
 
 
 Now we are looking at the results:
-The EV will be loaded just before the first leaving and right after the arriving of the second drive.
+The EV will be fully reloaded, because of the losses just before the first leaving and right after the arriving of the second drive to refill the battery.
+
 
 .. figure:: /./_files/driving_domestic_power_socket.svg
     :align: center

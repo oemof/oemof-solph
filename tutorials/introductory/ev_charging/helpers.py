@@ -23,7 +23,7 @@ def plot_results(results, plot_title, dark_mode=False):
         (("Car Battery", "Car Electricity"), "flow")
     ]
     plt.step(energy_leaves_battery.index, energy_leaves_battery, "r--")
-    plt.step(energy_enters_battery.index, energy_enters_battery, "r-")
+    plt.step(energy_enters_battery.index, energy_enters_battery, "g-")
     plt.grid()
     plt.ylabel("Power (kW)")
     plt.gcf().autofmt_xdate()
