@@ -81,7 +81,7 @@ dynamic_price.loc[pd.Timestamp("2025-01-01 16:00") :] = 0.7
 
 ## %%[plot_dynamic_price_start]
 plt.figure()
-plt.style.use("dark_background")
+# plt.style.use("dark_background")
 plt.title("Dynamic prices")
 plt.plot(dynamic_price)
 plt.ylabel("€/MWh")
@@ -150,5 +150,10 @@ model = solph.Model(ev_energy_system)
 model.solve(solve_kwargs={"tee": False})
 results = solph.processing.results(model)
 
-plot_results(results=results, plot_title="Bidirectional use dynamic prices")
+
+plot_results(
+    results=results,
+    plot_title="Bidirectional use dynamic prices",
+    dark_mode=False,
+)
 # %%[solve_and_plot_end]
