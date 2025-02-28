@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from helpers import plot_results
+
 # %%[imports_end]
 # %%[create_time_index_set_up_energysystem_start]
 import oemof.solph as solph
@@ -34,7 +35,7 @@ ev_demand.loc[driving_start_evening:driving_end_evening] = 9  # kW
 # %%[trip_data_end]
 ## %%[plot_trip_data_start]
 plt.figure()
-plt.style.use('dark_background')
+plt.style.use("dark_background")
 plt.title("Driving pattern")
 plt.plot(ev_demand)
 plt.ylabel("Power (kW)")
@@ -51,7 +52,7 @@ demand_driving = solph.components.Sink(
     inputs={bus_car: solph.Flow(nominal_capacity=1, fix=ev_demand)},
 )
 
-ev_energy_system.add(demand_driving) 
+ev_energy_system.add(demand_driving)
 
 storage_revenue = np.zeros(len(time_index) - 1)
 storage_revenue[-1] = -0.6  # 60 ct/kWh in the last time step
@@ -73,8 +74,10 @@ ev_energy_system.add(car_battery)
 # %%[solve_start]
 model = solph.Model(ev_energy_system)
 model.solve(solve_kwargs={"tee": True})
-results = solph.processing.results(model)   
+results = solph.processing.results(model)
 # %%[solve_end]
 # %%[plot_results_start]
-plot_results(results=results, plot_title="Driving demand only", dark_mode = False)
+plot_results(
+    results=results, plot_title="Driving demand only", dark_mode=False
+)
 # %%[plot_results_end]

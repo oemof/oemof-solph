@@ -14,7 +14,6 @@ import oemof.solph as solph
 from helpers import plot_results
 
 
-
 # %%[imports_end]
 
 # %%[create_time_index_start]
@@ -63,7 +62,6 @@ and an electricity demand.
 """
 
 
-
 energy_system = solph.EnergySystem(
     timeindex=time_index,
     infer_last_interval=False,
@@ -85,7 +83,7 @@ demand_driving = solph.components.Sink(
     inputs={bus_car: solph.Flow(nominal_capacity=1, fix=ev_demand)},
 )
 
-energy_system.add(demand_driving) 
+energy_system.add(demand_driving)
 
 
 """
@@ -103,21 +101,18 @@ storage_revenue = np.zeros(len(time_index) - 1)
 storage_revenue[-1] = -0.6  # 60 ct/kWh in the last time step
 
 car_battery = solph.components.GenericStorage(
-        label="Car Battery",
-        nominal_capacity=50,
-        inputs={bus_car: solph.Flow(variable_costs=0.1)},
-        outputs={bus_car: solph.Flow()},
-        loss_rate=0.001,
-        inflow_conversion_factor=0.9,
-        balanced=True,  # this is the default: SOC(T=0) = SOC(T=T_max)
-        min_storage_level=0.1,  # 10 % as reserve
-    )
-    
+    label="Car Battery",
+    nominal_capacity=50,
+    inputs={bus_car: solph.Flow(variable_costs=0.1)},
+    outputs={bus_car: solph.Flow()},
+    loss_rate=0.001,
+    inflow_conversion_factor=0.9,
+    balanced=True,  # this is the default: SOC(T=0) = SOC(T=T_max)
+    min_storage_level=0.1,  # 10 % as reserve
+)
+
 energy_system.add(car_battery)
 # %%[car_end]
-
-
-
 
 
 # %%[AC_30ct_charging_start]
@@ -126,7 +121,6 @@ Now, let's assume the car battery can be charged at home. Unfortunately, there
 is only a power socket available, limiting the charging process to 16 A at
 230 V. This, of course, can only happen while the car is present.
 """
-
 
 
 car_at_home = pd.Series(1, index=time_index[:-1])
@@ -152,16 +146,11 @@ energy_system.add(charger230V)
 # %%[AC_30ct_charging_end]
 
 
-
-
-    
-
 # %%[DC_charging_start]
 """
 Now, we add an 11 kW charger (free of charge) which is available at work.
 This, of course, can only happen while the car is present at work.
 """
-
 
 
 car_at_work = pd.Series(0, index=time_index[:-1])
@@ -183,15 +172,11 @@ energy_system.add(charger11kW)
 # %%[DC_charging_end]
 
 
-
-
-    
 # %%[AC_discharging]
 """
 Now, we add an option to use the car battery bidirectionally.
 The car can be charged at work and used at home to save 30 ct/kWh.
 """
-
 
 
 car_at_home = pd.Series(1, index=time_index[:-1])
@@ -221,7 +206,7 @@ model = solph.Model(energy_system)
 model.solve(solve_kwargs={"tee": False})
 results = solph.processing.results(model)
 
-    
+
 plot_results(results=results, plot_title="Bidirectional use (constant costs)")
 # %%[solve_and_plot_end]
 

@@ -1,16 +1,15 @@
-import oemof.solph as solph 
+import oemof.solph as solph
 
 import matplotlib.pyplot as plt
 
-def plot_results(results,plot_title, dark_mode=False ):
 
-   
+def plot_results(results, plot_title, dark_mode=False):
 
     battery_series = solph.views.node(results, "Car Battery")["sequences"]
 
     plt.figure()
     if dark_mode:
-        plt.style.use('dark_background')
+        plt.style.use("dark_background")
     plt.title(plot_title)
     plt.plot(battery_series[(("Car Battery", "None"), "storage_content")])
     plt.ylabel("Energy (kWh)")
@@ -28,4 +27,3 @@ def plot_results(results,plot_title, dark_mode=False ):
     plt.grid()
     plt.ylabel("Power (kW)")
     plt.gcf().autofmt_xdate()
-    
