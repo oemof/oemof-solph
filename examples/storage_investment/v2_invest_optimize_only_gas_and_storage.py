@@ -184,9 +184,8 @@ def main():
         outputs={bel: solph.Flow()},
         loss_rate=0.00,
         initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,  # input flow is 1/6 of capacity
-        invest_relation_output_capacity=1
-        / 6,  # output flow is 1/6 of capacity
+        invest_relation_input_capacity=1 / 6,  # c-rate of 1/6
+        invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
         nominal_storage_capacity=solph.Investment(ep_costs=epc_storage),
