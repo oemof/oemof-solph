@@ -3,52 +3,8 @@
 """
 General description
 -------------------
-
-A basic example to show how to model a simple energy system with oemof.solph.
-
-The following energy system is modeled:
-
-.. code-block:: text
-
-                     input/output  bgas     bel
-                         |          |        |
-                         |          |        |
-     wind(FixedSource)   |------------------>|
-                         |          |        |
-     pv(FixedSource)     |------------------>|
-                         |          |        |
-     rgas(Commodity)     |--------->|        |
-                         |          |        |
-     demand(Sink)        |<------------------|
-                         |          |        |
-                         |          |        |
-     pp_gas(Converter)   |<---------|        |
-                         |------------------>|
-                         |          |        |
-     storage(Storage)    |<------------------|
-                         |------------------>|
-
-Code
-----
-Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
-
-.. dropdown:: Click to display code
-
-    .. literalinclude:: /../examples/basic_example/basic_example.py
-        :language: python
-        :lines: 61-
-
-Data
-----
-Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
-
-Installation requirements
--------------------------
-This example requires oemof.solph (v0.5.x), install by:
-
-.. code:: bash
-
-    pip install oemof.solph[examples]
+This Code generates the picture of an energysystem used for the grid icons in 
+the docs
 
 License
 -------
@@ -60,8 +16,6 @@ License
 
 import logging
 import os
-import pprint as pp
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -75,17 +29,7 @@ from oemof.solph import buses
 from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
-from oemof.solph import helpers
 from oemof.solph import processing
-from oemof.solph import views
-
-STORAGE_LABEL = "battery_storage"
-
-
-def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    dir = os.path.dirname(os.path.abspath(__file__))
-    data = pd.read_csv(dir + "/" + file_path)
-    return data
 
 
 def plot_figures_for(element: dict) -> None:
@@ -102,22 +46,26 @@ def plot_figures_for(element: dict) -> None:
 
 
 # uses data from the basic example
-def main(dump_and_restore=False):
-    # For models that need a long time to optimise, saving and loading the
-    # EnergySystem might be advised. By default, we do not do this here. Feel
-    # free to experiment with this once you understood the rest of the code.
-    dump_results = restore_results = dump_and_restore
+def main():
 
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
 
     # Read data file
-    file_name = "basic_example.csv"
-    data = get_data_from_file_path(file_name)
+    file_name = os.path.realpath(
+        os.path.join(
+            __file__,
+            "..",
+            "..",
+            "..",
+            "..",
+            r"examples\basic_example\basic_example.csv",
+        )
+    )
+    data = pd.read_csv(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
-    debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
 
@@ -151,12 +99,13 @@ def main(dump_and_restore=False):
     # create electricity bus
     bus_electricity = buses.Bus(label="electricity")
 
+    # create heat bus
     bus_heat = buses.Bus(label="heat")
 
     # adding the buses to the energy system
     energysystem.add(bus_gas, bus_electricity, bus_heat)
 
-    # create excess component for the electricity bus to allow overproduction
+    # create sink for heat demand
     energysystem.add(
         components.Sink(
             label="Heat Demand",
@@ -174,7 +123,7 @@ def main(dump_and_restore=False):
         )
     )
 
-    # create fixed source object representing wind power plants
+    # create fixed source object representing power grid
     energysystem.add(
         components.Source(
             label="Power Grid",
@@ -207,7 +156,7 @@ def main(dump_and_restore=False):
         )
     )
 
-    # create simple converter object representing a gas power plant
+    # create simple converter object representing a gas boiler
     energysystem.add(
         components.Converter(
             label="Gas boiler",
@@ -217,6 +166,7 @@ def main(dump_and_restore=False):
         )
     )
 
+    # create simple converter object representing a heatpump
     energysystem.add(
         components.Converter(
             label="Heatpump",
@@ -225,22 +175,6 @@ def main(dump_and_restore=False):
             conversion_factors={bus_electricity: 0.58},
         )
     )
-
-    # create storage object representing a battery
-    nominal_capacity = 10077997
-    nominal_capacity = nominal_capacity / 6
-
-    # battery_storage = components.GenericStorage(
-    #     label=STORAGE_LABEL,
-    #     inputs={bus_electricity: flows.Flow()},
-    #     outputs={bus_electricity: flows.Flow(variable_costs=0.001)},
-    #     loss_rate=0.00,
-    #     initial_storage_level=None,
-    #     inflow_conversion_factor=1,
-    #     outflow_conversion_factor=0.8,
-    # )
-
-    # energysystem.add(battery_storage)
 
     ##########################################################################
     # Optimise the energy system and plot the results
@@ -254,7 +188,9 @@ def main(dump_and_restore=False):
     esgr = ESGraphRenderer(
         energysystem_model,
         legend=False,
-        filepath="D:/ES.svg",
+        filepath=os.path.realpath(
+            os.path.join(__file__, "..", "..", "ES.svg")
+        ),
         img_format="svg",
     )
     esgr.render()
