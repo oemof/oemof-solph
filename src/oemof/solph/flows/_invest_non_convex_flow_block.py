@@ -290,6 +290,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                 investment_costs += (
                     self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                     + m.flows[i, o].investment.offset[p]
+                    * self.invest_status[i, o, p]
                 )
 
         self.investment_costs = Expression(expr=investment_costs)
