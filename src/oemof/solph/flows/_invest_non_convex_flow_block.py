@@ -272,7 +272,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                     \cdot c_{shutdown}
 
             .. math::
-                P_{invest} \cdot c_{invest,var}
+                P_{invest} \cdot c_{ep} + c_{offset}
         """
         if not hasattr(self, "INVEST_NON_CONVEX_FLOWS"):
             return 0
