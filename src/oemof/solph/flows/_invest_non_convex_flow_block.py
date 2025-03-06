@@ -83,6 +83,10 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
 
+        :math::
+            `Y_{invest_status}(i,o,p)` `InvestNonConvexFlowBlock.invest_status`
+            Binary variable representing whether or not an investment is made. 
+
         :math::`status\_nominal(i,o,t)` (non-negative real number)
             New paramater representing the multiplication of `P_{invest}`
             (from the <class 'oemof.solph.flows.InvestmentFlow'>) and
