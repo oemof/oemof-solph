@@ -91,18 +91,8 @@ lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f'LCOH: {lcoh:.2f} €/MWh')
 
 # %%[sec_10_start]
-co2 = data_gas_bus[(('gas network', 'gas boiler'), 'flow')].sum() * 201.2
+# Einsatz
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplot(figsize=[10, 6])
 # %%[sec_10_end]
-print(f'CO2-emissions: {co2:.0f} kg')
-
-# %%[sec_11_start]
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplot(figsize=[10, 6])
-# %%[sec_11_end]
-
-# %%[sec_12_start]
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplot(figsize=[10, 6])
-# %%[sec_12_end]

@@ -139,8 +139,8 @@ get a more verbose solver logging output in the console.
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+7. Some results, LCOH (how to calculate and resulting numbers),
+   dispatch plot. Include the plots in the page here!!
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
@@ -176,27 +176,79 @@ get a more verbose solver logging output in the console.
 
     System dispatch
 
+.. admonition:: Learning
+    :class: important
+
+    After the first step of this tutorial you should be able to do the following:
+
+    * Reading csv.files
+
+    * Initialize a energy system
+
+    * Create simple components
+
+    * Optimize the dispatch of district heating system
+
+    * Visulize results and generate key parameter
+
+
 Step 2: Plan capacity of heat pump and heat storage
 ---------------------------------------------------
 
-.. dropdown:: See the complete code
-
-    .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
-        :language: python
-        :start-after: [sec_6_start]
-        :end-before: [sec_6_end]
-
 1. What information is required on the new components? (data, no code, include waste heat time series)
+
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_1_start]
+    :end-before: [sec_1_end]
 
 2. Add new buses (electricity, waste heat)
 
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_2_start]
+    :end-before: [sec_2_end]
+
 3. Add waste heat source and electricity source
+
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_3_start]
+    :end-before: [sec_3_end]
 
 4. Add heat storage
 
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_4_start]
+    :end-before: [sec_4_end]
+
 5. Add heat pump
 
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_5_start]
+    :end-before: [sec_5_end]
+
 6. Run model and analyze results
+
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_6_start]
+    :end-before: [sec_6_end]
+
+.. admonition:: Learning
+    :class: important
+
+    After the second step of this tutorial you should be able to do the following:
+
+    * Expand the district heating system
+
+    * Create first complex components
+
+    * Use functions for recurring tasks
+
+    * Optimize the design and dispatch of district heating system
 
 Step 3: Introduce a minimal load for the converters
 ---------------------------------------------------
