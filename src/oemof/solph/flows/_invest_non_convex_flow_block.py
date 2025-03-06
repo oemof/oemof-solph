@@ -119,6 +119,15 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             bounds=_investvar_bound_rule,
         )
 
+        # `invest_status` is a parameter which represents whether or not an
+        # investment is made. This way the investment offset cost only apply
+        # when the component is installed.
+        self.invest_status = Var(
+            self.INVEST_NON_CONVEX_FLOWS,
+            m.PERIODS,
+            within=Binary,
+        )
+
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
         # and a continuous variable (`invest` or `nominal_capacity`)
