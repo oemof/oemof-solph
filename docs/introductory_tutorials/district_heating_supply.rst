@@ -13,7 +13,7 @@ The tutorial is set up in three main steps:
 
 Each section contains a step by step explanation of how the district heating supply
 system is build using oemof.solph. Additionally, the repository contains a fully
-functional python file of all three main steps for you to execute yourself or
+functional Python file of all three main steps for you to execute yourself or
 modify and play around with.
 
 .. figure:: /_files/example_network.svg
@@ -127,25 +127,34 @@ the gas boiler to the district heating supply system.
     Keep in mind that the units used in your energy system model are only implicit
     and that you have to check their consistency yourself.
 
+FLOWCHART ENERGY SYSTEM
+
 As our system is complete for this step, its time to start the unit commitment
 optimization. For that, we first have to create a :py:class:`solph.Model` instance
 from our ``district_heating_system``. Then we can use its :py:func:`solve` method
-to run the optimization. We decide to use the open source solver CBC and add the
-additional :py:attr:`solve_kwargs` parameter ``'tee'`` to ``True``, in order to
-get a more verbose solver logging output in the console.
+to run the optimization. We decide to use the open source solver
+`CBC <https://projects.coin-or.org/Cbc>`_ and add the additional :py:attr:`solve_kwargs`
+parameter ``'tee'`` to ``True``, in order to get a more verbose solver logging
+output in the console.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+To receive the results, we pass the ``model`` into the ``results`` method
+of the ``solph.processing`` submodule. We then use the ``node`` method of the
+``solph.views`` submodule to access the results of the two buses ``'gas network'``
+and ``'heat network'``. Specifically, we need the optimized unit commitment time
+series, so we access the ``'sequences'`` key.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_7_start]
     :end-before: [sec_7_end]
+
+7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
+   dispatch plot(s). Include the plots in the page here!!
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
