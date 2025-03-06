@@ -315,6 +315,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                 for p in m.PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
+                        * self.invest_status[i, o, p]
                         <= self.invest[i, o, p]
                     )
                     self.minimum_investment.add((i, o, p), expr)
