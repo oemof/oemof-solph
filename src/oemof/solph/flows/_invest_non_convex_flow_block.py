@@ -341,6 +341,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                     expr = (
                         self.invest[i, o, p]
                         <= m.flows[i, o].investment.maximum[p]
+                        * self.invest_status[i, o, p]
                     )
                     self.maximum_investment.add((i, o, p), expr)
 
