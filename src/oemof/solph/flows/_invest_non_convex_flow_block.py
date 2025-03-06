@@ -305,7 +305,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     def _minimum_invest_constraint(self):
         r"""
         .. math::
-                P_{invest, min} \cdot Y_{invest,status} \le P_{invest}
+                P_{invest, min} \cdot Y_{invest, status} \le P_{invest}
         """
         m = self.parent_block()
 
@@ -330,7 +330,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     def _maximum_invest_constraint(self):
         r"""
         .. math::
-            P_{invest} \le P_{invest, max}
+            P_{invest} \le P_{invest, max} \cdot Y_{invest, status}
         """
         m = self.parent_block()
 
