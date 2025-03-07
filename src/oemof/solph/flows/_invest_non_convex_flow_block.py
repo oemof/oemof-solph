@@ -26,6 +26,7 @@ from pyomo.core import Set
 from pyomo.core import Var
 
 from ._non_convex_flow_block import NonConvexFlowBlock
+from oemof.solph._options import NonConvex
 
 
 class InvestNonConvexFlowBlock(NonConvexFlowBlock):
@@ -72,6 +73,22 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
+        self.LINEAR_INVEST_NON_CONVEX_FLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.nonconvex is None
+            ]
+        )
+
+        self.OFFSET_INVEST_NON_CONVEX_FLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if isinstance(g[2].investment.nonconvex, NonConvex)
+            ]
+        )
+
         self._sets_for_non_convex_flows(group)
 
     def _create_variables(self):
@@ -112,7 +129,12 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of the invest variable."""
-            if (i, o) in self.INVEST_NON_CONVEX_FLOWS:
+            if (i, o) in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
+                return (
+                    m.flows[i, o].investment.minimum[p],
+                    m.flows[i, o].investment.maximum[p],
+                )
+            elif (i, o) in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 return 0, m.flows[i, o].investment.maximum[p]
 
         # Create the `invest` variable for the nonconvex investment flow.
@@ -127,7 +149,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         # investment is made. This way the investment offset cost only apply
         # when the component is installed.
         self.invest_status = Var(
-            self.INVEST_NON_CONVEX_FLOWS,
+            self.OFFSET_INVEST_NON_CONVEX_FLOWS,
             m.PERIODS,
             within=Binary,
         )
@@ -285,7 +307,13 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         inactivity_costs = self._inactivity_costs()
         investment_costs = 0
 
-        for i, o in self.INVEST_NON_CONVEX_FLOWS:
+        for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
+            for p in m.PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
+                )
+
+        for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
             for p in m.PERIODS:
                 investment_costs += (
                     self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
@@ -312,7 +340,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+            for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 for p in m.PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
@@ -337,7 +365,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+            for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 for p in m.PERIODS:
                     expr = (
                         self.invest[i, o, p]
