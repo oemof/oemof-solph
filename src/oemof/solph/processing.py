@@ -151,6 +151,8 @@ def divide_scalars_sequences(df_dict, k):
         scalars = df.loc[:, condition].dropna()
         if scalars.size > 0:
             rv["scalars"] = scalars.iloc[0]
+        else:
+            rv["scalars"] = pd.DataFrame()
         rv["sequences"] = df.loc[:, ~condition]
         return rv
     except IndexError:
