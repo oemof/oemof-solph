@@ -124,16 +124,16 @@ def storage_level_constraint(
             .. math::
                 y_n \le E(t) / E_n
             """
-            for p, i, g in m.TIMEINDEX_CLUSTER:
+            for i, g in m.TIMEINDEX_CLUSTER:
                 k = m.es.tsa_parameters[p]["order"][i]
-                t = m.get_timestep_from_tsam_timestep(p, k, g)
-                tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                t = m.get_timestep_from_tsam_timestep(k, g)
+                tk = m.get_timestep_from_tsam_timestep(k, g)
                 for o in output_levels:
                     getattr(m, constraint_name).add(
-                        (o, p, i, g),
+                        (o, i, g),
                         (
                             m.GenericStorageBlock.storage_content_intra[
-                                storage_component, p, k, g + 1
+                                storage_component, k, g + 1
                             ]
                             + m.GenericStorageBlock.storage_content_inter[
                                 storage_component, i
@@ -142,7 +142,7 @@ def storage_level_constraint(
                             ** (g * m.timeincrement[tk])
                         )
                         / storage_component.nominal_storage_capacity
-                        >= active_output[o, p, k, g] * output_levels[o],
+                        >= active_output[o, k, g] * output_levels[o],
                     )
 
         setattr(
@@ -162,7 +162,7 @@ def storage_level_constraint(
 
         # Define constraints on the output flows
         def _constraint_output_rule(m, o, p, k, g):
-            t = m.get_timestep_from_tsam_timestep(p, k, g)
+            t = m.get_timestep_from_tsam_timestep(k, g)
             return (
                 m.flow[multiplexer_bus, o, p, t]
                 / m.flows[multiplexer_bus, o].nominal_value
@@ -268,8 +268,8 @@ def storage_level_constraint(
             """
             for p, i, g in m.TIMEINDEX_CLUSTER:
                 k = m.es.tsa_parameters[p]["order"][i]
-                t = m.get_timestep_from_tsam_timestep(p, k, g)
-                tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                t = m.get_timestep_from_tsam_timestep(k, g)
+                tk = m.get_timestep_from_tsam_timestep(k, g)
                 for inp in input_levels:
                     getattr(m, constraint_name).add(
                         (inp, p, i, g),
@@ -304,12 +304,12 @@ def storage_level_constraint(
         )
 
         # Define constraints on the input flows
-        def _constraint_input_rule(m, i, p, k, g):
-            t = m.get_timestep_from_tsam_timestep(p, k, g)
+        def _constraint_input_rule(m, i, k, g):
+            t = m.get_timestep_from_tsam_timestep(k, g)
             return (
-                m.flow[i, multiplexer_bus, p, t]
-                / m.flows[i, multiplexer_bus].nominal_value
-                <= 1 - inactive_input[i, p, k, g]
+                m.flow[i, multiplexer_bus, t]
+                / m.flows[i, multiplexer_bus].nominal_capacity
+                <= 1 - inactive_input[i, k, g]
             )
 
         setattr(

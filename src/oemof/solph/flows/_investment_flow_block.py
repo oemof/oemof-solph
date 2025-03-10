@@ -407,7 +407,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         m.flow[i, o, t]
                         <= self.capacity[i, o, 0] * m.flows[i, o].max[t]
                     )
-                    self.max.add((i, o, t), expr)
+                    self.max.add((i, o, t, 0), expr)
 
         self.max = Constraint(
             self.NON_FIXED_INVESTFLOWS,
