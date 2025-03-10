@@ -412,7 +412,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
         ts.timestep = range(len(ts))
         ts = ts.set_index("timestep")  # Have to set and reset index as
         # interpolation in pandas<2.1.0 cannot handle NANs in index
-        flow_dict[flow] = ts.interpolate(method="pad").reset_index("timestep")
+        flow_dict[flow] = ts.ffill().reset_index("timestep")
 
     # Add storage SOC flows:
     for storage, soc in storages.items():

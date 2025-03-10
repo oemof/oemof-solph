@@ -97,7 +97,10 @@ from oemof import solph
 
 def main():
     # Read data file
-    filename = "examples/storage_investment/storage_investment.csv"
+    filename = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "../storage_investment/storage_investment.csv",
+    )
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
