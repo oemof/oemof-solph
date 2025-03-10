@@ -54,9 +54,9 @@ from oemof.solph import Flow
 from oemof.solph import Model
 from oemof.solph import create_time_index
 from oemof.solph import views
+from oemof.solph.components import Converter
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Converter
 
 
 def main():

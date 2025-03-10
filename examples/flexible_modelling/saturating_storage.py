@@ -32,8 +32,8 @@ License
 """
 
 import pandas as pd
-from pyomo import environ as po
 from matplotlib import pyplot as plt
+from pyomo import environ as po
 
 from oemof import solph
 
