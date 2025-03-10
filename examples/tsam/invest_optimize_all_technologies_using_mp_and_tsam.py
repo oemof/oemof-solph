@@ -98,7 +98,8 @@ from oemof import solph
 def main():
     # Read data file
     filename = os.path.join(
-        os.getcwd(), "../storage_investment/storage_investment.csv"
+        os.path.dirname(os.path.abspath(__file__)),
+        "../storage_investment/storage_investment.csv",
     )
     try:
         data = pd.read_csv(filename)
@@ -122,8 +123,8 @@ def main():
     logger.define_logging()
     logging.info("Initialize the energy system")
 
-    t1 = pd.date_range("2022-01-01", periods=8760, freq="H")
-    t2 = pd.date_range("2033-01-01", periods=8760, freq="H")
+    t1 = pd.date_range("2022-01-01", periods=8760, freq="h")
+    t2 = pd.date_range("2033-01-01", periods=8760, freq="h")
     tindex = t1.append(t2)
 
     data.index = tindex
