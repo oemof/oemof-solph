@@ -135,7 +135,7 @@ def main():
     ]["flow"]
     results_df["storage_relative"] = results[(storage_relative, None)][
         "sequences"
-    ]
+    ]["storage_content"]
     results_df["storage_relative_inflow"] = results[(bus, storage_relative)][
         "sequences"
     ]["flow"]
