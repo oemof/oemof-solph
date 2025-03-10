@@ -37,7 +37,7 @@ from .helpers import flatten
 
 # FIXME: We should not rely on variable names to be repeated.
 # This will cause problems when refactoring. (It already did.)
-PERIOD_INDEXES = ["capacity", "invest_status"]
+PERIOD_INDEXES = ["capacity", "invest_status", "invest"]
 
 
 def get_tuple(x):
@@ -477,14 +477,14 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
         inter_value = soc["inter"].iloc[i]["value"]
         # Self-discharge has to be taken into account for calculating
         # inter SOC for each timestep in cluster
-        t0 = i * tsa_parameters["timesteps"]
+        t0 = i * tsa_parameters["timesteps_per_period"]
         # Add last timesteps of simulation in order to interpolate SOC for
         # last segment correctly:
         is_last_timestep = i == len(tsa_parameters["order"]) - 1
         timesteps = (
-            tsa_parameters["timesteps"] + 1
+            tsa_parameters["timesteps_per_period"] + 1
             if is_last_timestep
-            else tsa_parameters["timesteps"]
+            else tsa_parameters["timesteps_per_period"]
         )
         inter_series = (
             pd.Series(
@@ -507,7 +507,7 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
             )
             * inter_value
         )
-        intra_series = soc["intra"][(0, k)].iloc[0:timesteps]
+        intra_series = soc["intra"][k].iloc[0:timesteps]
         soc_frame = pd.DataFrame(
             intra_series["value"].values
             + inter_series.values,  # Neglect indexes, otherwise none
@@ -572,17 +572,15 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         storage_keys.append(oemof_tuple)
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
-        if len(oemof_tuple) == 2:
+        if oemof_tuple[1] is None:
             # Must be filtered for variable name "storage_content_inter",
             # otherwise "init_content" variable (in non-multi-period approach)
             # interferes with SOC results
             storages[oemof_tuple[0]]["inter"] = data[
                 data["variable_name"] == "storage_content_inter"
             ]
-        if len(oemof_tuple) == 3:
-            storages[oemof_tuple[0]]["intra"][
-                (oemof_tuple[1], oemof_tuple[2])
-            ] = data
+        elif isinstance(oemof_tuple[1], int):
+            storages[oemof_tuple[0]]["intra"][oemof_tuple[1]] = data
     return storages, storage_keys
 
 

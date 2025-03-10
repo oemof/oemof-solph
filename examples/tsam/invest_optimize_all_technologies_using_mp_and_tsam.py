@@ -228,7 +228,7 @@ def main():
     energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas)
 
     storage = None
-    if False:
+    if True:
         # create storage object representing a battery
         storage = solph.components.GenericStorage(
             label="storage",
@@ -287,7 +287,7 @@ def main():
     if storage:
         # installed capacity of storage in GWh
         my_results["storage_invest_GWh"] = (
-            results[(storage, None)]["period_scalars"]["capacity"] / 1e6
+            results[(storage, None)]["scalars"]["invest"] / 1e6
         )
 
     # installed capacity of wind power plant in MW
