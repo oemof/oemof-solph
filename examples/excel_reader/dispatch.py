@@ -375,7 +375,7 @@ def main(optimize=True):
     # read node data from Excel sheet
     excel_nodes = nodes_from_excel(
         os.path.join(
-            os.getcwd(),
+            os.path.dirname(os.path.abspath(__file__)),
             "scenario.xlsx",
         )
     )
