@@ -62,6 +62,8 @@ Johannes Röder <johannes.roeder@uni-bremen.de>
 import logging
 import os
 
+from PIL.ImageChops import offset
+
 try:
     import matplotlib.pyplot as plt
 except ModuleNotFoundError:
@@ -71,8 +73,8 @@ from oemof import solph
 
 
 def main(optimize=True):
-    data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
+    data = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # create an energy system
     idx = solph.create_time_index(2020, number=len(data))
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
@@ -143,11 +145,15 @@ def main(optimize=True):
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
+                        custom_attributes={"space": {"cost": 1,
+                                                     "offset" : 30}},
+                        nonconvex=True,
+                        maximum=1000
                     ),
+                    custom_attributes={"space": 0.1}
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
+            conversion_factors={bus_a_1: 1},
         )
     )
 
@@ -160,11 +166,14 @@ def main(optimize=True):
                 bus_b_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
+                        custom_attributes={"space": {"cost": 1}},
+                        maximum=1000
                     ),
+                    custom_attributes={"space": 0.1}
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
+            conversion_factors={bus_a_1: 1},
+
         )
     )
 
@@ -175,10 +184,9 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # add constraint for generic investment limit
-    om = solph.constraints.additional_investment_flow_limit(
-        om, "space", limit=24
+    om = solph.constraints.additional_total_limit(
+        om, "space", limit=100
     )
-
     # export lp file
     filename = os.path.join(
         solph.helpers.extend_basic_path("lp_files"), "GenericInvest.lp"
@@ -187,7 +195,7 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    om.solve(solver="gurobi", solve_kwargs={"tee": True})
 
     # create result object
     results = solph.processing.results(om)
@@ -204,7 +212,7 @@ def main(optimize=True):
         plt.legend()
         plt.show()
 
-    space_used = om.invest_limit_space()
+    space_used = om.total_limit_space()
     print("Space value: ", space_used)
     print(
         "Investment trafo_a: ",
