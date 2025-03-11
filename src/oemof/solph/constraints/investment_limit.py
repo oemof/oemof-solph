@@ -227,3 +227,123 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     )
 
     return model
+
+def additional_total_limit(model, keyword, limit=None):
+    r"""
+    Global limit for investment flows weighted by an attribute keyword.
+
+    This constraint is only valid for Flows not for components such as an
+    investment storage.
+
+    The attribute named by keyword has to be added to every Investment
+    attribute of the flow you want to take into account.
+    Total value of keyword attributes after optimization can be retrieved
+    calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
+
+    .. math::
+        \sum_{p \in \textrm{PERIODS}}
+        \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
+
+    With `IF` being the set of InvestmentFlows considered for the integral
+    limit.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol           | attribute                             | type | explanation                                                  |
+    +==================+=======================================+======+==============================================================+
+    | :math:`P_{i}(p)` | `InvestmentFlowBlock.invest[i, o, p]` | V    | invested capacity of investment flow in period p             |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which constraints are added.
+    keyword : attribute to consider
+        All flows with Investment attribute containing the keyword will be
+        used.
+    limit : numeric
+        Global limit of keyword attribute for the energy system.
+
+    Note
+    ----
+    The Investment attribute of the considered (Investment-)flows requires an
+    attribute named like keyword!
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2020', periods=6, freq='h')
+    >>> es = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
+    >>> bus = solph.buses.Bus(label='bus_1')
+    >>> sink = solph.components.Sink(label="sink", inputs={bus:
+    ...     solph.flows.Flow(nominal_capacity=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.components.Source(
+    ...     label='source_0', outputs={bus: solph.flows.Flow(
+    ...         nominal_capacity=solph.Investment(
+    ...             ep_costs=50, custom_attributes={"space": 4},
+    ...         ))
+    ...     })
+    >>> src2 = solph.components.Source(
+    ...     label='source_1', outputs={bus: solph.flows.Flow(
+    ...         nominal_capacity=solph.Investment(
+    ...              ep_costs=100, custom_attributes={"space": 1},
+    ...         ))
+    ...     })
+    >>> es.add(bus, sink, src1, src2)
+    >>> model = solph.Model(es)
+    >>> model = solph.constraints.additional_investment_flow_limit(
+    ...     model, "space", limit=1500)
+    >>> a = model.solve(solver="cbc")
+    >>> int(round(model.invest_limit_space()))
+    1500
+    """  # noqa: E501
+    invest_flows = {}
+    operational_flows = {}
+    for i, o in model.flows:
+        if hasattr(model.flows[i, o].investment, keyword):
+            invest_flows[(i, o)] = model.flows[i, o].investment
+        if hasattr(model.flows[i, o], keyword):
+            operational_flows[(i, o)] = model.flows[i, o]
+    limit_name = "total_limit_" + keyword
+
+    setattr(
+        model,
+        limit_name,
+        po.Expression(
+            expr=sum(
+                model.InvestmentFlowBlock.invest[inflow, outflow, p]
+                * getattr(invest_flows[inflow, outflow], keyword).get("cost", 0)
+                + model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
+                * getattr(invest_flows[inflow, outflow], keyword).get("offset", 0)
+                if (inflow, outflow, p) in model.InvestmentFlowBlock.invest_status else 0
+                for (inflow, outflow) in invest_flows
+                for p in model.PERIODS
+            ) +
+                 sum(
+                 model.flow[inflow, outflow, t]
+                 * model.timeincrement[t]
+                 * sequence(getattr(operational_flows[inflow, outflow], keyword))[t]
+                 for (inflow, outflow) in operational_flows
+                 for p in model.PERIODS
+                 for t in model.TIMESTEPS_IN_PERIOD[p]
+                 )
+        ),
+    )
+
+    setattr(
+        model,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    )
+
+    return model
