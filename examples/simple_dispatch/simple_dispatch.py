@@ -43,7 +43,6 @@ License
 """
 
 import os
-import warnings
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -59,22 +58,12 @@ from oemof.solph.components import Sink
 from oemof.solph.components import Source
 
 
-def main():
+def main(optimize=True):
     # Read data file
-    filename = os.path.join(os.getcwd(), "input_data.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame(
-            {
-                "pv": [0.3, 0.7],
-                "wind": [0.6, 0.5],
-                "demand_el": [500, 400],
-                "demand_th": [400, 300],
-            }
-        )
+    filename = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "input_data.csv"
+    )
+    data = pd.read_csv(filename)
 
     solver = "cbc"
 
@@ -203,6 +192,9 @@ def main():
     )
 
     # ################################ optimization ###########################
+
+    if optimize is False:
+        return energysystem
 
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)

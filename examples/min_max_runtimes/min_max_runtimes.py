@@ -35,7 +35,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Create demand data
     demand_el = [0] * 24
     for n in [10, 15, 19]:
@@ -86,6 +86,9 @@ def main():
     )
 
     es.add(bel, dummy_el, demand_el, pp1, pp2)
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)
