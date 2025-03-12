@@ -2,7 +2,7 @@
 r"""
 General description
 -------------------
-Example that shows how to use "Generic Investment Limit".
+Example that shows how to use "Generic Investment Limit With Offset".
 
 There are two supply chains. The energy systems looks like that:
 
@@ -21,26 +21,34 @@ There are two supply chains. The energy systems looks like that:
                                      |
                        source_b_1--->|
                                      |
+                                     v
+                              generic_storage_b
+                               /            \
+                              |              |
+                              v              v
+                            bus_b_1        bus_b_1
+
 
 Everything is identical - the costs for the sources, the demand, the efficiency
 of the Converter. And both Converter have an investment at the output.
 The source '\*_1' is in both cases very expensive, so that
-a investment is probably done in the converter.
-Now, both investments share a third resource, which is called "space" in this
+a investment is probably done in the converter. The demand and the
+maximum investment in Converter b1 is so set, that an investment in a generic
+storage is beneficial to not use source b0.
+Now, all investments share a third resource, which is called "space" in this
 example. (This could be anything, and you could use as many additional
 resources as you want.) And this resource is limited. In this case, every
-converter capacity unit, which might be installed, needs 2 space for
-'trafo a', and 1 space per installed capacity for 'trafo b'.
-And the total space is limited to 24.
+converter and storage capacity unit, which might be installed, needs 2 space
+for each installed capacity as well as an offset.
 See what happens, have fun ;)
 
 Code
 ----
-Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest.py>`
+Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest_offset.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
+    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest_offset.py
         :language: python
         :lines: 62-
 
@@ -54,13 +62,15 @@ This example requires oemof.solph (v0.5.x), install by:
 
 License
 -------
-Johannes Röder <johannes.roeder@uni-bremen.de>
+Maximilian Hillen <maximilian.hillen@dlr.de>
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
 
 import logging
 import os
+
+from PIL.ImageChops import offset
 
 try:
     import matplotlib.pyplot as plt
@@ -71,8 +81,8 @@ from oemof import solph
 
 
 def main(optimize=True):
-    data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
+    data = [2, 2, 12, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # create an energy system
     idx = solph.create_time_index(2020, number=len(data))
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
@@ -81,7 +91,7 @@ def main(optimize=True):
     c_0 = 10
     c_1 = 100
 
-    epc_invest = 500
+    epc_invest = 50
 
     # commodity a
     bus_a_0 = solph.Bus(label="bus_a_0")
@@ -143,11 +153,17 @@ def main(optimize=True):
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
+                        custom_attributes={"space": {"cost": 1,
+                                                     "offset" : 20
+                                                     }
+                                           },
+                        nonconvex=True,
+                        maximum=100
                     ),
+                    custom_attributes={"space": 0.1}
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
+            conversion_factors={bus_a_1: 1},
         )
     )
 
@@ -160,14 +176,33 @@ def main(optimize=True):
                 bus_b_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
+                        custom_attributes={"space": {"cost": 1}},
+                        nonconvex=True,
+                        maximum=8
                     ),
+                    custom_attributes={"space": 0.1}
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
         )
     )
-
+    if True:
+        # Generic Storage
+        es.add(
+            solph.components.GenericStorage(
+                label="generic_storage_b",
+                inputs={bus_b_1: solph.Flow()},
+                outputs={bus_b_1: solph.Flow()},
+                inflow_conversion_factor=0.9,
+                nominal_capacity = solph.Investment(
+                    ep_costs=epc_invest ,
+                    nonconvex=True,
+                    maximum=10,
+                    custom_attributes={"space": {"cost": 0.5, "offset":20 }},
+                    #maximum=1000
+                    )
+                ,
+            )
+        )
     if optimize is False:
         return es
 
@@ -175,10 +210,9 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # add constraint for generic investment limit
-    om = solph.constraints.additional_investment_flow_limit(
-        om, "space", limit=24
+    om = solph.constraints.additional_total_limit(
+        om, "space", limit=100
     )
-
     # export lp file
     filename = os.path.join(
         solph.helpers.extend_basic_path("lp_files"), "GenericInvest.lp"
@@ -187,7 +221,7 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    om.solve(solver="gurobi", solve_kwargs={"tee": True})
 
     # create result object
     results = solph.processing.results(om)
@@ -204,7 +238,7 @@ def main(optimize=True):
         plt.legend()
         plt.show()
 
-    space_used = om.invest_limit_space()
+    space_used = om.total_limit_space()
     print("Space value: ", space_used)
     print(
         "Investment trafo_a: ",

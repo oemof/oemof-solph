@@ -230,22 +230,26 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
 def additional_total_limit(model, keyword, limit=None):
     r"""
-    Global limit for investment flows weighted by an attribute keyword.
+    Global limit for investment flows and operation flows
+    weighted by an attribute keyword.
 
-    This constraint is only valid for Flows not for components such as an
+    This constraint is  valid for Flows and for an
     investment storage.
 
     The attribute named by keyword has to be added to every Investment
     attribute of the flow you want to take into account.
     Total value of keyword attributes after optimization can be retrieved
-    calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
+    calling the `oemof.solph._models.Model.total_limit_${keyword}()`.
 
     .. math::
         \sum_{p \in \textrm{PERIODS}}
-        \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
+        \sum_{i \in IF}  P_{i}(p) \cdot w_i
+        \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
+               \cdot \tau(t) \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
-    limit.
+    limit,  `F_I` being the set of flows considered for the integral limit and
+    `T` being the set of time steps.
 
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
@@ -258,6 +262,12 @@ def additional_total_limit(model, keyword, limit=None):
     | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
     +------------------+---------------------------------------+------+--------------------------------------------------------------+
     | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`P_n(p, t)`| `limit`                               | P    | power flow :math:`n` at time index :math:`p, t`              |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_N(t)`   | `limit`                               | P    | weight given to Flow named according to `keyword`            |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`\tau(t)`  | `limit`                               | P    | width of time step :math:`t`                                 |
     +------------------+---------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
@@ -319,11 +329,6 @@ def additional_total_limit(model, keyword, limit=None):
     if hasattr(model, "GenericInvestmentStorageBlock"):
         for st, _ in model.GenericInvestmentStorageBlock.invest:
             storages[st] = [st]
-    if False:
-        for st in storages:
-            getattr(storages[st][0].investment, keyword).get("cost", 0)
-        for st in storages:
-            model.GenericInvestmentStorageBlock.total[st]
     setattr(
         model,
         limit_name,
