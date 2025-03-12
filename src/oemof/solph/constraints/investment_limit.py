@@ -309,13 +309,21 @@ def additional_total_limit(model, keyword, limit=None):
     """  # noqa: E501
     invest_flows = {}
     operational_flows = {}
+    storages = {}
     for i, o in model.flows:
         if hasattr(model.flows[i, o].investment, keyword):
             invest_flows[(i, o)] = model.flows[i, o].investment
         if hasattr(model.flows[i, o], keyword):
             operational_flows[(i, o)] = model.flows[i, o]
     limit_name = "total_limit_" + keyword
-
+    if hasattr(model, "GenericInvestmentStorageBlock"):
+        for st, _ in model.GenericInvestmentStorageBlock.invest:
+            storages[st] = [st]
+    if False:
+        for st in storages:
+            getattr(storages[st][0].investment, keyword).get("cost", 0)
+        for st in storages:
+            model.GenericInvestmentStorageBlock.total[st]
     setattr(
         model,
         limit_name,
@@ -336,6 +344,16 @@ def additional_total_limit(model, keyword, limit=None):
                  for (inflow, outflow) in operational_flows
                  for p in model.PERIODS
                  for t in model.TIMESTEPS_IN_PERIOD[p]
+            ) +
+                 sum(
+                 model.GenericInvestmentStorageBlock.total[st, p]
+                 * getattr(storages[st][0].investment, keyword).get("cost", 0)
+                 + model.GenericInvestmentStorageBlock.invest_status[st, p]
+                 * getattr(storages[st][0].investment, keyword).get("offset", 0)
+                 if (st, p) in model.GenericInvestmentStorageBlock.invest_status else 0
+                 for st in storages
+                 for p in model.PERIODS
+                 if hasattr(model, "GenericInvestmentStorageBlock")
                  )
         ),
     )

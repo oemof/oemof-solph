@@ -74,7 +74,7 @@ from oemof import solph
 
 def main(optimize=True):
 
-    data = [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    data = [2, 2, 12, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
     # create an energy system
     idx = solph.create_time_index(2020, number=len(data))
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
@@ -83,7 +83,7 @@ def main(optimize=True):
     c_0 = 10
     c_1 = 100
 
-    epc_invest = 500
+    epc_invest = 50
 
     # commodity a
     bus_a_0 = solph.Bus(label="bus_a_0")
@@ -146,9 +146,11 @@ def main(optimize=True):
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": {"cost": 1,
-                                                     "offset" : 30}},
+                                                     "offset" : 20
+                                                     }
+                                           },
                         nonconvex=True,
-                        maximum=1000
+                        maximum=100
                     ),
                     custom_attributes={"space": 0.1}
                 )
@@ -167,16 +169,32 @@ def main(optimize=True):
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_attributes={"space": {"cost": 1}},
-                        maximum=1000
+                        nonconvex=True,
+                        maximum=8
                     ),
                     custom_attributes={"space": 0.1}
                 )
             },
-            conversion_factors={bus_a_1: 1},
-
         )
     )
-
+    if True:
+        # Generic Storage
+        es.add(
+            solph.components.GenericStorage(
+                label="generic_storage_b",
+                inputs={bus_b_1: solph.Flow()},
+                outputs={bus_b_1: solph.Flow()},
+                inflow_conversion_factor=0.9,
+                nominal_capacity = solph.Investment(
+                    ep_costs=epc_invest ,
+                    nonconvex=True,
+                    maximum=10,
+                    custom_attributes={"space": {"cost": 0.5, "offset":20 }},
+                    #maximum=1000
+                    )
+                ,
+            )
+        )
     if optimize is False:
         return es
 
