@@ -1676,15 +1676,42 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_fix_rule(block, n):
                 """Constraint for a fixed initial storage capacity."""
-                return block.storage_content[
-                    n, 0
-                ] == n.initial_storage_level * (
+                return block.init_content[n] == n.initial_storage_level * (
                     n.investment.existing + block.invest[n, 0]
                 )
 
             self.init_content_fix = Constraint(
                 self.INVESTSTORAGES_INIT_CONTENT,
                 rule=_inv_storage_init_content_fix_rule,
+            )
+
+            def _storage_balance_first_rule(block, n):
+                """
+                Rule definition for the storage balance of every storage n
+                for the first time step.
+                """
+                expr = 0
+                expr += block.storage_content[n, 0]
+                expr += (
+                    -block.init_content[n]
+                    * (1 - n.loss_rate[0]) ** m.timeincrement[0]
+                )
+                expr += (
+                    n.fixed_losses_relative[0]
+                    * (n.investment.existing + self.invest[n, 0])
+                    * m.timeincrement[0]
+                )
+                expr += n.fixed_losses_absolute[0] * m.timeincrement[0]
+                expr += (
+                    -m.flow[i[n], n, 0] * n.inflow_conversion_factor[0]
+                ) * m.timeincrement[0]
+                expr += (
+                    m.flow[n, o[n], 0] / n.outflow_conversion_factor[0]
+                ) * m.timeincrement[0]
+                return expr == 0
+
+            self.balance_first = Constraint(
+                self.INVESTSTORAGES, rule=_storage_balance_first_rule
             )
 
         def _storage_balance_rule(block, n, p, t):
