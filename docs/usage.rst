@@ -613,8 +613,7 @@ By calling:
 
     views.node(results, 'your_storage_label')['scalars']
 
-you get the results of the scalar values of your storage, e.g. the initial
-storage content before time step zero (``init_content``).
+you get the results of the scalar values of your storage.
 
 For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the :ref:`examples_label`.
 

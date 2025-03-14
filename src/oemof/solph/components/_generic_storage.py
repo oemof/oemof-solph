@@ -1440,11 +1440,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
             )
 
-        else:
-            self.init_content = Var(
-                self.INVESTSTORAGES, within=NonNegativeReals
-            )
-
         # create status variable for a non-convex investment storage
         self.invest_status = Var(
             self.NON_CONVEX_INVESTSTORAGES, m.PERIODS, within=Binary
@@ -1665,7 +1660,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             def _inv_storage_init_content_max_rule(block, n):
                 """Constraint for a variable initial storage capacity."""
                 return (
-                    block.init_content[n]
+                    block.storage_content[n, 0]
                     <= n.investment.existing + block.invest[n, 0]
                 )
 
@@ -1790,7 +1785,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMESTEPS.at(-1)]
-                    == block.init_content[n]
+                    == block.storage_content[n, m.TIMESTEPS.at(1)]
                 )
 
             self.balanced_cstr = Constraint(

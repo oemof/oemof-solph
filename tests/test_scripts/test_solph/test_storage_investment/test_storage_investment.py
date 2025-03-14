@@ -201,9 +201,9 @@ def test_results_with_recent_dump():
     # Problem results
     assert meta["problem"]["Lower bound"] == 4.231675777e17
     assert meta["problem"]["Upper bound"], 4.231675777e17
-    assert meta["problem"]["Number of variables"] == 2808
+    assert meta["problem"]["Number of variables"] == 2807
     assert meta["problem"]["Number of constraints"] == 2809
-    assert meta["problem"]["Number of nonzeros"] == 1199
+    assert meta["problem"]["Number of nonzeros"] == 1194
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
 
