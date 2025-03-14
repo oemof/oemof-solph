@@ -1659,10 +1659,13 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_max_rule(block, n):
                 """Constraint for a variable initial storage capacity."""
+                if not m.TSAM_MODE:
+                    lhs = block.storage_content[n, 0]
+                else:
+                    lhs = block.storage_content_intra[n, 0, 0, 0]
                 return (
-                    block.storage_content[n, 0]
-                    <= n.investment.existing + block.invest[n, 0]
-                )
+                        lhs <= n.investment.existing + block.invest[n, 0]
+                    )
 
             self.init_content_limit = Constraint(
                 self.INVESTSTORAGES_NO_INIT_CONTENT,
@@ -1671,9 +1674,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_fix_rule(block, n):
                 """Constraint for a fixed initial storage capacity."""
-                return block.storage_content[
-                    n, 0
-                ] == n.initial_storage_level * (
+                if not m.TSAM_MODE:
+                    lhs = block.storage_content[n, 0]
+                else:
+                    lhs = block.storage_content_intra[n, 0, 0, 0]
+                return lhs == n.initial_storage_level * (
                     n.investment.existing + block.invest[n, 0]
                 )
 
