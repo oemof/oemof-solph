@@ -25,8 +25,9 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 
-from ._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph._options import NonConvex
+
+from ._non_convex_flow_block import NonConvexFlowBlock
 
 
 class InvestNonConvexFlowBlock(NonConvexFlowBlock):
@@ -102,7 +103,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         :math::
             `Y_{invest_status}(i,o,p)` `InvestNonConvexFlowBlock.invest_status`
-            Binary variable representing whether or not an investment is made. 
+            Binary variable representing whether or not an investment is made.
 
         :math::`status\_nominal(i,o,t)` (non-negative real number)
             New paramater representing the multiplication of `P_{invest}`
