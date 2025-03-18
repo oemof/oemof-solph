@@ -9,9 +9,11 @@ SPDX-License-Identifier: MIT
 
 """
 
+import warnings
 from functools import cache
 
 import pandas as pd
+from oemof.tools import debugging
 from pyomo.core.base.var import Var
 
 from ._models import Model
@@ -24,6 +26,11 @@ class Results:
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
     def __init__(self, model: Model):
+        msg = (
+            "The class 'Results' is experimental. Functionality and API can"
+            " be changed without warning during any update."
+        )
+        warnings.warn(msg, debugging.ExperimentalFeatureWarning)
         # TODO: Disambiguate colliding variable names.
         self.variables = {
             str(variable).split(".")[-1]: variable
