@@ -173,8 +173,8 @@ class Investment:
                 msg = (
                     "It is not necessary to set the investment to `nonconvex` "
                     "if `minimum` and `offset` are 0.\n"
-                    "This can lead to the `invest_status` variable becoming 1, "
-                    "even if the `nominal_capacity` is optimized to 0."
+                    "This can lead to the `invest_status` variable becoming "
+                    "1, even if the `nominal_capacity` is optimized to 0."
                 )
                 warn(msg, debugging.SuspiciousUsageWarning)
 
