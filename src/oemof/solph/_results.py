@@ -31,12 +31,17 @@ class Results:
             " be changed without warning during any update."
         )
         warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-        # TODO: Disambiguate colliding variable names.
-        self.variables = {
-            str(variable).split(".")[-1]: variable
-            for vardata in model.component_data_objects(Var)
-            for variable in [vardata.parent_component()]
-        }
+        self.variables = {}
+        for vardata in model.component_data_objects(Var):
+            for variable in [vardata.parent_component()]:
+                key = str(variable).split(".")[-1]
+                if key not in self.variables:
+                    self.variables[key] = variable
+                else:
+                    raise ValueError(
+                        f"Variable name defined multiple times: {key}"
+                        + f"(last time in '{variable}')"
+                    )
 
     @cache
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
