@@ -37,6 +37,10 @@ class Results:
                 key = str(variable).split(".")[-1]
                 if key not in self.variables:
                     self.variables[key] = variable
+                elif self.variables[key] == variable:
+                    # For debugging purposes.
+                    # We should avoid useless iterations.
+                    pass
                 else:
                     raise ValueError(
                         f"Variable name defined multiple times: {key}"
