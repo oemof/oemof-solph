@@ -36,7 +36,7 @@ from oemof import solph
 from oemof.solph import constraints
 
 
-def main():
+def main(optimize=True):
     # create energy system
     energysystem = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
@@ -101,6 +101,9 @@ def main():
             conversion_factors={bel: 0.58},
         )
     )
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = solph.Model(energysystem)

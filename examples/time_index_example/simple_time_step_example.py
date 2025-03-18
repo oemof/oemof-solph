@@ -45,7 +45,7 @@ import matplotlib.pyplot as plt
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
@@ -85,6 +85,14 @@ def main():
     )
 
     energy_system.add(bus, source, sink, storage)
+
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
+
+    if optimize is False:
+        return energy_system
+
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 

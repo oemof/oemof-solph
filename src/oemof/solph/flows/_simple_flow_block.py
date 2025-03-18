@@ -221,7 +221,9 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
@@ -241,7 +243,9 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
@@ -433,17 +437,33 @@ class SimpleFlowBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        for i, o in m.FLOWS:
-            if valid_sequence(m.flows[i, o].variable_costs, len(m.TIMESTEPS)):
-                for t in m.TIMESTEPS:
-                    variable_costs += (
-                        m.flow[i, o, t]
-                        * m.objective_weighting[t]
-                        * m.flows[i, o].variable_costs[t]
-                    )
-
-        if m.es.periods is not None:
+        if m.es.periods is None:
             for i, o in m.FLOWS:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
+                    for t in m.TIMESTEPS:
+                        variable_costs += (
+                            m.flow[i, o, t]
+                            * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
+                            * m.flows[i, o].variable_costs[t]
+                        )
+
+        else:
+            for i, o in m.FLOWS:
+                if valid_sequence(
+                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+                ):
+                    for p, t in m.TIMEINDEX:
+                        variable_costs += (
+                            m.flow[i, o, t]
+                            * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
+                            * m.flows[i, o].variable_costs[t]
+                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                        )
+
                 # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None

@@ -60,7 +60,7 @@ DATA = [
 PARAMETER = {"el_price": 10, "ex_price": 5, "nominal_storage_capacity": 7}
 
 
-def storage_example():
+def main(optimize=True):
     timeseries = pd.DataFrame(
         {"demand_el": [7, 6, 6, 7], "pv_el": [3, 5, 3, 12]}
     )
@@ -126,6 +126,9 @@ def storage_example():
             )
         )
 
+    if optimize is False:
+        return es
+
     # create an optimization problem and solve it
     om = solph.Model(es)
 
@@ -172,4 +175,4 @@ def storage_example():
 
 
 if __name__ == "__main__":
-    storage_example()
+    main()

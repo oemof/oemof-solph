@@ -102,7 +102,7 @@ def plot_figures_for(element: dict) -> None:
     plt.show()
 
 
-def main(dump_and_restore=False):
+def main(dump_and_restore=False, optimize=True):
     # For models that need a long time to optimise, saving and loading the
     # EnergySystem might be advised. By default, we do not do this here. Feel
     # free to experiment with this once you understood the rest of the code.
@@ -247,6 +247,9 @@ def main(dump_and_restore=False):
     ##########################################################################
     # Optimise the energy system and plot the results
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
