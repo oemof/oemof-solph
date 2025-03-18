@@ -13,6 +13,8 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Pierre-François Duc
+SPDX-FileCopyrightText: Malte Fritz
+SPDX-FileCopyrightText: Jonas Freißmann
 
 SPDX-License-Identifier: MIT
 

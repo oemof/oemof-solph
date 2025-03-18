@@ -9,6 +9,8 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Malte Fritz
+SPDX-FileCopyrightText: Jonas Freißmann
 
 SPDX-License-Identifier: MIT
 
