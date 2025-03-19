@@ -2,10 +2,8 @@
 This example compares a cheap and an expensive heat pump, with the latter
 adding a fixed invest cost offset to the objective function.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location
-oemof/tests/test_scripts/test_solph/test_non_convex_investment_offset/test_non_convex_investment_offset.py
+SPDX-FileCopyrightText: Jonas Freißmann
+SPDX-FileCopyrightText: Malte Fritz
 
 SPDX-License-Identifier: MIT
 """
