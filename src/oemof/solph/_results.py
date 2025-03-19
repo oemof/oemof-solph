@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import warnings
 from functools import cache
 
+import numpy as np
 import pandas as pd
 from oemof.tools import debugging
 from pyomo.core.base.var import Var
@@ -34,6 +35,7 @@ class Results:
 
         self._solver_results = model.solver_results
         self._variables = {}
+        self._model = model
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
                 key = str(variable).split(".")[-1]
@@ -71,7 +73,14 @@ class Results:
         df = pd.DataFrame(variable.extract_values(), index=[0]).stack(
             future_stack=True
         )
-        df.index = df.index.get_level_values(-1)
+        # overwrite known indexes
+        match tuple(variable.index_set().subsets())[-1].name:
+            case "TIMEPOINTS":
+                df.index = self._model.es.timeindex
+            case "TIMESTEPS":
+                df.index = self._model.es.timeindex[:-1]
+            case _:
+                df.index = df.index.get_level_values(-1)
         return df
 
     def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
