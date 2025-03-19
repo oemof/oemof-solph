@@ -100,11 +100,7 @@ def plot_figures_for(element: dict) -> None:
     plt.show()
 
 
-def main(dump_and_restore=False, optimize=True):
-    # For models that need a long time to optimise, saving and loading the
-    # EnergySystem might be advised. By default, we do not do this here. Feel
-    # free to experiment with this once you understood the rest of the code.
-    dump_results = restore_results = dump_and_restore
+def main(optimize=True):
 
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
@@ -115,7 +111,6 @@ def main(dump_and_restore=False, optimize=True):
     data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
-    debug = True  # Set number_of_timesteps to 3 to get a readable lp-file.
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
 
@@ -284,7 +279,7 @@ def main(dump_and_restore=False, optimize=True):
     print(
         f"{result_dict[(storage, None)]['sequences'][start_time : end_time]}\n"
     )
-    # print(f"{results.storage_content[storage][start_time : end_time]}\n")
+    print(f"{results.storage_content[storage][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
     custom_storage = views.node(result_dict, "battery_storage")
