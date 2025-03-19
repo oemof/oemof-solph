@@ -40,7 +40,7 @@ Download source code: :download:`result_object.py </../examples/result_object/re
 
 Data
 ----
-Download data: :download:`time_series.csv </../examples/basic_example/time_series.csv>`
+Download data: :download:`time_series.csv </../examples/result_object/time_series.csv>`
 
 Installation requirements
 -------------------------
