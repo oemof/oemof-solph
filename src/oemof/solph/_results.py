@@ -15,8 +15,8 @@ from functools import cache
 import pandas as pd
 from oemof.tools import debugging
 from pyomo.core.base.var import Var
-
-from ._models import Model
+from pyomo.environ import ConcreteModel
+from pyomo.opt.results.container import ListContainer
 
 
 class Results:
@@ -25,19 +25,24 @@ class Results:
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: Model):
+    def __init__(self, model: ConcreteModel):
         msg = (
             "The class 'Results' is experimental. Functionality and API can"
             " be changed without warning during any update."
         )
         warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-        self.variables = {}
+
+        self._solver_results = model.solver_results
+        self._variables = {}
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
                 key = str(variable).split(".")[-1]
-                if key not in self.variables:
-                    self.variables[key] = variable
-                elif self.variables[key] == variable:
+                if (
+                    key not in self._variables
+                    and key not in self._solver_results
+                ):
+                    self._variables[key] = variable
+                elif self._variables[key] == variable:
                     # For debugging purposes.
                     # We should avoid useless iterations.
                     pass
@@ -62,15 +67,19 @@ class Results:
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
-        variable = self.variables[variable]
+        variable = self._variables[variable]
         df = pd.DataFrame(variable.extract_values(), index=[0]).stack(
             future_stack=True
         )
         df.index = df.index.get_level_values(-1)
         return df
 
-    def __getattr__(self, variable: str) -> pd.DataFrame | pd.Series:
-        return self[variable]
+    def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
+        return self[key]
 
-    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
-        return self.to_df(variable)
+    def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
+        # backward-compatibility with returned results object from Pyomo
+        if key in self._solver_results:
+            return self._solver_results[key]
+        else:
+            return self.to_df(key)
