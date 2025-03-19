@@ -12,7 +12,6 @@ SPDX-License-Identifier: MIT
 import warnings
 from functools import cache
 
-import numpy as np
 import pandas as pd
 from oemof.tools import debugging
 from pyomo.core.base.var import Var
