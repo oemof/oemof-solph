@@ -54,6 +54,9 @@ class Results:
                         + f"(last time in '{variable}')"
                     )
 
+    def keys(self):
+        return self._solver_results.keys() | self._variables.keys()
+
     @cache
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
         # TODO:
