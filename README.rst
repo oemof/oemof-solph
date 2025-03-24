@@ -179,7 +179,7 @@ To install the solvers have a look at the package repository of your Linux distr
  1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
- 4. Add the path of the executable files of both solvers to the PATH variable (cf. `setting environment variables as user <https://learn.microsoft.com/de-de/troubleshoot/windows-client/performance/cannot-modify-user-environment-variables-system-properties>`_)
+ 4. Add the path of the executable files of both solvers to the PATH variable (cf. `setting environment variables as user <https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/cannot-modify-user-environment-variables-system-properties>`_)
  5. Restart Windows
 
 Check the solver installation by executing the test_installation example (see the `Installation test` section).
