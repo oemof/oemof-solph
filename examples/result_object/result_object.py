@@ -30,21 +30,21 @@ The following energy system is modeled:
 
 Code
 ----
-Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
+Download source code: :download:`result_object.py </../examples/result_object/result_object.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/basic_example/basic_example.py
+    .. literalinclude:: /../examples/result_object/result_object.py
         :language: python
         :lines: 61-
 
 Data
 ----
-Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
+Download data: :download:`time_series.csv </../examples/result_object/time_series.csv>`
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (v0.6.x), install by:
 
 .. code:: bash
 
@@ -73,11 +73,9 @@ from oemof.solph import buses
 from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
-from oemof.solph import helpers
 from oemof.solph import processing
+from oemof.solph import Results
 from oemof.solph import views
-
-STORAGE_LABEL = "battery_storage"
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
@@ -102,22 +100,17 @@ def plot_figures_for(element: dict) -> None:
     plt.show()
 
 
-def main(dump_and_restore=False, optimize=True):
-    # For models that need a long time to optimise, saving and loading the
-    # EnergySystem might be advised. By default, we do not do this here. Feel
-    # free to experiment with this once you understood the rest of the code.
-    dump_results = restore_results = dump_and_restore
+def main(optimize=True):
 
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
 
     # Read data file
-    file_name = "basic_example.csv"
+    file_name = "time_series.csv"
     data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
-    debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
 
@@ -227,7 +220,7 @@ def main(dump_and_restore=False, optimize=True):
 
     battery_storage = components.GenericStorage(
         nominal_capacity=nominal_capacity,
-        label=STORAGE_LABEL,
+        label="battery_storage",
         inputs={
             bus_electricity: flows.Flow(nominal_capacity=nominal_capacity)
         },
@@ -256,18 +249,6 @@ def main(dump_and_restore=False, optimize=True):
     # initialise the operational model
     energysystem_model = Model(energysystem)
 
-    # This is for debugging only. It is not(!) necessary to solve the problem
-    # and should be set to False to save time and disc space in normal use. For
-    # debugging the timesteps should be set to 3, to increase the readability
-    # of the lp-file.
-    if debug:
-        file_path = os.path.join(
-            helpers.extend_basic_path("lp_files"), "basic_example.lp"
-        )
-        logging.info(f"Store lp-file in {file_path}.")
-        io_option = {"symbolic_solver_labels": True}
-        energysystem_model.write(file_path, io_options=io_option)
-
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
     energysystem_model.solve(
@@ -279,55 +260,34 @@ def main(dump_and_restore=False, optimize=True):
     # The processing module of the outputlib can be used to extract the results
     # from the model transfer them into a homogeneous structured dictionary.
 
-    # add results to the energy system to make it possible to store them.
-    energysystem.results["main"] = processing.results(energysystem_model)
-    energysystem.results["meta"] = processing.meta_results(energysystem_model)
+    results = Results(energysystem_model)
 
-    # The default path is the '.oemof' folder in your $HOME directory.
-    # The default filename is 'es_dump.oemof'.
-    # You can omit the attributes (as None is the default value) for testing
-    # cases. You should use unique names/folders for valuable results to avoid
-    # overwriting.
-    if dump_results:
-        energysystem.dump(dpath=None, filename=None)
+    result_dict = processing.results(energysystem_model)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************
     # *************************************************************************
 
-    # Saved data can be restored in a second script. So you can work on the
-    # data analysis without re-running the optimisation every time. If you do
-    # so, make sure that you really load the results you want. For example,
-    # if dumping fails, you might exidentially load outdated results.
-    if restore_results:
-        logging.info("**** The script can be divided into two parts here.")
-        logging.info("Restore the energy system and the results.")
-
-        energysystem = EnergySystem()
-        energysystem.restore(dpath=None, filename=None)
-
     # define an alias for shorter calls below (optional)
-    results = energysystem.results["main"]
-    storage = energysystem.groups[STORAGE_LABEL]
+    storage = energysystem.groups["battery_storage"]
 
     # print a time slice of the state of charge
-    start_time = datetime(2012, 2, 25, 8, 0, 0)
-    end_time = datetime(2012, 2, 25, 17, 0, 0)
+    start_time = datetime(2012, 7, 4, 8, 0, 0)
+    end_time = datetime(2012, 7, 4, 17, 0, 0)
 
     print("\n********* State of Charge (slice) *********")
-    print(f"{results[(storage, None)]['sequences'][start_time : end_time]}\n")
+    print(
+        f"{result_dict[(storage, None)]['sequences'][start_time : end_time]}\n"
+    )
+    print(f"{results.storage_content[storage][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
-    custom_storage = views.node(results, STORAGE_LABEL)
-    electricity_bus = views.node(results, "electricity")
+    custom_storage = views.node(result_dict, "battery_storage")
+    electricity_bus = views.node(result_dict, "electricity")
 
     # plot the time series (sequences) of a specific component/bus
     plot_figures_for(custom_storage)
     plot_figures_for(electricity_bus)
-
-    # print the solver results
-    print("********* Meta results *********")
-    pp.pprint(f"{energysystem.results['meta']}\n")
 
     # print the sums of the flows around the electricity bus
     print("********* Main results *********")

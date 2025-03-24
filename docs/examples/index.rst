@@ -7,10 +7,10 @@ Examples
     :glob:
     :maxdepth: 2
 
-    basic_example.rst
     time_index.rst
     nametuple.rst
     simple_dispatch.rst
+    result_object.rst
     activity_costs.rst
     min_max_runtimes.rst
     startup_costs.rst

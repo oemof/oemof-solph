@@ -1,4 +1,4 @@
-__version__ = "0.6.0a3"
+__version__ = "0.6.0a4"
 
 from . import buses
 from . import components
@@ -14,6 +14,7 @@ from ._models import Model
 from ._options import Investment
 from ._options import NonConvex
 from ._plumbing import sequence
+from ._results import Results
 from .buses import Bus  # default Bus (for convenience)
 from .flows import Flow  # default Flow (for convenience)
 
@@ -26,6 +27,7 @@ __all__ = [
     "Flow",
     "helpers",
     "processing",
+    "Results",
     "views",
     "EnergySystem",
     "create_time_index",
