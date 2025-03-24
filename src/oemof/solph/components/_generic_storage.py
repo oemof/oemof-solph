@@ -1440,11 +1440,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 self.INVESTSTORAGES, m.PERIODS, within=NonNegativeReals
             )
 
-        else:
-            self.init_content = Var(
-                self.INVESTSTORAGES, within=NonNegativeReals
-            )
-
         # create status variable for a non-convex investment storage
         self.invest_status = Var(
             self.NON_CONVEX_INVESTSTORAGES, m.PERIODS, within=Binary
@@ -1664,10 +1659,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_max_rule(block, n):
                 """Constraint for a variable initial storage capacity."""
-                return (
-                    block.init_content[n]
-                    <= n.investment.existing + block.invest[n, 0]
-                )
+                if not m.TSAM_MODE:
+                    lhs = block.storage_content[n, 0]
+                else:
+                    lhs = block.storage_content_intra[n, 0, 0, 0]
+                return lhs <= n.investment.existing + block.invest[n, 0]
 
             self.init_content_limit = Constraint(
                 self.INVESTSTORAGES_NO_INIT_CONTENT,
@@ -1676,9 +1672,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _inv_storage_init_content_fix_rule(block, n):
                 """Constraint for a fixed initial storage capacity."""
-                return block.storage_content[
-                    n, 0
-                ] == n.initial_storage_level * (
+                if not m.TSAM_MODE:
+                    lhs = block.storage_content[n, 0]
+                else:
+                    lhs = block.storage_content_intra[n, 0, 0, 0]
+                return lhs == n.initial_storage_level * (
                     n.investment.existing + block.invest[n, 0]
                 )
 
@@ -1789,8 +1787,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             def _balanced_storage_rule(block, n):
                 return (
-                    block.storage_content[n, m.TIMESTEPS.at(-1)]
-                    == block.init_content[n]
+                    block.storage_content[n, m.TIMEPOINTS.at(-1)]
+                    == block.storage_content[n, m.TIMEPOINTS.at(1)]
                 )
 
             self.balanced_cstr = Constraint(
