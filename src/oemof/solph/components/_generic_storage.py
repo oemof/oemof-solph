@@ -1349,9 +1349,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         def _inv_storage_init_content_fix_rule(block, n):
             """Constraint for a fixed initial storage capacity."""
-            return block.storage_content[
-                n, 0
-            ] == n.initial_storage_level * (
+            return block.storage_content[n, 0] == n.initial_storage_level * (
                 n.investment.existing + block.invest[n, 0]
             )
 
@@ -1413,7 +1411,10 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             expr += block.storage_content_inter[n, i + 1]
             expr += -block.storage_content_inter[n, i] * (
                 1 - n.loss_rate[t]
-            ) ** (m.timeincrement[t] * m.es.tsa_parameters["timesteps_per_period"])
+            ) ** (
+                m.timeincrement[t]
+                * m.es.tsa_parameters["timesteps_per_period"]
+            )
             expr += -self.storage_content_intra[
                 n, k, m.es.tsa_parameters["timesteps_per_period"]
             ]
