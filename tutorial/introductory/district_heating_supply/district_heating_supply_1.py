@@ -68,7 +68,20 @@ data_heat_bus = solph.views.node(results, 'heat network')['sequences']
 # %%[sec_8_start]
 import matplotlib.pyplot as plt
 
-fig, ax = plt.subplot(figsize=[10, 6])
+fig, ax = plt.subplots(figsize=[10, 6])
+
+ax.bar(
+    data_heat_bus.index,
+    data_heat_bus[(('gas boiler', 'heat network'), 'flow')],
+    label='gas boiler'
+)
+
+ax.legend(loc='upper right')
+ax.grid(axis='y')
+ax.set_ylabel('Hourly heat production in MWh')
+
+# plt.savefig('int_tut_dhs_1_hourly_heat_production.pdf')
+plt.show()
 # %%[sec_8_end]
 
 # %%[sec_9_start]

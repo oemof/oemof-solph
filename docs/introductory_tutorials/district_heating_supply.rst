@@ -153,13 +153,35 @@ series, so we access the ``'sequences'`` key.
     :start-after: [sec_7_start]
     :end-before: [sec_7_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+Now, let's have a look at those results. We will create a simple bar plot of
+the gas boilers unit commitment. To achieve this, we have to import a plotting
+library like ``matplotlib``. We use its ``subplots`` method to create a figure
+``fig`` and an axes ``ax`` and set the plots size to be ten by six inches.
+Then, we pass the index of `data_heat_bus` and the column containing the gas
+boiler's heat production into the axes ``bar`` method.
+
+.. note::
+    In ``oemof.solph``, indexing works by passing a tuple containing two items:
+    at first, another tuple containing the string labels of the two nodes of
+    interest and second, the the ``oemof.solph`` variable name to be extracted.
+    In case of the example below, we are looking for the ``'flow'`` between the
+    ``'gas boiler'`` and ``'heat network'`` nodes.
+
+Finally, we set a label to the bars to be plotted that corresponds to the
+unit's name. This is mostly anticipatory, as we will want to decern between
+different heat production units later in this tutorial. To improve the plots
+appearance, we add a legend in the upper right corner, grid lines along the
+horizontal axis and a fitting label for the same. Feel free to change the look
+of the plot to your heart's content. The final step to see the optimization
+results is calling the ``show`` method.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
+
+7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
+   dispatch plot(s). Include the plots in the page here!!
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
