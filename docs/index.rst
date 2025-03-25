@@ -14,6 +14,7 @@
     installation
     introductory_tutorials
     advanced_tutorials
+    examples
     showcase_examples
     support
 
@@ -23,7 +24,9 @@
     :hidden:
 
     basic_concepts
+    optimization
     advanced_concepts
+    best_practices
     api
     changelog
     zliterature

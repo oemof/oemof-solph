@@ -11,7 +11,6 @@ district_heating_system = solph.EnergySystem(timeindex=data.index)
 # %%[sec_2_end]
 
 # %%[sec_3_start]
-# Question: How to name the variables?
 heat_bus = solph.Bus(label='heat network')
 gas_bus = solph.Bus(label='gas network')
 
@@ -56,7 +55,7 @@ district_heating_system.add(gas_boiler)
 
 # %%[sec_6_start]
 model = solph.Model(district_heating_system)
-model.solve(solver="cbc", solve_kwargs={"tee": True})
+model.solve(solver='cbc', solve_kwargs={'tee': True})
 # %%[sec_6_end]
 
 # %%[sec_7_start]
