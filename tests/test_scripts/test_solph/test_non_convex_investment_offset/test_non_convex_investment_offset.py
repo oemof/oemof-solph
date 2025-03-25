@@ -23,30 +23,28 @@ from oemof.solph.flows import Flow
 def test_non_convex_investment_offset():
     # Energy System
     energy_system = EnergySystem(
-        timeindex=pd.date_range(start='2025-01-01 12:00', freq='h', periods=2),
-        infer_last_interval=False
+        timeindex=pd.date_range(start="2025-01-01 12:00", freq="h", periods=2),
+        infer_last_interval=False,
     )
 
     # Buses
-    b_el = Bus('electricity bus')
-    b_th = Bus('heat bus')
+    b_el = Bus("electricity bus")
+    b_th = Bus("heat bus")
 
     energy_system.add(b_el, b_th)
 
     # Source & Sink
-    el_source = components.Source(
-        'electricity source', outputs={b_el: Flow()}
-    )
+    el_source = components.Source("electricity source", outputs={b_el: Flow()})
 
     th_sink = components.Sink(
-        'heat sink', inputs={b_th: Flow(nominal_capacity=1, fix=[1])}
+        "heat sink", inputs={b_th: Flow(nominal_capacity=1, fix=[1])}
     )
 
     energy_system.add(el_source, th_sink)
 
     # Converter
     hp_expensive = components.Converter(
-        'heat pump expensive',
+        "heat pump expensive",
         inputs={b_el: Flow()},
         outputs={
             b_th: Flow(
@@ -55,35 +53,32 @@ def test_non_convex_investment_offset():
                     offset=2000,
                     maximum=1,
                     minimum=0,
-                    nonconvex=NonConvex()
+                    nonconvex=NonConvex(),
                 ),
                 variable_costs=1,
                 max=1,
                 min=0.1,
-                nonconvex=NonConvex()
+                nonconvex=NonConvex(),
             )
         },
-        conversion_factors={b_el: [3]}
+        conversion_factors={b_el: [3]},
     )
 
     hp_cheap = components.Converter(
-        'heat pump cheap',
+        "heat pump cheap",
         inputs={b_el: Flow()},
         outputs={
             b_th: Flow(
                 nominal_capacity=Investment(
-                    ep_costs=50,
-                    maximum=1,
-                    minimum=0,
-                    nonconvex=NonConvex()
+                    ep_costs=50, maximum=1, minimum=0, nonconvex=NonConvex()
                 ),
                 variable_costs=1,
                 max=1,
                 min=0.1,
-                nonconvex=NonConvex()
+                nonconvex=NonConvex(),
             )
         },
-        conversion_factors={b_el: [3]}
+        conversion_factors={b_el: [3]},
     )
 
     energy_system.add(hp_expensive, hp_cheap)
@@ -92,11 +87,11 @@ def test_non_convex_investment_offset():
     model = Model(energy_system)
 
     # Optimization
-    model.solve(solver='cbc', solve_kwargs={'tee': True})
+    model.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # Check Objective
     meta_results = processing.meta_results(model)
 
     # Cheap heat pump should be built (50) and dispatched (1). The investment
     # offset of the expensive heat pump (2000) should be ignored.
-    assert meta_results['objective'] == 51.0
+    assert meta_results["objective"] == 51.0
