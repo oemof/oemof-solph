@@ -80,14 +80,13 @@ ax.legend(loc='upper right')
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat production in MWh')
 
-# plt.savefig('int_tut_dhs_1_hourly_heat_production.pdf')
+# plt.savefig('intro_tut_dhs_1_hourly_heat_production.pdf')
 plt.show()
 # %%[sec_8_end]
 
 # %%[sec_9_start]
 def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
-    q = 1 + i
-    pvf = (q**n - 1)/(q**n * (q - 1))
+    pvf = ((1 + i)**n - 1)/((1 + i)**n * i)
 
     return (invest_cost + pvf * (operation_cost - revenue))/(pvf * heat_produced)
 # %%[sec_9_end]

@@ -180,13 +180,36 @@ results is calling the ``show`` method.
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+Let's continue by assesing the economic merit of our district heating supply
+system. A common indicator for that purpose are the Levelized Cost of Heat
+(:math:`LCOH`). As shown in the equations below, they account for the upfront
+invest cost :math:`C_\text{invest}` necessary to build the heat production
+units as well as the cost evoked via their operation :math:`C_\text{operation}`
+over the unit's assumed lifetime :math:`n`. These cost get reduced by any
+additional revenues :math:`R` generated besides its heat production. The total
+cash flow balance is then devided by the total heat produced
+:math:`Q_\text{total}`. In order to make one-off investments comparable with
+the other periodically occuring values, the latter are multiplied with the
+Present Value Factor (:math:`PVF`). This yields the total cost necessary to
+produce one unit of heat by the heat supply system (not accounting for any
+additional cost for e.g. the pipe network, etc.).
+
+.. math::
+    LCOH = \frac{C_\text{invest} + PVF \cdot \left(C_\text{operation} - R\right)}{PVF \cdot Q_\text{total}}
+
+.. math::
+    PVF = \frac{\left(1 + i\right)^n -1}{\left(1 + i\right)^n \cdot i}
+
+As we will evaluate the :math:`LCOH` again later, let's define a function to
+calculate it from the input values as depicted below.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_9_start]
     :end-before: [sec_9_end]
+
+7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
+   dispatch plot(s). Include the plots in the page here!!
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
