@@ -66,14 +66,20 @@ data_heat_bus = solph.views.node(results, 'heat network')['sequences']
 # %%[sec_7_end]
 
 # %%[sec_8_start]
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplot(figsize=[10, 6])
+# %%[sec_8_end]
+
+# %%[sec_9_start]
 def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
     q = 1 + i
     pvf = (q**n - 1)/(q**n * (q - 1))
 
     return (invest_cost + pvf * (operation_cost - revenue))/(pvf * heat_produced)
-# %%[sec_8_end]
+# %%[sec_9_end]
 
-# %%[sec_9_start]
+# %%[sec_10_start]
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
 var_cost_gas_boiler = 0.50
@@ -86,12 +92,5 @@ operation_cost = (
 heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
-# %%[sec_9_end]
-print(f'LCOH: {lcoh:.2f} €/MWh')
-
-# %%[sec_10_start]
-# Einsatz
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplot(figsize=[10, 6])
 # %%[sec_10_end]
+print(f'LCOH: {lcoh:.2f} €/MWh')
