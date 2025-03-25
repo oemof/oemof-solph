@@ -58,7 +58,7 @@ class SinkDSM(Sink):
     * DLR: Based on the PhD thesis of Gils, Hans Christian (2015):
       `Balancing of Intermittent Renewable Power Generation by Demand Response
       and Thermal Energy Storage`, Stuttgart,
-      `<http://dx.doi.org/10.18419/opus-6888>`_,
+      `<https://doi.org/10.18419/opus-6888>`_,
       accessed 08.01.2021, pp. 67-70.
     * oemof: Created by Julian Endres. A fairly simple DSM representation which
       demands the energy balance to be levelled out in fixed cycles
