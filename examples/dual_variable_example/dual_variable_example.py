@@ -47,7 +47,7 @@ from oemof.solph import flows
 from oemof.solph import processing
 
 
-def main():
+def main(optimize=True):
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
@@ -240,8 +240,11 @@ def main():
     energysystem.add(storage)
 
     ##########################################################################
-    # Optimise the energy system and plot the results
+    # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = Model(energysystem)

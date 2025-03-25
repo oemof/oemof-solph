@@ -89,7 +89,7 @@ from oemof.tools import logger
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Read data file
     filename = os.path.join(
         os.path.dirname(__file__), "storage_investment.csv"
@@ -193,7 +193,7 @@ def main():
         outputs={bel: solph.Flow()},
         loss_rate=0.00,
         initial_storage_level=0,
-        invest_relation_input_capacity=1 / 6,  # c-rate of 1/6 
+        invest_relation_input_capacity=1 / 6,  # c-rate of 1/6
         invest_relation_output_capacity=1 / 6,
         inflow_conversion_factor=1,
         outflow_conversion_factor=0.8,
@@ -205,6 +205,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 

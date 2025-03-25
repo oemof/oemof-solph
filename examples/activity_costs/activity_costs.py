@@ -47,7 +47,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Calculate parameters and initialize the energy system and
     ##########################################################################
@@ -94,6 +94,8 @@ def main():
     # Optimise the energy system
     ##########################################################################
 
+    if optimize is False:
+        return es
     # create an optimization problem and solve it
     om = solph.Model(es)
 

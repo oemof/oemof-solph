@@ -48,7 +48,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     energy_system = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=4, freq="h")
     )
@@ -124,6 +124,9 @@ def main():
             },
         )
     )
+
+    if optimize is False:
+        return energy_system
 
     model = solph.Model(energy_system)
 

@@ -62,7 +62,7 @@ from oemof import solph
 
 # import oemof plots
 try:
-    from oemof_visio import plot as oeplot
+    from oemof.visio import plot as oeplot
 except ImportError:
     oeplot = None
 
@@ -109,7 +109,7 @@ def write_lp_file(model):
     model.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
-def main():
+def main(optimize=True):
     # Read data file
     filename = os.path.join(os.getcwd(), "variable_chp.csv")
     try:
@@ -234,6 +234,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
