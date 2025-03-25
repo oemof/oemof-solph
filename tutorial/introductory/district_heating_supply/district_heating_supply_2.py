@@ -6,7 +6,9 @@ import oemof.solph as solph
 data = pd.read_csv('input_data.csv', sep=';', index_col=0, parse_dates=True)
 # %%[sec_1_end]
 
-district_heating_system = solph.EnergySystem(timeindex=data.index)
+district_heating_system = solph.EnergySystem(
+    timeindex=data.index, infer_last_interval=False
+)
 
 heat_bus = solph.Bus(label='heat network')
 gas_bus = solph.Bus(label='gas network')

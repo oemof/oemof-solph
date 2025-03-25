@@ -7,7 +7,9 @@ data = pd.read_csv('input_data.csv', sep=';', index_col=0, parse_dates=True)
 # %%[sec_2_start]
 import oemof.solph as solph
 
-district_heating_system = solph.EnergySystem(timeindex=data.index)
+district_heating_system = solph.EnergySystem(
+    timeindex=data.index, infer_last_interval=False
+)
 # %%[sec_2_end]
 
 # %%[sec_3_start]
@@ -43,7 +45,7 @@ gas_boiler = solph.components.Converter(
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=20,
+            nominal_value=data['heat demand'].max(),
             variable_costs=0.50
         )
     },
@@ -60,7 +62,7 @@ model.solve(solver='cbc', solve_kwargs={'tee': True})
 
 # %%[sec_7_start]
 results = solph.processing.results(model)
-
+# breakpoint()
 data_gas_bus = solph.views.node(results, 'gas network')['sequences']
 data_heat_bus = solph.views.node(results, 'heat network')['sequences']
 # %%[sec_7_end]
