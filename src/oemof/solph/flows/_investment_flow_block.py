@@ -194,12 +194,12 @@ class InvestmentFlowBlock(ScalarBlock):
 
         # Total capacity
         self.capacity = Var(
-            self.INVESTFLOWS, m.INVESTMENT_PERIODS, within=NonNegativeReals
+            self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
-            self.NON_CONVEX_INVESTFLOWS, m.INVESTMENT_PERIODS, within=Binary
+            self.NON_CONVEX_INVESTFLOWS, m.CAPACITY_PERIODS, within=Binary
         )
 
     def _create_constraints(self):
@@ -392,7 +392,7 @@ class InvestmentFlowBlock(ScalarBlock):
         self.fixed = Constraint(
             self.FIXED_INVESTFLOWS,
             m.TIMESTEPS,
-            m.INVESTMENT_PERIODS,
+            m.CAPACITY_PERIODS,
             noruleinit=True,
         )
         self.fixed_build = BuildAction(rule=_investflow_fixed_rule)
@@ -412,7 +412,7 @@ class InvestmentFlowBlock(ScalarBlock):
         self.max = Constraint(
             self.NON_FIXED_INVESTFLOWS,
             m.TIMESTEPS,
-            m.INVESTMENT_PERIODS,
+            m.CAPACITY_PERIODS,
             noruleinit=True,
         )
         self.max_build = BuildAction(rule=_max_investflow_rule)
@@ -432,7 +432,7 @@ class InvestmentFlowBlock(ScalarBlock):
         self.min = Constraint(
             self.MIN_INVESTFLOWS,
             m.TIMESTEPS,
-            m.INVESTMENT_PERIODS,
+            m.CAPACITY_PERIODS,
             noruleinit=True,
         )
         self.min_build = BuildAction(rule=_min_investflow_rule)
@@ -448,7 +448,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
         self.full_load_time_max = Constraint(
             self.FULL_LOAD_TIME_MAX_INVESTFLOWS,
-            m.INVESTMENT_PERIODS,
+            m.CAPACITY_PERIODS,
             rule=_full_load_time_max_investflow_rule,
         )
 
@@ -463,7 +463,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
         self.full_load_time_min = Constraint(
             self.FULL_LOAD_TIME_MIN_INVESTFLOWS,
-            m.INVESTMENT_PERIODS,
+            m.CAPACITY_PERIODS,
             rule=_full_load_time_min_investflow_rule,
         )
 

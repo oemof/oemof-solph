@@ -224,7 +224,7 @@ class Model(po.ConcreteModel):
         self.TIMEPOINTS = po.Set(
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
-        self.INVESTMENT_PERIODS = po.Set(
+        self.CAPACITY_PERIODS = po.Set(
             initialize=range(len(self.es.investment_steps)), ordered=True
         )
 
