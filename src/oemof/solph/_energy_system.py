@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 """
 
 import collections
+from typing import NamedTuple
 import warnings
 
 import numpy as np
@@ -64,7 +65,7 @@ class EnergySystem(network.energy_system.EnergySystem):
 
     def __init__(
         self,
-        timeindex,
+        timeindex=None,
         infer_last_interval=None,
         investment_times=None,
         groupings=None,
@@ -78,22 +79,26 @@ class EnergySystem(network.energy_system.EnergySystem):
             groupings = []
         groupings = GROUPINGS + groupings
 
-        (timeincrement, plain_timeindex, tsa_parameters) = (
-            self._organise_timeaxis(
-                timeindex,
-                infer_last_interval,
+        # allow to be practically uninitialised to be able to restore
+        if timeindex is None:
+            super().__init__()
+        else:
+            (timeincrement, plain_timeindex, tsa_parameters) = (
+                self._organise_timeaxis(
+                    timeindex,
+                    infer_last_interval,
+                )
             )
-        )
 
-        self.investment_steps = [0]
+            self.investment_steps = [0]
 
-        self.tsa_parameters = tsa_parameters
+            self.tsa_parameters = tsa_parameters
 
-        super().__init__(
-            groupings=groupings,
-            timeindex=plain_timeindex,
-            timeincrement=timeincrement,
-        )
+            super().__init__(
+                groupings=groupings,
+                timeindex=plain_timeindex,
+                timeincrement=timeincrement,
+            )
 
         self.end_year_of_optimization = 1
 
