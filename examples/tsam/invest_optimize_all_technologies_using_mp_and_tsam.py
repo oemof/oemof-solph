@@ -29,8 +29,8 @@ an energy system with storage. The following energy system is modeled:
 
 The example describes the use of time series aggregation
 methods for seasonal storages in oemof. For this the package tsam is used
-for this purpose, which is developed by Forschungszentrum Jülich. For a more detailed
-explanation we refer to the paper "Time series aggregation for energy
+for this purpose, which is developed by Forschungszentrum Jülich. For a more
+detailed explanation we refer to the paper "Time series aggregation for energy
 system design: Modeling seasonal storage" by Kotzur et. al.
 https://www.sciencedirect.com/science/article/pii/S0306261918300242
 
@@ -110,11 +110,8 @@ def main():
             {"pv": [0.3, 0.5], "wind": [0.6, 0.8], "demand_el": [500, 600]}
         )
 
-    data = pd.concat([data, data], ignore_index=True)
-    data["wind"].iloc[8760 - 24 : 8760] = 0
-    data["wind"].iloc[8760 * 2 - 24 : 8760] = 0
-    data["pv"].iloc[8760 - 24 : 8760] = 0
-    data["pv"].iloc[8760 * 2 - 24 : 8760] = 0
+    data.iloc["wind", 8760 - 24 : 8760] = 0
+    data.iloc["pv", 8760 - 24 : 8760] = 0
 
     ##########################################################################
     # Initialize the energy system and read/calculate necessary parameters
@@ -124,10 +121,8 @@ def main():
     logging.info("Initialize the energy system")
 
     t1 = pd.date_range("2022-01-01", periods=8760, freq="h")
-    t2 = pd.date_range("2033-01-01", periods=8760, freq="h")
-    tindex = t1.append(t2)
 
-    data.index = tindex
+    data.index = t1
     del data["timestep"]
 
     typical_periods = 40
@@ -144,44 +139,15 @@ def main():
         addPeakMin=["wind", "pv"],
         representationMethod="durationRepresentation",
     )
+
     aggregation1.createTypicalPeriods()
-    aggregation2 = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[8760:],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="hierarchical",
-        sortValues=False,
-        rescaleClusterPeriods=False,
-        extremePeriodMethod="replace_cluster_center",
-        addPeakMin=["wind", "pv"],
-        representationMethod="durationRepresentation",
-    )
-    aggregation2.createTypicalPeriods()
 
     t1_agg = pd.date_range(
-        "2022-01-01", periods=typical_periods * hours_per_period, freq="H"
+        "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
     )
-    t2_agg = pd.date_range(
-        "2033-01-01", periods=typical_periods * hours_per_period, freq="H"
-    )
-    tindex_agg = t1_agg.append(t2_agg)
 
     energysystem = solph.EnergySystem(
-        timeindex=tindex_agg,
-        timeincrement=[1] * len(tindex_agg),
-        periods=[t1_agg, t2_agg],
-        tsa_parameters=[
-            {
-                "timesteps_per_period": aggregation1.hoursPerPeriod,
-                "order": aggregation1.clusterOrder,
-                "timeindex": aggregation1.timeIndex,
-            },
-            {
-                "timesteps_per_period": aggregation2.hoursPerPeriod,
-                "order": aggregation2.clusterOrder,
-                "timeindex": aggregation2.timeIndex,
-            },
-        ],
+        timeindex=aggregation1,
         infer_last_interval=False,
     )
 
@@ -216,14 +182,7 @@ def main():
         label="rgas", outputs={bgas: solph.Flow(variable_costs=price_gas)}
     )
 
-    wind_profile = pd.concat(
-        [
-            aggregation1.typicalPeriods["wind"],
-            aggregation2.typicalPeriods["wind"],
-        ],
-        ignore_index=True,
-    )
-    wind_profile.iloc[-24:] = 0
+    wind_profile = aggregation1.typicalPeriods["wind"]
 
     # create fixed source object representing wind power plants
     wind = solph.components.Source(
@@ -231,34 +190,18 @@ def main():
         outputs={
             bel: solph.Flow(
                 fix=wind_profile,
-                nominal_capacity=solph.Investment(
-                    ep_costs=epc_wind, lifetime=10
-                ),
+                nominal_capacity=solph.Investment(ep_costs=epc_wind),
             )
         },
     )
-
-    pv_profile = pd.concat(
-        [aggregation1.typicalPeriods["pv"], aggregation2.typicalPeriods["pv"]],
-        ignore_index=True,
-    )
-    pv_profile.iloc[-24:] = 0
 
     # create fixed source object representing pv power plants
     pv = solph.components.Source(
         label="pv",
         outputs={
             bel: solph.Flow(
-                fix=pd.concat(
-                    [
-                        aggregation1.typicalPeriods["pv"],
-                        aggregation2.typicalPeriods["pv"],
-                    ],
-                    ignore_index=True,
-                ),
-                nominal_capacity=solph.Investment(
-                    ep_costs=epc_pv, lifetime=10
-                ),
+                fix=aggregation1.typicalPeriods["pv"],
+                nominal_capacity=solph.Investment(ep_costs=epc_pv),
             )
         },
     )
@@ -268,13 +211,7 @@ def main():
         label="demand",
         inputs={
             bel: solph.Flow(
-                fix=pd.concat(
-                    [
-                        aggregation1.typicalPeriods["demand_el"],
-                        aggregation2.typicalPeriods["demand_el"],
-                    ],
-                    ignore_index=True,
-                ),
+                fix=aggregation1.typicalPeriods["demand_el"],
                 nominal_value=1,
             )
         },
@@ -288,22 +225,28 @@ def main():
         conversion_factors={bel: 0.58},
     )
 
-    # create storage object representing a battery
-    storage = solph.components.GenericStorage(
-        label="storage",
-        inputs={bel: solph.Flow(variable_costs=0.0001)},
-        outputs={bel: solph.Flow()},
-        loss_rate=0.01,
-        lifetime_inflow=10,
-        lifetime_outflow=10,
-        invest_relation_input_capacity=1 / 6,
-        invest_relation_output_capacity=1 / 6,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-        nominal_capacity=solph.Investment(ep_costs=epc_storage, lifetime=10),
-    )
+    energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas)
 
-    energysystem.add(excess, gas_resource, wind, pv, demand, pp_gas, storage)
+    storage = None
+    if True:
+        # create storage object representing a battery
+        storage = solph.components.GenericStorage(
+            label="storage",
+            inputs={bel: solph.Flow(variable_costs=0.0001)},
+            outputs={bel: solph.Flow()},
+            loss_rate=0.01,
+            lifetime_inflow=10,
+            lifetime_outflow=10,
+            invest_relation_input_capacity=1 / 6,
+            invest_relation_output_capacity=1 / 6,
+            inflow_conversion_factor=1,
+            outflow_conversion_factor=0.8,
+            nominal_capacity=solph.Investment(
+                ep_costs=epc_storage, lifetime=10
+            ),
+        )
+
+        energysystem.add(storage)
 
     ##########################################################################
     # Optimise the energy system
@@ -339,16 +282,17 @@ def main():
     meta_results = solph.processing.meta_results(om)
     pp.pprint(meta_results)
 
-    my_results = electricity_bus["period_scalars"]
+    my_results = electricity_bus["scalars"]
 
-    # installed capacity of storage in GWh
-    my_results["storage_invest_GWh"] = (
-        results[(storage, None)]["period_scalars"]["invest"] / 1e6
-    )
+    if storage:
+        # installed capacity of storage in GWh
+        my_results["storage_invest_GWh"] = (
+            results[(storage, None)]["scalars"]["invest"] / 1e6
+        )
 
     # installed capacity of wind power plant in MW
     my_results["wind_invest_MW"] = (
-        results[(wind, bel)]["period_scalars"]["invest"] / 1e3
+        results[(wind, bel)]["scalars"]["capacity"] / 1e3
     )
 
     # resulting renewable energy share

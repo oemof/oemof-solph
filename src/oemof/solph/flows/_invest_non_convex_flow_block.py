@@ -143,7 +143,6 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         # Create the `invest` variable for the nonconvex investment flow.
         self.invest = Var(
             self.INVEST_NON_CONVEX_FLOWS,
-            m.PERIODS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )

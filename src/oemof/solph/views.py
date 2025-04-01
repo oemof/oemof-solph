@@ -69,7 +69,7 @@ def node(results, node, multiindex=False, keep_none_type=False):
     scalars = {
         k: v[scalars_col]
         for k, v in results.items()
-        if node in k and not v[scalars_col].empty
+        if node in k and scalars_col in v
     }
     if scalars:
         # aggregate data

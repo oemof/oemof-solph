@@ -142,15 +142,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     The symbols used are defined as follows
     (with Variables (V) and Parameters (P)):
 
-    +------------------+---------------------------------------+------+--------------------------------------------------------------+
-    | symbol           | attribute                             | type | explanation                                                  |
-    +==================+=======================================+======+==============================================================+
-    | :math:`P_{i}(p)` | `InvestmentFlowBlock.invest[i, o, p]` | V    | invested capacity of investment flow in period p             |
-    +------------------+---------------------------------------+------+--------------------------------------------------------------+
-    | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
-    +------------------+---------------------------------------+------+--------------------------------------------------------------+
-    | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
-    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    +------------------+-----------------------------------------------+------+--------------------------------------------------------------+
+    | symbol           | attribute                                     | type | explanation                                                  |
+    +==================+===============================================+======+==============================================================+
+    | :math:`P_{i}(p)` | `InvestmentFlowBlock.added_capacity[i, o, p]` | V    | invested capacity of investment flow in period p             |
+    +------------------+-----------------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`      | `keyword`                                     | P    | weight given to investment flow named according to `keyword` |
+    +------------------+-----------------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit`    | `limit`                                       | P    | global limit given by keyword `limit`                        |
+    +------------------+-----------------------------------------------+------+--------------------------------------------------------------+
 
     Parameters
     ----------
@@ -212,7 +212,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                model.InvestmentFlowBlock.invest[inflow, outflow, p]
+                model.InvestmentFlowBlock.added_capacity[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
                 for p in model.PERIODS
