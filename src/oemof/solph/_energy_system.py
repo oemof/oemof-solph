@@ -15,8 +15,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-import collections
-from typing import NamedTuple
 import warnings
 
 import numpy as np
@@ -60,7 +58,7 @@ class EnergySystem(network.energy_system.EnergySystem):
     investment_times : list or None
         The points in time, investments can be made.
 
-    kwargs
+    tsa_parameters : directly set TSA parameters (for testing and debugging)
     """
 
     def __init__(
@@ -68,6 +66,7 @@ class EnergySystem(network.energy_system.EnergySystem):
         timeindex=None,
         infer_last_interval=None,
         investment_times=None,
+        tsa_parameters=None,
         groupings=None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -83,7 +82,7 @@ class EnergySystem(network.energy_system.EnergySystem):
         if timeindex is None:
             super().__init__()
         else:
-            (timeincrement, plain_timeindex, tsa_parameters) = (
+            (timeincrement, plain_timeindex, derived_tsa_params) = (
                 self._organise_timeaxis(
                     timeindex,
                     infer_last_interval,
@@ -92,7 +91,17 @@ class EnergySystem(network.energy_system.EnergySystem):
 
             self.investment_steps = [0]
 
-            self.tsa_parameters = tsa_parameters
+            if tsa_parameters is not None:
+                msg = (
+                    "CAUTION! You specified tsa_parameters for "
+                    "your energy system.\n This will overwrite automtically "
+                    "detected (presumedly correct) values and is meant for "
+                    "testing only."
+                )
+                warnings.warn(msg, debugging.SuspiciousUsageWarning)
+                self.tsa_parameters = tsa_parameters
+            else:
+                self.tsa_parameters = derived_tsa_params
 
             super().__init__(
                 groupings=groupings,
@@ -139,7 +148,6 @@ class EnergySystem(network.energy_system.EnergySystem):
                     )
                 )
             tsa_parameters = {
-                "occurrences": [1],
                 "order": [0],
                 "timesteps_per_period": len(plain_timeindex) - 1,
             }
@@ -169,7 +177,6 @@ class EnergySystem(network.energy_system.EnergySystem):
                 )
 
                 tsa_parameters = {
-                    "occurrences": collections.Counter(timeindex.clusterOrder),
                     "order": timeindex.clusterOrder,
                     "timesteps_per_period": int(
                         round(timeindex.hoursPerPeriod // timeindex.resolution)

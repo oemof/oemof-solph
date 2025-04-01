@@ -14,6 +14,8 @@ SPDX-FileCopyrightText: Lennart Schürmann
 SPDX-License-Identifier: MIT
 
 """
+
+import collections
 import logging
 import warnings
 from logging import getLogger
@@ -229,6 +231,10 @@ class Model(po.ConcreteModel):
         )
 
         # Construct weighting from occurrences and order
+        self.es.tsa_parameters["occurrences"] = list(
+            collections.Counter(self.es.tsa_parameters["order"]),
+        )
+
         self.tsam_weighting = list(
             self.es.tsa_parameters["occurrences"][k]
             for k in range(len(self.es.tsa_parameters["occurrences"]))
