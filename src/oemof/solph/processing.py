@@ -683,11 +683,11 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         if oemof_tuple[0] not in storages:
             storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
         if len(oemof_tuple) == 2:
-            # Must be filtered for variable name "storage_content_inter",
+            # Must be filtered for variable name "storage_content_period",
             # otherwise "init_content" variable (in non-multi-period approach)
             # interferes with SOC results
             storages[oemof_tuple[0]]["inter"] = data[
-                data["variable_name"] == "storage_content_inter"
+                data["variable_name"] == "storage_content_period"
             ]
         if len(oemof_tuple) == 3:
             storages[oemof_tuple[0]]["intra"][
