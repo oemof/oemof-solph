@@ -231,7 +231,7 @@ class Model(po.ConcreteModel):
         )
 
         # Construct weighting from occurrences and order
-        self.es.tsa_parameters["occurrences"] = list(
+        self.es.tsa_parameters["occurrences"] = dict(
             collections.Counter(self.es.tsa_parameters["order"]),
         )
 
