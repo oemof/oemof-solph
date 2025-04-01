@@ -349,10 +349,10 @@ class GenericStorageBlock(ScalarBlock):
         The variable of storage s and timestep t can be accessed by:
         `om.GenericStorageBlock.storage_content[s, t]`
 
-    storage_content_intra
+    storage_content_step
         Storage content for every storage and timestep of typical periods
         (only used in TSAM-mode). The variable of storage s and timestep t can
-        be accessed by: `om.GenericStorageBlock.storage_content_intra[s, k, t]`
+        be accessed by: `om.GenericStorageBlock.storage_content_step[s, k, t]`
 
     **The following constraints are created:**
 
@@ -481,23 +481,23 @@ class GenericStorageBlock(ScalarBlock):
 
         #  ************* VARIABLES *****************************
 
-        self.storage_content_inter = Var(
+        self.storage_content_period = Var(
             self.STORAGES, m.CLUSTERS_OFFSET, within=NonNegativeReals
         )
-        self.storage_content_intra = Var(
+        self.storage_content_step = Var(
             self.STORAGES, m.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
         )
         # set the initial intra storage content
         # first timestep in intra storage is always zero
         for n in group:
             for k in m.TYPICAL_CLUSTERS:
-                self.storage_content_intra[n, k, 0] = 0
-                self.storage_content_intra[n, k, 0].fix()
+                self.storage_content_step[n, k, 0] = 0
+                self.storage_content_step[n, k, 0].fix()
             if n.initial_storage_level is not None:
-                self.storage_content_inter[n, 0] = (
+                self.storage_content_period[n, 0] = (
                     n.initial_storage_level * n.nominal_storage_capacity
                 )
-                self.storage_content_inter[n, 0].fix()
+                self.storage_content_period[n, 0].fix()
         #  ************* Constraints ***************************
 
         def _storage_inter_minimum_level_rule(block):
@@ -512,9 +512,9 @@ class GenericStorageBlock(ScalarBlock):
                     tk = m.get_timestep_from_tsam_timestep(k, g)
                     inter_i = len(m.es.tsa_parameters["order"]) + i
                     rhs = (
-                        self.storage_content_inter[n, inter_i]
+                        self.storage_content_period[n, inter_i]
                         * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
-                        + self.storage_content_intra[n, k, g]
+                        + self.storage_content_step[n, k, g]
                     )
                     self.storage_inter_minimum_level.add((n, i, g), lhs <= rhs)
 
@@ -534,9 +534,9 @@ class GenericStorageBlock(ScalarBlock):
                     tk = m.get_timestep_from_tsam_timestep(k, g)
                     inter_i = len(m.es.tsa_parameters["order"]) + i
                     lhs = (
-                        self.storage_content_inter[n, inter_i]
+                        self.storage_content_period[n, inter_i]
                         * (1 - n.loss_rate[t]) ** (g * m.timeincrement[tk])
-                        + self.storage_content_intra[n, k, g]
+                        + self.storage_content_step[n, k, g]
                     )
                     rhs = n.nominal_storage_capacity * n.max_storage_level[t]
                     self.storage_inter_maximum_level.add((n, i, g), lhs <= rhs)
@@ -556,9 +556,9 @@ class GenericStorageBlock(ScalarBlock):
             """
             t = m.get_timestep_from_tsam_timestep(k, g)
             expr = 0
-            expr += block.storage_content_intra[n, k, g + 1]
+            expr += block.storage_content_step[n, k, g + 1]
             expr += (
-                -block.storage_content_intra[n, k, g]
+                -block.storage_content_step[n, k, g]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -606,9 +606,9 @@ class GenericStorageBlock(ScalarBlock):
             )
 
             expr = 0
-            expr += block.storage_content_inter[n, i + 1]
-            expr += -block.storage_content_inter[n, i] * losses
-            expr += -self.storage_content_intra[
+            expr += block.storage_content_period[n, i + 1]
+            expr += -block.storage_content_period[n, i] * losses
+            expr += -self.storage_content_step[
                 n, k, m.es.tsa_parameters["timesteps_per_period"]
             ]
             return expr == 0
@@ -625,8 +625,8 @@ class GenericStorageBlock(ScalarBlock):
             if balanced.
             """
             return (
-                block.storage_content_inter[n, m.CLUSTERS_OFFSET.at(-1)]
-                == block.storage_content_inter[n, m.CLUSTERS_OFFSET.at(1)]
+                block.storage_content_period[n, m.CLUSTERS_OFFSET.at(-1)]
+                == block.storage_content_period[n, m.CLUSTERS_OFFSET.at(1)]
             )
 
         self.balanced_cstr = Constraint(
@@ -1257,18 +1257,18 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         # ######################### Variables  ################################
 
-        self.storage_content_inter = Var(
+        self.storage_content_period = Var(
             self.INVESTSTORAGES, m.CLUSTERS_OFFSET, within=NonNegativeReals
         )
-        self.storage_content_intra = Var(
+        self.storage_content_step = Var(
             self.INVESTSTORAGES, m.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
         )
         # set the initial intra storage content
         # first timestep in intra storage is always zero
         for n in group:
             for k in m.TYPICAL_CLUSTERS:
-                self.storage_content_intra[n, k, 0] = 0
-                self.storage_content_intra[n, k, 0].fix()
+                self.storage_content_step[n, k, 0] = 0
+                self.storage_content_step[n, k, 0].fix()
 
         def _storage_investvar_bound_rule(_, n, p):
             """
@@ -1349,7 +1349,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         def _inv_storage_init_content_fix_rule(block, n):
             """Constraint for a fixed initial storage capacity."""
-            return block.storage_content[n, 0] == n.initial_storage_level * (
+            return block.storage_content_step[
+                n, 0, 0, 0
+            ] == n.initial_storage_level * (
                 n.investment.existing + block.invest[n, 0]
             )
 
@@ -1365,9 +1367,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             """
             t = m.get_timestep_from_tsam_timestep(k, g)
             expr = 0
-            expr += block.storage_content_intra[n, k, g + 1]
+            expr += block.storage_content_step[n, k, g + 1]
             expr += (
-                -block.storage_content_intra[n, k, g]
+                -block.storage_content_step[n, k, g]
                 * (1 - n.loss_rate[t]) ** m.timeincrement[t]
             )
             expr += (
@@ -1408,14 +1410,14 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 k, m.es.tsa_parameters["timesteps_per_period"] - 1
             )
             expr = 0
-            expr += block.storage_content_inter[n, i + 1]
-            expr += -block.storage_content_inter[n, i] * (
+            expr += block.storage_content_period[n, i + 1]
+            expr += -block.storage_content_period[n, i] * (
                 1 - n.loss_rate[t]
             ) ** (
                 m.timeincrement[t]
                 * m.es.tsa_parameters["timesteps_per_period"]
             )
-            expr += -self.storage_content_intra[
+            expr += -self.storage_content_step[
                 n, k, m.es.tsa_parameters["timesteps_per_period"]
             ]
             return expr == 0

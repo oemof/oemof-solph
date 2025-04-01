@@ -132,10 +132,10 @@ def storage_level_constraint(
                     getattr(m, constraint_name).add(
                         (o, i, g),
                         (
-                            m.GenericStorageBlock.storage_content_intra[
+                            m.GenericStorageBlock.storage_content_step[
                                 storage_component, k, g + 1
                             ]
-                            + m.GenericStorageBlock.storage_content_inter[
+                            + m.GenericStorageBlock.storage_content_period[
                                 storage_component, i
                             ]
                             * (1 - storage_component.loss_rate[t])
@@ -274,10 +274,10 @@ def storage_level_constraint(
                     getattr(m, constraint_name).add(
                         (inp, p, i, g),
                         (
-                            m.GenericStorageBlock.storage_content_intra[
+                            m.GenericStorageBlock.storage_content_step[
                                 storage_component, p, k, g + 1
                             ]
-                            + m.GenericStorageBlock.storage_content_inter[
+                            + m.GenericStorageBlock.storage_content_period[
                                 storage_component, i
                             ]
                             * (1 - storage_component.loss_rate[t])

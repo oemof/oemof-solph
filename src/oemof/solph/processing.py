@@ -284,11 +284,7 @@ def results(model, remove_last_time_point=False):
             duals = [
                 model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
-            if model.es.periods is None:
-                df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
-            # TODO: Align with standard model
-            else:
-                df = pd.DataFrame({"duals": duals}, index=result_index)
+            df = pd.DataFrame({"duals": duals}, index=result_index)
             if (bus, None) not in result.keys():
                 result[(bus, None)] = {
                     "sequences": df,
@@ -416,7 +412,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
 
     # Add storage SOC flows:
     for storage, soc in storages.items():
-        flow_dict[(storage, None)] = _calculate_soc_from_inter_and_intra_soc(
+        flow_dict[(storage, None)] = _calculate_soc_from_period_and_step_soc(
             soc, storage, tsa_parameters
         )
     # Add multiplexer boolean actives values:
@@ -470,11 +466,11 @@ def _disaggregate_segmentation(
     return disaggregated_data
 
 
-def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
+def _calculate_soc_from_period_and_step_soc(soc, storage, tsa_parameters):
     """Calculate resulting SOC from inter and intra SOC flows"""
     soc_frames = []
     for i, k in enumerate(tsa_parameters["order"]):
-        inter_value = soc["inter"].iloc[i]["value"]
+        period_value = soc["period"].iloc[i]["value"]
         # Self-discharge has to be taken into account for calculating
         # inter SOC for each timestep in cluster
         t0 = i * tsa_parameters["timesteps_per_period"]
@@ -505,11 +501,11 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
                     initial=1,
                 )
             )
-            * inter_value
+            * period_value
         )
-        intra_series = soc["intra"][k].iloc[0:timesteps]
+        step_series = soc["step"][k].iloc[0:timesteps]
         soc_frame = pd.DataFrame(
-            intra_series["value"].values
+            step_series["value"].values
             + inter_series.values,  # Neglect indexes, otherwise none
             columns=["value"],
         )
@@ -567,20 +563,20 @@ def _get_storage_soc_flows_and_keys(flow_dict):
         if oemof_tuple[1] is not None and not isinstance(oemof_tuple[1], int):
             continue  # Skip storage output flows
 
-        # Here we have either inter or intra storage index,
+        # Here we have either period or step storage index,
         # depending on oemof tuple length
         storage_keys.append(oemof_tuple)
         if oemof_tuple[0] not in storages:
-            storages[oemof_tuple[0]] = {"inter": 0, "intra": {}}
+            storages[oemof_tuple[0]] = {"period": 0, "step": {}}
         if oemof_tuple[1] is None:
-            # Must be filtered for variable name "storage_content_inter",
+            # Must be filtered for variable name "storage_content_period",
             # otherwise "init_content" variable (in non-multi-period approach)
             # interferes with SOC results
-            storages[oemof_tuple[0]]["inter"] = data[
-                data["variable_name"] == "storage_content_inter"
+            storages[oemof_tuple[0]]["period"] = data[
+                data["variable_name"] == "storage_content_period"
             ]
         elif isinstance(oemof_tuple[1], int):
-            storages[oemof_tuple[0]]["intra"][oemof_tuple[1]] = data
+            storages[oemof_tuple[0]]["step"][oemof_tuple[1]] = data
     return storages, storage_keys
 
 
