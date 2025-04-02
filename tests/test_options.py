@@ -20,6 +20,17 @@ def test_check_age_and_lifetime():
         solph.Flow(nominal_capacity=solph.Investment(age=41, lifetime=40))
 
 
+def test_check_invest_attributes_nonconvex():
+    """Check error being thrown if nonconvex parameter is not of type bool"""
+    msg = (
+        "The `nonconvex` parameter of the `Investment` class has to beof type "
+        + "boolean, not <class 'oemof.solph._options.NonConvex'>."
+    )
+    with pytest.raises(AttributeError, match=msg):
+        solph.Flow(
+            nominal_capacity=solph.Investment(nonconvex=solph.NonConvex())
+        )
+
 def test_check_nonconvex():
     """
     Check warning being thrown if minimum and offset are zero and nonconvex
