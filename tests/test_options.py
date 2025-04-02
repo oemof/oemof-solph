@@ -39,6 +39,9 @@ def test_check_nonconvex():
     with pytest.warns(debugging.SuspiciousUsageWarning):
         solph.Flow(
             nominal_capacity=solph.Investment(
-                minimum=0, offset=0, nonconvex=True
+                maximum=1, minimum=0, offset=0, nonconvex=True
             )
         )
+
+
+test_check_invest_attributes_nonconvex()
