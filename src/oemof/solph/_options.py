@@ -173,7 +173,7 @@ class Investment:
         if not isinstance(self.nonconvex, bool):
             e5 = (
                 "The `nonconvex` parameter of the `Investment` class has to be"
-                + f"of type boolean, not {type(self.nonconvex)}."
+                + f" of type boolean, not {type(self.nonconvex)}."
             )
             raise AttributeError(e5)
 
