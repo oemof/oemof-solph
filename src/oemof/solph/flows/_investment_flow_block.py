@@ -829,6 +829,26 @@ class InvestmentFlowBlock(ScalarBlock):
                     &\\
                     &
                     \forall p \in \textrm{CAPACITY_PERIODS}
+<<<<<<< HEAD
+=======
+
+            * :attr:`fixed_costs` not None for investments
+
+                .. math::
+                    &
+                    (\sum_{pp=year(p)}^{limit_{end}}
+                    P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
+                    \cdot DF^{-p}\\
+                    &\\
+                    &
+                    \forall p \in \textrm{CAPACITY_PERIODS}
+
+            * :attr:`fixed_costs` not None for existing capacity
+
+                .. math::
+                    \sum_{pp=0}^{limit_{exo}} P_{exist} \cdot c_{fixed}(pp)
+                    \cdot DF^{-pp}
+>>>>>>> f0264a2a (Rename PERIODS to CAPACITY_PERIODS)
 
 
         where:
