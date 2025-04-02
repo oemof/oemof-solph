@@ -121,6 +121,7 @@ class Investment:
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
         self._check_age_and_lifetime()
+        self._check_invest_attributes_nonconvex()
         self._check_nonconvex()
 
     def _check_invest_attributes(self):
@@ -166,6 +167,15 @@ class Investment:
                     "expected lifetime."
                 )
                 raise AttributeError(e4)
+
+    def _check_invest_attributes_nonconvex(self):
+        """Throw an error if nonconvex is not of type boolean."""
+        if not isinstance(self.nonconvex, bool):
+            e5 = (
+                "The `nonconvex` parameter of the `Investment` class has to be"
+                + f"of type boolean, not {type(self.nonconvex)}."
+            )
+            raise AttributeError(e5)
 
     def _check_nonconvex(self):
         """Checking for unnecessary setting of nonconvex"""
