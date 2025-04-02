@@ -278,7 +278,7 @@ def test_invest_content_minimum_nonconvex():
         nominal_capacity=solph.Investment(
             ep_costs=0.1,
             minimum=32,
-            nonconvex=solph.NonConvex(),
+            nonconvex=True,
         ),
         balanced=False,
     )
