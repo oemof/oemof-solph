@@ -27,8 +27,6 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 
-from oemof.solph._options import NonConvex
-
 from ._non_convex_flow_block import NonConvexFlowBlock
 
 
