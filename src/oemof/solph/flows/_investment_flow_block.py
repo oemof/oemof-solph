@@ -236,32 +236,34 @@ class InvestmentFlowBlock(ScalarBlock):
         # create invest variable for an investment flow
         self.invest = Var(
             self.INVESTFLOWS,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )
 
         # Total capacity
-        self.total = Var(self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals)
+        self.total = Var(
+            self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
+        )
 
         if m.es.periods is not None:
             self.old = Var(
-                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
             self.old_end = Var(
-                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
             # Old exogenous capacity to be decommissioned (due to lifetime)
             self.old_exo = Var(
-                self.INVESTFLOWS, m.PERIODS, within=NonNegativeReals
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
-            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, within=Binary
+            self.NON_CONVEX_INVESTFLOWS, m.CAPACITY_PERIODS, within=Binary
         )
 
     def _create_constraints(self):
@@ -286,7 +288,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 P_{total}(p) = P_{total}(p-1) + P_{invest}(p) - P_{old}(p) \\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
             Upper bound for the flow value
 
@@ -333,7 +335,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 P_{old,exo}(p) = 0\\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
             where:
 
@@ -353,7 +355,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 &
                 P_{invest, min}(p) \le P_{invest}(p) \le P_{invest, max}(p) \\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
             * :attr:`nonconvex = True`
 
@@ -364,7 +366,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 P_{invest}(p) \le P_{invest, max}(p) \cdot Y_{invest}(p)\\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
         For all *InvestmentFlowBlock* objects
         (independent of the attribute :attr:`nonconvex`),
@@ -423,7 +425,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 P_{total}(p) \leq P_{overall,max} \\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
             * :attr:`overall_minimum` is not None
               (for multi-period model only)
@@ -445,7 +447,7 @@ class InvestmentFlowBlock(ScalarBlock):
             capacity (taking decommissioning into account)
             """
             for i, o in self.INVESTFLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if p == 0:
                         expr = (
                             self.total[i, o, p]
@@ -464,7 +466,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.total_rule.add((i, o, p), expr)
 
         self.total_rule = Constraint(
-            self.INVESTFLOWS, m.PERIODS, noruleinit=True
+            self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.total_rule_build = BuildAction(rule=_total_capacity_rule)
 
@@ -521,7 +523,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
                     # all periods not in decomm_periods have no decommissioning
                     # zero is excluded
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         if p not in decomm_periods and p != 0:
                             expr = self.old_end[i, o, p] == 0
                             self.old_rule_end.add((i, o, p), expr)
@@ -567,7 +569,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.old_rule_end.add((i, o, last_decomm_p), expr)
 
             self.old_rule_end = Constraint(
-                self.INVESTFLOWS, m.PERIODS, noruleinit=True
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_rule_end_build = BuildAction(rule=_old_capacity_rule_end)
 
@@ -579,7 +581,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     age = m.flows[i, o].investment.age
                     lifetime = m.flows[i, o].investment.lifetime
                     is_decommissioned = False
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # No shutdown in first period
                         if p == 0:
                             expr = self.old_exo[i, o, p] == 0
@@ -600,7 +602,7 @@ class InvestmentFlowBlock(ScalarBlock):
                             self.old_rule_exo.add((i, o, p), expr)
 
             self.old_rule_exo = Constraint(
-                self.INVESTFLOWS, m.PERIODS, noruleinit=True
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_rule_exo_build = BuildAction(rule=_old_capacity_rule_exo)
 
@@ -609,7 +611,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 to be decommissioned due to reaching its lifetime
                 """
                 for i, o in self.INVESTFLOWS:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = (
                             self.old[i, o, p]
                             == self.old_end[i, o, p] + self.old_exo[i, o, p]
@@ -617,7 +619,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.old_rule.add((i, o, p), expr)
 
             self.old_rule = Constraint(
-                self.INVESTFLOWS, m.PERIODS, noruleinit=True
+                self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_rule_build = BuildAction(rule=_old_capacity_rule)
 
@@ -680,7 +682,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) <= (
                 m.flows[i, o].full_load_time_max
-                * sum(self.total[i, o, p] for p in m.PERIODS)
+                * sum(self.total[i, o, p] for p in m.CAPACITY_PERIODS)
             )
             return expr
 
@@ -696,7 +698,7 @@ class InvestmentFlowBlock(ScalarBlock):
             expr = sum(
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
-                sum(self.total[i, o, p] for p in m.PERIODS)
+                sum(self.total[i, o, p] for p in m.CAPACITY_PERIODS)
                 * m.flows[i, o].full_load_time_min
             )
             return expr
@@ -713,7 +715,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 in investment case.
                 """
                 for i, o in self.OVERALL_MAXIMUM_INVESTFLOWS:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = (
                             self.total[i, o, p]
                             <= m.flows[i, o].investment.overall_maximum
@@ -721,7 +723,9 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.overall_maximum.add((i, o, p), expr)
 
             self.overall_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTFLOWS, m.PERIODS, noruleinit=True
+                self.OVERALL_MAXIMUM_INVESTFLOWS,
+                m.CAPACITY_PERIODS,
+                noruleinit=True,
             )
             self.overall_maximum_build = BuildAction(
                 rule=_overall_maximum_investflow_rule
@@ -735,7 +739,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 """
                 expr = (
                     m.flows[i, o].investment.overall_minimum
-                    <= self.total[i, o, m.PERIODS[-1]]
+                    <= self.total[i, o, m.CAPACITY_PERIODS[-1]]
                 )
                 return expr
 
@@ -782,7 +786,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p}\\
                     &\\
                     &
-                    \forall p \in \textrm{PERIODS}
+                    \forall p \in \textrm{CAPACITY_PERIODS}
 
             In case, the remaining lifetime of an asset is greater than 0 and
             attribute `use_remaining_value` of the energy system is True,
@@ -797,7 +801,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
                     &\\
                     &
-                    \forall p \in \textrm{PERIODS}
+                    \forall p \in \textrm{CAPACITY_PERIODS}
 
             * :attr:`nonconvex = True`
 
@@ -809,7 +813,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p}\\
                     &\\
                     &
-                    \forall p \in \textrm{PERIODS}
+                    \forall p \in \textrm{CAPACITY_PERIODS}
 
             In case, the remaining lifetime of an asset is greater than 0 and
             attribute `use_remaining_value` of the energy system is True,
@@ -827,7 +831,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot b_{invest}(p)) \cdot DF^{-p}\\
                     &\\
                     &
-                    \forall p \in \textrm{PERIODS}
+                    \forall p \in \textrm{CAPACITY_PERIODS}
 
             * :attr:`fixed_costs` not None for investments
 
@@ -838,7 +842,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot DF^{-p}\\
                     &\\
                     &
-                    \forall p \in \textrm{PERIODS}
+                    \forall p \in \textrm{CAPACITY_PERIODS}
 
             * :attr:`fixed_costs` not None for existing capacity
 
@@ -892,19 +896,19 @@ class InvestmentFlowBlock(ScalarBlock):
 
         m = self.parent_block()
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.PERIODS}
+        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
         fixed_costs = 0
 
         if m.es.periods is None:
             for i, o in self.CONVEX_INVESTFLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     investment_costs += (
                         self.invest[i, o, p]
                         * m.flows[i, o].investment.ep_costs[p]
                     )
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     investment_costs += (
                         self.invest[i, o, p]
                         * m.flows[i, o].investment.ep_costs[p]
@@ -924,7 +928,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     msg.format(interest),
                     debugging.SuspiciousUsageWarning,
                 )
-                for p in m.PERIODS:
+
+                for p in m.CAPACITY_PERIODS:
 
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
@@ -965,7 +970,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     msg.format(interest),
                     debugging.SuspiciousUsageWarning,
                 )
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,
@@ -1008,10 +1013,11 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.INVESTFLOWS:
                 if valid_sequence(
-                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                    m.flows[i, o].investment.fixed_costs,
+                    len(m.CAPACITY_PERIODS),
                 ):
                     lifetime = m.flows[i, o].investment.lifetime
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
@@ -1024,7 +1030,8 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.EXISTING_INVESTFLOWS:
                 if valid_sequence(
-                    m.flows[i, o].investment.fixed_costs, len(m.PERIODS)
+                    m.flows[i, o].investment.fixed_costs,
+                    len(m.CAPACITY_PERIODS),
                 ):
                     lifetime = m.flows[i, o].investment.lifetime
                     age = m.flows[i, o].investment.age
@@ -1131,7 +1138,7 @@ class InvestmentFlowBlock(ScalarBlock):
         def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
                         * self.invest_status[i, o, p]
@@ -1140,7 +1147,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     self.minimum_rule.add((i, o, p), expr)
 
         self.minimum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, noruleinit=True
+            self.NON_CONVEX_INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.minimum_rule_build = BuildAction(rule=_min_invest_rule)
 
@@ -1153,7 +1160,7 @@ class InvestmentFlowBlock(ScalarBlock):
         def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     expr = self.invest[i, o, p] <= (
                         m.flows[i, o].investment.maximum[p]
                         * self.invest_status[i, o, p]
@@ -1161,7 +1168,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     self.maximum_rule.add((i, o, p), expr)
 
         self.maximum_rule = Constraint(
-            self.NON_CONVEX_INVESTFLOWS, m.PERIODS, noruleinit=True
+            self.NON_CONVEX_INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.maximum_rule_build = BuildAction(rule=_max_invest_rule)
 
