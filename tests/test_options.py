@@ -33,6 +33,7 @@ def test_check_invest_attributes_nonconvex():
             )
         )
 
+
 def test_check_nonconvex():
     """
     Check warning being thrown if minimum and offset are zero and nonconvex
