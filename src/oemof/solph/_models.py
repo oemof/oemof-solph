@@ -208,7 +208,8 @@ class Model(po.ConcreteModel):
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
-        Also create sets CAPACITY_PERIODS and TIMEINDEX used formulti-period models.
+        Also create sets CAPACITY_PERIODS and TIMEINDEX used for
+        multi-period models.
         """
         self.nodes = list(self.es.nodes)
 
