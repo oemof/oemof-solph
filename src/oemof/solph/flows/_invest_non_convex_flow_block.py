@@ -27,8 +27,6 @@ from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 
-from oemof.solph._options import NonConvex
-
 from ._non_convex_flow_block import NonConvexFlowBlock
 
 
@@ -80,7 +78,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].investment.nonconvex is None
+                if g[2].investment.nonconvex is False
             ]
         )
 
@@ -88,7 +86,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if isinstance(g[2].investment.nonconvex, NonConvex)
+                if g[2].investment.nonconvex is True
             ]
         )
 
