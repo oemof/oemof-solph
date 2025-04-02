@@ -28,7 +28,9 @@ def test_check_invest_attributes_nonconvex():
     )
     with pytest.raises(AttributeError, match=msg):
         solph.Flow(
-            nominal_capacity=solph.Investment(nonconvex=solph.NonConvex())
+            nominal_capacity=solph.Investment(
+                maximum=1, nonconvex=solph.NonConvex()
+            )
         )
 
 def test_check_nonconvex():
