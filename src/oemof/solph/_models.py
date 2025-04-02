@@ -90,7 +90,7 @@ class Model(po.ConcreteModel):
     TIMESTEPS
         A set with all timesteps of the given time horizon.
 
-    PERIODS
+    CAPACITY_PERIODS
         A set with all investment periods of the given time horizon.
 
     TIMEINDEX
@@ -208,7 +208,7 @@ class Model(po.ConcreteModel):
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
-        Also create sets PERIODS and TIMEINDEX used for multi-period models.
+        Also create sets CAPACITY_PERIODS and TIMEINDEX used formulti-period models.
         """
         self.nodes = list(self.es.nodes)
 
@@ -240,7 +240,7 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(initialize=[0])
+            self.CAPACITY_PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
                 [k] * len(self.es.periods[k])
@@ -255,12 +255,12 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(
+            self.CAPACITY_PERIODS = po.Set(
                 initialize=sorted(list(set(range(len(self.es.periods)))))
             )
 
         # (Re-)Map timesteps to periods
-        timesteps_in_period = {p: [] for p in self.PERIODS}
+        timesteps_in_period = {p: [] for p in self.CAPACITY_PERIODS}
         for p, t in self.TIMEINDEX:
             timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
@@ -275,7 +275,7 @@ class Model(po.ConcreteModel):
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(
                 self.es.tsa_parameters[p]["occurrences"][k]
-                for p in self.PERIODS
+                for p in self.CAPACITY_PERIODS
                 for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
                 for _ in range(self.es.tsa_parameters[p]["timesteps"])
             )
@@ -284,7 +284,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                     )
                 )
@@ -294,7 +294,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                         + 1
                     )
@@ -303,7 +303,7 @@ class Model(po.ConcreteModel):
             self.TYPICAL_CLUSTERS = po.Set(
                 initialize=[
                     (p, i)
-                    for p in self.PERIODS
+                    for p in self.CAPACITY_PERIODS
                     for i in range(
                         len(self.es.tsa_parameters[p]["occurrences"])
                     )

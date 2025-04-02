@@ -699,7 +699,7 @@ class SinkDSMOemofBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(g.fixed_costs, len(m.CAPACITY_PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -803,7 +803,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
         * :attr:`fixed_costs` not None for investments
 
@@ -939,26 +939,30 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         # Investment in DR capacity
         self.invest = Var(
             self.investdsm,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=NonNegativeReals,
             bounds=_dsm_investvar_bound_rule,
         )
 
         # Total capacity
-        self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+        self.total = Var(
+            self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
+        )
 
         if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
-            self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            self.old = Var(
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
+            )
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
             self.old_end = Var(
-                self.investdsm, m.PERIODS, within=NonNegativeReals
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
             # Old exogenous capacity to be decommissioned (due to lifetime)
             self.old_exo = Var(
-                self.investdsm, m.PERIODS, within=NonNegativeReals
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
         # Variable load shift down
@@ -984,7 +988,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             capacity (taking decommissioning into account)
             """
             for g in group:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if p == 0:
                         expr = (
                             self.total[g, p]
@@ -1000,7 +1004,9 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         )
                         self.total_dsm_rule.add((g, p), expr)
 
-        self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+        self.total_dsm_rule = Constraint(
+            group, m.CAPACITY_PERIODS, noruleinit=True
+        )
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
         if m.es.periods is not None:
@@ -1056,7 +1062,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
 
                     # all periods not in decomm_periods have no decommissioning
                     # zero is excluded
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
@@ -1102,7 +1108,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_end_build = BuildAction(
                 rule=_old_dsm_capacity_rule_end
@@ -1116,7 +1122,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     age = g.investment.age
                     lifetime = g.investment.lifetime
                     is_decommissioned = False
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # No shutdown in first period
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
@@ -1136,7 +1142,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             self.old_dsm_rule_exo.add((g, p), expr)
 
             self.old_dsm_rule_exo = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_exo_build = BuildAction(
                 rule=_old_dsm_capacity_rule_exo
@@ -1147,14 +1153,16 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 to be decommissioned due to reaching its lifetime
                 """
                 for g in group:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = (
                             self.old[g, p]
                             == self.old_end[g, p] + self.old_exo[g, p]
                         )
                         self.old_dsm_rule.add((g, p), expr)
 
-            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule = Constraint(
+                group, m.CAPACITY_PERIODS, noruleinit=True
+            )
             self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
@@ -1294,12 +1302,14 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 in investment case.
                 """
                 for g in self.OVERALL_MAXIMUM_INVESTDSM:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = self.total[g, p] <= g.investment.overall_maximum
                         self.overall_dsm_maximum.add((g, p), expr)
 
             self.overall_dsm_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+                self.OVERALL_MAXIMUM_INVESTDSM,
+                m.CAPACITY_PERIODS,
+                noruleinit=True,
             )
 
             self.overall_maximum_build = BuildAction(
@@ -1315,7 +1325,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS.at(-1)]
+                        <= self.total[g, m.CAPACITY_PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 
@@ -1333,13 +1343,13 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         m = self.parent_block()
 
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.PERIODS}
+        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
         if m.es.periods is None:
             for g in self.investdsm:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
                         investment_costs += (
                             self.invest[g, p] * g.investment.ep_costs[p]
@@ -1376,7 +1386,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                             debugging.SuspiciousUsageWarning,
                         )
                         interest = m.discount_rate
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         annuity = economics.annuity(
                             capex=g.investment.ep_costs[p],
                             n=lifetime,
@@ -1424,9 +1434,11 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
@@ -1440,7 +1452,9 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
@@ -2176,7 +2190,7 @@ class SinkDSMDIWBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(g.fixed_costs, len(m.CAPACITY_PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -2308,7 +2322,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
         * :attr:`fixed_costs` not None for investments
 
@@ -2443,27 +2457,31 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         # Investment in DR capacity
         self.invest = Var(
             self.investdsm,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=NonNegativeReals,
             bounds=_dsm_investvar_bound_rule,
         )
 
         # Total capacity
-        self.total = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+        self.total = Var(
+            self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
+        )
 
         if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             # Old capacity built out of old exogenous and endogenous capacities
-            self.old = Var(self.investdsm, m.PERIODS, within=NonNegativeReals)
+            self.old = Var(
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
+            )
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
             self.old_end = Var(
-                self.investdsm, m.PERIODS, within=NonNegativeReals
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
             # Old exogenous capacity to be decommissioned (due to lifetime)
             self.old_exo = Var(
-                self.investdsm, m.PERIODS, within=NonNegativeReals
+                self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
         # Variable load shift down
@@ -2493,7 +2511,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             capacity (taking decommissioning into account)
             """
             for g in group:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if p == 0:
                         expr = (
                             self.total[g, p]
@@ -2509,7 +2527,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
                         self.total_dsm_rule.add((g, p), expr)
 
-        self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+        self.total_dsm_rule = Constraint(
+            group, m.CAPACITY_PERIODS, noruleinit=True
+        )
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
         if m.es.periods is not None:
@@ -2564,7 +2584,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
 
                     # all periods not in decomm_periods have no decommissioning
                     # zero is excluded
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
@@ -2610,7 +2630,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_end_build = BuildAction(
                 rule=_old_dsm_capacity_rule_end
@@ -2624,7 +2644,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     age = g.investment.age
                     lifetime = g.investment.lifetime
                     is_decommissioned = False
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # No shutdown in first period
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
@@ -2644,7 +2664,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             self.old_dsm_rule_exo.add((g, p), expr)
 
             self.old_dsm_rule_exo = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_exo_build = BuildAction(
                 rule=_old_dsm_capacity_rule_exo
@@ -2655,14 +2675,16 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 to be decommissioned due to reaching its lifetime
                 """
                 for g in group:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = (
                             self.old[g, p]
                             == self.old_end[g, p] + self.old_exo[g, p]
                         )
                         self.old_dsm_rule.add((g, p), expr)
 
-            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule = Constraint(
+                group, m.CAPACITY_PERIODS, noruleinit=True
+            )
             self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
@@ -3127,12 +3149,14 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 in investment case.
                 """
                 for g in self.OVERALL_MAXIMUM_INVESTDSM:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = self.total[g, p] <= g.investment.overall_maximum
                         self.overall_dsm_maximum.add((g, p), expr)
 
             self.overall_dsm_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+                self.OVERALL_MAXIMUM_INVESTDSM,
+                m.CAPACITY_PERIODS,
+                noruleinit=True,
             )
 
             self.overall_maximum_build = BuildAction(
@@ -3148,7 +3172,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS.at(-1)]
+                        <= self.total[g, m.CAPACITY_PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 
@@ -3166,13 +3190,13 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         m = self.parent_block()
 
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.PERIODS}
+        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
         if m.es.periods is None:
             for g in self.investdsm:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
                         investment_costs += (
                             self.invest[g, p] * g.investment.ep_costs[p]
@@ -3210,7 +3234,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                             debugging.SuspiciousUsageWarning,
                         )
                         interest = m.discount_rate
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         annuity = economics.annuity(
                             capex=g.investment.ep_costs[p],
                             n=lifetime,
@@ -3259,9 +3283,11 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
@@ -3275,7 +3301,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(
@@ -4053,7 +4081,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for g in group:
                 if g.shed_eligibility:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # sum of all load reductions
                         lhs = sum(
                             self.dsm_do_shed[g, t]
@@ -4076,7 +4104,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_shed = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_shed_build = BuildAction(
             rule=dr_yearly_limit_shed_rule
@@ -4091,7 +4119,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for g in group:
                 if g.ActivateYearLimit:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # sum of all load reductions
                         lhs = sum(
                             sum(
@@ -4117,7 +4145,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_red = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_red_build = BuildAction(
             rule=dr_yearly_limit_red_rule
@@ -4130,7 +4158,7 @@ class SinkDSMDLRBlock(ScalarBlock):
             """
             for g in group:
                 if g.ActivateYearLimit:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # sum of all load increases
                         lhs = sum(
                             sum(self.dsm_up[g, h, t] for h in g.delay_time)
@@ -4153,7 +4181,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                     pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_inc = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_inc_build = BuildAction(
             rule=dr_yearly_limit_inc_rule
@@ -4347,7 +4375,7 @@ class SinkDSMDLRBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(g.fixed_costs, len(m.CAPACITY_PERIODS)):
                     fixed_costs += sum(
                         max(g.max_capacity_up, g.max_capacity_down)
                         * g.fixed_costs[pp]
@@ -4554,7 +4582,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
                 &\\
                 &
-                \forall p \in \textrm{PERIODS}
+                \forall p \in \textrm{CAPACITY_PERIODS}
 
         * :attr:`fixed_costs` not None for investments
 
@@ -4707,26 +4735,30 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         # Investment in DR capacity
         self.invest = Var(
             self.INVESTDR,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=NonNegativeReals,
             bounds=_dr_investvar_bound_rule,
         )
 
         # Total capacity
-        self.total = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+        self.total = Var(
+            self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
+        )
 
         if m.es.periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
-            self.old = Var(self.INVESTDR, m.PERIODS, within=NonNegativeReals)
+            self.old = Var(
+                self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
+            )
 
             # Old endogenous capacity to be decommissioned (due to lifetime)
             self.old_end = Var(
-                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+                self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
             # Old exogenous capacity to be decommissioned (due to lifetime)
             self.old_exo = Var(
-                self.INVESTDR, m.PERIODS, within=NonNegativeReals
+                self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
         # Variable load shift down (capacity)
@@ -4772,7 +4804,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             capacity (taking decommissioning into account)
             """
             for g in group:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if p == 0:
                         expr = (
                             self.total[g, p]
@@ -4788,7 +4820,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         )
                         self.total_dsm_rule.add((g, p), expr)
 
-        self.total_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+        self.total_dsm_rule = Constraint(
+            group, m.CAPACITY_PERIODS, noruleinit=True
+        )
         self.total_dsm_rule_build = BuildAction(rule=_total_capacity_rule)
 
         if m.es.periods is not None:
@@ -4844,7 +4878,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
                     # all periods not in decomm_periods have no decommissioning
                     # zero is excluded
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         if p not in decomm_periods and p != 0:
                             expr = self.old_end[g, p] == 0
                             self.old_dsm_rule_end.add((g, p), expr)
@@ -4890,7 +4924,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         self.old_dsm_rule_end.add((g, last_decomm_p), expr)
 
             self.old_dsm_rule_end = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_end_build = BuildAction(
                 rule=_old_dsm_capacity_rule_end
@@ -4904,7 +4938,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     age = g.investment.age
                     lifetime = g.investment.lifetime
                     is_decommissioned = False
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # No shutdown in first period
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
@@ -4924,7 +4958,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             self.old_dsm_rule_exo.add((g, p), expr)
 
             self.old_dsm_rule_exo = Constraint(
-                group, m.PERIODS, noruleinit=True
+                group, m.CAPACITY_PERIODS, noruleinit=True
             )
             self.old_dsm_rule_exo_build = BuildAction(
                 rule=_old_dsm_capacity_rule_exo
@@ -4935,14 +4969,16 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 to be decommissioned due to reaching its lifetime
                 """
                 for g in group:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = (
                             self.old[g, p]
                             == self.old_end[g, p] + self.old_exo[g, p]
                         )
                         self.old_dsm_rule.add((g, p), expr)
 
-            self.old_dsm_rule = Constraint(group, m.PERIODS, noruleinit=True)
+            self.old_dsm_rule = Constraint(
+                group, m.CAPACITY_PERIODS, noruleinit=True
+            )
             self.old_dsm_rule_build = BuildAction(rule=_old_dsm_capacity_rule)
 
         def _shift_shed_vars_rule(block):
@@ -5344,7 +5380,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             to the others.
             """
             for g in group:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if g.shed_eligibility:
                         # sum of all load reductions
                         lhs = sum(
@@ -5365,7 +5401,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         block.dr_yearly_limit_shed.add((g, p), (lhs <= rhs))
 
         self.dr_yearly_limit_shed = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_shed_build = BuildAction(
             rule=dr_yearly_limit_shed_rule
@@ -5380,7 +5416,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for g in group:
                 if g.ActivateYearLimit:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # sum of all load reductions
                         lhs = sum(
                             sum(
@@ -5406,7 +5442,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_red = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_red_build = BuildAction(
             rule=dr_yearly_limit_red_rule
@@ -5419,7 +5455,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             """
             for g in group:
                 if g.ActivateYearLimit:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         # sum of all load increases
                         lhs = sum(
                             sum(self.dsm_up[g, h, t] for h in g.delay_time)
@@ -5442,7 +5478,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     pass  # return(Constraint.Skip)
 
         self.dr_yearly_limit_inc = Constraint(
-            group, m.PERIODS, noruleinit=True
+            group, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.dr_yearly_limit_inc_build = BuildAction(
             rule=dr_yearly_limit_inc_rule
@@ -5591,12 +5627,14 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 in investment case.
                 """
                 for g in self.OVERALL_MAXIMUM_INVESTDSM:
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         expr = self.total[g, p] <= g.investment.overall_maximum
                         self.overall_dsm_maximum.add((g, p), expr)
 
             self.overall_dsm_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTDSM, m.PERIODS, noruleinit=True
+                self.OVERALL_MAXIMUM_INVESTDSM,
+                m.CAPACITY_PERIODS,
+                noruleinit=True,
             )
 
             self.overall_maximum_build = BuildAction(
@@ -5612,7 +5650,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                 for g in self.OVERALL_MINIMUM_INVESTDSM:
                     expr = (
                         g.investment.overall_minimum
-                        <= self.total[g, m.PERIODS.at(-1)]
+                        <= self.total[g, m.CAPACITY_PERIODS.at(-1)]
                     )
                     self.overall_minimum.add(g, expr)
 
@@ -5631,13 +5669,13 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         m = self.parent_block()
 
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.PERIODS}
+        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
         variable_costs = 0
         fixed_costs = 0
 
         if m.es.periods is None:
             for g in self.INVESTDR:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
                         investment_costs += (
                             self.invest[g, p] * g.investment.ep_costs[p]
@@ -5682,7 +5720,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                             debugging.SuspiciousUsageWarning,
                         )
                         interest = m.discount_rate
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         annuity = economics.annuity(
                             capex=g.investment.ep_costs[p],
                             n=lifetime,
@@ -5737,9 +5775,11 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         + self.dsm_do_shed[g, t] * g.cost_dsm_down_shed[t]
                     ) * m.objective_weighting[t]
 
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
-                    for p in m.PERIODS:
+                    for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
                             m.es.periods_years[p] + lifetime,
@@ -5753,7 +5793,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         )
 
             for g in self.EXISTING_INVESTDSM:
-                if valid_sequence(g.investment.fixed_costs, len(m.PERIODS)):
+                if valid_sequence(
+                    g.investment.fixed_costs, len(m.CAPACITY_PERIODS)
+                ):
                     lifetime = g.investment.lifetime
                     age = g.investment.age
                     range_limit = min(

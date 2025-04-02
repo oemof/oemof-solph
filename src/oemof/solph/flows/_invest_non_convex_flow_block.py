@@ -143,7 +143,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         # Create the `invest` variable for the nonconvex investment flow.
         self.invest = Var(
             self.INVEST_NON_CONVEX_FLOWS,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=NonNegativeReals,
             bounds=_investvar_bound_rule,
         )
@@ -153,7 +153,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         # when the component is installed.
         self.invest_status = Var(
             self.OFFSET_INVEST_NON_CONVEX_FLOWS,
-            m.PERIODS,
+            m.CAPACITY_PERIODS,
             within=Binary,
         )
 
@@ -311,13 +311,13 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         investment_costs = 0
 
         for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
-            for p in m.PERIODS:
+            for p in m.CAPACITY_PERIODS:
                 investment_costs += (
                     self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                 )
 
         for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
-            for p in m.PERIODS:
+            for p in m.CAPACITY_PERIODS:
                 investment_costs += (
                     self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                     + m.flows[i, o].investment.offset[p]
@@ -344,7 +344,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
                         * self.invest_status[i, o, p]
@@ -353,7 +353,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                     self.minimum_investment.add((i, o, p), expr)
 
         self.minimum_investment = Constraint(
-            self.INVEST_NON_CONVEX_FLOWS, m.PERIODS, noruleinit=True
+            self.INVEST_NON_CONVEX_FLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.minimum_rule_build = BuildAction(rule=_min_invest_rule)
 
@@ -369,7 +369,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
             for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
-                for p in m.PERIODS:
+                for p in m.CAPACITY_PERIODS:
                     expr = (
                         self.invest[i, o, p]
                         <= m.flows[i, o].investment.maximum[p]
@@ -378,7 +378,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                     self.maximum_investment.add((i, o, p), expr)
 
         self.maximum_investment = Constraint(
-            self.INVEST_NON_CONVEX_FLOWS, m.PERIODS, noruleinit=True
+            self.INVEST_NON_CONVEX_FLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
         self.maximum_rule_build = BuildAction(rule=_max_invest_rule)
 

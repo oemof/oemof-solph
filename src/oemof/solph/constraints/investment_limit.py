@@ -64,7 +64,7 @@ def investment_limit_per_period(model, limit=None):
 
     .. math::
         \sum_{investment\_costs(p)} \leq limit(p)
-        \forall p \in \textrm{PERIODS}
+        \forall p \in \textrm{CAPACITY_PERIODS}
 
     Parameters
     ----------
@@ -114,7 +114,7 @@ def investment_limit_per_period(model, limit=None):
         return expr <= limit[p]
 
     model.investment_limit_per_period = po.Constraint(
-        model.PERIODS, rule=investment_period_rule
+        model.CAPACITY_PERIODS, rule=investment_period_rule
     )
 
     return model
@@ -133,7 +133,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
 
     .. math::
-        \sum_{p \in \textrm{PERIODS}}
+        \sum_{p \in \textrm{CAPACITY_PERIODS}}
         \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
@@ -215,7 +215,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
                 model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
-                for p in model.PERIODS
+                for p in model.CAPACITY_PERIODS
             )
         ),
     )

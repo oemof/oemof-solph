@@ -218,7 +218,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     **Constraint:**
 
     .. math:: \sum_{i \in F_I} \sum_{t \in T} P_i(t) \cdot w_i(t)
-               \cdot \tau(t) \leq L(p) \forall p \in \textrm{PERIODS}
+               \cdot \tau(t) \leq L(p) \forall p \in \textrm{CAPACITY_PERIODS}
 
 
     For the parameter and variable explanation, please refer to the docs
@@ -258,7 +258,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
         return expr <= limit[p]
 
     om.periodical_integral_limit = po.Constraint(
-        om.PERIODS,
+        om.CAPACITY_PERIODS,
         rule=_periodical_integral_limit_rule,
         name=limit_name + "_constraint",
     )
