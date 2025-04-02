@@ -80,7 +80,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].investment.nonconvex is None
+                if g[2].investment.nonconvex is False
             ]
         )
 
@@ -88,7 +88,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if isinstance(g[2].investment.nonconvex, NonConvex)
+                if g[2].investment.nonconvex is True
             ]
         )
 
