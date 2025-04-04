@@ -217,34 +217,32 @@ additional cost for e.g. the pipe network, etc.).
     PVF = \frac{\left(1 + i\right)^n -1}{\left(1 + i\right)^n \cdot i}
 
 As we will evaluate the :math:`LCOH` again later, let's define a function to
-calculate it from the input values as depicted below.
+calculate it from the input values using sensible default values as depicted
+below.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_9_start]
     :end-before: [sec_9_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+Now we'll begin computing the :math:`LCOH`. First of all, we need some cost
+data of a typical gas boiler. We assume specific invest cost of 50,000.00 €/MW,
+a nominal rated capacity of 20 MW and variable operation cost of 0.50 €/MWh.
+The invest cost can be calculate by multiplying the specific cost and capacity.
+For all cost related to the gas boiler's operation, we multiply the variable
+cost with the total heat produced by the unit and add it to the sum of the
+hourly cost evoked by the purchase of natural gas. Finllay, we sum up the heat
+supplied to the heat sink and use the calculated values to compute the LCOH,
+which are printed to the console with a value of 18.24 €/MWh.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_10_start]
     :end-before: [sec_10_end]
 
-.. figure:: /_files/example_network.svg
-    :align: center
-    :alt: System dispatch of heating system with gas boiler
-    :figclass: only-light
-
-    System dispatch
-
-.. figure:: /_files/example_network_darkmode.svg
-    :align: center
-    :alt: System dispatch of heating system with gas boiler
-    :figclass: only-dark
-
-    System dispatch
+This completes the first step of the District Heating Tutorial. Take a look at
+the following lessons and think about what you should take away with you for
+now.
 
 .. admonition:: Learning
     :class: important
