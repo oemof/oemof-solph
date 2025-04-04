@@ -249,17 +249,18 @@ calculate it from the input values as depicted below.
 .. admonition:: Learning
     :class: important
 
-    After the first step of this tutorial you should be able to do the following:
+    After the first step of this tutorial you should be able to do the
+    following:
 
-    * Reading csv.files
+    * Read data from csv-files
 
-    * Initialize a energy system
+    * Initialize an energy system
 
     * Create simple components
 
-    * Optimize the dispatch of district heating system
+    * Optimize the dispatch of a district heating system
 
-    * Visulize results and generate key parameter
+    * Visualize results and compute key parameters
 
 
 Step 2: Plan capacity of heat pump and heat storage
