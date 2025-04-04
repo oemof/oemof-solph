@@ -180,6 +180,22 @@ results is calling the ``show`` method.
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
 
+Your plot should similar to this:
+
+.. figure:: /_files/intro_tut_dhs_1_hourly_heat_production.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_1_hourly_heat_production_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    System dispatch of heating system with gas boiler
+
 Let's continue by assesing the economic merit of our district heating supply
 system. A common indicator for that purpose are the Levelized Cost of Heat
 (:math:`LCOH`). As shown in the equations below, they account for the upfront
