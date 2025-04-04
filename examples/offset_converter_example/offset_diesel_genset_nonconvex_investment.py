@@ -60,7 +60,16 @@ except ImportError:
     plt = None
 
 
-def offset_converter_example():
+def get_data_from_file_path(file_path: str) -> pd.DataFrame:
+    try:
+        data = pd.read_csv(file_path)
+    except FileNotFoundError:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        data = pd.read_csv(dir + "/" + file_path)
+    return data
+
+
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -84,9 +93,7 @@ def offset_converter_example():
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    filename = os.path.join(current_directory, "diesel_genset_data.csv")
-    data = pd.read_csv(filepath_or_buffer=filename)
+    data = get_data_from_file_path("diesel_genset_data.csv")
 
     # Change the index of data to be able to select data based on the time range.
     data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
@@ -278,10 +285,13 @@ def offset_converter_example():
     # Optimise the energy system
     ##########################################################################
 
+    if optimize is False:
+        return energy_system
+
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "gurobi"
+    solver = "cbc"
 
     model = solph.Model(energy_system)
     model.solve(
@@ -605,4 +615,4 @@ def offset_converter_example():
 
 
 if __name__ == "__main__":
-    offset_converter_example()
+    main()

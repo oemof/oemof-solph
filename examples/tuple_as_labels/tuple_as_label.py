@@ -4,7 +4,7 @@
 General description
 -------------------
 
-You should have grasped the basic_example to understand this one.
+You should have grasped the result_object example to understand this one.
 
 This is an example to show how the label attribute can be used with tuples to
 manage the results of large energy system. Even though, the feature is
@@ -132,9 +132,10 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
         return "_".join(map(str, self._asdict().values()))
 
 
-def main():
+def main(optimize=True):
     # Read data file
-    filename = os.path.join(os.getcwd(), "tuple_as_label.csv")
+    home_path = os.path.dirname(__file__)
+    filename = os.path.join(home_path, "tuple_as_label.csv")
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
@@ -250,8 +251,11 @@ def main():
     energysystem.add(storage)
 
     ##########################################################################
-    # Optimise the energy system and plot the results
+    # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
@@ -264,7 +268,7 @@ def main():
     # of the lp-file.
     if debug:
         filename = os.path.join(
-            helpers.extend_basic_path("lp_files"), "basic_example.lp"
+            helpers.extend_basic_path("lp_files"), "tuple_as_label.lp"
         )
         logging.info("Store lp-file in {0}.".format(filename))
         model.write(filename, io_options={"symbolic_solver_labels": True})
@@ -320,7 +324,6 @@ def main():
     )
 
     # Store the table to csv or excel file:
-    home_path = os.path.expanduser("~")
     my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
     # my_flows.to_excel(os.path.join(home_path, "my_flows.xlsx"))
     print(my_flows.sum())

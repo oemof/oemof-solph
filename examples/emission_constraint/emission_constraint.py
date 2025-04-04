@@ -36,7 +36,7 @@ from oemof import solph
 from oemof.solph import constraints
 
 
-def main():
+def main(optimize=True):
     # create energy system
     energysystem = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
@@ -102,6 +102,9 @@ def main():
         )
     )
 
+    if optimize is False:
+        return energysystem
+
     # initialise the operational model
     model = solph.Model(energysystem)
 
@@ -109,7 +112,7 @@ def main():
     constraints.emission_limit(model, limit=100)
 
     # print out the emission constraint
-    model.integral_limit_emission_factor_constraint.pprint()
+    model.integral_limit_emission_factor_upper_limit.pprint()
     model.integral_limit_emission_factor.pprint()
 
     # solve the model
