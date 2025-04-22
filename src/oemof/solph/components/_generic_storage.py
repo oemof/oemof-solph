@@ -2224,8 +2224,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 # to iterating over the TIMESTEPS with one offset.
                 for t in m.TIMESTEPS:
                     storage_costs += (
-                        self.storage_content[n, t + 1]
-                        * n.storage_costs[t + 1]
+                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
                     )
 
         self.storage_costs = Expression(expr=storage_costs)
