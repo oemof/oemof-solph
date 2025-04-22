@@ -2082,6 +2082,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         m = self.parent_block()
 
         investment_costs = 0
+        storage_costs = 0
         period_investment_costs = {p: 0 for p in m.PERIODS}
         fixed_costs = 0
 
@@ -2216,10 +2217,25 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         for pp in range(range_limit)
                     )
 
+        for n in self.INVESTSTORAGES:
+            if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
+                # We actually want to iterate over all TIMEPOINTS except the
+                # 0th. As integers are used for the index, this is equicalent
+                # to iterating over the TIMESTEPS with one offset.
+                for t in m.TIMESTEPS:
+                    storage_costs += (
+                        self.storage_content[n, t + 1]
+                        * n.storage_costs[t + 1]
+                    )
+
+        self.storage_costs = Expression(expr=storage_costs)
+
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = period_investment_costs
         self.fixed_costs = Expression(expr=fixed_costs)
-        self.costs = Expression(expr=investment_costs + fixed_costs)
+        self.costs = Expression(
+            expr=investment_costs + fixed_costs + storage_costs
+        )
 
         return self.costs
 
