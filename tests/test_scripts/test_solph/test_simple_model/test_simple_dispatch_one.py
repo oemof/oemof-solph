@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" This example shows how to create an energysystem with oemof objects and
+"""This example shows how to create an energysystem with oemof objects and
 solve it with the solph module.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
