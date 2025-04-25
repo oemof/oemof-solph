@@ -213,7 +213,9 @@ class BaseModel(po.ConcreteModel):
         """
         return processing.results(self)
 
-    def solve(self, solver="cbc", solver_io="lp", **kwargs):
+    def solve(
+        self, solver="cbc", solver_io="lp", allow_nonoptimal=True, **kwargs
+    ):
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
@@ -222,6 +224,9 @@ class BaseModel(po.ConcreteModel):
             solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
         solver_io : string
             pyomo solver interface file format: "lp", "python", "nl", etc.
+        allow_nonoptimal : bool
+            if set to false, an error will be raised
+            if no optimal solution is found
         \**kwargs : keyword arguments
             Possible keys can be set see below:
 
@@ -248,23 +253,29 @@ class BaseModel(po.ConcreteModel):
 
         solver_results = opt.solve(self, **solve_kwargs)
 
-        status = solver_results["Solver"][0]["Status"]
-        termination_condition = solver_results["Solver"][0][
-            "Termination condition"
-        ]
+        status = solver_results.Solver.Status
+        termination_condition = solver_results.Solver.Termination_condition
+
+        self.es.results = solver_results
+        self.solver_results = solver_results
 
         if status == "ok" and termination_condition == "optimal":
             logging.info("Optimization successful...")
         else:
             msg = (
-                "Optimization ended with status {0} and termination "
-                "condition {1}"
+                f"The solver did not return an optimal solution. "
+                f"Instead the optimization ended with\n "
+                f"    - status: {status}\n"
+                f"    - termination condition: {termination_condition}"
             )
-            warnings.warn(
-                msg.format(status, termination_condition), UserWarning
-            )
-        self.es.results = solver_results
-        self.solver_results = solver_results
+
+            if allow_nonoptimal:
+                msg += "\n In the future, this will be treated as an error."
+                warnings.warn(
+                    msg.format(status, termination_condition), UserWarning
+                )
+            else:
+                raise RuntimeError(msg)
 
         return solver_results
 
