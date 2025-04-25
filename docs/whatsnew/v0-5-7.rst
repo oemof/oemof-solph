@@ -1,0 +1,27 @@
+v0.5.7 (April 25th, 2025)
+--------------------------
+
+New features
+############
+
+* Introduce option Model.solve(allow_nonoptimal=False) that raises
+  an error if no optimal solution is found. (Backported from v0.6.)
+
+Bug fixes
+#########
+
+* storage_costs are now considered also for GenericStorage with a
+  capacity that is subject to an Investment.
+
+Known issues
+############
+
+* Indexing of storage with capacity investment is off by one.
+* Related: Storage limits not applied for last time step.
+* Some links in the documentation are no longer valid.
+
+Contributors
+############
+
+* Eva Schischke
+* Patrik Schönfeldt
