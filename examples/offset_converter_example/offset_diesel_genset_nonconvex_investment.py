@@ -69,7 +69,7 @@ def get_data_from_file_path(file_path: str) -> pd.DataFrame:
     return data
 
 
-def offset_converter_example():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -284,6 +284,9 @@ def offset_converter_example():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energy_system
 
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
@@ -612,4 +615,4 @@ def offset_converter_example():
 
 
 if __name__ == "__main__":
-    offset_converter_example()
+    main()

@@ -61,7 +61,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -84,7 +84,8 @@ def main():
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    filename = os.path.join(os.getcwd(), "solar_generation.csv")
+
+    filename = os.path.join(os.path.dirname(__file__), "solar_generation.csv")
     data = pd.read_csv(filename)
 
     # Change the index of data to be able to select data based on the time
@@ -267,6 +268,9 @@ def main():
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
     solver = "cbc"
+
+    if optimize is False:
+        return energysystem
 
     model = solph.Model(energysystem)
     model.solve(

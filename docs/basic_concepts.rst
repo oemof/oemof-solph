@@ -14,9 +14,11 @@ buses and flows as well as the basic components.
     :hidden:
 
     basic_concepts/energy_system.rst
-    basic_concepts/buses.rst
     basic_concepts/flows.rst
+    basic_concepts/buses.rst
     basic_concepts/components.rst
+    basic_concepts/model.rst
+    basic_concepts/results.rst
 
 .. grid:: 2
     :gutter: 1
@@ -31,19 +33,6 @@ buses and flows as well as the basic components.
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
             :class: only-dark
 
-    .. grid-item-card::  Buses
-        :link: basic_concepts_buses_label
-        :link-type: ref
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
-            :class: only-light
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
-            :class: only-dark
-
-.. grid:: 2
-    :gutter: 1
-
     .. grid-item-card::  Flows
         :link: basic_concepts_flows_label
         :link-type: ref
@@ -54,8 +43,46 @@ buses and flows as well as the basic components.
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
             :class: only-dark
 
+
+.. grid:: 2
+    :gutter: 1
+
+    .. grid-item-card::  Buses
+        :link: basic_concepts_buses_label
+        :link-type: ref
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+            :class: only-light
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+            :class: only-dark
+
     .. grid-item-card::  Components
         :link: basic_concepts_components_label
+        :link-type: ref
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+            :class: only-light
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+            :class: only-dark
+
+
+.. grid:: 2
+    :gutter: 1
+
+    .. grid-item-card::  Optimization Model
+        :link: basic_concepts_model_label
+        :link-type: ref
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+            :class: only-light
+
+        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+            :class: only-dark
+
+    .. grid-item-card::  Result handling
+        :link: basic_concepts_results_label
         :link-type: ref
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg

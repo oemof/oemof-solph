@@ -14,6 +14,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+import collections
+import itertools
 import warnings
 
 import numpy as np
@@ -60,6 +62,20 @@ class EnergySystem(es.EnergySystem):
         For a standard model, periods are not (to be) declared, i.e. None.
         A list with one entry is derived, i.e. [0].
 
+    tsa_parameters : list of dicts, dict or None
+        Parameter can be set in order to use aggregated timeseries from TSAM.
+        If multi-period model is used, one dict per period has to be set.
+        If no multi-period (aka single period) approach is selected, a single
+        dict can be provided.
+        If parameter is None, model is set up as usual.
+
+        Dict must contain keys `timesteps_per_period`
+        (from TSAMs `hoursPerPeriod`), `order` (from TSAMs `clusterOrder`) and
+        `occurrences` (from TSAMs `clusterPeriodNoOccur`).
+        When activated, storage equations and flow rules for full_load_time
+        will be adapted. Note that timeseries for components have to
+        be set up as already aggregated timeseries.
+
     use_remaining_value : bool
         If True, compare the remaining value of an investment to the
         original value (only applicable for multi-period models)
@@ -73,6 +89,7 @@ class EnergySystem(es.EnergySystem):
         timeincrement=None,
         infer_last_interval=None,
         periods=None,
+        tsa_parameters=None,
         use_remaining_value=False,
         groupings=None,
     ):
@@ -143,14 +160,19 @@ class EnergySystem(es.EnergySystem):
                 warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
         elif timeindex is not None and timeincrement is None:
-            df = pd.DataFrame(timeindex)
-            timedelta = df.diff()
-            timeincrement = timedelta / np.timedelta64(1, "h")
+            if tsa_parameters is not None:
+                pass
+            else:
+                df = pd.DataFrame(timeindex)
+                timedelta = df.diff()
+                timeincrement = timedelta / np.timedelta64(1, "h")
 
-            # we want a series (squeeze)
-            # without the first item (no delta defined for first entry)
-            # but starting with index 0 (reset)
-            timeincrement = timeincrement.squeeze()[1:].reset_index(drop=True)
+                # we want a series (squeeze)
+                # without the first item (no delta defined for first entry)
+                # but starting with index 0 (reset)
+                timeincrement = timeincrement.squeeze()[1:].reset_index(
+                    drop=True
+                )
 
         if timeincrement is not None and (pd.Series(timeincrement) <= 0).any():
             msg = (
@@ -159,7 +181,48 @@ class EnergySystem(es.EnergySystem):
                 "timeincrement parameter or an incorrect timeindex."
             )
             raise TypeError(msg)
+        if tsa_parameters is not None:
+            msg = (
+                "CAUTION! You specified the 'tsa_parameters' attribute for "
+                "your energy system.\n This will lead to setting up "
+                "energysystem with aggregated timeseries. "
+                "Storages and flows will be adapted accordingly.\n"
+                "Please be aware that the feature is experimental as of "
+                "now. If you find anything suspicious or any bugs, "
+                "please report them."
+            )
+            warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
+            if isinstance(tsa_parameters, dict):
+                # Set up tsa_parameters for single period:
+                tsa_parameters = [tsa_parameters]
+
+            # Construct occurrences of typical periods
+            if periods is not None:
+                for p in range(len(periods)):
+                    tsa_parameters[p]["occurrences"] = collections.Counter(
+                        tsa_parameters[p]["order"]
+                    )
+            else:
+                tsa_parameters[0]["occurrences"] = collections.Counter(
+                    tsa_parameters[0]["order"]
+                )
+
+            # If segmentation is used, timesteps is set to number of
+            # segmentations per period.
+            # Otherwise, default timesteps_per_period is used.
+            for params in tsa_parameters:
+                if "segments" in params:
+                    params["timesteps"] = int(
+                        len(params["segments"]) / len(params["occurrences"])
+                    )
+                else:
+                    params["timesteps"] = params["timesteps_per_period"]
+        self.tsa_parameters = tsa_parameters
+
+        timeincrement = self._init_timeincrement(
+            timeincrement, timeindex, periods, tsa_parameters
+        )
         super().__init__(
             groupings=groupings,
             timeindex=timeindex,
@@ -244,3 +307,50 @@ class EnergySystem(es.EnergySystem):
             - self.periods[period].min().year
             + 1
         )
+
+    @staticmethod
+    def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
+        """Check and initialize timeincrement"""
+
+        # Timeincrement in TSAM mode
+        if (
+            timeincrement is not None
+            and tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You must not specify timeincrement in TSAM mode. "
+                "TSAM will define timeincrement itself."
+            )
+            raise AttributeError(msg)
+        if (
+            tsa_parameters is not None
+            and any("segments" in params for params in tsa_parameters)
+            and not all("segments" in params for params in tsa_parameters)
+        ):
+            msg = (
+                "You have to set up segmentation in all periods, "
+                "if you want to use segmentation in TSAM mode"
+            )
+            raise AttributeError(msg)
+        if tsa_parameters is not None and all(
+            "segments" in params for params in tsa_parameters
+        ):
+            # Concatenate segments from TSAM parameters to get timeincrement
+            return list(
+                itertools.chain(
+                    *[params["segments"].values() for params in tsa_parameters]
+                )
+            )
+
+        elif timeindex is not None and timeincrement is None:
+            df = pd.DataFrame(timeindex)
+            timedelta = df.diff()
+            timeincrement = timedelta / np.timedelta64(1, "h")
+
+            # we want a series (squeeze)
+            # without the first item (no delta defined for first entry)
+            # but starting with index 0 (reset)
+            return timeincrement.squeeze()[1:].reset_index(drop=True)
+
+        return timeincrement
