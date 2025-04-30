@@ -2219,9 +2219,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         for n in self.INVESTSTORAGES:
             if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
-                # We actually want to iterate over all TIMEPOINTS except the
-                # 0th. As integers are used for the index, this is equicalent
-                # to iterating over the TIMESTEPS with one offset.
+                storage_costs += (
+                    self.storage_content[n, 0] * n.storage_costs[0]
+                )
                 for t in m.TIMESTEPS:
                     storage_costs += (
                         self.storage_content[n, t + 1] * n.storage_costs[t + 1]
