@@ -107,7 +107,8 @@ class GenericStorage(Node):
         see: min_storage_level
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
         Cost (per energy) for having energy in the storage, starting from
-        time point :math:`t_{1}`.
+        time point :math:`t_{1}`. (:math:`t_{0}` is left out to avoid counting
+        it twice if balanced=True.)
     lifetime_inflow : int, :math:`n_{in}`
         Determine the lifetime of an inflow; only applicable for multi-period
         models which can invest in storage capacity and have an
@@ -786,8 +787,7 @@ class GenericStorageBlock(ScalarBlock):
                 if not m.TSAM_MODE:
                     for t in m.TIMESTEPS:
                         storage_costs += (
-                            self.storage_content[n, t + 1]
-                            * n.storage_costs[t + 1]
+                            self.storage_content[n, t + 1] * n.storage_costs[t]
                         )
                 else:
                     for t in m.TIMESTEPS_ORIGINAL:
@@ -2219,13 +2219,20 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         for n in self.INVESTSTORAGES:
             if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
-                storage_costs += (
-                    self.storage_content[n, 0] * n.storage_costs[0]
-                )
-                for t in m.TIMESTEPS:
-                    storage_costs += (
-                        self.storage_content[n, t + 1] * n.storage_costs[t + 1]
-                    )
+                # We actually want to iterate over all TIMEPOINTS except the
+                # 0th. As integers are used for the index, this is equicalent
+                # to iterating over the TIMESTEPS with one offset.
+                if not m.TSAM_MODE:
+                    for t in m.TIMESTEPS:
+                        storage_costs += (
+                            self.storage_content[n, t + 1] * n.storage_costs[t]
+                        )
+                else:
+                    for t in m.TIMESTEPS_ORIGINAL:
+                        storage_costs += (
+                            self.storage_content[n, t + 1]
+                            * n.storage_costs[t + 1]
+                        )
 
         self.storage_costs = Expression(expr=storage_costs)
 
