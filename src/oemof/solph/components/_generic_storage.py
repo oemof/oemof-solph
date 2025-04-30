@@ -788,7 +788,7 @@ class GenericStorageBlock(ScalarBlock):
                     for t in m.TIMESTEPS:
                         storage_costs += (
                             self.storage_content[n, t + 1]
-                            * n.storage_costs[t + 1]
+                            * n.storage_costs[t]
                         )
                 else:
                     for t in m.TIMESTEPS_ORIGINAL:
