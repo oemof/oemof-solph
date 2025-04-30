@@ -6,10 +6,7 @@ Energy System
 
 In most cases an `EnergySystem` instance is defined when we start to build up an energy system model. The `EnergySystem` instance will contain the model's elements and a time index.
 
-The model time is defined by the number of intervals and the length of intervals. The length of each interval does not have to be the same. This can be defined in two ways:
-
-1. Define the length of each interval in an array/Series where the number of the elements is the number of intervals.
-2. Define a `pandas.DatetimeIndex` with all time steps that encloses an interval. Be aware that you have to define n+1 time points to get n intervals. For non-leap year with hourly values that means 8761 time points to get 8760 interval e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
+The model time is defined by the number of intervals and the length of intervals. The length of each interval does not have to be the same. The intervals are defined by giving a `pandas.DatetimeIndex` with all time steps that define the intervals. Be aware that you have to define n+1 time points to get n intervals. For non-leap year with hourly values that means 8761 time points to get 8760 interval e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
 
 The index will also be used for the results. For a numeric index the resulting time series will indexed with a numeric index starting with 0.
 
@@ -46,7 +43,7 @@ This index is used at initialisation of the energy system:
 
 After defining an instance of the `EnergySystem` class, one need to add nodes and links between them to define the underlying network of the energy system.
 
-There are two types of *nodes* : *components* and *buses*. Every Component has to be connected with one or more *buses*. The link between a *component* and a *bus* is called a *flow*.
+There are two types of *nodes* : *components* and *buses*. Every Component has to be connected with one or more *buses*. The link between a *component* and a *bus* (or between *two buses*) is called a *flow*.
 
 All solph *components* can be used to set up an energy system model. However you should read the documentation of each *component* to learn about usage and restrictions. For example it is not possible to combine every *component* with every *flow*. Furthermore, you can add your own *components* in your application (see below) but we would be pleased to integrate them into solph if they are of general interest (see :ref:`feature_requests_and_feedback`).
 
