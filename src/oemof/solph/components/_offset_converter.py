@@ -165,10 +165,11 @@ class OffsetConverter(Node):
                 )
                 raise TypeError(msg)
 
-            normed_offsets, conversion_factors = (
-                self.normed_offset_and_conversion_factors_from_coefficients(
-                    coefficients
-                )
+            (
+                normed_offsets,
+                conversion_factors,
+            ) = self.normed_offset_and_conversion_factors_from_coefficients(
+                coefficients
             )
         # --- END ---
 
@@ -275,7 +276,6 @@ class OffsetConverter(Node):
 
         input_bus = list(self.inputs.values())[0].input
         for flow in self.outputs.values():
-
             if flow.max.size is not None:
                 target_len = flow.max.size
             else:
@@ -464,7 +464,6 @@ class OffsetConverterBlock(ScalarBlock):
             """Link binary input and output flow to component outflow."""
             for t in m.TIMESTEPS:
                 for n in group:
-
                     if reference_node_at_input[n]:
                         ref_flow = m.flow[reference_node[n], n, t]
                         status_nominal_idx = reference_node[n], n, t

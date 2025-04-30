@@ -47,7 +47,7 @@ except ModuleNotFoundError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
@@ -118,6 +118,14 @@ def main():
     )
 
     energy_system.add(bus, source, sink, storage_relative, storage_fixed)
+
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
+
+    if optimize is False:
+        return energy_system
+
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 

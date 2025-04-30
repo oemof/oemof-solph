@@ -277,8 +277,9 @@ def test_invest_content_minimum_nonconvex():
         outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},
         nominal_capacity=solph.Investment(
             ep_costs=0.1,
+            maximum=42,
             minimum=32,
-            nonconvex=solph.NonConvex(),
+            nonconvex=True,
         ),
         balanced=False,
     )

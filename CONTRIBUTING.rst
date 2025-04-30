@@ -45,7 +45,7 @@ To set up `oemof-solph` for local development:
    (look for the "Fork" button).
 2. Clone your fork locally::
 
-    git clone git@github.com:oemof/oemof-solph.git
+    git clone git@github.com:$(your_github_account)/oemof-solph.git
 
 3. Install oemof.solph in editable mode with dev dependencies::
 
@@ -61,11 +61,11 @@ To set up `oemof-solph` for local development:
 
     tox
 
-6. Commit your changes and push your branch to GitHub::
+5. Commit your changes and push your branch to GitHub. Please do not forget to write a descriptive commit message that eventually explains design decisions::
 
-    git add .
-    git commit -m "Your detailed description of your changes."
-    git push origin name-of-your-bugfix-or-feature
+    git add $(changed_files)
+    git commin
+    git push origin name-of-your-bugfix-or-feature 
 
 7. Submit a pull request through the GitHub website.
 

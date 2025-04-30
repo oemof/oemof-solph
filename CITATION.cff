@@ -174,4 +174,12 @@ authors:
     family-names: Schischke
     given-names: Eva
     alias: "@esske"
+  -
+    family-names: Fritz
+    given-names: Malte
+    alias: "@maltefritz"
+  -
+    family-names: Freißmann
+    given-names: Jonas
+    alias: "@jfreissmann"
 ...

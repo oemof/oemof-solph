@@ -70,7 +70,7 @@ except ModuleNotFoundError:
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
@@ -167,6 +167,9 @@ def main():
             conversion_factors={bus_a_1: 0.8},
         )
     )
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

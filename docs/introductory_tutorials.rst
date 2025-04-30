@@ -17,7 +17,7 @@ you have any questions please reach out to the
 
     introductory_tutorials/district_heating_supply.rst
     introductory_tutorials/home_pv_battery_system.rst
-    introductory_tutorials/tutorial_3.rst
+    introductory_tutorials/ev_charging.rst
     introductory_tutorials/tutorial_4.rst
 
 
@@ -48,7 +48,7 @@ you have any questions please reach out to the
     :gutter: 1
 
     .. grid-item-card::  Tutorial 3
-        :link: tutorial_3_label
+        :link: ev_charging_label
         :link-type: ref
 
         .. image:: /_files/example_network.svg

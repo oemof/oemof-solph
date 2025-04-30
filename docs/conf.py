@@ -85,6 +85,7 @@ html_theme = "furo"
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
+html_title = f"v{version}"
 
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
@@ -155,6 +156,8 @@ linkcheck_ignore = [
     r"https://forum.openmod-initiative.org/*",
     r"https://github.com/oemof/oemof-solph/issues/*",
     r"https://github.com/oemof/oemof-solph/pull/*",
-    # Due to traffic limitation, the folowwing creates a 403 in CI pipeline:
+    # DOIs always redirect, we believe they will always work.
+    r"https://doi.org/*",
+    # Due to traffic limitation, the folowwing create a 403 in CI pipeline:
     "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",
 ]
