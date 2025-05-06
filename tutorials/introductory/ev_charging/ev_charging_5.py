@@ -147,7 +147,7 @@ ev_energy_system.add(charger11kW)
 
 # %%[solve_and_plot_start]
 model = solph.Model(ev_energy_system)
-model.solve(solve_kwargs={"tee": False})
+model.solve()
 results = solph.processing.results(model)
 
 

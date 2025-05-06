@@ -123,7 +123,7 @@ ev_energy_system.add(discharger230V)
 # %%[AC_discharging_end]
 # %%[solve_and_plot_start]
 model = solph.Model(ev_energy_system)
-model.solve(solve_kwargs={"tee": False})
+model.solve(solver="cbc", solve_kwargs={"tee": False})
 results = solph.processing.results(model)
 
 

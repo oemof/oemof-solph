@@ -96,7 +96,7 @@ ev_energy_system.add(charger230V)
 
 # %%[solve_start]
 model = solph.Model(ev_energy_system)
-model.solve(solve_kwargs={"tee": True})
+model.solve(solver="cbc", solve_kwargs={"tee": True})
 results = solph.processing.results(model)
 # %%[solve_end]
 # %%[plot_results_start]
