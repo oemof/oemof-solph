@@ -80,4 +80,5 @@ results = solph.processing.results(model)
 plot_results(
     results=results, plot_title="Driving demand only", dark_mode=False
 )
+plt.show()
 # %%[plot_results_end]

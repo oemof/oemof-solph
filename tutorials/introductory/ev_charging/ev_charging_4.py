@@ -128,4 +128,5 @@ results = solph.processing.results(model)
 
 
 plot_results(results=results, plot_title="Bidirectional use constant costs")
+plt.show()
 # %%[solve_and_plot_end]

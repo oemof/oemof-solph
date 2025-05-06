@@ -156,4 +156,5 @@ plot_results(
     plot_title="Bidirectional use dynamic prices",
     dark_mode=False,
 )
+plt.show()
 # %%[solve_and_plot_end]

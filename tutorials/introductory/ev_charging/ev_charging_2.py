@@ -105,4 +105,5 @@ plot_results(
     plot_title="Domestic power socket charging",
     dark_mode=False,
 )
+plt.show()
 # %%[plot_results_end]

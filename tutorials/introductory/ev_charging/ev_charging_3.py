@@ -126,4 +126,5 @@ plot_results(
     plot_title="Home and work charging",
     dark_mode=False,
 )
+plt.show()
 # %%[plot_results_end]
