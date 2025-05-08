@@ -36,7 +36,7 @@ Costs do not have to be monetary costs but could be emissions or other variable 
 
 Furthermore, it is possible to optimise the capacity of different components using the investment mode (see :ref:`optimization_invest_label`).
 
-Since v0.5.1, there also is the possibility to have multi-period (i.e. dynamic) investments over longer-time horizon which is in experimental state (see :ref:`multi_period_mode_label`).
+Since v0.5.1, there also is the possibility to have multi-period (i.e. dynamic) investments over longer-time horizon which is in experimental state (see :ref:`optimization_multi_period_label`).
 
 .. code-block:: python
 
