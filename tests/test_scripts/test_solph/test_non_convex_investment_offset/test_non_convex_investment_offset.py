@@ -53,7 +53,7 @@ def test_non_convex_investment_offset():
                     offset=2000,
                     maximum=1,
                     minimum=0,
-                    nonconvex=NonConvex(),
+                    nonconvex=True,
                 ),
                 variable_costs=1,
                 max=1,
@@ -70,7 +70,7 @@ def test_non_convex_investment_offset():
         outputs={
             b_th: Flow(
                 nominal_capacity=Investment(
-                    ep_costs=50, maximum=1, minimum=0, nonconvex=NonConvex()
+                    ep_costs=50, maximum=1, minimum=0, nonconvex=True
                 ),
                 variable_costs=1,
                 max=1,

@@ -438,6 +438,9 @@ class Model(po.ConcreteModel):
             solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
         solver_io : string
             pyomo solver interface file format: "lp", "python", "nl", etc.
+        allow_nonoptimal : bool
+            False: If no optimal solution is found, an error will be risen.
+            True: If no optimal solution is found, there will be a warning.
         \**kwargs : keyword arguments
             Possible keys can be set see below:
 
