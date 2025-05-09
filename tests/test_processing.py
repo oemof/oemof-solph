@@ -164,7 +164,6 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "investment_age": 0,
                     "investment_existing": 0,
                     "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,
@@ -203,7 +202,6 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "investment_age": 0,
                     "investment_existing": 0,
                     "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,

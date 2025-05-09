@@ -63,15 +63,6 @@ class Investment:
         Overall minimum capacity investment that needs to be installed
         in the last period of the optimization (taking into account
         decommissionings); only applicable for multi-period models
-    lifetime : int, :math:`l`
-        Units lifetime, given in years; only applicable for multi-period
-        models
-    age : int, :math:`a`
-        Units start age, given in years at the beginning of the optimization;
-        only applicable for multi-period models
-    fixed_costs : float or list of float, :math:`c_{fixed}(p)`
-        Fixed costs in each period (given in nominal terms);
-        only applicable for multi-period models
 
 
     For the variables, constraints and parts of the objective function, which
@@ -94,9 +85,6 @@ class Investment:
         offset=0,
         overall_maximum=None,
         overall_minimum=None,
-        lifetime=None,
-        age=0,
-        fixed_costs=None,
         custom_attributes=None,
     ):
         if custom_attributes is None:
@@ -109,9 +97,6 @@ class Investment:
         self.offset = sequence(offset)
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
-        self.lifetime = lifetime
-        self.age = age
-        self.fixed_costs = sequence(fixed_costs)
 
         for attribute in custom_attributes.keys():
             value = custom_attributes.get(attribute)
@@ -120,7 +105,6 @@ class Investment:
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
-        self._check_age_and_lifetime()
         self._check_invest_attributes_nonconvex()
         self._check_nonconvex()
 
@@ -155,18 +139,6 @@ class Investment:
                 " ignored."
             )
             raise AttributeError(e3)
-
-    def _check_age_and_lifetime(self):
-        """Throw an error if age is chosen greater or equal to lifetime;
-        only applicable for multi-period models
-        """
-        if self.lifetime is not None:
-            if self.age >= self.lifetime:
-                e4 = (
-                    "A unit's age must be smaller than its "
-                    "expected lifetime."
-                )
-                raise AttributeError(e4)
 
     def _check_invest_attributes_nonconvex(self):
         """Throw an error if nonconvex is not of type boolean."""

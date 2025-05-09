@@ -259,12 +259,12 @@ class GenericStorage(Node):
             if self.invest_relation_input_capacity[
                 0
             ] is not None and not isinstance(flow.investment, Investment):
-                flow.investment = Investment(lifetime=self.lifetime_inflow)
+                flow.investment = Investment()
         for flow in self.outputs.values():
             if self.invest_relation_output_capacity[
                 0
             ] is not None and not isinstance(flow.investment, Investment):
-                flow.investment = Investment(lifetime=self.lifetime_outflow)
+                flow.investment = Investment()
 
     def _check_invest_attributes(self):
         """Raise errors for infeasible investment attribute combinations"""
@@ -1459,7 +1459,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         i = {n: [i for i in n.inputs][0] for n in group}
         o = {n: [o for o in n.outputs][0] for n in group}
 
-        # Handle unit lifetimes
         def _total_storage_capacity_rule(block):
             """Rule definition for determining total installed
             capacity (taking decommissioning into account)
@@ -1489,211 +1488,33 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=_total_storage_capacity_rule
         )
 
-        # multi-period storage implementation for time intervals
-        if m.es.periods is not None:
-
-            def _old_storage_capacity_rule_end(block):
-                """Rule definition for determining old endogenously installed
-                capacity to be decommissioned due to reaching its lifetime.
-                Investment and decommissioning periods are linked within
-                the constraint. The respective decommissioning period is
-                determined for every investment period based on the components
-                lifetime and a matrix describing its age of each endogenous
-                investment. Decommissioning can only occur at the beginning of
-                each period.
-
-                Note
-                ----
-                For further information on the implementation check
-                PR#957 https://github.com/oemof/oemof-solph/pull/957
-                """
-                for n in self.INVESTSTORAGES:
-                    lifetime = n.investment.lifetime
-                    if lifetime is None:
-                        msg = (
-                            "You have to specify a lifetime "
-                            "for a Flow going into or out of "
-                            "a GenericStorage unit "
-                            "in a multi-period model!"
-                            f" Value for {n} is missing."
-                        )
-                        raise ValueError(msg)
-                    # get the period matrix describing the temporal distance
-                    # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
-
-                    # get the index of the minimum value in each row greater
-                    # equal than the lifetime. This value equals the
-                    # decommissioning period if not zero. The index of this
-                    # value represents the investment period. If np.where
-                    # condition is not met in any row, min value will be zero
-                    decomm_periods = np.argmin(
-                        np.where(
-                            (periods_matrix >= lifetime),
-                            periods_matrix,
-                            np.inf,
-                        ),
-                        axis=1,
-                    )
-
-                    # no decommissioning in first period
-                    expr = self.old_end[n, 0] == 0
-                    self.old_rule_end.add((n, 0), expr)
-
-                    # all periods not in decomm_periods have no decommissioning
-                    # zero is excluded
-                    for p in m.CAPACITY_PERIODS:
-                        if p not in decomm_periods and p != 0:
-                            expr = self.old_end[n, p] == 0
-                            self.old_rule_end.add((n, p), expr)
-
-                    # multiple invests can be decommissioned in the same period
-                    # but only sequential ones, thus a bookkeeping is
-                    # introduced andconstraints are added to equation one
-                    # iteration later.
-                    last_decomm_p = np.nan
-                    # loop over invest periods (values are decomm_periods)
-                    for invest_p, decomm_p in enumerate(decomm_periods):
-                        # Add constraint of iteration before
-                        # (skipped in first iteration by last_decomm_p = nan)
-                        if (decomm_p != last_decomm_p) and (
-                            last_decomm_p is not np.nan
-                        ):
-                            expr = self.old_end[n, last_decomm_p] == expr
-                            self.old_rule_end.add((n, last_decomm_p), expr)
-
-                        # no decommissioning if decomm_p is zero
-                        if decomm_p == 0:
-                            # overwrite decomm_p with zero to avoid
-                            # chaining invest periods in next iteration
-                            last_decomm_p = 0
-
-                        # if decomm_p is the same as the last one chain invest
-                        # period
-                        elif decomm_p == last_decomm_p:
-                            expr += self.invest[n, invest_p]
-                            # overwrite decomm_p
-                            last_decomm_p = decomm_p
-
-                        # if decomm_p is not zero, not the same as the last one
-                        # and it's not the first period
-                        else:
-                            expr = self.invest[n, invest_p]
-                            # overwrite decomm_p
-                            last_decomm_p = decomm_p
-
-                    # Add constraint of very last iteration
-                    if last_decomm_p != 0:
-                        expr = self.old_end[n, last_decomm_p] == expr
-                        self.old_rule_end.add((n, last_decomm_p), expr)
-
-            self.old_rule_end = Constraint(
-                self.INVESTSTORAGES, m.CAPACITY_PERIODS, noruleinit=True
-            )
-
-            self.old_rule_end_build = BuildAction(
-                rule=_old_storage_capacity_rule_end
-            )
-
-            def _old_storage_capacity_rule_exo(block):
-                """Rule definition for determining old exogenously given
-                capacity to be decommissioned due to reaching its lifetime
-                """
-                for n in self.INVESTSTORAGES:
-                    age = n.investment.age
-                    lifetime = n.investment.lifetime
-                    is_decommissioned = False
-                    for p in m.CAPACITY_PERIODS:
-                        # No shutdown in first period
-                        if p == 0:
-                            expr = self.old_exo[n, p] == 0
-                            self.old_rule_exo.add((n, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
-                            # Track decommissioning status
-                            if not is_decommissioned:
-                                expr = (
-                                    self.old_exo[n, p] == n.investment.existing
-                                )
-                                is_decommissioned = True
-                            else:
-                                expr = self.old_exo[n, p] == 0
-                            self.old_rule_exo.add((n, p), expr)
-                        else:
-                            expr = self.old_exo[n, p] == 0
-                            self.old_rule_exo.add((n, p), expr)
-
-            self.old_rule_exo = Constraint(
-                self.INVESTSTORAGES, m.CAPACITY_PERIODS, noruleinit=True
-            )
-
-            self.old_rule_exo_build = BuildAction(
-                rule=_old_storage_capacity_rule_exo
-            )
-
-            def _old_storage_capacity_rule(block):
-                """Rule definition for determining (overall) old capacity
-                to be decommissioned due to reaching its lifetime
-                """
-                for n in self.INVESTSTORAGES:
-                    for p in m.CAPACITY_PERIODS:
-                        expr = (
-                            self.old[n, p]
-                            == self.old_end[n, p] + self.old_exo[n, p]
-                        )
-                        self.old_rule.add((n, p), expr)
-
-            self.old_rule = Constraint(
-                self.INVESTSTORAGES, m.CAPACITY_PERIODS, noruleinit=True
-            )
-
-            self.old_rule_build = BuildAction(rule=_old_storage_capacity_rule)
-
-            def _initially_empty_rule(_):
-                """Ensure storage to be empty initially"""
-                for n in self.INVESTSTORAGES:
-                    expr = self.storage_content[n, 0] == 0
-                    self.initially_empty.add((n, 0), expr)
-
+        def _inv_storage_init_content_max_rule(block, n):
+            """Constraint for a variable initial storage capacity."""
             if not m.TSAM_MODE:
-                # inter and intra initial storage contents are handled above
-                self.initially_empty = Constraint(
-                    self.INVESTSTORAGES, m.TIMESTEPS, noruleinit=True
-                )
+                lhs = block.storage_content[n, 0]
+            else:
+                lhs = block.intra_storage_delta[n, 0, 0, 0]
+            return lhs <= n.investment.existing + block.invest[n, 0]
 
-                self.initially_empty_build = BuildAction(
-                    rule=_initially_empty_rule
-                )
+        self.init_content_limit = Constraint(
+            self.INVESTSTORAGES_NO_INIT_CONTENT,
+            rule=_inv_storage_init_content_max_rule,
+        )
 
-        # Standard storage implementation for discrete time points
-        else:
-
-            def _inv_storage_init_content_max_rule(block, n):
-                """Constraint for a variable initial storage capacity."""
-                if not m.TSAM_MODE:
-                    lhs = block.storage_content[n, 0]
-                else:
-                    lhs = block.intra_storage_delta[n, 0, 0, 0]
-                return lhs <= n.investment.existing + block.invest[n, 0]
-
-            self.init_content_limit = Constraint(
-                self.INVESTSTORAGES_NO_INIT_CONTENT,
-                rule=_inv_storage_init_content_max_rule,
+        def _inv_storage_init_content_fix_rule(block, n):
+            """Constraint for a fixed initial storage capacity."""
+            if not m.TSAM_MODE:
+                lhs = block.storage_content[n, 0]
+            else:
+                lhs = block.intra_storage_delta[n, 0, 0, 0]
+            return lhs == n.initial_storage_level * (
+                n.investment.existing + block.invest[n, 0]
             )
 
-            def _inv_storage_init_content_fix_rule(block, n):
-                """Constraint for a fixed initial storage capacity."""
-                if not m.TSAM_MODE:
-                    lhs = block.storage_content[n, 0]
-                else:
-                    lhs = block.intra_storage_delta[n, 0, 0, 0]
-                return lhs == n.initial_storage_level * (
-                    n.investment.existing + block.invest[n, 0]
-                )
-
-            self.init_content_fix = Constraint(
-                self.INVESTSTORAGES_INIT_CONTENT,
-                rule=_inv_storage_init_content_fix_rule,
-            )
+        self.init_content_fix = Constraint(
+            self.INVESTSTORAGES_INIT_CONTENT,
+            rule=_inv_storage_init_content_fix_rule,
+        )
 
         def _storage_balance_rule(block, n, p, t):
             """
@@ -2098,140 +1919,17 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
         fixed_costs = 0
 
-        if m.es.periods is None:
-            for n in self.CONVEX_INVESTSTORAGES:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[n, p] * n.investment.ep_costs[p]
-                    )
-            for n in self.NON_CONVEX_INVESTSTORAGES:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[n, p] * n.investment.ep_costs[p]
-                        + self.invest_status[n, p] * n.investment.offset[p]
-                    )
-
-        else:
-            msg = (
-                "You did not specify an interest rate.\n"
-                "It will be set equal to the discount_rate of {} "
-                "of the model as a default.\nThis corresponds to a "
-                "social planner point of view and does not reflect "
-                "microeconomic interest requirements."
-            )
-            for n in self.CONVEX_INVESTSTORAGES:
-                lifetime = n.investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
-                    )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            n,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
-                    period_investment_costs[p] += investment_costs_increment
-
-            for n in self.NON_CONVEX_INVESTSTORAGES:
-                lifetime = n.investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
-                        + self.invest_status[n, p] * n.investment.offset[p]
-                    )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            n,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                            nonconvex=True,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
-                    period_investment_costs[p] += investment_costs_increment
-
-            for n in self.INVESTSTORAGES:
-                if valid_sequence(
-                    n.investment.fixed_costs, len(m.CAPACITY_PERIODS)
-                ):
-                    lifetime = n.investment.lifetime
-                    for p in m.CAPACITY_PERIODS:
-                        range_limit = min(
-                            m.es.end_year_of_optimization,
-                            m.es.periods_years[p] + lifetime,
-                        )
-                        fixed_costs += sum(
-                            self.invest[n, p] * n.investment.fixed_costs[pp]
-                            for pp in range(
-                                m.es.periods_years[p],
-                                range_limit,
-                            )
-                        )
-
-            for n in self.EXISTING_INVESTSTORAGES:
-                if valid_sequence(
-                    n.investment.fixed_costs, len(m.CAPACITY_PERIODS)
-                ):
-                    lifetime = n.investment.lifetime
-                    age = n.investment.age
-                    range_limit = min(
-                        m.es.end_year_of_optimization, lifetime - age
-                    )
-                    fixed_costs += sum(
-                        n.investment.existing * n.investment.fixed_costs[pp]
-                        for pp in range(range_limit)
-                    )
+        for n in self.CONVEX_INVESTSTORAGES:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[n, p] * n.investment.ep_costs[p]
+                )
+        for n in self.NON_CONVEX_INVESTSTORAGES:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[n, p] * n.investment.ep_costs[p]
+                    + self.invest_status[n, p] * n.investment.offset[p]
+                )
 
         for n in self.INVESTSTORAGES:
             if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):
@@ -2260,76 +1958,3 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         return self.costs
-
-    def _evaluate_remaining_value_difference(
-        self,
-        m,
-        p,
-        n,
-        end_year_of_optimization,
-        lifetime,
-        interest,
-        nonconvex=False,
-    ):
-        """Evaluate and return the remaining value difference of an investment
-
-        The remaining value difference in the net present values if the asset
-        was to be liquidated at the end of the optimization horizon and the
-        net present value using the original investment expenses.
-
-        Parameters
-        ----------
-        m : oemof.solph.models.Model
-            Optimization model
-
-        p : int
-            Period in which investment occurs
-
-        n : oemof.solph.components.GenericStorage
-            storage unit
-
-        end_year_of_optimization : int
-            Last year of the optimization horizon
-
-        lifetime : int
-            lifetime of investment considered
-
-        interest : float
-            Demanded interest rate for investment
-
-        nonconvex : bool
-            Indicating whether considered flow is nonconvex.
-        """
-        if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
-                remaining_lifetime = lifetime - (
-                    end_year_of_optimization - m.es.periods_years[p]
-                )
-                remaining_annuity = economics.annuity(
-                    capex=n.investment.ep_costs[-1],
-                    n=remaining_lifetime,
-                    wacc=interest,
-                )
-                original_annuity = economics.annuity(
-                    capex=n.investment.ep_costs[p],
-                    n=remaining_lifetime,
-                    wacc=interest,
-                )
-                present_value_factor_remaining = 1 / economics.annuity(
-                    capex=1, n=remaining_lifetime, wacc=interest
-                )
-                convex_investment_costs = (
-                    self.invest[n, p]
-                    * (remaining_annuity - original_annuity)
-                    * present_value_factor_remaining
-                )
-                if nonconvex:
-                    return convex_investment_costs + self.invest_status[
-                        n, p
-                    ] * (n.investment.offset[-1] - n.investment.offset[p])
-                else:
-                    return convex_investment_costs
-            else:
-                return 0
-        else:
-            return 0

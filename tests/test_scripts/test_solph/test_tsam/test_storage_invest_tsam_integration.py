@@ -95,9 +95,9 @@ demand = solph.components.Sink(
 epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 storage = solph.components.GenericStorage(
     label="storage",
-    inputs={bel: solph.Flow(lifetime=20)},
-    outputs={bel: solph.Flow(lifetime=20)},
-    nominal_capacity=solph.Investment(ep_costs=epc, lifetime=20),
+    inputs={bel: solph.Flow()},
+    outputs={bel: solph.Flow()},
+    nominal_capacity=solph.Investment(ep_costs=epc),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
     outflow_conversion_factor=0.8,
