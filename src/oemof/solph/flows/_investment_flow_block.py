@@ -17,7 +17,6 @@ SPDX-License-Identifier: MIT
 """
 from warnings import warn
 
-import numpy as np
 from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core import Binary
