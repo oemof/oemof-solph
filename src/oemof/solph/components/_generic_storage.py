@@ -175,7 +175,6 @@ class GenericStorage(Node):
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
-        fixed_costs=0,
         storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
@@ -226,7 +225,6 @@ class GenericStorage(Node):
         self.outflow_conversion_factor = sequence(outflow_conversion_factor)
         self.max_storage_level = sequence(max_storage_level)
         self.min_storage_level = sequence(min_storage_level)
-        self.fixed_costs = sequence(fixed_costs)
         self.storage_costs = sequence(storage_costs)
         self.invest_relation_input_output = sequence(
             invest_relation_input_output
@@ -422,15 +420,6 @@ class GenericStorageBlock(ScalarBlock):
 
         .. math::
             \sum_{t \in \textrm{TIMEPOINTS} > 0} c_{storage}(t) \cdot E(t)
-
-    * :attr:`fixed_costs` not 0
-
-        .. math::
-            \displaystyle \sum_{pp=0}^{year_{max}} E_{nom}
-            \cdot c_{fixed}(pp)
-
-    where :math:`year_{max}` denotes the last year of the optimization
-      horizon, i.e. at the end of the last period.
 
     """  # noqa: E501
 
@@ -766,16 +755,6 @@ class GenericStorageBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        fixed_costs = 0
-
-        for n in self.STORAGES:
-            if valid_sequence(n.fixed_costs, len(m.CAPACITY_PERIODS)):
-                fixed_costs += sum(
-                    n.nominal_storage_capacity * n.fixed_costs[pp]
-                    for pp in range(m.es.end_year_of_optimization)
-                )
-        self.fixed_costs = Expression(expr=fixed_costs)
-
         storage_costs = 0
 
         for n in self.STORAGES:
@@ -796,7 +775,7 @@ class GenericStorageBlock(ScalarBlock):
                         )
 
         self.storage_costs = Expression(expr=storage_costs)
-        self.costs = Expression(expr=storage_costs + fixed_costs)
+        self.costs = Expression(expr=storage_costs)
 
         return self.costs
 
@@ -1118,77 +1097,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 &
                 \forall p \in \textrm{CAPACITY_PERIODS}
 
-        * :attr:`fixed_costs` not None for investments
-
-            .. math::
-                &
-                \sum_{pp=year(p)}^{limit_{end}}
-                E_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
-                \cdot DF^{-p}\\
-                &
-                \forall p \in \textrm{CAPACITY_PERIODS}
-
-        * :attr:`fixed_costs` not None for existing capacity
-
-            .. math::
-                \sum_{pp=0}^{limit_{exo}} E_{exist} \cdot c_{fixed}(pp)
-                \cdot DF^{-pp}
-
-    where:
-
-    * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-      investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
-      and interest rate :math:`ir`.
-    * :math:`l_{r}` is the remaining lifetime at the end of the
-      optimization horizon (in case it is greater than 0 and
-      smaller than the actual lifetime).
-    * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
-      and interest rate :math:`ir`.
-    * :math:`d=min\{year_{max} - year(p), l\}` defines the
-      number of years within the optimization horizon that investment
-      annuities are accounted for.
-    * :math:`year(p)` denotes the start year of period :math:`p`.
-    * :math:`year_{max}` denotes the last year of the optimization
-      horizon, i.e. at the end of the last period.
-    * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
-      upper bound to ensure fixed costs for endogenous investments
-      to occur within the optimization horizon.
-    * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
-      upper bound to ensure fixed costs for existing capacities to occur
-      within the optimization horizon. :math:`a` is the initial age
-      of an asset.
-    * :math:`DF=(1+dr)` is the discount factor.
-
-    The annuity / annuity factor hereby is:
-
-        .. math::
-            &
-            A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
-            &\\
-            &
-            ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
-
-    They are retrieved, using oemof.tools.economics annuity function. The
-    interest rate :math:`ir` for the annuity is defined as weighted
-    average costs of capital (wacc) and assumed constant over time.
-
-    The overall summed cost expressions for all *InvestmentFlowBlock* objects
-    can be accessed by
-
-    * :attr:`om.GenericInvestmentStorageBlock.investment_costs`,
-    * :attr:`om.GenericInvestmentStorageBlock.fixed_costs` and
-    * :attr:`om.GenericInvestmentStorageBlock.costs`.
-
-    Their values  after optimization can be retrieved by
-
-    * :meth:`om.GenericInvestmentStorageBlock.investment_costs`,
-    * :attr:`om.GenericInvestmentStorageBlock.period_investment_costs`
-      (yielding a dict keyed by periods); note: this is not a Pyomo expression,
-      but calculated,
-    * :meth:`om.GenericInvestmentStorageBlock.fixed_costs` and
-    * :meth:`om.GenericInvestmentStorageBlock.costs`.
-
     .. csv-table:: List of Variables
         :header: "symbol", "attribute", "explanation"
         :widths: 1, 1, 1
@@ -1244,8 +1152,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         ", "Variable investment costs"
         ":math:`c_{invest,fix}`", "`flows[i, o].investment.offset`", "
         Fix investment costs"
-        ":math:`c_{fixed}`", "`flows[i, o].investment.fixed_costs`", "
-        Fixed costs; only allowed in multi-period model"
         ":math:`r_{cap,in}`", ":attr:`invest_relation_input_capacity`", "
         Relation of storage capacity and nominal inflow"
         ":math:`r_{cap,out}`", ":attr:`invest_relation_output_capacity`", "
@@ -1913,8 +1819,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         investment_costs = 0
         storage_costs = 0
-        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
-        fixed_costs = 0
 
         for n in self.CONVEX_INVESTSTORAGES:
             for p in m.CAPACITY_PERIODS:
@@ -1948,10 +1852,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         self.storage_costs = Expression(expr=storage_costs)
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = period_investment_costs
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.costs = Expression(
-            expr=investment_costs + fixed_costs + storage_costs
-        )
+        self.costs = Expression(expr=investment_costs + storage_costs)
 
         return self.costs
