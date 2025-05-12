@@ -37,27 +37,3 @@ def test_add_periods():
     assert es.periods[1].equals(
         pd.date_range(start="2013-01-01", periods=1217, freq="h")
     )
-
-
-@pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are"
-    " consistent.:UserWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
-)
-def test_extract_periods_years():
-    """test method _extract_periods_years of energy system"""
-    t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h").to_series()
-    t_idx_2 = pd.date_range("1/1/2041", periods=3, freq="h").to_series()
-    t_idx_3 = pd.date_range("1/1/2050", periods=3, freq="h").to_series()
-    timeindex = pd.concat([t_idx_1, t_idx_2, t_idx_3]).index
-    periods = [t_idx_1, t_idx_2, t_idx_3]
-    es = EnergySystem(
-        timeindex=timeindex,
-        timeincrement=[1] * len(timeindex),
-        infer_last_interval=False,
-        periods=periods,
-    )
-    periods_years = [0, 21, 30]
-    assert es.periods_years == periods_years

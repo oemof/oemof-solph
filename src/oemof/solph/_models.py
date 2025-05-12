@@ -176,11 +176,6 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if energysystem.periods is not None:
-            self._set_discount_rate_with_warning()
-        else:
-            pass
-
         if kwargs.get("auto_construct", True):
             self._construct()
 
@@ -192,19 +187,6 @@ class Model(po.ConcreteModel):
         self._add_parent_block_variables()
         self._add_child_blocks()
         self._add_objective()
-
-    def _set_discount_rate_with_warning(self):
-        """
-        Sets the discount rate to the standard value and raises a warning.
-        """
-        self.discount_rate = 0.02
-        msg = (
-            f"By default, a discount_rate of {self.discount_rate} "
-            f"is used for a multi-period model. "
-            f"If you want to use another value, "
-            f"you have to specify the `discount_rate` attribute."
-        )
-        warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.

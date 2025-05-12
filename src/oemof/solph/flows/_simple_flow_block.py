@@ -339,49 +339,6 @@ class SimpleFlowBlock(ScalarBlock):
             self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
         )
 
-        if m.es.periods is not None:
-
-            def _lifetime_output_rule(_):
-                """Force flow value to zero when lifetime is reached"""
-                for inp, out in self.LIFETIME_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_output = Constraint(
-                self.LIFETIME_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_output_build = BuildAction(
-                rule=_lifetime_output_rule
-            )
-
-            def _lifetime_age_output_rule(block):
-                """Force flow value to zero when lifetime is reached
-                considering initial age
-                """
-                for inp, out in self.LIFETIME_AGE_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if (
-                            m.flows[inp, out].lifetime - m.flows[inp, out].age
-                            <= m.es.periods_years[p]
-                        ):
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_age_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_age_output = Constraint(
-                self.LIFETIME_AGE_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_age_output_build = BuildAction(
-                rule=_lifetime_age_output_rule
-            )
-
     def _objective_expression(self):
         r"""Objective expression for all standard flows with fixed costs
         and variable costs.
@@ -402,18 +359,6 @@ class SimpleFlowBlock(ScalarBlock):
             .. math::
               \sum_{(i,o)} \sum_{p, t} P(p, t) \cdot w(t)
               \cdot c_{var}(i, o, t)
-
-        Hereby
-
-        * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`
-          and :math:`dr` is the discount rate.
-        * :math:`n` is the unit lifetime and :math:`a` is the initial age.
-        * :math:`year_{max}` denotes the last year of the optimization
-          horizon, i.e. at the end of the last period.
-        * :math:`limit_{exo}=min\{year_{max}, n - a\}` is used as an
-          upper bound to ensure fixed costs for existing capacities to occur
-          within the optimization horizon. :math:`a` is the initial age
-          of an asset (or 0 if not specified).
         """
         m = self.parent_block()
 
@@ -443,7 +388,6 @@ class SimpleFlowBlock(ScalarBlock):
                             * m.objective_weighting[t]
                             * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
         self.variable_costs = Expression(expr=variable_costs)

@@ -285,7 +285,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         dsm_unit,
     )
 
-    om = Model(es, discount_rate=0.02)
+    om = Model(es)
     om.solve(solver=solver)
 
     results = processing.results(om)
