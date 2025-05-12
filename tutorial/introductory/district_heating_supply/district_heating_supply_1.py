@@ -7,7 +7,10 @@ data = pd.read_csv('input_data.csv', sep=';', index_col=0, parse_dates=True)
 # %%[sec_2_start]
 import oemof.solph as solph
 
-district_heating_system = solph.EnergySystem(timeindex=data.index)
+district_heating_system = solph.EnergySystem(
+    timeindex=data.index,
+    infer_last_interval=False
+)
 # %%[sec_2_end]
 
 # %%[sec_3_start]
@@ -108,5 +111,5 @@ operation_cost = (
 heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
-# %%[sec_10_end]
 print(f'LCOH: {lcoh:.2f} €/MWh')
+# %%[sec_10_end]

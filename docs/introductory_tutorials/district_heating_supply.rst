@@ -180,7 +180,7 @@ results is calling the ``show`` method.
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
 
-Your plot should similar to this:
+Your plot should look similar to this:
 
 .. figure:: /_files/intro_tut_dhs_1_hourly_heat_production.svg
     :align: center
@@ -232,8 +232,8 @@ The invest cost can be calculate by multiplying the specific cost and capacity.
 For all cost related to the gas boiler's operation, we multiply the variable
 cost with the total heat produced by the unit and add it to the sum of the
 hourly cost evoked by the purchase of natural gas. Finllay, we sum up the heat
-supplied to the heat sink and use the calculated values to compute the LCOH,
-which are printed to the console with a value of 18.24 €/MWh.
+supplied to the heat sink and use the calculated values to compute the
+:math:`LCOH`, which are printed to the console with a value of 18.24 €/MWh.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
