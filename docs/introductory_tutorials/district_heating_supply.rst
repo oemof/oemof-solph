@@ -153,52 +153,112 @@ series, so we access the ``'sequences'`` key.
     :start-after: [sec_7_start]
     :end-before: [sec_7_end]
 
-7. Some results, LCOH, CO2 emissions (how to calculate and resulting numbers),
-   dispatch plot(s). Include the plots in the page here!!
+Now, let's have a look at those results. We will create a simple bar plot of
+the gas boilers unit commitment. To achieve this, we have to import a plotting
+library like ``matplotlib``. We use its ``subplots`` method to create a figure
+``fig`` and an axes ``ax`` and set the plots size to be ten by six inches.
+Then, we pass the index of `data_heat_bus` and the column containing the gas
+boiler's heat production into the axes ``bar`` method.
+
+.. note::
+    In ``oemof.solph``, indexing works by passing a tuple containing two items:
+    at first, another tuple containing the string labels of the two nodes of
+    interest and second, the the ``oemof.solph`` variable name to be extracted.
+    In case of the example below, we are looking for the ``'flow'`` between the
+    ``'gas boiler'`` and ``'heat network'`` nodes.
+
+Finally, we set a label to the bars to be plotted that corresponds to the
+unit's name. This is mostly anticipatory, as we will want to decern between
+different heat production units later in this tutorial. To improve the plots
+appearance, we add a legend in the upper right corner, grid lines along the
+horizontal axis and a fitting label for the same. Feel free to change the look
+of the plot to your heart's content. The final step to see the optimization
+results is calling the ``show`` method.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
 
+Your plot should look similar to this:
+
+.. figure:: /_files/intro_tut_dhs_1_hourly_heat_production.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_1_hourly_heat_production_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    System dispatch of heating system with gas boiler
+
+Let's continue by assesing the economic merit of our district heating supply
+system. A common indicator for that purpose are the Levelized Cost of Heat
+(:math:`LCOH`). As shown in the equations below, they account for the upfront
+invest cost :math:`C_\text{invest}` necessary to build the heat production
+units as well as the cost evoked via their operation :math:`C_\text{operation}`
+over the unit's assumed lifetime :math:`n`. These cost get reduced by any
+additional revenues :math:`R` generated besides its heat production. The total
+cash flow balance is then devided by the total heat produced
+:math:`Q_\text{total}`. In order to make one-off investments comparable with
+the other periodically occuring values, the latter are multiplied with the
+Present Value Factor (:math:`PVF`). This yields the total cost necessary to
+produce one unit of heat by the heat supply system (not accounting for any
+additional cost for e.g. the pipe network, etc.).
+
+.. math::
+    LCOH = \frac{C_\text{invest} + PVF \cdot \left(C_\text{operation} - R\right)}{PVF \cdot Q_\text{total}}
+
+.. math::
+    PVF = \frac{\left(1 + i\right)^n -1}{\left(1 + i\right)^n \cdot i}
+
+As we will evaluate the :math:`LCOH` again later, let's define a function to
+calculate it from the input values using sensible default values as depicted
+below.
+
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_9_start]
     :end-before: [sec_9_end]
+
+Now we'll begin computing the :math:`LCOH`. First of all, we need some cost
+data of a typical gas boiler. We assume specific invest cost of 50,000.00 €/MW,
+a nominal rated capacity of 20 MW and variable operation cost of 0.50 €/MWh.
+The invest cost can be calculate by multiplying the specific cost and capacity.
+For all cost related to the gas boiler's operation, we multiply the variable
+cost with the total heat produced by the unit and add it to the sum of the
+hourly cost evoked by the purchase of natural gas. Finllay, we sum up the heat
+supplied to the heat sink and use the calculated values to compute the
+:math:`LCOH`, which are printed to the console with a value of 18.24 €/MWh.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_10_start]
     :end-before: [sec_10_end]
 
-.. figure:: /_files/example_network.svg
-    :align: center
-    :alt: System dispatch of heating system with gas boiler
-    :figclass: only-light
-
-    System dispatch
-
-.. figure:: /_files/example_network_darkmode.svg
-    :align: center
-    :alt: System dispatch of heating system with gas boiler
-    :figclass: only-dark
-
-    System dispatch
+This completes the first step of the District Heating Tutorial. Take a look at
+the following lessons and think about what you should take away with you for
+now.
 
 .. admonition:: Learning
     :class: important
 
-    After the first step of this tutorial you should be able to do the following:
+    After the first step of this tutorial you should be able to do the
+    following:
 
-    * Reading csv.files
+    * Read data from csv-files
 
-    * Initialize a energy system
+    * Initialize an energy system
 
     * Create simple components
 
-    * Optimize the dispatch of district heating system
+    * Optimize the dispatch of a district heating system
 
-    * Visulize results and generate key parameter
+    * Visualize results and compute key parameters
 
 
 Step 2: Plan capacity of heat pump and heat storage
