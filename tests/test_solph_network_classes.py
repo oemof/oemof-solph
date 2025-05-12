@@ -9,8 +9,6 @@ available from its original location oemof/tests/test_solph_network_classes.py
 SPDX-License-Identifier: MIT
 """
 
-import warnings
-
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 

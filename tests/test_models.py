@@ -9,9 +9,6 @@ available from its original location oemof/tests/basic_tests.py
 SPDX-License-Identifier: MIT
 """
 
-import warnings
-
-import pandas as pd
 import pytest
 
 from oemof import solph
