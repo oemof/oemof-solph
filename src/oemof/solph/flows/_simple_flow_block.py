@@ -403,23 +403,6 @@ class SimpleFlowBlock(ScalarBlock):
               \sum_{(i,o)} \sum_{p, t} P(p, t) \cdot w(t)
               \cdot c_{var}(i, o, t)
 
-        * `Flow.fixed_costs` is not `None` and flow has no lifetime limit
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{year_{max}}
-              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
-        * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
-           but not an initial age
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}}
-              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
-        * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
-           and an initial age
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}} P_{nominal}
-              \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
         Hereby
 
         * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`
@@ -435,7 +418,6 @@ class SimpleFlowBlock(ScalarBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        fixed_costs = 0
 
         if m.es.periods is None:
             for i, o in m.FLOWS:
@@ -464,46 +446,7 @@ class SimpleFlowBlock(ScalarBlock):
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
 
-                # Fixed costs for units with no lifetime limit
-                if (
-                    m.flows[i, o].fixed_costs[0] is not None
-                    and m.flows[i, o].nominal_capacity is not None
-                    and (i, o) not in self.LIFETIME_FLOWS
-                    and (i, o) not in self.LIFETIME_AGE_FLOWS
-                ):
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(m.es.end_year_of_optimization)
-                    )
-
-            # Fixed costs for units with limited lifetime
-            for i, o in self.LIFETIME_FLOWS:
-                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
-                    range_limit = min(
-                        m.es.end_year_of_optimization,
-                        m.flows[i, o].lifetime,
-                    )
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(range_limit)
-                    )
-
-            for i, o in self.LIFETIME_AGE_FLOWS:
-                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
-                    range_limit = min(
-                        m.es.end_year_of_optimization,
-                        m.flows[i, o].lifetime - m.flows[i, o].age,
-                    )
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(range_limit)
-                    )
-
         self.variable_costs = Expression(expr=variable_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.costs = Expression(expr=variable_costs + fixed_costs)
+        self.costs = Expression(expr=variable_costs)
 
         return self.costs

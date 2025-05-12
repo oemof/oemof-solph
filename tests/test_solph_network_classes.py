@@ -72,24 +72,6 @@ class TestConverterClass:
             assert converter.inputs == {}
 
 
-def test_fixed_costs_warning():
-    msg = (
-        "Be aware that the fixed costs attribute is only\n"
-        "meant to be used for multi-period models to depict "
-        "fixed costs that occur on a yearly basis.\n"
-        "If you wish to set up a multi-period model, explicitly "
-        "set the `periods` attribute of your energy system.\n"
-        "It has been decided to remove the `fixed_costs` "
-        "attribute with v0.2 for regular uses.\n"
-        "If you specify `fixed_costs` for a regular model, "
-        "this will simply be silently ignored."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.flows.Flow(fixed_costs=34)
-        assert len(w) != 0
-        assert msg == str(w[-1].message)
-
-
 def test_flow_with_fix_and_min_max():
     msg = "It is not allowed to define `min`/`max` if `fix` is defined."
     with pytest.raises(AttributeError, match=msg):

@@ -50,16 +50,7 @@ class InvestmentFlowBlock(ScalarBlock):
     can be accessed by
 
     * :attr:`om.InvestmentFlowBlock.investment_costs`,
-    * :attr:`om.InvestmentFlowBlock.fixed_costs` and
     * :attr:`om.InvestmentFlowBlock.costs`.
-
-    Their values  after optimization can be retrieved by
-
-    * :meth:`om.InvestmentFlowBlock.investment_costs`,
-    * :attr:`om.InvestmentFlowBlock.period_investment_costs` (yielding a dict
-      keyed by periods); note: this is not a Pyomo expression, but calculated,
-    * :meth:`om.InvestmentFlowBlock.fixed_costs` and
-    * :meth:`om.InvestmentFlowBlock.costs`.
 
     Note
     ----
@@ -678,23 +669,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     &
                     \forall p \in \textrm{CAPACITY_PERIODS}
 
-            * :attr:`fixed_costs` not None for investments
-
-                .. math::
-                    &
-                    (\sum_{pp=year(p)}^{limit_{end}}
-                    P_{invest}(p) \cdot c_{fixed}(pp) \cdot DF^{-pp})
-                    \cdot DF^{-p}\\
-                    &\\
-                    &
-                    \forall p \in \textrm{CAPACITY_PERIODS}
-
-            * :attr:`fixed_costs` not None for existing capacity
-
-                .. math::
-                    \sum_{pp=0}^{limit_{exo}} P_{exist} \cdot c_{fixed}(pp)
-                    \cdot DF^{-pp}
-
 
         where:
 
@@ -741,8 +715,6 @@ class InvestmentFlowBlock(ScalarBlock):
 
         m = self.parent_block()
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
-        fixed_costs = 0
 
         if m.es.periods is None:
             for i, o in self.CONVEX_INVESTFLOWS:
@@ -810,7 +782,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     investment_costs += (
                         investment_costs_increment + remaining_value_difference
                     )
-                    period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
@@ -856,45 +827,9 @@ class InvestmentFlowBlock(ScalarBlock):
                     investment_costs += (
                         investment_costs_increment + remaining_value_difference
                     )
-                    period_investment_costs[p] += investment_costs_increment
-
-            for i, o in self.INVESTFLOWS:
-                if valid_sequence(
-                    m.flows[i, o].investment.fixed_costs,
-                    len(m.CAPACITY_PERIODS),
-                ):
-                    lifetime = m.flows[i, o].investment.lifetime
-                    for p in m.CAPACITY_PERIODS:
-                        range_limit = min(
-                            m.es.end_year_of_optimization,
-                            m.es.periods_years[p] + lifetime,
-                        )
-                        fixed_costs += sum(
-                            self.invest[i, o, p]
-                            * m.flows[i, o].investment.fixed_costs[pp]
-                            for pp in range(m.es.periods_years[p], range_limit)
-                        )
-
-            for i, o in self.EXISTING_INVESTFLOWS:
-                if valid_sequence(
-                    m.flows[i, o].investment.fixed_costs,
-                    len(m.CAPACITY_PERIODS),
-                ):
-                    lifetime = m.flows[i, o].investment.lifetime
-                    age = m.flows[i, o].investment.age
-                    range_limit = min(
-                        m.es.end_year_of_optimization, lifetime - age
-                    )
-                    fixed_costs += sum(
-                        m.flows[i, o].investment.existing
-                        * m.flows[i, o].investment.fixed_costs[pp]
-                        for pp in range(range_limit)
-                    )
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = period_investment_costs
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.costs = Expression(expr=investment_costs + fixed_costs)
+        self.costs = Expression(expr=investment_costs)
 
         return self.costs
 

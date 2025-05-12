@@ -134,7 +134,6 @@ class TestParameterResult:
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
-            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),

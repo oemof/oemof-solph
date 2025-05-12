@@ -196,7 +196,6 @@ def test_multi_period_dispatch_model(solver="cbc"):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
         balanced=True,
-        fixed_costs=10,
     )
 
     link_de_fr = components.Link(
