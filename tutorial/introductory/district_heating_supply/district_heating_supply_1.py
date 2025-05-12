@@ -1,3 +1,5 @@
+from helpers import LCOH
+
 # %%[sec_1_start]
 import pandas as pd
 
@@ -91,13 +93,6 @@ plt.show()
 # %%[sec_8_end]
 
 # %%[sec_9_start]
-def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
-    pvf = ((1 + i)**n - 1)/((1 + i)**n * i)
-
-    return (invest_cost + pvf * (operation_cost - revenue))/(pvf * heat_produced)
-# %%[sec_9_end]
-
-# %%[sec_10_start]
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
 var_cost_gas_boiler = 0.50
@@ -111,4 +106,4 @@ heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f'LCOH: {lcoh:.2f} €/MWh')
-# %%[sec_10_end]
+# %%[sec_9_end]

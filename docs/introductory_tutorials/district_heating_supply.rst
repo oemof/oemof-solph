@@ -220,10 +220,10 @@ As we will evaluate the :math:`LCOH` again later, let's define a function to
 calculate it from the input values using sensible default values as depicted
 below.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorial/introductory/district_heating_supply/helpers.py
     :language: python
-    :start-after: [sec_9_start]
-    :end-before: [sec_9_end]
+    :start-after: [func_lcoh_start]
+    :end-before: [func_lcoh_end]
 
 Now we'll begin computing the :math:`LCOH`. First of all, we need some cost
 data of a typical gas boiler. We assume specific invest cost of 50,000.00 €/MW,
@@ -237,8 +237,8 @@ supplied to the heat sink and use the calculated values to compute the
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
-    :start-after: [sec_10_start]
-    :end-before: [sec_10_end]
+    :start-after: [sec_09_start]
+    :end-before: [sec_09_end]
 
 This completes the first step of the District Heating Tutorial. Take a look at
 the following lessons and think about what you should take away with you for

@@ -1,8 +1,8 @@
 import pandas as pd
+from helpers import LCOH
+from helpers import epc
 
 import oemof.solph as solph
-
-# from helpers import lcoh
 
 # %%[sec_1_start]
 data = pd.read_csv('input_data.csv', sep=';', index_col=0, parse_dates=True)
@@ -72,10 +72,6 @@ gas_boiler = solph.components.Converter(
 district_heating_system.add(gas_boiler)
 
 # %%[sec_4_start]
-def epc(capex, lifetime=20, wacc=0.05):
-    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
-    return epc
-
 spec_inv_storage=250
 
 # Soll es ein saisonaler oder Pufferspeicher sein?
