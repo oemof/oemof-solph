@@ -50,7 +50,7 @@ from oemof.solph import Model
 from oemof.solph import components as cmp
 
 
-def run_add_constraints_example(solver="cbc", nologg=False):
+def main(solver="cbc", nologg=False, optimize=True):
     if not nologg:
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
@@ -85,6 +85,9 @@ def run_add_constraints_example(solver="cbc", nologg=False):
     )
 
     es.add(sink, pp_oil, pp_lig)
+
+    if optimize is False:
+        return es
 
     # create the model
     om = Model(energysystem=es)
@@ -155,4 +158,4 @@ def run_add_constraints_example(solver="cbc", nologg=False):
 
 
 if __name__ == "__main__":
-    run_add_constraints_example()
+    main()
