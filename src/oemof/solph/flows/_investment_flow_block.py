@@ -596,119 +596,20 @@ class InvestmentFlowBlock(ScalarBlock):
         or nonconvex *InvestmentFlowBlock* is selected.
         The following parts of the objective function are created:
 
-        *Standard model*
 
-            * :attr:`nonconvex = False`
-
-                .. math::
-                    P_{invest}(0) \cdot c_{invest,var}(0)
-
-            * :attr:`nonconvex = True`
-
-                .. math::
-                    P_{invest}(0) \cdot c_{invest,var}(0)
-                    + c_{invest,fix}(0) \cdot Y_{invest}(0) \\
-
-        Where 0 denotes the 0th (investment) period since
-        in a standard model, there is only this one period.
-
-        *Multi-period model*
-
-            * :attr:`nonconvex = False`
-
-                .. math::
-                    &
-                    P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
-                    \cdot \frac {1}{ANF(d, ir)} \cdot DF^{-p}\\
-                    &\\
-                    &
-                    \forall p \in \textrm{CAPACITY_PERIODS}
-
-            In case, the remaining lifetime of an asset is greater than 0 and
-            attribute `use_remaining_value` of the energy system is True,
-            the difference in value for the investment period compared to the
-            last period of the optimization horizon is accounted for
-            as an adder to the investment costs:
-
-                .. math::
-                    &
-                    P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
-                    A(c_{invest,var}(|P|), l_{r}, ir)\\
-                    & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
-                    &\\
-                    &
-                    \forall p \in \textrm{CAPACITY_PERIODS}
-
-            * :attr:`nonconvex = True`
-
-                .. math::
-                    &
-                    (P_{invest}(p) \cdot A(c_{invest,var}(p), l, ir)
-                    \cdot \frac {1}{ANF(d, ir)}\\
-                    &
-                    +  c_{invest,fix}(p) \cdot b_{invest}(p)) \cdot DF^{-p}\\
-                    &\\
-                    &
-                    \forall p \in \textrm{CAPACITY_PERIODS}
-
-            In case, the remaining lifetime of an asset is greater than 0 and
-            attribute `use_remaining_value` of the energy system is True,
-            the difference in value for the investment period compared to the
-            last period of the optimization horizon is accounted for
-            as an adder to the investment costs:
-
-                .. math::
-                    &
-                    (P_{invest}(p) \cdot (A(c_{invest,var}(p), l_{r}, ir) -
-                    A(c_{invest,var}(|P|), l_{r}, ir)\\
-                    & \cdot \frac {1}{ANF(l_{r}, ir)} \cdot DF^{-|P|}\\
-                    &
-                    +  (c_{invest,fix}(p) - c_{invest,fix}(|P|))
-                    \cdot b_{invest}(p)) \cdot DF^{-p}\\
-                    &\\
-                    &
-                    \forall p \in \textrm{CAPACITY_PERIODS}
-
-
-        where:
-
-        * :math:`A(c_{invest,var}(p), l, ir)` A is the annuity for
-          investment expenses :math:`c_{invest,var}(p)`, lifetime :math:`l`
-          and interest rate :math:`ir`.
-        * :math:`l_{r}` is the remaining lifetime at the end of the
-          optimization horizon (in case it is greater than 0 and
-          smaller than the actual lifetime).
-        * :math:`ANF(d, ir)` is the annuity factor for duration :math:`d`
-          and interest rate :math:`ir`.
-        * :math:`d=min\{year_{max} - year(p), l\}` defines the
-          number of years within the optimization horizon that investment
-          annuities are accounted for.
-        * :math:`year(p)` denotes the start year of period :math:`p`.
-        * :math:`year_{max}` denotes the last year of the optimization
-          horizon, i.e. at the end of the last period.
-        * :math:`limit_{end}=min\{year_{max}, year(p) + l\}` is used as an
-          upper bound to ensure fixed costs for endogenous investments
-          to occur within the optimization horizon.
-        * :math:`limit_{exo}=min\{year_{max}, l - a\}` is used as an
-          upper bound to ensure fixed costs for existing capacities to occur
-          within the optimization horizon. :math:`a` is the initial age
-          of an asset.
-        * :math:`DF=(1+dr)` is the discount factor.
-
-        The annuity / annuity factor hereby is:
+        * :attr:`nonconvex = False`
 
             .. math::
-                &
-                A(c_{invest,var}(p), l, ir) = c_{invest,var}(p) \cdot
-                    \frac {(1+ir)^l \cdot ir} {(1+ir)^l - 1}\\
-                &\\
-                &
-                ANF(d, ir)=\frac {(1+ir)^d \cdot ir} {(1+ir)^d - 1}
+                \sum_p P_{invest}(p) \cdot c_{invest,var}(p)
 
-        They are derived using the reciprocal of the oemof.tools.economics
-        annuity function with a capex of 1.
-        The interest rate :math:`ir` for the annuity is defined as weighted
-        average costs of capital (wacc) and assumed constant over time.
+        * :attr:`nonconvex = True`
+
+            .. math::
+                \sum_p \left(P_{invest}(p) \cdot c_{invest,var}(p)
+                + c_{invest,fix}(p) \cdot Y_{invest}(p) \right)\\
+
+        Where p denotes the capacity period.
+
         """
         if not hasattr(self, "INVESTFLOWS"):
             return 0
@@ -716,202 +617,24 @@ class InvestmentFlowBlock(ScalarBlock):
         m = self.parent_block()
         investment_costs = 0
 
-        if m.es.periods is None:
-            for i, o in self.CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                    )
+        for i, o in self.CONVEX_INVESTFLOWS:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
+                )
 
-            for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                        + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
-                    )
-
-        else:
-            msg = (
-                "You did not specify an interest rate.\n"
-                "It will be set equal to the discount_rate of {} "
-                "of the model as a default.\nThis corresponds to a "
-                "social planner point of view and does not reflect "
-                "microeconomic interest requirements."
-            )
-            for i, o in self.CONVEX_INVESTFLOWS:
-                lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=m.flows[i, o].investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor_remaining = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[i, o, p]
-                        * annuity
-                        * present_value_factor_remaining
-                    )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            i,
-                            o,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
-
-            for i, o in self.NON_CONVEX_INVESTFLOWS:
-                lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=m.flows[i, o].investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor_remaining = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[i, o, p]
-                        * annuity
-                        * present_value_factor_remaining
-                        + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
-                    )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            i,
-                            o,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                            nonconvex=True,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
+        for i, o in self.NON_CONVEX_INVESTFLOWS:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
+                    + self.invest_status[i, o, p]
+                    * m.flows[i, o].investment.offset[p]
+                )
 
         self.investment_costs = Expression(expr=investment_costs)
         self.costs = Expression(expr=investment_costs)
 
         return self.costs
-
-    def _evaluate_remaining_value_difference(
-        self,
-        m,
-        p,
-        i,
-        o,
-        end_year_of_optimization,
-        lifetime,
-        interest,
-        nonconvex=False,
-    ):
-        """Evaluate and return the remaining value difference of an investment
-
-        The remaining value difference in the net present values if the asset
-        was to be liquidated at the end of the optimization horizon and the
-        net present value using the original investment expenses.
-
-        Parameters
-        ----------
-        m : oemof.solph.models.Model
-            Optimization model
-
-        p : int
-            Period in which investment occurs
-
-        i : any instance of oemof.solph.components
-            start node of flow
-
-        o : any instance of oemof.solph.components
-            end node of flow
-
-        end_year_of_optimization : int
-            Last year of the optimization horizon
-
-        lifetime : int
-            lifetime of investment considered
-
-        interest : float
-            Demanded interest rate for investment
-
-        nonconvex : bool
-            Indicating whether considered flow is nonconvex.
-        """
-        if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
-                remaining_lifetime = lifetime - (
-                    end_year_of_optimization - m.es.periods_years[p]
-                )
-                remaining_annuity = economics.annuity(
-                    capex=m.flows[i, o].investment.ep_costs[-1],
-                    n=remaining_lifetime,
-                    wacc=interest,
-                )
-                original_annuity = economics.annuity(
-                    capex=m.flows[i, o].investment.ep_costs[p],
-                    n=remaining_lifetime,
-                    wacc=interest,
-                )
-                present_value_factor_remaining = 1 / economics.annuity(
-                    capex=1, n=remaining_lifetime, wacc=interest
-                )
-                convex_investment_costs = (
-                    self.invest[i, o, p]
-                    * (remaining_annuity - original_annuity)
-                    * present_value_factor_remaining
-                )
-                if nonconvex:
-                    return convex_investment_costs + self.invest_status[
-                        i, o, p
-                    ] * (
-                        m.flows[i, o].investment.offset[-1]
-                        - m.flows[i, o].investment.offset[p]
-                    )
-                else:
-                    return convex_investment_costs
-            else:
-                return 0
-        else:
-            return 0
 
     def _minimum_investment_constraint(self):
         """Constraint factory for a minimum investment"""
