@@ -1,5 +1,7 @@
 import pandas as pd
+
 import oemof.solph as solph
+
 # from helpers import lcoh
 
 # %%[sec_1_start]
@@ -49,7 +51,7 @@ waste_heat_source = solph.components.Source(
 electricity_source = solph.components.Source(
     label='electricity source',
     outputs={electricity_bus: solph.flows.Flow(
-        variable_costs=data['electricity price'])}
+        variable_costs=data['el_spot_price'])}
 )
 
 district_heating_system.add(waste_heat_source, electricity_source)
@@ -79,13 +81,17 @@ spec_inv_storage=250
 # Soll es ein saisonaler oder Pufferspeicher sein?
 heat_storage = solph.components.GenericStorage(
     label='heat storage',
-    investment=solph.Investment(
+    nominal_capacity=solph.Investment(
         ep_costs=epc(spec_inv_storage)
-    )
-    inputs={heat_bus: solph.flows.Flow(nominal_capacity=100, variable_costs=10)},
-    outputs={heat_bus: solph.flows.Inves(nominal_capacity=100, variable_costs=10)},
-    loss_rate=0.001, nominal_capacity=50,
+    ),
+    inputs={heat_bus: solph.flows.Flow(variable_costs=10)},
+    outputs={heat_bus: solph.flows.Flow(variable_costs=10)},
+    loss_rate=0.001,
+    invest_relation_input_capacity=0.1,
+    invest_relation_output_capacity=0.1
 )
+
+district_heating_system.add(heat_storage)
 # %%[sec_4_end]
 
 # %%[sec_5_start]
