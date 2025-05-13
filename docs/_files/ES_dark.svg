@@ -10,7 +10,7 @@
    viewBox="0.00 0.00 616.20 353.20"
    version="1.1"
    id="svg20"
-   sodipodi:docname="ES_light.svg"
+   sodipodi:docname="ES_dark.svg"
    inkscape:version="1.4 (86a8ad7, 2024-10-11)"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
@@ -18,7 +18,101 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
   <defs
-     id="defs20" />
+     id="defs20">
+    <linearGradient
+       id="linearGradient1"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#000000;stop-opacity:1;"
+         offset="0"
+         id="stop1" />
+      <stop
+         style="stop-color:#000000;stop-opacity:0;"
+         offset="1"
+         id="stop2" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient2"
+       x1="169.40848"
+       y1="-225.66362"
+       x2="288.93444"
+       y2="-225.66362"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient3"
+       x1="143.39526"
+       y1="-233.94323"
+       x2="151.80474"
+       y2="-233.94323"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient4"
+       x1="106.82666"
+       y1="-291.11637"
+       x2="138.8666"
+       y2="-291.11637"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient5"
+       x1="156.3334"
+       y1="-291.11637"
+       x2="188.37334"
+       y2="-291.11637"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient6"
+       x1="456.39526"
+       y1="-290.95323"
+       x2="464.80474"
+       y2="-290.95323"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient7"
+       x1="435.26223"
+       y1="-227.82749"
+       x2="456.87787"
+       y2="-227.82749"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient8"
+       x1="330.71375"
+       y1="-142.75131"
+       x2="365.5915"
+       y2="-142.75131"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient9"
+       x1="379.7375"
+       y1="-142.75114"
+       x2="415.24395"
+       y2="-142.75114"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient1"
+       id="linearGradient10"
+       x1="368.39526"
+       y1="-79.343228"
+       x2="376.80474"
+       y2="-79.343228"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
   <sodipodi:namedview
      id="namedview20"
      pagecolor="#ffffff"
@@ -29,9 +123,9 @@
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
      inkscape:document-units="pt"
-     inkscape:zoom="1.6890935"
-     inkscape:cx="436.62473"
-     inkscape:cy="245.98993"
+     inkscape:zoom="2.3887389"
+     inkscape:cx="464.47102"
+     inkscape:cy="163.05675"
      inkscape:window-width="4300"
      inkscape:window-height="1711"
      inkscape:window-x="2391"
@@ -67,7 +161,7 @@
              font-family="Times New Roman,serif"
              font-size="10.00"
              id="text2"
-             style="fill:#000000;fill-opacity:1">natural gas</text>
+             style="fill:#ffffff;fill-opacity:1">natural gas</text>
         </a>
       </g>
     </g>
@@ -89,24 +183,28 @@
          font-family="Times New Roman,serif"
          font-size="10.00"
          id="text3"
-         style="fill:#000000;fill-opacity:1">Gas boiler</text>
+         style="fill:#ffffff;fill-opacity:1">Gas boiler</text>
     </g>
     <!-- natural gas&#45;&gt;Gas boiler -->
     <g
        id="edge2"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title3">natural gas-&gt;Gas boiler</title>
+         id="title3"
+         style="fill:url(#linearGradient7)">natural gas-&gt;Gas boiler</title>
       <path
          fill="none"
          stroke="black"
          d="M456.42,-251.86C452.23,-242.31 445.59,-227.14 439.73,-213.78"
-         id="path3" />
+         id="path3"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="443.09,-212.73 435.87,-204.98 436.68,-215.54 443.09,-212.73"
-         id="polygon4" />
+         id="polygon4"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- electricity -->
     <g
@@ -132,7 +230,7 @@
              font-family="Times New Roman,serif"
              font-size="10.00"
              id="text5"
-             style="fill:#000000;fill-opacity:1">electricity</text>
+             style="fill:#ffffff;fill-opacity:1">electricity</text>
         </a>
       </g>
     </g>
@@ -157,7 +255,7 @@ y Demand</title>
          font-family="'Times New Roman', serif"
          font-size="10px"
          id="text6"
-         style="fill:#000000;fill-opacity:1">Electricity</text>
+         style="fill:#ffffff;fill-opacity:1">Electricity</text>
       <text
          text-anchor="middle"
          x="147.60001"
@@ -165,26 +263,30 @@ y Demand</title>
          font-family="'Times New Roman', serif"
          font-size="10px"
          id="text7"
-         style="fill:#000000;fill-opacity:1">Demand</text>
+         style="fill:#ffffff;fill-opacity:1">Demand</text>
     </g>
     <!-- electricity&#45;&gt;Electricit
 y Demand -->
     <g
        id="edge5"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title7">electricity-&gt;Electricit
+         id="title7"
+         style="fill:url(#linearGradient3)">electricity-&gt;Electricit
 y Demand</title>
       <path
          fill="none"
          stroke="black"
          d="M147.6,-251.86C147.6,-245.45 147.6,-236.5 147.6,-227.27"
-         id="path7" />
+         id="path7"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="151.1,-227.54 147.6,-217.54 144.1,-227.54 151.1,-227.54"
-         id="polygon7" />
+         id="polygon7"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Heatpump -->
     <g
@@ -204,24 +306,28 @@ y Demand</title>
          font-family="Times New Roman,serif"
          font-size="10.00"
          id="text8"
-         style="fill:#000000;fill-opacity:1">Heatpump</text>
+         style="fill:#ffffff;fill-opacity:1">Heatpump</text>
     </g>
     <!-- electricity&#45;&gt;Heatpump -->
     <g
        id="edge6"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title9">electricity-&gt;Heatpump</title>
+         id="title9"
+         style="fill:url(#linearGradient2)">electricity-&gt;Heatpump</title>
       <path
          fill="none"
          stroke="black"
          d="M169.61,-251.71C197.04,-239.63 244.44,-218.76 278.42,-203.79"
-         id="path9" />
+         id="path9"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="279.81,-207.01 287.55,-199.77 276.99,-200.6 279.81,-207.01"
-         id="polygon9" />
+         id="polygon9"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- heat -->
     <g
@@ -247,7 +353,7 @@ y Demand</title>
              font-family="Times New Roman,serif"
              font-size="10.00"
              id="text10"
-             style="fill:#000000;fill-opacity:1">heat</text>
+             style="fill:#ffffff;fill-opacity:1">heat</text>
         </a>
       </g>
     </g>
@@ -271,7 +377,7 @@ d</title>
          font-family="'Times New Roman', serif"
          font-size="10px"
          id="text11"
-         style="fill:#000000;fill-opacity:1">Heat Demand</text>
+         style="fill:#ffffff;fill-opacity:1">Heat Demand</text>
       <text
          text-anchor="middle"
          x="372.60001"
@@ -279,26 +385,30 @@ d</title>
          font-family="'Times New Roman', serif"
          font-size="10px"
          id="text12"
-         style="fill:#000000;fill-opacity:1" />
+         style="fill:#ffffff;fill-opacity:1" />
     </g>
     <!-- heat&#45;&gt;Heat Deman
 d -->
     <g
        id="edge9"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title12">heat-&gt;Heat Deman
+         id="title12"
+         style="fill:url(#linearGradient10)">heat-&gt;Heat Deman
 d</title>
       <path
          fill="none"
          stroke="black"
          d="M372.6,-97.26C372.6,-90.85 372.6,-81.9 372.6,-72.67"
-         id="path12" />
+         id="path12"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="376.1,-72.94 372.6,-62.94 369.1,-72.94 376.1,-72.94"
-         id="polygon12" />
+         id="polygon12"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Gas Grid -->
     <g
@@ -318,24 +428,28 @@ d</title>
          font-family="Times New Roman,serif"
          font-size="10.00"
          id="text13"
-         style="fill:#000000;fill-opacity:1">Gas Grid</text>
+         style="fill:#ffffff;fill-opacity:1">Gas Grid</text>
     </g>
     <!-- Gas Grid&#45;&gt;natural gas -->
     <g
        id="edge1"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title14">Gas Grid-&gt;natural gas</title>
+         id="title14"
+         style="fill:url(#linearGradient6)">Gas Grid-&gt;natural gas</title>
       <path
          fill="none"
          stroke="black"
          d="M460.6,-308.71C460.6,-301.18 460.6,-292.32 460.6,-284.44"
-         id="path14" />
+         id="path14"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="464.1,-284.71 460.6,-274.71 457.1,-284.71 464.1,-284.71"
-         id="polygon14" />
+         id="polygon14"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Power Grid -->
     <g
@@ -355,24 +469,28 @@ d</title>
          font-family="Times New Roman,serif"
          font-size="10.00"
          id="text15"
-         style="fill:#000000;fill-opacity:1">Power Grid</text>
+         style="fill:#ffffff;fill-opacity:1">Power Grid</text>
     </g>
     <!-- Power Grid&#45;&gt;electricity -->
     <g
        id="edge4"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title16">Power Grid-&gt;electricity</title>
+         id="title16"
+         style="fill:url(#linearGradient4)">Power Grid-&gt;electricity</title>
       <path
          fill="none"
          stroke="black"
          d="M107.2,-308.71C114.71,-300.28 123.71,-290.19 131.31,-281.67"
-         id="path16" />
+         id="path16"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="133.82,-284.12 137.86,-274.32 128.59,-279.46 133.82,-284.12"
-         id="polygon16" />
+         id="polygon16"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Pv Plant -->
     <g
@@ -392,58 +510,70 @@ d</title>
          font-family="Times New Roman,serif"
          font-size="10.00"
          id="text17"
-         style="fill:#000000;fill-opacity:1">Pv Plant</text>
+         style="fill:#ffffff;fill-opacity:1">Pv Plant</text>
     </g>
     <!-- Pv Plant&#45;&gt;electricity -->
     <g
        id="edge3"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title18">Pv Plant-&gt;electricity</title>
+         id="title18"
+         style="fill:url(#linearGradient5)">Pv Plant-&gt;electricity</title>
       <path
          fill="none"
          stroke="black"
          d="M188,-308.71C180.49,-300.28 171.49,-290.19 163.89,-281.67"
-         id="path18" />
+         id="path18"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="166.61,-279.46 157.34,-274.32 161.38,-284.12 166.61,-279.46"
-         id="polygon18" />
+         id="polygon18"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Gas boiler&#45;&gt;heat -->
     <g
        id="edge8"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title19">Gas boiler-&gt;heat</title>
+         id="title19"
+         style="fill:url(#linearGradient9)">Gas boiler-&gt;heat</title>
       <path
          fill="none"
          stroke="black"
          d="M414.84,-166.64C406.32,-154.96 395.1,-139.61 386.37,-127.65"
-         id="path19" />
+         id="path19"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="389.35,-125.8 380.63,-119.79 383.7,-129.93 389.35,-125.8"
-         id="polygon19" />
+         id="polygon19"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
     <!-- Heatpump&#45;&gt;heat -->
     <g
        id="edge7"
-       class="edge">
+       class="edge"
+       style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1">
       <title
-         id="title20">Heatpump-&gt;heat</title>
+         id="title20"
+         style="fill:url(#linearGradient8)">Heatpump-&gt;heat</title>
       <path
          fill="none"
          stroke="black"
          d="M331.12,-166.64C339.5,-154.96 350.51,-139.61 359.08,-127.65"
-         id="path20" />
+         id="path20"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
       <polygon
          fill="black"
          stroke="black"
          points="361.73,-129.96 364.71,-119.8 356.04,-125.88 361.73,-129.96"
-         id="polygon20" />
+         id="polygon20"
+         style="fill:#ffffff;fill-opacity:1;stroke:#ffffff;stroke-opacity:1" />
     </g>
   </g>
 </svg>
