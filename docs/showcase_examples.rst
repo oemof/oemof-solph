@@ -4,10 +4,14 @@
 Showcases
 ~~~~~~~~~
 
-On this page we collect showcases applications of oemof.solph. If you want to
-add your example here, please open an issue on GitHub and let us know. The
-source code of the application should be accessible freely, so other users can
-learn from your project.
+On this page we collect showcases applications using or emplyoing oemof.solph.
+These tools are working in a stable state and should be usable from scratch.
+Furthermore, in our blog on oemof.org, we sometimes post examples implemented
+`by the community <https://oemof.org/category/showcase/>`__.
+
+If you want to add your example here, please open an issue on GitHub and let us
+know. The application should be in a stable state and the source code should be
+accessible freely, so other users can explore and learn from your project.
 
 .. card::
 
