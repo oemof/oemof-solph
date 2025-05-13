@@ -63,7 +63,7 @@ gas_boiler = solph.components.Converter(
     outputs={
         heat_bus: solph.flows.Flow(
             nominal_value=20,
-            variable_costs=0.50
+            variable_costs=1.10
         )
     },
     conversion_factors={gas_bus: 0.95}
@@ -72,7 +72,7 @@ gas_boiler = solph.components.Converter(
 district_heating_system.add(gas_boiler)
 
 # %%[sec_4_start]
-spec_inv_storage=250
+spec_inv_storage=100
 
 # Soll es ein saisonaler oder Pufferspeicher sein?
 heat_storage = solph.components.GenericStorage(
@@ -80,19 +80,21 @@ heat_storage = solph.components.GenericStorage(
     nominal_capacity=solph.Investment(
         ep_costs=epc(spec_inv_storage)
     ),
-    inputs={heat_bus: solph.flows.Flow(variable_costs=10)},
-    outputs={heat_bus: solph.flows.Flow(variable_costs=10)},
-    loss_rate=0.001,
-    invest_relation_input_capacity=0.1,
-    invest_relation_output_capacity=0.1
+    inputs={heat_bus: solph.flows.Flow(variable_costs=0.1)},
+    outputs={heat_bus: solph.flows.Flow(variable_costs=0.1)},
+    invest_relation_input_capacity=1/24,
+    invest_relation_output_capacity=1/24,
+    balanced=True,
+    initial_storage_level=0.5,
+    loss_rate=0.001
 )
 
 district_heating_system.add(heat_storage)
 # %%[sec_4_end]
 
 # %%[sec_5_start]
-cop = 3
-spec_inv_heat_pump = 500000
+cop = 3.5
+spec_inv_heat_pump = 450000
 
 heat_pump = solph.components.Converter(
     label='heat pump',
@@ -105,6 +107,7 @@ heat_pump = solph.components.Converter(
             nominal_value=solph.Investment(
                 ep_costs=epc(spec_inv_heat_pump), maximum=50
                 ),
+            variable_costs=1.2
         )
     },
     conversion_factors={
@@ -128,7 +131,7 @@ data_heat_bus = solph.views.node(results, 'heat network')['sequences']
 
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
-var_cost_gas_boiler = 0.50
+var_cost_gas_boiler = 1.10
 
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
@@ -149,10 +152,58 @@ print(f'CO2-emissions: {co2:.0f} kg')
 
 import matplotlib.pyplot as plt
 
-fig, ax = plt.subplot(figsize=[10, 6])
+# plt.style.use('dark_background')
+
+unit_colors = {
+    'gas boiler': '#EC6707',
+    'heat pump': '#B54036',
+    'heat storage (discharge)': '#BFBFBF',
+    'heat storage (charge)': '#696969',
+}
+
+fig, ax = plt.subplots(figsize=[10, 6])
+
+bottom = 0
+for unit in ['gas boiler', 'heat pump', 'heat storage']:
+    unit_label = f'{unit} (discharge)' if 'storage' in unit else unit
+    ax.bar(
+        data_heat_bus.index,
+        data_heat_bus[((unit, 'heat network'), 'flow')],
+        label=unit_label,
+        color=unit_colors[unit_label],
+        bottom=bottom
+    )
+    bottom += data_heat_bus[((unit, 'heat network'), 'flow')]
+
+unit_label = 'heat storage (charge)'
+ax.bar(
+    data_heat_bus.index,
+    -1*data_heat_bus[(('heat network', 'heat storage'), 'flow')],
+    label=unit_label,
+    color=unit_colors[unit_label]
+)
+
+ax.legend(loc='upper right')
+ax.grid(axis='y')
+ax.set_ylabel('Hourly heat production in MWh')
+
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_2_hourly_heat_production.svg')
 
 
+fig, ax = plt.subplots(figsize=[10, 6])
 
-import matplotlib.pyplot as plt
+data_heat_storage = solph.views.node(results, 'heat storage')['sequences']
 
-fig, ax = plt.subplot(figsize=[10, 6])
+ax.plot(
+    data_heat_storage[(('heat storage', 'None'), 'storage_content')],
+    color='#00395B'
+)
+
+ax.grid(axis='y')
+ax.set_ylabel('Hourly heat storage content in MWh')
+
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
+
+plt.show()
