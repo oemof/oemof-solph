@@ -27,7 +27,7 @@ buses and flows as well as the basic components.
         :link: basic_concepts_energy_system_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/ES_light.svg
             :class: only-light
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
@@ -37,7 +37,7 @@ buses and flows as well as the basic components.
         :link: basic_concepts_flows_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/FLOW_light.svg
             :class: only-light
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
@@ -51,7 +51,7 @@ buses and flows as well as the basic components.
         :link: basic_concepts_buses_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/BUS_light.svg
             :class: only-light
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
@@ -61,7 +61,7 @@ buses and flows as well as the basic components.
         :link: basic_concepts_components_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/COMPONENT_light.svg
             :class: only-light
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
@@ -75,17 +75,17 @@ buses and flows as well as the basic components.
         :link: basic_concepts_model_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/math_opt_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/math_opt_dark.svg
             :class: only-dark
 
     .. grid-item-card::  Result handling
         :link: basic_concepts_results_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/results_light.png
             :class: only-light
 
         .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
