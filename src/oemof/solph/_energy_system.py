@@ -76,10 +76,6 @@ class EnergySystem(es.EnergySystem):
         will be adapted. Note that timeseries for components have to
         be set up as already aggregated timeseries.
 
-    use_remaining_value : bool
-        If True, compare the remaining value of an investment to the
-        original value (only applicable for multi-period models)
-
     kwargs
     """
 
@@ -90,7 +86,6 @@ class EnergySystem(es.EnergySystem):
         infer_last_interval=None,
         periods=None,
         tsa_parameters=None,
-        use_remaining_value=False,
         groupings=None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
