@@ -15,7 +15,7 @@ learn from your project.
     **open-plan-tool**
     ^^^
 
-    .. image:: /_files/open-plant-tool-screenshot.png
+    .. image:: /_files/open-plan-tool-screenshot.png
       :align: center
       :alt: open-plan-tool
       :target: https://open-plan-tool.org

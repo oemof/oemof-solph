@@ -1,8 +1,8 @@
 .. _contribute_label:
 
-============
-Contributing
-============
+=================
+How to contribute
+=================
 
 Contributions are welcome, and they are greatly appreciated! Every
 little bit helps, and credit will always be given.
@@ -65,7 +65,7 @@ To set up `oemof-solph` for local development:
 
     git add $(changed_files)
     git commin
-    git push origin name-of-your-bugfix-or-feature 
+    git push origin name-of-your-bugfix-or-feature
 
 7. Submit a pull request through the GitHub website.
 

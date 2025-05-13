@@ -14,8 +14,6 @@ buses and flows as well as the basic components.
     :hidden:
 
     basic_concepts/energy_system.rst
-    basic_concepts/flows.rst
-    basic_concepts/buses.rst
     basic_concepts/components.rst
     basic_concepts/model.rst
     basic_concepts/results.rst
@@ -30,31 +28,7 @@ buses and flows as well as the basic components.
         .. image:: /_files/ES_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
-            :class: only-dark
-
-    .. grid-item-card::  Flows
-        :link: basic_concepts_flows_label
-        :link-type: ref
-
-        .. image:: /_files/FLOW_light.svg
-            :class: only-light
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
-            :class: only-dark
-
-
-.. grid:: 2
-    :gutter: 1
-
-    .. grid-item-card::  Buses
-        :link: basic_concepts_buses_label
-        :link-type: ref
-
-        .. image:: /_files/BUS_light.svg
-            :class: only-light
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/ES_dark.svg
             :class: only-dark
 
     .. grid-item-card::  Components
@@ -64,9 +38,8 @@ buses and flows as well as the basic components.
         .. image:: /_files/COMPONENT_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_static/_logo/COMPONENT_dark.svg
             :class: only-dark
-
 
 .. grid:: 2
     :gutter: 1
@@ -88,5 +61,5 @@ buses and flows as well as the basic components.
         .. image:: /_files/results_light.png
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/results_light.png
             :class: only-dark
