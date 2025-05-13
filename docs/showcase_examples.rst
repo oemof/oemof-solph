@@ -22,3 +22,37 @@ learn from your project.
 
     The open plan tool is an online app with a grafical user interface, that
     let's you create your :code:`EnergySystem` interactively.
+
+
+.. card::
+
+    **Dashboard for optimization of heating supply systems**
+    ^^^
+
+    .. image:: /_files/showcase_owp.png
+      :align: center
+      :alt: screenshot owp dashboard
+      :class: only-light
+      :target: https://owp-inno-nord.streamlit.app
+
+    .. image:: /_files/showcase_owp_darkmode.png
+      :align: center
+      :alt: screenshot owp dashboard
+      :class: only-dark
+      :target: https://owp-inno-nord.streamlit.app
+
+    The streamlit dashboard supports the creation of heating supply system 
+    concepts. This user-friendly tool is developed as part of a research 
+    project at the Flensburg University of Applied Sciences with the aim of 
+    lowering the entry barrier to energy system analysis for non-experts.
+
+    +++
+    Title: Dashboard for optimization of heating supply systems
+
+    Authors: Malte Fritz, Jonas Freißmann
+
+    URL: https://owp-inno-nord.streamlit.app
+
+    GitHub: https://github.com/maltefritz/owp_milp_optimization
+
+    Language: German
