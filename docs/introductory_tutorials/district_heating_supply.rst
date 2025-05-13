@@ -111,7 +111,7 @@ components before, we have to define at least one input *and* one output, which 
 case of the gas boiler is the natural gas burnt and the heat produced from it.
 The connection from the gas network does not need any parametrization. We set the
 :py:attr:`nominal_value` of the heat output to 20 MW (see note on units below) and
-add :py:attr:`variable_cost` of 0.50 €/MWh. To depict energy losses due to thermodynamic
+add :py:attr:`variable_cost` of 1.10 €/MWh. To depict energy losses due to thermodynamic
 inefficiencies, we can set the :py:attr:`conversion_factors` keyword argument of
 the :py:class:`solph.components.Converter`. It expects a dictionary, with a key
 corresponding to the bus to which the value (scalar or iterable) is applied. So,
@@ -196,7 +196,7 @@ Your plot should look similar to this:
 
     System dispatch of heating system with gas boiler
 
-Let's continue by assesing the economic merit of our district heating supply
+Let's continue by assessing the economic merit of our district heating supply
 system. A common indicator for that purpose are the Levelized Cost of Heat
 (:math:`LCOH`). As shown in the equations below, they account for the upfront
 invest cost :math:`C_\text{invest}` necessary to build the heat production
@@ -227,13 +227,13 @@ below.
 
 Now we'll begin computing the :math:`LCOH`. First of all, we need some cost
 data of a typical gas boiler. We assume specific invest cost of 50,000.00 €/MW,
-a nominal rated capacity of 20 MW and variable operation cost of 0.50 €/MWh.
+a nominal rated capacity of 20 MW and variable operation cost of 1.10 €/MWh.
 The invest cost can be calculate by multiplying the specific cost and capacity.
 For all cost related to the gas boiler's operation, we multiply the variable
 cost with the total heat produced by the unit and add it to the sum of the
 hourly cost evoked by the purchase of natural gas. Finllay, we sum up the heat
 supplied to the heat sink and use the calculated values to compute the
-:math:`LCOH`, which are printed to the console with a value of 18.24 €/MWh.
+:math:`LCOH`, which are printed to the console with a value of 18.84 €/MWh.
 
 .. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python

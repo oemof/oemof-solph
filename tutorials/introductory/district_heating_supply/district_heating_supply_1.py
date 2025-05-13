@@ -48,7 +48,7 @@ gas_boiler = solph.components.Converter(
     outputs={
         heat_bus: solph.flows.Flow(
             nominal_value=data['heat demand'].max(),
-            variable_costs=0.50
+            variable_costs=1.10
         )
     },
     conversion_factors={gas_bus: 0.95}
@@ -95,7 +95,7 @@ plt.show()
 # %%[sec_9_start]
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
-var_cost_gas_boiler = 0.50
+var_cost_gas_boiler = 1.10
 
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
