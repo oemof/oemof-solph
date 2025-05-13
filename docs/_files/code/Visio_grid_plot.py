@@ -3,7 +3,7 @@
 """
 General description
 -------------------
-This Code generates the picture of an energysystem used for the grid icons in 
+This Code generates the picture of an energysystem used for the grid icons in
 the docs
 
 License
@@ -60,7 +60,7 @@ def main():
             "..",
             "..",
             "..",
-            r"examples\basic_example\basic_example.csv",
+            r"examples\result_object\time_series.csv",
         )
     )
     data = pd.read_csv(file_name)
