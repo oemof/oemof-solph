@@ -47,15 +47,11 @@ you have any questions please reach out to the
 .. grid:: 2
     :gutter: 1
 
-    .. grid-item-card::  Tutorial 3
+    .. grid-item-card::  EV charging
         :link: ev_charging_label
         :link-type: ref
 
-        .. image:: /_files/example_network.svg
-            :class: only-light
-
-        .. image:: /_files/example_network.svg
-            :class: only-dark
+        .. image:: /_files/ev_charging_graph_4.svg
 
     .. grid-item-card::  Tutorial 4
         :link: tutorial_4_label
