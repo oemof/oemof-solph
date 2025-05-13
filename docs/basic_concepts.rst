@@ -14,8 +14,6 @@ buses and flows as well as the basic components.
     :hidden:
 
     basic_concepts/energy_system.rst
-    basic_concepts/flows.rst
-    basic_concepts/buses.rst
     basic_concepts/components.rst
     basic_concepts/model.rst
     basic_concepts/results.rst
