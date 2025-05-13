@@ -1,8 +1,8 @@
 .. _showcase_examples_label:
 
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
 Showcases
-~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~
 
 On this page we collect showcases applications of oemof.solph. If you want to
 add your example here, please open an issue on GitHub and let us know. The
