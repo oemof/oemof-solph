@@ -130,6 +130,10 @@ get a more verbose solver logging output in the console.
     :end-before: [solve_end]
 
 
+.. note::
+    Optimisation will fail if supply and demand cannot be balanced.
+    You can try this by setting `initial_storage_level=0`.
+
 Now plot the results using the helper function from helpers.py.
 
 The results are showing that the EV is using the battery while driving.
@@ -155,9 +159,11 @@ The results are showing that the EV is using the battery while driving.
 .. admonition:: Learning 
     :class: important
 
-    The learning of this step: Understanding the trivial electric vehicle dispatch from battery
+    The model balances supply and demand. Operation is optimised
+    so that the total costs are minimised (or revenue is maximised).
 
-You can get the complete (uncommented) code for this step: :download:`ev_charging_1.py </../tutorials/introductory/ev_charging/ev_charging_1.py>`
+You can get the complete (uncommented) code for this step:
+:download:`ev_charging_1.py </../tutorials/introductory/ev_charging/ev_charging_1.py>`
 
 .. dropdown:: Click to display the code
 
@@ -172,10 +178,19 @@ Now, let's assume the car battery can be charged at home.
 To be able to load the battery a charger is necessary.  Unfortunately, there
 is only a power socket available, limiting the charging process to 16 A at
 230 V. The costs for charging are 30 ct/kWh.
-So the charging is added as :py:class:`solph.components.Sink`, where the :py:attr:`nominal_capacity` is set to 3.68 kW (= 230 V * 16 A) and :py:attr:`variable_costs` are set to 0.3 (30 ct/kWh).
+
+.. note::
+    Costs in the model are understood as a mathematical term,
+    i.e. you could minimise emissions by choosing 363 g/kWh
+    (German average for 2024) instead of the monetary costs.
+
+So the charging is added as :py:class:`solph.components.Sink`,
+where the :py:attr:`nominal_capacity` is set to 3.68 kW (= 230 V * 16 A) and :py:attr:`variable_costs` are set to 0.3 (30 ct/kWh).
 This, of course, can only happen while the car is present at home. 
 To connect the car while it is at home, we create avalibility data series. 
-The value 1 means that the car is at home, chargable. When it is set to 0, car is not present (between morning departure and the arrival back home in the evening). 
+The value 1 means that the car is at home, chargable.
+When it is set to 0, car is not present
+(between morning departure and the arrival back home in the evening).
 The timeseries is set as :py:attr:`max`.
 
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_2.py
@@ -185,7 +200,9 @@ The timeseries is set as :py:attr:`max`.
 
 
 Now we are looking at the results:
-The EV will be fully reloaded, because of the losses just before the first leaving and right after the arriving of the second drive to refill the battery.
+The EV will be charged as much as possible.
+As it's not possible to load it completely in the afternoon,
+it is charged to 100 % just before the first leaving.
 
 
 .. figure:: /./_files/driving_domestic_power_socket.svg
@@ -201,9 +218,13 @@ The EV will be fully reloaded, because of the losses just before the first leavi
 .. admonition:: Learning 
     :class: important
 
-    The learning of this step: Incentive to re-charge the battery
+    Optimisation is carried out under perfect foresight,
+    meaning that things that happen later can imply things
+    earlier in the time horison.
 
-You can get the complete (uncommented) code for this step: :download:`ev_charging_2.py </../tutorials/introductory/ev_charging/ev_charging_2.py>`
+
+You can get the complete (uncommented) code for this step:
+:download:`ev_charging_2.py </../tutorials/introductory/ev_charging/ev_charging_2.py>`
 
 .. dropdown:: Click to display the code
 
@@ -218,7 +239,8 @@ So we add an 11 kW charger (free of charge) which is available at work.
 This, of course, can only happen while the car is present at work.
 Same with avalibility data at home charging, we will create a data set for 
 avalibility at work. When it is set to 0, car is not present at the work. 
-When it is set to 1, car is able to connect to work charge station (between morning arrival and the evening departure from work)
+When it is set to 1, car is able to connect to work charge station
+(between morning arrival and the evening departure from work).
 
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_3.py
     :language: python
@@ -248,9 +270,11 @@ Further we can see, the battery is charged when the car is at work, because the 
 .. admonition:: Learning 
     :class: important
 
-    The learning of this step: Dispatch with shifting under simple constraint. The loading of the EV will be optimized. So the load is as cheap as possible.
+    Among multiple optimal solutions, any one can be your results.
+    If something is free in the model, this can include unintuitive things.
 
-You can get the complete (uncommented) code for this step: :download:`ev_charging_3.py </../tutorials/introductory/ev_charging/ev_charging_3.py>`
+You can get the complete (uncommented) code for this step:
+:download:`ev_charging_3.py </../tutorials/introductory/ev_charging/ev_charging_3.py>`
 
 .. dropdown:: Click to display the code
 
@@ -261,7 +285,7 @@ You can get the complete (uncommented) code for this step: :download:`ev_chargin
 Step 4:  Fix free charging artefact and allow bidirectional use of the battery 
 -------------------------------------------------------------------------------
 
-To avoid the energy from looping in the battery, we introduce marginal costs
+To avoid the energy from looping in the battery, we introduce costs
 to battery charging. This is a way to model cyclic aging of the battery.
 This is done by adding some :py:attr:`variable_costs` on flow of to the input.
 
@@ -309,9 +333,11 @@ Looking at the results:
 .. admonition:: Learning 
     :class: important
 
-    The learning of this step: Looped energy flow as indicator for flawed model and understand the bidirectional loading.
+    Looped energy flows can be used as an indicator for a flawed model.
+    If possible, it should be fixed (instead of suppressed).
 
-You can get the complete (uncommented) code for this step: :download:`ev_charging_4.py </../tutorials/introductory/ev_charging/ev_charging_4.py>`
+You can get the complete (uncommented) code for this step:
+:download:`ev_charging_4.py </../tutorials/introductory/ev_charging/ev_charging_4.py>`
 
 .. dropdown:: Click to display the code
 
@@ -375,9 +401,12 @@ to get 50 ct/kWh. The battery is recharged for free at the work and in the eveni
 .. admonition:: Learning 
     :class: important
 
-    The learning of this step:how to include time series for costs
+    Costs can be time-dependent. The optimal operation can be changed this way
+    if the model includes a storage.
 
-You can get the complete (uncommented) code for this step: :download:`ev_charging_5.py </../tutorials/introductory/ev_charging/ev_charging_5.py>`
+
+You can get the complete (uncommented) code for this step:
+:download:`ev_charging_5.py </../tutorials/introductory/ev_charging/ev_charging_5.py>`
 
 .. dropdown:: Click to display the code
 
