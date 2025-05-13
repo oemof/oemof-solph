@@ -9,7 +9,6 @@ add your example here, please open an issue on GitHub and let us know. The
 source code of the application should be accessible freely, so other users can
 learn from your project.
 
-
 .. card::
 
     **OpenPlan Tool**
@@ -24,6 +23,8 @@ learn from your project.
     let's you create, solve and explore your :code:`EnergySystem`
     interactively. You can use the online variant or clone it to run it on
     self-hosted servers.
+
+.. card::
 
     **Spreadsheet Energy System Model Generator**
     ^^^
