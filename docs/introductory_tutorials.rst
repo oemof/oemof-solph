@@ -18,7 +18,6 @@ you have any questions please reach out to the
     introductory_tutorials/district_heating_supply.rst
     introductory_tutorials/home_pv_battery_system.rst
     introductory_tutorials/tutorial_3.rst
-    introductory_tutorials/tutorial_4.rst
 
 
 .. grid:: 2
@@ -49,16 +48,6 @@ you have any questions please reach out to the
 
     .. grid-item-card::  Tutorial 3
         :link: tutorial_3_label
-        :link-type: ref
-
-        .. image:: /_files/example_network.svg
-            :class: only-light
-
-        .. image:: /_files/example_network.svg
-            :class: only-dark
-
-    .. grid-item-card::  Tutorial 4
-        :link: tutorial_4_label
         :link-type: ref
 
         .. image:: /_files/example_network.svg
