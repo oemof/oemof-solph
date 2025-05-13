@@ -19,7 +19,6 @@ modify and play around with.
 
 Step 1: Plugged EV as load
 ---------------------------
-The script for this step you can find `/tutorials/introductory/ev_charging/ev_charging_1.py``
 
 Within the first step we want to simulate a plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load.
 First of all, we create some input data. We use Pandas to do so and will also
@@ -158,10 +157,16 @@ The results are showing that the EV is using the battery while driving.
 
     The learning of this step: Understanding the trivial electric vehicle dispatch from battery
 
+You can get the complete (uncommented) code for this step: :download:`ev_charging_1.py </../tutorials/introductory/ev_charging/ev_charging_1.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
+        :language: python
+
 Step 2: Plugged EV as load
 ----------------------------
 
-The complete script for this step you can find `/tutorials/introductory/ev_charging/ev_charging_2.py``
 
 Now, let's assume the car battery can be charged at home.
 To be able to load the battery a charger is necessary.  Unfortunately, there
@@ -198,10 +203,15 @@ The EV will be fully reloaded, because of the losses just before the first leavi
 
     The learning of this step: Incentive to re-charge the battery
 
+You can get the complete (uncommented) code for this step: :download:`ev_charging_2.py </../tutorials/introductory/ev_charging/ev_charging_2.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_2.py
+        :language: python
+
 Step 3: Free charging with PV system at work
 ---------------------------------------------
-
-The complete script for this step you can find `/tutorials/introductory/ev_charging/ev_charging_3.py``
 
 Within this step we are regarding a free charging option at work.
 So we add an 11 kW charger (free of charge) which is available at work.
@@ -240,11 +250,16 @@ Further we can see, the battery is charged when the car is at work, because the 
 
     The learning of this step: Dispatch with shifting under simple constraint. The loading of the EV will be optimized. So the load is as cheap as possible.
 
+You can get the complete (uncommented) code for this step: :download:`ev_charging_3.py </../tutorials/introductory/ev_charging/ev_charging_3.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_3.py
+        :language: python
+
 
 Step 4:  Fix free charging artefact and allow bidirectional use of the battery 
 -------------------------------------------------------------------------------
-
-The complete script for this step you can find `/tutorials/introductory/ev_charging/ev_charging_4.py``
 
 To avoid the energy from looping in the battery, we introduce marginal costs
 to battery charging. This is a way to model cyclic aging of the battery.
@@ -296,11 +311,16 @@ Looking at the results:
 
     The learning of this step: Looped energy flow as indicator for flawed model and understand the bidirectional loading.
 
+You can get the complete (uncommented) code for this step: :download:`ev_charging_4.py </../tutorials/introductory/ev_charging/ev_charging_4.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_4.py
+        :language: python
+
 
 Step 5: Variable electricity prices
 ------------------------------------
- 
-The complete script for this step you can find `/tutorials/introductory/ev_charging/ev_charging_5.py``
 
 Within the last step we want to regard dynamic prices for the the charging and discharging at home. 
 So the optimization is going to load when the prices are are load and discharge if the prices are high.
@@ -356,3 +376,10 @@ to get 50 ct/kWh. The battery is recharged for free at the work and in the eveni
     :class: important
 
     The learning of this step:how to include time series for costs
+
+You can get the complete (uncommented) code for this step: :download:`ev_charging_5.py </../tutorials/introductory/ev_charging/ev_charging_5.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_5.py
+        :language: python
