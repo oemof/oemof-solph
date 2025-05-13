@@ -229,7 +229,7 @@ class InvestmentFlowBlock(ScalarBlock):
             self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             self.old = Var(
                 self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
@@ -538,7 +538,7 @@ class InvestmentFlowBlock(ScalarBlock):
             rule=_full_load_time_min_investflow_rule,
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _overall_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment

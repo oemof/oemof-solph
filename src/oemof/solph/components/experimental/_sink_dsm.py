@@ -673,7 +673,7 @@ class SinkDSMOemofBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for t in m.TIMESTEPS:
                 for g in self.dsm:
                     variable_costs += (
@@ -949,7 +949,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(
                 self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
@@ -1009,7 +1009,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         )
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -1040,7 +1040,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
 
                     # get the period matrix describing the temporal distance
                     # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
+                    periods_matrix = m.es.investment_times_matrix
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
@@ -1127,7 +1127,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
                             self.old_dsm_rule_exo.add((g, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
+                        elif lifetime - age <= m.es.investment_times_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
@@ -1295,7 +1295,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             rule=dsm_sum_constraint_rule
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -1347,7 +1347,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for g in self.investdsm:
                 for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
@@ -1394,7 +1394,7 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                         )
                         duration = min(
                             m.es.end_year_of_optimization
-                            - m.es.periods_years[p],
+                            - m.es.investment_times_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -1441,12 +1441,12 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
                     for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
-                            m.es.periods_years[p] + lifetime,
+                            m.es.investment_times_years[p] + lifetime,
                         )
                         fixed_costs += sum(
                             self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
-                                m.es.periods_years[p],
+                                m.es.investment_times_years[p],
                                 range_limit,
                             )
                         )
@@ -1511,9 +1511,9 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
                 remaining_lifetime = lifetime - (
-                    end_year_of_optimization - m.es.periods_years[p]
+                    end_year_of_optimization - m.es.investment_times_years[p]
                 )
                 remaining_annuity = economics.annuity(
                     capex=g.investment.ep_costs[-1],
@@ -2162,7 +2162,7 @@ class SinkDSMDIWBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for t in m.TIMESTEPS:
                 for g in self.dsm:
                     variable_costs += (
@@ -2467,7 +2467,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             self.investdsm, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             # Old capacity to be decommissioned (due to lifetime)
             # Old capacity built out of old exogenous and endogenous capacities
             self.old = Var(
@@ -2532,7 +2532,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         )
         self.total_dsm_rule_build = BuildAction(rule=_total_dsm_capacity_rule)
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -2562,7 +2562,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         raise ValueError(msg)
                     # get the period matrix describing the temporal distance
                     # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
+                    periods_matrix = m.es.investment_times_matrix
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
@@ -2649,7 +2649,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
                             self.old_dsm_rule_exo.add((g, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
+                        elif lifetime - age <= m.es.investment_times_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
@@ -3142,7 +3142,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             rule=shed_limit_constraint_rule
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -3194,7 +3194,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for g in self.investdsm:
                 for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
@@ -3242,7 +3242,7 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                         )
                         duration = min(
                             m.es.end_year_of_optimization
-                            - m.es.periods_years[p],
+                            - m.es.investment_times_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -3290,12 +3290,12 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
                     for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
-                            m.es.periods_years[p] + lifetime,
+                            m.es.investment_times_years[p] + lifetime,
                         )
                         fixed_costs += sum(
                             self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
-                                m.es.periods_years[p],
+                                m.es.investment_times_years[p],
                                 range_limit,
                             )
                         )
@@ -3360,9 +3360,9 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
                 remaining_lifetime = lifetime - (
-                    end_year_of_optimization - m.es.periods_years[p]
+                    end_year_of_optimization - m.es.investment_times_years[p]
                 )
                 remaining_annuity = economics.annuity(
                     capex=g.investment.ep_costs[-1],
@@ -4334,7 +4334,7 @@ class SinkDSMDLRBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for t in m.TIMESTEPS:
                 for g in self.DR:
                     variable_costs += (
@@ -4745,7 +4745,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(
                 self.INVESTDR, m.CAPACITY_PERIODS, within=NonNegativeReals
@@ -4825,7 +4825,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         )
         self.total_dsm_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _old_dsm_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -4856,7 +4856,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
 
                     # get the period matrix describing the temporal distance
                     # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
+                    periods_matrix = m.es.investment_times_matrix
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
@@ -4943,7 +4943,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         if p == 0:
                             expr = self.old_exo[g, p] == 0
                             self.old_dsm_rule_exo.add((g, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
+                        elif lifetime - age <= m.es.investment_times_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
@@ -5620,7 +5620,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             rule=dr_logical_constraint_rule
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _overall_dsm_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -5673,7 +5673,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
         variable_costs = 0
         fixed_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for g in self.INVESTDR:
                 for p in m.CAPACITY_PERIODS:
                     if g.investment.ep_costs is not None:
@@ -5728,7 +5728,7 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                         )
                         duration = min(
                             m.es.end_year_of_optimization
-                            - m.es.periods_years[p],
+                            - m.es.investment_times_years[p],
                             lifetime,
                         )
                         present_value_factor = 1 / economics.annuity(
@@ -5782,12 +5782,12 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
                     for p in m.CAPACITY_PERIODS:
                         range_limit = min(
                             m.es.end_year_of_optimization,
-                            m.es.periods_years[p] + lifetime,
+                            m.es.investment_times_years[p] + lifetime,
                         )
                         fixed_costs += sum(
                             self.invest[g, p] * g.investment.fixed_costs[pp]
                             for pp in range(
-                                m.es.periods_years[p],
+                                m.es.investment_times_years[p],
                                 range_limit,
                             )
                         )
@@ -5852,9 +5852,9 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.periods_years[p] < lifetime:
+            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
                 remaining_lifetime = lifetime - (
-                    end_year_of_optimization - m.es.periods_years[p]
+                    end_year_of_optimization - m.es.investment_times_years[p]
                 )
                 remaining_annuity = economics.annuity(
                     capex=g.investment.ep_costs[-1],

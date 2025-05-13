@@ -1194,7 +1194,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         m = self.parent_block()
 
         # ########################## CHECKS ###################################
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             for n in group:
                 error_fixed_absolute_losses = (
                     "For a multi-period investment model, fixed absolute"
@@ -1331,7 +1331,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=0,
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(
                 self.INVESTSTORAGES,
@@ -1517,7 +1517,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
 
-        if m.es.periods is None and not m.TSAM_MODE:
+        if m.es.investment_times is None and not m.TSAM_MODE:
 
             def _balanced_storage_rule(block, n):
                 return (
@@ -1631,7 +1631,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=smallest_invest,
         )
 
-        if m.es.periods is not None:
+        if m.es.investment_times is not None:
 
             def _overall_storage_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -1676,7 +1676,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def _add_storage_limit_constraints(self):
         m = self.parent_block()
         if not m.TSAM_MODE:
-            if m.es.periods is None:
+            if m.es.investment_times is None:
 
                 def _max_storage_content_invest_rule(_, n, t):
                     """

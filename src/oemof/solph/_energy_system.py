@@ -51,16 +51,10 @@ class EnergySystem(es.EnergySystem):
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
 
-    periods : list or None
-        The periods of a multi-period model.
-        If this is explicitly specified, it leads to creating a multi-period
-        model, providing a respective user warning as a feedback.
-
-        list of pd.date_range objects carrying the timeindex for the
-        respective period;
-
-        For a standard model, periods are not (to be) declared, i.e. None.
-        A list with one entry is derived, i.e. [0].
+    investment_times : list or None
+        The points in time investments can be made. Defaults to timeindex[0].
+        If multiple times are specified, it leads to creating a multi-period
+        model.
 
     tsa_parameters : list of dicts, dict or None
         Parameter can be set in order to use aggregated timeseries from TSAM.
@@ -84,7 +78,7 @@ class EnergySystem(es.EnergySystem):
         timeindex=None,
         timeincrement=None,
         infer_last_interval=None,
-        periods=None,
+        investment_times=None,
         tsa_parameters=None,
         groupings=None,
     ):
@@ -140,7 +134,7 @@ class EnergySystem(es.EnergySystem):
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            if periods is None:
+            if investment_times is None:
                 msg = (
                     "Specifying the timeincrement and the timeindex parameter "
                     "at the same time is not allowed since these might be "
@@ -193,8 +187,8 @@ class EnergySystem(es.EnergySystem):
                 tsa_parameters = [tsa_parameters]
 
             # Construct occurrences of typical periods
-            if periods is not None:
-                for p in range(len(periods)):
+            if investment_times is not None:
+                for p in range(len(investment_times)):
                     tsa_parameters[p]["occurrences"] = collections.Counter(
                         tsa_parameters[p]["order"]
                     )
@@ -216,7 +210,7 @@ class EnergySystem(es.EnergySystem):
         self.tsa_parameters = tsa_parameters
 
         timeincrement = self._init_timeincrement(
-            timeincrement, timeindex, periods, tsa_parameters
+            timeincrement, timeindex, investment_times, tsa_parameters
         )
         super().__init__(
             groupings=groupings,
@@ -224,7 +218,7 @@ class EnergySystem(es.EnergySystem):
             timeincrement=timeincrement,
         )
 
-        self.periods = periods
+        self.investment_times = investment_times
 
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):

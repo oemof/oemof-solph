@@ -364,7 +364,7 @@ class SimpleFlowBlock(ScalarBlock):
 
         variable_costs = 0
 
-        if m.es.periods is None:
+        if m.es.investment_times is None:
             for i, o in m.FLOWS:
                 if valid_sequence(
                     m.flows[i, o].variable_costs, len(m.TIMESTEPS)

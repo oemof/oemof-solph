@@ -75,7 +75,7 @@ def investment_limit_per_period(model, limit=None):
         (i.e. RHS of constraint)
     """
 
-    if model.es.periods is None:
+    if model.es.investment_times is None:
         msg = (
             "investment_limit_per_period is only applicable "
             "for multi-period models.\nIn order to create such a model, "

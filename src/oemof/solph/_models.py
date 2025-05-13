@@ -213,7 +213,7 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.periods is None:
+        if self.es.investment_times is None:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
@@ -226,8 +226,8 @@ class Model(po.ConcreteModel):
             self.CAPACITY_PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
-                [k] * len(self.es.periods[k])
-                for k in range(len(self.es.periods))
+                [k] * len(self.es.investment_times[k])
+                for k in range(len(self.es.investment_times))
             ]
             flattened_list = [
                 item for sublist in nested_list for item in sublist
@@ -239,7 +239,7 @@ class Model(po.ConcreteModel):
                 ordered=True,
             )
             self.CAPACITY_PERIODS = po.Set(
-                initialize=sorted(list(set(range(len(self.es.periods)))))
+                initialize=sorted(list(set(range(len(self.es.investment_times)))))
             )
 
         # (Re-)Map timesteps to periods

@@ -54,7 +54,7 @@ tindex = pd.date_range("2022-01-01", periods=4, freq="H")
 
 energysystem = solph.EnergySystem(
     timeindex=tindex,
-    periods=[tindex],
+    investment_times=[tindex],
     tsa_parameters=[
         {
             "timesteps_per_period": 2,

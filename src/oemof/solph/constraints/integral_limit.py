@@ -228,7 +228,7 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
     flows = _check_and_set_flows(om, flows, keyword)
     limit_name = "integral_limit_" + keyword
 
-    if om.es.periods is None:
+    if om.es.investment_times is None:
         msg = (
             "generic_periodical_integral_limit is only applicable\n"
             "for multi-period models.\nFor standard models, use "
