@@ -12,13 +12,27 @@ learn from your project.
 
 .. card::
 
-    **open-plan-tool**
+    **OpenPlan Tool**
     ^^^
 
     .. image:: /_files/open-plan-tool-screenshot.png
       :align: center
-      :alt: open-plan-tool
+      :alt: openplan-tool
       :target: https://open-plan-tool.org
 
-    The open plan tool is an online app with a grafical user interface, that
-    let's you create your :code:`EnergySystem` interactively.
+    The OpenPlan Tool is an online app with a grafical user interface, that
+    let's you create, solve and explore your :code:`EnergySystem`
+    interactively. You can use the online variant or clone it to run it on
+    self-hosted servers.
+
+    **Spreadsheet Energy System Model Generator**
+    ^^^
+
+    .. image:: /_files/sesmg-screenshot.png
+      :align: center
+      :alt: sesmg
+      :target: https://spreadsheet-energy-system-model-generator.readthedocs.io/
+
+    The Spreadsheet Energy System Model Generator is a tool to build and
+    organize your model through an excel interface. Furthermore it provides a
+    user dashboard in the form of a locally hosted webserver using streamlit.
