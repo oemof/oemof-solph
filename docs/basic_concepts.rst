@@ -38,7 +38,7 @@ buses and flows as well as the basic components.
         .. image:: /_files/COMPONENT_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/COMPONENT_dark.svg
+        .. image:: /_files/COMPONENT_dark.svg
             :class: only-dark
 
 .. grid:: 2
