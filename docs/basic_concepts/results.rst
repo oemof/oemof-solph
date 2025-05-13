@@ -4,9 +4,6 @@
 Results handling
 ~~~~~~~~~~~~~~~~
 
-
-.. _oemof_outputlib_label:
-
 Handling Results
 --------------------
 
@@ -63,7 +60,7 @@ dictionary such that the keys are changed to strings given by the labels:
 
 
 Another option is to access data belonging to a grouping by the name of the grouping
-(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_.
+(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_).
 Given the label of an object, e.g. 'wind' you can access the grouping by its label
 and use this to extract data from the results dictionary.
 
@@ -173,9 +170,3 @@ Getting all labels of the starting node of your investment flows:
 
     flows_invest = [x[0].label for x in flows if hasattr(
         results[x]['scalars'], 'invest')]
-
-
-
-
-
-

@@ -1,4 +1,4 @@
-.. _basic_concepts_label:
+.. _optimization_label:
 
 ~~~~~~~~~~~~~~
 Optimization

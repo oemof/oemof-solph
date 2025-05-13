@@ -27,13 +27,11 @@
     recipe_book
     api
     changelog
-    zliterature
 
 ..  toctree::
     :maxdepth: 2
     :caption: Contribute
     :hidden:
 
-    contributing
-    community
+    contribute
     authors
