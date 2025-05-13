@@ -244,7 +244,7 @@ This completes the first step of the District Heating Tutorial. Take a look at
 the following lessons and think about what you should take away with you for
 now.
 
-.. admonition:: Learning
+.. admonition:: Learnings
     :class: important
 
     After the first step of this tutorial you should be able to do the
@@ -306,7 +306,7 @@ Step 2: Plan capacity of heat pump and heat storage
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
 
-.. admonition:: Learning
+.. admonition:: Learnings
     :class: important
 
     After the second step of this tutorial you should be able to do the following:
@@ -330,3 +330,10 @@ Step 3: Introduce a minimal load for the converters
     demand.
 
 2. Run optimization, get results, what is the difference to before?
+
+.. admonition:: Learnings
+    :class: important
+
+    After the second step of this tutorial you should be able to do the following:
+
+    * tbc
