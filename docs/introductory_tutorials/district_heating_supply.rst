@@ -57,7 +57,7 @@ sure to be properly parsed. Generally, it is also recommended to use a parameter
 file (e.g. in the JSON format) for the constant input data, but in a small example
 like this, we opt to writing those values directly into the code.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
@@ -68,7 +68,7 @@ To create an instance of the :py:class:`solph.EnergySystem` class, we have to im
 package at first. To enforce our simulation time period and resolution, we set its
 :py:attr:`timeindex` keyword argument to the index of the input DataFrame.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_2_start]
     :end-before: [sec_2_end]
@@ -78,7 +78,7 @@ network. We make sure to set a label for the two to reference them later when we
 analyze the results. After initialization, we add them to the ``district_heating_system``
 object.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_3_start]
     :end-before: [sec_3_end]
@@ -100,7 +100,7 @@ setting the :py:attr:`fix` parameter.
 
 Finally, both components get added to the energy system.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_4_start]
     :end-before: [sec_4_end]
@@ -118,7 +118,7 @@ corresponding to the bus to which the value (scalar or iterable) is applied. So,
 to model a constant efficiency of 95 %, we set it to 0.95. Do not forget to add
 the gas boiler to the district heating supply system.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_5_start]
     :end-before: [sec_5_end]
@@ -137,7 +137,7 @@ to run the optimization. We decide to use the open source solver
 parameter ``'tee'`` to ``True``, in order to get a more verbose solver logging
 output in the console.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
@@ -148,7 +148,7 @@ of the ``solph.processing`` submodule. We then use the ``node`` method of the
 and ``'heat network'``. Specifically, we need the optimized unit commitment time
 series, so we access the ``'sequences'`` key.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_7_start]
     :end-before: [sec_7_end]
@@ -175,7 +175,7 @@ horizontal axis and a fitting label for the same. Feel free to change the look
 of the plot to your heart's content. The final step to see the optimization
 results is calling the ``show`` method.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
     :start-after: [sec_8_start]
     :end-before: [sec_8_end]
@@ -220,7 +220,7 @@ As we will evaluate the :math:`LCOH` again later, let's define a function to
 calculate it from the input values using sensible default values as depicted
 below.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/helpers.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/helpers.py
     :language: python
     :start-after: [func_lcoh_start]
     :end-before: [func_lcoh_end]
@@ -235,10 +235,10 @@ hourly cost evoked by the purchase of natural gas. Finllay, we sum up the heat
 supplied to the heat sink and use the calculated values to compute the
 :math:`LCOH`, which are printed to the console with a value of 18.84 €/MWh.
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_1.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
     :language: python
-    :start-after: [sec_09_start]
-    :end-before: [sec_09_end]
+    :start-after: [sec_9_start]
+    :end-before: [sec_9_end]
 
 This completes the first step of the District Heating Tutorial. Take a look at
 the following lessons and think about what you should take away with you for
@@ -266,42 +266,42 @@ Step 2: Plan capacity of heat pump and heat storage
 
 1. What information is required on the new components? (data, no code, include waste heat time series)
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
 
 2. Add new buses (electricity, waste heat)
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_2_start]
     :end-before: [sec_2_end]
 
 3. Add waste heat source and electricity source
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_3_start]
     :end-before: [sec_3_end]
 
 4. Add heat storage
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_4_start]
     :end-before: [sec_4_end]
 
 5. Add heat pump
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_5_start]
     :end-before: [sec_5_end]
 
 6. Run model and analyze results
 
-.. literalinclude:: /../tutorial/introductory/district_heating_supply/district_heating_supply_2.py
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
