@@ -13,7 +13,6 @@
 
     installation
     introductory_tutorials
-    advanced_tutorials
     examples
     showcase_examples
     support
