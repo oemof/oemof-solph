@@ -24,8 +24,7 @@
 
     basic_concepts
     optimization
-    advanced_concepts
-    best_practices
+    recipe_book
     api
     changelog
     zliterature
