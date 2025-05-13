@@ -1,7 +1,9 @@
 # %%[imports_start]
 
 import matplotlib.pyplot as plt
+import networkx as nx
 import numpy as np
+from oemof.network.graph import create_nx_graph
 import pandas as pd
 from helpers import plot_results
 
@@ -92,9 +94,13 @@ charger230V = solph.components.Source(
 ev_energy_system.add(charger230V)
 
 # %%[AC_30ct_charging_end]
-
-
-# %%[solve_start]
+# %%[graph_start]
+plt.figure()
+graph = create_nx_graph(ev_energy_system)
+nx.drawing.nx_pydot.write_dot(graph, "ev_carging_graph_2.dot")
+nx.draw(graph, with_labels=True, font_size=8)
+# %%[graph_end]
+# %%[solve_start]# %%[solve_start]
 model = solph.Model(ev_energy_system)
 model.solve(solver="cbc", solve_kwargs={"tee": True})
 results = solph.processing.results(model)

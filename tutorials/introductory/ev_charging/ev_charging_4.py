@@ -1,7 +1,8 @@
 # %%[imports_start]
 
 import matplotlib.pyplot as plt
-import numpy as np
+import networkx as nx
+from oemof.network.graph import create_nx_graph
 import pandas as pd
 from helpers import plot_results
 
@@ -121,6 +122,13 @@ discharger230V = solph.components.Sink(
 
 ev_energy_system.add(discharger230V)
 # %%[AC_discharging_end]
+# %%[graph_start]
+plt.figure()
+graph = create_nx_graph(ev_energy_system)
+nx.drawing.nx_pydot.write_dot(graph, "ev_carging_graph_4.dot")
+nx.draw(graph, with_labels=True, font_size=8)
+# %%[graph_end]
+# %%[solve_start]
 # %%[solve_and_plot_start]
 model = solph.Model(ev_energy_system)
 model.solve(solver="cbc", solve_kwargs={"tee": False})

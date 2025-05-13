@@ -1,17 +1,17 @@
 .. _ev_charging_label:
 
-Load management of a single EV 
+Load management of a single EV
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In this tutorial we will optimize the loading of an EV.
 
 The tutorial is set up in 5 different steps
 
-- Step 1: Plugged EV as load 
-- Step 2: Unidircetional charging 
+- Step 1: Plugged EV as load
+- Step 2: Unidircetional charging
 - Step 3: Free charging with PV system at work
 - Step 4: Fix free charging artefact and allow bidirectional use of the battery
-- Step 5: Variable electricity prices 
+- Step 5: Variable electricity prices
 
 Each section contains a step by step explanation of how the a management of an ev loading can be done is using oemof.solph. Additionally, the repository contains a fully
 functional python file of all five main steps for you to execute yourself or
@@ -87,7 +87,7 @@ analyze the results. After initialization, we add them to the ``ev_energy_system
     :end-before: [energysystem_and_bus_end]
 
 After setting up the energy system and the buses, we can now add the components to the energy system.
-We adding the driving demand as :py:class:`solph.components.Sink`, where the loading profile is added as 
+We adding the driving demand as :py:class:`solph.components.Sink`, where the loading profile is added as
 :py:attr:`fix` and :py:attr:`nominal_capacity` is set to one, because the loading profile is absolute.
 As we have a demand time series which is actually in kW, we use a common
 "hack" here: We set the nominal capacity to 1 (kW), so that
@@ -106,7 +106,7 @@ The following parameters are set:
 - :py:attr:`balanced` is set to False. This means the battery storage level at the end has not to be the same as at the beginning.
 - :py:attr:`storage_costs` is set to the defined storage revenue. Where "storage revenue" is defined as list with negative costs (of 60 ct/kWh) for the last time step, so that energy inside the storage in the last time step is worth something.
 
-This leads to the fact that the battery is not necessary emptied at the end of the simulation. 
+This leads to the fact that the battery is not necessary emptied at the end of the simulation.
 
 The car battery inputs and outputs are connected with the the electric energy carrying bus.
 
@@ -116,11 +116,27 @@ The car battery inputs and outputs are connected with the the electric energy ca
     :end-before: [car_end]
 
 
-As our system is complete for this step, its time to start the unit commitment
-optimization. For that, we first have to create a :py:class:`solph.Model` instance
-from our ``ev_energy_system``. Then we can use its :py:func:`solve` method
-to run the optimization. We decide to use the open source solver CBC and add the
-additional :py:attr:`solve_kwargs` parameter ``'tee'`` to ``True``, in order to
+As our system is complete for this step. Before we start the unit commitment
+optimization, let us have a look at the energy system graph
+
+.. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
+    :language: python
+    :start-after: [graph_start]
+    :end-before: [graph_end]
+
+While `nx.draw` is handy to just have a quick look without too many extra
+tools, writing the graph `dot` allows for handling in specialised programs.
+The folloing has been created using
+
+.. figure:: /./_files/ev_charging_graph_1.svg
+    :align: center
+    :alt: Energy system graph in step 1
+
+For the actual optimisation, we first have to create a :py:class:`solph.Model`
+instance from our ``ev_energy_system``. Then we can use its :py:func:`solve`
+method to run the optimization.
+We decide to use the open source solver CBC and add the additional
+:py:attr:`solve_kwargs` parameter ``'tee'`` to ``True``, in order to
 get a more verbose solver logging output in the console.
 
 
@@ -155,12 +171,12 @@ The results are showing that the EV is using the battery while driving.
 
     Driving pattern
 
-    
-.. admonition:: Learning 
+
+.. admonition:: Learning
     :class: important
 
-    The model balances supply and demand. Operation is optimised
-    so that the total costs are minimised (or revenue is maximised).
+    The model balances supply and demand along flows in a graph based model.
+    The operation is optimised so that the total costs are minimised.
 
 You can get the complete (uncommented) code for this step:
 :download:`ev_charging_1.py </../tutorials/introductory/ev_charging/ev_charging_1.py>`
@@ -186,8 +202,8 @@ is only a power socket available, limiting the charging process to 16 A at
 
 So the charging is added as :py:class:`solph.components.Sink`,
 where the :py:attr:`nominal_capacity` is set to 3.68 kW (= 230 V * 16 A) and :py:attr:`variable_costs` are set to 0.3 (30 ct/kWh).
-This, of course, can only happen while the car is present at home. 
-To connect the car while it is at home, we create avalibility data series. 
+This, of course, can only happen while the car is present at home.
+To connect the car while it is at home, we create avalibility data series.
 The value 1 means that the car is at home, chargable.
 When it is set to 0, car is not present
 (between morning departure and the arrival back home in the evening).
@@ -215,7 +231,7 @@ it is charged to 100 % just before the first leaving.
     :alt: Driving pattern
     :figclass: only-dark
 
-.. admonition:: Learning 
+.. admonition:: Learning
     :class: important
 
     Optimisation is carried out under perfect foresight,
@@ -237,8 +253,8 @@ Step 3: Free charging with PV system at work
 Within this step we are regarding a free charging option at work.
 So we add an 11 kW charger (free of charge) which is available at work.
 This, of course, can only happen while the car is present at work.
-Same with avalibility data at home charging, we will create a data set for 
-avalibility at work. When it is set to 0, car is not present at the work. 
+Same with avalibility data at home charging, we will create a data set for
+avalibility at work. When it is set to 0, car is not present at the work.
 When it is set to 1, car is able to connect to work charge station
 (between morning arrival and the evening departure from work).
 
@@ -267,7 +283,7 @@ Further we can see, the battery is charged when the car is at work, because the 
     :figclass: only-dark
 
 
-.. admonition:: Learning 
+.. admonition:: Learning
     :class: important
 
     Among multiple optimal solutions, any one can be your results.
@@ -282,7 +298,7 @@ You can get the complete (uncommented) code for this step:
         :language: python
 
 
-Step 4:  Fix free charging artefact and allow bidirectional use of the battery 
+Step 4:  Fix free charging artefact and allow bidirectional use of the battery
 -------------------------------------------------------------------------------
 
 To avoid the energy from looping in the battery, we introduce costs
@@ -290,7 +306,7 @@ to battery charging. This is a way to model cyclic aging of the battery.
 This is done by adding some :py:attr:`variable_costs` on flow of to the input.
 
 Further in this step we want to allow the bidirectional use of the battery.
-So we are setting the :py:attr:`balanced` to  the default True. 
+So we are setting the :py:attr:`balanced` to  the default True.
 This means the battery storage level at the end has to be the same as at the beginning.
 We also have to remove the :py:attr:`initial_capacity`, so SOC(T=0) = SOC(T=T_max) is valid.
 To ensure to have a reserve of 10 % within the battery, the :py:attr:`min_storage_level` is set to 0.1.
@@ -302,8 +318,10 @@ To ensure to have a reserve of 10 % within the battery, the :py:attr:`min_storag
 
 
 To be able to discharge the battery we need a discharger, which will be added as :py:class:`solph.components.Sink`.
-The :py:attr:`nominal_capacity` is set to 3.68 kW (= 230 V * 16 A) and :py:attr:`variable_costs` are set to -0.3 to save 30 ct/kWh.
-The battery can only be discharged is the car is at home, so the created timeseries from above is used and set to :py:attr:`max`.
+The :py:attr:`nominal_capacity` is set to 3.68 kW (= 230 V * 16 A) and
+:py:attr:`variable_costs` are set to -0.3 to save 30 ct/kWh.
+The battery can only be discharged is the car is at home,
+so the created timeseries from above is used and set to :py:attr:`max`.
 
 
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_4.py
@@ -311,7 +329,11 @@ The battery can only be discharged is the car is at home, so the created timeser
     :start-after: [AC_discharging_start]
     :end-before: [AC_discharging_end]
 
+The final energy system graph now looks like this:
 
+.. figure:: /./_files/ev_charging_graph_4.svg
+    :align: center
+    :alt: Energy system graph in step 4
 
 Looking at the results:
 
@@ -330,7 +352,7 @@ Looking at the results:
     :figclass: only-dark
 
 
-.. admonition:: Learning 
+.. admonition:: Learning
     :class: important
 
     Looped energy flows can be used as an indicator for a flawed model.
@@ -348,7 +370,7 @@ You can get the complete (uncommented) code for this step:
 Step 5: Variable electricity prices
 ------------------------------------
 
-Within the last step we want to regard dynamic prices for the the charging and discharging at home. 
+Within the last step we want to regard dynamic prices for the the charging and discharging at home.
 So the optimization is going to load when the prices are are load and discharge if the prices are high.
 Assuming the following prices:
 
@@ -398,7 +420,7 @@ to get 50 ct/kWh. The battery is recharged for free at the work and in the eveni
     :alt: Driving pattern
     :figclass: only-dark
 
-.. admonition:: Learning 
+.. admonition:: Learning
     :class: important
 
     Costs can be time-dependent. The optimal operation can be changed this way
