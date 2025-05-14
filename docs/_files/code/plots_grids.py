@@ -1,3 +1,4 @@
+import os
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import numpy as np
@@ -276,9 +277,15 @@ def plot_dispatch_invest(csv_path, mode="dark"):
 # draw_timeline("dark")  # Speichert als "timeline_dark.png"
 # draw_timeline("light")  # Speichert als "timeline_light.png"
 
-plot_dispatch_invest(
-    r"D:\oemof-solph_fork\tests\test_outputlib\input_data.csv", mode="light"
+file_name = os.path.realpath(
+    os.path.join(
+        __file__,
+        "..",
+        "..",
+        "..",
+        "..",
+        "tests/test_outputlib/input_data.csv",
+    )
 )
-plot_dispatch_invest(
-    r"D:\oemof-solph_fork\tests\test_outputlib\input_data.csv", mode="dark"
-)
+plot_dispatch_invest(file_name, mode="light")
+plot_dispatch_invest(file_name, mode="dark")
