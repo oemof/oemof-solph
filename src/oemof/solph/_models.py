@@ -239,7 +239,9 @@ class Model(po.ConcreteModel):
                 ordered=True,
             )
             self.CAPACITY_PERIODS = po.Set(
-                initialize=sorted(list(set(range(len(self.es.investment_times)))))
+                initialize=sorted(
+                    list(set(range(len(self.es.investment_times))))
+                )
             )
 
         # (Re-)Map timesteps to periods

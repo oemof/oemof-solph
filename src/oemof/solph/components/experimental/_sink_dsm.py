@@ -1511,7 +1511,10 @@ class SinkDSMOemofInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
+            if (
+                end_year_of_optimization - m.es.investment_times_years[p]
+                < lifetime
+            ):
                 remaining_lifetime = lifetime - (
                     end_year_of_optimization - m.es.investment_times_years[p]
                 )
@@ -3360,7 +3363,10 @@ class SinkDSMDIWInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
+            if (
+                end_year_of_optimization - m.es.investment_times_years[p]
+                < lifetime
+            ):
                 remaining_lifetime = lifetime - (
                     end_year_of_optimization - m.es.investment_times_years[p]
                 )
@@ -5852,7 +5858,10 @@ class SinkDSMDLRInvestmentBlock(ScalarBlock):
             Demanded interest rate for investment
         """
         if m.es.use_remaining_value:
-            if end_year_of_optimization - m.es.investment_times_years[p] < lifetime:
+            if (
+                end_year_of_optimization - m.es.investment_times_years[p]
+                < lifetime
+            ):
                 remaining_lifetime = lifetime - (
                     end_year_of_optimization - m.es.investment_times_years[p]
                 )

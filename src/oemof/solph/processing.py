@@ -418,7 +418,10 @@ def _extract_multi_period_model_result(
             col for col in df_dict[k].columns if col in period_indexed
         ]
         # map periods to their start years for displaying period results
-        d = {key: val.min().year for key, val in enumerate(model.es.investment_times)}
+        d = {
+            key: val.min().year
+            for key, val in enumerate(model.es.investment_times)
+        }
         period_scalars = df_dict[k].loc[:, period_cols].dropna()
         sequences = df_dict[k].loc[
             :, [col for col in df_dict[k].columns if col not in period_cols]
