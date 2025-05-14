@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-============
-Contributing
-============
-=======
 .. _contribute_label:
 
 =================
 How to contribute
 =================
->>>>>>> upstream/docs/make-style-modern
 
 Contributions are welcome, and they are greatly appreciated! Every
 little bit helps, and credit will always be given.
