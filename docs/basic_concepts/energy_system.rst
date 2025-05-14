@@ -56,6 +56,7 @@ without any parameter.
     >>> import oemof.solph as solph
     >>> blank_flow = solph.Flow()
     >>> type(blank_flow)
+    <class 'oemof.solph.flows._flow.Flow'>
 
 The flow connecting a bus and a component should be provided within the
 `inputs` and/or `outputs` attributes of the respective component. Examples are
@@ -80,6 +81,7 @@ you can assign it to a variable for later use.
 .. code-block:: python
 
     >>> solph.buses.Bus(label='natural_gas')
+    "<oemof.solph.buses._bus.Bus: 'natural_gas'>"
     >>> electricity_bus = solph.buses.Bus(label='electricity')
 
 .. note:: See the :py:class:`~oemof.solph.buses._bus.Bus` class for all parameters and the mathematical background.
