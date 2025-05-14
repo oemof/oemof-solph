@@ -77,14 +77,15 @@ from oemof.solph import helpers
 from oemof.solph import processing
 from oemof.solph import views
 
-from .facade import DSO
+from facade import DSO
+
+
 STORAGE_LABEL = "battery_storage"
 
 
-
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
-    dir = os.path.dirname(os.path.abspath(__file__))
-    data = pd.read_csv(dir + "/" + file_path)
+    my_dir = os.path.dirname(os.path.abspath(__file__))
+    data = pd.read_csv(my_dir + "/" + file_path)
     return data
 
 
@@ -206,7 +207,6 @@ def main(dump_and_restore=False):
             },
         )
     )
-
 
     # create storage object representing a battery
     nominal_capacity = 10077997

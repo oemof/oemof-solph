@@ -8,6 +8,7 @@ from . import helpers
 from . import processing
 from . import views
 from ._energy_system import EnergySystem
+from . import _facades as facades
 from ._groupings import GROUPINGS
 from ._helpers import create_time_index
 from ._models import Model
@@ -36,4 +37,5 @@ __all__ = [
     "Investment",
     "NonConvex",
     "sequence",
+    "facades",
 ]
