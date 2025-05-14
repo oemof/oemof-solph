@@ -53,6 +53,7 @@ without any parameter.
 
 .. code-block:: python
 
+    >>> import oemof.solph as solph
     >>> blank_flow = solph.Flow()
     >>> type(blank_flow)
 
@@ -78,8 +79,8 @@ you can assign it to a variable for later use.
 
 .. code-block:: python
 
-    solph.buses.Bus(label='natural_gas')
-    electricity_bus = solph.buses.Bus(label='electricity')
+    >>> solph.buses.Bus(label='natural_gas')
+    >>> electricity_bus = solph.buses.Bus(label='electricity')
 
 .. note:: See the :py:class:`~oemof.solph.buses._bus.Bus` class for all parameters and the mathematical background.
 
@@ -156,7 +157,6 @@ To create your `EnergySystem` you have to pass the time index at initialisation:
 
 .. code-block:: python
 
-    >>> import oemof.solph as solph
     >>> my_energysystem = solph.EnergySystem(timeindex=my_index_from_solph)
     >>> type(my_energysystem)
     <class 'oemof.solph._energy_system.EnergySystem'>
