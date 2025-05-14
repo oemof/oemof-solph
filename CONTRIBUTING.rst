@@ -1,6 +1,14 @@
+<<<<<<< HEAD
 ============
 Contributing
 ============
+=======
+.. _contribute_label:
+
+=================
+How to contribute
+=================
+>>>>>>> upstream/docs/make-style-modern
 
 Contributions are welcome, and they are greatly appreciated! Every
 little bit helps, and credit will always be given.
@@ -59,7 +67,7 @@ To set up `oemof-solph` for local development:
 
     git add $(changed_files)
     git commin
-    git push origin name-of-your-bugfix-or-feature 
+    git push origin name-of-your-bugfix-or-feature
 
 6. Submit a pull request through the GitHub website.
 

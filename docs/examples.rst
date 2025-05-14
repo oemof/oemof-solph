@@ -11,10 +11,10 @@ are mostly standalone examples, that are not commented in detail.
     :glob:
     :maxdepth: 2
 
-    examples/basic_example.rst
     examples/time_index.rst
     examples/nametuple.rst
     examples/simple_dispatch.rst
+    examples/result_object.rst
     examples/activity_costs.rst
     examples/min_max_runtimes.rst
     examples/startup_costs.rst
