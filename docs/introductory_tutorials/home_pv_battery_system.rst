@@ -23,8 +23,8 @@ Imagine you want to set up a PV plant on top of a single family house.
 How would you find out which system fits best and why?
 Here are some possible points to think about:
 
-* Which area (e.g. on the roof) can be covered and how large is it?
-* How much energy will you consume or be able to feed into the grid?
+* Which area (e.g. on the roof) can be covered and how large is it?
+* How much energy will you consume or be able to feed into the grid?
 * How much will you have to pay for the system?
 
 Especially for single-family homes without energy storage, the load can be
@@ -132,7 +132,7 @@ by default (False) it will be silent.
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_1.py
     :language: python
     :start-after: [model_optimisation]
-    :end-before: [plot_results]
+    :end-before: [results]
 
 If the model cannot find an optimal solution,
 ``model.solve()`` will fail. You can try this, e.g. by setting
@@ -143,11 +143,22 @@ we can proceed with evaluating the results.
 
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_1.py
     :language: python
-    :start-after: [plot_results]
+    :start-after: [results]
 
-First of all, let's have a look at the flows from and to the "electricity"
-bus. The function ``solph.views.node(...)`` compiles the respective
-``DataFrame``.
+At first, we look at the total costs.
+As we used these for our objective value, it is directly accassible in the
+``meta_results``.
+Because we want to evaluate differnt contibutions later,
+we also manually calculate the costs manually.
+To no surprise the numbers are the same:
+
+    The total annual costs are 629.90 €.
+    
+    The annual costs for grid electricity are 629.90 €.
+
+To have a look at the flows from and to the "electricity" bus.
+The function ``solph.views.node(...)`` can help.
+It compiles the respective ``DataFrame`` so that it can be directly used.
 
 .. figure:: /./_files/home_pv_result-1_light.svg
     :align: center
@@ -159,6 +170,8 @@ bus. The function ``solph.views.node(...)`` compiles the respective
     :alt: Input data
     :figclass: only-dark
 
+As grid supply is the only option, both lines of course overlap perfectly.
+
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_1.py </../tutorials/introductory/home_pv/home_pv_1.py>`
 
@@ -166,3 +179,91 @@ You can get the complete (uncommented) code for this step:
 
     .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_1.py
         :language: python
+
+
+Step 2: Adding fixed size PV
+----------------------------
+
+The grid connection needs to accept an incoming ``Flow``.
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
+    :language: python
+    :start-after: [pv_system]
+    :end-before: [graph_plotting]
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
+    :language: python
+    :start-after: [results]
+
+As the PV system is free for the model itself,
+we manually add an annuity to have the PV system included in the total costs.
+
+    The annual costs for grid electricity are 365.32 €.
+
+    The annual revenue from feed-in is 435.48 €.
+    
+    The annuity for the PV system is 375.00 €.
+    
+    The total annual costs are 479.03 €.
+
+
+Step 3: PV investment optimisation
+----------------------------------
+
+In our example, the incoming ``Flow``
+can of course directly be added when defining the grid is defined.
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
+    :language: python
+    :start-after: [grid_conection]
+    :end-before: [graph_plotting]
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
+    :language: python
+    :start-after: [results]
+
+    The optimal PV size is 4.13 kW.
+
+    The annual costs for grid electricity are 376.59 €.
+    
+    The annual revenue from feed-in is 347.64 €.
+    
+    The annuity for the PV system is 309.40 €.
+    
+    The total annual costs are 477.41 €.
+
+
+Step 4: PV investment optimisation with existing battery
+--------------------------------------------------------
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_4.py
+    :language: python
+    :start-after: [battery]
+    :end-before: [graph_plotting]
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
+    :language: python
+    :start-after: [results]
+
+    The optimal PV size is 4.81 kW.
+
+    The annual costs for grid electricity are 193.48 €.
+    
+    The annual revenue from feed-in is 347.99 €.
+    
+    The annuity for the PV system is 360.79 €.
+    
+    The annuity for the battery is 200.00 €.
+    
+    The total annual costs are 545.48 €.
+
+
+Step 5: Full investment optimisation
+------------------------------------
+
+Inverter exra.
+
+
+Step 6: Autarky of the system
+-----------------------------
+
