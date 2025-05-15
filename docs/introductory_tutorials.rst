@@ -1,6 +1,6 @@
 .. _introductory_tutorials_label:
 
-Basic Examples
+Introductory Tutorials
 ~~~~~~~~~~~~~~~~~~~~~~
 
 In this section we will introduce how to create your first simple oemof.solph models. The
