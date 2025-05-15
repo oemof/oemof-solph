@@ -23,7 +23,8 @@ Step 1: Plugged EV as load
 Within the first step we want to simulate a plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load.
 First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data.
-Further for plotting we use a helper function from helpers.py (within this folder)
+Further for plotting we use a helper function from
+:download:`helpers.py </../tutorials/introductory/ev_charging/helpers.py>`.
 
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
@@ -70,7 +71,7 @@ Lets look at the driving pattern
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure::/./_files/driving_pattern_dark_mode.svg
+.. figure:: /./_files/driving_pattern_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
