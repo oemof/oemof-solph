@@ -77,11 +77,10 @@ meta_results = solph.processing.meta_results(model)
 
 # %%[results]
 
-print(f"The total annual costs are {meta_results["objective"]:.2f} €.")
+tce = meta_results["objective"]
+print(f"The total annual costs are {tce:.2f} €.")
 el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
-print(
-    f"The annual costs for grid electricity are {el_costs:.2f} €."
-)
+print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
 electricity_fows.plot(drawstyle="steps")
