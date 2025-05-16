@@ -198,13 +198,14 @@ The grid connection needs to accept an incoming ``Flow``.
 As the PV system is free for the model itself,
 we manually add an annuity to have the PV system included in the total costs.
 
-    The annual costs for grid electricity are 365.32 €.
 
-    The annual revenue from feed-in is 435.48 €.
-    
-    The annuity for the PV system is 375.00 €.
-    
-    The total annual costs are 479.03 €.
+You can get the complete (uncommented) code for this step:
+:download:`home_pv_2.py </../tutorials/introductory/home_pv/home_pv_2.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
+        :language: python
 
 
 Step 3: PV investment optimisation
@@ -222,15 +223,14 @@ can of course directly be added when defining the grid is defined.
     :language: python
     :start-after: [results]
 
-    The optimal PV size is 4.13 kW.
 
-    The annual costs for grid electricity are 376.59 €.
-    
-    The annual revenue from feed-in is 347.64 €.
-    
-    The annuity for the PV system is 309.40 €.
-    
-    The total annual costs are 477.41 €.
+You can get the complete (uncommented) code for this step:
+:download:`home_pv_3.py </../tutorials/introductory/home_pv/home_pv_3.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
+        :language: python
 
 
 Step 4: PV investment optimisation with existing battery
@@ -245,25 +245,82 @@ Step 4: PV investment optimisation with existing battery
     :language: python
     :start-after: [results]
 
-    The optimal PV size is 4.81 kW.
 
-    The annual costs for grid electricity are 193.48 €.
-    
-    The annual revenue from feed-in is 347.99 €.
-    
-    The annuity for the PV system is 360.79 €.
-    
-    The annuity for the battery is 200.00 €.
-    
-    The total annual costs are 545.48 €.
+You can get the complete (uncommented) code for this step:
+:download:`home_pv_4.py </../tutorials/introductory/home_pv/home_pv_4.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_4.py
+        :language: python
 
 
 Step 5: Full investment optimisation
 ------------------------------------
 
-Inverter exra.
+For a full investment optimisation, of course, we include optimising the
+battery size. First, however, we will separate the PV system into
+PV panels and inverter.
+For clearity, we rename the former ``el_bus`` to ``ac_bus``
+and create a separate ``dc_bus``.
+As the numbers given in the input data already consider inverter losses,
+we compensate for that by allowing higer DC gains from the panels,
+the inverter then has a ``conversion_factor`` so that the ``Flow`` to the
+AC bus is reduced by 5 %.
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_5.py
+    :language: python
+    :start-after: [pv_system]
+    :end-before: [battery]
+
+Now, the optimiser can choose on the inverter
+and number of PV panels separately.
+Note that the costs for inverter and pv panels add up to the value we used
+in the previous step.
+For the sake of simplicity in this tutorial, the battery will remain
+coupled to the AC system. We only let the optimisation decide on the size.
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_5.py
+    :language: python
+    :start-after: [battery]
+    :end-before: [graph_plotting]
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_5.py
+    :language: python
+    :start-after: [results]
+
+
+You can get the complete (uncommented) code for this step:
+:download:`home_pv_5.py </../tutorials/introductory/home_pv/home_pv_5.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_5.py
+        :language: python
 
 
 Step 6: Autarky of the system
 -----------------------------
 
+The final step of the tutorial shows a way how to limit the energy supply
+from the grid in order to guarantee a minimum autarky grade of our system
+consisting of a combined PV and battery storage investment.
+
+Since our total energy demand is almost 2100 kWh, we
+could accomplish an autarky grade of 90 percent if we
+limited the sum of thegrid energy supply to 210 kWh.
+Choosing 42 kW as a reasonable dimensioned power,
+multiplying it by five full load hours does the trick.
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_6.py
+    :language: python
+    :start-after: [grid]
+    :end-before: [pv_system]
+
+You can get the complete (uncommented) code for this step:
+:download:`home_pv_6.py </../tutorials/introductory/home_pv/home_pv_6.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_6.py
+        :language: python
