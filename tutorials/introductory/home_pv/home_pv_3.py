@@ -61,7 +61,11 @@ grid = solph.Bus(
     balanced=False,
 )
 
+# %%[add_grid]
+
 energy_system.add(grid)
+
+# %%[pv_system]
 
 pv_specific_costs = 1500  # €/kW
 pv_lifetime = 20  # years
@@ -91,12 +95,15 @@ model.solve(solver="cbc", solve_kwargs={"tee": True})
 results = solph.processing.results(model)
 meta_results = solph.processing.meta_results(model)
 
-# %%[results]
+# %%[result_pv]
 
 pv_size = results[(pv_system, el_bus)]["scalars"]["invest"]
 
+# %%[results]
+
 pv_annuity = pv_epc * pv_size
-el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
+annual_grid_supply = results[(grid, el_bus)]["sequences"]["flow"].sum()
+el_costs = 0.3 * annual_grid_supply
 el_revenue = 0.1 * results[(el_bus, grid)]["sequences"]["flow"].sum()
 
 tce = meta_results["objective"]
@@ -108,6 +115,12 @@ print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
 print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The total annual costs are {tce:.2f} €.")
 
+annual_demand = input_data["electricity demand (kW)"].sum()
+
+print(
+    f"Autarky is 1 - {annual_grid_supply:.2f} kWh / {annual_demand:.2f} kWh"
+    + f" = {100 - 100 * annual_grid_supply / annual_demand:.2f} %."
+)
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
 electricity_fows.plot(drawstyle="steps")

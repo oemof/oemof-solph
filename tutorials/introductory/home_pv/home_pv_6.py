@@ -158,6 +158,13 @@ print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The annuity for the battery is {battery_annuity:.2f} €.")
 print(f"The total annual costs are {tce:.2f} €.")
 
+annual_demand = input_data["electricity demand (kW)"].sum()
+
+print(
+    f"Autarky is 1 - {annual_grid_supply:.2f} kWh / {annual_demand:.2f} kWh"
+    + f" = {100 - 100 * annual_grid_supply / annual_demand:.2f} %."
+)
+
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
 electricity_fows.plot(drawstyle="steps")

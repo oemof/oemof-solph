@@ -81,7 +81,7 @@ energy_system.add(pv_system)
 battery_specific_costs = 1000  # €/kW
 battery_lifetime = 10  # years
 battery_epc = battery_specific_costs / battery_lifetime
-battery_size = 2  # kWh
+battery_size = 10  # kWh
 
 battery = solph.components.GenericStorage(
     label="Battery",
@@ -112,7 +112,8 @@ pv_size = results[(pv_system, el_bus)]["scalars"]["invest"]
 
 battery_annuity = battery_epc * battery_size
 pv_annuity = pv_epc * results[(pv_system, el_bus)]["scalars"]["invest"]
-el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
+annual_grid_supply = results[(grid, el_bus)]["sequences"]["flow"].sum()
+el_costs = 0.3 * annual_grid_supply
 el_revenue = 0.1 * results[(el_bus, grid)]["sequences"]["flow"].sum()
 
 tce = meta_results["objective"] + battery_annuity
@@ -125,6 +126,12 @@ print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The annuity for the battery is {battery_annuity:.2f} €.")
 print(f"The total annual costs are {tce:.2f} €.")
 
+annual_demand = input_data["electricity demand (kW)"].sum()
+
+print(
+    f"Autarky is 1 - {annual_grid_supply:.2f} kWh / {annual_demand:.2f} kWh"
+    + f" = {100 - 100 * annual_grid_supply / annual_demand:.2f} %."
+)
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
 electricity_fows.plot(drawstyle="steps")

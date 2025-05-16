@@ -152,9 +152,12 @@ Because we want to evaluate differnt contibutions later,
 we also manually calculate the costs manually.
 To no surprise the numbers are the same:
 
-    The total annual costs are 629.90 €.
-    
-    The annual costs for grid electricity are 629.90 €.
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value"
+    :widths: auto
+
+    "Annual costs for grid electricity",   "€", 629.90
+    "Total annual costs",                  "€", 629.90
 
 To have a look at the flows from and to the "electricity" bus.
 The function ``solph.views.node(...)`` can help.
@@ -184,20 +187,64 @@ You can get the complete (uncommented) code for this step:
 Step 2: Adding fixed size PV
 ----------------------------
 
-The grid connection needs to accept an incoming ``Flow``.
+So far so good. But what would happen if we had an existing PV plant?
+Let us simply add one to the system by creating a suitable source.
+We might have five kW installed and therefore enter a nominal capacity of five.
 
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
     :language: python
     :start-after: [pv_system]
     :end-before: [graph_plotting]
 
+Note that we set the PV yield time series using the max parameter:
+It is always possible to not take the energy.
+In our case, however, we want to allow feeding into the grid.
+Thus, the corresponding ``Bus`` needs to accept an incoming ``Flow``.
+It is possible, to add ``Flow`` s to existing nodes:
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
+    :language: python
+    :start-after: [grid_feedin]
+    :end-before: [add_grid]
+
+However, the ``Flow`` is typically directly added when defining the grid.
+So, alternatively, you can just change the previos definition to look like:
+
+.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
+    :language: python
+    :start-after: [grid_conection]
+    :end-before: [add_grid]
+
+Note that feeding into the grid will make sense if there is compensation
+(or if the PV output is set to have a ``fix``
+production instead of a maximum one).
+For our example, we take 6 ct/kWh as compensation for feed-in.
+
+.. note::
+
+    You can give negative costs to model a revenue.
+
+As building the PV system is free for the model (it is already present),
+we manually add an annuity to have the PV system included in the total costs.
+
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
     :language: python
     :start-after: [results]
 
-As the PV system is free for the model itself,
-we manually add an annuity to have the PV system included in the total costs.
+In this scenario, the objective value is negative,
+so a revenue is accieved.
+However, correcting this by adding the annuity of the PV system
+leaves us with (positive) costs.
 
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value (no PW)", "Value (5 kW PV)"
+    :widths: auto
+
+    "Annual costs for grid electricity",   "€", 629.90, 365.32
+    "Annual revenue from feed-in",         "€", ,       451.61
+    "Annuity for the PV system",           "€", ,       375.00
+    "Total annual costs",                  "€", 629.90, 479.03
+    "Autarky",                             "%", 0.00,   42.00
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_2.py </../tutorials/introductory/home_pv/home_pv_2.py>`
@@ -211,17 +258,47 @@ You can get the complete (uncommented) code for this step:
 Step 3: PV investment optimisation
 ----------------------------------
 
-In our example, the incoming ``Flow``
-can of course directly be added when defining the grid is defined.
+Now, compared to dispatch with a fixed PV plant,
+almost everything else stays the same, except for one thing:
+the nominal capacity of the PV plant.
+That’s because we want to find out which peak power
+the system should have to minimise our costs.
+Therefore an investment object with a periodical cost
+of 75 Euros per kW is assigned.
+These costs represent an assumed investment cost of 1500 Euros per kW
+divided by an estimated life time of 20 years as a straight-line deprecation.
+To make sure the model converges, we set a maximum capacity:
+If building the PV system was profitable,
+the optimiser would try to build an infinite size PV system,
+which would effectively prevent the model from converging.
 
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
     :language: python
-    :start-after: [grid_conection]
+    :start-after: [pv_system]
     :end-before: [graph_plotting]
 
+However, in this case we did not need to set the limit.
+The assumed annuity is so high that the costs of the produced electricity
+are above 6 ct/kWh.
+The resulting optimal PV size
+
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
     :language: python
-    :start-after: [results]
+    :start-after: [result_pv]
+    :end-before: [results]
+
+is 4.13 kW, which is even smaller than what we tried before.
+
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value"
+    :widths: auto
+
+    "Optimal PV size",                     "kW",    4.13
+    "Annual costs for grid electricity",   "€",     376.59
+    "Annual revenue from feed-in",         "€",     347.64
+    "Annuity for the PV system",           "€",     309.40
+    "Total annual costs",                  "€",     477.41
+    "Autarky",                             "%",     40.21
 
 
 You can get the complete (uncommented) code for this step:
@@ -236,15 +313,32 @@ You can get the complete (uncommented) code for this step:
 Step 4: PV investment optimisation with existing battery
 --------------------------------------------------------
 
+In the previous step we learned that in our assumed scenario,
+compensation for feeding into the grid will not pay the PV system.
+So, what if we had a big battery?
+Let us just add one:
+
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_4.py
     :language: python
     :start-after: [battery]
     :end-before: [graph_plotting]
 
-.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
-    :language: python
-    :start-after: [results]
+As before, we manually add the deprecation of the battery
+to the objective value to get the total costs of the system.
+Surprisingly, the total PV size is not increased too much,
+but the (very much unused) battery drives the total costs.
 
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value"
+    :widths: auto
+
+    "Optimal PV size",                     "kW",    5.67
+    "Annual costs for grid electricity",   "€",     72.56
+    "Annual revenue from feed-in",         "€",     383.39
+    "Annuity for the PV system",           "€",     425.12
+    "Annuity for the battery",             "€",     1000.00
+    "Total annual costs",                  "€",     1267.65
+    "Autarky",                             "%",     88.48
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_4.py </../tutorials/introductory/home_pv/home_pv_4.py>`
@@ -285,10 +379,24 @@ coupled to the AC system. We only let the optimisation decide on the size.
     :start-after: [battery]
     :end-before: [graph_plotting]
 
-.. literalinclude:: /../tutorials/introductory/home_pv/home_pv_5.py
-    :language: python
-    :start-after: [results]
+We find that it is advisible to have an inverter that can only output
+two thirds of the nominal power of the PV panels.
+While the inverter is even smaller than in the previous steps,
+the total power of the panels is increased.
 
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value"
+    :widths: auto
+
+    "Optimal PV size",                     "kW",    6.04
+    "Optimal inverter size",               "kW",    4.10
+    "Optimal battery size",                "kWh",   2.39
+    "Annual costs for grid electricity",   "€",     156.35
+    "Annual revenue from feed-in",         "€",     451.61
+    "Annuity for the PV system",           "€",     362.27
+    "Annuity for the battery",             "€",     89.53
+    "Total annual costs",                  "€",     398.66
+    "Autarky",                             "%",     75.18
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_5.py </../tutorials/introductory/home_pv/home_pv_5.py>`
@@ -316,6 +424,22 @@ multiplying it by five full load hours does the trick.
     :language: python
     :start-after: [grid]
     :end-before: [pv_system]
+
+So, finally let us compare the results from all different steps.
+
+.. csv-table:: Result overview
+    :header: "Quantity", "Unit", "Value (no PV)", "Value (5 kW PV)", "Value (opt. PV)", "Value (big bat.)", "Value (all opt.)", "Value (Autarky)"
+    :widths: auto
+
+    "Optimal PV size", "kW ", , , 4.13, 5.67, 6.04, 10
+    "Optimal inverter size", "kW ", , , , , 4.1, 6.79
+    "Optimal battery size", "kWh", , , , , 2.39, 5.01
+    "Annual costs for grid electricity", "€ ", 629.9, 365.32, 376.59, 72.56, 156.35, 63
+    "Annual revenue from feed-in", "€ ", , 451.61, 347.64, 383.39, 451.61, 821.78
+    "Annuity for the PV system", "€ ", , 375, 309.4, 425.12, 362.27, 600
+    "Annuity for the battery", "€ ", , , , 1000.00, 89.53, 188.02
+    "Total annual costs", "€ ", 629.9, 479.03, 477.41, 1267.65, 398.66, 459.76
+    "Autarky", "% ", 0, 42, 40.21, 88.48, 75.18, 90
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_6.py </../tutorials/introductory/home_pv/home_pv_6.py>`
