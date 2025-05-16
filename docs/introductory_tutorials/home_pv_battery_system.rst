@@ -175,6 +175,11 @@ It compiles the respective ``DataFrame`` so that it can be directly used.
 
 As grid supply is the only option, both lines of course overlap perfectly.
 
+.. admonition:: Learning
+    :class: important
+
+    The model balances supply and demand along flows in a graph based model.
+
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_1.py </../tutorials/introductory/home_pv/home_pv_1.py>`
 
@@ -220,10 +225,6 @@ Note that feeding into the grid will make sense if there is compensation
 production instead of a maximum one).
 For our example, we take 6 ct/kWh as compensation for feed-in.
 
-.. note::
-
-    You can give negative costs to model a revenue.
-
 As building the PV system is free for the model (it is already present),
 we manually add an annuity to have the PV system included in the total costs.
 
@@ -245,6 +246,11 @@ leaves us with (positive) costs.
     "Annuity for the PV system",           "€", ,       375.00
     "Total annual costs",                  "€", 629.90, 479.03
     "Autarky",                             "%", 0.00,   42.00
+
+.. admonition:: Learning
+    :class: important
+
+    You can give negative costs to model a revenue.
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_2.py </../tutorials/introductory/home_pv/home_pv_2.py>`
@@ -310,6 +316,13 @@ You can get the complete (uncommented) code for this step:
         :language: python
 
 
+.. admonition:: Learning
+    :class: important
+
+    You can use an ``Investment`` object for the ``nominal_capacity``
+    to make the capacity an optimisation variable.
+
+
 Step 4: PV investment optimisation with existing battery
 --------------------------------------------------------
 
@@ -339,6 +352,12 @@ but the (very much unused) battery drives the total costs.
     "Annuity for the battery",             "€",     1000.00
     "Total annual costs",                  "€",     1267.65
     "Autarky",                             "%",     88.48
+
+.. admonition:: Learning
+    :class: important
+
+    Energy storage is modelled using the ``GenericStorage`` class.
+
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_4.py </../tutorials/introductory/home_pv/home_pv_4.py>`
@@ -398,6 +417,11 @@ the total power of the panels is increased.
     "Total annual costs",                  "€",     398.66
     "Autarky",                             "%",     75.18
 
+.. admonition:: Learning
+    :class: important
+
+    ``Converter`` s are used to model (possibly lossy) conversion.
+
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_5.py </../tutorials/introductory/home_pv/home_pv_5.py>`
 
@@ -440,6 +464,13 @@ So, finally let us compare the results from all different steps.
     "Annuity for the battery", "€ ", , , , 1000.00, 89.53, 188.02
     "Total annual costs", "€ ", 629.9, 479.03, 477.41, 1267.65, 398.66, 459.76
     "Autarky", "% ", 0, 42, 40.21, 88.48, 75.18, 90
+
+.. admonition:: Learning
+    :class: important
+
+    You can define the full load time of a ``Flow``
+    to limit its energy transfer.
+    Here, this has been used to accieve a minimum autarky.
 
 You can get the complete (uncommented) code for this step:
 :download:`home_pv_6.py </../tutorials/introductory/home_pv/home_pv_6.py>`
