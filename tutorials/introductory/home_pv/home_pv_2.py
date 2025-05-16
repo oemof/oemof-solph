@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Daniel Niederhöfer
+SPDX-FileCopyrightText: DLR e.V.
+
+SPDX-License-Identifier: MIT
+"""
 # %%[imports]
 import os
 import matplotlib.pyplot as plt
@@ -89,9 +98,7 @@ el_revenue = 0.1 * results[(el_bus, grid)]["sequences"]["flow"].sum()
 
 tce = pv_annuity + meta_results["objective"]
 
-print(
-    f"The annual costs for grid electricity are {el_costs:.2f} €."
-)
+print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
 print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The total annual costs are {tce:.2f} €.")

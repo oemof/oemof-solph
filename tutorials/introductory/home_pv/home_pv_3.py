@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Daniel Niederhöfer
+SPDX-FileCopyrightText: DLR e.V.
+
+SPDX-License-Identifier: MIT
+"""
 # %%[imports]
 import os
 import matplotlib.pyplot as plt
@@ -62,10 +71,7 @@ pv_system = solph.components.Source(
     label="PV",
     outputs={
         el_bus: solph.Flow(
-            nominal_capacity=solph.Investment(
-                ep_costs=pv_epc,
-                maximum=10
-            ),
+            nominal_capacity=solph.Investment(ep_costs=pv_epc, maximum=10),
             max=input_data["pv yield (kW/kW)"],
         )
     },
@@ -89,7 +95,7 @@ meta_results = solph.processing.meta_results(model)
 
 pv_size = results[(pv_system, el_bus)]["scalars"]["invest"]
 
-pv_annuity = pv_epc * results[(pv_system, el_bus)]["scalars"]["invest"]
+pv_annuity = pv_epc * pv_size
 el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
 el_revenue = 0.1 * results[(el_bus, grid)]["sequences"]["flow"].sum()
 
@@ -97,9 +103,7 @@ tce = meta_results["objective"]
 
 print(f"The optimal PV size is {pv_size:.2f} kW.")
 
-print(
-    f"The annual costs for grid electricity are {el_costs:.2f} €."
-)
+print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
 print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The total annual costs are {tce:.2f} €.")

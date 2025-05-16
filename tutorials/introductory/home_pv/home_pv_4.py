@@ -1,3 +1,12 @@
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Daniel Niederhöfer
+SPDX-FileCopyrightText: DLR e.V.
+
+SPDX-License-Identifier: MIT
+"""
 # %%[imports]
 import os
 import matplotlib.pyplot as plt
@@ -59,10 +68,7 @@ pv_system = solph.components.Source(
     label="PV",
     outputs={
         el_bus: solph.Flow(
-            nominal_capacity=solph.Investment(
-                ep_costs=pv_epc,
-                maximum=10
-            ),
+            nominal_capacity=solph.Investment(ep_costs=pv_epc, maximum=10),
             max=input_data["pv yield (kW/kW)"],
         )
     },
@@ -72,10 +78,10 @@ energy_system.add(pv_system)
 
 # %%[battery]
 
-battery_size = 2  # kWh
 battery_specific_costs = 1000  # €/kW
 battery_lifetime = 10  # years
 battery_epc = battery_specific_costs / battery_lifetime
+battery_size = 2  # kWh
 
 battery = solph.components.GenericStorage(
     label="Battery",
@@ -91,7 +97,7 @@ energy_system.add(battery)
 # %%[graph_plotting]
 plt.figure()
 graph = create_nx_graph(energy_system)
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_3.dot")
+nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_4.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
@@ -113,9 +119,7 @@ tce = meta_results["objective"] + battery_annuity
 
 print(f"The optimal PV size is {pv_size:.2f} kW.")
 
-print(
-    f"The annual costs for grid electricity are {el_costs:.2f} €."
-)
+print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
 print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
 print(f"The annuity for the battery is {battery_annuity:.2f} €.")
