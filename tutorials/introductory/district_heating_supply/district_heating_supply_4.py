@@ -41,16 +41,22 @@ heat_sink = solph.components.Sink(
 
 district_heating_system.add(gas_source, electricity_source, heat_sink)
 
+# %%[sec_1_start]
+data['waste heat'] = 2
 
 waste_heat_source = solph.components.Source(
     label='waste heat source',
     outputs={
         waste_heat_bus: solph.flows.Flow(
+            nominal_value=1,
+            fix=data['waste heat']
         )
     }
 )
 
 district_heating_system.add(waste_heat_source)
+
+# %%[sec_1_end]
 
 spec_inv_gas_boiler=60000
 var_cost_gas_boiler = 1.10
@@ -92,7 +98,6 @@ cop = 3.5
 spec_inv_heat_pump = 500000
 var_cost_heat_pump = 1.2
 
-# %%[sec_1_start]
 heat_pump = solph.components.Converter(
     label='heat pump',
     inputs={
@@ -114,7 +119,6 @@ heat_pump = solph.components.Converter(
         }
 )
 district_heating_system.add(heat_pump)
-# %%[sec_1_end]
 
 # solve model
 model = solph.Model(district_heating_system)

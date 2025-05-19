@@ -327,21 +327,46 @@ approach in the previous step.
 
     * Optimize the design and dispatch of district heating system
 
-Step 3: Introduce a minimal load for the converters
----------------------------------------------------
+Step 3: Introduce constraints to the heat production units
+----------------------------------------------------------
 
-1. Modify the converters, remaining parts are identical.
+1. Introduce a minimal load constraint for the heat pump
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_3.py
+    :language: python
+    :start-after: [sec_1_start]
+    :end-before: [sec_1_end]
 
 .. tip::
 
-    What if minimum demand cannot be supplied? Add a slack source for the heat
-    demand.
+    What if minimum demand cannot be supplied?
+
+    * Add a slack source for the heat demand
+
+    * Add a thermal energy store or change the parameters of this storage
+
+    * Add a new heat production unit
 
 2. Run optimization, get results, what is the difference to before?
+
+3. Expand the waste heat source with a constraint on fixed consumption
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_4.py
+    :language: python
+    :start-after: [sec_1_start]
+    :end-before: [sec_1_end]
+
+4. Again: Run optimization, get results, what is the difference to before?
 
 .. admonition:: Learnings
     :class: important
 
-    After the second step of this tutorial you should be able to do the following:
+    After the third step of this tutorial you should be able to do the following:
 
-    * tbc
+    * Add or change key word arguments to customize heat production units
+
+    * Deal with theoretically unsolvable optimization problems
+
+    * Understand the functionality of minimum load constraints as well as the impact of fixed and variable sources
+
+    * Analyse results of design and dispatch
