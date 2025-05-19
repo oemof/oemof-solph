@@ -42,33 +42,35 @@ from oemof.solph._facades import Facade
 
 class DSO(Facade):
     def __init__(self, label, el_bus, *args, energy_price, feedin_tariff):
-        super().__init__(*args, label=label)
-        self.facade_type = "dso"
+        super().__init__(*args, label=label, facade_type=type(self))
         self.energy_price = energy_price
         self.feedin_tariff = feedin_tariff
-
         self.el_bus = el_bus
 
     def build_subnetwork(self):
-        internal_bus = Bus(label="internal_bus")
+        internal_bus = Bus(custom_properties={"sub_label": "internal_bus"})
         self.add_subnode(internal_bus)
 
         feedin = Converter(
             inputs={self.el_bus: Flow(variable_costs=self.feedin_tariff)},
             outputs={internal_bus: Flow()},
-            label="feedin_converter",
+            label=self.sub_component_labelling("feedin_converter"),
         )
-        sink = Sink(inputs={internal_bus: Flow()}, label="feedin_sink")
+        sink = Sink(
+            inputs={internal_bus: Flow()},
+            label=self.sub_component_labelling("feedin_sink"),
+        )
         self.add_subnode(sink, feedin)
 
         bus_c = Bus()
         consumption = Converter(
             inputs={bus_c: Flow()},
             outputs={self.el_bus: Flow(variable_costs=self.energy_price)},
-            label="consumption_converter",
+            label=self.sub_component_labelling("consumption_converter"),
         )
         source = Source(
-            outputs={internal_bus: Flow()}, label="consumption_sink"
+            outputs={internal_bus: Flow()},
+            label=self.sub_component_labelling("consumption_sink"),
         )
         self.add_subnode(source, consumption)
 
