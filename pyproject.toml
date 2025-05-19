@@ -119,6 +119,7 @@ norecursedirs = [
     "dist",
     "build",
     "docs/_build",
+    "docs/_files/code",
     "migrations",
     "examples",
 ]

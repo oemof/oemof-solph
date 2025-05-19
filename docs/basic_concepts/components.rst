@@ -174,7 +174,7 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: ../src/oemof/solph/components/_extraction_turbine_chp.py
+.. include:: /../src/oemof/solph/components/_extraction_turbine_chp.py
   :start-after: _ETCHP-equations:
   :end-before: """
 
@@ -332,13 +332,13 @@ are active in all three cases. Constraint 10 depends on the attribute back_press
 an equality, if not it is a less or equal. Constraint 11 is only needed for modeling motoric CHP which is done by
 setting the attribute `H_L_FG_share_min`.
 
-.. include:: ../src/oemof/solph/components/_generic_chp.py
+.. include:: /../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations1-10:
   :end-before: **For the attribute**
 
 If :math:`\dot{H}_{L,FG,min}` is given, e.g. for a motoric CHP:
 
-.. include:: ../src/oemof/solph/components/_generic_chp.py
+.. include:: /../src/oemof/solph/components/_generic_chp.py
   :start-after: _GenericCHP-equations11:
   :end-before: """
 
@@ -619,7 +619,7 @@ offset. By multiplying the offset :math:`y_\text{0,normed}` with the binary
 status variable of the `NonConvex` flow, the origin (0, 0) becomes part of the
 solution space and the boiler is allowed to switch off.
 
-.. include:: ../src/oemof/solph/components/_offset_converter.py
+.. include:: /../src/oemof/solph/components/_offset_converter.py
   :start-after: _OffsetConverter-equations:
   :end-before: """
 
@@ -647,7 +647,7 @@ GenericCAES (experimental)
 Compressed Air Energy Storage (CAES).
 The following constraints describe the CAES:
 
-.. include:: ../src/oemof/solph/components/experimental/_generic_caes.py
+.. include:: /../src/oemof/solph/components/experimental/_generic_caes.py
   :start-after: _GenericCAES-equations:
   :end-before: """
 
@@ -755,6 +755,3 @@ Yielding the following results
     * The parameters `demand`, `capacity_up` and `capacity_down` have been normalized to allow investments modeling. To retreive the original dispatch behaviour from v0.4.1, set `max_demand=1`, `max_capacity_up=1`, `max_capacity_down=1`.
     * This component is a candidate component. It's implemented as a custom component for users that like to use and test the component at early stage. Please report issues to improve the component.
     * See the :py:class:`~oemof.solph.custom.sink_dsm.SinkDSM` class for all parameters and the mathematical background.
-
-
-

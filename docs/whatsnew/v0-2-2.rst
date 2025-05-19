@@ -19,7 +19,7 @@ New features
 * We added a new attribute `existing` to the `solph.options.Investement` class.
   It will now be possible to run investment optimization based on already
   installed capacity of a component.
-  Take a look on :ref:`investment_mode_label` for usage of this option.
+  Take a look on :ref:`optimization_invest_label` for usage of this option.
   (`Issue #489 <https://github.com/oemof/oemof-solph/pull/489>`_).
 
 * Investement variables for the capacity and the flows are now decoupled to

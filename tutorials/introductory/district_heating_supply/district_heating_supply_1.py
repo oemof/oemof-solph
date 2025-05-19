@@ -3,7 +3,7 @@ from helpers import LCOH
 # %%[sec_1_start]
 import pandas as pd
 
-data = pd.read_csv('input_data.csv', sep=';', index_col=0, parse_dates=True)
+data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
 # %%[sec_1_end]
 
 # %%[sec_2_start]
@@ -15,27 +15,27 @@ district_heating_system = solph.EnergySystem(
 # %%[sec_2_end]
 
 # %%[sec_3_start]
-heat_bus = solph.Bus(label='heat network')
-gas_bus = solph.Bus(label='gas network')
+heat_bus = solph.Bus(label="heat network")
+gas_bus = solph.Bus(label="gas network")
 
 district_heating_system.add(heat_bus, gas_bus)
 # %%[sec_3_end]
 
 # %%[sec_4_start]
 gas_source = solph.components.Source(
-    label='gas source',
-    outputs={gas_bus: solph.flows.Flow(variable_costs=data['gas price'])}
+    label="gas source",
+    outputs={gas_bus: solph.flows.Flow(variable_costs=data["gas price"])},
 )
 
 # nominal_value -> nominal_capacity
 heat_sink = solph.components.Sink(
-    label='heat sink',
+    label="heat sink",
     inputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=data['heat demand'].max(),
-            fix=data['heat demand']/data['heat demand'].max()
+            nominal_value=data["heat demand"].max(),
+            fix=data["heat demand"] / data["heat demand"].max(),
         )
-    }
+    },
 )
 
 district_heating_system.add(heat_sink, gas_source)
@@ -43,7 +43,7 @@ district_heating_system.add(heat_sink, gas_source)
 
 # %%[sec_5_start]
 gas_boiler = solph.components.Converter(
-    label='gas boiler',
+    label="gas boiler",
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
@@ -51,7 +51,7 @@ gas_boiler = solph.components.Converter(
             variable_costs=1.10
         )
     },
-    conversion_factors={gas_bus: 0.95}
+    conversion_factors={gas_bus: 0.95},
 )
 
 district_heating_system.add(gas_boiler)
@@ -64,10 +64,11 @@ model.solve(solver='cbc', solve_kwargs={'tee': True})
 
 # %%[sec_7_start]
 results = solph.processing.results(model)
-# breakpoint()
-data_gas_bus = solph.views.node(results, 'gas network')['sequences']
-data_heat_bus = solph.views.node(results, 'heat network')['sequences']
+
+data_gas_bus = solph.views.node(results, "gas network")["sequences"]
+data_heat_bus = solph.views.node(results, "heat network")["sequences"]
 # %%[sec_7_end]
+
 
 # %%[sec_8_start]
 import matplotlib.pyplot as plt
@@ -99,10 +100,14 @@ var_cost_gas_boiler = 1.10
 
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
-    var_cost_gas_boiler * data_heat_bus[(('gas boiler', 'heat network'), 'flow')].sum()
-    + (data['gas price'] * data_gas_bus[(('gas network', 'gas boiler'), 'flow')]).sum()
+    var_cost_gas_boiler
+    * data_heat_bus[(("gas boiler", "heat network"), "flow")].sum()
+    + (
+        data["gas price"]
+        * data_gas_bus[(("gas network", "gas boiler"), "flow")]
+    ).sum()
 )
-heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
+heat_produced = data_heat_bus[(("heat network", "heat sink"), "flow")].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f'LCOH: {lcoh:.2f} €/MWh')

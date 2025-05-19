@@ -1,4 +1,4 @@
-.. _basic_concepts_label:
+.. _optimization_label:
 
 ~~~~~~~~~~~~~~
 Optimization
@@ -25,51 +25,42 @@ you have by using oemof.solph.
         :link: optimization_dispatch_vs_invest_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/plot_dispatch_invest_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/plot_dispatch_invest_dark.svg
             :class: only-dark
 
     .. grid-item-card::  Linear vs. Mixed Integer Linear Optimization
         :link: optimization_linear_vs_mixed_integer_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/lin_vs_mixed_int_plot_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/lin_vs_mixed_int_plot_dark.svg
             :class: only-dark
 
 .. grid:: 2
     :gutter: 1
 
-    .. grid-item-card::  Dispatch vs. Investment Optimization
-        :link: optimization_dispatch_vs_invest_label
-        :link-type: ref
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
-            :class: only-light
-
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
-            :class: only-dark
 
     .. grid-item-card::  Multi Period Optimization
-        :link: optimization_mutli_period_label
+        :link: optimization_multi_period_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/timeline_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/timeline_dark.svg
             :class: only-dark
 
     .. grid-item-card::  Add additional constraints to your model
         :link: additional_constraints_label
         :link-type: ref
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT.svg
+        .. image:: /_files/math_eq_light.svg
             :class: only-light
 
-        .. image:: /_static/_logo/logo_oemof_solph_NOTEXT_darkmode.svg
+        .. image:: /_files/math_eq_dark.svg
             :class: only-dark

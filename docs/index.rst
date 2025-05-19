@@ -13,7 +13,6 @@
 
     installation
     introductory_tutorials
-    advanced_tutorials
     examples
     showcase_examples
     support
@@ -25,17 +24,14 @@
 
     basic_concepts
     optimization
-    advanced_concepts
-    best_practices
+    recipe_book
     api
     changelog
-    zliterature
 
 ..  toctree::
     :maxdepth: 2
     :caption: Contribute
     :hidden:
 
-    contributing
-    community
+    contribute
     authors
