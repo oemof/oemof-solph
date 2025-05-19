@@ -56,14 +56,20 @@ electricity_source = solph.components.Source(
 
 district_heating_system.add(waste_heat_source, electricity_source)
 # %%[sec_3_end]
+spec_inv_gas_boiler=60000
 
 gas_boiler = solph.components.Converter(
     label='gas boiler',
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=20,
+            nominal_value=solph.Investment(
+                ep_costs=epc(spec_inv_gas_boiler), maximum=50
+                ),
             variable_costs=1.10
+        # heat_bus: solph.flows.Flow(
+        #     nominal_value=20,
+        #     variable_costs=1.10
         )
     },
     conversion_factors={gas_bus: 0.95}
@@ -72,7 +78,7 @@ gas_boiler = solph.components.Converter(
 district_heating_system.add(gas_boiler)
 
 # %%[sec_4_start]
-spec_inv_storage=100
+spec_inv_storage=1060
 
 # Soll es ein saisonaler oder Pufferspeicher sein?
 heat_storage = solph.components.GenericStorage(
@@ -80,12 +86,11 @@ heat_storage = solph.components.GenericStorage(
     nominal_capacity=solph.Investment(
         ep_costs=epc(spec_inv_storage)
     ),
-    inputs={heat_bus: solph.flows.Flow(variable_costs=0.1)},
-    outputs={heat_bus: solph.flows.Flow(variable_costs=0.1)},
+    inputs={heat_bus: solph.flows.Flow()},
+    outputs={heat_bus: solph.flows.Flow()},
     invest_relation_input_capacity=1/24,
     invest_relation_output_capacity=1/24,
     balanced=True,
-    initial_storage_level=0.5,
     loss_rate=0.001
 )
 
@@ -94,7 +99,7 @@ district_heating_system.add(heat_storage)
 
 # %%[sec_5_start]
 cop = 3.5
-spec_inv_heat_pump = 450000
+spec_inv_heat_pump = 500000
 
 heat_pump = solph.components.Converter(
     label='heat pump',
@@ -118,16 +123,21 @@ heat_pump = solph.components.Converter(
 district_heating_system.add(heat_pump)
 # %%[sec_5_end]
 
+# %%[sec_6_start]
 # solve model
 model = solph.Model(district_heating_system)
-model.solve(solver="cbc", solve_kwargs={"tee": True})
-
+# model.solve(solver="cbc", solve_kwargs={"tee": True})
+model.solve(solver="gurobi", solve_kwargs={"tee": True})
 
 # results
 results = solph.processing.results(model)
 
 data_gas_bus = solph.views.node(results, 'gas network')['sequences']
 data_heat_bus = solph.views.node(results, 'heat network')['sequences']
+
+data_caps = solph.views.node(results, 'heat network')['scalars']
+print(data_caps)
+# %%[sec_6_end]
 
 spec_inv_gas_boiler = 50000
 cap_gas_boiler = 20
@@ -139,16 +149,6 @@ operation_cost = (
     + (data['gas price'] * data_gas_bus[(('gas network', 'gas boiler'), 'flow')]).sum()
 )
 heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
-
-lcoh = LCOH(invest_cost, operation_cost, heat_produced)
-
-print(f'LCOH: {lcoh:.2f} €/MWh')
-
-
-co2 = data_gas_bus[(('gas network', 'gas boiler'), 'flow')].sum() * 201.2
-
-print(f'CO2-emissions: {co2:.0f} kg')
-
 
 import matplotlib.pyplot as plt
 
@@ -164,7 +164,7 @@ unit_colors = {
 fig, ax = plt.subplots(figsize=[10, 6])
 
 bottom = 0
-for unit in ['gas boiler', 'heat pump', 'heat storage']:
+for unit in ['heat pump', 'gas boiler', 'heat storage']:
     unit_label = f'{unit} (discharge)' if 'storage' in unit else unit
     ax.bar(
         data_heat_bus.index,
@@ -183,7 +183,7 @@ ax.bar(
     color=unit_colors[unit_label]
 )
 
-ax.legend(loc='upper right')
+ax.legend(loc='upper center', ncol=2)
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat production in MWh')
 
