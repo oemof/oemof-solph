@@ -264,6 +264,14 @@ now.
 Step 2: Plan capacity of heat pump and heat storage
 ---------------------------------------------------
 
+In addition to the gas boiler, in the second step of the tutorial, we want to
+consider adding a heat pump as well as a thermal energy storage to our district
+heating system. As we don't want to predefine their respective sizes, but
+rather build them according to what makes the most sense economically, we will
+employ a combined design and dispatch optimization. To make it a fair
+comparison, the gas boiler's size will also be optimized, as opposed to our
+approach in the previous step.
+
 1. What information is required on the new components? (data, no code, include waste heat time series)
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
