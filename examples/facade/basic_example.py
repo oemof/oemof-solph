@@ -164,7 +164,7 @@ def main(dump_and_restore=False):
 
     energysystem.add(
         DSO(
-            label="DSO",
+            label="My_DSO",
             el_bus=bus_electricity,
             energy_price=0.1,
             feedin_tariff=0.04,
