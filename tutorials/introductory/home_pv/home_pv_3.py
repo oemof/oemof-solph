@@ -132,7 +132,7 @@ baseline = np.zeros(len(electricity_fows))
 plt.figure()
 
 mode = "light"
-mode = "dark"
+# mode = "dark"
 if mode == "dark":
     plt.style.use("dark_background")
 

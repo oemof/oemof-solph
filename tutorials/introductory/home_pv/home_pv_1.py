@@ -88,7 +88,7 @@ electricity_fows = solph.views.node(results, "electricity")["sequences"]
 baseline = np.zeros(len(electricity_fows))
 
 mode = "light"
-mode = "dark"
+# mode = "dark"
 if mode == "dark":
     plt.style.use("dark_background")
 
