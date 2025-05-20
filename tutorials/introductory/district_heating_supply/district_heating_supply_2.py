@@ -50,7 +50,8 @@ waste_heat_source = solph.components.Source(
 electricity_source = solph.components.Source(
     label='electricity source',
     outputs={electricity_bus: solph.flows.Flow(
-        variable_costs=data['el_spot_price'])}
+        variable_costs=data['el_spot_price']
+    )}
 )
 
 district_heating_system.add(waste_heat_source, electricity_source)
@@ -75,26 +76,6 @@ gas_boiler = solph.components.Converter(
 district_heating_system.add(gas_boiler)
 
 # %%[sec_4_start]
-spec_inv_storage=1060
-
-# Soll es ein saisonaler oder Pufferspeicher sein?
-heat_storage = solph.components.GenericStorage(
-    label='heat storage',
-    nominal_capacity=solph.Investment(
-        ep_costs=epc(spec_inv_storage)
-    ),
-    inputs={heat_bus: solph.flows.Flow()},
-    outputs={heat_bus: solph.flows.Flow()},
-    invest_relation_input_capacity=1/24,
-    invest_relation_output_capacity=1/24,
-    balanced=True,
-    loss_rate=0.001
-)
-
-district_heating_system.add(heat_storage)
-# %%[sec_4_end]
-
-# %%[sec_5_start]
 cop = 3.5
 spec_inv_heat_pump = 500000
 var_cost_heat_pump = 1.2
@@ -119,6 +100,26 @@ heat_pump = solph.components.Converter(
         }
 )
 district_heating_system.add(heat_pump)
+# %%[sec_4_end]
+
+# %%[sec_5_start]
+spec_inv_storage=1060
+
+# Soll es ein saisonaler oder Pufferspeicher sein?
+heat_storage = solph.components.GenericStorage(
+    label='heat storage',
+    nominal_capacity=solph.Investment(
+        ep_costs=epc(spec_inv_storage)
+    ),
+    inputs={heat_bus: solph.flows.Flow()},
+    outputs={heat_bus: solph.flows.Flow()},
+    invest_relation_input_capacity=1/24,
+    invest_relation_output_capacity=1/24,
+    balanced=True,
+    loss_rate=0.001
+)
+
+district_heating_system.add(heat_storage)
 # %%[sec_5_end]
 
 
