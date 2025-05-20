@@ -27,10 +27,10 @@ you have any questions please reach out to the
         :link: district_heating_portfolio_optimization_label
         :link-type: ref
 
-        .. image:: /_files/example_network.svg
+        .. image:: /_files/tutorial_dhs_2.svg
             :class: only-light
 
-        .. image:: /_files/example_network.svg
+        .. image:: /_files/tutorial_dhs_2_darkmode.svg
             :class: only-dark
 
     .. grid-item-card::  Tutorial 2

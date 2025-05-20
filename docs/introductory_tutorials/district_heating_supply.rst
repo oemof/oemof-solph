@@ -16,29 +16,29 @@ system is build using oemof.solph. Additionally, the repository contains a fully
 functional Python file of all three main steps for you to execute yourself or
 modify and play around with.
 
-.. figure:: /_files/example_network.svg
+Step 1: Status-Quo system
+-------------------------
+
+As described above, we want to start by building the existing district heating
+supply systems, which in our simple example only contains a single gas boiler.
+
+.. figure:: /_files/tutorial_dhs_1.svg
     :align: center
     :alt: Structure of the heating supplier's portfolio
     :figclass: only-light
 
     Structure of the heating supplier's portfolio
 
-.. figure:: /_files/example_network_darkmode.svg
+.. figure:: /_files/tutorial_dhs_1_darkmode.svg
     :align: center
     :alt: Structure of the heating supplier's portfolio
     :figclass: only-dark
 
     Structure of the heating supplier's portfolio
 
-Step 1: Status-Quo system
--------------------------
-
-As described above, we want to start by building the existing district heating
-supply systems, which in our simple example only contains a single gas boiler.
 But before we start modeling the energy system, we should give some thought about
-what kind of input data we need for the simulation.
-
-Maybe the first that comes to mind is the heat demand our system should supply.
+what kind of input data we need for the simulation.Maybe the first that comes to 
+mind is the heat demand our system should supply.
 As the demand varies throughout the seasons, it makes sense to simulate a full
 year. Typically, this is done with an hourly time resolution. Furthermore, we have
 to know the technical specifications of our gas boiler. This includes the existing
@@ -266,11 +266,27 @@ Step 2: Plan capacity of heat pump and heat storage
 
 In addition to the gas boiler, in the second step of the tutorial, we want to
 consider adding a heat pump as well as a thermal energy storage to our district
-heating system. As we don't want to predefine their respective sizes, but
-rather build them according to what makes the most sense economically, we will
-employ a combined design and dispatch optimization. To make it a fair
-comparison, the gas boiler's size will also be optimized, as opposed to our
-approach in the previous step.
+heating system.
+
+.. figure:: /_files/tutorial_dhs_2.svg
+    :align: center
+    :alt: Structure of the heating supplier's portfolio
+    :figclass: only-light
+
+    Structure of the heating supplier's portfolio
+
+.. figure:: /_files/tutorial_dhs_2_darkmode.svg
+    :align: center
+    :alt: Structure of the heating supplier's portfolio
+    :figclass: only-dark
+
+    Structure of the heating supplier's portfolio
+
+As we don't want to predefine their respective sizes, but rather build them
+according to what makes the most sense economically, we will employ a combined
+design and dispatch optimization. To make it a fair comparison, the gas
+boiler's size will also be optimized, as opposed to our approach in the
+previous step.
 
 1. What information is required on the new components? (data, no code, include waste heat time series)
 
