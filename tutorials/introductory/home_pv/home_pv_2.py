@@ -126,7 +126,7 @@ baseline = np.zeros(len(electricity_fows))
 plt.figure()
 
 mode = "light"
-mode = "dark"
+# mode = "dark"
 if mode == "dark":
     plt.style.use("dark_background")
 
@@ -160,7 +160,7 @@ plt.step(
     electricity_fows.index,
     electricity_fows[(("electricity", "demand"), "flow")]
     + electricity_fows[(("electricity", "grid"), "flow")],
-    "--",
+    ":",
     color="darkgrey",
     label="Feed-In",
 )

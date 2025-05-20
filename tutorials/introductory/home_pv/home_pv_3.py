@@ -166,7 +166,7 @@ plt.step(
     electricity_fows.index,
     electricity_fows[(("electricity", "demand"), "flow")]
     + electricity_fows[(("electricity", "grid"), "flow")],
-    "--",
+    ":",
     color="darkgrey",
     label="Feed-In",
 )
