@@ -8,7 +8,8 @@ def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
 
 
 # %%[func_epc_start]
-def epc(capex, lifetime=20, wacc=0.05):
-    epc = capex * (wacc * (1 + wacc) ** lifetime) / ((1 + wacc) ** lifetime - 1)
-    return epc
+def epc(invest_cost, i=0.05, n=20):
+    af = (i * (1 + i) ** n) / ((1 + i) ** n - 1)
+
+    return invest_cost * af
 # %%[func_epc_end]
