@@ -198,23 +198,26 @@ Your plot should look similar to this:
 
 Let's continue by assessing the economic merit of our district heating supply
 system. A common indicator for that purpose are the Levelized Cost of Heat
-(:math:`LCOH`). As shown in the equations below, they account for the upfront
-invest cost :math:`C_\text{invest}` necessary to build the heat production
-units as well as the cost evoked via their operation :math:`C_\text{operation}`
-over the unit's assumed lifetime :math:`n`. These cost get reduced by any
-additional revenues :math:`R` generated besides its heat production. The total
-cash flow balance is then devided by the total heat produced
-:math:`Q_\text{total}`. In order to make one-off investments comparable with
-the other periodically occuring values, the latter are multiplied with the
-Present Value Factor (:math:`PVF`). This yields the total cost necessary to
-produce one unit of heat by the heat supply system (not accounting for any
-additional cost for e.g. the pipe network, etc.).
+(:math:`LCOH`). As shown in equation :eq:`eq:LCOH`, they account for the
+upfront invest cost :math:`C_\text{invest}` necessary to build the heat
+production units as well as the cost evoked via their operation
+:math:`C_\text{operation}` over the unit's assumed lifetime :math:`n`. These
+cost get reduced by any additional revenues :math:`R` generated besides its
+heat production. The total cash flow balance is then devided by the total heat
+produced :math:`Q_\text{total}`. In order to make one-off investments
+comparable with the other periodically occuring values, the latter are
+multiplied with the Present Value Factor (:math:`PVF`, see equation
+:eq:`eq:PVF`). This yields the total cost necessary to produce one unit of heat
+by the heat supply system (not accounting for any additional cost for e.g. the
+pipe network, etc.).
 
 .. math::
     LCOH = \frac{C_\text{invest} + PVF \cdot \left(C_\text{operation} - R\right)}{PVF \cdot Q_\text{total}}
+    :label: eq:LCOH
 
 .. math::
     PVF = \frac{\left(1 + i\right)^n -1}{\left(1 + i\right)^n \cdot i}
+    :label: eq:PVF
 
 As we will evaluate the :math:`LCOH` again later, let's define a function to
 calculate it from the input values using sensible default values as depicted
