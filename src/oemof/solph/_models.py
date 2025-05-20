@@ -236,9 +236,7 @@ class Model(po.ConcreteModel):
             [k] * len(self.TIMESTEPS_IN_CAPACITY_PERIOD[k])
             for k in range(len(self.es.investment_times))
         ]
-        flattened_list = [
-            item for sublist in nested_list for item in sublist
-        ]
+        flattened_list = [item for sublist in nested_list for item in sublist]
         self.TIMEINDEX = po.Set(
             initialize=list(
                 zip(flattened_list, range(len(self.es.timeincrement)))
