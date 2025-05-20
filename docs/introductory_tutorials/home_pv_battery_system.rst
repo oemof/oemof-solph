@@ -72,12 +72,12 @@ In contrast to the demand, the PV gain is given in normalised units and
 has to be multiplied by the installed PV capacity to yield the electricity
 production.
 
-.. figure:: /./_files/home_pv_input-data_light.svg
+.. figure:: /./_files/tutorial_home-pv/home_pv_input-data_light.svg
     :align: center
     :alt: Input data
     :figclass: only-light
 
-.. figure:: /./_files/home_pv_input-data_dark.svg
+.. figure:: /./_files/tutorial_home-pv/home_pv_input-data_dark.svg
     :align: center
     :alt: Input data
     :figclass: only-dark
@@ -163,12 +163,12 @@ To have a look at the flows from and to the "electricity" bus.
 The function ``solph.views.node(...)`` can help.
 It compiles the respective ``DataFrame`` so that it can be directly used.
 
-.. figure:: /./_files/home_pv_result-1_light.svg
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-1_light.svg
     :align: center
     :alt: Input data
     :figclass: only-light
 
-.. figure:: /./_files/home_pv_result-2_dark.svg
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-2_dark.svg
     :align: center
     :alt: Input data
     :figclass: only-dark
