@@ -216,7 +216,7 @@ pipe network, etc.).
     :label: eq:LCOH
 
 .. math::
-    PVF = \frac{\left(1 + i\right)^n -1}{\left(1 + i\right)^n \cdot i}
+    PVF = \frac{\left(1 + i\right)^n - 1}{\left(1 + i\right)^n \cdot i}
     :label: eq:PVF
 
 As we will evaluate the :math:`LCOH` again later, let's define a function to
@@ -334,30 +334,110 @@ predefine the heat pump's nominal capacity, we can't set it to a numerical
 value, but rather pass an instance of the :py:class:`solph.Investment` class.
 It can take upper and lower bounds as well as other arguments, but we only set
 the so called 'equivalent periodical cost' to the :py:attr:`ep_cost` parameter.
-
+Before diving deeper into those cost, let's finish the initialization of the
+heat pump by defining the :py:attr:`conversion_factors` between the output and
+the two inputs.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_4_start]
     :end-before: [sec_4_end]
 
+To derive the correct relations between the respective inputs and the produced
+heat flow, we have to take a look at the definition of the :math:`COP`.
+Equation :eq:`eq:COP` describes it according to both the power and the heat
+input. These terms can then be rearranged to calculate the ratios between all
+flows, which are finally passed into the values of the
+:py:attr:`conversion_factors` dictionary to the bus keys.
+
 .. math::
     COP = \frac{\dot Q_{out}}{P_{in}} = \frac{\dot Q_{out}}{\dot Q_{out} - \dot Q_{in}}
     :label: eq:COP
 
-5. Add heat storage
+As mentioned above, specific investment cost aren't directly passed to the
+:py:attr:`ep_cost` argument, as they are typically allocated over the units
+lifetime. Furthermore, capital cost in the form of interest have to be
+considered. This is done by multiplying the specific investment cost
+:math:`c_\text{invest}` by the annuity factor :math:`AF` (see equation
+:eq:`eq:ep_cost`), which itself is the reciprocal of the :math:`PVF` introduced
+earlier (see equation :eq:`eq:AF`).
+
+.. math::
+    c_\text{ep} = c_\text{invest} \cdot AF
+    :label: eq:ep_cost
+
+.. math::
+    AF = \frac{\left(1 + i\right)^n \cdot 1}{\left(1 + i\right)^n - i}
+    :label: eq:AF
+
+The calculation of the specific equivalent periodical cost :math:`c_\text{ep}`
+are again implemented via a python function, which will be organized together
+with the :math:`LCOH` function in the ``helpers.py`` utility file.
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/helpers.py
+    :language: python
+    :start-after: [func_epc_start]
+    :end-before: [func_epc_end]
+
+.. tip::
+    It often makes sense to organize code in different logically coherent
+    utility files. Just make sure to import the functions you want to use from
+    now on like this: ``from helpers import LCOH, epc``
+
+This concludes the addition of the heat pump and we can continue by adding the
+thermal energy storage. This time only specific invest cost are considered, as
+operational cost of heat storage are often negligible. Then again, the
+:py:class:`solph.components.GenericStorage` class takes some additional
+arguments we will supply. Besides defining the in- and output with an empty
+flow, we pass the constant relation between their nominal flows and the
+storage's capacity to be optimized. The value of 1/24 is chosen so that the TES
+can be fully charged from an empty content within one day. Furthermore, we set
+the :py:attr:`balanced` parameter ``True`` in order to force the optimizer to
+recharge the TES back to its inital storage content at the end of the period.
+Last of all, we define a constant relative loss factor of 0.001 per timestep or
+1/10 % per hour.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_5_start]
     :end-before: [sec_5_end]
 
-6. Run model and analyze results
+Now we can finally run the model and extract the optimization results again. In
+addition to the data in the previous step, we also pull out data for the
+electricity bus as well as the optimized capacities of our heat production
+units. The latter are also displayed in :numref:`tab-caps`.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
+
+.. list-table:: Optimized heat production unit capacities
+    :name: tab-caps
+    :widths: 1 1 1 1
+    :header-rows: 1
+
+    * - 
+      - gas boiler
+      - heat pump
+      - heat storage
+    * - capacity
+      - 9.9 MW
+      - 6.2 MW
+      - 106.2 MWh
+
+The results show that the gas boilers capacities is halfed, yet it stays the
+biggest heat production unit, with the heat pump being about 2/3 of the
+boiler's size. Interestingly, the heat production units are not large enough to
+supply the peak load on their own, but rather rely on the storage to support
+them in the few hours of the year when necessary.
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_7_start]
+    :end-before: [sec_7_end]
+
+:math:`LCOH`: 18.61 €/MWh
 
 .. admonition:: Learnings
     :class: important
