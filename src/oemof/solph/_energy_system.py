@@ -218,7 +218,12 @@ class EnergySystem(es.EnergySystem):
             timeincrement=timeincrement,
         )
 
-        self.investment_times = investment_times
+        if investment_times is None:
+            self.investment_times = [self.timeindex[0]]
+        else:
+            self.investment_times = sorted(
+                set([self.timeindex[0]] + investment_times)
+            )
 
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):

@@ -213,42 +213,38 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.investment_times is None:
-            self.TIMEINDEX = po.Set(
-                initialize=list(
-                    zip(
-                        [0] * len(self.es.timeincrement),
-                        range(len(self.es.timeincrement)),
-                    )
-                ),
-                ordered=True,
-            )
-            self.CAPACITY_PERIODS = po.Set(initialize=[0])
-        else:
-            nested_list = [
-                [k] * len(self.es.investment_times[k])
-                for k in range(len(self.es.investment_times))
-            ]
-            flattened_list = [
-                item for sublist in nested_list for item in sublist
-            ]
-            self.TIMEINDEX = po.Set(
-                initialize=list(
-                    zip(flattened_list, range(len(self.es.timeincrement)))
-                ),
-                ordered=True,
-            )
-            self.CAPACITY_PERIODS = po.Set(
-                initialize=sorted(
-                    list(set(range(len(self.es.investment_times))))
+        self.CAPACITY_PERIODS = po.Set(
+            initialize=range(len(self.es.investment_times)), ordered=True
+        )
+
+        self.TIMESTEPS_IN_CAPACITY_PERIOD = {
+            p: list(
+                range(
+                    self.es.timeindex.get_loc(time_from),
+                    self.es.timeindex.get_loc(time_to),
                 )
             )
+            for p, (time_from, time_to) in enumerate(
+                zip(
+                    self.es.investment_times,
+                    self.es.investment_times[1:] + [self.es.timeindex[-1]],
+                )
+            )
+        }
 
-        # (Re-)Map timesteps to periods
-        timesteps_in_period = {p: [] for p in self.CAPACITY_PERIODS}
-        for p, t in self.TIMEINDEX:
-            timesteps_in_period[p].append(t)
-        self.TIMESTEPS_IN_PERIOD = timesteps_in_period
+        nested_list = [
+            [k] * len(self.TIMESTEPS_IN_CAPACITY_PERIOD[k])
+            for k in range(len(self.es.investment_times))
+        ]
+        flattened_list = [
+            item for sublist in nested_list for item in sublist
+        ]
+        self.TIMEINDEX = po.Set(
+            initialize=list(
+                zip(flattened_list, range(len(self.es.timeincrement)))
+            ),
+            ordered=True,
+        )
 
         # Set up disaggregated timesteps from original timeseries
         self.TSAM_MODE = False
@@ -486,7 +482,7 @@ class Model(po.ConcreteModel):
     def get_timestep_from_tsam_timestep(self, p, ik, g):
         """Return original timestep from cluster-based timestep"""
         t = (
-            p * len(self.TIMESTEPS_IN_PERIOD[p])
+            p * len(self.TIMESTEPS_IN_CAPACITY_PERIOD[p])
             + ik * self.es.tsa_parameters[p]["timesteps"]
             + g
         )

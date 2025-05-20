@@ -419,7 +419,7 @@ def _extract_multi_period_model_result(
         ]
         # map periods to their start years for displaying period results
         d = {
-            key: val.min().year
+            key: val.year
             for key, val in enumerate(model.es.investment_times)
         }
         period_scalars = df_dict[k].loc[:, period_cols].dropna()
