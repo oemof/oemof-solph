@@ -275,35 +275,61 @@ employ a combined design and dispatch optimization. To make it a fair
 comparison, the gas boiler's size will also be optimized, as opposed to our
 approach in the previous step.
 
-1. What information is required on the new components? (data, no code, include waste heat time series)
+.. note::
+    For clarity, we'll only show code that is new or changing, but each example
+    step will contain a fully functional model.
+
+First of all, we have to think about what new information we need for adding a
+heat pump and storage. Besides technical specifications of the two units we
+also have to know the price of electricity our heat pump will use to produce
+heat. As we won't model any constraints for its heat source yet, the
+electricity price data is the only new entry in our time series input data.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
 
-2. Add new buses (electricity, waste heat)
+As new energy carriers will be used in our energy system, we need to add
+corresponding buses to it. So let's add an electricity and a waste heat bus.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_2_start]
     :end-before: [sec_2_end]
 
-3. Add waste heat source and electricity source
+Using the buses above, we can now add two sources accordingly by connecting
+their respective outputs to them via :py:class:`solph.flows.Flow` instances.
+Secondly, we make sure to add the `'el_spot_price'` time series as variable
+cost of the flow.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_3_start]
     :end-before: [sec_3_end]
 
-4. Add heat storage
+Finally, let's add the waste heat heat pump to the energy system. Before
+creating the :py:class:`solph.components.Converter` instance, we'll define some
+specifications like the heat pump's :math:`COP` as well as specific invest and
+variable operation costs, which we can use again later for the economic
+evaluation. We then add to flows from the electricity and waste heat buses to
+the inputs and the heat bus to the outputs dictionary. As we decided not to
+predefine the heat pump's nominal capacity, we can't set it to a numerical
+value, but rather pass an instance of the :py:class:`solph.Investment` class.
+It can take upper and lower bounds as well as other arguments, but we only set
+the so called 'equivalent periodical cost' to the :py:attr:`ep_cost` parameter.
+
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_4_start]
     :end-before: [sec_4_end]
 
-5. Add heat pump
+.. math::
+    COP = \frac{\dot Q_{out}}{P_{in}} = \frac{\dot Q_{out}}{\dot Q_{out} - \dot Q_{in}}
+    :label: eq:COP
+
+5. Add heat storage
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
