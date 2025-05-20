@@ -97,7 +97,7 @@ plt.fill_between(
     baseline,
     electricity_fows[(("grid", "electricity"), "flow")],
     step="pre",
-    label="Grid supply"
+    label="Grid supply",
 )
 
 plt.step(
