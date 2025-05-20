@@ -165,12 +165,12 @@ It compiles the respective ``DataFrame`` so that it can be directly used.
 
 .. figure:: /./_files/tutorial_home-pv/home_pv_result-1_light.svg
     :align: center
-    :alt: Input data
+    :alt: Result time-series
     :figclass: only-light
 
-.. figure:: /./_files/tutorial_home-pv/home_pv_result-2_dark.svg
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-1_dark.svg
     :align: center
-    :alt: Input data
+    :alt: Result time-series
     :figclass: only-dark
 
 As grid supply is the only option, both lines of course overlap perfectly.
@@ -231,9 +231,22 @@ we manually add an annuity to have the PV system included in the total costs.
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_2.py
     :language: python
     :start-after: [results]
+    :end-before: [result_plotting]
+
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-2_light.svg
+    :align: center
+    :alt: Result time-series
+    :figclass: only-light
+
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-2_dark.svg
+    :align: center
+    :alt: Result time-series
+    :figclass: only-dark
 
 In this scenario, the objective value is negative,
 so a revenue is accieved.
+This is ostly because of feeding in,
+deand and supply do hardly match in this scenario.
 However, correcting this by adding the annuity of the PV system
 leaves us with (positive) costs.
 
@@ -336,10 +349,23 @@ Let us just add one:
     :start-after: [battery]
     :end-before: [graph_plotting]
 
-As before, we manually add the deprecation of the battery
+As before with the PV system, we manually add the deprecation of the battery
 to the objective value to get the total costs of the system.
-Surprisingly, the total PV size is not increased too much,
-but the (very much unused) battery drives the total costs.
+
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-4_light.svg
+    :align: center
+    :alt: Result time-series
+    :figclass: only-light
+
+.. figure:: /./_files/tutorial_home-pv/home_pv_result-4_dark.svg
+    :align: center
+    :alt: Result time-series
+    :figclass: only-dark
+
+As can be seen in the time series, the Battery allows to use much of the
+produced PV electricity.
+Thus, total PV size is not increased too much.
+With a battery that large, the it now dominates the total costs.
 
 .. csv-table:: Result overview
     :header: "Quantity", "Unit", "Value"

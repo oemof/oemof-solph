@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 import os
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from oemof.network.graph import create_nx_graph
 import pandas as pd
 

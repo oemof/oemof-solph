@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 import os
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from oemof.network.graph import create_nx_graph
 import pandas as pd
 
@@ -134,6 +135,77 @@ print(
 )
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
-electricity_fows.plot(drawstyle="steps")
+
+
+baseline = np.zeros(len(electricity_fows))
+
+plt.figure()
+
+mode = "light"
+# mode = "dark"
+if mode == "dark":
+    plt.style.use("dark_background")
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    baseline + electricity_fows[(("grid", "electricity"), "flow")],
+    step="pre",
+    label="Grid supply",
+)
+
+baseline += electricity_fows[(("grid", "electricity"), "flow")]
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    baseline + electricity_fows[(("PV", "electricity"), "flow")],
+    step="pre",
+    label="PV supply",
+)
+
+baseline += electricity_fows[(("PV", "electricity"), "flow")]
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    baseline + electricity_fows[(("Battery", "electricity"), "flow")],
+    step="pre",
+    label="Battery supply",
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")],
+    "-",
+    color="darkgrey",
+    label="Electricity demand",
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")]
+    + electricity_fows[(("electricity", "Battery"), "flow")],
+    ":",
+    color="darkgrey",
+    label="Battery charging",
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")]
+    + electricity_fows[(("electricity", "Battery"), "flow")]
+    + electricity_fows[(("electricity", "grid"), "flow")],
+    "--",
+    color="darkgrey",
+    label="Feed-In",
+)
+
+plt.legend()
 plt.ylabel("Power (kW)")
+plt.xlim(pd.Timestamp("2020-02-21 00:00"), pd.Timestamp("2020-02-28 00:00"))
+plt.gcf().autofmt_xdate()
+
+plt.savefig(f"home_pv_result-4_{mode}.svg")
+
 plt.show()

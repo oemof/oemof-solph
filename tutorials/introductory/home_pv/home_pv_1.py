@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 import os
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from oemof.network.graph import create_nx_graph
 import pandas as pd
 
@@ -83,6 +84,34 @@ el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
 print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
-electricity_fows.plot(drawstyle="steps")
+
+baseline = np.zeros(len(electricity_fows))
+
+mode = "light"
+mode = "dark"
+if mode == "dark":
+    plt.style.use("dark_background")
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    electricity_fows[(("grid", "electricity"), "flow")],
+    step="pre",
+    label="Grid supply"
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")],
+    "-",
+    color="darkgrey",
+    label="Electricity demand",
+)
+plt.legend()
 plt.ylabel("Power (kW)")
+plt.xlim(pd.Timestamp("2020-01-01 00:00"), pd.Timestamp("2020-01-07 00:00"))
+plt.gcf().autofmt_xdate()
+
+plt.savefig(f"home_pv_result-1_{mode}.svg")
+
 plt.show()

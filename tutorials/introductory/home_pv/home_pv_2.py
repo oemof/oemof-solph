@@ -11,6 +11,7 @@ SPDX-License-Identifier: MIT
 import os
 import matplotlib.pyplot as plt
 import networkx as nx
+import numpy as np
 from oemof.network.graph import create_nx_graph
 import pandas as pd
 
@@ -103,6 +104,7 @@ el_costs = 0.3 * annual_grid_supply
 el_revenue = 0.1 * results[(el_bus, grid)]["sequences"]["flow"].sum()
 
 tce = pv_annuity + meta_results["objective"]
+# %%[result_plotting]
 
 print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
@@ -118,6 +120,56 @@ print(
 
 
 electricity_fows = solph.views.node(results, "electricity")["sequences"]
-electricity_fows.plot(drawstyle="steps")
+
+baseline = np.zeros(len(electricity_fows))
+
+plt.figure()
+
+mode = "light"
+mode = "dark"
+if mode == "dark":
+    plt.style.use("dark_background")
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    baseline + electricity_fows[(("grid", "electricity"), "flow")],
+    step="pre",
+    label="Grid supply",
+)
+
+baseline += electricity_fows[(("grid", "electricity"), "flow")]
+
+plt.fill_between(
+    electricity_fows.index,
+    baseline,
+    baseline + electricity_fows[(("PV", "electricity"), "flow")],
+    step="pre",
+    label="PV supply",
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")],
+    "-",
+    color="darkgrey",
+    label="Electricity demand",
+)
+
+plt.step(
+    electricity_fows.index,
+    electricity_fows[(("electricity", "demand"), "flow")]
+    + electricity_fows[(("electricity", "grid"), "flow")],
+    "--",
+    color="darkgrey",
+    label="Feed-In",
+)
+
+plt.legend()
 plt.ylabel("Power (kW)")
+plt.xlim(pd.Timestamp("2020-02-21 00:00"), pd.Timestamp("2020-02-28 00:00"))
+plt.gcf().autofmt_xdate()
+
+plt.savefig(f"home_pv_result-2_{mode}.svg")
+
 plt.show()
