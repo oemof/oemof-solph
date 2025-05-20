@@ -103,7 +103,7 @@ district_heating_system.add(heat_pump)
 # %%[sec_4_end]
 
 # %%[sec_5_start]
-spec_inv_storage=1060
+spec_inv_storage = 1060
 
 # Soll es ein saisonaler oder Pufferspeicher sein?
 heat_storage = solph.components.GenericStorage(
@@ -122,33 +122,38 @@ heat_storage = solph.components.GenericStorage(
 district_heating_system.add(heat_storage)
 # %%[sec_5_end]
 
-
 # solve model
 model = solph.Model(district_heating_system)
-# model.solve(solver="cbc", solve_kwargs={"tee": True})
-model.solve(solver="gurobi", solve_kwargs={"tee": True})
+model.solve(solver="cbc", solve_kwargs={"tee": True})
 
 # results
 results = solph.processing.results(model)
 
 data_gas_bus = solph.views.node(results, 'gas network')['sequences']
 data_heat_bus = solph.views.node(results, 'heat network')['sequences']
+
 # %%[sec_6_start]
 data_el_bus = solph.views.node(results, 'electricity network')['sequences']
 data_caps = solph.views.node(results, 'heat network')['scalars']
 
 cap_gas_boiler = data_caps[('gas boiler', 'heat network'), 'invest']
-cap_storage = data_caps[('heat storage', 'heat network'), 'invest']
 cap_heat_pump = data_caps[('heat pump', 'heat network'), 'invest']
+cap_storage = solph.views.node(results, 'heat storage')['scalars'][
+    (('heat storage', 'None'), 'invest')
+]
+cap_storage_out = data_caps[('heat storage', 'heat network'), 'invest']
 
-print(f'Kapazität Gas Boiler: {cap_gas_boiler:.1f} MW')
-print(f'Kapazität Speicher: {cap_storage:.1f} MWh')
-print(f'Kapazität Wärmepumpe: {cap_heat_pump:.1f} MW')
+print(f'capacity gas boiler: {cap_gas_boiler:.1f} MW')
+print(f'capacity heat pump: {cap_heat_pump:.1f} MW')
+print(f'capacity heat storage: {cap_storage:.1f} MWh')
+print(f'capacity heat storage (out): {cap_storage:.1f} MW')
+# %%[sec_6_end]
 
+# %%[sec_7_start]
 invest_cost = (
     spec_inv_gas_boiler * cap_gas_boiler
-    + spec_inv_storage * cap_storage
     + spec_inv_heat_pump * cap_heat_pump
+    + spec_inv_storage * cap_storage
 )
 operation_cost = (
     var_cost_gas_boiler * data_heat_bus[(('gas boiler', 'heat network'), 'flow')].sum()
@@ -160,6 +165,7 @@ heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f'LCOH: {lcoh:.2f} €/MWh')
+# %%[sec_7_end]
 
 import matplotlib.pyplot as plt
 
@@ -218,4 +224,3 @@ ax.set_ylabel('Hourly heat storage content in MWh')
 # plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
 
 plt.show()
-# %%[sec_6_end]
