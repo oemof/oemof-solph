@@ -104,15 +104,15 @@ district_heating_system.add(heat_pump)
 
 # %%[sec_5_start]
 spec_inv_storage = 1060
+var_cost_storage = 0.1
 
-# Soll es ein saisonaler oder Pufferspeicher sein?
 heat_storage = solph.components.GenericStorage(
     label='heat storage',
     nominal_capacity=solph.Investment(
         ep_costs=epc(spec_inv_storage)
     ),
-    inputs={heat_bus: solph.flows.Flow()},
-    outputs={heat_bus: solph.flows.Flow()},
+    inputs={heat_bus: solph.flows.Flow(variable_costs=var_cost_storage)},
+    outputs={heat_bus: solph.flows.Flow(variable_costs=var_cost_storage)},
     invest_relation_input_capacity=1/24,
     invest_relation_output_capacity=1/24,
     balanced=True,
@@ -146,7 +146,7 @@ cap_storage_out = data_caps[('heat storage', 'heat network'), 'invest']
 print(f'capacity gas boiler: {cap_gas_boiler:.1f} MW')
 print(f'capacity heat pump: {cap_heat_pump:.1f} MW')
 print(f'capacity heat storage: {cap_storage:.1f} MWh')
-print(f'capacity heat storage (out): {cap_storage:.1f} MW')
+print(f'capacity heat storage (out): {cap_storage_out:.1f} MW')
 # %%[sec_6_end]
 
 # %%[sec_7_start]
@@ -160,6 +160,8 @@ operation_cost = (
     + (data['gas price'] * data_gas_bus[(('gas network', 'gas boiler'), 'flow')]).sum()
     + var_cost_heat_pump * data_heat_bus[(('heat pump', 'heat network'), 'flow')].sum()
     + (data['el_spot_price'] * data_el_bus[(('electricity network', 'heat pump'), 'flow')]).sum()
+    + var_cost_storage * data_heat_bus[(('heat storage', 'heat network'), 'flow')].sum()
+    + var_cost_storage * data_heat_bus[(('heat network', 'heat storage'), 'flow')].sum()
 )
 heat_produced = data_heat_bus[(('heat network', 'heat sink'), 'flow')].sum()
 
@@ -204,8 +206,8 @@ ax.legend(loc='upper center', ncol=2)
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat production in MWh')
 
-# plt.tight_layout()
-# plt.savefig('intro_tut_dhs_2_hourly_heat_production.svg')
+plt.tight_layout()
+plt.savefig('intro_tut_dhs_2_hourly_heat_production.svg')
 
 
 fig, ax = plt.subplots(figsize=[10, 6])
@@ -220,7 +222,7 @@ ax.plot(
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat storage content in MWh')
 
-# plt.tight_layout()
-# plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
+plt.tight_layout()
+plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
 
-plt.show()
+# plt.show()

@@ -413,7 +413,7 @@ units. The latter are also displayed in :numref:`tab-caps`.
     :end-before: [sec_6_end]
 
 .. list-table:: Optimized heat production unit capacities
-    :name: tab-caps
+    :name: tab-caps-1
     :widths: 1 1 1 1
     :header-rows: 1
 
@@ -422,15 +422,43 @@ units. The latter are also displayed in :numref:`tab-caps`.
       - heat pump
       - heat storage
     * - capacity
-      - 9.9 MW
-      - 6.2 MW
-      - 106.2 MWh
+      - 10.2 MW
+      - 6.0 MW
+      - 98.6 MWh
 
 The results show that the gas boilers capacities is halfed, yet it stays the
-biggest heat production unit, with the heat pump being about 2/3 of the
+biggest heat production unit, with the heat pump being about 60% of the
 boiler's size. Interestingly, the heat production units are not large enough to
 supply the peak load on their own, but rather rely on the storage to support
 them in the few hours of the year when necessary.
+
+.. figure:: /_files/intro_tut_dhs_2_hourly_heat_production.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_2_hourly_heat_production_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_2_hourly_storage_content.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    Storage content over an operating period
+
+.. figure:: /_files/intro_tut_dhs_2_hourly_storage_content_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    Storage content over an operating period
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
@@ -468,11 +496,53 @@ Step 3: Introduce constraints to the heat production units
 
     * Add a slack source for the heat demand
 
-    * Add a thermal energy store or change the parameters of this storage
+    * Add a thermal energy store or change parameters of the existing storage
 
     * Add a new heat production unit
 
 2. Run optimization, get results, what is the difference to before?
+
+.. list-table:: Optimized heat production unit capacities
+    :name: tab-caps-2
+    :widths: 1 1 1 1
+    :header-rows: 1
+
+    * - 
+      - gas boiler
+      - heat pump
+      - heat storage
+    * - capacity
+      - 12.5 MW
+      - 3.9 MW
+      - 86.3 MWh
+
+.. figure:: /_files/intro_tut_dhs_3_hourly_heat_production.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_3_hourly_heat_production_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_3_hourly_storage_content.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    Storage content over an operating period
+
+.. figure:: /_files/intro_tut_dhs_3_hourly_storage_content_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    Storage content over an operating period
 
 3. Expand the waste heat source with a constraint on fixed consumption
 
@@ -482,6 +552,48 @@ Step 3: Introduce constraints to the heat production units
     :end-before: [sec_1_end]
 
 4. Again: Run optimization, get results, what is the difference to before?
+
+.. list-table:: Optimized heat production unit capacities
+    :name: tab-caps-3
+    :widths: 1 1 1 1
+    :header-rows: 1
+
+    * - 
+      - gas boiler
+      - heat pump
+      - heat storage
+    * - capacity
+      - 10.9 MW
+      - 3.5 MW
+      - 542.8 MWh
+
+.. figure:: /_files/intro_tut_dhs_4_hourly_heat_production.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_4_hourly_heat_production_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    System dispatch of heating system with gas boiler
+
+.. figure:: /_files/intro_tut_dhs_4_hourly_storage_content.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-light
+
+    Storage content over an operating period
+
+.. figure:: /_files/intro_tut_dhs_4_hourly_storage_content_darkmode.svg
+    :align: center
+    :alt: System dispatch of heating system with gas boiler
+    :figclass: only-dark
+
+    Storage content over an operating period
 
 .. admonition:: Learnings
     :class: important
