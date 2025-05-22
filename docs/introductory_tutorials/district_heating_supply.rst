@@ -385,9 +385,9 @@ with the :math:`LCOH` function in the ``helpers.py`` utility file.
     now on like this: ``from helpers import LCOH, epc``
 
 This concludes the addition of the heat pump and we can continue by adding the
-thermal energy storage. This time only specific invest cost are considered, as
-operational cost of heat storage are often negligible. Then again, the
-:py:class:`solph.components.GenericStorage` class takes some additional
+thermal energy storage. Again, we are considering specific invest cost as well
+as operational cost while charging and discharging the storage. Besides that,
+the :py:class:`solph.components.GenericStorage` class takes some additional
 arguments we will supply. Besides defining the in- and output with an empty
 flow, we pass the constant relation between their nominal flows and the
 storage's capacity to be optimized. The value of 1/24 is chosen so that the TES
@@ -405,7 +405,7 @@ Last of all, we define a constant relative loss factor of 0.001 per timestep or
 Now we can finally run the model and extract the optimization results again. In
 addition to the data in the previous step, we also pull out data for the
 electricity bus as well as the optimized capacities of our heat production
-units. The latter are also displayed in :numref:`tab-caps`.
+units. The latter are also displayed in :numref:`tab-caps-1`.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
@@ -430,42 +430,76 @@ The results show that the gas boilers capacities is halfed, yet it stays the
 biggest heat production unit, with the heat pump being about 60% of the
 boiler's size. Interestingly, the heat production units are not large enough to
 supply the peak load on their own, but rather rely on the storage to support
-them in the few hours of the year when necessary.
+them in the few hours of the year where it is necessary. The TES itself is
+sized to store about 10 hours of full load production of the gas boiler. To
+investigate how the units are actually dispatched, let's plot the hourly heat
+production again. Furthermore, we can plot the heat storages hourly content to
+help our understanding of the district heating system.
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
+    :language: python
+    :start-after: [sec_8_start]
+    :end-before: [sec_8_end]
+
+Below you can see the two plots created from the code snippet above. We can see
+that the heat pump is used to deliver the base load most of the time throughout
+the year. During the heating period the gas boiler is dispatched together with
+the heat pump to cover the middle load. As suspected from the optimized
+capacities, the heat storage then joins the other two units to supply the peak
+load. It is also employed to cover the summer demand when it falls below the
+nominal capacity of the heat pump, which is used in tandem with the storage to
+avoid part load operation.
 
 .. figure:: /_files/intro_tut_dhs_2_hourly_heat_production.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with gas boiler, heat pump and storage
     :figclass: only-light
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with gas boiler, heat pump and storage
 
 .. figure:: /_files/intro_tut_dhs_2_hourly_heat_production_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with gas boiler, heat pump and storage
     :figclass: only-dark
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with gas boiler, heat pump and storage
+
+The hourly storage content plot reinforces our assumptions about its usage
+within the district heating system. It is filled for peak load early in the
+year, then empty for a while until the summer demand makes it desirable again.
+This holds true for almost the rest of the year until it phases out again, with
+the exception of a peak load case in december.
 
 .. figure:: /_files/intro_tut_dhs_2_hourly_storage_content.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period
     :figclass: only-light
 
-    Storage content over an operating period
+    Storage content over the operating period
 
 .. figure:: /_files/intro_tut_dhs_2_hourly_storage_content_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period
     :figclass: only-dark
 
-    Storage content over an operating period
+    Storage content over the operating period
+
+Let's conclude our result analysis by recalculating the :math:`LCOH` of the
+newly designed system. The computation works analogous to the one before, but
+with additional investment and operational cost of the new heat production
+units. Make sure to correctly import the ``LCOH`` function, if you moved it to
+the ``helpers.py`` file like we did.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_2.py
     :language: python
     :start-after: [sec_7_start]
     :end-before: [sec_7_end]
 
-:math:`LCOH`: 18.61 €/MWh
+The calculation yields a :math:`LCOH` of 18.61 €/MWh, which is slightly cheaper
+then the one we got from only using the gas boiler in the step before. We
+ommited any ecological analysis or emission calculation to keep the tutorial
+concise, but it is self-evident that reducing gas boiler heat covarage in
+favor of Power-to-Heat technologies has environmental benefits as well.
 
 .. admonition:: Learnings
     :class: important

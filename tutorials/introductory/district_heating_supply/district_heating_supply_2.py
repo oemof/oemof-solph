@@ -173,6 +173,7 @@ import matplotlib.pyplot as plt
 
 # plt.style.use('dark_background')
 
+# %%[sec_8_start]
 unit_colors = {
     'gas boiler': '#EC6707',
     'heat pump': '#B54036',
@@ -206,8 +207,8 @@ ax.legend(loc='upper center', ncol=2)
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat production in MWh')
 
-plt.tight_layout()
-plt.savefig('intro_tut_dhs_2_hourly_heat_production.svg')
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_2_hourly_heat_production.svg')
 
 
 fig, ax = plt.subplots(figsize=[10, 6])
@@ -222,7 +223,8 @@ ax.plot(
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat storage content in MWh')
 
-plt.tight_layout()
-plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_2_hourly_storage_content.svg')
 
-# plt.show()
+plt.show()
+# %%[sec_8_end]
