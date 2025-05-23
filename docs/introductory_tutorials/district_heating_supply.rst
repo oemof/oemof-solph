@@ -592,46 +592,85 @@ before.
       - 5.7 MW
       - 91.1 MWh
 
+.. note::
+    Especially when introducing an optimality tolerance, but also in the case
+    of flat optima, different solutions to the same optimization problem can
+    result in similar objective values. Keep that in mind when comparing your
+    results with ours and in future analyses.
+
 To check for any significant changes of the hourly unit dispatch, let's create
 the plots from before again. They don't need any adaptation, so we don't show
 the code again.
 
 .. figure:: /_files/intro_tut_dhs_3_hourly_heat_production.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with minimum part load of heat pump
     :figclass: only-light
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with minimum part load of heat pump
 
 .. figure:: /_files/intro_tut_dhs_3_hourly_heat_production_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with minimum part load of heat pump
     :figclass: only-dark
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with minimum part load of heat pump
+
+We can visually confirm the enforcement of minimum part load by observing the
+valleys of the heat pump heat production. While those reach deeper in the
+previous plot, this time we can see them being half the height of full load
+operation, which is exactly what we imposed. As to be expected from the
+similar size of capacities, we don't see any major differences in the unit
+dispatch.
+
+For the sake of completeness, we'll have a look at the storage content as well.
+It shows even fewer obvious dissimilarities to the previous plot.
 
 .. figure:: /_files/intro_tut_dhs_3_hourly_storage_content.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period with minimum part load of heat pump
     :figclass: only-light
 
-    Storage content over an operating period
+    Storage content over the operating period with minimum part load of heat pump
 
 .. figure:: /_files/intro_tut_dhs_3_hourly_storage_content_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period with minimum part load of heat pump
     :figclass: only-dark
 
-    Storage content over an operating period
+    Storage content over the operating period with minimum part load of heat pump
 
-3. Expand the waste heat source with a constraint on fixed consumption
+As the :math:`LCOH` comes out only a few cents higher than before, we also
+don't spend too much time on economical analysis. Rather, let's have a look at
+the last constraint we want to add to our district heating system model. Up
+until now, we didn't impose any restriction on the amount of wast heat we could
+obtain from the source. In reality, often this isn't the case at all. If the
+heat comes from an industrial process, it likely runs as much as possible and
+oftentimes produces a constant rate of excess heat. Depending on agreements or
+contracts between the waste heat supplier and the district heating system
+operator, using the waste heat at any time could be obligated.
+
+For our last example, let's say this is the case. We decide that a constant
+2.5 MW of excess heat is produced at all times throughout the year.
+Furthermore, we agree to use it in our district heating system every time as
+well. We can model this behavior by adding the :py:attr:`fix` parameter to the
+definition of the waste heat source and passing the amount to it.
+:py:attr:`fix` can also take a time series of values and is multiplied with the
+:py:attr:`nominal_value` elementwise to compute the amount supplied to the
+energy system in all time intervals. In this example, we'll do without
+considering any cost for the usage of waste heat, but feel free play around
+with that on your own.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_4.py
     :language: python
     :start-after: [sec_1_start]
     :end-before: [sec_1_end]
 
-4. Again: Run optimization, get results, what is the difference to before?
+As this is the only change we'll perform, we can have a look at the results
+again. :numref:`tab-caps-3` shows the capacities, with the gas boiler coming
+out slightly larger again. The heat pump is excatly 3.5 MW, which you can
+ponder for a moment to why this occured. In contrast to the previous examples,
+the heat storage is much larger and can work as more than just a daily buffer.
 
 .. list-table:: Optimized heat production unit capacities
     :name: tab-caps-3
@@ -647,43 +686,52 @@ the code again.
       - 3.5 MW
       - 542.8 MWh
 
+To possibly confirm a suspicion of yours about how the size of the heat pump
+came about, let's have a look at the unit commitment in the figure below. We
+can see that the heat pump is always running at full capacity. This results
+from the new constraint we subjected the waste heat source to. The biggest
+other difference is the extended usage of the heat storage, which has to pick
+up excess heat production of the heat pump during the low summer load. This is
+also seen in the storage content plot below the unit commitment figure.
+Beyond that, we see peaks of usage during the heating period.
+
 .. figure:: /_files/intro_tut_dhs_4_hourly_heat_production.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with fixed waste heat source
     :figclass: only-light
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with fixed waste heat source
 
 .. figure:: /_files/intro_tut_dhs_4_hourly_heat_production_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: System dispatch of heating system with fixed waste heat source
     :figclass: only-dark
 
-    System dispatch of heating system with gas boiler
+    System dispatch of heating system with fixed waste heat source
 
 .. figure:: /_files/intro_tut_dhs_4_hourly_storage_content.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period with fixed waste heat source
     :figclass: only-light
 
-    Storage content over an operating period
+    Storage content over the operating period with fixed waste heat source
 
 .. figure:: /_files/intro_tut_dhs_4_hourly_storage_content_darkmode.svg
     :align: center
-    :alt: System dispatch of heating system with gas boiler
+    :alt: Storage content over the operating period with fixed waste heat source
     :figclass: only-dark
 
-    Storage content over an operating period
+    Storage content over the operating period with fixed waste heat source
 
 .. admonition:: Learnings
     :class: important
 
     After the third step of this tutorial you should be able to do the following:
 
-    * Add or change key word arguments to customize heat production units
-
-    * Deal with theoretically unsolvable optimization problems
+    * Add or change key word arguments to add constraints to heat production units
 
     * Understand the functionality of minimum load constraints as well as the impact of fixed and variable sources
 
-    * Analyse results of design and dispatch
+    * Understand the implications of adding mixed integer linear constraints compared to purely linear problems
+
+    * Deal with theoretically unsolvable optimization problems
