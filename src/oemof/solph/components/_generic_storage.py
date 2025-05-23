@@ -1193,24 +1193,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         """Create a storage block for investment modeling"""
         m = self.parent_block()
 
-        # ########################## CHECKS ###################################
-        if m.es.investment_times is not None:
-            for n in group:
-                error_fixed_absolute_losses = (
-                    "For a multi-period investment model, fixed absolute"
-                    " losses are not supported. Please remove parameter."
-                )
-                if n.fixed_losses_absolute[0] != 0:
-                    raise ValueError(error_fixed_absolute_losses)
-                error_initial_storage_level = (
-                    "For a multi-period model, initial_storage_level is"
-                    " not supported.\nIt needs to be removed since it"
-                    " has no effect.\nstorage_content will be zero,"
-                    " until there is some usable storage capacity installed."
-                )
-                if n.initial_storage_level is not None:
-                    raise ValueError(error_initial_storage_level)
-
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
