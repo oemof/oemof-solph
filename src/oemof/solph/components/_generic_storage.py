@@ -1313,28 +1313,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=0,
         )
 
-        if m.es.investment_times is not None:
-            # Old capacity to be decommissioned (due to lifetime)
-            self.old = Var(
-                self.INVESTSTORAGES,
-                m.CAPACITY_PERIODS,
-                within=NonNegativeReals,
-            )
-
-            # Old endogenous capacity to be decommissioned (due to lifetime)
-            self.old_end = Var(
-                self.INVESTSTORAGES,
-                m.CAPACITY_PERIODS,
-                within=NonNegativeReals,
-            )
-
-            # Old exogenous capacity to be decommissioned (due to lifetime)
-            self.old_exo = Var(
-                self.INVESTSTORAGES,
-                m.CAPACITY_PERIODS,
-                within=NonNegativeReals,
-            )
-
         # create status variable for a non-convex investment storage
         self.invest_status = Var(
             self.NON_CONVEX_INVESTSTORAGES, m.CAPACITY_PERIODS, within=Binary
