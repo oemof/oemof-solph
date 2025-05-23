@@ -103,10 +103,12 @@ heat_pump = solph.components.Converter(
     outputs={
         heat_bus: solph.flows.Flow(
             nominal_value=solph.Investment(
-                ep_costs=epc(spec_inv_heat_pump)
+                ep_costs=epc(spec_inv_heat_pump),
+                maximum=999
                 ),
             variable_costs=1.2,
-            min=0.5
+            min=0.5,
+            nonconvex=solph.NonConvex()
         )
     },
     conversion_factors={
@@ -117,10 +119,15 @@ heat_pump = solph.components.Converter(
 district_heating_system.add(heat_pump)
 # %%[sec_1_end]
 
+# %%[sec_2_start]
 # solve model
 model = solph.Model(district_heating_system)
-model.solve(solver="cbc", solve_kwargs={"tee": True})
-# model.solve(solver="gurobi", solve_kwargs={"tee": True})
+model.solve(
+    solver="cbc",
+    solve_kwargs={"tee": True}, cmdline_options={'ratio': 0.01},
+    allow_nonoptimal=True
+)
+# %%[sec_2_end]
 
 # results
 results = solph.processing.results(model)
@@ -162,7 +169,7 @@ print(f'LCOH: {lcoh:.2f} €/MWh')
 
 import matplotlib.pyplot as plt
 
-plt.style.use('dark_background')
+# plt.style.use('dark_background')
 
 unit_colors = {
     'gas boiler': '#EC6707',
@@ -197,8 +204,8 @@ ax.legend(loc='upper center', ncol=2)
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat production in MWh')
 
-plt.tight_layout()
-plt.savefig('intro_tut_dhs_3_hourly_heat_production_darkomde.svg')
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_3_hourly_heat_production.svg')
 
 
 fig, ax = plt.subplots(figsize=[10, 6])
@@ -213,7 +220,7 @@ ax.plot(
 ax.grid(axis='y')
 ax.set_ylabel('Hourly heat storage content in MWh')
 
-plt.tight_layout()
-plt.savefig('intro_tut_dhs_3_hourly_storage_content_darkomde.svg')
+# plt.tight_layout()
+# plt.savefig('intro_tut_dhs_3_hourly_storage_content.svg')
 
-# plt.show()
+plt.show()
