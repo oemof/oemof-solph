@@ -69,7 +69,7 @@ def main(optimize=True):
 
     # Create an energy system and optimize the dispatch at least costs.
     # ####################### initialize and provide data #####################
-    datetimeindex = create_time_index(2016, number=len(data))
+    datetimeindex = create_time_index(2016, number_of_intervals=len(data))
     energysystem = EnergySystem(
         timeindex=datetimeindex, infer_last_interval=False
     )

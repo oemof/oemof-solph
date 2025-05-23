@@ -130,7 +130,9 @@ def main(optimize=True):
     logging.info("Initialize the energy system")
 
     # create time index for 192 hours in May.
-    date_time_index = solph.create_time_index(2012, number=len(data))
+    date_time_index = solph.create_time_index(
+        2012, number_of_intervals=len(data)
+    )
 
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=False

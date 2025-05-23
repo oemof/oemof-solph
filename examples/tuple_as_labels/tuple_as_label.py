@@ -157,7 +157,9 @@ def main(optimize=True):
 
     logging.info("Initialize the energy system")
     energysystem = EnergySystem(
-        timeindex=create_time_index(2012, number=number_of_time_steps),
+        timeindex=create_time_index(
+            2012, number_of_intervals=number_of_time_steps
+        ),
         infer_last_interval=False,
     )
 

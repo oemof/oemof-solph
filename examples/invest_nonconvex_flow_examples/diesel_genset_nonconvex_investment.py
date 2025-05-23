@@ -101,7 +101,7 @@ def main(optimize=True):
 
     # Create the energy system.
     date_time_index = solph.create_time_index(
-        number=n_days * 24, start=start_date
+        number_of_intervals=n_days * 24, start=start_date
     )
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=False

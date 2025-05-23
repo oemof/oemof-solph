@@ -52,9 +52,11 @@ def warn_if_missing_attribute(obj, attribute):
 
 def create_time_index(
     year: int = None,
-    interval: float = 1,
-    number: int = None,
+    interval_length: float = None,
+    number_of_intervals: int = None,
     start: datetime.date = None,
+    number: int = None,
+    interval: float = None,
 ):
     """
     Create a datetime index for one year.
@@ -70,10 +72,10 @@ def create_time_index(
     year : int, datetime
         The year of the index.
         Used to automatically set start and number for the specific year.
-    interval : float
-        The time interval in hours e.g. 0.5 for 30min or 2 for a two hour
-        interval (default: 1).
-    number : int
+    interval_length : float
+        The length time interval in hours e.g. 0.5 for 30min or 2 for a
+        two hour interval (default: 1).
+    number_of_intervals : int
         The number of time intervals. By default number is calculated to create
         an index of one year. For a shorter or longer period the number of
         intervals can be set by the user.
@@ -98,12 +100,30 @@ def create_time_index(
     >>> str(create_time_index(2014, interval=2, number=10)[-1])
     '2014-01-01 20:00:00'
     """
-    if number is None:
+    if number is not None:
+        warnig_text = "The argument 'number_of_intervals' repleaces 'number'."
+        if number_of_intervals is None:
+            warn(warnig_text)
+            number_of_intervals = number
+        else:
+            raise AttributeError(warnig_text + " You cannot set both!")
+
+    if interval is not None:
+        warnig_text = "The argument 'interval_length' repleaces 'interval'."
+        if interval_length is None:
+            warn(warnig_text)
+            interval_length = interval
+        else:
+            raise AttributeError(warnig_text + " You cannot set both!")
+    if interval_length is None:
+        interval_length = 1
+
+    if number_of_intervals is None:
         if calendar.isleap(year):
             hours_in_year = 8784
         else:
             hours_in_year = 8760
-        number = round(hours_in_year / interval)
+        number_of_intervals = round(hours_in_year / interval_length)
     if start is not None:
         if year is not None:
             raise ValueError(
@@ -113,11 +133,11 @@ def create_time_index(
         start = f"1/1/{year}"
     try:
         time_index = pd.date_range(
-            start, periods=number + 1, freq=f"{interval}h"
+            start, periods=number_of_intervals + 1, freq=f"{interval_length}h"
         )
     except ValueError:
         # Pandas <2.2 compatibility
         time_index = pd.date_range(
-            start, periods=number + 1, freq=f"{interval}H"
+            start, periods=number_of_intervals + 1, freq=f"{interval_length}H"
         )
     return time_index

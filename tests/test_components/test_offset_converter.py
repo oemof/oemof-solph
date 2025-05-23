@@ -16,7 +16,7 @@ from oemof.solph.components._offset_converter import (
 
 def create_energysystem_stub(num_in, num_out):
     es = solph.EnergySystem(
-        timeindex=solph.create_time_index(year=2023, number=9),
+        timeindex=solph.create_time_index(year=2023, number_of_intervals=9),
         infer_last_interval=True,
     )
 

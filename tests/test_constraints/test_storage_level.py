@@ -7,7 +7,9 @@ def test_storage_level_constraint():
     n_time_steps = 10
 
     es = solph.EnergySystem(
-        timeindex=solph.create_time_index("2022-01-01", number=n_time_steps),
+        timeindex=solph.create_time_index(
+            "2022-01-01", number_of_intervals=n_time_steps
+        ),
         infer_last_interval=False,
     )
 
