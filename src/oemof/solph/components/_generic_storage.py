@@ -1337,9 +1337,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     else:
                         expr = (
                             self.total[n, p]
-                            == self.invest[n, p]
-                            + self.total[n, p - 1]
-                            - self.old[n, p]
+                            == self.invest[n, p] + self.total[n, p - 1]
                         )
                         self.total_storage_rule.add((n, p), expr)
 
@@ -1636,76 +1634,40 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def _add_storage_limit_constraints(self):
         m = self.parent_block()
         if not m.TSAM_MODE:
-            if m.es.investment_times is None:
 
-                def _max_storage_content_invest_rule(_, n, t):
-                    """
-                    Rule definition for upper bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        <= self.total[n, 0] * n.max_storage_level[t]
-                    )
-                    return expr
-
-                self.max_storage_content = Constraint(
-                    self.INVESTSTORAGES,
-                    m.TIMEPOINTS,
-                    rule=_max_storage_content_invest_rule,
+            def _max_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition for upper bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    <= self.total[n, 0] * n.max_storage_level[t]
                 )
+                return expr
 
-                def _min_storage_content_invest_rule(_, n, t):
-                    """
-                    Rule definition of lower bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        >= self.total[n, 0] * n.min_storage_level[t]
-                    )
-                    return expr
+            self.max_storage_content = Constraint(
+                self.INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_max_storage_content_invest_rule,
+            )
 
-                self.min_storage_content = Constraint(
-                    self.MIN_INVESTSTORAGES,
-                    m.TIMEPOINTS,
-                    rule=_min_storage_content_invest_rule,
+            def _min_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition of lower bound constraint for the
+                storage content.
+                """
+                expr = (
+                    self.storage_content[n, t]
+                    >= self.total[n, 0] * n.min_storage_level[t]
                 )
-            else:
+                return expr
 
-                def _max_storage_content_invest_rule(_, n, p, t):
-                    """
-                    Rule definition for upper bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        <= self.total[n, p] * n.max_storage_level[t]
-                    )
-                    return expr
-
-                self.max_storage_content = Constraint(
-                    self.INVESTSTORAGES,
-                    m.TIMEINDEX,
-                    rule=_max_storage_content_invest_rule,
-                )
-
-                def _min_storage_content_invest_rule(_, n, p, t):
-                    """
-                    Rule definition of lower bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        >= self.total[n, p] * n.min_storage_level[t]
-                    )
-                    return expr
-
-                self.min_storage_content = Constraint(
-                    self.MIN_INVESTSTORAGES,
-                    m.TIMEINDEX,
-                    rule=_min_storage_content_invest_rule,
-                )
+            self.min_storage_content = Constraint(
+                self.MIN_INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_min_storage_content_invest_rule,
+            )
         else:
 
             def _storage_inter_maximum_level_rule(block):
