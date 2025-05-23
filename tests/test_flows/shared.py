@@ -13,7 +13,7 @@ import pandas as pd
 from oemof import solph
 
 
-def _run_flow_model(flow):
+def _run_flow_model(flow, variable="flow"):
     date_time_index = pd.date_range("1/1/2012", periods=10, freq="h")
     energysystem = solph.EnergySystem(
         timeindex=date_time_index,
@@ -27,4 +27,4 @@ def _run_flow_model(flow):
     model = solph.Model(energysystem)
     model.solve()
 
-    return solph.processing.results(model)[(bus, bus)]["sequences"]
+    return solph.Results(model)[variable][(bus, bus)]
