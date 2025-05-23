@@ -517,7 +517,26 @@ favor of Power-to-Heat technologies has environmental benefits as well.
 Step 3: Introduce constraints to the heat production units
 ----------------------------------------------------------
 
-1. Introduce a minimal load constraint for the heat pump
+To round off this tutorial, let's add some more realistic constraints to our
+heat pump. We will begin by enforcing a relative minimum part load and finish
+by constraining the waste heat source.
+
+To implement the minimum part load constraint we have to change the definition
+of our heat pump converter. The :py:attr:`min` keyword takes a relative
+minimum part load that is multiplied with the nominal capacity or invest
+variable to form a lower bound of the flow. Passing ``0.5`` results in a
+minimum heat production of 50% its nominal value. If we only set this argument,
+the heat pump would always have to produce at least this amount of heat. As we
+also want to allow it to be switched off, we have to use a mixed integer linear
+formulation, instead of the purely linear one we used until now. That is
+achieved by setting the :py:attr:`nonconvex` argument to an instance of the
+:py:class:`solph.NonConvex` class. This powerful object also allows for setting
+minimum and maximum up- or downtimes and startups as well as gradient limits.
+A side effect of setting the :py:attr:`nonconvex` parameter is, that we also
+have to pass an upper limit to the :py:class:`solph.Investment` instance via
+the :py:attr:`maximum` parameter. To not interfere with the free optimization
+of the nominal capacity, we can set it to an amount that is arbitrarily larger
+than the peak load, so we decide on 999 MW.
 
 .. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_3.py
     :language: python
@@ -534,7 +553,30 @@ Step 3: Introduce constraints to the heat production units
 
     * Add a new heat production unit
 
-2. Run optimization, get results, what is the difference to before?
+As these changes introduce mixed integer linear formulations, the CBC solver is
+taking longer to solve the optimization problem and may not reach optimality in
+a feasable time frame. We can reach a solution that is good enough for our
+standards by introducing the concept of an optimality tolerance or MIP Gap. It
+describes a relative tolerance to a known optimal objective value from a
+solution, that is small enough to tolerate to us. For example, we can decide
+that a solution that is within 1% of the optimum is precise enough for us that
+we don't need the solver to potentially run for hours longer to reach it. Each
+solver has its own parameter to control this behavior. Using CBC, we can set
+the ``'ratio'`` key of the :py:attr:`cmdline_options` parameter to the desired
+tolerance. As this will likely lead to an early termination short of optimality
+(as is also intended), we have to set the :py:attr:`allow_nonoptimal` flag to
+``True`` in order to avoid raising an exception.
+
+.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_3.py
+    :language: python
+    :start-after: [sec_2_start]
+    :end-before: [sec_2_end]
+
+We extract the optimized unit capacities just as we did before.
+:numref:`tab-caps-2` contains those results, which are not too far off from the
+previous solution without the minimum part load constraint. This shouldn't be
+too confusing, as the heat pump hasn't been operated in part load very often
+before.
 
 .. list-table:: Optimized heat production unit capacities
     :name: tab-caps-2
@@ -546,9 +588,13 @@ Step 3: Introduce constraints to the heat production units
       - heat pump
       - heat storage
     * - capacity
-      - 12.5 MW
-      - 3.9 MW
-      - 86.3 MWh
+      - 10.6 MW
+      - 5.7 MW
+      - 91.1 MWh
+
+To check for any significant changes of the hourly unit dispatch, let's create
+the plots from before again. They don't need any adaptation, so we don't show
+the code again.
 
 .. figure:: /_files/intro_tut_dhs_3_hourly_heat_production.svg
     :align: center
