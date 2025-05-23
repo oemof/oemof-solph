@@ -134,20 +134,17 @@ class EnergySystem(es.EnergySystem):
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None and timeindex is not None:
-            if investment_times is None:
-                msg = (
-                    "Specifying the timeincrement and the timeindex parameter "
-                    "at the same time is not allowed since these might be "
-                    "conflicting to each other."
-                )
-                raise AttributeError(msg)
-            else:
-                msg = (
-                    "Ensure that your timeindex and timeincrement are "
-                    "consistent."
-                )
-                warnings.warn(msg, debugging.ExperimentalFeatureWarning)
+            msg = (
+                "Specifying the timeincrement and the timeindex parameter "
+                "at the same time is not allowed since these might be "
+                "conflicting to each other."
+            )
+            raise AttributeError(msg)
 
+        elif timeindex is None and timeincrement is not None:
+            timeindex = pd.Index(
+                np.append(np.array([0]), np.cumsum(timeincrement))
+            )
         elif timeindex is not None and timeincrement is None:
             if tsa_parameters is not None:
                 pass
@@ -218,12 +215,14 @@ class EnergySystem(es.EnergySystem):
             timeincrement=timeincrement,
         )
 
-        if investment_times is None:
-            self.investment_times = [self.timeindex[0]]
-        else:
-            self.investment_times = sorted(
-                set([self.timeindex[0]] + investment_times)
-            )
+        # bare system to load pickled data
+        if self.timeindex is not None:
+            if investment_times is None:
+                self.investment_times = [self.timeindex[0]]
+            else:
+                self.investment_times = sorted(
+                    set([self.timeindex[0]] + investment_times)
+                )
 
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
