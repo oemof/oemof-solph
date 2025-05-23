@@ -23,7 +23,8 @@ Step 1: Plugged EV as load
 Within the first step we want to simulate a plugged EV as load with pre-calculated charging time series Charged EV with predefined trips for load.
 First of all, we create some input data. We use Pandas to do so and will also
 import matplotlib to plot the data.
-Further for plotting we use a helper function from helpers.py (within this folder)
+Further for plotting we use a helper function from
+:download:`helpers.py </../tutorials/introductory/ev_charging/helpers.py>`.
 
 .. literalinclude:: /../tutorials/introductory/ev_charging/ev_charging_1.py
     :language: python
@@ -65,12 +66,12 @@ Lets look at the driving pattern
     :start-after: [plot_trip_data_start]
     :end-before: [plot_trip_data_end]
 
-.. figure:: /./_files/driving_pattern.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_pattern.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure::/./_files/driving_pattern_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_pattern_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -128,7 +129,7 @@ While `nx.draw` is handy to just have a quick look without too many extra
 tools, writing the graph `dot` allows for handling in specialised programs.
 The folloing has been created using
 
-.. figure:: /./_files/ev_charging_graph_1.svg
+.. figure:: /./_files/tutorial_ev-charging/ev_charging_graph_1.svg
     :align: center
     :alt: Energy system graph in step 1
 
@@ -159,12 +160,12 @@ The results are showing that the EV is using the battery while driving.
     :start-after: [plot_results_start]
     :end-before: [plot_results_end]
 
-.. figure:: /./_files/driving_demand_only.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_demand_only.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/driving_demand_only_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_demand_only_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -221,12 +222,12 @@ As it's not possible to load it completely in the afternoon,
 it is charged to 100 % just before the first leaving.
 
 
-.. figure:: /./_files/driving_domestic_power_socket.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_domestic_power_socket.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/driving_domestic_power_socket_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_domestic_power_socket_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -272,12 +273,12 @@ A possible solution will be introducted within the next step.
 
 Further we can see, the battery is charged when the car is at work, because the charging is free.
 
-.. figure:: /./_files/driving_home_and_work_charging.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_home_and_work_charging.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/driving_home_and_work_charging_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_home_and_work_charging_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -331,7 +332,7 @@ so the created timeseries from above is used and set to :py:attr:`max`.
 
 The final energy system graph now looks like this:
 
-.. figure:: /./_files/ev_charging_graph_4.svg
+.. figure:: /./_files/tutorial_ev-charging/ev_charging_graph_4.svg
     :align: center
     :alt: Energy system graph in step 4
 
@@ -341,12 +342,12 @@ Looking at the results:
 - The battery will be loaded for free within the working period
 - There is a discharging at home at the evening to save money
 
-.. figure:: /./_files/driving_bidirectional_constant_costs.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_bidirectional_constant_costs.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/driving_bidirectional_constant_costs_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/driving_bidirectional_constant_costs_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -386,12 +387,12 @@ Assuming the following prices:
 
 Lets have a look on the dynamic prices
 
-.. figure:: /./_files/dynamic_price.svg
+.. figure:: /./_files/tutorial_ev-charging/dynamic_price.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/dynamic_price_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/dynamic_price_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark
@@ -410,12 +411,12 @@ we set the :py:attr:`variable_costs` to the dynamic price or rather to the negat
 Looking at the results the battery is loaded before 6 a.m. with the cheap price of 5 ct/kWh right before the first leaving
 to get 50 ct/kWh. The battery is recharged for free at the work and in the evening discharged to get 70 ct/kWh.
 
-.. figure:: /./_files/drivining_bidirectional_dynamic_costs.svg
+.. figure:: /./_files/tutorial_ev-charging/drivining_bidirectional_dynamic_costs.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-light
 
-.. figure:: /./_files/drivining_bidirectional_dynamic_costs_dark_mode.svg
+.. figure:: /./_files/tutorial_ev-charging/drivining_bidirectional_dynamic_costs_dark_mode.svg
     :align: center
     :alt: Driving pattern
     :figclass: only-dark

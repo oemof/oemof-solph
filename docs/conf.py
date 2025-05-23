@@ -52,7 +52,7 @@ version = oemof.solph.__version__.split(" ")[0]
 release = oemof.solph.__version__
 
 # The suffix of source filenames.
-source_suffix = {".rst": 'restructuredtext'}
+source_suffix = {".rst": "restructuredtext"}
 # folder for templates
 templates_path = ["_templates"]
 

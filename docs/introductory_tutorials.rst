@@ -37,11 +37,7 @@ you have any questions please reach out to the
         :link: home_pv_battery_system_label
         :link-type: ref
 
-        .. image:: /_files/example_network.svg
-            :class: only-light
-
-        .. image:: /_files/example_network.svg
-            :class: only-dark
+        .. image:: /_files/tutorial_home-pv/home_pv_graph_5.svg
 
 .. grid:: 2
     :gutter: 1
@@ -50,4 +46,4 @@ you have any questions please reach out to the
         :link: ev_charging_label
         :link-type: ref
 
-        .. image:: /_files/ev_charging_graph_4.svg
+        .. image:: /_files/tutorial_ev-charging/ev_charging_graph_4.svg
