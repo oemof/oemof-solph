@@ -78,6 +78,10 @@ extlinks = {
     "commit": (f"{github_repo_url}/commit/%s", "%s"),  # noqa: WPS323
 }
 
+# Automatic numbering of figures, tables, etc.
+numfig = True
+numfig_secnum_depth = 1
+
 # -- Options for HTML output ----------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.

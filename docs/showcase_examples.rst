@@ -28,6 +28,41 @@ accessible freely, so other users can explore and learn from your project.
     interactively. You can use the online variant or clone it to run it on
     self-hosted servers.
 
+
+.. card::
+
+    **Dashboard for optimization of heating supply systems**
+    ^^^
+
+    .. image:: /_files/showcase_owp.png
+      :align: center
+      :alt: screenshot owp dashboard
+      :class: only-light
+      :target: https://owp-inno-nord.streamlit.app
+
+    .. image:: /_files/showcase_owp_darkmode.png
+      :align: center
+      :alt: screenshot owp dashboard
+      :class: only-dark
+      :target: https://owp-inno-nord.streamlit.app
+
+    The streamlit dashboard supports the creation of heating supply system 
+    concepts. This user-friendly tool is developed as part of a research 
+    project at the Flensburg University of Applied Sciences with the aim of 
+    lowering the entry barrier to energy system analysis for non-experts.
+
+    +++
+    Title: Dashboard for optimization of heating supply systems
+
+    Authors: Malte Fritz, Jonas Freißmann
+
+    URL: https://owp-inno-nord.streamlit.app
+
+    GitHub: https://github.com/maltefritz/owp_milp_optimization
+
+    Language: German
+
+
 .. card::
 
     **Spreadsheet Energy System Model Generator**

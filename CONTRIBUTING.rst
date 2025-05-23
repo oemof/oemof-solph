@@ -47,17 +47,13 @@ To set up `oemof-solph` for local development:
 
     git clone git@github.com:$(your_github_account)/oemof-solph.git
 
-3. Install oemof.solph in editable mode with dev dependencies::
+3. Create a branch for local development::
 
-    pip install -e ./path/to/local/clone[dev]
-
-4. Create a branch for local development::
-
-    `git checkout -b features/name-of-your-feature` or  `git checkout -b fix/name-of-your-fix`
+    git checkout -b name-of-your-bugfix-or-feature
 
    Now you can make your changes locally.
 
-5. When you're done making changes run all the checks and docs builder with `tox <https://tox.wiki/en/latest/installation.html>`_ one command::
+4. When you're done making changes run all the checks and docs builder with `tox <https://tox.wiki/en/latest/installation.html>`_ one command::
 
     tox
 
@@ -67,7 +63,7 @@ To set up `oemof-solph` for local development:
     git commin
     git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+6. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 -----------------------
@@ -85,6 +81,7 @@ For merging, you should:
        you can rely on the CI pipeline at GitHub.
 
        It will be slower though ...
+
 
 Tests
 -----
@@ -109,6 +106,7 @@ Note, to combine the coverage data from all the tox environments run:
       - ::
 
             PYTEST_ADDOPTS=--cov-append tox
+
 
 Tips
 ----

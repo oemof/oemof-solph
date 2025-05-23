@@ -86,6 +86,7 @@ If you call dump/restore without any parameters, the dump will be stored as *'es
 See :ref:`oemof_outputlib_label` to learn how to process, plot and analyse the results.
 
 
+.. _oemof_solph_components_label:
 
 
 
