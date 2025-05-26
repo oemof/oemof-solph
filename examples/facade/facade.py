@@ -42,14 +42,13 @@ from oemof.solph._facades import Facade
 
 class DSO(Facade):
     def __init__(self, label, el_bus, *args, energy_price, feedin_tariff):
-        super().__init__(*args, label=label, facade_type=type(self))
         self.energy_price = energy_price
         self.feedin_tariff = feedin_tariff
         self.el_bus = el_bus
+        super().__init__(*args, label=label, facade_type=type(self))
 
-    def build_subnetwork(self):
+    def define_subnetwork(self):
         internal_bus = Bus(custom_properties={"sub_label": "internal_bus"})
-        self.add_subnode(internal_bus)
 
         feedin = Converter(
             inputs={self.el_bus: Flow(variable_costs=self.feedin_tariff)},
@@ -60,7 +59,6 @@ class DSO(Facade):
             inputs={internal_bus: Flow()},
             label=self.sub_component_labelling("feedin_sink"),
         )
-        self.add_subnode(sink, feedin)
 
         bus_c = Bus()
         consumption = Converter(
@@ -72,7 +70,9 @@ class DSO(Facade):
             outputs={internal_bus: Flow()},
             label=self.sub_component_labelling("consumption_sink"),
         )
-        self.add_subnode(source, consumption)
+        self.add_subnode(
+            bus_c, source, consumption, sink, feedin, internal_bus
+        )
 
 
 # class CriticalDemand(Facade):

@@ -18,15 +18,12 @@ class Facade(SubNetwork):
     def __init__(self, label, facade_type, *args, **kwargs):
         super().__init__(label=label)
         self.facade_type = facade_type
-        self.build_subnetwork()
+        self.define_subnetwork()
 
-    def add_subnode(self, *args):
-        """Add a subnode to the subnetwork"""
-        for sub_component in args:
-            # ToDo: Check format of label
-            super(SubNetwork).add_subnode(sub_component)
+    def define_subnetwork(self):
+        pass
 
-    def build_subnetwork(self):
+    def add_subnetwork(self):
         """Instanciate and add Node instance to the sub network"""
         pass
 
