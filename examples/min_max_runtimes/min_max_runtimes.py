@@ -42,7 +42,7 @@ def main(optimize=True):
         demand_el[n] = 1
 
     # create an energy system
-    idx = solph.create_time_index(2017, number=24)
+    idx = solph.create_time_index(2017, number_of_intervals=24)
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
     # power bus and components

@@ -82,34 +82,33 @@ def test_integral_limit():
 
     model.solve()
 
-    results = solph.processing.results(model)
+    results = solph.Results(model)
 
     # total limeted to integral_limit1
     assert integral_weight1 * sum(
-        results[(src1, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src1, bel)]
     ) == pytest.approx(integral_limit1)
 
     # unconstrained, full load all the time
     assert (
-        np.array(results[(src2, bel)]["sequences"]["flow"][:-1])
-        == np.full(periods, 50)
+        np.array(results["flow"][(src2, bel)]) == np.full(periods, 50)
     ).all()
 
     # have my_factor, limited to low_emission_flow_limit
     assert integral_weight1 * sum(
-        results[(src1, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src1, bel)]
     ) + integral_weight3 * sum(
-        results[(src3, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src3, bel)]
     ) == pytest.approx(
         low_emission_flow_limit
     )
 
     assert emission_factor_low * sum(
-        results[(src1, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src1, bel)]
     ) + emission_factor_low * sum(
-        results[(src3, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src3, bel)]
     ) + emission_factor_high * sum(
-        results[(src4, bel)]["sequences"]["flow"][:-1]
+        results["flow"][(src4, bel)]
     ) == pytest.approx(
         emission_limit
     )
