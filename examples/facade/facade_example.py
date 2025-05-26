@@ -113,7 +113,7 @@ def main(dump_and_restore=False):
     # *************************************************************************
 
     # Read data file
-    file_name = "basic_example.csv"
+    file_name = "facade_example_data.csv"
     data = get_data_from_file_path(file_name)
 
     solver = "cbc"  # 'glpk', 'gurobi',....
@@ -170,6 +170,14 @@ def main(dump_and_restore=False):
             feedin_tariff=0.04,
         )
     )
+    # energysystem.add(
+    #     components.Source(
+    #         label="DSO_simple",
+    #         outputs={
+    #             bus_electricity: flows.Flow(variable_costs=0.1)
+    #         },
+    #     )
+    # )
 
     # create fixed source object representing wind power plants
     energysystem.add(
