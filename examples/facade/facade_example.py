@@ -30,17 +30,19 @@ The following energy system is modeled:
 
 Code
 ----
-Download source code: :download:`basic_example.py </../examples/basic_example/basic_example.py>`
+Download source code: :download:
+    `facade_example.py </../examples/facade/facade_example.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/basic_example/basic_example.py
+    .. literalinclude:: /../examples/facade/facade_example.py
         :language: python
         :lines: 61-
 
 Data
 ----
-Download data: :download:`basic_example.csv </../examples/basic_example/basic_example.csv>`
+Download data: :download:
+    `facade_example_data.csv </../examples/facade/facade_example_data.csv>`
 
 Installation requirements
 -------------------------
