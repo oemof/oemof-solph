@@ -108,12 +108,12 @@ def results(
                 if node_tuple not in result_dict:
                     result_dict[node_tuple] = {
                         "scalars": pd.Series(),
-                        "sequences": pd.DataFrame(index=timeindex)
+                        "sequences": pd.DataFrame(index=timeindex),
                     }
 
                 data = result_object[result_key][item]
-                result_dict[node_tuple][result_type][
-                    result_key
-                ] = data_handler(data)
+                result_dict[node_tuple][result_type][result_key] = (
+                    data_handler(data)
+                )
 
     return result_dict
