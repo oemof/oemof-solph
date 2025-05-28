@@ -8,9 +8,9 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 """
 
-import pandas as pd
 import warnings
 
+import pandas as pd
 from oemof.tools import debugging
 
 from ._models import Model
