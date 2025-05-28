@@ -21,7 +21,6 @@ def results(
     model: Model,
     remove_last_time_point: bool = False,
     scalar_data: list[str] | None = None,
-    sequence_data: list[str] | None = None,
 ):
     """Create a nested result dictionary from the result DataFrame
 
@@ -66,8 +65,6 @@ def results(
 
     if scalar_data is None:
         scalar_data = ["invest", "total"]
-    if sequence_data is None:
-        sequence_data = ["flow", "storage_content", "storage_losses"]
 
     result_dict = {}
     with warnings.catch_warnings():
@@ -92,12 +89,9 @@ def results(
             if result_key in scalar_data:
                 result_type = "scalars"
                 data_handler = _handle_scalar
-            elif result_key in sequence_data:
+            else:
                 result_type = "sequences"
                 data_handler = _handle_sequence
-            else:
-                warnings.warn(f"Unhandled data: {result_key}")
-                continue
 
             index = result_object[result_key].columns
             for item in index:
