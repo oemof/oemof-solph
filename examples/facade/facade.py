@@ -70,7 +70,7 @@ class DSO(Facade):
             outputs={internal_bus: Flow()},
             label=self.sub_component_labelling("consumption_sink"),
         )
-        self.add_subnode(
+        self.append_subnodes(
             bus_c, source, consumption, sink, feedin, internal_bus
         )
 
