@@ -47,8 +47,7 @@ gas_boiler = solph.components.Converter(
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=data['heat demand'].max(),
-            variable_costs=1.10
+            nominal_value=data["heat demand"].max(), variable_costs=1.10
         )
     },
     conversion_factors={gas_bus: 0.95},
@@ -59,7 +58,7 @@ district_heating_system.add(gas_boiler)
 
 # %%[sec_6_start]
 model = solph.Model(district_heating_system)
-model.solve(solver='cbc', solve_kwargs={'tee': True})
+model.solve(solver="cbc", solve_kwargs={"tee": True})
 # %%[sec_6_end]
 
 # %%[sec_7_start]
@@ -79,14 +78,14 @@ fig, ax = plt.subplots(figsize=[10, 6])
 
 ax.bar(
     data_heat_bus.index,
-    data_heat_bus[(('gas boiler', 'heat network'), 'flow')],
-    label='gas boiler',
-    color='#EC6707'
+    data_heat_bus[(("gas boiler", "heat network"), "flow")],
+    label="gas boiler",
+    color="#EC6707",
 )
 
-ax.legend(loc='upper right')
-ax.grid(axis='y')
-ax.set_ylabel('Hourly heat production in MWh')
+ax.legend(loc="upper right")
+ax.grid(axis="y")
+ax.set_ylabel("Hourly heat production in MWh")
 
 # plt.tight_layout()
 # plt.savefig('intro_tut_dhs_1_hourly_heat_production.svg')
@@ -110,5 +109,5 @@ operation_cost = (
 heat_produced = data_heat_bus[(("heat network", "heat sink"), "flow")].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
-print(f'LCOH: {lcoh:.2f} €/MWh')
+print(f"LCOH: {lcoh:.2f} €/MWh")
 # %%[sec_9_end]
