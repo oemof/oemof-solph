@@ -32,7 +32,10 @@ to learn about which solvers are supported.
          .. code-block:: console
 
             conda create -n oemof-solph-env python=3.11
-            activate oemof-solph-env
+
+         .. code-block:: console
+
+            conda activate oemof-solph-env
 
       4. Install a solver, e.g. CBC
 
@@ -49,52 +52,36 @@ to learn about which solvers are supported.
 
    .. tab-item:: Linux
 
-      **Installing Python 3**
+      **Install oemof.solph**
 
-      Most Linux distributions will have Python 3 in their repository. Use the
-      specific software management to install it, if it is not yet installed.
-      If you are using Ubuntu/Debian try executing the following code in your
-      terminal:
+      With python3 installed, we recommend installing oemof.solph within a
+      virtual Python environment and not into the base, system-wide Python
+      installation. On Linux you can use virtualenv to do so.
 
-      .. code:: console
-
-         sudo apt-get install python3
-
-      You can also download different versions of Python via
-      https://www.python.org/downloads/.
-
-      **Having Python 3 installed**
-
-      We recommend installing oemof.solph within a virtual Python environment
-      and not into the base, system-wide Python installation. On Linux you can
-      use virtualenv to do so.
-
-      1. Install virtualenv using the package management of your Linux
-         distribution, pip install or install it from source
-         (`see virtualenv documentation <https://virtualenv.pypa.io/en/stable/installation.html>`_)
-      2. Open terminal to create and activate a virtual environment by typing:
+      1. Open terminal to create and activate a virtual environment by typing:
 
          .. code-block:: console
 
-            virtualenv -p /usr/bin/python3 your_env_name
-            source your_env_name/bin/activate
+            python -m venv /path/to/desired/oemof-solph-env
+            source /path/to/desired/oemof-solph-env/bin/activate
 
-      3. In terminal type: :code:`pip install oemof.solph`
+      2. In terminal type:
 
-      Warning: If you have an older version of virtualenv you should update pip
-      :code:`pip install --upgrade pip`.
+         .. code-block:: console
 
-      **Solver installation**
+            pip install oemof.solph
+
+      **Install a solver**
 
       To install the solvers have a look at the package repository of your
       Linux distribution or search for precompiled packages. GLPK and CBC ares
       available at Debian, Feodora, Ubuntu and others.
 
-   .. tab-item:: Windows solver
+   .. tab-item:: Windows (solver only)
 
-      We recommend using conda for the python installation. If you want to
-      install the solver externally (not via conda), you can follow these
-      steps:
+      We recommend using conda for the python installation, with which you can
+      also install a solver. If you want to install the solver externally (not
+      via conda), you can follow these steps:
 
       1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_ or
          `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
@@ -103,17 +90,17 @@ to learn about which solvers are supported.
          variable (can be done per user without administrator privileges).
       4. Restart Windows
 
-   .. tab-item:: OSX solver
+   .. tab-item:: OSX (solver only)
 
-        We recommend using conda for the python installation. If you want to
-        install the solver externally (not via conda), you can follow these
-        instructions:
+      We recommend using conda for the python installation, with which you can
+      also install a solver. If you want to install the solver externally (not
+      via conda), you can follow these steps:
 
-        - CBC-solver: https://projects.coin-or.org/Cbc
-        - GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
+      - CBC-solver: https://projects.coin-or.org/Cbc
+      - GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
-        If you install the CBC solver via brew (highly recommended), it should
-        work without additional configuration.
+      If you install the CBC solver via brew (highly recommended), it should
+      work without additional configuration.
 
    .. tab-item:: Developer version
 
@@ -130,19 +117,19 @@ in your virtual environment:
 
 .. code:: console
 
-    oemof_installation_test
+   oemof_installation_test
 
 If the installation was successful, you will receive something like this:
 
 .. code:: console
 
-    *********
-    Solver installed with oemof:
-    glpk: working
-    cplex: not working
-    cbc: working
-    gurobi: not working
-    *********
-    oemof.solph successfully installed.
+   *********
+   Solver installed with oemof:
+   glpk: working
+   cplex: not working
+   cbc: working
+   gurobi: not working
+   *********
+   oemof.solph successfully installed.
 
 as an output.
