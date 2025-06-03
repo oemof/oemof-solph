@@ -225,13 +225,6 @@ output of an example in the `example directory
    :scale: 10%
    :alt: variable_chp_plot.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/variable_chp_plot_darkmode.svg
-   :scale: 10%
-   :alt: variable_chp_plot_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 .. note:: See the :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` class for all parameters and the mathematical background.
 
@@ -586,28 +579,11 @@ becomes non-linear.
    :width: 70 %
    :alt: OffsetConverter_relations_1.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/OffsetConverter_relations_1_darkmode.svg
-   :width: 70 %
-   :alt: OffsetConverter_relations_1_darkmode.svg
-   :align: center
-   :figclass: only-dark
-
-
-
 
 .. 	figure:: /_files/OffsetConverter_relations_2.svg
    :width: 70 %
    :alt: OffsetConverter_relations_2.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/OffsetConverter_relations_2_darkmode.svg
-   :width: 70 %
-   :alt: OffsetConverter_relations_2_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 .. math::
 
@@ -741,13 +717,6 @@ Yielding the following results
    :width: 85 %
    :alt: Plot_delay_2013-01-01.svg
    :align: center
-   :figclass: only-light
-
-..  figure:: /_files/Plot_delay_2013-01-01_darkmode.svg
-   :width: 85 %
-   :alt: Plot_delay_2013-01-01_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 
 .. note::

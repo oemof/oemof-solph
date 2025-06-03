@@ -45,8 +45,8 @@ New features
   for optimization results and enable quick analyses.
   All decision variables of a Node are now collected automatically which
   enables an easier development of custom components. See the revised
-  :ref:`oemof_outputlib_label` documentation for more details or have a look at
-  :ref:`examples_label`
+  :ref:`_basic_concepts_results_label` documentation for more details
+  or have a look at :ref:`examples_label`
   for information on the usage. Keep your eyes open, some new functions will
   come soon that make the processing of the results easier. See the actual pull
   request or issues for detailed information.

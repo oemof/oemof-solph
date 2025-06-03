@@ -157,13 +157,6 @@ the *ep_costs* value:
    :width: 70 %
    :alt: nonconvex_invest_investcosts_power.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/nonconvex_invest_investcosts_power_darkmode.svg
-   :width: 70 %
-   :alt: nonconvex_invest_investcosts_power_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 In case of a convex investment (which is the default setting
 `nonconvex=False`), the *minimum* attribute leads to a forced investment,
@@ -176,13 +169,6 @@ in the following relation for convex and nonconvex investments:
    :width: 70 %
    :alt: nonconvex_invest_specific_costs.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/nonconvex_invest_specific_costs_darkmode.svg
-   :width: 70 %
-   :alt: nonconvex_invest_specific_costs_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 See :py:class:`~oemof.solph.blocks.investment_flow.InvestmentFlow` and
 :py:class:`~oemof.solph.components._generic_storage.GenericInvestmentStorageBlock` for all the
@@ -236,13 +222,6 @@ it is possible to obtain the optimal capacity of this component and simultaneous
    :width: 100 %
    :alt: diesel_genset_nonconvex_invest_flow.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/diesel_genset_nonconvex_invest_flow_darkmode.svg
-   :width: 100 %
-   :alt: diesel_genset_nonconvex_invest_flow_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 Without using the new :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, if the same system is optimized again, but this
 time using the :py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock`, the corresponding duration curve would be similar to the following
@@ -258,13 +237,6 @@ oversized diesel genset, which has a 30% larger capacity compared with the optim
    :width: 100 %
    :alt: diesel_genset_investment_flow.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/diesel_genset_investment_flow_darkmode.svg
-   :width: 100 %
-   :alt: diesel_genset_investment_flow_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 
 Solving such an optimisation problem considering `min`/`max` loads without the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, the only possibility is first to obtain the optimal capacity using the
@@ -276,13 +248,6 @@ this method to the same diesel genset.
    :width: 100 %
    :alt: diesel_genset_nonconvex_flow.svg
    :align: center
-   :figclass: only-light
-
-.. 	figure:: /_files/diesel_genset_nonconvex_flow_darkmode.svg
-   :width: 100 %
-   :alt: diesel_genset_nonconvex_flow_darkmode.svg
-   :align: center
-   :figclass: only-dark
 
 Because of the oversized diesel genset obtained from this approach, the capacity of the PV and battery in the given case study
 would be 13% and 43% smaller than the capacities obtained using the :py:class:`~oemof.solph.flows.NonConvexInvestmentFlow` class.
