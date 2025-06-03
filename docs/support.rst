@@ -15,7 +15,7 @@ Get online support
 ==================
 
 Furthermore, there is a monthly online meeting, which you can join without
-registration. It takes place on every second Monday of a month at HH:MM CE(S)T.
+registration. It takes place on every last Thursday of a month at 11:00 CE(S)T.
 Just join the `jit.si meeting room <https://meet.jit.si/oemof-solph-users>`__.
 
 Join the user meetings
