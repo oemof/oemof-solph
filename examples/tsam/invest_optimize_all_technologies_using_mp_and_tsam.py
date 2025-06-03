@@ -30,9 +30,7 @@ an energy system with storage. The following energy system is modeled:
 The example describes the use of time series aggregation
 methods for seasonal storages in oemof. For this the package tsam is used
 for this purpose, which is developed by Forschungszentrum Jülich. For a more detailed
-explanation we refer to the paper "Time series aggregation for energy
-system design: Modeling seasonal storage" by Kotzur et. al.
-https://www.sciencedirect.com/science/article/pii/S0306261918300242
+explanation we refer to the paper `"Time series aggregation for energy system design: Modeling seasonal storage" by Kotzur et. al. <https://doi.org/10.1016/j.apenergy.2018.01.023>`_
 
 
 The optimization aim is:

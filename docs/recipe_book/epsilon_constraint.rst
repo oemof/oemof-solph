@@ -52,7 +52,7 @@ optimal :math:`value_{obj2}` can be found by fixing the optimal value of
 :math:`obj1` and then optimizing for :math:`obj2`. This is computationally 
 expensive and mainly used for scientific purposes. For more on augmented 
 :math:`\epsilon` constraints, see 
-`this article <https://www.sciencedirect.com/science/article/abs/pii/S0306261922017780?via%3Dihub>`_ .
+`this article <https://doi.org/10.1016/j.apenergy.2022.120521>`_ .
 
 How to realise it in Code
 -------------------------

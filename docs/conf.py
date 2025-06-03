@@ -163,5 +163,5 @@ linkcheck_ignore = [
     # DOIs always redirect, we believe they will always work.
     r"https://doi.org/*",
     # Due to traffic limitation, the folowwing create a 403 in CI pipeline:
-    "https://www.sciencedirect.com/science/article/abs/pii/S036054421500331X",
+    "https://sourceforge.net/projects/winglpk/",
 ]

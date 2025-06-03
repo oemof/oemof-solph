@@ -13,7 +13,7 @@ commercial. Two open source solvers are widely used (HiGHS, CBC and GLPK), but
 oemof.solph suggests CBC (Coin-or branch and cut). It may be useful to compare
 results of different solvers to see which performs best. Other commercial
 solvers, like Gurobi or Cplex, are also options. Have a look at the
-`pyomo docs <https://pyomo.readthedocs.io/en/stable/solving_pyomo_models.html#supported-solvers>`__
+`pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`__
 to learn about which solvers are supported.
 
 .. tab-set::
@@ -99,7 +99,8 @@ to learn about which solvers are supported.
       1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_ or
          `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
       2. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
-      3. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
+      3. Add the path of the executable files of both solvers to the PATH
+         variable (can be done per user without administrator privileges).
       4. Restart Windows
 
    .. tab-item:: OSX solver
