@@ -120,11 +120,7 @@ to learn about which solvers are supported.
       If you would like to get access to not yet released features or features
       under development you can install the developer version. The steps are
       similar to the steps here, but INSTEAD of installing oemof.solph using
-
-      .. code-block:: console
-
-           pip install oemof.solph
-
+      the standard way,
       follow the instructions on :ref:`this page <contribute_label>`.
 
 Installation test
