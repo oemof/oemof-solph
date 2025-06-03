@@ -12,13 +12,13 @@ This User's guide provides a user-friendly introduction into oemof.solph,
 which includes small examples and nice illustrations.
 However, the functionalities of oemof.solph go beyond the content of this User's guide section.
 So, if you want to know all details of a certain component or a function,
-please go the :ref:`_api_reference_label`. There, you will find
+please go the :ref:`api_reference_label`. There, you will find
 a detailed and complete description of all oemof.solph modules.
 
 How can I use solph?
 --------------------
 
-To use solph you have to install oemof.solph and at least one solver (see :ref:`_installation_label`),
+To use solph you have to install oemof.solph and at least one solver (see :ref:`installation_and_setup_label`),
 which can be used together with `pyomo <https://pyomo.readthedocs.io/en/stable/getting_started/installation.html>`_
 (e.g. CBC, GLPK, Gurobi, Cplex).
 You can test it by executing one of the existing examples (see :ref:`examples_label`).
@@ -83,7 +83,7 @@ To restore the dump you can simply create an EnergySystem instance and restore y
 
 If you call dump/restore without any parameters, the dump will be stored as *'es_dump.oemof'* into the *'.oemof/dumps/'* folder created in your HOME directory.
 
-See :ref:`_basic_concepts_results_label` to learn how to process, plot and analyse the results.
+See :ref:`basic_concepts_results_label` to learn how to process, plot and analyse the results.
 
 
 .. _oemof_solph_modules_label:
@@ -133,5 +133,3 @@ The idea is to create different sheets within one spreadsheet file for different
 Once you have create your specific excel reader you can lower the entry barrier for other users. It is some sort of a GUI in form of platform independent spreadsheet software and to make data and models exchangeable in one archive.
 
 See :ref:`excel_reader_example_label` for an excel reader example.
-
-
