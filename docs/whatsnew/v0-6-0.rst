@@ -53,3 +53,9 @@ Contributors
 * Patrik Schönfeldt
 * Eva Schischke
 * Johannes Kochems
+
+Acknowledgements
+################
+
+Work of PS was funded by the German Federal Ministry of Education and Research
+(BMBF) within the project "WärmewendeNordwest" (grant no 03SF0624L).
