@@ -150,7 +150,7 @@ class EnergySystem(es.EnergySystem):
             else:
                 try:
                     df = pd.DataFrame(timeindex)
-                except:
+                except ValueError:
                     raise ValueError("Invalid timeindex.")
                 timedelta = df.diff()
                 if isinstance(timeindex, pd.DatetimeIndex):
