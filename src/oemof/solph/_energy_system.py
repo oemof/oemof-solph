@@ -87,7 +87,7 @@ class EnergySystem(es.EnergySystem):
         self,
         timeindex=None,
         timeincrement=None,
-        infer_last_interval=None,
+        infer_last_interval=False,
         periods=None,
         tsa_parameters=None,
         use_remaining_value=False,
@@ -101,18 +101,6 @@ class EnergySystem(es.EnergySystem):
         if groupings is None:
             groupings = []
         groupings = GROUPINGS + groupings
-
-        if infer_last_interval is None and timeindex is not None:
-            msg = (
-                "The default behaviour will change in future versions.\n"
-                "At the moment the last interval of an equidistant time "
-                "index is added implicitly by default. Set "
-                "'infer_last_interval' explicitly 'True' or 'False' to avoid "
-                "this warning. In future versions 'False' will be the default"
-                "behaviour"
-            )
-            warnings.warn(msg, FutureWarning)
-            infer_last_interval = True
 
         if infer_last_interval is True and timeindex is not None:
             # Add one time interval to the timeindex by adding one time point.
