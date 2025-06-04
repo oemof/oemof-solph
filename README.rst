@@ -1,7 +1,7 @@
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate|
+|scrutinizer| |codacy|
 
 |wheel| |packaging| |supported-versions|
 
@@ -40,10 +40,6 @@
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
     :alt: Codacy Code Quality Status
-
-.. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
-   :target: https://codeclimate.com/github/oemof/oemof-solph
-   :alt: CodeClimate Quality Status
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
