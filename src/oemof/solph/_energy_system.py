@@ -102,16 +102,6 @@ class EnergySystem(es.EnergySystem):
             groupings = []
         groupings = GROUPINGS + groupings
 
-        if not (
-            isinstance(timeindex, pd.DatetimeIndex)
-            or isinstance(timeindex, type(None))
-        ):
-            msg = (
-                "Parameter 'timeindex' has to be of type "
-                "pandas.DatetimeIndex or NoneType and not of type {0}"
-            )
-            raise TypeError(msg.format(type(timeindex)))
-
         if infer_last_interval is None and timeindex is not None:
             msg = (
                 "The default behaviour will change in future versions.\n"
@@ -165,8 +155,10 @@ class EnergySystem(es.EnergySystem):
             else:
                 df = pd.DataFrame(timeindex)
                 timedelta = df.diff()
-                timeincrement = timedelta / np.timedelta64(1, "h")
-
+                if isinstance(timeindex, pd.DatetimeIndex):
+                    timeincrement = timedelta / np.timedelta64(1, "h")
+                else:
+                    timeincrement = timedelta
                 # we want a series (squeeze)
                 # without the first item (no delta defined for first entry)
                 # but starting with index 0 (reset)
