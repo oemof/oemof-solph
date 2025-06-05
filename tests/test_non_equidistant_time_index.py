@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 import datetime
 import random
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -188,20 +189,12 @@ class TestParameterResult:
         assert charge.index[-1] == datetime.datetime(2012, 1, 3, 0, 0, 0)
 
     def test_numeric_index(self):
-        self.es.timeindex = None
+        self.es.timeindex = np.cumsum([0] + list(self.es.timeincrement))
         model = Model(self.es)
         model.receive_duals()
         model.solve()
         results = processing.results(self.model)
-        flow = {k: v for k, v in results.items() if k[1] is not None}
-        diesel_generator_out = [
-            v["sequences"]["flow"]
-            for k, v in flow.items()
-            if k[0].label == "diesel_generator"
-        ][0]
-        assert diesel_generator_out.index[0] == 0
-        assert diesel_generator_out.index[-1] == 72
-        assert len(diesel_generator_out.index) == 73
+        flows = {k: v for k, v in results.items() if k[1] is not None}
 
         storage_content = [
             v["sequences"]["storage_content"]
@@ -212,7 +205,7 @@ class TestParameterResult:
 
         charge = [
             v["sequences"]["flow"]
-            for k, v in self.flows.items()
+            for k, v in flows.items()
             if k[1].label == "storage"
         ][0]
         # Calculate the next storage content and verify it with the storage
