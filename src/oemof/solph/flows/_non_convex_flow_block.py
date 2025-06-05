@@ -71,7 +71,9 @@ class NonConvexFlowBlock(ScalarBlock):
 
         .. automethod:: _sets_for_non_convex_flows
         """
-        self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.FIXED_CAPACITY_NONCONVEX_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group]
+        )
 
         self._sets_for_non_convex_flows(group)
 
@@ -86,8 +88,10 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _variables_for_non_convex_flows
         """
         m = self.parent_block()
-        self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
-        for o, i in self.NONCONVEX_FLOWS:
+        self.status = Var(
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary
+        )
+        for o, i in self.FIXED_CAPACITY_NONCONVEX_FLOWS:
             if m.flows[o, i].nonconvex.initial_status is not None:
                 for t in range(
                     0, m.flows[o, i].nonconvex.first_flexible_timestep
@@ -101,7 +105,9 @@ class NonConvexFlowBlock(ScalarBlock):
         # multiplication of a binary variable (`status`)
         # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
-            self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS,
+            m.TIMESTEPS,
+            within=NonNegativeReals,
         )
 
         self._variables_for_non_convex_flows()
@@ -132,7 +138,7 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _activity_costs
         .. automethod:: _inactivity_costs
         """
-        if not hasattr(self, "NONCONVEX_FLOWS"):
+        if not hasattr(self, "FIXED_CAPACITY_NONCONVEX_FLOWS"):
             return 0
 
         startup_costs = self._startup_costs()
@@ -669,7 +675,9 @@ class NonConvexFlowBlock(ScalarBlock):
             return expr
 
         return Constraint(
-            self.NONCONVEX_FLOWS, m.TIMESTEPS, rule=_status_nominal_rule
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS,
+            m.TIMESTEPS,
+            rule=_status_nominal_rule,
         )
 
     def _shared_constraints_for_non_convex_flows(self):

@@ -129,6 +129,7 @@ class EnergySystem(es.EnergySystem):
                     " is deprecated. Please give a timeindex instead."
                 )
                 warnings.warn(msg, FutureWarning)
+                timeindex = np.cumsum([0] + list(timeincrement))
             else:
                 if periods is None:
                     msg = (
