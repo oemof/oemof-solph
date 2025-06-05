@@ -8,8 +8,8 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 """
 
-from itertools import groupby
 import warnings
+from itertools import groupby
 
 import pandas as pd
 from oemof.tools import debugging
