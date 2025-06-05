@@ -8,6 +8,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 """
 
+from itertools import groupby
 import warnings
 
 import pandas as pd
@@ -109,5 +110,26 @@ def results(
                 result_dict[node_tuple][result_type][result_key] = (
                     data_handler(data)
                 )
+
+    if model.dual is not None:
+        grouped = groupby(
+            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
+        )
+        for bus, timestep in grouped:
+            duals = [
+                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
+            ]
+            if model.es.periods is None:
+                df = pd.DataFrame({"duals": duals}, index=timeindex[:-1])
+            # TODO: Align with standard model
+            else:
+                df = pd.DataFrame({"duals": duals}, index=timeindex)
+            if (bus, None) not in result_dict.keys():
+                result_dict[(bus, None)] = {
+                    "sequences": df,
+                    "scalars": pd.Series(dtype=float),
+                }
+            else:
+                result_dict[(bus, None)]["sequences"]["duals"] = duals
 
     return result_dict
