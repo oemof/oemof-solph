@@ -19,6 +19,7 @@ import numbers
 from collections import abc
 
 import pandas as pd
+
 from ._plumbing import _FakeSequence
 from ._processing import results as new_results
 from .helpers import flatten
