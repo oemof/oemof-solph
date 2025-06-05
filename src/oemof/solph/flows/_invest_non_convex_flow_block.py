@@ -26,12 +26,11 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
-from pyomo.core.base.block import ScalarBlock
 
 from ._non_convex_flow_block import NonConvexFlowBlock
 
 
-class InvestNonConvexFlowBlock(ScalarBlock):
+class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     r"""
     .. automethod:: _create_constraints
     .. automethod:: _create_variables
@@ -91,7 +90,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             ]
         )
 
-        NonConvexFlowBlock._sets_for_non_convex_flows(self, group)
+        self._sets_for_non_convex_flows(group)
 
     def _create_variables(self):
         r"""
@@ -124,7 +123,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        NonConvexFlowBlock._variables_for_non_convex_flows(self)
+        self._variables_for_non_convex_flows()
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -172,7 +171,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         .. automethod:: _maximum_flow_constraint
         .. automethod:: _linearised_investment_constraints
         """
-        NonConvexFlowBlock._shared_constraints_for_non_convex_flows(self)
+        self._shared_constraints_for_non_convex_flows()
 
         self.minimum_investment = self._minimum_invest_constraint()
         self.maximum_investment = self._maximum_invest_constraint()
