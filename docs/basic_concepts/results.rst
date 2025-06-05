@@ -35,10 +35,11 @@ The results chapter consists of three parts:
     :local:
     :backlinks: top
 
-The first step is the processing of the results (:ref:`results_collect_results_label`)
-This is followed by basic examples of the general analysis of the results
-(:ref:`res_general_approach_label`) and finally the use of functionality already included in solph
-for providing a quick access to your results (:ref:`results_easy_access_label`).
+The first step is the processing of the results
+(:ref:`results_collect_results_label`). This is followed by basic examples of
+the general analysis of the results (:ref:`res_general_approach_label`) and
+finally the use of functionality already included in solph for providing a
+quick access to your results (:ref:`results_easy_access_label`).
 Especially for larger energy systems the general approach will help you to
 write your own results processing functions.
 
@@ -59,20 +60,9 @@ dictionary such that the keys are changed to strings given by the labels:
     print(results[('wind', 'bus_electricity')]['sequences']
 
 
-Another option is to access data belonging to a grouping by the name of the grouping
-(`note also this section on groupings <https://oemof-solph.readthedocs.io/en/latest/usage.html#the-grouping-module-sets>`_).
-Given the label of an object, e.g. 'wind' you can access the grouping by its label
-and use this to extract data from the results dictionary.
-
-.. code-block:: python
-
-    node_wind = energysystem.groups['wind']
-    print(results[(node_wind, bus_electricity)])
-
-
-However, in many situations it might be convenient to use the views module to
-collect information on a specific node. You can request all data related to a
-specific node by using either the node's variable name or its label:
+In many situations it might be convenient to use the views module to collect
+information on a specific node. You can request all data related to a specific
+node by using either the node's variable name or its label:
 
 .. code-block:: python
 
