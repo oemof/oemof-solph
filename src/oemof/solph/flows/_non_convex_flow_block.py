@@ -138,7 +138,7 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _activity_costs
         .. automethod:: _inactivity_costs
         """
-        if not hasattr(self, "NONCONVEX_FLOWS"):
+        if not hasattr(self, "FIXED_CAPACITY_NONCONVEX_FLOWS"):
             return 0
 
         startup_costs = self._startup_costs()
