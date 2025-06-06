@@ -180,19 +180,19 @@ class InvestmentFlowBlock(ScalarBlock):
         * :math:`P(p, t)`
 
             Actual flow value
-            (created in :class:`oemof.solph.models.BaseModel`),
+            (created in :class:`oemof.solph.models.Model`),
             indexed by tuple of periods p and timestep t
 
         * :math:`P_{invest}(p)`
 
             Value of the investment variable in period p,
             equal to what is being invested and equivalent resp. similar to
-            the nominal value of the flows after optimization.
+            the nominal capacity of the flows after optimization.
 
         * :math:`P_{total}(p)`
 
             Total installed capacity / energy in period p,
-            equivalent to the nominal value of the flows after optimization.
+            equivalent to the nominal capacity of the flows after optimization.
 
         * :math:`P_{old}(p)`
 
@@ -921,7 +921,7 @@ class InvestmentFlowBlock(ScalarBlock):
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -945,7 +945,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -964,7 +964,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = m.flows[i, o].investment.interest_rate
+                interest = 0
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -990,7 +990,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         * present_value_factor_remaining
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
-                    ) * (1 + m.discount_rate) ** (-m.es.periods_years[p])
+                    )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
                             m,
@@ -1021,7 +1021,6 @@ class InvestmentFlowBlock(ScalarBlock):
                         fixed_costs += sum(
                             self.invest[i, o, p]
                             * m.flows[i, o].investment.fixed_costs[pp]
-                            * (1 + m.discount_rate) ** (-pp)
                             for pp in range(m.es.periods_years[p], range_limit)
                         )
 
@@ -1037,7 +1036,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     fixed_costs += sum(
                         m.flows[i, o].investment.existing
                         * m.flows[i, o].investment.fixed_costs[pp]
-                        * (1 + m.discount_rate) ** (-pp)
                         for pp in range(range_limit)
                     )
 
@@ -1113,17 +1111,13 @@ class InvestmentFlowBlock(ScalarBlock):
                     self.invest[i, o, p]
                     * (remaining_annuity - original_annuity)
                     * present_value_factor_remaining
-                ) * (1 + m.discount_rate) ** (-end_year_of_optimization)
+                )
                 if nonconvex:
                     return convex_investment_costs + self.invest_status[
                         i, o, p
                     ] * (
                         m.flows[i, o].investment.offset[-1]
                         - m.flows[i, o].investment.offset[p]
-                    ) * (
-                        1 + m.discount_rate
-                    ) ** (
-                        -end_year_of_optimization
                     )
                 else:
                     return convex_investment_costs

@@ -1,0 +1,79 @@
+v0.6.0 (June 4th, 2025)
+-----------------------
+
+API changes
+###########
+
+* Costs for energy storage are now defined for N-1 points in time
+  (initial time step is neglected). This is because with a balanced
+  storage, content of the initial and the first time step (which is
+  effectively the same) had double weight before. Also, if the
+  initial storage level is defined, the costs just offset the
+  objective value without changing anything else.
+* Tansitional wrappers that still allowed to use `Transformer` and
+  `OffsetTransformer` have been removed. Use of the new names
+  (`Converter` and `OffsetConverter`) is now obligatory.
+* Tansitional wrappers that still allowed to use `investment`,
+  `summed_min`, and `summed_max` as arguments to initialise a `Flow`
+  have been removed. Use of the new names (`nominal_capacity`,
+  `full_load_time_min`, and `full_load_time_max`) is now obligatory.
+* Rename `custom_attributes` to `custom_properties` for all Nodes.
+  Setting the `oemof.network.Node.custom_properties`
+  using an argument called "custom_attributes" was rather confusing.
+  Additionally, the class Bus already called the argument
+  "custom_properties".
+* The parameters `GenericStorage.nominal_storage_capacity` and
+  `Flow.nominal_value` are now both called `nominal_capacity`.
+* Initialisation of an `EnergySystem` can now be done using any index
+  consisting of increasing numbers (not only timestamps). This is to
+  prepare the removal of the parameter `timeincrement` (now deprecated).
+* The default of `EnergySystem(infer_last_interval)` is now False.
+  (This was required to allow arbitrary numeric intervals.)
+
+New features
+############
+
+* Add a new `Results` class (experimental)
+* Add time-series-agrgregation mode (experimental)
+
+Documentation
+#############
+
+* Completely reworked the design of the documentation.
+* Added introductory tutorials as getting started material.
+
+Bug fixes
+#########
+
+* Remove unneeded use of gurobi from examples.
+* Fixed storage costs for initial storage level.
+
+
+Other changes
+#############
+
+* `Model.solve()` will now fail, if solver status is nonoptimal. 
+  Added new keyword `allow_nonoptimal` to deactivate this behaviour.
+
+Contributors
+############
+
+* Pierre Francois Bachibouzouk
+* Uwe Krien
+* Patrik Schönfeldt
+* Cord Kaldemeyer
+* Hendrik Huyskens
+* Franscesco Witte
+* Malte Fritz
+* Julian Endres
+* Julian Endres
+* Lennart Schürmann
+* Eva Schischke (fist contribution)
+* Simon Günther
+* Johannes Kochems
+
+Acknowledgements
+################
+
+Work of PS was funded by the German Federal Ministry of Research, Technology
+and Space (BMFTR) within the project "WärmewendeNordwest" (grant no 03SF0624L).

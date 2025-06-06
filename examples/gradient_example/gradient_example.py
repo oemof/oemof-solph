@@ -43,7 +43,7 @@ from oemof.solph import flows
 from oemof.solph import processing
 
 
-def main():
+def main(optimize=True):
     # The gradient for the output of the natural gas power plant.
     # Change the gradient between 0.1 and 0.0001 and check the results. The
     # more flexible the power plant can be run the less the storage will be
@@ -131,7 +131,7 @@ def main():
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=demand, nominal_value=1)},
+            inputs={bel: flows.Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
@@ -142,7 +142,7 @@ def main():
             inputs={bgas: flows.Flow()},
             outputs={
                 bel: flows.Flow(
-                    nominal_value=10e5,
+                    nominal_capacity=10e5,
                     negative_gradient_limit=gradient,
                     positive_gradient_limit=gradient,
                 )
@@ -153,7 +153,7 @@ def main():
 
     # create storage object representing a battery
     storage = cmp.GenericStorage(
-        nominal_storage_capacity=999999999,
+        nominal_capacity=999999999,
         label="storage",
         inputs={bel: flows.Flow()},
         outputs={bel: flows.Flow()},
@@ -164,6 +164,9 @@ def main():
     )
 
     energysystem.add(storage)
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = Model(energysystem)
@@ -204,7 +207,6 @@ def main():
         axis=1,
     )
 
-    print(my_flows)
     my_flows.plot()
     plt.show()
 

@@ -7,6 +7,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-License-Identifier: MIT
 """
 import numpy as np
+import pandas as pd
 import pytest
 
 from oemof.solph._plumbing import _FakeSequence
@@ -64,6 +65,15 @@ def test_sequence():
     seq_ab = sequence("ab")
     assert isinstance(seq_ab, str)
     assert seq_ab == "ab"
+
+
+def test_dimension_is_too_high_to_create_a_sequence():
+    df = pd.DataFrame({"epc": 5}, index=["a"])
+    with pytest.raises(ValueError, match="Dimension too high"):
+        sequence(df)
+    n2 = [[4]]
+    with pytest.raises(ValueError, match="Dimension too high"):
+        sequence(n2)
 
 
 def test_valid_sequence():

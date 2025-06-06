@@ -60,7 +60,7 @@ DATA = [
 PARAMETER = {"el_price": 10, "ex_price": 5, "nominal_storage_capacity": 7}
 
 
-def storage_example():
+def main(optimize=True):
     timeseries = pd.DataFrame(
         {"demand_el": [7, 6, 6, 7], "pv_el": [3, 5, 3, 12]}
     )
@@ -89,7 +89,9 @@ def storage_example():
             solph.components.Source(
                 label="pv_el_{0}".format(name),
                 outputs={
-                    bel: solph.Flow(fix=timeseries["pv_el"], nominal_value=1)
+                    bel: solph.Flow(
+                        fix=timeseries["pv_el"], nominal_capacity=1
+                    )
                 },
             )
         )
@@ -99,7 +101,7 @@ def storage_example():
                 label="demand_el_{0}".format(name),
                 inputs={
                     bel: solph.Flow(
-                        fix=timeseries["demand_el"], nominal_value=1
+                        fix=timeseries["demand_el"], nominal_capacity=1
                     )
                 },
             )
@@ -116,13 +118,16 @@ def storage_example():
         es.add(
             solph.components.GenericStorage(
                 label="storage_elec_{0}".format(name),
-                nominal_storage_capacity=PARAMETER["nominal_storage_capacity"],
+                nominal_capacity=PARAMETER["nominal_storage_capacity"],
                 inputs={bel: solph.Flow()},
                 outputs={bel: solph.Flow()},
                 initial_storage_level=data_set["initial_storage_level"],
                 balanced=data_set["balanced"],
             )
         )
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)
@@ -170,4 +175,4 @@ def storage_example():
 
 
 if __name__ == "__main__":
-    storage_example()
+    main()

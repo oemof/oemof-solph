@@ -37,7 +37,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
@@ -66,7 +66,7 @@ def main():
     es.add(
         solph.components.Sink(
             label="demand",
-            inputs={bus_1: solph.Flow(fix=data, nominal_value=1)},
+            inputs={bus_1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
@@ -86,7 +86,7 @@ def main():
         inputs={bus_0: solph.Flow()},
         outputs={
             bus_1: solph.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=c_var,
                     maximum=p_install_max,
                     minimum=p_install_min,
@@ -102,6 +102,10 @@ def main():
         conversion_factors={bus_1: eta},
     )
     es.add(trafo)
+
+    if optimize is False:
+        return es
+
     # create an optimization problem and solve it
     om = solph.Model(es)
 

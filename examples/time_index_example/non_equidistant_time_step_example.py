@@ -47,7 +47,7 @@ except ModuleNotFoundError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
@@ -75,7 +75,7 @@ def main():
         label="source",
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=16,
+                nominal_capacity=16,
                 variable_costs=0.2,
                 max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
@@ -87,7 +87,7 @@ def main():
         label="storage_fixed",
         inputs={bus: solph.flows.Flow()},
         outputs={bus: solph.flows.Flow()},
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         fixed_losses_absolute=1,  # 1 energy unit loss per hour
     )
@@ -99,10 +99,10 @@ def main():
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_value=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
-        nominal_storage_capacity=8,
+        nominal_capacity=8,
         initial_storage_level=1,
         loss_rate=0.5,  # 50 % losses per hour
     )
@@ -110,7 +110,7 @@ def main():
         label="sink",
         inputs={
             bus: solph.flows.Flow(
-                nominal_value=8,
+                nominal_capacity=8,
                 variable_costs=0.1,
                 fix=[0.75, 0.5, 0, 0, 1, 0, 0, 0, 0],
             )
@@ -118,6 +118,14 @@ def main():
     )
 
     energy_system.add(bus, source, sink, storage_relative, storage_fixed)
+
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
+
+    if optimize is False:
+        return energy_system
+
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 
@@ -135,7 +143,7 @@ def main():
     ]["flow"]
     results_df["storage_relative"] = results[(storage_relative, None)][
         "sequences"
-    ]
+    ]["storage_content"]
     results_df["storage_relative_inflow"] = results[(bus, storage_relative)][
         "sequences"
     ]["flow"]

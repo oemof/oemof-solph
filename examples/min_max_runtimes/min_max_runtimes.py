@@ -35,7 +35,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Create demand data
     demand_el = [0] * 24
     for n in [10, 15, 19]:
@@ -50,7 +50,7 @@ def main():
 
     demand_el = solph.components.Sink(
         label="demand_el",
-        inputs={bel: solph.Flow(fix=demand_el, nominal_value=10)},
+        inputs={bel: solph.Flow(fix=demand_el, nominal_capacity=10)},
     )
 
     dummy_el = solph.components.Sink(
@@ -61,7 +61,7 @@ def main():
         label="plant_min_down_constraints",
         outputs={
             bel: solph.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.5,
                 max=1.0,
                 variable_costs=10,
@@ -76,7 +76,7 @@ def main():
         label="plant_min_up_constraints",
         outputs={
             bel: solph.Flow(
-                nominal_value=10,
+                nominal_capacity=10,
                 min=0.5,
                 max=1.0,
                 variable_costs=10,
@@ -86,6 +86,9 @@ def main():
     )
 
     es.add(bel, dummy_el, demand_el, pp1, pp2)
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

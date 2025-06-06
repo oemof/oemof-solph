@@ -18,7 +18,7 @@ import pandas as pd
 from oemof import solph
 
 
-def check_oemof_installation(silent=False):
+def _check_oemof_installation(solvers):
     logging.disable(logging.CRITICAL)
 
     date_time_index = pd.date_range("1/1/2012", periods=6, freq="h")
@@ -27,43 +27,65 @@ def check_oemof_installation(silent=False):
         infer_last_interval=False,
     )
 
-    bgas = solph.buses.Bus(label="natural_gas")
-    bel = solph.buses.Bus(label="electricity")
-    solph.components.Sink(label="excess_bel", inputs={bel: solph.flows.Flow()})
-    solph.components.Source(label="rgas", outputs={bgas: solph.flows.Flow()})
-    solph.components.Sink(
+    b_gas = solph.buses.Bus(label="natural_gas")
+    b_el = solph.buses.Bus(label="electricity")
+    sink_el = solph.components.Sink(
+        label="excess_bel", inputs={b_el: solph.flows.Flow()}
+    )
+    source_gas = solph.components.Source(
+        label="rgas", outputs={b_gas: solph.flows.Flow()}
+    )
+    demand_el = solph.components.Sink(
         label="demand",
         inputs={
-            bel: solph.flows.Flow(fix=[10, 20, 30, 40, 50], nominal_value=1)
+            b_el: solph.flows.Flow(
+                fix=[10, 20, 30, 40, 50], nominal_capacity=1
+            )
         },
     )
-    solph.components.Converter(
+    pp = solph.components.Converter(
         label="pp_gas",
-        inputs={bgas: solph.flows.Flow()},
+        inputs={b_gas: solph.flows.Flow()},
         outputs={
-            bel: solph.flows.Flow(nominal_value=10e10, variable_costs=50)
+            b_el: solph.flows.Flow(nominal_capacity=10e10, variable_costs=50)
         },
-        conversion_factors={bel: 0.58},
+        conversion_factors={b_el: 0.58},
     )
+    energysystem.add(b_gas, b_el, source_gas, sink_el, demand_el, pp)
     om = solph.Model(energysystem)
 
     # check solvers
-    solver = dict()
-    for s in ["cbc", "glpk", "gurobi", "cplex"]:
+    solver_status = dict()
+    for s in solvers:
         try:
             om.solve(solver=s)
-            solver[s] = "working"
+            solver_status[s] = True
         except Exception:
-            solver[s] = "not working"
+            solver_status[s] = False
 
-    if not silent:
-        print()
-        print("*****************************")
-        print("Solver installed with oemof:")
-        print()
-        for s, t in solver.items():
-            print("{0}: {1}".format(s, t))
-        print()
-        print("*****************************")
-        print("oemof successfully installed.")
-        print("*****************************")
+    return solver_status
+
+
+def check_oemof_installation():
+    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex", "scip"]
+
+    solver_status = _check_oemof_installation(solvers_to_test)
+
+    print_text = (
+        "***********************************\n"
+        "Solver installed with oemof.solph:\n"
+        "\n"
+    )
+    for solver, works in solver_status.items():
+        if works:
+            print_text += f"{solver}: installed and working\n"
+        else:
+            print_text += f"{solver}: not installed/ not working\n"
+    print_text += (
+        "\n"
+        "***********************************\n"
+        "oemof.solph successfully installed.\n"
+        "***********************************\n"
+    )
+
+    print(print_text)

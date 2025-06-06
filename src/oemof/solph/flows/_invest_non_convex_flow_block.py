@@ -13,6 +13,8 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems (jokochems)
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Pierre-François Duc
+SPDX-FileCopyrightText: Malte Fritz
+SPDX-FileCopyrightText: Jonas Freißmann
 
 SPDX-License-Identifier: MIT
 
@@ -72,6 +74,22 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
+        self.LINEAR_INVEST_NON_CONVEX_FLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.nonconvex is False
+            ]
+        )
+
+        self.OFFSET_INVEST_NON_CONVEX_FLOWS = Set(
+            initialize=[
+                (g[0], g[1])
+                for g in group
+                if g[2].investment.nonconvex is True
+            ]
+        )
+
         self._sets_for_non_convex_flows(group)
 
     def _create_variables(self):
@@ -82,6 +100,10 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         :math::`P_{invest}` `InvestNonConvexFlowBlock.invest`
             Value of the investment variable, i.e. equivalent to the nominal
             value of the flows after optimization.
+
+        :math::
+            `Y_{invest_status}(i,o,p)` `InvestNonConvexFlowBlock.invest_status`
+            Binary variable representing whether or not an investment is made.
 
         :math::`status\_nominal(i,o,t)` (non-negative real number)
             New paramater representing the multiplication of `P_{invest}`
@@ -108,7 +130,12 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         def _investvar_bound_rule(block, i, o, p):
             """Rule definition for bounds of the invest variable."""
-            if (i, o) in self.INVEST_NON_CONVEX_FLOWS:
+            if (i, o) in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
+                return (
+                    m.flows[i, o].investment.minimum[p],
+                    m.flows[i, o].investment.maximum[p],
+                )
+            elif (i, o) in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 return 0, m.flows[i, o].investment.maximum[p]
 
         # Create the `invest` variable for the nonconvex investment flow.
@@ -119,9 +146,18 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             bounds=_investvar_bound_rule,
         )
 
+        # `invest_status` is a parameter which represents whether or not an
+        # investment is made. This way the investment offset cost only apply
+        # when the component is installed.
+        self.invest_status = Var(
+            self.OFFSET_INVEST_NON_CONVEX_FLOWS,
+            m.PERIODS,
+            within=Binary,
+        )
+
         # `status_nominal` is a parameter which represents the
         # multiplication of a binary variable (`status`)
-        # and a continuous variable (`invest` or `nominal_value`)
+        # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
         )
@@ -259,7 +295,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
                     \cdot c_{shutdown}
 
             .. math::
-                P_{invest} \cdot c_{invest,var}
+                P_{invest} \cdot c_{ep} + c_{offset} \cdot Y_{invest, status}
         """
         if not hasattr(self, "INVEST_NON_CONVEX_FLOWS"):
             return 0
@@ -272,11 +308,18 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         inactivity_costs = self._inactivity_costs()
         investment_costs = 0
 
-        for i, o in self.INVEST_NON_CONVEX_FLOWS:
+        for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
+            for p in m.PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
+                )
+
+        for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
             for p in m.PERIODS:
                 investment_costs += (
                     self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                     + m.flows[i, o].investment.offset[p]
+                    * self.invest_status[i, o, p]
                 )
 
         self.investment_costs = Expression(expr=investment_costs)
@@ -292,16 +335,17 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     def _minimum_invest_constraint(self):
         r"""
         .. math::
-                P_{invest, min} \le P_{invest}
+                P_{invest, min} \cdot Y_{invest, status} \le P_{invest}
         """
         m = self.parent_block()
 
         def _min_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+            for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 for p in m.PERIODS:
                     expr = (
                         m.flows[i, o].investment.minimum[p]
+                        * self.invest_status[i, o, p]
                         <= self.invest[i, o, p]
                     )
                     self.minimum_investment.add((i, o, p), expr)
@@ -316,17 +360,18 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
     def _maximum_invest_constraint(self):
         r"""
         .. math::
-            P_{invest} \le P_{invest, max}
+            P_{invest} \le P_{invest, max} \cdot Y_{invest, status}
         """
         m = self.parent_block()
 
         def _max_invest_rule(_):
             """Rule definition for applying a minimum investment"""
-            for i, o in self.INVEST_NON_CONVEX_FLOWS:
+            for i, o in self.OFFSET_INVEST_NON_CONVEX_FLOWS:
                 for p in m.PERIODS:
                     expr = (
                         self.invest[i, o, p]
                         <= m.flows[i, o].investment.maximum[p]
+                        * self.invest_status[i, o, p]
                     )
                     self.maximum_investment.add((i, o, p), expr)
 

@@ -48,7 +48,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -71,7 +71,7 @@ def main():
         inputs={
             b_heat: solph.flows.Flow(
                 fix=[heat_demand(day) for day in range(0, periods)],
-                nominal_value=10,
+                nominal_capacity=10,
             )
         },
     )
@@ -91,7 +91,7 @@ def main():
                     minimum_uptime=5,
                     initial_status=1,
                 ),
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc,
                     minimum=1.0,
                     maximum=10.0,
@@ -104,14 +104,14 @@ def main():
         label="boiler",
         outputs={
             b_heat: solph.flows.Flow(
-                nominal_value=10, min=0.3, variable_costs=0.2
+                nominal_capacity=10, min=0.3, variable_costs=0.2
             )
         },
     )
 
     excess_heat = solph.components.Sink(
         label="excess_heat",
-        inputs={b_heat: solph.flows.Flow(nominal_value=10)},
+        inputs={b_heat: solph.flows.Flow(nominal_capacity=10)},
     )
 
     es.add(demand_heat, fireplace, boiler, excess_heat)
@@ -119,6 +119,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

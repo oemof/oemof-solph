@@ -77,7 +77,7 @@ class SimpleFlowBlock(ScalarBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_max is not None
-                and g[2].nominal_value is not None
+                and g[2].nominal_capacity is not None
             ]
         )
 
@@ -86,7 +86,7 @@ class SimpleFlowBlock(ScalarBlock):
                 (g[0], g[1])
                 for g in group
                 if g[2].full_load_time_min is not None
-                and g[2].nominal_value is not None
+                and g[2].nominal_capacity is not None
             ]
         )
 
@@ -179,14 +179,14 @@ class SimpleFlowBlock(ScalarBlock):
             ):
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient_limit[t] * f.nominal_value
+                        f.positive_gradient_limit[t] * f.nominal_capacity
                     )
             if valid_sequence(
                 m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
             ):
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient_limit[t] * f.nominal_value
+                        f.negative_gradient_limit[t] * f.nominal_capacity
                     )
 
     def _create_constraints(self):
@@ -221,12 +221,14 @@ class SimpleFlowBlock(ScalarBlock):
             """Rule definition for build action of max. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MAX_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
                     m.flows[inp, out].full_load_time_max
-                    * m.flows[inp, out].nominal_value
+                    * m.flows[inp, out].nominal_capacity
                 )
                 self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
@@ -237,16 +239,18 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_max_rule
         )
 
-        def _flow_full_load_time_min_rule(model):
+        def _flow_full_load_time_min_rule(_):
             """Rule definition for build action of min. sum flow constraint."""
             for inp, out in self.FULL_LOAD_TIME_MIN_FLOWS:
                 lhs = sum(
-                    m.flow[inp, out, ts] * m.timeincrement[ts]
+                    m.flow[inp, out, ts]
+                    * m.timeincrement[ts]
+                    * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
                 rhs = (
                     m.flows[inp, out].full_load_time_min
-                    * m.flows[inp, out].nominal_value
+                    * m.flows[inp, out].nominal_capacity
                 )
                 self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
@@ -257,7 +261,7 @@ class SimpleFlowBlock(ScalarBlock):
             rule=_flow_full_load_time_min_rule
         )
 
-        def _positive_gradient_flow_rule(model):
+        def _positive_gradient_flow_rule(_):
             """Rule definition for positive gradient constraint."""
             for inp, out in self.POSITIVE_GRADIENT_FLOWS:
                 for index in range(1, len(m.TIMESTEPS) + 1):
@@ -442,6 +446,7 @@ class SimpleFlowBlock(ScalarBlock):
                         variable_costs += (
                             m.flow[i, o, t]
                             * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                         )
 
@@ -454,6 +459,7 @@ class SimpleFlowBlock(ScalarBlock):
                         variable_costs += (
                             m.flow[i, o, t]
                             * m.objective_weighting[t]
+                            * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
                             * ((1 + m.discount_rate) ** -m.es.periods_years[p])
                         )
@@ -461,14 +467,13 @@ class SimpleFlowBlock(ScalarBlock):
                 # Fixed costs for units with no lifetime limit
                 if (
                     m.flows[i, o].fixed_costs[0] is not None
-                    and m.flows[i, o].nominal_value is not None
+                    and m.flows[i, o].nominal_capacity is not None
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
                 ):
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(m.es.end_year_of_optimization)
                     )
 
@@ -480,9 +485,8 @@ class SimpleFlowBlock(ScalarBlock):
                         m.flows[i, o].lifetime,
                     )
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 
@@ -493,9 +497,8 @@ class SimpleFlowBlock(ScalarBlock):
                         m.flows[i, o].lifetime - m.flows[i, o].age,
                     )
                     fixed_costs += sum(
-                        m.flows[i, o].nominal_value
+                        m.flows[i, o].nominal_capacity
                         * m.flows[i, o].fixed_costs[pp]
-                        * ((1 + m.discount_rate) ** (-pp))
                         for pp in range(range_limit)
                     )
 

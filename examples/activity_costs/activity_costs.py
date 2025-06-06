@@ -47,7 +47,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Calculate parameters and initialize the energy system and
     ##########################################################################
@@ -69,14 +69,14 @@ def main():
 
     sink_heat = solph.components.Sink(
         label="demand",
-        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_value=1)},
+        inputs={b_heat: solph.Flow(fix=demand_heat, nominal_capacity=1)},
     )
 
     fireplace = solph.components.Source(
         label="fireplace",
         outputs={
             b_heat: solph.Flow(
-                nominal_value=3,
+                nominal_capacity=3,
                 variable_costs=0,
                 nonconvex=solph.NonConvex(activity_costs=activity_costs),
             )
@@ -85,7 +85,7 @@ def main():
 
     boiler = solph.components.Source(
         label="boiler",
-        outputs={b_heat: solph.Flow(nominal_value=10, variable_costs=1)},
+        outputs={b_heat: solph.Flow(nominal_capacity=10, variable_costs=1)},
     )
 
     es.add(sink_heat, fireplace, boiler)
@@ -94,6 +94,8 @@ def main():
     # Optimise the energy system
     ##########################################################################
 
+    if optimize is False:
+        return es
     # create an optimization problem and solve it
     om = solph.Model(es)
 

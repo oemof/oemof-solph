@@ -24,7 +24,7 @@ def storage_level_constraint(
     As a GenericStorage just allows exactly one input and one output,
     an additional bus, the multiplexer_bus, is used for the connections.
     Note that all Flow objects connected to the multiplexer_bus have to have
-    a nominal_value.
+    a nominal_capacity.
 
     Parameters
     ----------
@@ -91,7 +91,7 @@ def storage_level_constraint(
         def _constraint_output_rule(m, o, t):
             return (
                 m.flow[multiplexer_bus, o, t]
-                / m.flows[multiplexer_bus, o].nominal_value
+                / m.flows[multiplexer_bus, o].nominal_capacity
                 <= active_output[o, t]
             )
 
@@ -105,7 +105,84 @@ def storage_level_constraint(
             ),
         )
 
-    _outputs()
+    def _outputs_tsam():
+        OUTPUTS = po.Set(initialize=output_levels.keys())
+        setattr(model, f"{name}_OUTPUTS", OUTPUTS)
+
+        active_output = po.Var(
+            OUTPUTS,
+            model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET,
+            domain=po.Binary,
+            bounds=(0, 1),
+        )
+        setattr(model, f"{name}_active_output", active_output)
+
+        constraint_name = f"{name}_output_active_constraint"
+
+        def _output_active_rule(m):
+            r"""
+            .. math::
+                y_n \le E(t) / E_n
+            """
+            for p, i, g in m.TIMEINDEX_CLUSTER:
+                k = m.es.tsa_parameters[p]["order"][i]
+                t = m.get_timestep_from_tsam_timestep(p, k, g)
+                tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                for o in output_levels:
+                    getattr(m, constraint_name).add(
+                        (o, p, i, g),
+                        (
+                            m.GenericStorageBlock.intra_storage_delta[
+                                storage_component, p, k, g + 1
+                            ]
+                            + m.GenericStorageBlock.inter_storage_content[
+                                storage_component, i
+                            ]
+                            * (1 - storage_component.loss_rate[t])
+                            ** (g * m.timeincrement[tk])
+                        )
+                        / storage_component.nominal_storage_capacity
+                        >= active_output[o, p, k, g] * output_levels[o],
+                    )
+
+        setattr(
+            model,
+            constraint_name,
+            po.Constraint(
+                OUTPUTS,
+                model.TIMEINDEX_CLUSTER,
+                noruleinit=True,
+            ),
+        )
+        setattr(
+            model,
+            constraint_name + "build",
+            po.BuildAction(rule=_output_active_rule),
+        )
+
+        # Define constraints on the output flows
+        def _constraint_output_rule(m, o, p, k, g):
+            t = m.get_timestep_from_tsam_timestep(p, k, g)
+            return (
+                m.flow[multiplexer_bus, o, p, t]
+                / m.flows[multiplexer_bus, o].nominal_value
+                <= active_output[o, p, k, g]
+            )
+
+        setattr(
+            model,
+            f"{name}_output_constraint",
+            po.Constraint(
+                OUTPUTS,
+                model.TIMEINDEX_TYPICAL_CLUSTER,
+                rule=_constraint_output_rule,
+            ),
+        )
+
+    if not model.TSAM_MODE:
+        _outputs()
+    else:
+        _outputs_tsam()
 
     def _inputs():
         INPUTS = po.Set(initialize=input_levels.keys())
@@ -156,7 +233,7 @@ def storage_level_constraint(
         def _constraint_input_rule(m, i, t):
             return (
                 m.flow[i, multiplexer_bus, t]
-                / m.flows[i, multiplexer_bus].nominal_value
+                / m.flows[i, multiplexer_bus].nominal_capacity
                 <= 1 - inactive_input[i, t]
             )
 
@@ -170,4 +247,82 @@ def storage_level_constraint(
             ),
         )
 
-    _inputs()
+    def _inputs_tsam():
+        INPUTS = po.Set(initialize=input_levels.keys())
+        setattr(model, f"{name}_INPUTS", INPUTS)
+
+        inactive_input = po.Var(
+            INPUTS,
+            model.TIMEINDEX_TYPICAL_CLUSTER_OFFSET,
+            domain=po.Binary,
+            bounds=(0, 1),
+        )
+        setattr(model, f"{name}_active_input", inactive_input)
+
+        constraint_name = f"{name}_input_active_constraint"
+
+        def _input_active_rule(m):
+            r"""
+            .. math::
+                \hat{y}_n \ge (E(t) - E_n) / E_{max}
+            """
+            for p, i, g in m.TIMEINDEX_CLUSTER:
+                k = m.es.tsa_parameters[p]["order"][i]
+                t = m.get_timestep_from_tsam_timestep(p, k, g)
+                tk = m.get_timestep_from_tsam_timestep(p, k, g)
+                for inp in input_levels:
+                    getattr(m, constraint_name).add(
+                        (inp, p, i, g),
+                        (
+                            m.GenericStorageBlock.intra_storage_delta[
+                                storage_component, p, k, g + 1
+                            ]
+                            + m.GenericStorageBlock.inter_storage_content[
+                                storage_component, i
+                            ]
+                            * (1 - storage_component.loss_rate[t])
+                            ** (g * m.timeincrement[tk])
+                        )
+                        / storage_component.nominal_storage_capacity
+                        - input_levels[inp]
+                        <= inactive_input[inp, p, k, g],
+                    )
+
+        setattr(
+            model,
+            constraint_name,
+            po.Constraint(
+                INPUTS,
+                model.TIMEINDEX_CLUSTER,
+                noruleinit=True,
+            ),
+        )
+        setattr(
+            model,
+            constraint_name + "build",
+            po.BuildAction(rule=_input_active_rule),
+        )
+
+        # Define constraints on the input flows
+        def _constraint_input_rule(m, i, p, k, g):
+            t = m.get_timestep_from_tsam_timestep(p, k, g)
+            return (
+                m.flow[i, multiplexer_bus, p, t]
+                / m.flows[i, multiplexer_bus].nominal_value
+                <= 1 - inactive_input[i, p, k, g]
+            )
+
+        setattr(
+            model,
+            f"{name}_input_constraint",
+            po.Constraint(
+                INPUTS,
+                model.TIMEINDEX_TYPICAL_CLUSTER,
+                rule=_constraint_input_rule,
+            ),
+        )
+
+    if not model.TSAM_MODE:
+        _inputs()
+    else:
+        _inputs_tsam()

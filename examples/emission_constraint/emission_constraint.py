@@ -36,7 +36,7 @@ from oemof import solph
 from oemof.solph import constraints
 
 
-def main():
+def main(optimize=True):
     # create energy system
     energysystem = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
@@ -57,7 +57,7 @@ def main():
             label="biomass",
             outputs={
                 bel: solph.Flow(
-                    nominal_value=100,
+                    nominal_capacity=100,
                     variable_costs=10,
                     fix=[0.1, 0.2, 0.3],
                     custom_attributes={"emission_factor": 0.01},
@@ -84,7 +84,9 @@ def main():
             label="demand",
             inputs={
                 bel: solph.Flow(
-                    nominal_value=200, variable_costs=10, fix=[0.1, 0.2, 0.3]
+                    nominal_capacity=200,
+                    variable_costs=10,
+                    fix=[0.1, 0.2, 0.3],
                 )
             },
         )
@@ -95,10 +97,13 @@ def main():
         solph.components.Converter(
             label="pp_gas",
             inputs={bgas: solph.Flow()},
-            outputs={bel: solph.Flow(nominal_value=200)},
+            outputs={bel: solph.Flow(nominal_capacity=200)},
             conversion_factors={bel: 0.58},
         )
     )
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = solph.Model(energysystem)
@@ -107,7 +112,7 @@ def main():
     constraints.emission_limit(model, limit=100)
 
     # print out the emission constraint
-    model.integral_limit_emission_factor_constraint.pprint()
+    model.integral_limit_emission_factor_upper_limit.pprint()
     model.integral_limit_emission_factor.pprint()
 
     # solve the model

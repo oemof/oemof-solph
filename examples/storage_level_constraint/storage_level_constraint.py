@@ -30,11 +30,6 @@ License
 """
 
 
-import pandas as pd
-from oemof.solph import Bus, EnergySystem, Flow, Model
-from oemof.solph.components import GenericStorage, Source, Sink
-from oemof.solph.processing import results
-
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -61,7 +56,7 @@ def storage_level_constraint_example():
 
     storage = GenericStorage(
         label="storage",
-        nominal_storage_capacity=3,
+        nominal_capacity=3,
         initial_storage_level=1,
         balanced=True,
         loss_rate=0.05,
@@ -73,22 +68,24 @@ def storage_level_constraint_example():
 
     in_0 = Source(
         label="in_0",
-        outputs={multiplexer: Flow(nominal_value=0.5, variable_costs=0.15)},
+        outputs={multiplexer: Flow(nominal_capacity=0.5, variable_costs=0.15)},
     )
     es.add(in_0)
 
-    in_1 = Source(label="in_1", outputs={multiplexer: Flow(nominal_value=0.1)})
+    in_1 = Source(
+        label="in_1", outputs={multiplexer: Flow(nominal_capacity=0.1)}
+    )
     es.add(in_1)
 
     out_0 = Sink(
         label="out_0",
-        inputs={multiplexer: Flow(nominal_value=0.25, variable_costs=-0.1)},
+        inputs={multiplexer: Flow(nominal_capacity=0.25, variable_costs=-0.1)},
     )
     es.add(out_0)
 
     out_1 = Sink(
         label="out_1",
-        inputs={multiplexer: Flow(nominal_value=0.15, variable_costs=-0.1)},
+        inputs={multiplexer: Flow(nominal_capacity=0.15, variable_costs=-0.1)},
     )
     es.add(out_1)
 

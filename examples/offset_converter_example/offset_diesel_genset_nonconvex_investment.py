@@ -60,7 +60,16 @@ except ImportError:
     plt = None
 
 
-def offset_converter_example():
+def get_data_from_file_path(file_path: str) -> pd.DataFrame:
+    try:
+        data = pd.read_csv(file_path)
+    except FileNotFoundError:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        data = pd.read_csv(dir + "/" + file_path)
+    return data
+
+
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -84,9 +93,7 @@ def offset_converter_example():
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    filename = os.path.join(current_directory, "diesel_genset_data.csv")
-    data = pd.read_csv(filepath_or_buffer=filename)
+    data = get_data_from_file_path("diesel_genset_data.csv")
 
     # Change the index of data to be able to select data based on the time range.
     data.index = pd.date_range(start="2022-01-01", periods=len(data), freq="h")
@@ -130,7 +137,7 @@ def offset_converter_example():
         outputs={
             b_el_dc: solph.flows.Flow(
                 fix=solar_potential / peak_solar_potential,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_pv * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -173,7 +180,7 @@ def offset_converter_example():
                 variable_costs=variable_cost_diesel_genset,
                 min=min_load,
                 max=max_load,
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,
                 ),
@@ -190,7 +197,7 @@ def offset_converter_example():
         label="rectifier",
         inputs={
             b_el_ac: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_rectifier * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -208,7 +215,7 @@ def offset_converter_example():
         label="inverter",
         inputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(
+                nominal_capacity=solph.Investment(
                     ep_costs=epc_inverter * n_days / n_days_in_year
                 ),
                 variable_costs=0,
@@ -224,13 +231,13 @@ def offset_converter_example():
     epc_battery = 101.00  # currency/kWh/year
     battery = solph.components.GenericStorage(
         label="battery",
-        nominal_storage_capacity=solph.Investment(
+        nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
         inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
         outputs={
             b_el_dc: solph.flows.Flow(
-                nominal_value=solph.Investment(ep_costs=0)
+                nominal_capacity=solph.Investment(ep_costs=0)
             )
         },
         initial_storage_level=0.0,
@@ -249,7 +256,7 @@ def offset_converter_example():
         inputs={
             b_el_ac: solph.flows.Flow(
                 fix=hourly_demand / peak_demand,
-                nominal_value=peak_demand,
+                nominal_capacity=peak_demand,
             )
         },
     )
@@ -278,10 +285,13 @@ def offset_converter_example():
     # Optimise the energy system
     ##########################################################################
 
+    if optimize is False:
+        return energy_system
+
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "gurobi"
+    solver = "cbc"
 
     model = solph.Model(energy_system)
     model.solve(
@@ -605,4 +615,4 @@ def offset_converter_example():
 
 
 if __name__ == "__main__":
-    offset_converter_example()
+    main()

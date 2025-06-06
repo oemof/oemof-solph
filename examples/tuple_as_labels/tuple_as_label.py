@@ -4,7 +4,7 @@
 General description
 -------------------
 
-You should have grasped the basic_example to understand this one.
+You should have grasped the result_object example to understand this one.
 
 This is an example to show how the label attribute can be used with tuples to
 manage the results of large energy system. Even though, the feature is
@@ -132,9 +132,10 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
         return "_".join(map(str, self._asdict().values()))
 
 
-def main():
+def main(optimize=True):
     # Read data file
-    filename = os.path.join(os.getcwd(), "tuple_as_label.csv")
+    home_path = os.path.dirname(__file__)
+    filename = os.path.join(home_path, "tuple_as_label.csv")
     try:
         data = pd.read_csv(filename)
     except FileNotFoundError:
@@ -198,7 +199,7 @@ def main():
     energysystem.add(
         comp.Source(
             label=Label("ee_source", "electricity", "wind"),
-            outputs={bel: flows.Flow(fix=data["wind"], nominal_value=2000)},
+            outputs={bel: flows.Flow(fix=data["wind"], nominal_capacity=2000)},
         )
     )
 
@@ -206,7 +207,7 @@ def main():
     energysystem.add(
         comp.Source(
             label=Label("ee_source", "electricity", "pv"),
-            outputs={bel: flows.Flow(fix=data["pv"], nominal_value=3000)},
+            outputs={bel: flows.Flow(fix=data["pv"], nominal_capacity=3000)},
         )
     )
 
@@ -215,7 +216,9 @@ def main():
         comp.Sink(
             label=Label("sink", "electricity", "demand"),
             inputs={
-                bel: flows.Flow(fix=data["demand_el"] / 1000, nominal_value=1)
+                bel: flows.Flow(
+                    fix=data["demand_el"] / 1000, nominal_capacity=1
+                )
             },
         )
     )
@@ -225,18 +228,20 @@ def main():
         comp.Converter(
             label=Label("power plant", "electricity", "gas"),
             inputs={bgas: flows.Flow()},
-            outputs={bel: flows.Flow(nominal_value=10000, variable_costs=50)},
+            outputs={
+                bel: flows.Flow(nominal_capacity=10000, variable_costs=50)
+            },
             conversion_factors={bel: 0.58},
         )
     )
 
     # create storage object representing a battery
-    nominal_storage_capacity = 5000
+    nominal_capacity = 5000
     storage = comp.GenericStorage(
-        nominal_storage_capacity=nominal_storage_capacity,
+        nominal_capacity=nominal_capacity,
         label=Label("storage", "electricity", "battery"),
-        inputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
-        outputs={bel: flows.Flow(nominal_value=nominal_storage_capacity / 6)},
+        inputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
+        outputs={bel: flows.Flow(nominal_capacity=nominal_capacity / 6)},
         loss_rate=0.00,
         initial_storage_level=None,
         inflow_conversion_factor=1,
@@ -246,8 +251,11 @@ def main():
     energysystem.add(storage)
 
     ##########################################################################
-    # Optimise the energy system and plot the results
+    # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
@@ -260,7 +268,7 @@ def main():
     # of the lp-file.
     if debug:
         filename = os.path.join(
-            helpers.extend_basic_path("lp_files"), "basic_example.lp"
+            helpers.extend_basic_path("lp_files"), "tuple_as_label.lp"
         )
         logging.info("Store lp-file in {0}.".format(filename))
         model.write(filename, io_options={"symbolic_solver_labels": True})
@@ -316,7 +324,6 @@ def main():
     )
 
     # Store the table to csv or excel file:
-    home_path = os.path.expanduser("~")
     my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
     # my_flows.to_excel(os.path.join(home_path, "my_flows.xlsx"))
     print(my_flows.sum())

@@ -43,7 +43,6 @@ License
 """
 
 import os
-import warnings
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -54,27 +53,17 @@ from oemof.solph import Flow
 from oemof.solph import Model
 from oemof.solph import create_time_index
 from oemof.solph import views
+from oemof.solph.components import Converter
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.components import Converter
 
 
-def main():
+def main(optimize=True):
     # Read data file
-    filename = os.path.join(os.getcwd(), "input_data.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame(
-            {
-                "pv": [0.3, 0.7],
-                "wind": [0.6, 0.5],
-                "demand_el": [500, 400],
-                "demand_th": [400, 300],
-            }
-        )
+    filename = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), "input_data.csv"
+    )
+    data = pd.read_csv(filename)
 
     solver = "cbc"
 
@@ -108,13 +97,14 @@ def main():
     energysystem.add(
         Source(
             label="wind",
-            outputs={bel: Flow(fix=data["wind"], nominal_value=66.3)},
+            outputs={bel: Flow(fix=data["wind"], nominal_capacity=66.3)},
         )
     )
 
     energysystem.add(
         Source(
-            label="pv", outputs={bel: Flow(fix=data["pv"], nominal_value=65.3)}
+            label="pv",
+            outputs={bel: Flow(fix=data["pv"], nominal_capacity=65.3)},
         )
     )
 
@@ -122,14 +112,14 @@ def main():
     energysystem.add(
         Sink(
             label="demand_el",
-            inputs={bel: Flow(nominal_value=85, fix=data["demand_el"])},
+            inputs={bel: Flow(nominal_capacity=85, fix=data["demand_el"])},
         )
     )
 
     energysystem.add(
         Sink(
             label="demand_th",
-            inputs={bth: Flow(nominal_value=40, fix=data["demand_th"])},
+            inputs={bth: Flow(nominal_capacity=40, fix=data["demand_th"])},
         )
     )
 
@@ -138,7 +128,7 @@ def main():
         Converter(
             label="pp_coal",
             inputs={bcoal: Flow()},
-            outputs={bel: Flow(nominal_value=20.2, variable_costs=25)},
+            outputs={bel: Flow(nominal_capacity=20.2, variable_costs=25)},
             conversion_factors={bel: 0.39},
         )
     )
@@ -147,7 +137,7 @@ def main():
         Converter(
             label="pp_lig",
             inputs={blig: Flow()},
-            outputs={bel: Flow(nominal_value=11.8, variable_costs=19)},
+            outputs={bel: Flow(nominal_capacity=11.8, variable_costs=19)},
             conversion_factors={bel: 0.41},
         )
     )
@@ -156,7 +146,7 @@ def main():
         Converter(
             label="pp_gas",
             inputs={bgas: Flow()},
-            outputs={bel: Flow(nominal_value=41, variable_costs=40)},
+            outputs={bel: Flow(nominal_capacity=41, variable_costs=40)},
             conversion_factors={bel: 0.50},
         )
     )
@@ -165,7 +155,7 @@ def main():
         Converter(
             label="pp_oil",
             inputs={boil: Flow()},
-            outputs={bel: Flow(nominal_value=5, variable_costs=50)},
+            outputs={bel: Flow(nominal_capacity=5, variable_costs=50)},
             conversion_factors={bel: 0.28},
         )
     )
@@ -176,8 +166,8 @@ def main():
             label="pp_chp",
             inputs={bgas: Flow()},
             outputs={
-                bel: Flow(nominal_value=30, variable_costs=42),
-                bth: Flow(nominal_value=40),
+                bel: Flow(nominal_capacity=30, variable_costs=42),
+                bth: Flow(nominal_capacity=40),
             },
             conversion_factors={bel: 0.3, bth: 0.4},
         )
@@ -196,12 +186,15 @@ def main():
         Converter(
             label="heat_pump",
             inputs={bel: Flow(), b_heat_source: Flow()},
-            outputs={bth: Flow(nominal_value=10)},
+            outputs={bth: Flow(nominal_capacity=10)},
             conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
         )
     )
 
     # ################################ optimization ###########################
+
+    if optimize is False:
+        return energysystem
 
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)

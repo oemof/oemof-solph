@@ -51,7 +51,7 @@ class TestParameterResult:
             inputs={b_diesel: Flow(variable_costs=2)},
             outputs={
                 b_el1: Flow(
-                    variable_costs=1, nominal_value=Investment(ep_costs=0.5)
+                    variable_costs=1, nominal_capacity=Investment(ep_costs=0.5)
                 )
             },
             conversion_factors={b_el1: 2},
@@ -67,7 +67,7 @@ class TestParameterResult:
             invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
-            nominal_storage_capacity=Investment(ep_costs=0.4),
+            nominal_capacity=Investment(ep_costs=0.4),
         )
 
         cls.demand_values = [0.0] + [100] * 23
@@ -75,7 +75,7 @@ class TestParameterResult:
             label="demand_el",
             inputs={
                 b_el2: Flow(
-                    nominal_value=1,
+                    nominal_capacity=1,
                     fix=cls.demand_values,
                 )
             },
@@ -99,7 +99,7 @@ class TestParameterResult:
                 {
                     "bidirectional": False,
                     "integer": False,
-                    "nominal_value": 1,
+                    "nominal_capacity": 1,
                     "max": 1,
                     "min": 0,
                     "variable_costs": 0,
@@ -124,7 +124,7 @@ class TestParameterResult:
             "lifetime": None,
             "integer": False,
             "investment": None,
-            "nominal_value": 1,
+            "nominal_capacity": 1,
             "nonconvex": None,
             "bidirectional": False,
             "full_load_time_max": None,
@@ -164,11 +164,8 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
                     "investment_age": 0,
                     "investment_existing": 0,
-                    "investment_interest_rate": 0,
                     "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
@@ -180,6 +177,8 @@ class TestParameterResult:
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
@@ -204,11 +203,8 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "initial_storage_level": 0,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
                     "investment_age": 0,
                     "investment_existing": 0,
-                    "investment_interest_rate": 0,
                     "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,
                     "investment_maximum": float("inf"),
@@ -220,6 +216,8 @@ class TestParameterResult:
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
