@@ -65,14 +65,6 @@ Link
     :undoc-members:
     :show-inheritance:
 
-experimental.ElectricalLine
----------------------------
-
-.. automodule:: oemof.solph.flows.experimental._electrical_line
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 experimental.GenericCAES
 ------------------------
 

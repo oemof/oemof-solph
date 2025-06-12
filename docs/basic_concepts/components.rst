@@ -649,16 +649,6 @@ The `Link` allows to model connections between two busses, e.g. modeling the tra
 
 .. note:: See the :py:class:`~oemof.solph.components.experimental._link.Link` class for all parameters and the mathematical background.
 
-.. _oemof_solph_custom_electrical_line_label:
-
-ElectricalLine (experimental)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Electrical line.
-
-.. note:: See the :py:class:`~oemof.solph.flows.experimental._electrical_line.ElectricalLine` class for all parameters and the mathematical background.
-
-
 .. _oemof_solph_components_generic_caes_label:
 
 GenericCAES (experimental)
