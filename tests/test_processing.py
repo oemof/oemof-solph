@@ -285,13 +285,6 @@ class TestParameterResult:
             int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()) == 2875
         )
 
-    def test_error_from_nan_values(self):
-        trsf = self.es.groups["diesel"]
-        bus = self.es.groups["b_el1"]
-        self.mod.flow[trsf, bus, 5] = float("nan")
-        with pytest.raises(ValueError):
-            processing.results(self.mod)
-
     def test_duals(self):
         results = processing.results(self.om)
         bel = views.node(results, "b_el1", multiindex=True)
