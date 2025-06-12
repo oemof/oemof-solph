@@ -42,8 +42,6 @@ The experimental section was created to lower the entry barrier to bring new com
 
 * :ref:`oemof_solph_custom_link_label`
 * :ref:`oemof_solph_components_generic_caes_label`
-* :ref:`oemof_solph_custom_electrical_line_label`
-* :ref:`oemof_solph_custom_sinkdsm_label`
 
 .. _oemof_solph_components_sink_label:
 
