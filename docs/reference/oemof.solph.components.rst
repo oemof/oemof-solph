@@ -79,12 +79,3 @@ experimental.PiecewiseLinearConverter
     :members:
     :undoc-members:
     :show-inheritance:
-
-experimental.SinkDSM
---------------------
-
-.. automodule:: oemof.solph.components.experimental._sink_dsm
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
