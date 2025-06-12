@@ -88,7 +88,8 @@ class Results:
         df = pd.concat(df, axis=1)
 
         # overwrite known indexes
-        match tuple(dataset.index_set().subsets())[-1].name:
+        index_type = tuple(dataset.index_set().subsets())[-1].name
+        match index_type:
             case "TIMEPOINTS":
                 df.index = self._model.es.timeindex
             case "TIMESTEPS":

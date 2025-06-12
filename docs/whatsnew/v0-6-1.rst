@@ -1,0 +1,32 @@
+v0.6.1
+------
+
+API changes
+###########
+
+New features
+############
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+Other changes
+#############
+
+* Experimental component `SinkDSM` (unmaintained) has been removed
+* Unmaintained, non-working functionality for three-phase electricity has been
+  removed.
+
+Contributors
+############
+
+* Patrik Schönfeldt
+
+Acknowledgements
+################
+
+Work of PS was funded by the German Federal Ministry of Research, Technology
+and Space (BMFTR) within the project "WärmewendeNordwest" (grant no 03SF0624L).
