@@ -11,7 +11,7 @@ from oemof.solph.flows import Flow
 
 
 def test_custom_attribut_with_numeric_value():
-    date_time_index = create_time_index(2012, number=6)
+    date_time_index = create_time_index(2012, number_of_intervals=6)
     energysystem = EnergySystem(timeindex=date_time_index)
     bs = Bus(label="bus")
     energysystem.add(bs)

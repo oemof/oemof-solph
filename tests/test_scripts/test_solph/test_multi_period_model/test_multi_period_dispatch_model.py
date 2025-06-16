@@ -196,7 +196,6 @@ def test_multi_period_dispatch_model(solver="cbc"):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
         balanced=True,
-        fixed_costs=10,
     )
 
     link_de_fr = components.Link(
@@ -286,7 +285,7 @@ def test_multi_period_dispatch_model(solver="cbc"):
         dsm_unit,
     )
 
-    om = Model(es, discount_rate=0.02)
+    om = Model(es)
     om.solve(solver=solver)
 
     results = processing.results(om)

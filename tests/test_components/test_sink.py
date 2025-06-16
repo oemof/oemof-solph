@@ -13,7 +13,9 @@ def test_multi_input_sink():
     costs = -0.1
 
     es = solph.EnergySystem(
-        timeindex=solph.create_time_index(year=2023, number=steps),
+        timeindex=solph.create_time_index(
+            year=2023, number_of_intervals=steps
+        ),
         infer_last_interval=False,
     )
 

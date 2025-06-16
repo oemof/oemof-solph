@@ -83,12 +83,9 @@ def test_flow_count_limit():
 
     model.solve()
 
-    results = solph.processing.results(model)
+    results = solph.Results(model)
 
-    flow = [
-        list(results[(b1, s)]["sequences"]["flow"][:-1])
-        for s in [s0, s1, s2, s3]
-    ]
+    flow = [list(results["flow"][(b1, s)]) for s in [s0, s1, s2, s3]]
 
     assert flow[0] == pytest.approx([4, 0])
     assert flow[1] == pytest.approx([2, 0])

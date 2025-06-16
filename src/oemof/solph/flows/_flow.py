@@ -24,7 +24,6 @@ from warnings import warn
 
 import numpy as np
 from oemof.network import Edge
-from oemof.tools import debugging
 
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
@@ -82,10 +81,6 @@ class Flow(Edge):
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
-    fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
-        The fixed costs associated with a flow.
-        Note: These are only applicable for a multi-period model
-        and given on a yearly basis.
     lifetime : int, :math:`l`
         The lifetime of a flow (usually given in years);
         once it reaches its lifetime (considering also
@@ -139,7 +134,6 @@ class Flow(Edge):
         nonconvex=None,
         lifetime=None,
         age=None,
-        fixed_costs=None,
         custom_attributes=None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
@@ -183,21 +177,6 @@ class Flow(Edge):
         elif isinstance(nominal_capacity, Investment):
             self.investment = nominal_capacity
 
-        if fixed_costs is not None:
-            msg = (
-                "Be aware that the fixed costs attribute is only\n"
-                "meant to be used for multi-period models to depict "
-                "fixed costs that occur on a yearly basis.\n"
-                "If you wish to set up a multi-period model, explicitly "
-                "set the `periods` attribute of your energy system.\n"
-                "It has been decided to remove the `fixed_costs` "
-                "attribute with v0.2 for regular uses.\n"
-                "If you specify `fixed_costs` for a regular model, "
-                "this will simply be silently ignored."
-            )
-            warn(msg, debugging.SuspiciousUsageWarning)
-
-        self.fixed_costs = sequence(fixed_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
 

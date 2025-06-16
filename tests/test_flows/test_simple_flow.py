@@ -24,7 +24,7 @@ def test_gradient_limit():
         positive_gradient_limit=0.4,
         negative_gradient_limit=0.25,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = list(_run_flow_model(flow))
 
     assert flow_result == pytest.approx(
         [0, 0.8, 1.6, 2.0, 2.0, 2.0, 1.5, 1.0, 0.5, 0]
@@ -39,7 +39,7 @@ def test_full_load_time_max():
         variable_costs=price_pattern,
         full_load_time_max=4.5,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = list(_run_flow_model(flow))
 
     assert flow_result == pytest.approx(5 * [0] + [1] + 4 * [2])
 
@@ -52,7 +52,7 @@ def test_full_load_time_min():
         variable_costs=price_pattern,
         full_load_time_min=4.5,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = list(_run_flow_model(flow))
 
     assert flow_result == pytest.approx(4 * [2] + [1] + 5 * [0])
 
