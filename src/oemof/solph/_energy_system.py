@@ -41,9 +41,9 @@ class EnergySystem(es.EnergySystem):
 
     Parameters
     ----------
-    timeindex : pandas.DatetimeIndex
-
-    timeincrement : iterable
+    timeindex : sequence of ascending numeric values
+        Typically a pandas.DatetimeIndex is used,
+        but for example also a list of floats works.
 
     infer_last_interval : bool
         Add an interval to the last time point. The end time of this interval
@@ -77,7 +77,7 @@ class EnergySystem(es.EnergySystem):
         self,
         timeindex=None,
         timeincrement=None,
-        infer_last_interval=None,
+        infer_last_interval=False,
         investment_times=None,
         tsa_parameters=None,
         groupings=None,
@@ -90,28 +90,6 @@ class EnergySystem(es.EnergySystem):
         if groupings is None:
             groupings = []
         groupings = GROUPINGS + groupings
-
-        if not (
-            isinstance(timeindex, pd.DatetimeIndex)
-            or isinstance(timeindex, type(None))
-        ):
-            msg = (
-                "Parameter 'timeindex' has to be of type "
-                "pandas.DatetimeIndex or NoneType and not of type {0}"
-            )
-            raise TypeError(msg.format(type(timeindex)))
-
-        if infer_last_interval is None and timeindex is not None:
-            msg = (
-                "The default behaviour will change in future versions.\n"
-                "At the moment the last interval of an equidistant time "
-                "index is added implicitly by default. Set "
-                "'infer_last_interval' explicitly 'True' or 'False' to avoid "
-                "this warning. In future versions 'False' will be the default"
-                "behaviour"
-            )
-            warnings.warn(msg, FutureWarning)
-            infer_last_interval = True
 
         if infer_last_interval is True and timeindex is not None:
             # Add one time interval to the timeindex by adding one time point.
@@ -133,13 +111,21 @@ class EnergySystem(es.EnergySystem):
             )
 
         # catch wrong combinations and infer timeincrement from timeindex.
-        if timeincrement is not None and timeindex is not None:
-            msg = (
-                "Specifying the timeincrement and the timeindex parameter "
-                "at the same time is not allowed since these might be "
-                "conflicting to each other."
-            )
-            raise AttributeError(msg)
+        if timeincrement is not None:
+            if timeindex is None:
+                msg = (
+                    "Initialising an EnergySystem using a timeincrement"
+                    " is deprecated. Please give a timeindex instead."
+                )
+                warnings.warn(msg, FutureWarning)
+            else:
+                msg = (
+                    "The timeincrement is infered from the given timeindex."
+                    " As both parameters might be conflicting to each other,"
+                    " you cannot define both at the same time."
+                    " Please give only a timeindex."
+                )
+                raise AttributeError(msg)
 
         elif timeindex is None and timeincrement is not None:
             timeindex = pd.Index(
@@ -149,10 +135,15 @@ class EnergySystem(es.EnergySystem):
             if tsa_parameters is not None:
                 pass
             else:
-                df = pd.DataFrame(timeindex)
+                try:
+                    df = pd.DataFrame(timeindex)
+                except ValueError:
+                    raise ValueError("Invalid timeindex.")
                 timedelta = df.diff()
-                timeincrement = timedelta / np.timedelta64(1, "h")
-
+                if isinstance(timeindex, pd.DatetimeIndex):
+                    timeincrement = timedelta / np.timedelta64(1, "h")
+                else:
+                    timeincrement = timedelta
                 # we want a series (squeeze)
                 # without the first item (no delta defined for first entry)
                 # but starting with index 0 (reset)

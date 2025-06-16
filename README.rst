@@ -1,7 +1,7 @@
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate|
+|scrutinizer| |codacy|
 
 |wheel| |packaging| |supported-versions|
 
@@ -40,10 +40,6 @@
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
     :alt: Codacy Code Quality Status
-
-.. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
-   :target: https://codeclimate.com/github/oemof/oemof-solph
-   :alt: CodeClimate Quality Status
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
@@ -127,9 +123,6 @@ you can follow our news-blog at `oemof.org <https://oemof.org/>`_.
 Documentation
 =============
 The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <https://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <https://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
-
-
-.. _installation_label:
 
 Installation
 ============
