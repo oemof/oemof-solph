@@ -48,31 +48,32 @@ class DSO(Facade):
         super().__init__(*args, label=label, facade_type=type(self))
 
     def define_subnetwork(self):
-        internal_bus = Bus(custom_properties={"sub_label": "internal_bus"})
+        internal_bus = Bus(label=self.sub_component_labelling("internal_bus"))
 
         feedin = Converter(
-            inputs={self.el_bus: Flow(variable_costs=self.feedin_tariff)},
+            inputs={self.el_bus: Flow(variable_costs=self.feedin_tariff * -1)},
             outputs={internal_bus: Flow()},
-            label=self.sub_component_labelling("feedin_converter"),
+            label=self.sub_component_labelling(
+                "feedin_converter", interface=True
+            ),
         )
         sink = Sink(
             inputs={internal_bus: Flow()},
             label=self.sub_component_labelling("feedin_sink"),
         )
 
-        bus_c = Bus()
         consumption = Converter(
-            inputs={bus_c: Flow()},
+            inputs={internal_bus: Flow()},
             outputs={self.el_bus: Flow(variable_costs=self.energy_price)},
-            label=self.sub_component_labelling("consumption_converter"),
+            label=self.sub_component_labelling(
+                "consumption_converter", interface=True
+            ),
         )
         source = Source(
             outputs={internal_bus: Flow()},
-            label=self.sub_component_labelling("consumption_sink"),
+            label=self.sub_component_labelling("consumption_source"),
         )
-        self.subnodes.extend(
-            [bus_c, source, consumption, sink, feedin, internal_bus]
-        )
+        self.subnodes.extend([source, consumption, sink, feedin, internal_bus])
 
 
 # class CriticalDemand(Facade):
