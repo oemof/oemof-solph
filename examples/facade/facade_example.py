@@ -286,8 +286,9 @@ def main():
             inplace=True
         )
 
-    print(flow_results_filtered)
+    print(results.flow.sum())
     print(flow_results_filtered.sum())
+
 
 
 if __name__ == "__main__":
