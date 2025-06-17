@@ -259,7 +259,35 @@ def main():
         solver=solver, solve_kwargs={"tee": solver_verbose}
     )
     results = Results(energysystem_model)
-    print(results.flow)
+
+    # ToDO Implement a filter methode for the Result object to exclude
+    #  subcomponents of a facade/sub-network
+    # The following lines are meant to show how the result should look like
+    # in case the subcomponents should be exclude. There should not be a
+    # postprocessing it is better to filter the nodes directly
+
+    # Filter columns that are internal only
+    keep_columns = [
+        c
+        for c in results.flow.columns
+        if getattr(c[1].label, "interface", True) is True
+        and getattr(c[0].label, "interface", True) is True
+    ]
+    flow_results_filtered = results.flow[keep_columns]
+
+    # Replace subcomponent with facade object
+    for level in [0, 1]:
+        flow_results_filtered.rename(
+            columns={
+                c[level]: getattr(c[level].label, "parent", c[level])
+                for c in flow_results_filtered.columns
+            },
+            level=level,
+            inplace=True
+        )
+
+    print(flow_results_filtered)
+    print(flow_results_filtered.sum())
 
 
 if __name__ == "__main__":
