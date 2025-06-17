@@ -27,12 +27,6 @@ class Facade(SubNetwork):
         """Instanciate and add Node instance to the sub network"""
         pass
 
-    def sub_component_labelling(self, sub_label):
-        """
-        Method to always keep the Facade instance label in its subcomponents
-        """
-        return f"{self.label}_{sub_label}"
-
     def sub_label_error(self, sub_component):
         msg = (
             f"Sublabel ERROR in Facade instance:\n{self.label}, "
