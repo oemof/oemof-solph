@@ -6,9 +6,9 @@ from oemof.solph import processing
 
 
 def test_disaggregate_timeindex():
-    ti_1 = pd.date_range("2020-01-01", periods=10, freq="H")
-    ti_2 = pd.date_range("2030-01-01", periods=20, freq="H")
-    ti_3 = pd.date_range("2040-01-01", periods=40, freq="H")
+    ti_1 = pd.date_range("2020-01-01", periods=10, freq="h")
+    ti_2 = pd.date_range("2030-01-01", periods=20, freq="h")
+    ti_3 = pd.date_range("2040-01-01", periods=40, freq="h")
     ti = ti_1.union(ti_2).union(ti_3)
 
     periods = [ti_1, ti_2, ti_3]
