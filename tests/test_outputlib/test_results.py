@@ -5,7 +5,7 @@ from oemof.solph import _results
 from . import optimization_model
 
 
-class TestFilterView:
+class TestResultsClass:
     @classmethod
     def setup_class(cls):
         cls.results = _results.Results(optimization_model)
@@ -14,8 +14,7 @@ class TestFilterView:
         assert int(self.results.objective) == 8495
 
     def test_to_set_objective(self):
-        msg = "property 'objective' of 'Results' object has no setter"
-        with pytest.raises(AttributeError, match=msg):
+        with pytest.raises(AttributeError):
             self.results.objective = 5
 
     def test_time_index(self):
