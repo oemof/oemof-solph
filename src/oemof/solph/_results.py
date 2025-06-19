@@ -90,12 +90,20 @@ class Results:
         # overwrite known indexes
         match tuple(dataset.index_set().subsets())[-1].name:
             case "TIMEPOINTS":
-                df.index = self._model.es.timeindex
+                df.index = self.timeindex
             case "TIMESTEPS":
-                df.index = self._model.es.timeindex[:-1]
+                df.index = self.timeindex[:-1]
             case _:
                 df.index = df.index.get_level_values(-1)
         return df
+
+    @property
+    def objective(self):
+        return self._model.objective()
+
+    @property
+    def timeindex(self):
+        return self._model.es.timeindex
 
     def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
         return self[key]
