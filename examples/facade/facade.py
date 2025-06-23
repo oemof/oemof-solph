@@ -37,7 +37,7 @@ from oemof.solph.components import Converter, Source, Sink
 from oemof.solph.flows import Flow
 from oemof.solph.buses import Bus
 
-from oemof.solph._facades import Facade
+from oemof.solph import Facade
 
 
 class DSO(Facade):
