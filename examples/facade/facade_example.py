@@ -270,10 +270,14 @@ def main():
     keep_columns = [
         c
         for c in results.flow.columns
-        if getattr(c[1].label, "interface", True) is True
-        and getattr(c[0].label, "interface", True) is True
+        if getattr(c[1].label, "parent", None)
+        != getattr(c[0].label, "parent", None)
+        or (
+            getattr(c[0].label, "parent", True) is True
+            and getattr(c[1].label, "parent", True) is True
+        )
     ]
-    flow_results_filtered = results.flow[keep_columns]
+    flow_results_filtered = results.flow[keep_columns].copy()
 
     # Replace subcomponent with facade object
     for level in [0, 1]:
@@ -283,12 +287,14 @@ def main():
                 for c in flow_results_filtered.columns
             },
             level=level,
-            inplace=True
+            inplace=True,
         )
 
+    print("**** All results ****")
     print(results.flow.sum())
-    print(flow_results_filtered.sum())
 
+    print("**** Filtered results ****")
+    print(flow_results_filtered.sum())
 
 
 if __name__ == "__main__":
