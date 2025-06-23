@@ -78,8 +78,7 @@ New features
 New components
 ####################
 
-* The nodes `ElectricalLine <oemof.solph.custom.ElectricalLine>`
-  and `ElectricalBus <oemof.solph.custom.ElectricalBus>` can be used
+* The nodes `ElectricalLine` and `ElectricalBus` can be used
   for Linear Optimal Powerflow calculation based on angle formulations.
   These components have been added to the `solph.custom` module.
   Though it should work correctly, it is in a preliminary stage.
