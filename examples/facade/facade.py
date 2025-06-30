@@ -57,9 +57,7 @@ class DSO(Facade):
             outputs={internal_bus: Flow()},
             label="feedin_converter",
         )
-        self.subnode(
-            Sink, inputs={internal_bus: Flow()}, label="feedin_sink"
-        )
+        self.subnode(Sink, inputs={internal_bus: Flow()}, label="feedin_sink")
 
         self.subnode(
             Converter,
