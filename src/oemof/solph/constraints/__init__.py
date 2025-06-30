@@ -13,6 +13,7 @@ from .integral_limit import emission_limit_per_period
 from .integral_limit import generic_integral_limit
 from .integral_limit import generic_periodical_integral_limit
 from .investment_limit import additional_investment_flow_limit
+from .investment_limit import additional_total_limit
 from .investment_limit import investment_limit
 from .investment_limit import investment_limit_per_period
 from .shared_limit import shared_limit
@@ -29,6 +30,7 @@ __all__ = [
     "generic_integral_limit",
     "generic_periodical_integral_limit",
     "additional_investment_flow_limit",
+    "additional_total_limit",
     "investment_limit",
     "investment_limit_per_period",
     "shared_limit",
