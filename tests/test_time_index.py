@@ -15,6 +15,22 @@ from oemof.tools import debugging
 from oemof import solph
 
 
+def test_increment_from_timeindex():
+    dtindex1 = pd.date_range("1/1/2012", periods=24, freq="h")
+    dtindex2 = pd.date_range("1/2/2012", periods=49, freq="30min")
+    dtindex = dtindex1.union(dtindex2)
+    es = solph.EnergySystem(timeindex=dtindex)
+    assert (es.timeindex == dtindex).all()
+    assert (es.timeincrement == 24 * [1] + 48 * [0.5]).all()
+
+
+def test_increment_from_numeric_index():
+    index = [0, 1, 3, 4, 5]
+    es = solph.EnergySystem(timeindex=index)
+    assert es.timeindex == index
+    assert (es.timeincrement == [1, 2, 1, 1]).all()
+
+
 def test_energysystem_with_datetimeindex_infer_last_interval():
     """Test EnergySystem with DatetimeIndex (equidistant)"""
     datetimeindex = pd.date_range("1/1/2012", periods=24, freq="h")
@@ -30,10 +46,9 @@ def test_energysystem_with_datetimeindex():
     assert es.timeincrement.sum() == 23
 
 
-def test_energysystem_interval_inference_warning():
-    datetimeindex = pd.date_range("1/1/2012", periods=24, freq="h")
+def test_energysystem_interval_warning():
     with pytest.warns(FutureWarning):
-        _ = solph.EnergySystem(timeindex=datetimeindex)
+        _ = solph.EnergySystem(timeincrement=[1, 2, 1])
 
 
 def test_energysystem_with_datetimeindex_non_equidistant_infer_last_interval():
@@ -117,9 +132,7 @@ def test_model_timeincrement_with_valid_timeindex():
 
 
 def test_timeincrement_with_non_valid_timeindex():
-    with pytest.raises(
-        TypeError, match="Parameter 'timeindex' has to be of type"
-    ):
+    with pytest.raises(ValueError, match="Invalid timeindex."):
         solph.EnergySystem(timeindex=4)
 
 

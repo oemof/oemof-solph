@@ -38,12 +38,18 @@ class Results:
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
                 key = str(variable).split(".")[-1]
+                occurence = str(variable)[: -(len(key) + 1)]
                 if (
                     key not in self._variables
                     and key not in self._solver_results
                 ):
-                    self._variables[key] = variable
-                elif self._variables[key] == variable:
+                    self._variables[key] = {occurence: variable}
+                elif (
+                    key in self._variables
+                    and occurence not in self._variables[key]
+                ):
+                    self._variables[key][occurence] = variable
+                elif self._variables[key][occurence] == variable:
                     # For debugging purposes.
                     # We should avoid useless iterations.
                     pass
@@ -71,19 +77,34 @@ class Results:
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
-        variable = self._variables[variable]
-        df = pd.DataFrame(variable.extract_values(), index=[0]).stack(
-            future_stack=True
-        )
+        df = []
+        for occurence in self._variables[variable]:
+            dataset = self._variables[variable][occurence]
+            df.append(
+                pd.DataFrame(dataset.extract_values(), index=[0]).stack(
+                    future_stack=True
+                )
+            )
+        df = pd.concat(df, axis=1)
+
         # overwrite known indexes
-        match tuple(variable.index_set().subsets())[-1].name:
+        index_type = tuple(dataset.index_set().subsets())[-1].name
+        match index_type:
             case "TIMEPOINTS":
-                df.index = self._model.es.timeindex
+                df.index = self.timeindex
             case "TIMESTEPS":
-                df.index = self._model.es.timeindex[:-1]
+                df.index = self.timeindex[:-1]
             case _:
                 df.index = df.index.get_level_values(-1)
         return df
+
+    @property
+    def objective(self):
+        return self._model.objective()
+
+    @property
+    def timeindex(self):
+        return self._model.es.timeindex
 
     def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
         return self[key]
