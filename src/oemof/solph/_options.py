@@ -238,6 +238,7 @@ class NonConvex:
         self,
         initial_status=0,
         minimum_uptime=0,
+        maximum_uptime=0,
         minimum_downtime=0,
         maximum_startups=None,
         maximum_shutdowns=None,
@@ -254,6 +255,7 @@ class NonConvex:
 
         self.initial_status = initial_status
         self.minimum_uptime = sequence(minimum_uptime)
+        self.maximum_uptime = sequence(maximum_uptime)
         self.minimum_downtime = sequence(minimum_downtime)
         self.maximum_startups = maximum_startups
         self.maximum_shutdowns = maximum_shutdowns
