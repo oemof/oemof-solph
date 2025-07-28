@@ -69,14 +69,22 @@ def main():
         timeindex=date_time_index, infer_last_interval=False
     )
 
-    el_bus = solph.Bus(label="el")
+    house = SubNetwork("house")
+
+    el_bus = house.subnode(
+        solph.Bus,
+        label="el",
+    )
     el_source = solph.components.Source(
         label="el_grid",
         outputs={el_bus: solph.Flow(variable_costs=0.3)},
     )
-    es.add(el_bus, el_source)
+    es.add(house, el_bus, el_source)
 
-    heat_demands = SubNetwork("heat demand")
+    heat_demands = house.subnode(
+        SubNetwork,
+        label="heat demand",
+    )
     demand_bus_dhw = heat_demands.subnode(solph.Bus, "b_dhw")
     demand_bus_sh = heat_demands.subnode(solph.Bus, "b_sh")
 
@@ -91,7 +99,8 @@ def main():
         inputs={demand_bus_sh: solph.Flow(nominal_capacity=1, fix=[0.4, 2.1])},
     )
     es.add(heat_demands)
-    hp = HeatPump(
+    hp = house.subnode(
+        HeatPump,
         "hp",
         el_supply=el_bus,
         heat_demand={demand_bus_dhw: 60.0, demand_bus_sh: 30},
