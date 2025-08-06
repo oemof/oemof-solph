@@ -9,13 +9,15 @@ SPDX-License-Identifier: MIT
 """
 # %%[imports]
 import os
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from oemof.network.graph import create_nx_graph
 import pandas as pd
 
 from oemof import solph
+from oemof.network.graph import create_nx_graph
+from oemof.solph import Results
 
 # %%[input_data]
 
@@ -128,116 +130,24 @@ nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
 
-model.solve(solver="cbc", solve_kwargs={"tee": True})
+model.solve(solver="gurobi", solve_kwargs={"tee": False})
 results = solph.processing.results(model)
 meta_results = solph.processing.meta_results(model)
 
-# %%[results]
+new_results = Results(model)
+# %%
+keys = new_results.keys()
 
-pv_size = results[(pv_panels, dc_bus)]["scalars"]["invest"]
-pv_annuity = pv_epc * pv_size
+print("---------------------------------------------")
+print("Hier findet sich die Ausgabe nach dem Solve")
+print("---------------------------------------------")
+print("Das sind die keys, welche man für die Results nutzen kann: ")
+print(keys)
 
-inverter_size = results[(dc_bus, inverter)]["scalars"]["invest"]
-inverter_annuity = inverter_epc * inverter_size
+# %%
 
-battery_size = results[(battery, None)]["scalars"]["invest"]
-battery_annuity = battery_epc * battery_size
+# opex = new_results.calc_opex()
+# print(opex)
 
-annual_grid_supply = results[(grid, ac_bus)]["sequences"]["flow"].sum()
-el_costs = 0.3 * annual_grid_supply
-el_revenue = 0.1 * results[(ac_bus, grid)]["sequences"]["flow"].sum()
-
-tce = meta_results["objective"]
-
-print(f"The optimal PV size is {pv_size:.2f} kW.")
-print(f"The optimal inverter size is {inverter_size:.2f} kW.")
-print(f"The optimal battery size is {battery_size:.2f} kWh.")
-
-print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
-print(f"The annual revenue from feed-in is {el_revenue:.2f} €.")
-print(f"The annuity for the PV system is {pv_annuity:.2f} €.")
-print(f"The annuity for the battery is {battery_annuity:.2f} €.")
-print(f"The total annual costs are {tce:.2f} €.")
-
-annual_demand = input_data["electricity demand (kW)"].sum()
-
-print(
-    f"Autarky is 1 - {annual_grid_supply:.2f} kWh / {annual_demand:.2f} kWh"
-    + f" = {100 - 100 * annual_grid_supply / annual_demand:.2f} %."
-)
-
-
-electricity_fows = solph.views.node(results, "electricity")["sequences"]
-
-baseline = np.zeros(len(electricity_fows))
-
-plt.figure()
-
-mode = "light"
-# mode = "dark"
-if mode == "dark":
-    plt.style.use("dark_background")
-
-plt.fill_between(
-    electricity_fows.index,
-    baseline,
-    baseline + electricity_fows[(("grid", "electricity"), "flow")],
-    step="pre",
-    label="Grid supply",
-)
-
-baseline += electricity_fows[(("grid", "electricity"), "flow")]
-
-plt.fill_between(
-    electricity_fows.index,
-    baseline,
-    baseline + electricity_fows[(("PV", "electricity"), "flow")],
-    step="pre",
-    label="PV supply",
-)
-
-baseline += electricity_fows[(("PV", "electricity"), "flow")]
-
-plt.fill_between(
-    electricity_fows.index,
-    baseline,
-    baseline + electricity_fows[(("Battery", "electricity"), "flow")],
-    step="pre",
-    label="Battery supply",
-)
-
-plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")],
-    "-",
-    color="darkgrey",
-    label="Electricity demand",
-)
-
-plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")]
-    + electricity_fows[(("electricity", "Battery"), "flow")],
-    "--",
-    color="darkgrey",
-    label="Battery charging",
-)
-
-plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")]
-    + electricity_fows[(("electricity", "Battery"), "flow")]
-    + electricity_fows[(("electricity", "grid"), "flow")],
-    ":",
-    color="darkgrey",
-    label="Feed-In",
-)
-
-plt.legend()
-plt.ylabel("Power (kW)")
-plt.xlim(pd.Timestamp("2020-02-21 00:00"), pd.Timestamp("2020-02-28 00:00"))
-plt.gcf().autofmt_xdate()
-
-plt.savefig(f"home_pv_result-4_{mode}.svg")
-
-plt.show()
+opex = new_results.to_df("opex")
+# print(opex)

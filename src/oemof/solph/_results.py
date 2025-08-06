@@ -13,10 +13,13 @@ import warnings
 from functools import cache
 
 import pandas as pd
-from oemof.tools import debugging
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
+from pyomo.environ import Param
 from pyomo.opt.results.container import ListContainer
+
+import oemof.solph
+from oemof.tools import debugging
 
 
 class Results:
@@ -25,20 +28,30 @@ class Results:
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: ConcreteModel):
+    def __init__(self, model: ConcreteModel, eval_economy=True):
         msg = (
             "The class 'Results' is experimental. Functionality and API can"
             " be changed without warning during any update."
         )
         warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
+        print("---------------------------------------------")
+        print(
+            "Hier findet sich die Ausgabe von Berechnungen in der Results Klasse"
+        )
+        print("---------------------------------------------")
+
         self._solver_results = model.solver_results
         self._variables = {}
         self._model = model
+
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
+                # print(variable)
                 key = str(variable).split(".")[-1]
+                # print(key)
                 occurence = str(variable)[: -(len(key) + 1)]
+                # print(occurence)
                 if (
                     key not in self._variables
                     and key not in self._solver_results
@@ -59,8 +72,24 @@ class Results:
                         + f"(last time in '{variable}')"
                     )
 
+        # adss additional keys for the calculation of opex and capex
+        # if the keyword eval_economy is True
+        # checks if investment optimization is happing to add capex as key
+        # TODO: add keyword for multiperiod
+        if eval_economy == True:
+            if "invest" in self._variables.keys():
+                self._economy = {"opex": None, "capex": None}
+            else:
+                self._economy = {"opex": None}
+        else:
+            pass
+
     def keys(self):
-        return self._solver_results.keys() | self._variables.keys()
+        return (
+            self._solver_results.keys()
+            | self._variables.keys()
+            | self._economy.keys()
+        )
 
     @cache
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
@@ -77,26 +106,49 @@ class Results:
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
-        df = []
-        for occurence in self._variables[variable]:
-            dataset = self._variables[variable][occurence]
-            df.append(
-                pd.DataFrame(dataset.extract_values(), index=[0]).stack(
-                    future_stack=True
-                )
-            )
-        df = pd.concat(df, axis=1)
 
-        # overwrite known indexes
-        index_type = tuple(dataset.index_set().subsets())[-1].name
-        match index_type:
-            case "TIMEPOINTS":
-                df.index = self.timeindex
-            case "TIMESTEPS":
-                df.index = self.timeindex[:-1]
-            case _:
-                df.index = df.index.get_level_values(-1)
+        if variable == "opex":
+            df = self.calc_opex()
+
+        else:
+            df = []
+            for occurence in self._variables[variable]:
+                dataset = self._variables[variable][occurence]
+                df.append(
+                    pd.DataFrame(dataset.extract_values(), index=[0]).stack(
+                        future_stack=True
+                    )
+                )
+            df = pd.concat(df, axis=1)
+
+            # overwrite known indexes
+            index_type = tuple(dataset.index_set().subsets())[-1].name
+            match index_type:
+                case "TIMEPOINTS":
+                    df.index = self.timeindex
+                case "TIMESTEPS":
+                    df.index = self.timeindex[:-1]
+                case _:
+                    df.index = df.index.get_level_values(-1)
         return df
+
+    def calc_opex(self):
+        df_opex = pd.DataFrame()
+
+        # extract the the optimized flow values
+        flow_values = self.to_df("flow")
+
+        for o, i in self._model.FLOWS:
+            # access the variable costs of each flow
+            variable_costs = self._model.flows[o, i].variable_costs
+
+            # map flows and variable costs and mulitply
+            for col in flow_values.columns:
+                if col[0] == o and col[1] == i:
+                    opex = flow_values[col] * variable_costs
+                    df_opex[col] = opex
+
+        return df_opex
 
     @property
     def objective(self):
