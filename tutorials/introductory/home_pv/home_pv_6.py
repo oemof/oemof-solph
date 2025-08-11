@@ -77,6 +77,7 @@ dc_bus = solph.Bus(label="DC")
 pv_specific_costs = 1200  # €/kW
 pv_lifetime = 20  # years
 pv_epc = pv_specific_costs / pv_lifetime
+print(pv_epc)
 
 pv_panels = solph.components.Source(
     label="PV",
@@ -91,12 +92,15 @@ pv_panels = solph.components.Source(
 inverter_specific_costs = 300  # €/kW
 inverter_lifetime = 20  # years
 inverter_epc = inverter_specific_costs / inverter_lifetime
+print(inverter_epc)
 
 inverter = solph.components.Converter(
     label="inverter",
     inputs={
         dc_bus: solph.Flow(
-            nominal_capacity=solph.Investment(ep_costs=inverter_epc)
+            nominal_capacity=solph.Investment(
+                ep_costs=inverter_epc, nonconvex=True, offset=400, maximum=150
+            )
         )
     },
     outputs={ac_bus: solph.Flow()},
@@ -122,6 +126,17 @@ battery = solph.components.GenericStorage(
 
 energy_system.add(battery)
 
+battery2 = solph.components.GenericStorage(
+    label="Battery2",
+    nominal_capacity=battery_size,
+    inputs={ac_bus: solph.Flow()},
+    outputs={ac_bus: solph.Flow()},
+    inflow_conversion_factor=0.9,
+    loss_rate=0.01,
+)
+
+energy_system.add(battery2)
+
 # %%[graph_plotting]
 plt.figure()
 graph = create_nx_graph(energy_system)
@@ -134,7 +149,7 @@ model.solve(solver="gurobi", solve_kwargs={"tee": False})
 results = solph.processing.results(model)
 meta_results = solph.processing.meta_results(model)
 
-new_results = Results(model)
+new_results = Results(model, eval_economy=True)
 # %%
 keys = new_results.keys()
 
@@ -149,5 +164,5 @@ print(keys)
 # opex = new_results.calc_opex()
 # print(opex)
 
-opex = new_results.to_df("opex")
-# print(opex)
+opex = new_results.to_df("yearly_investment_costs")
+print(opex)

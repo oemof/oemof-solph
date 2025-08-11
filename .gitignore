@@ -73,3 +73,4 @@ docs/_build
 .mypy_cache/
 src/oemof/zum_Ausprobieren.py
 tutorials/introductory/home_pv/home_pv_6.py
+tutorials/introductory/home_pv/home_pv_6.py
