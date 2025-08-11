@@ -35,12 +35,6 @@ class Results:
         )
         warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
-        print("---------------------------------------------")
-        print(
-            "Hier findet sich die Ausgabe von Berechnungen in der Results Klasse"
-        )
-        print("---------------------------------------------")
-
         self._solver_results = model.solver_results
         self._variables = {}
         self._model = model
@@ -144,23 +138,23 @@ class Results:
 
         # calculate yearly investment costs associated with investment FLOWS
         # and store data in capex_data dictionary
-        for o, i in self._model.FLOWS:
+        for i, o in self._model.FLOWS:
 
             # access the costs of each investment flow
-            if self._model.flows[o, i].investment != None:
+            if hasattr(self._model.flows[i, o], "investment"):
 
                 # map investment and costs and mulitply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):
                         pass
                     else:
-                        if col[0] == o and col[1] == i:
+                        if col[0] == i and col[1] == o:
                             invest_size = invest_values[col][0]
 
                             yearly_investment_costs = (
-                                self._model.flows[o, i].investment.ep_costs[0]
+                                self._model.flows[i, o].investment.ep_costs[0]
                                 * invest_size
-                                + self._model.flows[o, i].investment.offset[0]
+                                + self._model.flows[i, o].investment.offset[0]
                             )
 
                             # Save values to dictionary
@@ -203,13 +197,13 @@ class Results:
         # extract the the optimized flow values
         flow_values = self.to_df("flow")
 
-        for o, i in self._model.FLOWS:
+        for i, o in self._model.FLOWS:
             # access the variable costs of each flow
-            variable_costs = self._model.flows[o, i].variable_costs
+            variable_costs = self._model.flows[i, o].variable_costs
 
             # map flows and variable costs and mulitply
             for col in flow_values.columns:
-                if col[0] == o and col[1] == i:
+                if col[0] == i and col[1] == o:
                     opex = flow_values[col] * variable_costs
                     df_opex[col] = opex
 
