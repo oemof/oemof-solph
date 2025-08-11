@@ -47,11 +47,8 @@ class Results:
 
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
-                # print(variable)
                 key = str(variable).split(".")[-1]
-                # print(key)
                 occurence = str(variable)[: -(len(key) + 1)]
-                # print(occurence)
                 if (
                     key not in self._variables
                     and key not in self._solver_results
@@ -78,7 +75,10 @@ class Results:
         # TODO: add keyword for multiperiod
         if eval_economy == True:
             if "invest" in self._variables.keys():
-                self._economy = {"variable_opex": None, "capex_annuity": None}
+                self._economy = {
+                    "variable_opex": None,
+                    "yearly_investment_costs": None,
+                }
             else:
                 self._economy = {"variable_opex": None}
         else:
@@ -109,8 +109,7 @@ class Results:
 
         if variable == "variable_opex":
             df = self.calc_opex()
-        elif variable == "capex_annuity":
-            print("success")
+        elif variable == "yearly_investment_costs":
             df = self.calc_capex()
 
         else:
@@ -139,7 +138,6 @@ class Results:
 
         # extract the the optimized investment sizes
         invest_values = self.to_df("invest")
-        print(invest_values)
 
         # Initialize an empty dictionary to collect results
         capex_data = {}
@@ -150,8 +148,6 @@ class Results:
 
             # access the costs of each investment flow
             if self._model.flows[o, i].investment != None:
-                ep_costs = self._model.flows[o, i].investment.ep_costs
-                fixed_costs = self._model.flows[o, i].investment.offset
 
                 # map investment and costs and mulitply
                 for col in invest_values.columns:
@@ -170,19 +166,32 @@ class Results:
                             # Save values to dictionary
                             capex_data[col] = yearly_investment_costs
 
-                # print(
-                #     "Out: {}, In: {}, ep_costs: {}, offset: {}, yearly_inestment_costs: {}".format(
-                #         o, i, ep_costs[0], fixed_costs, yearly_investment_costs
-                #     )
-                # )
-
             else:
                 pass
 
-            # calculate yearly investment costs associated with GenericStorages
-            # and store data in capex_data dictionary
-            # for i in self._model.GenericStorages:
-            #     print(i)
+        # calculate yearly investment costs associated with GenericStorages
+        # and store data in capex_data dictionary
+        for node in self._model.nodes:
+            if isinstance(
+                node,
+                oemof.solph.components._generic_storage.GenericStorage,
+            ):
+
+                # map investment and costs and mulitply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        if col == node:
+                            invest_size = invest_values[col][0]
+
+                            yearly_investment_costs = (
+                                node.investment.ep_costs[0] * invest_size
+                                + node.investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = yearly_investment_costs
+                    else:
+                        pass
 
         df_capex = pd.DataFrame([capex_data])
 
