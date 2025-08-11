@@ -28,7 +28,7 @@ class Results:
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: ConcreteModel, eval_economy=True):
+    def __init__(self, model: ConcreteModel, eval_economy=False):
         msg = (
             "The class 'Results' is experimental. Functionality and API can"
             " be changed without warning during any update."
@@ -78,9 +78,9 @@ class Results:
         # TODO: add keyword for multiperiod
         if eval_economy == True:
             if "invest" in self._variables.keys():
-                self._economy = {"opex": None, "capex": None}
+                self._economy = {"variable_opex": None, "capex_annuity": None}
             else:
-                self._economy = {"opex": None}
+                self._economy = {"variable_opex": None}
         else:
             pass
 
@@ -107,8 +107,11 @@ class Results:
         with the equivalent `results.variable` or `results["variable"]`.
         """
 
-        if variable == "opex":
+        if variable == "variable_opex":
             df = self.calc_opex()
+        elif variable == "capex_annuity":
+            print("success")
+            df = self.calc_capex()
 
         else:
             df = []
@@ -131,6 +134,59 @@ class Results:
                 case _:
                     df.index = df.index.get_level_values(-1)
         return df
+
+    def calc_capex(self):
+
+        # extract the the optimized investment sizes
+        invest_values = self.to_df("invest")
+        print(invest_values)
+
+        # Initialize an empty dictionary to collect results
+        capex_data = {}
+
+        # calculate yearly investment costs associated with investment FLOWS
+        # and store data in capex_data dictionary
+        for o, i in self._model.FLOWS:
+
+            # access the costs of each investment flow
+            if self._model.flows[o, i].investment != None:
+                ep_costs = self._model.flows[o, i].investment.ep_costs
+                fixed_costs = self._model.flows[o, i].investment.offset
+
+                # map investment and costs and mulitply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        pass
+                    else:
+                        if col[0] == o and col[1] == i:
+                            invest_size = invest_values[col][0]
+
+                            yearly_investment_costs = (
+                                self._model.flows[o, i].investment.ep_costs[0]
+                                * invest_size
+                                + self._model.flows[o, i].investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = yearly_investment_costs
+
+                # print(
+                #     "Out: {}, In: {}, ep_costs: {}, offset: {}, yearly_inestment_costs: {}".format(
+                #         o, i, ep_costs[0], fixed_costs, yearly_investment_costs
+                #     )
+                # )
+
+            else:
+                pass
+
+            # calculate yearly investment costs associated with GenericStorages
+            # and store data in capex_data dictionary
+            # for i in self._model.GenericStorages:
+            #     print(i)
+
+        df_capex = pd.DataFrame([capex_data])
+
+        return df_capex
 
     def calc_opex(self):
         df_opex = pd.DataFrame()
