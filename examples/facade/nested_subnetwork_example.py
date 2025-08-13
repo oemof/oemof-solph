@@ -45,12 +45,11 @@ class Volatile(solph.Facade):
         label: str,
         output_bus: solph.Bus,
         timeseries: float | list[float],
-        nominal_value: float,
+        nominal_capacity: float,
     ):
         self.output_bus = output_bus
         self.timeseries = timeseries
-        self.nominal_value = nominal_value
-
+        self.nominal_capacity = nominal_capacity
 
         super().__init__(label=label, facade_type=type(self))
 
@@ -60,11 +59,10 @@ class Volatile(solph.Facade):
             label="source",
             outputs={
                 self.output_bus: solph.Flow(
-                    max=self.timeseries, nominal_value=self.nominal_value
+                    max=self.timeseries, nominal_capacity=self.nominal_capacity
                 ),
             },
         )
-
 
 
 def main():
@@ -99,8 +97,6 @@ def main():
     energysystem = EnergySystem(
         timeindex=date_time_index, infer_last_interval=False
     )
-
-
 
     ##########################################################################
     # Create oemof objects
@@ -145,18 +141,18 @@ def main():
     # create fixed source object representing wind power plants
     renewables.subnode(
         Volatile,
-            label="wind",
-            output_bus=re_bus,
-            timeseries=data["wind"],
-            nominal_value=1000000,
+        label="wind",
+        output_bus=re_bus,
+        timeseries=data["wind"],
+        nominal_capacity=1000000,
     )
     # create fixed source object representing pv power plants
     renewables.subnode(
         Volatile,
-            label="pv",
-            output_bus=re_bus,
-            timeseries=data["pv"],
-            nominal_value=582000,
+        label="pv",
+        output_bus=re_bus,
+        timeseries=data["pv"],
+        nominal_capacity=582000,
     )
     renewables.subnode(
         components.Converter,
@@ -174,7 +170,7 @@ def main():
             label="demand",
             inputs={
                 bus_electricity: flows.Flow(
-                    fix=data["demand_el"], nominal_value=1
+                    fix=data["demand_el"], nominal_capacity=1
                 )
             },
         )
@@ -201,10 +197,10 @@ def main():
     battery_storage = components.GenericStorage(
         nominal_capacity=nominal_capacity,
         label=STORAGE_LABEL,
-        inputs={bus_electricity: flows.Flow(nominal_value=nominal_value)},
+        inputs={bus_electricity: flows.Flow(nominal_capacity=nominal_value)},
         outputs={
             bus_electricity: flows.Flow(
-                nominal_value=nominal_value, variable_costs=0.001
+                nominal_capacity=nominal_value, variable_costs=0.001
             )
         },
         loss_rate=0.00,
@@ -214,7 +210,6 @@ def main():
     )
 
     energysystem.add(battery_storage)
-
 
     ##########################################################################
     # Optimise the energy system and plot the results
