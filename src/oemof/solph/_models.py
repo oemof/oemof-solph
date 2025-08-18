@@ -447,18 +447,26 @@ class Model(po.ConcreteModel):
 
 
 class Results:
+    filters = {
+        "flow": lambda column: getattr(
+            column[0].outputs[column[1]], "visible", True
+        ),
+    }
+
     # TODO:
     #   Defer attribute references not present as variables to
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: Model):
+    def __init__(self, model: Model, filters=None):
         # TODO: Disambiguate colliding variable names.
         self.variables = {
             str(variable).split(".")[-1]: variable
             for vardata in model.component_data_objects(Var)
             for variable in [vardata.parent_component()]
         }
+        if filters is not None:
+            self.filters = filters
 
     @cache
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
@@ -475,12 +483,14 @@ class Results:
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
+        filter = self.filters.get(variable, lambda *xs: True)
         variable = self.variables[variable]
         df = pd.DataFrame(variable.extract_values(), index=[0]).stack(
             future_stack=True
         )
         df.index = df.index.get_level_values(-1)
-        return df
+        columns = [column for column in df.columns if filter(column)]
+        return df.loc[:, columns]
 
     def __getattr__(self, variable: str) -> pd.DataFrame | pd.Series:
         return self[variable]
