@@ -95,7 +95,6 @@ oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation
 
 [tool.black]
 line-length = 79
-target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 exclude = '''
 /(
