@@ -24,7 +24,6 @@ include = [
     ".flake8",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
-    ".scrutinizer.yml",
 ]
 exclude = ["docs/_build"]
 
