@@ -326,40 +326,47 @@ def additional_total_limit(model, keyword, limit=None):
         if hasattr(model.flows[i, o], keyword):
             operational_flows[(i, o)] = model.flows[i, o]
     limit_name = "total_limit_" + keyword
+
     if hasattr(model, "GenericInvestmentStorageBlock"):
         for st, _ in model.GenericInvestmentStorageBlock.invest:
             storages[st] = [st]
+
     setattr(
         model,
         limit_name,
         po.Expression(
-            expr=sum(
+            rule=lambda m:
+            sum(
                 model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword).get("cost", 0)
-                + model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
-                * getattr(invest_flows[inflow, outflow], keyword).get("offset", 0)
-                if (inflow, outflow, p) in model.InvestmentFlowBlock.invest_status else 0
+                + (
+                    model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
+                    * getattr(invest_flows[inflow, outflow], keyword).get("offset", 0)
+                    if (inflow, outflow, p) in model.InvestmentFlowBlock.invest_status
+                    else 0
+                )
                 for (inflow, outflow) in invest_flows
                 for p in model.PERIODS
             ) +
-                 sum(
-                 model.flow[inflow, outflow, t]
-                 * model.timeincrement[t]
-                 * sequence(getattr(operational_flows[inflow, outflow], keyword))[t]
-                 for (inflow, outflow) in operational_flows
-                 for p in model.PERIODS
-                 for t in model.TIMESTEPS_IN_PERIOD[p]
+            sum(
+                model.flow[inflow, outflow, t]
+                * model.tsam_weighting[t]
+                * model.timeincrement[t]
+                * sequence(getattr(operational_flows[inflow, outflow], keyword))[t]
+                for (inflow, outflow) in operational_flows
+                for p in model.PERIODS
+                for t in model.TIMESTEPS_IN_PERIOD[p]
             ) +
-                 sum(
-                 model.GenericInvestmentStorageBlock.total[st, p]
-                 * getattr(storages[st][0].investment, keyword).get("cost", 0)
-                 + model.GenericInvestmentStorageBlock.invest_status[st, p]
-                 * getattr(storages[st][0].investment, keyword).get("offset", 0)
-                 if (st, p) in model.GenericInvestmentStorageBlock.invest_status else 0
-                 for st in storages
-                 for p in model.PERIODS
-                 if hasattr(model, "GenericInvestmentStorageBlock")
-                 )
+            sum(
+                model.GenericInvestmentStorageBlock.total[st, p]
+                * getattr(storages[st][0].investment, keyword).get("cost", 0)
+                + model.GenericInvestmentStorageBlock.invest_status[st, p]
+                * getattr(storages[st][0].investment, keyword).get("offset", 0)
+                if (st, p) in model.GenericInvestmentStorageBlock.invest_status else 0
+                for st in storages
+                for p in model.PERIODS
+                if hasattr(model, "GenericInvestmentStorageBlock")
+            )
         ),
     )
 
