@@ -16,8 +16,9 @@ SPDX-License-Identifier: MIT
 """
 import logging
 import warnings
-from functools import cache
+from collections.abc import Callable
 from logging import getLogger
+from typing import TypeAlias
 
 import pandas as pd
 from oemof.tools import debugging
@@ -35,6 +36,9 @@ from oemof.solph.flows._invest_non_convex_flow_block import (
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
+
+
+Filters: TypeAlias = dict[str, Callable[[object], bool]]
 
 
 class LoggingError(BaseException):
@@ -458,18 +462,18 @@ class Results:
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: Model, filters=None):
+    def __init__(self, model: Model):
         # TODO: Disambiguate colliding variable names.
         self.variables = {
             str(variable).split(".")[-1]: variable
             for vardata in model.component_data_objects(Var)
             for variable in [vardata.parent_component()]
         }
-        if filters is not None:
-            self.filters = filters
+        self._dfs = {}
 
-    @cache
-    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+    def to_df(
+        self, variable: str, filters: Filters = None
+    ) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
         #   - Support `Var`s as arguments?
@@ -479,15 +483,22 @@ class Results:
 
         This is the function that attribute and dictionary access to
         variables as `DataFrame`s is based on. Use it if you like to be
-        explicit.
+        explicit. Also, if you want to override the default filtering of the
+        resulting `DataFrame`'s columns, this is the function to use.
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
-        filter = self.filters.get(variable, lambda *xs: True)
-        values = self.variables[variable].extract_values()
-        df = pd.DataFrame(values, index=[0]).stack(future_stack=True)
-        df.index = df.index.get_level_values(-1)
+        if variable not in self._dfs:
+            values = self.variables[variable].extract_values()
+            df = pd.DataFrame(values, index=[0]).stack(future_stack=True)
+            df.index = df.index.get_level_values(-1)
+            self._dfs[variable] = df
+        df = self._dfs[variable]
+
+        filters = self.filters if filters is None else filters
+        filter = filters.get(variable, lambda *xs: True)
         columns = [column for column in df.columns if filter(column)]
+
         return df.loc[:, columns]
 
     def __getattr__(self, variable: str) -> pd.DataFrame | pd.Series:
