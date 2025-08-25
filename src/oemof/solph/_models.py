@@ -484,10 +484,8 @@ class Results:
         with the equivalent `results.variable` or `results["variable"]`.
         """
         filter = self.filters.get(variable, lambda *xs: True)
-        variable = self.variables[variable]
-        df = pd.DataFrame(variable.extract_values(), index=[0]).stack(
-            future_stack=True
-        )
+        values = self.variables[variable].extract_values()
+        df = pd.DataFrame(values, index=[0]).stack(future_stack=True)
         df.index = df.index.get_level_values(-1)
         columns = [column for column in df.columns if filter(column)]
         return df.loc[:, columns]
