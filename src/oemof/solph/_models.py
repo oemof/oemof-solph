@@ -457,11 +457,13 @@ class Filters(dict):
 
 
 class Results:
-    filters = Filters({
-        "flow": lambda column: getattr(
-            column[0].outputs[column[1]], "visible", True
-        ),
-    })
+    filters = Filters(
+        {
+            "flow": lambda column: getattr(
+                column[0].outputs[column[1]], "visible", True
+            ),
+        }
+    )
 
     # TODO:
     #   Defer attribute references not present as variables to
