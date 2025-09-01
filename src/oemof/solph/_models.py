@@ -38,9 +38,6 @@ from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 
-Filters: TypeAlias = dict[str, Callable[[object], bool]]
-
-
 class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
 
@@ -450,12 +447,21 @@ class Model(po.ConcreteModel):
         return self
 
 
+class Filters(dict):
+    def updating(
+        self, filters: dict[str, Callable[[object], bool]]
+    ) -> "Filters":
+        result = Filters(self)
+        result.update(filters)
+        return result
+
+
 class Results:
-    filters = {
+    filters = Filters({
         "flow": lambda column: getattr(
             column[0].outputs[column[1]], "visible", True
         ),
-    }
+    })
 
     # TODO:
     #   Defer attribute references not present as variables to
