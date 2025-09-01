@@ -65,6 +65,8 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from oemof.network.network import HierachicalLabel
+
 from facade import DSO
 from oemof.tools import logger
 
@@ -141,10 +143,10 @@ def main():
     # connect components to these buses (see below).
 
     # create natural gas bus
-    bus_gas = buses.Bus(label="natural_gas")
+    bus_gas = buses.Bus(label=HierachicalLabel("natural_gas"))
 
     # create electricity bus
-    bus_electricity = buses.Bus(label="electricity")
+    bus_electricity = buses.Bus(label=HierachicalLabel("electricity"))
 
     # adding the buses to the energy system
     energysystem.add(bus_gas, bus_electricity)
@@ -152,7 +154,7 @@ def main():
     # create excess component for the electricity bus to allow overproduction
     energysystem.add(
         components.Sink(
-            label="excess_bus_electricity",
+            label=HierachicalLabel("excess_bus_electricity"),
             inputs={bus_electricity: flows.Flow()},
         )
     )
@@ -177,7 +179,7 @@ def main():
     # create fixed source object representing wind power plants
     energysystem.add(
         components.Source(
-            label="wind",
+            label=HierachicalLabel("wind"),
             outputs={
                 bus_electricity: flows.Flow(
                     fix=data["wind"], nominal_capacity=1000000
@@ -189,7 +191,7 @@ def main():
     # create fixed source object representing pv power plants
     energysystem.add(
         components.Source(
-            label="pv",
+            label=HierachicalLabel("pv"),
             outputs={
                 bus_electricity: flows.Flow(
                     fix=data["pv"], nominal_capacity=582000
@@ -202,7 +204,7 @@ def main():
     # nominal_value is set to 1 because demand_el is not a normalised series
     energysystem.add(
         components.Sink(
-            label="demand",
+            label=HierachicalLabel("demand"),
             inputs={
                 bus_electricity: flows.Flow(
                     fix=data["demand_el"], nominal_capacity=1
@@ -217,7 +219,7 @@ def main():
 
     battery_storage = components.GenericStorage(
         nominal_capacity=nominal_capacity,
-        label=STORAGE_LABEL,
+        label=HierachicalLabel(STORAGE_LABEL),
         inputs={bus_electricity: flows.Flow(nominal_capacity=nominal_value)},
         outputs={
             bus_electricity: flows.Flow(

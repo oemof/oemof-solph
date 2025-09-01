@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from oemof.tools import logger
 from oemof.network import SubNetwork
+from oemof.network.network.hierachical_nodes import HierachicalLabel
 from oemof import solph
 
 from oemof.solph import EnergySystem
@@ -108,10 +109,10 @@ def main():
     # connect components to these buses (see below).
 
     # create natural gas bus
-    bus_gas = buses.Bus(label="natural_gas")
+    bus_gas = buses.Bus(label=HierachicalLabel("natural_gas"))
 
     # create electricity bus
-    bus_electricity = buses.Bus(label="electricity")
+    bus_electricity = buses.Bus(label=HierachicalLabel("electricity"))
 
     # adding the buses to the energy system
     energysystem.add(bus_gas, bus_electricity)
