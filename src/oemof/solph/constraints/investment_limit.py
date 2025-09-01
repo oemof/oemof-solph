@@ -358,8 +358,8 @@ def additional_total_limit(model, keyword, limit=None):
                 for t in model.TIMESTEPS_IN_PERIOD[p]
             ) +
             sum(
-                model.GenericInvestmentStorageBlock.total[st, p]
-                * getattr(storages[st][0].investment, keyword).get("cost", 0)
+                model.GenericInvestmentStorageBlock.invest[st, p]
+                * getattr(storages[st][0].investment, keyword).get("cost", 0) / 2 
                 + model.GenericInvestmentStorageBlock.invest_status[st, p]
                 * getattr(storages[st][0].investment, keyword).get("offset", 0)
                 if (st, p) in model.GenericInvestmentStorageBlock.invest_status else 0
