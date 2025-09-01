@@ -455,6 +455,13 @@ class Filters(dict):
         result.update(filters)
         return result
 
+    @staticmethod
+    def nofilter(*args, **kwargs):
+        return True
+
+    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
+        return self.get(variable, self.nofilter)
+
 
 class Results:
     filters = Filters(
@@ -504,7 +511,7 @@ class Results:
         df = self._dfs[variable]
 
         filters = self.filters if filters is None else filters
-        filter = filters.get(variable, lambda *xs: True)
+        filter = filters[variable]
         columns = [column for column in df.columns if filter(column)]
 
         return df.loc[:, columns]
