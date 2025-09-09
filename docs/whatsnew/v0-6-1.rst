@@ -6,6 +6,8 @@ API changes
 
 New features
 ############
+* Two new keywords added to `Results` class (experimental) to calculate variable costs and 
+  investment costs via `results.to_df("variable_costs")` and `results.to_df("investment_costs")`
 
 Documentation
 #############
@@ -24,6 +26,7 @@ Contributors
 ############
 
 * Patrik Schönfeldt
+* Eva Schischke
 
 Acknowledgements
 ################

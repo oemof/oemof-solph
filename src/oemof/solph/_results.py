@@ -70,11 +70,11 @@ class Results:
         if eval_economy == True:
             if "invest" in self._variables.keys():
                 self._economy = {
-                    "variable_opex": None,
-                    "yearly_investment_costs": None,
+                    "variable_costs": None,
+                    "investment_costs": None,
                 }
             else:
-                self._economy = {"variable_opex": None}
+                self._economy = {"variable_costs": None}
         else:
             pass
 
@@ -101,9 +101,9 @@ class Results:
         with the equivalent `results.variable` or `results["variable"]`.
         """
 
-        if variable == "variable_opex":
+        if variable == "variable_costs":
             df = self.calc_opex()
-        elif variable == "yearly_investment_costs":
+        elif variable == "investment_costs":
             df = self.calc_capex()
 
         else:
@@ -138,12 +138,15 @@ class Results:
 
         # calculate yearly investment costs associated with investment FLOWS
         # and store data in capex_data dictionary
+
+        # TODO: is it really necessary to loop over all flows again or is it
+        # possible to use the flows of 'invest_values'?
         for i, o in self._model.FLOWS:
 
             # access the costs of each investment flow
             if hasattr(self._model.flows[i, o], "investment"):
 
-                # map investment and costs and mulitply
+                # map investment and costs and multiply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):
                         pass
@@ -151,14 +154,14 @@ class Results:
                         if col[0] == i and col[1] == o:
                             invest_size = invest_values[col][0]
 
-                            yearly_investment_costs = (
+                            investment_costs = (
                                 self._model.flows[i, o].investment.ep_costs[0]
                                 * invest_size
                                 + self._model.flows[i, o].investment.offset[0]
                             )
 
                             # Save values to dictionary
-                            capex_data[col] = yearly_investment_costs
+                            capex_data[col] = investment_costs
 
             else:
                 pass
@@ -177,13 +180,13 @@ class Results:
                         if col == node:
                             invest_size = invest_values[col][0]
 
-                            yearly_investment_costs = (
+                            investment_costs = (
                                 node.investment.ep_costs[0] * invest_size
                                 + node.investment.offset[0]
                             )
 
                             # Save values to dictionary
-                            capex_data[col] = yearly_investment_costs
+                            capex_data[col] = investment_costs
                     else:
                         pass
 

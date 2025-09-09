@@ -5,6 +5,8 @@ General description
 -------------------
 
 A basic example to show how to model a simple energy system with oemof.solph.
+and use the Results class to calculate the variable costs as well as the
+investment costs.
 
 The following energy system is modeled:
 
@@ -30,17 +32,17 @@ The following energy system is modeled:
 
 Code
 ----
-Download source code: :download:`result_object.py </../examples/result_object/result_object.py>`
+Download source code: :download:`economic_results.py </../examples/economic_results/economics_results_with_invest.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/result_object/result_object.py
+    .. literalinclude:: /../examples/economic_results/economics_results_with_invest.py
         :language: python
         :lines: 61-
 
 Data
 ----
-Download data: :download:`time_series.csv </../examples/result_object/time_series.csv>`
+Download data: :download:`time_series.csv </../examples/economic_results/time_series.csv>`
 
 Installation requirements
 -------------------------
@@ -60,8 +62,6 @@ License
 
 import logging
 import os
-import pprint as pp
-from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -74,8 +74,6 @@ from oemof.solph import buses
 from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
-from oemof.solph import processing
-from oemof.solph import views
 from oemof.tools import logger
 
 
@@ -86,19 +84,6 @@ def get_data_from_file_path(file_path: str) -> pd.DataFrame:
         dir = os.path.dirname(os.path.abspath(__file__))
         data = pd.read_csv(dir + "/" + file_path)
     return data
-
-
-def plot_figures_for(element: dict) -> None:
-    figure, axes = plt.subplots(figsize=(10, 5))
-    element["sequences"].plot(ax=axes, kind="line", drawstyle="steps-post")
-    plt.legend(
-        loc="upper center",
-        prop={"size": 8},
-        bbox_to_anchor=(0.5, 1.25),
-        ncol=2,
-    )
-    figure.subplots_adjust(top=0.8)
-    plt.show()
 
 
 def main(optimize=True):
@@ -276,10 +261,10 @@ def main(optimize=True):
 
     # Evaluating the economics of the solution
 
-    print("\n********* Evaluate economics *********")
+    print("\n********* Evaluating economics *********")
 
-    # -------------- Variable OPEX ---------------------------
-    variable_opex = results.to_df("variable_opex")
+    # -------------- variable costs ---------------------------
+    variable_costs = results.to_df("variable_costs")
     values = results.to_df("flow")
 
     var_costs_dict = {}
@@ -302,20 +287,26 @@ def main(optimize=True):
     # First subplot for flow values
     values.loc[start_date:end_date, :].plot(ax=axs[0])
     axs[0].set_title("Flow Values")
+    axs[0].set_ylabel("Power in kW")
 
     # Second subplot for variable costs
     df_var_costs.loc[start_date:end_date, :].plot(ax=axs[1])
     axs[1].set_title("Variable costs")
+    axs[1].set_ylabel("specific variable costs in €/kWh")
 
     # Third subplot for variable opex
-    variable_opex.loc[start_date:end_date, :].plot(ax=axs[2])
+    variable_costs.loc[start_date:end_date, :].plot(ax=axs[2])
     axs[2].set_title("Variable OPEX")
+    axs[2].set_ylabel("variable costs in €")
 
     # plt.show()
 
-    # -------------- Yearly Investment Costs ---------------------------
+    # -------------- Investment Costs ---------------------------
 
-    yearly_investment_costs = results.to_df("yearly_investment_costs")
+    invest = results.to_df("invest")
+    print(invest)
+
+    investment_costs = results.to_df("investment_costs")
 
     annual_costs_dict = {}
     for i, o in energysystem_model.FLOWS:
@@ -346,14 +337,17 @@ def main(optimize=True):
     # First subplot for invest decisions
     results.to_df("invest").plot(ax=axs2[0], kind="bar")
     axs2[0].set_title("Yearly Investment Installation")
+    axs2[0].set_ylabel("installed capacity in kW")
 
     # Second subplot for ep_costs and offset
     df_annual_costs.plot(ax=axs2[1], kind="bar")
     axs2[1].set_title("ep_costs and offset")
+    axs2[1].set_ylabel("specific investment costs in €/kWh and €")
 
     # Third subplot for yearly investment costs
-    yearly_investment_costs.plot(ax=axs2[2], kind="bar")
+    investment_costs.plot(ax=axs2[2], kind="bar")
     axs2[2].set_title("Yearly Investment Costs")
+    axs2[2].set_ylabel("investment costs in €")
 
     plt.show()
 
