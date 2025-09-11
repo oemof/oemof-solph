@@ -27,6 +27,7 @@ class HeatPump(solph.Facade):
         source_temperature: float | list[float],
         cpf: float = 0.5,
         el_power_limit: float = None,
+        parent_node=None,
     ):
         self.el_supply_bus = el_supply
         self.heat_demand_buses = heat_demand
@@ -35,12 +36,14 @@ class HeatPump(solph.Facade):
         self.cpf = cpf
         self.el_power_limit = el_power_limit
 
-        super().__init__(label=label, facade_type=type(self))
+        super().__init__(
+            label=label, parent_node=parent_node, facade_type=type(self)
+        )
 
     def define_subnetwork(self):
         el_bus = self.subnode(
             solph.Bus,
-            label="el",
+            local_name="el",
             inputs={
                 self.el_supply_bus: solph.Flow(
                     nominal_capacity=self.el_power_limit,
@@ -53,7 +56,7 @@ class HeatPump(solph.Facade):
 
             self.subnode(
                 solph.components.Converter,
-                label=f"hp_{temperature}",
+                local_name=f"hp_{temperature}",
                 inputs={el_bus: solph.Flow()},
                 outputs={target: solph.Flow()},
                 conversion_factors={el_bus: cop},
@@ -73,7 +76,7 @@ def main():
 
     el_bus = house.subnode(
         solph.Bus,
-        label="el",
+        local_name="el",
     )
     el_source = solph.components.Source(
         label="el_grid",
@@ -83,25 +86,25 @@ def main():
 
     heat_demands = house.subnode(
         SubNetwork,
-        label="heat demand",
+        local_name="heat demand",
     )
     demand_bus_dhw = heat_demands.subnode(solph.Bus, "b_dhw")
     demand_bus_sh = heat_demands.subnode(solph.Bus, "b_sh")
 
     heat_demands.subnode(
         solph.components.Sink,
-        label="d_dhw",
+        local_name="d_dhw",
         inputs={demand_bus_dhw: solph.Flow(nominal_capacity=1, fix=[0, 0.2])},
     )
     heat_demands.subnode(
         solph.components.Sink,
-        label="d_sh",
+        local_name="d_sh",
         inputs={demand_bus_sh: solph.Flow(nominal_capacity=1, fix=[0.4, 2.1])},
     )
     es.add(heat_demands)
     hp = house.subnode(
         HeatPump,
-        "hp",
+        local_name="hp",
         el_supply=el_bus,
         heat_demand={demand_bus_dhw: 60.0, demand_bus_sh: 30},
         source_temperature=[3, 0],

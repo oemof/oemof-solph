@@ -113,18 +113,18 @@ def main():
     # create fixed source object representing wind power plants
     renewables.subnode(
         components.Source,
-        label="wind",
+        local_name="wind",
         outputs={re_bus: flows.Flow(fix=data["wind"], nominal_value=1000000)},
     )
     # create fixed source object representing pv power plants
     renewables.subnode(
         components.Source,
-        label="pv",
+        local_name="pv",
         outputs={re_bus: flows.Flow(fix=data["pv"], nominal_value=582000)},
     )
     renewables.subnode(
         components.Converter,
-        label="connection",
+        local_name="connection",
         outputs={bus_electricity: flows.Flow()},
         inputs={re_bus: flows.Flow()},
     )

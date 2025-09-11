@@ -15,8 +15,8 @@ from oemof.network import SubNetwork
 
 class Facade(SubNetwork):
     # attributes
-    def __init__(self, label, facade_type, *args, **kwargs):
-        super().__init__(label=label)
+    def __init__(self, label, facade_type, *args, parent_node=None, **kwargs):
+        super().__init__(label=label, parent_node=parent_node)
         self.facade_type = facade_type
         self.define_subnetwork()
 

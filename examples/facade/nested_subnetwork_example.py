@@ -46,17 +46,20 @@ class Volatile(solph.Facade):
         output_bus: solph.Bus,
         timeseries: float | list[float],
         nominal_capacity: float,
+        parent_node=None,
     ):
         self.output_bus = output_bus
         self.timeseries = timeseries
         self.nominal_capacity = nominal_capacity
 
-        super().__init__(label=label, facade_type=type(self))
+        super().__init__(
+            label=label, parent_node=parent_node, facade_type=type(self)
+        )
 
     def define_subnetwork(self):
         self.subnode(
             solph.components.Source,
-            label="source",
+            local_name="source",
             outputs={
                 self.output_bus: solph.Flow(
                     max=self.timeseries, nominal_capacity=self.nominal_capacity
@@ -141,7 +144,7 @@ def main():
     # create fixed source object representing wind power plants
     renewables.subnode(
         Volatile,
-        label="wind",
+        local_name="wind",
         output_bus=re_bus,
         timeseries=data["wind"],
         nominal_capacity=1000000,
@@ -149,14 +152,14 @@ def main():
     # create fixed source object representing pv power plants
     renewables.subnode(
         Volatile,
-        label="pv",
+        local_name="pv",
         output_bus=re_bus,
         timeseries=data["pv"],
         nominal_capacity=582000,
     )
     renewables.subnode(
         components.Converter,
-        label="connection",
+        local_name="connection",
         outputs={bus_electricity: flows.Flow()},
         inputs={re_bus: flows.Flow()},
     )

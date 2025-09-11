@@ -49,23 +49,27 @@ class DSO(Facade):
         super().__init__(*args, label=label, facade_type=type(self))
 
     def define_subnetwork(self):
-        internal_bus = self.subnode(Bus, label="internal_bus")
+        internal_bus = self.subnode(Bus, local_name="internal_bus")
 
         self.subnode(
             Converter,
             inputs={self.el_bus: Flow(variable_costs=self.feedin_tariff * -1)},
             outputs={internal_bus: Flow()},
-            label="feedin_converter",
+            local_name="feedin_converter",
         )
-        self.subnode(Sink, inputs={internal_bus: Flow()}, label="feedin_sink")
+        self.subnode(
+            Sink, inputs={internal_bus: Flow()}, local_name="feedin_sink"
+        )
 
         self.subnode(
             Converter,
             inputs={internal_bus: Flow()},
             outputs={self.el_bus: Flow(variable_costs=self.energy_price)},
-            label="consumption_converter",
+            local_name="consumption_converter",
         )
 
         self.subnode(
-            Source, outputs={internal_bus: Flow()}, label="consumption_source"
+            Source,
+            outputs={internal_bus: Flow()},
+            local_name="consumption_source",
         )
