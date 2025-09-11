@@ -132,7 +132,9 @@ class GenericCHP(Node):
     ):
         if custom_properties is None:
             custom_properties = {}
-        super().__init__(label, parent_node=parent_node, custom_properties=custom_properties)
+        super().__init__(
+            label, parent_node=parent_node, custom_properties=custom_properties
+        )
 
         self.fuel_input = fuel_input
         self.electrical_output = electrical_output
