@@ -464,6 +464,29 @@ class Filters(dict):
 
 
 class Results:
+    """provides functionality for results processing
+
+    Takes pyomo results and uses variables to access
+    different types of results. Some of these variables
+    are related to meta results.
+    of the solver. And some of the variables are related to
+    the oemof-solph model, such as flow, storage_content or
+    invest.
+
+    Does this need to be named variable? And where does it
+    all come from?
+
+    Example
+    -------
+    >>> energysystem = EnergySystem(...)
+    >>> energysystem_model = Model(energysystem)
+    >>> energysystem_model.solve(...)
+    >>> results = Results(energysystem_model)
+    >>> results.to_df("flow") # with the equivalent `results.flow` or `results["flow"]`
+
+    """
+
+    # default filters
     filters = Filters(
         {
             "flow": lambda column: getattr(
@@ -478,6 +501,10 @@ class Results:
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
     def __init__(self, model: Model):
+        """Postprocesser of pyomo model results
+
+        Takes pyomo model results and ???
+        """
         # TODO: Disambiguate colliding variable names.
         self.variables = {
             str(variable).split(".")[-1]: variable
@@ -496,12 +523,24 @@ class Results:
         #       source, target, timestep etc.
         """Return a `DataFrame` view of the model's `variable`.
 
-        This is the function that attribute and dictionary access to
-        variables as `DataFrame`s is based on. Use it if you like to be
-        explicit. Also, if you want to override the default filtering of the
+        What is a variable???
+
+        Use it if you like to be explicit.
+        Also, if you want to override the default filtering of the
         resulting `DataFrame`'s columns, this is the function to use.
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
+
+        Parameters
+        ----------
+        variable : str
+            common variables are: flow, invest, storage_content, invest_status
+        filter : Filter
+            filters to be applied on the DataFrame MulitIndex Column
+
+        Returns
+        -------
+            pd.DataFrame | pd.Series
         """
         if variable not in self._dfs:
             values = self.variables[variable].extract_values()
