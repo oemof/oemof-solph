@@ -108,7 +108,7 @@ class Results:
         """Returns objective of model
 
         Returns:
-            float: optimum of model 
+            float: optimum of model
         """
         return self._model.objective()
 
@@ -117,7 +117,7 @@ class Results:
         """Returns timeindex of energy system
 
         Returns:
-            float: optimum of model 
+            float: optimum of model
         """
         return self._model.es.timeindex
 
