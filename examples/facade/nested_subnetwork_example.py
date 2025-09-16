@@ -53,7 +53,8 @@ class Volatile(SubNetwork):
         self.nominal_capacity = nominal_capacity
 
         super().__init__(
-            label=label, parent_node=parent_node,
+            label=label,
+            parent_node=parent_node,
         )
 
         self.subnode(
