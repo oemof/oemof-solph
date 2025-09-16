@@ -38,7 +38,7 @@ def plot_figures_for(element: dict) -> None:
     plt.show()
 
 
-class Volatile(solph.Facade):
+class Volatile(SubNetwork):
 
     def __init__(
         self,
@@ -53,10 +53,9 @@ class Volatile(solph.Facade):
         self.nominal_capacity = nominal_capacity
 
         super().__init__(
-            label=label, parent_node=parent_node, facade_type=type(self)
+            label=label, parent_node=parent_node,
         )
 
-    def define_subnetwork(self):
         self.subnode(
             solph.components.Source,
             local_name="source",
@@ -136,8 +135,7 @@ def main():
     )
 
     # *** SUB-NETWORK ***************************
-    # Add a subnetwork for Renewable Energies. This not a Facade it just meant
-    # to group components
+    # Add a subnetwork for Renewable Energies.
     renewables = SubNetwork("renewables")
     re_bus = renewables.subnode(buses.Bus, "re_elec")
 

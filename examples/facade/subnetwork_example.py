@@ -105,8 +105,7 @@ def main():
     )
 
     # *** SUB-NETWORK ***************************
-    # Add a subnetwork for Renewable Energies. This not a Facade it just meant
-    # to group components
+    # Add a subnetwork for Renewable Energies.
     renewables = SubNetwork("renewables")
     re_bus = renewables.subnode(buses.Bus, "re_elec")
 

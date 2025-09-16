@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This example gives a simplified idea how Facades and SubNetworks
+This example gives a simplified idea how SubNetworks
 might be used to work with discretised temperatures.
 
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
@@ -17,7 +17,7 @@ from oemof.network import SubNetwork
 from oemof import solph
 
 
-class HeatPump(solph.Facade):
+class HeatPump(SubNetwork):
 
     def __init__(
         self,
@@ -40,7 +40,6 @@ class HeatPump(solph.Facade):
             label=label, parent_node=parent_node, facade_type=type(self)
         )
 
-    def define_subnetwork(self):
         el_bus = self.subnode(
             solph.Bus,
             local_name="el",

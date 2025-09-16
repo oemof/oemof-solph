@@ -38,17 +38,16 @@ from oemof.solph.components import Converter, Source, Sink
 from oemof.solph.flows import Flow
 from oemof.solph.buses import Bus
 
-from oemof.solph import Facade
+from oemof.network import SubNetwork
 
 
-class DSO(Facade):
+class DSO(SubNetwork):
     def __init__(self, label, el_bus, *args, energy_price, feedin_tariff):
         self.energy_price = energy_price
         self.feedin_tariff = feedin_tariff
         self.el_bus = el_bus
-        super().__init__(*args, label=label, facade_type=type(self))
+        super().__init__(*args, label=label)
 
-    def define_subnetwork(self):
         internal_bus = self.subnode(Bus, local_name="internal_bus")
 
         self.subnode(
