@@ -36,11 +36,11 @@ See what happens, have fun ;)
 
 Code
 ----
-Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest.py>`
+Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_flow.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
+    .. literalinclude:: /../examples/generic_invest_limit/example_generic_flow.py
         :language: python
         :lines: 62-
 
