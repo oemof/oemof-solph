@@ -18,7 +18,10 @@ from oemof import solph
 
 
 class HeatPump(SubNetwork):
-
+    """A simple heat pump model (including its source) with a COP depending
+    on source a temperature (parameter) and and one of multiple possible target
+    temperatures (optimiser decision).
+    """
     def __init__(
         self,
         label: str,
@@ -29,6 +32,24 @@ class HeatPump(SubNetwork):
         el_power_limit: float = None,
         parent_node=None,
     ):
+        """
+        Parameters
+        ----------
+        label: str
+            Name of the heat pump
+        el_supply
+            Bus where electricity is taken from
+        heat_demand:
+            dictionary containing heat demand Buses (keys),
+            and temperatures (in °C, values)
+        source_temperature:
+            temperature (in °C), potentially a time series
+        cpf:
+            Carnot Performacne Factor
+            (efficiency relative to thermodynamic optimum)
+        el_power_limit:
+            Limit for electric power consumption.
+        """
         self.el_supply_bus = el_supply
         self.heat_demand_buses = heat_demand
         self.temperature = np.array(source_temperature)
@@ -49,7 +70,7 @@ class HeatPump(SubNetwork):
         )
 
         for target, temperature in self.heat_demand_buses.items():
-            cop = self.cpf * temperature / (temperature - self.temperature)
+            cop = self.cpf * (temperature + 273.15) / (temperature - self.temperature)
 
             self.subnode(
                 solph.components.Converter,
