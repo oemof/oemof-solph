@@ -36,9 +36,7 @@ class HeatPump(SubNetwork):
         self.cpf = cpf
         self.el_power_limit = el_power_limit
 
-        super().__init__(
-            label=label, parent_node=parent_node, facade_type=type(self)
-        )
+        super().__init__(label=label, parent_node=parent_node)
 
         el_bus = self.subnode(
             solph.Bus,
