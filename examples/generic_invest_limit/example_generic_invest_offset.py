@@ -188,32 +188,31 @@ def main(optimize=True):
         inputs={bus_b_1: solph.Flow()},
         outputs={bus_b_1: solph.Flow()},
         inflow_conversion_factor=1,
-        nominal_capacity = solph.Investment(
-            ep_costs=epc_invest ,
+        nominal_capacity=solph.Investment(
+            ep_costs=epc_invest,
             nonconvex=True,
             maximum=1,
-            custom_attributes={"space": {"cost": 0.5, "offset":1 }},
+            custom_attributes={"space": {"cost": 0.5, "offset": 1}},
         ),
-        invest_relation_input_capacity = 0.5,
-        invest_relation_output_capacity = 0.5,
+        invest_relation_input_capacity=0.5,
+        invest_relation_output_capacity=0.5,
     )
 
     es.add(generic_storage_b_0)
 
     # Generic Storage b_1
     generic_storage_b_1 = solph.components.GenericStorage(
-            label="generic_storage_b_1",
-            inputs={bus_b_1: solph.Flow()},
-            outputs={bus_b_1: solph.Flow()},
-            inflow_conversion_factor=1,
-            nominal_capacity = solph.Investment(
-                ep_costs=epc_invest *100,
-                nonconvex=True,
-                maximum=2,
-                custom_attributes={"space": {"cost": 1, "offset":5 }},
-                )
-            ,
-        )
+        label="generic_storage_b_1",
+        inputs={bus_b_1: solph.Flow()},
+        outputs={bus_b_1: solph.Flow()},
+        inflow_conversion_factor=1,
+        nominal_capacity=solph.Investment(
+            ep_costs=epc_invest * 100,
+            nonconvex=True,
+            maximum=2,
+            custom_attributes={"space": {"cost": 1, "offset": 5}},
+        ),
+    )
 
     es.add(generic_storage_b_1)
     if optimize is False:
@@ -269,6 +268,7 @@ def main(optimize=True):
         "Investment generic_storage_b_1: ",
         results[generic_storage_b_1, None]["scalars"]["total"],
     )
+
 
 if __name__ == "__main__":
     main()
