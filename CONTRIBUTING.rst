@@ -65,6 +65,8 @@ To set up `oemof-solph` for local development:
 
 6. Submit a pull request through the GitHub website.
 
+Here you should check an option which we will only know about when we try it
+
 Pull Request Guidelines
 -----------------------
 
