@@ -108,7 +108,7 @@ def main(optimize=True):
     es.add(
         solph.components.Source(
             label="source_a_1",
-            outputs={bus_a_1: solph.Flow(variable_costs=c_1*10000)},
+            outputs={bus_a_1: solph.Flow(variable_costs=c_1 * 10000)},
         )
     )
 
@@ -133,7 +133,7 @@ def main(optimize=True):
     es.add(
         solph.components.Source(
             label="source_b_1",
-            outputs={bus_b_1: solph.Flow(variable_costs=c_1*10000)},
+            outputs={bus_b_1: solph.Flow(variable_costs=c_1 * 10000)},
         )
     )
 
@@ -153,14 +153,11 @@ def main(optimize=True):
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": {"cost": 1,
-                                                     "offset" : 20
-                                                     }
-                                           },
+                        custom_attributes={"space": {"cost": 1, "offset": 20}},
                         nonconvex=True,
-                        maximum=20
+                        maximum=20,
                     ),
-                    custom_attributes={"space": 0.1}
+                    custom_attributes={"space": 0.1},
                 )
             },
             conversion_factors={bus_a_1: 1},
@@ -178,35 +175,33 @@ def main(optimize=True):
                         ep_costs=epc_invest,
                         custom_attributes={"space": {"cost": 1}},
                         nonconvex=True,
-                        maximum=10
+                        maximum=10,
                     ),
-                    custom_attributes={"space": 0.1}
+                    custom_attributes={"space": 0.1},
                 )
             },
         )
     )
     # Generic Storage b_0
-    generic_storage_b_0 = (
-        solph.components.GenericStorage(
-            label="generic_storage_b_0",
-            inputs={bus_b_1: solph.Flow()},
-            outputs={bus_b_1: solph.Flow()},
-            inflow_conversion_factor=1,
-            nominal_capacity = solph.Investment(
-                ep_costs=epc_invest ,
-                nonconvex=True,
-                maximum=1,
-                custom_attributes={"space": {"cost": 0.5, "offset":1 }},
-            ),
-            invest_relation_input_capacity = 0.5,
-            invest_relation_output_capacity = 0.5,
-        )
+    generic_storage_b_0 = solph.components.GenericStorage(
+        label="generic_storage_b_0",
+        inputs={bus_b_1: solph.Flow()},
+        outputs={bus_b_1: solph.Flow()},
+        inflow_conversion_factor=1,
+        nominal_capacity = solph.Investment(
+            ep_costs=epc_invest ,
+            nonconvex=True,
+            maximum=1,
+            custom_attributes={"space": {"cost": 0.5, "offset":1 }},
+        ),
+        invest_relation_input_capacity = 0.5,
+        invest_relation_output_capacity = 0.5,
     )
+
     es.add(generic_storage_b_0)
 
     # Generic Storage b_1
-    generic_storage_b_1 = (
-        solph.components.GenericStorage(
+    generic_storage_b_1 = solph.components.GenericStorage(
             label="generic_storage_b_1",
             inputs={bus_b_1: solph.Flow()},
             outputs={bus_b_1: solph.Flow()},
@@ -219,7 +214,7 @@ def main(optimize=True):
                 )
             ,
         )
-    )
+
     es.add(generic_storage_b_1)
     if optimize is False:
         return es
@@ -228,9 +223,7 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # add constraint for generic investment limit
-    om = solph.constraints.additional_total_limit(
-        om, "space", limit=100
-    )
+    om = solph.constraints.additional_total_limit(om, "space", limit=100)
     # export lp file
     filename = os.path.join(
         solph.helpers.extend_basic_path("lp_files"), "GenericInvest.lp"
@@ -269,12 +262,12 @@ def main(optimize=True):
 
     print(
         "Investment generic_storage_b_0: ",
-        results[generic_storage_b_0,None]["scalars"]["total"],
+        results[generic_storage_b_0, None]["scalars"]["total"],
     )
 
     print(
         "Investment generic_storage_b_1: ",
-        results[generic_storage_b_1,None]["scalars"]["total"],
+        results[generic_storage_b_1, None]["scalars"]["total"],
     )
 
 if __name__ == "__main__":

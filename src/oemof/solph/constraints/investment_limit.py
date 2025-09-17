@@ -228,6 +228,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
     return model
 
+
 def additional_total_limit(model, keyword, limit=None):
     r"""
     Global limit for investment flows and operation flows
@@ -335,14 +336,16 @@ def additional_total_limit(model, keyword, limit=None):
         model,
         limit_name,
         po.Expression(
-            rule=lambda m:
-            sum(
+            rule=lambda m: sum(
                 model.InvestmentFlowBlock.invest[inflow, outflow, p]
-                * getattr(invest_flows[inflow, outflow], keyword).get("cost", 0)
+                * getattr(invest_flows[inflow, outflow], keyword).get(
+                    "cost", 0
+                )
                 + (
                     model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
                     * getattr(invest_flows[inflow, outflow], keyword).get("offset", 0)
-                    if (inflow, outflow, p) in model.InvestmentFlowBlock.invest_status
+                    if (inflow, outflow, p)
+                    in model.InvestmentFlowBlock.invest_status
                     else 0
                 )
                 for (inflow, outflow) in invest_flows
@@ -352,17 +355,25 @@ def additional_total_limit(model, keyword, limit=None):
                 model.flow[inflow, outflow, t]
                 * model.tsam_weighting[t]
                 * model.timeincrement[t]
-                * sequence(getattr(operational_flows[inflow, outflow], keyword))[t]
+                * sequence(
+                    getattr(operational_flows[inflow, outflow], keyword)
+                )[t]
                 for (inflow, outflow) in operational_flows
                 for p in model.PERIODS
                 for t in model.TIMESTEPS_IN_PERIOD[p]
             ) +
             sum(
                 model.GenericInvestmentStorageBlock.invest[st, p]
-                * getattr(storages[st][0].investment, keyword).get("cost", 0)
+                * getattr(storages[st][0].investment, keyword).get(
+                    "cost", 0
+                )
                 + model.GenericInvestmentStorageBlock.invest_status[st, p]
-                * getattr(storages[st][0].investment, keyword).get("offset", 0)
-                if (st, p) in model.GenericInvestmentStorageBlock.invest_status else 0
+                * getattr(storages[st][0].investment, keyword).get(
+                    "offset", 0
+                )
+                if (st, p)
+                in model.GenericInvestmentStorageBlock.invest_status
+                else 0
                 for st in storages
                 for p in model.PERIODS
                 if hasattr(model, "GenericInvestmentStorageBlock")
