@@ -67,13 +67,9 @@ class Results:
         # checks if investment optimization is happing to add capex as key
         # TODO: add keyword for multiperiod
 
+        self._economy = {"variable_costs": None}
         if "invest" in self._variables.keys():
-            self._economy = {
-                "variable_costs": None,
-                "investment_costs": None,
-            }
-        else:
-            self._economy = {"variable_costs": None}
+            self._economy["investment_costs"] = None
 
     def keys(self):
         return (
@@ -99,9 +95,9 @@ class Results:
         """
 
         if variable == "variable_costs":
-            df = self.calc_opex()
+            df = self._calc_variable_costs()
         elif variable == "investment_costs":
-            df = self.calc_capex()
+            df = self._calc_capex()
 
         else:
             df = []
@@ -125,7 +121,7 @@ class Results:
                     df.index = df.index.get_level_values(-1)
         return df
 
-    def calc_capex(self):
+    def _calc_capex(self):
 
         # extract the the optimized investment sizes
         invest_values = self.to_df("invest")
@@ -191,7 +187,7 @@ class Results:
 
         return df_capex
 
-    def calc_opex(self):
+    def _calc_variable_costs(self):
         df_opex = pd.DataFrame()
 
         # extract the the optimized flow values
