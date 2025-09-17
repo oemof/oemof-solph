@@ -65,6 +65,7 @@ import os
 
 import matplotlib.pyplot as plt
 import pandas as pd
+from oemof.tools import logger
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -74,7 +75,6 @@ from oemof.solph import buses
 from oemof.solph import components
 from oemof.solph import create_time_index
 from oemof.solph import flows
-from oemof.tools import logger
 
 
 def get_data_from_file_path(file_path: str) -> pd.DataFrame:
@@ -96,7 +96,7 @@ def main(optimize=True):
     file_name = "time_series.csv"
     data = get_data_from_file_path(file_name)
 
-    solver = "gurobi"  # 'glpk', 'gurobi',....
+    solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
 
@@ -247,7 +247,7 @@ def main(optimize=True):
     # The processing module of the outputlib can be used to extract the results
     # from the model transfer them into a homogeneous structured dictionary.
 
-    results = Results(energysystem_model, eval_economy=True)
+    results = Results(energysystem_model)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************

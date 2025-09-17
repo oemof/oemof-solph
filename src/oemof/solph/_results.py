@@ -13,13 +13,12 @@ import warnings
 from functools import cache
 
 import pandas as pd
+from oemof.tools import debugging
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
-from pyomo.environ import Param
 from pyomo.opt.results.container import ListContainer
 
 import oemof.solph
-from oemof.tools import debugging
 
 
 class Results:
@@ -28,7 +27,7 @@ class Results:
     #   attributes of `model.solver_results` in order to make `Results`
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
-    def __init__(self, model: ConcreteModel, eval_economy=False):
+    def __init__(self, model: ConcreteModel):
         msg = (
             "The class 'Results' is experimental. Functionality and API can"
             " be changed without warning during any update."
@@ -67,16 +66,14 @@ class Results:
         # if the keyword eval_economy is True
         # checks if investment optimization is happing to add capex as key
         # TODO: add keyword for multiperiod
-        if eval_economy == True:
-            if "invest" in self._variables.keys():
-                self._economy = {
-                    "variable_costs": None,
-                    "investment_costs": None,
-                }
-            else:
-                self._economy = {"variable_costs": None}
+
+        if "invest" in self._variables.keys():
+            self._economy = {
+                "variable_costs": None,
+                "investment_costs": None,
+            }
         else:
-            pass
+            self._economy = {"variable_costs": None}
 
     def keys(self):
         return (

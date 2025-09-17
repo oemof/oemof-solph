@@ -42,7 +42,7 @@ def results_opex():
 
     energysystem_model.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    results = solph.Results(energysystem_model, eval_economy=True)
+    results = solph.Results(energysystem_model)
 
     assert results.to_df("variable_costs").iloc[:, 2].values == [
         50,
@@ -96,7 +96,7 @@ def results_capex():
 
     energysystem_model.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    results = solph.Results(energysystem_model, eval_economy=True)
+    results = solph.Results(energysystem_model)
 
     assert results.to_df("investment_costs").iloc[0, 0] == 42 * 100 + 200
 
@@ -136,7 +136,7 @@ def results_storage():
 
     energysystem_model.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    results = solph.Results(energysystem_model, eval_economy=True)
+    results = solph.Results(energysystem_model)
 
     assert results.to_df("investment_costs").iloc[0, 0] == 100
     assert results.to_df("investment_costs").iloc[0, 1] == 2000
