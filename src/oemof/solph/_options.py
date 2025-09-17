@@ -9,10 +9,16 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Malte Fritz
+SPDX-FileCopyrightText: Jonas Freißmann
 
 SPDX-License-Identifier: MIT
 
 """
+from warnings import warn
+
+from oemof.tools import debugging
+
 from oemof.solph._plumbing import sequence
 
 
@@ -115,6 +121,8 @@ class Investment:
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
         self._check_age_and_lifetime()
+        self._check_invest_attributes_nonconvex()
+        self._check_nonconvex()
 
     def _check_invest_attributes(self):
         """Throw an error if existing is other than 0 and nonconvex is True"""
@@ -159,6 +167,27 @@ class Investment:
                     "expected lifetime."
                 )
                 raise AttributeError(e4)
+
+    def _check_invest_attributes_nonconvex(self):
+        """Throw an error if nonconvex is not of type boolean."""
+        if not isinstance(self.nonconvex, bool):
+            e5 = (
+                "The `nonconvex` parameter of the `Investment` class has to be"
+                + f" of type boolean, not {type(self.nonconvex)}."
+            )
+            raise AttributeError(e5)
+
+    def _check_nonconvex(self):
+        """Checking for unnecessary setting of nonconvex"""
+        if self.nonconvex:
+            if (self.minimum.min() == 0) and (self.offset.min() == 0):
+                msg = (
+                    "It is not necessary to set the investment to `nonconvex` "
+                    "if `minimum` and `offset` are 0.\n"
+                    "This can lead to the `invest_status` variable becoming "
+                    "1, even if the `nominal_capacity` is optimized to 0."
+                )
+                warn(msg, debugging.SuspiciousUsageWarning)
 
 
 class NonConvex:

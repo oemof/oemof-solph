@@ -10,7 +10,8 @@ API changes
   pull/537>`_).
 
 * The storage API has been revised. Please check the
-  `API documentation <https://oemof-solph.readthedocs.io/en/latest/usage.html#genericstorage-component>`_ for all details.
+  :ref:`API documentation <oemof_solph_components_generic_storage_label>` for
+  all details.
 
 * The OffsetTransformer is now a regular oemof.solph component. It has been
   tested and the documentation has been improved. So it has been move from
@@ -26,8 +27,9 @@ New features
 
 * The storage can be used unbalanced now, which means that the level at the end
   could be different to the level at the beginning of the modeled time period.
-  See the `storage documentation <https://oemof-solph.readthedocs.io/en/latest/
-  usage.html#genericstorage-component>`_ for more details.
+  See the
+  :ref:`storage documentation <oemof_solph_components_generic_storage_label>`
+  for more details.
 
 * `NonConvexFlow <oemof.solph.blocks.NonConvexFlow>` can now have
   `activity_costs`, `maximum_startups`, and `maximum_shutdowns`.

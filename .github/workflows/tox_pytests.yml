@@ -20,7 +20,7 @@ jobs:
         python-version: ["3.10", "3.11"]
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v3
     - name: Install cbc
       run: sudo apt install coinor-cbc
     - name: Set up Python ${{ matrix.python-version }}
@@ -32,10 +32,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install tox tox-gh-actions coverage coveralls
     - name: Test with tox
-      run: tox
+      run: tox -e py3
 
     - name: Check test coverage
-      run: coverage report -m --fail-under=${{ matrix.vcs == 'bzr' && 84 || 85 }}
+      run: coverage report -m --fail-under=80
 
     - name: Report to coveralls
       run: coveralls

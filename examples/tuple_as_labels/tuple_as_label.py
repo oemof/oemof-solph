@@ -4,7 +4,7 @@
 General description
 -------------------
 
-You should have grasped the basic_example to understand this one.
+You should have grasped the result_object example to understand this one.
 
 This is an example to show how the label attribute can be used with tuples to
 manage the results of large energy system. Even though, the feature is
@@ -268,7 +268,7 @@ def main(optimize=True):
     # of the lp-file.
     if debug:
         filename = os.path.join(
-            helpers.extend_basic_path("lp_files"), "basic_example.lp"
+            helpers.extend_basic_path("lp_files"), "tuple_as_label.lp"
         )
         logging.info("Store lp-file in {0}.".format(filename))
         model.write(filename, io_options={"symbolic_solver_labels": True})

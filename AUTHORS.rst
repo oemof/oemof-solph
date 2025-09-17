@@ -16,6 +16,7 @@ Authors
 * Ekaterina Zolotarevskaya
 * Elisa Gaudchau
 * Elisa Papadis
+* Eva Schischke
 * Fabian Büllesbach
 * Francesco Witte
 * Guido Plessmann
@@ -25,10 +26,12 @@ Authors
 * Jens-Olaf Delfs
 * Johannes Kochems
 * Johannes Röder
+* Jonas Freißmann
 * Jonathan Amme
 * Julian Endres
 * Lluis Millet
 * Lennart Schürmann
+* Malte Fritz
 * Martin Soethe
 * Marie-Claire Gering
 * Patrik Schönfeldt
@@ -39,4 +42,4 @@ Authors
 * Stephan Günther
 * Uwe Krien
 * Tobi Rohrer
-* Eva Schischke
+

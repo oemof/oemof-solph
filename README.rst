@@ -1,7 +1,7 @@
 
 |tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
 
-|scrutinizer| |codacy| |codeclimate|
+|scrutinizer| |codacy|
 
 |wheel| |packaging| |supported-versions|
 
@@ -40,10 +40,6 @@
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
     :alt: Codacy Code Quality Status
-
-.. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
-   :target: https://codeclimate.com/github/oemof/oemof-solph
-   :alt: CodeClimate Quality Status
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
@@ -128,9 +124,6 @@ Documentation
 =============
 The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <https://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <https://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
-
-.. _installation_label:
-
 Installation
 ============
 
@@ -179,7 +172,7 @@ To install the solvers have a look at the package repository of your Linux distr
  1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
- 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
+ 4. Add the path of the executable files of both solvers to the PATH variable (cf. `setting environment variables as user <https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/cannot-modify-user-environment-variables-system-properties>`_)
  5. Restart Windows
 
 Check the solver installation by executing the test_installation example (see the `Installation test` section).
@@ -198,7 +191,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 
