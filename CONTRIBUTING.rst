@@ -63,9 +63,7 @@ To set up `oemof-solph` for local development:
     git commit
     git push origin name-of-your-bugfix-or-feature
 
-6. Submit a pull request through the GitHub website.
-
-Here you should check an option which we will only know about when we try it
+6. Submit a pull request through the GitHub website. Please check the box to allow changes by maintainers.
 
 Pull Request Guidelines
 -----------------------
