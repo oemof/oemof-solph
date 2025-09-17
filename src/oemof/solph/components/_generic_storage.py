@@ -161,6 +161,7 @@ class GenericStorage(Node):
         label=None,
         inputs=None,
         outputs=None,
+        parent_node=None,
         nominal_capacity=None,
         nominal_storage_capacity=None,  # Can be removed for versions >= v0.7
         initial_storage_level=None,
@@ -190,6 +191,7 @@ class GenericStorage(Node):
             label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_attributes,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---

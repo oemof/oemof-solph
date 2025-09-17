@@ -162,6 +162,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_existing": 0,
                     "investment_nonconvex": False,
@@ -199,6 +200,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_existing": 0,
                     "investment_nonconvex": False,
@@ -233,7 +235,9 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
+                    "parent": None,
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
                 }
@@ -252,6 +256,7 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
                 }
             ),
