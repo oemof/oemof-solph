@@ -108,7 +108,7 @@ def main(optimize=True):
     es.add(
         solph.components.Source(
             label="source_a_1",
-            outputs={bus_a_1: solph.Flow(variable_costs=c_1)},
+            outputs={bus_a_1: solph.Flow(variable_costs=c_1*10000)},
         )
     )
 
@@ -133,7 +133,7 @@ def main(optimize=True):
     es.add(
         solph.components.Source(
             label="source_b_1",
-            outputs={bus_b_1: solph.Flow(variable_costs=c_1)},
+            outputs={bus_b_1: solph.Flow(variable_costs=c_1*10000)},
         )
     )
 
@@ -158,7 +158,7 @@ def main(optimize=True):
                                                      }
                                            },
                         nonconvex=True,
-                        maximum=100
+                        maximum=20
                     ),
                     custom_attributes={"space": 0.1}
                 )
@@ -178,31 +178,49 @@ def main(optimize=True):
                         ep_costs=epc_invest,
                         custom_attributes={"space": {"cost": 1}},
                         nonconvex=True,
-                        maximum=8
+                        maximum=10
                     ),
                     custom_attributes={"space": 0.1}
                 )
             },
         )
     )
-    if True:
-        # Generic Storage
-        es.add(
-            solph.components.GenericStorage(
-                label="generic_storage_b",
-                inputs={bus_b_1: solph.Flow()},
-                outputs={bus_b_1: solph.Flow()},
-                inflow_conversion_factor=0.9,
-                nominal_capacity = solph.Investment(
-                    ep_costs=epc_invest ,
-                    nonconvex=True,
-                    maximum=10,
-                    custom_attributes={"space": {"cost": 0.5, "offset":20 }},
-                    #maximum=1000
-                    )
-                ,
-            )
+    # Generic Storage b_0
+    generic_storage_b_0 = (
+        solph.components.GenericStorage(
+            label="generic_storage_b_0",
+            inputs={bus_b_1: solph.Flow()},
+            outputs={bus_b_1: solph.Flow()},
+            inflow_conversion_factor=1,
+            nominal_capacity = solph.Investment(
+                ep_costs=epc_invest ,
+                nonconvex=True,
+                maximum=1,
+                custom_attributes={"space": {"cost": 0.5, "offset":1 }},
+            ),
+            invest_relation_input_capacity = 0.5,
+            invest_relation_output_capacity = 0.5,
         )
+    )
+    es.add(generic_storage_b_0)
+
+    # Generic Storage b_1
+    generic_storage_b_1 = (
+        solph.components.GenericStorage(
+            label="generic_storage_b_1",
+            inputs={bus_b_1: solph.Flow()},
+            outputs={bus_b_1: solph.Flow()},
+            inflow_conversion_factor=1,
+            nominal_capacity = solph.Investment(
+                ep_costs=epc_invest *100,
+                nonconvex=True,
+                maximum=2,
+                custom_attributes={"space": {"cost": 1, "offset":5 }},
+                )
+            ,
+        )
+    )
+    es.add(generic_storage_b_1)
     if optimize is False:
         return es
 
@@ -249,6 +267,15 @@ def main(optimize=True):
         solph.views.node(results, "trafo_b")["scalars"][0],
     )
 
+    print(
+        "Investment generic_storage_b_0: ",
+        results[generic_storage_b_0,None]["scalars"]["total"],
+    )
+
+    print(
+        "Investment generic_storage_b_1: ",
+        results[generic_storage_b_1,None]["scalars"]["total"],
+    )
 
 if __name__ == "__main__":
     main()
