@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
+
+SPDX-FileCopyrightText: Johannes Röder <johannes.roeder@uni-bremen.de>
+SPDX-FileCopyrightText: Maximilan Hillen
+
+SPDX-License-Identifier: MIT
+
+
 General description
 -------------------
 Example that shows how to use "Generic Investment Limit With Offset".
@@ -50,27 +57,19 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
     .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest_offset.py
         :language: python
-        :lines: 62-
+        :lines: 71-
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (>=0.6.1), install by:
 
 .. code:: bash
 
     pip install oemof.solph[examples]
-
-License
--------
-Maximilian Hillen <maximilian.hillen@dlr.de>
-
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
 
 import logging
 import os
-
-from PIL.ImageChops import offset
 
 try:
     import matplotlib.pyplot as plt
