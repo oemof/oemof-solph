@@ -83,6 +83,7 @@ class Link(Node):
         label=None,
         inputs=None,
         outputs=None,
+        parent_node=None,
         conversion_factors=None,
         custom_attributes=None,
     ):
@@ -97,6 +98,7 @@ class Link(Node):
             label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_attributes,
         )
         if not inputs:
