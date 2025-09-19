@@ -204,7 +204,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         "Use additional_total_limit() instead, which requires a new structure of costume attributes. "
         "F.e.custom_attributes={“space”: {“linear”: 1, “offset”: 5}}",
         DeprecationWarning,
-        stacklevel=2
+        stacklevel=2,
     )
     invest_flows = {}
 

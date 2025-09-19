@@ -136,7 +136,7 @@ def main(optimize=True):
     es.add(
         solph.components.Source(
             label="source_b_1",
-            outputs={bus_b_1: solph.Flow(variable_costs=c_1 )},
+            outputs={bus_b_1: solph.Flow(variable_costs=c_1)},
         )
     )
 
@@ -148,50 +148,57 @@ def main(optimize=True):
     )
 
     # Converter a
-    emission_conv_a_linear=1
-    emission_conv_a_offset=20
-    emission_conv_a_flow=0.1
+    emission_conv_a_linear = 1
+    emission_conv_a_offset = 20
+    emission_conv_a_flow = 0.1
     converter_a = solph.components.Converter(
-            label="trafo_a",
-            inputs={bus_a_0: solph.Flow()},
-            outputs={
-                bus_a_1: solph.Flow(
-                    nominal_capacity=solph.Investment(
-                        ep_costs=epc_invest,
-                        custom_attributes={"emission": {"linear": emission_conv_a_linear, "offset": emission_conv_a_offset}},
-                        nonconvex=True,
-                        maximum=20,
-                    ),
-                    custom_attributes={"emission": emission_conv_a_flow},
-                )
-            },
-            conversion_factors={bus_a_1: 1},
-        )
+        label="trafo_a",
+        inputs={bus_a_0: solph.Flow()},
+        outputs={
+            bus_a_1: solph.Flow(
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_invest,
+                    custom_attributes={
+                        "emission": {
+                            "linear": emission_conv_a_linear,
+                            "offset": emission_conv_a_offset,
+                        }
+                    },
+                    nonconvex=True,
+                    maximum=20,
+                ),
+                custom_attributes={"emission": emission_conv_a_flow},
+            )
+        },
+        conversion_factors={bus_a_1: 1},
+    )
     es.add(converter_a)
 
     # Converter b
-    emission_conv_b_linear=1
-    emission_conv_b_flow=0.1
+    emission_conv_b_linear = 1
+    emission_conv_b_flow = 0.1
     converter_b = solph.components.Converter(
-            label="trafo_b",
-            inputs={bus_b_0: solph.Flow()},
-            outputs={
-                bus_b_1: solph.Flow(
-                    nominal_capacity=solph.Investment(
-                        ep_costs=epc_invest,
-                        custom_attributes={"emission": {"linear": emission_conv_b_linear}},
-                        nonconvex=True,
-                        maximum=10,
-                    ),
-                    custom_attributes={"emission": emission_conv_b_flow},
-                )
-            },
-        )
+        label="trafo_b",
+        inputs={bus_b_0: solph.Flow()},
+        outputs={
+            bus_b_1: solph.Flow(
+                nominal_capacity=solph.Investment(
+                    ep_costs=epc_invest,
+                    custom_attributes={
+                        "emission": {"linear": emission_conv_b_linear}
+                    },
+                    nonconvex=True,
+                    maximum=10,
+                ),
+                custom_attributes={"emission": emission_conv_b_flow},
+            )
+        },
+    )
     es.add(converter_b)
 
     # Generic Storage b_0
-    emission_storage_b_0_linear=0.5
-    emission_storage_b_0_offset=1
+    emission_storage_b_0_linear = 0.5
+    emission_storage_b_0_offset = 1
     generic_storage_b_0 = solph.components.GenericStorage(
         label="generic_storage_b_0",
         inputs={bus_b_1: solph.Flow()},
@@ -201,7 +208,12 @@ def main(optimize=True):
             ep_costs=epc_invest,
             nonconvex=True,
             maximum=1,
-            custom_attributes={"emission": {"linear": emission_storage_b_0_linear, "offset": emission_storage_b_0_offset}},
+            custom_attributes={
+                "emission": {
+                    "linear": emission_storage_b_0_linear,
+                    "offset": emission_storage_b_0_offset,
+                }
+            },
         ),
         invest_relation_input_capacity=0.5,
         invest_relation_output_capacity=0.5,
@@ -210,8 +222,8 @@ def main(optimize=True):
     es.add(generic_storage_b_0)
 
     # Generic Storage b_1
-    emission_storage_b_1_linear=1
-    emission_storage_b_1_offset=5
+    emission_storage_b_1_linear = 1
+    emission_storage_b_1_offset = 5
     generic_storage_b_1 = solph.components.GenericStorage(
         label="generic_storage_b_1",
         inputs={bus_b_1: solph.Flow()},
@@ -221,7 +233,12 @@ def main(optimize=True):
             ep_costs=epc_invest * 100,
             nonconvex=True,
             maximum=2,
-            custom_attributes={"emission": {"linear": emission_storage_b_1_linear, "offset": emission_storage_b_1_offset}},
+            custom_attributes={
+                "emission": {
+                    "linear": emission_storage_b_1_linear,
+                    "offset": emission_storage_b_1_offset,
+                }
+            },
         ),
     )
 
@@ -267,11 +284,14 @@ def main(optimize=True):
     )
     print(
         "Emission investment of trafo_a: ",
-        solph.views.node(results, "trafo_a")["scalars"][0] * emission_conv_a_linear + emission_conv_a_offset,
+        solph.views.node(results, "trafo_a")["scalars"][0]
+        * emission_conv_a_linear
+        + emission_conv_a_offset,
     )
     print(
         "Emission flow through trafo_a: ",
-        results[converter_a, bus_a_1]["sequences"]["flow"].sum() * emission_conv_a_flow,
+        results[converter_a, bus_a_1]["sequences"]["flow"].sum()
+        * emission_conv_a_flow,
     )
 
     print(
@@ -280,11 +300,13 @@ def main(optimize=True):
     )
     print(
         "Emission investment of trafo_b: ",
-        solph.views.node(results, "trafo_b")["scalars"][0] * emission_conv_b_linear,
+        solph.views.node(results, "trafo_b")["scalars"][0]
+        * emission_conv_b_linear,
     )
     print(
         "Emission flow through trafo_b: ",
-        results[converter_b, bus_b_1]["sequences"]["flow"].sum() * emission_conv_b_flow,
+        results[converter_b, bus_b_1]["sequences"]["flow"].sum()
+        * emission_conv_b_flow,
     )
 
     print(
@@ -293,8 +315,10 @@ def main(optimize=True):
     )
     print(
         "Emission investment generic_storage_b_0: ",
-        results[generic_storage_b_0, None]["scalars"]["total"] * emission_storage_b_0_linear
-        + results[generic_storage_b_0, None]["scalars"]["invest_status"] *emission_storage_b_0_offset,
+        results[generic_storage_b_0, None]["scalars"]["total"]
+        * emission_storage_b_0_linear
+        + results[generic_storage_b_0, None]["scalars"]["invest_status"]
+        * emission_storage_b_0_offset,
     )
 
     print(
@@ -303,9 +327,12 @@ def main(optimize=True):
     )
     print(
         "Emission investment generic_storage_b_1: ",
-        results[generic_storage_b_1, None]["scalars"]["total"] * emission_storage_b_1_linear
-        + results[generic_storage_b_1, None]["scalars"]["invest_status"] *emission_storage_b_1_offset,
+        results[generic_storage_b_1, None]["scalars"]["total"]
+        * emission_storage_b_1_linear
+        + results[generic_storage_b_1, None]["scalars"]["invest_status"]
+        * emission_storage_b_1_offset,
     )
+
 
 if __name__ == "__main__":
     main()
