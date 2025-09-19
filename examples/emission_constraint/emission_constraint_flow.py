@@ -7,11 +7,11 @@ Example that shows how to add an emission constraint in a model.
 
 Code
 ----
-Download source code: :download:`emission_constraint.py </../examples/emission_constraint/emission_constraint.py>`
+Download source code: :download:`emission_constraint_flow.py </../examples/emission_constraint/emission_constraint_flow.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/emission_constraint/emission_constraint.py
+    .. literalinclude:: /../examples/emission_constraint/emission_constraint_flow.py
         :language: python
         :lines: 32-129
 
