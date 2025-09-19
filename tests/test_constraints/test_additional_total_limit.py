@@ -9,7 +9,6 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas as pd
-import pytest
 
 from oemof import solph
 
@@ -65,8 +64,6 @@ def test_additional_total_limit():
     )
 
     model.solve(solver="cbc")
-
-    results = solph.processing.results(model)
 
     emission_used = model.total_limit_emission()
     print(emission_used)

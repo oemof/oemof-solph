@@ -200,8 +200,10 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     1500
     """  # noqa: E501
     warnings.warn(
-        "additional_investment_flow_limit() is deprecated and will be removed in a future version.\n"
-        "Use additional_total_limit() instead, which requires a new structure of costume attributes. "
+        "additional_investment_flow_limit() is deprecated "
+        "and will be removed in a future version.\n"
+        "Use additional_total_limit() instead, "
+        "which requires a new structure of costume attributes. "
         "F.e.custom_attributes={“space”: {“linear”: 1, “offset”: 5}}",
         DeprecationWarning,
         stacklevel=2,
