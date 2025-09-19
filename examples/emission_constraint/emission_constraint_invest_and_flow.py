@@ -53,11 +53,11 @@ Download source code: :download:`emission_constraint_invest.py </../examples/gen
 
     .. literalinclude:: /../examples/generic_invest_limit/emission_constraint_invest_and_flow.py
         :language: python
-        :lines: 62-
+        :lines: 71-
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (>=0.6.1), install by:
 
 .. code:: bash
 
@@ -259,7 +259,7 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="gurobi", solve_kwargs={"tee": True})
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # create result object
     results = solph.processing.results(om)

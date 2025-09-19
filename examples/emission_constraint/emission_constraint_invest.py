@@ -187,7 +187,7 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="gurobi", solve_kwargs={"tee": True})
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # create result object
     results = solph.processing.results(om)
