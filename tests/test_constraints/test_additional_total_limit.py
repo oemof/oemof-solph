@@ -64,7 +64,7 @@ def test_additional_total_limit():
         model, "emission", limit=100
     )
 
-    model.solve(solver="gurobi")
+    model.solve(solver="cbc")
 
     results = solph.processing.results(model)
 
