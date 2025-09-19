@@ -12,7 +12,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
-
+import warnings
 from pyomo import environ as po
 
 from oemof.solph._plumbing import sequence
@@ -199,6 +199,13 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
+    warnings.warn(
+        "additional_investment_flow_limit() is deprecated and will be removed in a future version.\n"
+        "Use additional_total_limit() instead, which requires a new structure of costume attributes. "
+        "F.e.custom_attributes={“space”: {“linear”: 1, “offset”: 5}}",
+        DeprecationWarning,
+        stacklevel=2
+    )
     invest_flows = {}
 
     for i, o in model.flows:
@@ -229,7 +236,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     return model
 
 
-def additional_total_limit(model, keyword, limit=None):
+def additional_total_limit(model, keyword, limit=None, consider_offset=True):
     r"""
     Global limit for investment flows and operation flows
     weighted by an attribute keyword.
@@ -339,7 +346,7 @@ def additional_total_limit(model, keyword, limit=None):
             rule=lambda m: sum(
                 model.InvestmentFlowBlock.invest[inflow, outflow, p]
                 * getattr(invest_flows[inflow, outflow], keyword).get(
-                    "cost", 0
+                    "linear", 0
                 )
                 + (
                     model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
@@ -368,7 +375,7 @@ def additional_total_limit(model, keyword, limit=None):
                 (
                     model.GenericInvestmentStorageBlock.invest[st, p]
                     * getattr(storages[st][0].investment, keyword).get(
-                        "cost", 0
+                        "linear", 0
                     )
                     + model.GenericInvestmentStorageBlock.invest_status[st, p]
                     * getattr(storages[st][0].investment, keyword).get(
