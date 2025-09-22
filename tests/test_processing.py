@@ -59,8 +59,12 @@ class TestParameterResult:
 
         batt = GenericStorage(
             label="storage",
-            inputs={b_el1: Flow(variable_costs=3)},
-            outputs={b_el2: Flow(variable_costs=2.5)},
+            inputs={
+                b_el1: Flow(variable_costs=3, nominal_capacity=Investment())
+            },
+            outputs={
+                b_el2: Flow(variable_costs=2.5, nominal_capacity=Investment())
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_capacity=1 / 6,

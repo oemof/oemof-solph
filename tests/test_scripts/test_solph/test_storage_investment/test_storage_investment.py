@@ -136,8 +136,16 @@ def test_optimise_storage_size(
     es.add(
         solph.components.GenericStorage(
             label="storage",
-            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            inputs={
+                bel: solph.flows.Flow(
+                    variable_costs=10e10, nominal_capacity=solph.Investment()
+                )
+            },
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=10e10, nominal_capacity=solph.Investment()
+                )
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_capacity=1 / 6,
