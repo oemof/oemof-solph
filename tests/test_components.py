@@ -23,7 +23,7 @@ from oemof.solph.flows import Flow
 # ********* GenericStorage *********
 
 
-def test_generic_storage_duplicate_inflows():
+def test_generic_storage_relations_overdetermined():
     """Duplicate definition inflow."""
     bel = Bus()
     with pytest.raises(AttributeError, match="Overdetermined."):
@@ -43,6 +43,108 @@ def test_generic_storage_duplicate_inflows():
             nominal_capacity=Investment(),
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
+        )
+
+
+def test_generic_storage_input_capacity_relation_without_investment_flow():
+    """invest_relation_input_capacity set without passing an Investment object
+    to the input flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The input flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1,
+            nominal_capacity=Investment(),
+        )
+
+
+def test_generic_storage_input_capacity_relation_without_storage_investment():
+    """invest_relation_input_capacity set without passing an Investment object
+    to the storage"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="`nominal_capacity` needs to be an Investment",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow(nominal_capacity=Investment())},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_output_capacity_relation_without_investment_flow():
+    """invest_relation_output_capacity set without passing an Investment
+    object to the output flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The output flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_output_capacity=1,
+            nominal_capacity=Investment(),
+        )
+
+
+def test_generic_storage_output_capacity_relation_without_storage_investment():
+    """invest_relation_output_capacity set without passing an Investment object
+    to the storage"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="`nominal_capacity` needs to be an Investment",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow(nominal_capacity=Investment())},
+            invest_relation_output_capacity=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_input_output_relation_without_investment_flow_in():
+    """invest_relation_input_output set without passing an Investment
+    object to the input flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The input flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow(nominal_capacity=Investment())},
+            invest_relation_input_output=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_input_output_relation_without_investment_flow_out():
+    """invest_relation_input_output set without passing an Investment
+    object to the output flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The output flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow(nominal_capacity=Investment())},
+            outputs={bel: Flow()},
+            invest_relation_input_output=1,
+            nominal_capacity=45,
         )
 
 
