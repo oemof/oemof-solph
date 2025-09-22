@@ -213,7 +213,11 @@ def main(optimize=True):
         nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
-        inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
+        inputs={
+            b_el_dc: solph.flows.Flow(
+                variable_costs=0, nominal_capacity=solph.Investment()
+            )
+        },
         outputs={
             b_el_dc: solph.flows.Flow(
                 nominal_capacity=solph.Investment(ep_costs=0)
@@ -409,7 +413,7 @@ def main(optimize=True):
 
     print("\n" + 50 * "*")
     print(
-        f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s"
+        f"Simulation Time:\t {end_simulation_time - start_simulation_time:.2f} s"
     )
     print(50 * "*")
     print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")

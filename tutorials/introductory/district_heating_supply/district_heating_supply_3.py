@@ -74,8 +74,18 @@ var_cost_storage = 0.1
 heat_storage = solph.components.GenericStorage(
     label="heat storage",
     nominal_capacity=solph.Investment(ep_costs=epc(spec_inv_storage)),
-    inputs={heat_bus: solph.flows.Flow(variable_costs=var_cost_storage)},
-    outputs={heat_bus: solph.flows.Flow(variable_costs=var_cost_storage)},
+    inputs={
+        heat_bus: solph.flows.Flow(
+            variable_costs=var_cost_storage,
+            nominal_capacity=solph.Investment(),
+        )
+    },
+    outputs={
+        heat_bus: solph.flows.Flow(
+            variable_costs=var_cost_storage,
+            nominal_capacity=solph.Investment(),
+        )
+    },
     invest_relation_input_capacity=1 / 24,
     invest_relation_output_capacity=1 / 24,
     balanced=True,
