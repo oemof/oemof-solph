@@ -16,7 +16,7 @@ SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 SPDX-FileCopyrightText: Johannes Kochems
 SPDX-FileCopyrightText: Johannes Giehl
 SPDX-FileCopyrightText: Raul Ciria Aylagas
-SPDX-FileCopyrightText: Lennart Schürmann
+SPDX-FileCopyrightText: Lennart Schürmann (Fraunhofer UMSICHT)
 
 SPDX-License-Identifier: MIT
 
