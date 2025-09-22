@@ -295,8 +295,8 @@ class GenericStorage(Node):
             if not self._check_storage_for_investment():
                 msg = (
                     "If `invest_relation_input_capacity` is set, "
-                    "`nominal_capacity` of the `GenericStorage` needs to "
-                    "be an Investment object as well."
+                    "`nominal_capacity` needs to be an Investment "
+                    "object as well."
                 )
                 raise AttributeError(msg)
             self._invest_group = True
@@ -310,8 +310,8 @@ class GenericStorage(Node):
             if not self._check_storage_for_investment():
                 msg = (
                     "If `invest_relation_output_capacity` is set, "
-                    "`nominal_capacity` of the `GenericStorage` needs to "
-                    "be an Investment object as well."
+                    "`nominal_capacity` needs to be an Investment "
+                    "object as well."
                 )
                 raise AttributeError(msg)
             self._invest_group = True
