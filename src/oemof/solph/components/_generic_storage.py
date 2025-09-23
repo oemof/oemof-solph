@@ -795,9 +795,9 @@ class GenericStorageBlock(ScalarBlock):
             for n in self.STORAGES_WITH_INVEST_FLOW_REL:
                 for p in m.PERIODS:
                     expr = (
-                        (m.InvestmentFlowBlock.total[n, o[n], p])
-                        * n.invest_relation_input_output[p]
-                        == (m.InvestmentFlowBlock.total[i[n], n, p])
+                        m.InvestmentFlowBlock.total[n, o[n], p]
+                    ) * n.invest_relation_input_output[p] == (
+                        m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -1854,9 +1854,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.PERIODS:
                     expr = (
-                        (m.InvestmentFlowBlock.total[n, o[n], p])
-                        * n.invest_relation_input_output[p]
-                        == (m.InvestmentFlowBlock.total[i[n], n, p])
+                        m.InvestmentFlowBlock.total[n, o[n], p]
+                    ) * n.invest_relation_input_output[p] == (
+                        m.InvestmentFlowBlock.total[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
 
