@@ -216,6 +216,7 @@ class GenericStorage(Node):
         # --- END ---
 
         self.nominal_storage_capacity = None
+        self.investment = None
         self._invest_group = False
         self.invest_relation_input_output = sequence(
             invest_relation_input_output
@@ -280,7 +281,7 @@ class GenericStorage(Node):
     def _check_storage_for_investment(self):
         """Checks the storage for an investment object (i.e. if investment
         into the capacity is possible)"""
-        return hasattr(self, "investment")
+        return isinstance(self.investment, Investment)
 
     def _check_invest_relations(self):
         """Checks if the passed invest_relation keywords fit the
@@ -354,7 +355,7 @@ class GenericStorage(Node):
             )
             raise AttributeError(e2)
         if (
-            hasattr(self, "investment")
+            self.investment
             and self.fixed_losses_absolute.max() != 0
             and self.investment.existing == 0
             and self.investment.minimum.min() == 0
