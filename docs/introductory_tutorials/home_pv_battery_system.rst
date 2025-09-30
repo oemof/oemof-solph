@@ -243,7 +243,7 @@ we manually add an annuity to have the PV system included in the total costs.
     :alt: Result time-series
     :figclass: only-dark
 
-In this scenario, the objective value is negative, so a revenue is accieved.
+In this scenario, the objective value is negative, so a revenue is achieved.
 This is costly because of feeding in, demand and supply do hardly match in this
 scenario. However, correcting this by adding the annuity of the PV system
 leaves us with (positive) costs.
