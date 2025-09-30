@@ -83,9 +83,9 @@ print(f"The total annual costs are {tce:.2f} €.")
 el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
 print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 
-electricity_fows = solph.views.node(results, "electricity")["sequences"]
+electricity_flows = solph.views.node(results, "electricity")["sequences"]
 
-baseline = np.zeros(len(electricity_fows))
+baseline = np.zeros(len(electricity_flows))
 
 mode = "light"
 # mode = "dark"
@@ -93,16 +93,16 @@ if mode == "dark":
     plt.style.use("dark_background")
 
 plt.fill_between(
-    electricity_fows.index,
+    electricity_flows.index,
     baseline,
-    electricity_fows[(("grid", "electricity"), "flow")],
+    electricity_flows[(("grid", "electricity"), "flow")],
     step="pre",
     label="Grid supply",
 )
 
 plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")],
+    electricity_flows.index,
+    electricity_flows[(("electricity", "demand"), "flow")],
     "-",
     color="darkgrey",
     label="Electricity demand",

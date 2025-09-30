@@ -243,15 +243,13 @@ we manually add an annuity to have the PV system included in the total costs.
     :alt: Result time-series
     :figclass: only-dark
 
-In this scenario, the objective value is negative,
-so a revenue is accieved.
-This is ostly because of feeding in,
-deand and supply do hardly match in this scenario.
-However, correcting this by adding the annuity of the PV system
+In this scenario, the objective value is negative, so a revenue is accieved.
+This is costly because of feeding in, demand and supply do hardly match in this
+scenario. However, correcting this by adding the annuity of the PV system
 leaves us with (positive) costs.
 
 .. csv-table:: Result overview
-    :header: "Quantity", "Unit", "Value (no PW)", "Value (5 kW PV)"
+    :header: "Quantity", "Unit", "Value (no PV)", "Value (5 kW PV)"
     :widths: auto
 
     "Annual costs for grid electricity",   "€", 629.90, 365.32
@@ -277,19 +275,16 @@ You can get the complete (uncommented) code for this step:
 Step 3: PV investment optimisation
 ----------------------------------
 
-Now, compared to dispatch with a fixed PV plant,
-almost everything else stays the same, except for one thing:
-the nominal capacity of the PV plant.
-That’s because we want to find out which peak power
-the system should have to minimise our costs.
-Therefore an investment object with a periodical cost
-of 75 Euros per kW is assigned.
-These costs represent an assumed investment cost of 1500 Euros per kW
-divided by an estimated life time of 20 years as a straight-line deprecation.
-To make sure the model converges, we set a maximum capacity:
-If building the PV system was profitable,
-the optimiser would try to build an infinite size PV system,
-which would effectively prevent the model from converging.
+Now, compared to dispatch with a fixed PV plant, almost everything else stays
+the same, except for one thing: the nominal capacity of the PV plant. That's
+because we want to find out which peak power the system should have to minimise
+our costs. Therefore an investment object with a periodical cost of 75 Euros
+per kW is assigned. These costs represent an assumed investment cost of 1500
+Euros per kW divided by an estimated life time of 20 years as a straight-line
+deprecation. To make sure the model converges, we set a maximum capacity: If
+building the PV system was profitable, the optimiser would try to build an
+infinite size PV system, which would effectively prevent the model from
+converging.
 
 .. literalinclude:: /../tutorials/introductory/home_pv/home_pv_3.py
     :language: python
