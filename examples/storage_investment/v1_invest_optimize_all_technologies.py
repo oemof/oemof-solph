@@ -111,7 +111,9 @@ def main(optimize=True):
 
     logger.define_logging()
     logging.info("Initialize the energy system")
-    date_time_index = solph.create_time_index(2012, number=number_timesteps)
+    date_time_index = solph.create_time_index(
+        2012, number_of_intervals=number_timesteps
+    )
     energysystem = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=False
     )

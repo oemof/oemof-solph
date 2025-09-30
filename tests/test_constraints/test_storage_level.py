@@ -7,7 +7,9 @@ def test_storage_level_constraint():
     n_time_steps = 10
 
     es = solph.EnergySystem(
-        timeindex=solph.create_time_index("2022-01-01", number=n_time_steps),
+        timeindex=solph.create_time_index(
+            "2022-01-01", number_of_intervals=n_time_steps
+        ),
         infer_last_interval=False,
     )
 
@@ -82,33 +84,23 @@ def test_storage_level_constraint():
     )
     model.solve()
 
-    my_results = solph.processing.results(model)
+    my_results = solph.Results(model)
 
     assert list(
-        my_results[(in_100, None)]["sequences"]["multiplexer_active_input"][
-            :-1
-        ]
+        my_results["multiplexer_active_input"][in_100]
     ) == n_time_steps * [0]
-    assert list(
-        my_results[(out_100, None)]["sequences"]["multiplexer_active_output"][
-            :-1
-        ]
-    ) == (n_time_steps - 1) * [0] + [1]
+    assert list(my_results["multiplexer_active_output"][out_100]) == (
+        n_time_steps - 1
+    ) * [0] + [1]
 
     assert list(
-        my_results[(in_050, None)]["sequences"]["multiplexer_active_input"][
-            :-1
-        ]
+        my_results["multiplexer_active_input"][in_050]
     ) == n_time_steps // 2 * [1] + n_time_steps // 2 * [0]
     assert list(
-        my_results[(out_050, None)]["sequences"]["multiplexer_active_output"][
-            :-1
-        ]
+        my_results["multiplexer_active_output"][out_050]
     ) == n_time_steps // 2 * [1] + (n_time_steps // 2 - 1) * [0] + [1]
 
     assert list(
-        my_results[(out_000, None)]["sequences"]["multiplexer_active_output"][
-            :-1
-        ]
+        my_results["multiplexer_active_output"][out_000]
     ) == n_time_steps * [1]
     assert (in_000, None) not in my_results.keys()

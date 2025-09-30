@@ -49,7 +49,9 @@ def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
-    date_time_index = solph.create_time_index(2000, interval=0.25, number=8)
+    date_time_index = solph.create_time_index(
+        2000, interval_length=0.25, number_of_intervals=8
+    )
 
     energy_system = solph.EnergySystem(
         timeindex=date_time_index, infer_last_interval=False

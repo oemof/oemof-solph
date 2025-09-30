@@ -13,51 +13,65 @@ import pytest
 from oemof.solph import EnergySystem
 
 
-@pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are"
-    " consistent.:UserWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
-)
-def test_add_periods():
-    """test method _add_periods of energy system"""
-    timeindex = pd.date_range(start="2012-01-01", periods=10000, freq="h")
-    periods = [
-        pd.date_range(start="2012-01-01", periods=8784, freq="h"),
-        pd.date_range(start="2013-01-01", periods=1217, freq="h"),
-    ]
-    es = EnergySystem(
-        timeindex=timeindex, periods=periods, infer_last_interval=True
-    )
-    assert len(es.periods) == 2
-    assert es.periods[0].equals(
-        pd.date_range(start="2012-01-01", periods=8784, freq="h")
-    )
-    assert es.periods[1].equals(
-        pd.date_range(start="2013-01-01", periods=1217, freq="h")
-    )
-
-
-@pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are"
-    " consistent.:UserWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
-)
-def test_extract_periods_years():
-    """test method _extract_periods_years of energy system"""
-    t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h").to_series()
-    t_idx_2 = pd.date_range("1/1/2041", periods=3, freq="h").to_series()
-    t_idx_3 = pd.date_range("1/1/2050", periods=3, freq="h").to_series()
-    timeindex = pd.concat([t_idx_1, t_idx_2, t_idx_3]).index
-    periods = [t_idx_1, t_idx_2, t_idx_3]
+def test_default_invest_times():
+    start_time = pd.Timestamp("2012-01-01 00:00")
+    timeindex = pd.date_range(start=start_time, periods=8760, freq="h")
     es = EnergySystem(
         timeindex=timeindex,
-        timeincrement=[1] * len(timeindex),
-        infer_last_interval=False,
-        periods=periods,
+        infer_last_interval=True,
     )
-    periods_years = [0, 21, 30]
-    assert es.periods_years == periods_years
+    assert len(es.investment_times) == 1
+    assert es.investment_times[0] == start_time
+
+
+def test_custom_invest_times():
+    start_time = pd.Timestamp("2012-01-01 00:00")
+    time2 = pd.Timestamp("2012-01-11 00:00")
+
+    timeindex = pd.date_range(start=start_time, periods=8760, freq="h")
+
+    investment_times = [start_time, time2]
+    es = EnergySystem(
+        timeindex=timeindex,
+        investment_times=investment_times,
+        infer_last_interval=True,
+    )
+    assert len(es.investment_times) == 2
+    assert es.investment_times[0] == start_time
+    assert es.investment_times[1] == time2
+
+    # start time is added automatically
+    es = EnergySystem(
+        timeindex=timeindex,
+        investment_times=[time2],
+        infer_last_interval=True,
+    )
+    assert len(es.investment_times) == 2
+    assert es.investment_times[0] == start_time
+    assert es.investment_times[1] == time2
+
+    # invest times are sorted automatically
+    investment_times = [time2, start_time]
+    es = EnergySystem(
+        timeindex=timeindex,
+        investment_times=investment_times,
+        infer_last_interval=True,
+    )
+    assert len(es.investment_times) == 2
+    assert es.investment_times[0] == start_time
+    assert es.investment_times[1] == time2
+
+
+@pytest.mark.skip(reason="Will fail in 'model'.")
+def test_invelid_invest_time():
+    start_time = pd.Timestamp("2012-01-01 00:00")
+    time3 = pd.Timestamp("2012-01-11 00:15")
+
+    timeindex = pd.date_range(start=start_time, periods=8760, freq="h")
+    investment_times = [start_time, time3]
+    with pytest.raises(KeyError, match="2012-01-11 00:15"):
+        _ = EnergySystem(
+            timeindex=timeindex,
+            investment_times=investment_times,
+            infer_last_interval=True,
+        )

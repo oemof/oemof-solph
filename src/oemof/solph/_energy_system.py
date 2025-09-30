@@ -51,16 +51,10 @@ class EnergySystem(es.EnergySystem):
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
 
-    periods : list or None
-        The periods of a multi-period model.
-        If this is explicitly specified, it leads to creating a multi-period
-        model, providing a respective user warning as a feedback.
-
-        list of pd.date_range objects carrying the timeindex for the
-        respective period;
-
-        For a standard model, periods are not (to be) declared, i.e. None.
-        A list with one entry is derived, i.e. [0].
+    investment_times : list or None
+        The points in time investments can be made. Defaults to timeindex[0].
+        If multiple times are specified, it leads to creating a multi-period
+        model.
 
     tsa_parameters : list of dicts, dict or None
         Parameter can be set in order to use aggregated timeseries from TSAM.
@@ -76,10 +70,6 @@ class EnergySystem(es.EnergySystem):
         will be adapted. Note that timeseries for components have to
         be set up as already aggregated timeseries.
 
-    use_remaining_value : bool
-        If True, compare the remaining value of an investment to the
-        original value (only applicable for multi-period models)
-
     kwargs
     """
 
@@ -88,9 +78,8 @@ class EnergySystem(es.EnergySystem):
         timeindex=None,
         timeincrement=None,
         infer_last_interval=False,
-        periods=None,
+        investment_times=None,
         tsa_parameters=None,
-        use_remaining_value=False,
         groupings=None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -130,20 +119,18 @@ class EnergySystem(es.EnergySystem):
                 )
                 warnings.warn(msg, FutureWarning)
             else:
-                if periods is None:
-                    msg = (
-                        "Specifying the timeincrement and the timeindex"
-                        " parameter at the same time is not allowed since"
-                        " these might be conflicting to each other."
-                    )
-                    raise AttributeError(msg)
-                else:
-                    msg = (
-                        "Ensure that your timeindex and timeincrement are "
-                        "consistent."
-                    )
-                    warnings.warn(msg, debugging.ExperimentalFeatureWarning)
+                msg = (
+                    "The timeincrement is infered from the given timeindex."
+                    " As both parameters might be conflicting to each other,"
+                    " you cannot define both at the same time."
+                    " Please give only a timeindex."
+                )
+                raise AttributeError(msg)
 
+        elif timeindex is None and timeincrement is not None:
+            timeindex = pd.Index(
+                np.append(np.array([0]), np.cumsum(timeincrement))
+            )
         elif timeindex is not None and timeincrement is None:
             if tsa_parameters is not None:
                 pass
@@ -188,8 +175,8 @@ class EnergySystem(es.EnergySystem):
                 tsa_parameters = [tsa_parameters]
 
             # Construct occurrences of typical periods
-            if periods is not None:
-                for p in range(len(periods)):
+            if investment_times is not None:
+                for p in range(len(investment_times)):
                     tsa_parameters[p]["occurrences"] = collections.Counter(
                         tsa_parameters[p]["order"]
                     )
@@ -211,7 +198,7 @@ class EnergySystem(es.EnergySystem):
         self.tsa_parameters = tsa_parameters
 
         timeincrement = self._init_timeincrement(
-            timeincrement, timeindex, periods, tsa_parameters
+            timeincrement, timeindex, investment_times, tsa_parameters
         )
         super().__init__(
             groupings=groupings,
@@ -219,84 +206,14 @@ class EnergySystem(es.EnergySystem):
             timeincrement=timeincrement,
         )
 
-        self.periods = periods
-        if self.periods is not None:
-            msg = (
-                "CAUTION! You specified the 'periods' attribute for your "
-                "energy system.\n This will lead to creating "
-                "a multi-period optimization modeling which can be "
-                "used e.g. for long-term investment modeling.\n"
-                "Please be aware that the feature is experimental as of "
-                "now. If you find anything suspicious or any bugs, "
-                "please report them."
-            )
-            warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-            self._extract_periods_years()
-            self._extract_periods_matrix()
-            self._extract_end_year_of_optimization()
-            self.use_remaining_value = use_remaining_value
-        else:
-            self.end_year_of_optimization = 1
-
-    def _extract_periods_years(self):
-        """Map years in optimization to respective period based on time indices
-
-        Attribute `periods_years` of type list is set. It contains
-        the year of the start of each period, relative to the
-        start of the optimization run and starting with 0.
-        """
-        periods_years = [0]
-        start_year = self.periods[0].min().year
-        for k, v in enumerate(self.periods):
-            if k >= 1:
-                periods_years.append(v.min().year - start_year)
-
-        self.periods_years = periods_years
-
-    def _extract_periods_matrix(self):
-        """Determines a matrix describing the temporal distance to each period.
-
-        Attribute `periods_matrix` of type list np.array is set.
-        Rows represent investment/commissioning periods, columns represent
-        decommissioning periods. The values describe the temporal distance
-        between each investment period to each decommissioning period.
-        """
-        periods_matrix = []
-        period_years = np.array(self.periods_years)
-        for v in period_years:
-            row = period_years - v
-            row = np.where(row < 0, 0, row)
-            periods_matrix.append(row)
-        self.periods_matrix = np.array(periods_matrix)
-
-    def _extract_end_year_of_optimization(self):
-        """Extract the end of the optimization in years
-
-        Attribute `end_year_of_optimization` of int is set.
-        """
-        duration_last_period = self.get_period_duration(-1)
-        self.end_year_of_optimization = (
-            self.periods_years[-1] + duration_last_period
-        )
-
-    def get_period_duration(self, period):
-        """Get duration of a period in full years
-
-        Parameters
-        ----------
-        period : int
-            Period for which the duration in years shall be obtained
-
-        Returns
-        -------
-        int
-            Duration of the period
-        """
-        return (
-            self.periods[period].max().year
-            - self.periods[period].min().year
-            + 1
-        )
+        # bare system to load pickled data
+        if self.timeindex is not None:
+            if investment_times is None:
+                self.investment_times = [self.timeindex[0]]
+            else:
+                self.investment_times = sorted(
+                    set([self.timeindex[0]] + investment_times)
+                )
 
     @staticmethod
     def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):

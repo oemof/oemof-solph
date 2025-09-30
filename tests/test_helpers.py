@@ -26,19 +26,38 @@ def test_creation_of_extended_path():
 def test_create_time_index():
     assert len(create_time_index(2014)) == 8761
     assert len(create_time_index(2012)) == 8785  # leap year
-    assert len(create_time_index(2014, interval=0.5)) == 17521
-    assert len(create_time_index(2014, interval=0.5, number=10)) == 11
-    assert len(create_time_index(2014, number=10)) == 11
+    assert len(create_time_index(2014, interval_length=0.5)) == 17521
     assert (
-        str(create_time_index(2014, interval=0.5, number=10)[-1])
+        len(
+            create_time_index(
+                2014, interval_length=0.5, number_of_intervals=10
+            )
+        )
+        == 11
+    )
+    assert len(create_time_index(2014, number_of_intervals=10)) == 11
+    assert (
+        str(
+            create_time_index(
+                2014, interval_length=0.5, number_of_intervals=10
+            )[-1]
+        )
         == "2014-01-01 05:00:00"
     )
     assert (
-        str(create_time_index(2014, interval=2, number=10)[-1])
+        str(
+            create_time_index(2014, interval_length=2, number_of_intervals=10)[
+                -1
+            ]
+        )
         == "2014-01-01 20:00:00"
     )
     assert (
-        str(create_time_index(interval=0.5, number=10, start="2025-01-02")[-1])
+        str(
+            create_time_index(
+                interval_length=0.5, number_of_intervals=10, start="2025-01-02"
+            )[-1]
+        )
         == "2025-01-02 05:00:00"
     )
     with pytest.raises(ValueError, match="mutually exclusive"):

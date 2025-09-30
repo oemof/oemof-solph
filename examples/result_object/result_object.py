@@ -122,7 +122,9 @@ def main(optimize=True):
     )
 
     logging.info("Initialize the energy system")
-    date_time_index = create_time_index(2012, number=number_of_time_steps)
+    date_time_index = create_time_index(
+        2012, number_of_intervals=number_of_time_steps
+    )
 
     # create the energysystem and assign the time index
     energysystem = EnergySystem(

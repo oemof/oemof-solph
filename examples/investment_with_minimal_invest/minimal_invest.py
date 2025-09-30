@@ -41,7 +41,7 @@ def main(optimize=True):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
-    idx = solph.create_time_index(2017, number=len(data))
+    idx = solph.create_time_index(2017, number_of_intervals=len(data))
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
 
     bus_0 = solph.Bus(label="bus_0")
