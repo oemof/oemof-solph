@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-This example gives a simplified idea how SubNetworks
+This example gives a simplified idea how subnodes
 might be used to work with discretised temperatures.
 
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
@@ -12,12 +12,15 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 
-from oemof.network import SubNetwork
+import matplotlib.pyplot as plt
+
+from oemof.network import Node
+from oemof.network.network.nodes import QualifiedLabel
 
 from oemof import solph
 
 
-class HeatPump(SubNetwork):
+class HeatPump(Node):
     """A simple heat pump model (including its source) with a COP depending
     on source a temperature (parameter) and and one of multiple possible target
     temperatures (optimiser decision).
@@ -82,7 +85,7 @@ class HeatPump(SubNetwork):
                 local_name=f"hp_{temperature}",
                 inputs={el_bus: solph.Flow()},
                 outputs={target: solph.Flow()},
-                conversion_factors={el_bus: cop},
+                conversion_factors={target: cop},
             )
 
 
@@ -95,20 +98,20 @@ def main():
         timeindex=date_time_index, infer_last_interval=False
     )
 
-    house = SubNetwork("house")
+    house = Node("house")
 
     el_bus = house.subnode(
         solph.Bus,
         local_name="el",
     )
     el_source = solph.components.Source(
-        label="el_grid",
+        label=QualifiedLabel(("el_grid",)),
         outputs={el_bus: solph.Flow(variable_costs=0.3)},
     )
     es.add(house, el_bus, el_source)
 
     heat_demands = house.subnode(
-        SubNetwork,
+        Node,
         local_name="heat demand",
     )
     demand_bus_dhw = heat_demands.subnode(solph.Bus, "b_dhw")
@@ -141,7 +144,8 @@ def main():
 
     results = solph.Results(model)
 
-    print(results.flow)
+    print(results.flow.columns)
+
 
 
 if __name__ == "__main__":
