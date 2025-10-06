@@ -22,6 +22,7 @@ class HeatPump(SubNetwork):
     on source a temperature (parameter) and and one of multiple possible target
     temperatures (optimiser decision).
     """
+
     def __init__(
         self,
         label: str,
@@ -70,7 +71,11 @@ class HeatPump(SubNetwork):
         )
 
         for target, temperature in self.heat_demand_buses.items():
-            cop = self.cpf * (temperature + 273.15) / (temperature - self.temperature)
+            cop = (
+                self.cpf
+                * (temperature + 273.15)
+                / (temperature - self.temperature)
+            )
 
             self.subnode(
                 solph.components.Converter,
