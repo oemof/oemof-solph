@@ -62,7 +62,7 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.1a2",
+    "oemof.network >= 0.5.1b2",
 ]
 license = "MIT"
 license-files = [
