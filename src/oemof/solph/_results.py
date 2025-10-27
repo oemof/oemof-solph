@@ -224,7 +224,7 @@ class Results:
         """Returns timeindex of energy system
 
         Returns:
-            float: optimum of model
+            float: time index of the model
         """
         return self._model.es.timeindex
 
