@@ -18,6 +18,8 @@ from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
 from pyomo.opt.results.container import ListContainer
 
+import oemof.solph
+
 
 class Results:
     # TODO:
@@ -35,6 +37,7 @@ class Results:
         self._solver_results = model.solver_results
         self._variables = {}
         self._model = model
+
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
                 key = str(variable).split(".")[-1]
@@ -59,13 +62,26 @@ class Results:
                         + f"(last time in '{variable}')"
                     )
 
+        # adss additional keys for the calculation of opex and capex
+        # if the keyword eval_economy is True
+        # checks if investment optimization is happing to add capex as key
+        # TODO: add keyword for multiperiod
+
+        self._economy = {"variable_costs": None}
+        if "invest" in self._variables.keys():
+            self._economy["investment_costs"] = None
+
     def keys(self):
-        """Method returning keys of _solver_results and _variables
+        """Method returning keys of the result object
 
         Returns:
-            set: keys of _solver_results and _variables
+            set: keys that can be used to access results
         """
-        return self._solver_results.keys() | self._variables.keys()
+        return (
+            self._solver_results.keys()
+            | self._variables.keys()
+            | self._economy.keys()
+        )
 
     @cache
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
@@ -82,26 +98,117 @@ class Results:
         For convenience you can also replace `results.to_df("variable")`
         with the equivalent `results.variable` or `results["variable"]`.
         """
-        df = []
-        for occurence in self._variables[variable]:
-            dataset = self._variables[variable][occurence]
-            df.append(
-                pd.DataFrame(dataset.extract_values(), index=[0]).stack(
-                    future_stack=True
-                )
-            )
-        df = pd.concat(df, axis=1)
 
-        # overwrite known indexes
-        index_type = tuple(dataset.index_set().subsets())[-1].name
-        match index_type:
-            case "TIMEPOINTS":
-                df.index = self.timeindex
-            case "TIMESTEPS":
-                df.index = self.timeindex[:-1]
-            case _:
-                df.index = df.index.get_level_values(-1)
+        if variable == "variable_costs":
+            df = self._calc_variable_costs()
+        elif variable == "investment_costs":
+            df = self._calc_capex()
+
+        else:
+            df = []
+            for occurence in self._variables[variable]:
+                dataset = self._variables[variable][occurence]
+                df.append(
+                    pd.DataFrame(dataset.extract_values(), index=[0]).stack(
+                        future_stack=True
+                    )
+                )
+            df = pd.concat(df, axis=1)
+
+            # overwrite known indexes
+            index_type = tuple(dataset.index_set().subsets())[-1].name
+            match index_type:
+                case "TIMEPOINTS":
+                    df.index = self.timeindex
+                case "TIMESTEPS":
+                    df.index = self.timeindex[:-1]
+                case _:
+                    df.index = df.index.get_level_values(-1)
         return df
+
+    def _calc_capex(self):
+
+        # extract the the optimized investment sizes
+        invest_values = self.to_df("invest")
+
+        # Initialize an empty dictionary to collect results
+        capex_data = {}
+
+        # calculate yearly investment costs associated with investment FLOWS
+        # and store data in capex_data dictionary
+
+        # TODO: is it really necessary to loop over all flows again or is it
+        # possible to use the flows of 'invest_values'?
+        for i, o in self._model.FLOWS:
+
+            # access the costs of each investment flow
+            if hasattr(self._model.flows[i, o], "investment"):
+
+                # map investment and costs and multiply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        pass
+                    else:
+                        if col[0] == i and col[1] == o:
+                            invest_size = invest_values[col][0]
+
+                            investment_costs = (
+                                self._model.flows[i, o].investment.ep_costs[0]
+                                * invest_size
+                                + self._model.flows[i, o].investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = investment_costs
+
+            else:
+                pass
+
+        # calculate yearly investment costs associated with GenericStorages
+        # and store data in capex_data dictionary
+        for node in self._model.nodes:
+            if isinstance(
+                node,
+                oemof.solph.components._generic_storage.GenericStorage,
+            ):
+
+                # map investment and costs and mulitply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        if col == node:
+                            invest_size = invest_values[col][0]
+
+                            investment_costs = (
+                                node.investment.ep_costs[0] * invest_size
+                                + node.investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = investment_costs
+                    else:
+                        pass
+
+        df_capex = pd.DataFrame([capex_data])
+
+        return df_capex
+
+    def _calc_variable_costs(self):
+        df_opex = pd.DataFrame()
+
+        # extract the the optimized flow values
+        flow_values = self.to_df("flow")
+
+        for i, o in self._model.FLOWS:
+            # access the variable costs of each flow
+            variable_costs = self._model.flows[i, o].variable_costs
+
+            # map flows and variable costs and mulitply
+            for col in flow_values.columns:
+                if col[0] == i and col[1] == o:
+                    opex = flow_values[col] * variable_costs
+                    df_opex[col] = opex
+
+        return df_opex
 
     @property
     def objective(self):

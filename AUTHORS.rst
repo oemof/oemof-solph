@@ -16,6 +16,7 @@ Authors
 * Ekaterina Zolotarevskaya
 * Elisa Gaudchau
 * Elisa Papadis
+* Eva Schischke
 * Fabian Büllesbach
 * Francesco Witte
 * Guido Plessmann
@@ -41,4 +42,4 @@ Authors
 * Stephan Günther
 * Uwe Krien
 * Tobi Rohrer
-* Eva Schischke
+

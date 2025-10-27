@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
+
 import datetime
 import random
 
@@ -52,8 +53,6 @@ class TestParameterResult:
             inputs={b_el1: flows.Flow(variable_costs=3)},
             outputs={b_el1: flows.Flow(variable_costs=2.5)},
             loss_rate=0.00,
-            invest_relation_input_capacity=1 / 6,
-            invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.9,
         )
