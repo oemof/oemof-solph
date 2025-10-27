@@ -64,14 +64,16 @@ class NonConvexFlowBlock(ScalarBlock):
         **The following sets are created:** (-> see basic sets at
         :class:`.Model` )
 
-        NONCONVEX_FLOWS
+        FIXED_CAPACITY_NONCONVEX_FLOWS
             A set of flows with the attribute `nonconvex` of type
             :class:`.options.NonConvex`.
 
 
         .. automethod:: _sets_for_non_convex_flows
         """
-        self.NONCONVEX_FLOWS = Set(initialize=[(g[0], g[1]) for g in group])
+        self.FIXED_CAPACITY_NONCONVEX_FLOWS = Set(
+            initialize=[(g[0], g[1]) for g in group]
+        )
 
         self._sets_for_non_convex_flows(group)
 
@@ -86,8 +88,10 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _variables_for_non_convex_flows
         """
         m = self.parent_block()
-        self.status = Var(self.NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary)
-        for o, i in self.NONCONVEX_FLOWS:
+        self.status = Var(
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS, m.TIMESTEPS, within=Binary
+        )
+        for o, i in self.FIXED_CAPACITY_NONCONVEX_FLOWS:
             if m.flows[o, i].nonconvex.initial_status is not None:
                 for t in range(
                     0, m.flows[o, i].nonconvex.first_flexible_timestep
@@ -101,7 +105,9 @@ class NonConvexFlowBlock(ScalarBlock):
         # multiplication of a binary variable (`status`)
         # and a continuous variable (`invest` or `nominal_capacity`)
         self.status_nominal = Var(
-            self.NONCONVEX_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS,
+            m.TIMESTEPS,
+            within=NonNegativeReals,
         )
 
         self._variables_for_non_convex_flows()
@@ -132,7 +138,7 @@ class NonConvexFlowBlock(ScalarBlock):
         .. automethod:: _activity_costs
         .. automethod:: _inactivity_costs
         """
-        if not hasattr(self, "NONCONVEX_FLOWS"):
+        if not hasattr(self, "FIXED_CAPACITY_NONCONVEX_FLOWS"):
             return 0
 
         startup_costs = self._startup_costs()
@@ -160,39 +166,39 @@ class NonConvexFlowBlock(ScalarBlock):
         r"""Creates all sets for non-convex flows.
 
         MIN_FLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute `min`
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute `min`
             being not None in the first timestep.
         ACTIVITYCOSTFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `activity_costs` being not None.
         INACTIVITYCOSTFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `inactivity_costs` being not None.
         STARTUPFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `maximum_startups` or `startup_costs`
             being not None.
         MAXSTARTUPFLOWS
             A subset of set STARTUPFLOWS with the attribute
             `maximum_startups` being not None.
         SHUTDOWNFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `maximum_shutdowns` or `shutdown_costs`
             being not None.
         MAXSHUTDOWNFLOWS
             A subset of set SHUTDOWNFLOWS with the attribute
             `maximum_shutdowns` being not None.
         MINUPTIMEFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `minimum_uptime` being > 0.
         MINDOWNTIMEFLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `minimum_downtime` being > 0.
         POSITIVE_GRADIENT_FLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `positive_gradient` being not None.
         NEGATIVE_GRADIENT_FLOWS
-            A subset of set NONCONVEX_FLOWS with the attribute
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `negative_gradient` being not None.
         """
         self.MIN_FLOWS = Set(
@@ -618,7 +624,7 @@ class NonConvexFlowBlock(ScalarBlock):
             P(t) \leq max(i, o, t) \cdot P_{nom} \
                 \cdot status(t), \\
             \forall t \in \textrm{TIMESTEPS}, \\
-            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}.
+            \forall (i, o) \in \textrm{FIXED_CAPACITY_NONCONVEX_FLOWS}.
         """
         m = self.parent_block()
 
@@ -637,7 +643,7 @@ class NonConvexFlowBlock(ScalarBlock):
         .. math::
             P(t) \geq min(i, o, t) \cdot P_{nom} \
                 \cdot Y_{status}(t), \\
-            \forall (i, o) \in \textrm{NONCONVEX_FLOWS}, \\
+            \forall (i, o) \in \textrm{FIXED_CAPACITY_NONCONVEX_FLOWS}, \\
             \forall t \in \textrm{TIMESTEPS}.
         """
         m = self.parent_block()
@@ -669,7 +675,9 @@ class NonConvexFlowBlock(ScalarBlock):
             return expr
 
         return Constraint(
-            self.NONCONVEX_FLOWS, m.TIMESTEPS, rule=_status_nominal_rule
+            self.FIXED_CAPACITY_NONCONVEX_FLOWS,
+            m.TIMESTEPS,
+            rule=_status_nominal_rule,
         )
 
     def _shared_constraints_for_non_convex_flows(self):
