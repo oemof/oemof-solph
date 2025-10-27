@@ -26,11 +26,20 @@ from pyomo.core import Expression
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
+from pyomo.core.base.block import ScalarBlock
 
-from ._non_convex_flow_block import NonConvexFlowBlock
+from ._shared import _activity_costs
+from ._shared import _inactivity_costs
+from ._shared import _maximum_flow_constraint
+from ._shared import _minimum_flow_constraint
+from ._shared import _sets_for_non_convex_flows
+from ._shared import _shared_constraints_for_non_convex_flows
+from ._shared import _shutdown_costs
+from ._shared import _startup_costs
+from ._shared import _variables_for_non_convex_flows
 
 
-class InvestNonConvexFlowBlock(NonConvexFlowBlock):
+class InvestNonConvexFlowBlock(ScalarBlock):
     r"""
     .. automethod:: _create_constraints
     .. automethod:: _create_variables
@@ -90,7 +99,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             ]
         )
 
-        self._sets_for_non_convex_flows(group)
+        _sets_for_non_convex_flows(self, group)
 
     def _create_variables(self):
         r"""
@@ -123,7 +132,7 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        self._variables_for_non_convex_flows()
+        _variables_for_non_convex_flows(self)
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -171,13 +180,13 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
         .. automethod:: _maximum_flow_constraint
         .. automethod:: _linearised_investment_constraints
         """
-        self._shared_constraints_for_non_convex_flows()
+        _shared_constraints_for_non_convex_flows(self)
 
         self.minimum_investment = self._minimum_invest_constraint()
         self.maximum_investment = self._maximum_invest_constraint()
 
-        self.min = self._minimum_flow_constraint()
-        self.max = self._maximum_flow_constraint()
+        self.min = _minimum_flow_constraint(self)
+        self.max = _maximum_flow_constraint(self)
 
         self._linearised_investment_constraints()
 
@@ -302,10 +311,10 @@ class InvestNonConvexFlowBlock(NonConvexFlowBlock):
 
         m = self.parent_block()
 
-        startup_costs = self._startup_costs()
-        shutdown_costs = self._shutdown_costs()
-        activity_costs = self._activity_costs()
-        inactivity_costs = self._inactivity_costs()
+        startup_costs = _startup_costs(self)
+        shutdown_costs = _shutdown_costs(self)
+        activity_costs = _activity_costs(self)
+        inactivity_costs = _inactivity_costs(self)
         investment_costs = 0
 
         for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:
