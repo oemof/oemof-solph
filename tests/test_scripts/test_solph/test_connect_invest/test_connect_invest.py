@@ -19,10 +19,9 @@ import pytest
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
 from oemof.solph import Model
+from oemof.solph import Results
 from oemof.solph import components as components
 from oemof.solph import constraints
-from oemof.solph import processing
-from oemof.solph import views
 from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
 
@@ -120,39 +119,19 @@ def test_connect_invest():
     om.solve(solver="cbc", tee=True)
 
     # check if the new result object is working for custom components
-    results = processing.results(om)
+    results = Results(om)
 
-    my_results = dict()
-    my_results["line12"] = (
-        views.node(results, "line12")["scalars"]
-        .loc[[(("line12", "electricity2"), "invest")]]
-        .iloc[0]
-    )
-
-    my_results["line21"] = (
-        views.node(results, "line21")["scalars"]
-        .loc[[(("line21", "electricity1"), "invest")]]
-        .iloc[0]
-    )
-
-    stor_res = views.node(results, "storage")["scalars"]
-    my_results["storage_in"] = stor_res[
-        [(("electricity1", "storage"), "invest")]
-    ].iloc[0]
-    my_results["storage"] = stor_res[[(("storage", "None"), "invest")]].iloc[0]
-    my_results["storage_out"] = stor_res[
-        [(("storage", "electricity1"), "invest")]
-    ].iloc[0]
+    my_results = results.invest
 
     connect_invest_dict = {
-        "line12": 814705,
-        "line21": 1629410,
-        "storage": 814705,
-        "storage_in": 135784,
-        "storage_out": 135784,
+        (line12, bel2): 814705,
+        (line21, bel1): 1629410,
+        storage: 814705,
+        (bel1, storage): 135784,
+        (storage, bel1): 135784,
     }
 
     for key in connect_invest_dict.keys():
-        assert my_results[key] == pytest.approx(
+        assert my_results[key].iloc[0] == pytest.approx(
             connect_invest_dict[key], abs=0.5
         )

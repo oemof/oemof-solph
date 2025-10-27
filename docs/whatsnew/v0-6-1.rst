@@ -3,11 +3,12 @@ v0.6.1
 
 API changes
 ###########
-* GenericStorage requires explicitly set `Investment` objects if the `invest_relation` 
-  keywords are used. Automatic creation of the `Investment` objects is removed.
+
 
 New features
 ############
+* GenericStorage requires explicitly set `Investment` objects if the `invest_relation` 
+  keywords are used. Automatic creation of the `Investment` objects is removed.
 * Two new keys added to `Results` class (experimental) to calculate variable costs and 
   investment costs via `results["variable_costs"]` and `results["investment_costs"]`.
 
@@ -22,9 +23,18 @@ Bug fixes
 Other changes
 #############
 
+* Implement a backward-compatibility module for processing.results that uses
+  the new solph.Results object.
 * Experimental component `SinkDSM` (unmaintained) has been removed
 * Unmaintained, non-working functionality for three-phase electricity has been
   removed.
+
+Known issues
+############
+
+* Backward-compatibile result extraction (processing.results)
+  of mutli-period-models fails.
+* Results of TSAM-models do not have original time axis reconstructed.
 
 Contributors
 ############
