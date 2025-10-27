@@ -24,7 +24,6 @@ include = [
     ".flake8",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
-    ".scrutinizer.yml",
 ]
 exclude = ["docs/_build"]
 
@@ -63,7 +62,7 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.0",
+    "oemof.network >= 0.5.1b2",
 ]
 license = "MIT"
 license-files = [
@@ -95,7 +94,6 @@ oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation
 
 [tool.black]
 line-length = 79
-target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 exclude = '''
 /(

@@ -289,8 +289,15 @@ def main():
     # create storage object representing a battery
     storage = solph.components.GenericStorage(
         label="storage",
-        inputs={bel: solph.Flow(variable_costs=0.0001)},
-        outputs={bel: solph.Flow()},
+        inputs={
+            bel: solph.Flow(
+                variable_costs=0.0001,
+                nominal_capacity=solph.Investment(lifetime=10),
+            )
+        },
+        outputs={
+            bel: solph.Flow(nominal_capacity=solph.Investment(lifetime=10))
+        },
         loss_rate=0.01,
         lifetime_inflow=10,
         lifetime_outflow=10,

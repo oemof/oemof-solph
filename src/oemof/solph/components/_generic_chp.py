@@ -126,12 +126,15 @@ class GenericCHP(Node):
         heat_output,
         beta,
         back_pressure,
+        parent_node=None,
         label=None,
         custom_properties=None,
     ):
         if custom_properties is None:
             custom_properties = {}
-        super().__init__(label, custom_properties=custom_properties)
+        super().__init__(
+            label, parent_node=parent_node, custom_properties=custom_properties
+        )
 
         self.fuel_input = fuel_input
         self.electrical_output = electrical_output

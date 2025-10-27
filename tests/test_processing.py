@@ -59,8 +59,12 @@ class TestParameterResult:
 
         batt = GenericStorage(
             label="storage",
-            inputs={b_el1: Flow(variable_costs=3)},
-            outputs={b_el2: Flow(variable_costs=2.5)},
+            inputs={
+                b_el1: Flow(variable_costs=3, nominal_capacity=Investment())
+            },
+            outputs={
+                b_el2: Flow(variable_costs=2.5, nominal_capacity=Investment())
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_capacity=1 / 6,
@@ -163,6 +167,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_age": 0,
                     "investment_existing": 0,
@@ -202,6 +207,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_age": 0,
                     "investment_existing": 0,
@@ -238,7 +244,9 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
+                    "parent": None,
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
                 }
@@ -257,6 +265,7 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
                 }
             ),
