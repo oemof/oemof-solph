@@ -40,23 +40,28 @@ class Results:
 
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
+                # name of the variable
                 key = str(variable).split(".")[-1]
+                # where the variable is found in the model
                 occurence = str(variable)[: -(len(key) + 1)]
                 if (
                     key not in self._variables
                     and key not in self._solver_results
-                ):
+                ):  # varaible found for the first time
                     self._variables[key] = {occurence: variable}
                 elif (
                     key in self._variables
                     and occurence not in self._variables[key]
-                ):
+                ):  # variable with same name found elsewhere in the model
                     self._variables[key][occurence] = variable
                 elif self._variables[key][occurence] == variable:
-                    # For debugging purposes.
+                    # Iterated over the same thing twice.
+                    # Case for debugging purposes.
                     # We should avoid useless iterations.
                     pass
                 else:
+                    # Same variable, known occurance but different content.
+                    # The following lines should be unreachable.
                     raise ValueError(
                         f"Variable name defined multiple times: {key}"
                         + f"(last time in '{variable}')"
