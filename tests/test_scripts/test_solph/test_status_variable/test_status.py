@@ -41,9 +41,11 @@ def test_non_convex_status_variables():
     # gas boiler with minimal load
     boiler = solph.components.Source(
         label="gb",
-        outputs={bus_heat: solph.Flow(
+        outputs={
+            bus_heat: solph.Flow(
                 nonconvex=solph.NonConvex(),
-                nominal_capacity=5, min=0.5,
+                nominal_capacity=5,
+                min=0.5,
                 variable_costs=0.15,
             ),
         },
@@ -80,3 +82,9 @@ def test_non_convex_status_variables():
 
     assert (results.status[(boiler, bus_heat)] == [1, 0]).all()
     assert (results.status[(heat_pump, bus_heat)] == [0, 1]).all()
+
+    print(results.flow)
+
+
+if __name__ == "__main__":
+    test_non_convex_status_variables()
