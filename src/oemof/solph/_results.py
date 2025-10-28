@@ -47,7 +47,7 @@ class Results:
                 if (
                     key not in self._variables
                     and key not in self._solver_results
-                ):  # varaible found for the first time
+                ):  # variable found for the first time
                     self._variables[key] = {occurence: variable}
                 elif (
                     key in self._variables
