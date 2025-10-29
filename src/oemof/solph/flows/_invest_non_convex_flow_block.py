@@ -28,15 +28,15 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from ._shared import _activity_costs
-from ._shared import _inactivity_costs
-from ._shared import _maximum_flow_constraint
-from ._shared import _minimum_flow_constraint
-from ._shared import _sets_for_non_convex_flows
-from ._shared import _shared_constraints_for_non_convex_flows
-from ._shared import _shutdown_costs
-from ._shared import _startup_costs
-from ._shared import _variables_for_non_convex_flows
+from ._shared import activity_costs
+from ._shared import inactivity_costs
+from ._shared import maximum_flow_constraint
+from ._shared import minimum_flow_constraint
+from ._shared import sets_for_non_convex_flows
+from ._shared import shared_constraints_for_non_convex_flows
+from ._shared import shutdown_costs
+from ._shared import startup_costs
+from ._shared import variables_for_non_convex_flows
 
 
 class InvestNonConvexFlowBlock(ScalarBlock):
@@ -77,7 +77,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             :class:`.options.NonConvex` and the attribute `invest`
             of type :class:`.options.Invest`.
 
-        .. automethod:: _sets_for_non_convex_flows
+        Also creates :py:func:`sets_for_non_convex_flows`.
         """
         self.INVEST_NON_CONVEX_FLOWS = Set(
             initialize=[(g[0], g[1]) for g in group]
@@ -99,7 +99,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             ]
         )
 
-        _sets_for_non_convex_flows(self, group)
+        sets_for_non_convex_flows(self, group)
 
     def _create_variables(self):
         r"""
@@ -122,7 +122,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             used for the constraints on the minimum and maximum
             flow constraints.
 
-        .. automethod:: _variables_for_non_convex_flows
+        Also creates :py:func:`variables_for_non_convex_flows`.
         """
 
         m = self.parent_block()
@@ -132,7 +132,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        _variables_for_non_convex_flows(self)
+        variables_for_non_convex_flows(self)
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -173,20 +173,22 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
     def _create_constraints(self):
         r"""
-        .. automethod:: _shared_constraints_for_non_convex_flows
         .. automethod:: _minimum_invest_constraint
         .. automethod:: _maximum_invest_constraint
-        .. automethod:: _minimum_flow_constraint
-        .. automethod:: _maximum_flow_constraint
         .. automethod:: _linearised_investment_constraints
+
+        Also creates
+        * :py:func:`shared_constraints_for_non_convex_flows`,
+        * :py:func:`minimum_flow_constraint`, and
+        * :py:func:`maximum_flow_constraint`.
         """
-        _shared_constraints_for_non_convex_flows(self)
+        shared_constraints_for_non_convex_flows(self)
 
         self.minimum_investment = self._minimum_invest_constraint()
         self.maximum_investment = self._maximum_invest_constraint()
 
-        self.min = _minimum_flow_constraint(self)
-        self.max = _maximum_flow_constraint(self)
+        self.min = minimum_flow_constraint(self)
+        self.max = maximum_flow_constraint(self)
 
         self._linearised_investment_constraints()
 
@@ -311,10 +313,10 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        startup_costs = _startup_costs(self)
-        shutdown_costs = _shutdown_costs(self)
-        activity_costs = _activity_costs(self)
-        inactivity_costs = _inactivity_costs(self)
+        startup_costs = startup_costs(self)
+        shutdown_costs = shutdown_costs(self)
+        activity_costs = activity_costs(self)
+        inactivity_costs = inactivity_costs(self)
         investment_costs = 0
 
         for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:

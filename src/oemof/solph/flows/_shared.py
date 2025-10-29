@@ -26,7 +26,7 @@ from pyomo.core import Var
 from oemof.solph._plumbing import valid_sequence
 
 
-def _sets_for_non_convex_flows(block, group):
+def sets_for_non_convex_flows(block, group):
     r"""Creates all sets for non-convex flows.
 
     MIN_FLOWS
@@ -143,7 +143,7 @@ def _sets_for_non_convex_flows(block, group):
     )
 
 
-def _variables_for_non_convex_flows(block):
+def variables_for_non_convex_flows(block):
     r"""
     :math:`Y_{startup}` (binary) `NonConvexFlowBlock.startup`:
         Variable indicating startup of flow (component) indexed by
@@ -382,16 +382,8 @@ def _max_shutdown_constraint(block):
     return Constraint(block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule)
 
 
-def _shared_constraints_for_non_convex_flows(block):
+def shared_constraints_for_non_convex_flows(block):
     r"""
-
-    .. automethod:: _startup_constraint
-    .. automethod:: _max_startup_constraint
-    .. automethod:: _shutdown_constraint
-    .. automethod:: _max_shutdown_constraint
-    .. automethod:: _min_uptime_constraint
-    .. automethod:: _min_downtime_constraint
-
     positive_gradient_constraint
         .. math::
 
@@ -406,6 +398,15 @@ def _shared_constraints_for_non_convex_flows(block):
             - P(t) \cdot Y_{status}(t) \leq \
             \dot{P}_{down}(t), \\
             \forall t \in \textrm{TIMESTEPS}.
+
+    Also creates:
+
+    * :py:func:`startup_constraint`
+    * :py:func:`max_startup_constraint`
+    * :py:func:`shutdown_constraint`
+    * :py:func:`max_shutdown_constraint`
+    * :py:func:`min_uptime_constraint`
+    * :py:func:`min_downtime_constraint`
     """
     m = block.parent_block()
 
@@ -507,7 +508,7 @@ def _shared_constraints_for_non_convex_flows(block):
     )
 
 
-def _maximum_flow_constraint(block):
+def maximum_flow_constraint(block):
     r"""
     .. math::
         P(t) \leq max(i, o, t) \cdot P_{nom} \
@@ -528,7 +529,7 @@ def _maximum_flow_constraint(block):
     return Constraint(block.MIN_FLOWS, m.TIMESTEPS, rule=_maximum_flow_rule)
 
 
-def _minimum_flow_constraint(block):
+def minimum_flow_constraint(block):
     r"""
     .. math::
         P(t) \geq min(i, o, t) \cdot P_{nom} \
@@ -549,7 +550,7 @@ def _minimum_flow_constraint(block):
     return Constraint(block.MIN_FLOWS, m.TIMESTEPS, rule=_minimum_flow_rule)
 
 
-def _startup_costs(block):
+def startup_costs(block):
     r"""
     .. math::
         \sum_{i, o \in STARTUPFLOWS} \sum_t  Y_{startup}(t) \
@@ -575,7 +576,7 @@ def _startup_costs(block):
     return startup_costs
 
 
-def _shutdown_costs(block):
+def shutdown_costs(block):
     r"""
     .. math::
         \sum_{SHUTDOWNFLOWS} \sum_t Y_{shutdown}(t) \
@@ -603,7 +604,7 @@ def _shutdown_costs(block):
     return shutdown_costs
 
 
-def _activity_costs(block):
+def activity_costs(block):
     r"""
     .. math::
         \sum_{ACTIVITYCOSTFLOWS} \sum_t Y_{status}(t) \
@@ -631,7 +632,7 @@ def _activity_costs(block):
     return activity_costs
 
 
-def _inactivity_costs(block):
+def inactivity_costs(block):
     r"""
     .. math::
         \sum_{INACTIVITYCOSTFLOWS} \sum_t (1 - Y_{status}(t)) \
