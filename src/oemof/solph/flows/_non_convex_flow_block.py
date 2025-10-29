@@ -166,8 +166,8 @@ class NonConvexFlowBlock(ScalarBlock):
         r"""Creates all sets for non-convex flows.
 
         MIN_FLOWS
-            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute `min`
-            being not None in the first timestep.
+            A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
+            `min` being not None in the first timestep.
         ACTIVITYCOSTFLOWS
             A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
             `activity_costs` being not None.
