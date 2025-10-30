@@ -28,15 +28,7 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from ._shared import activity_costs
-from ._shared import inactivity_costs
-from ._shared import maximum_flow_constraint
-from ._shared import minimum_flow_constraint
-from ._shared import sets_for_non_convex_flows
-from ._shared import shared_constraints_for_non_convex_flows
-from ._shared import shutdown_costs
-from ._shared import startup_costs
-from ._shared import variables_for_non_convex_flows
+from . import _shared
 
 
 class InvestNonConvexFlowBlock(ScalarBlock):
@@ -99,7 +91,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             ]
         )
 
-        sets_for_non_convex_flows(self, group)
+        _shared.sets_for_non_convex_flows(self, group)
 
     def _create_variables(self):
         r"""
@@ -132,7 +124,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
             self.INVEST_NON_CONVEX_FLOWS, m.TIMESTEPS, within=Binary
         )
 
-        variables_for_non_convex_flows(self)
+        _shared.variables_for_non_convex_flows(self)
 
         # Investment-related variable similar to the
         # <class 'oemof.solph.flows.InvestmentFlow'> class.
@@ -182,13 +174,13 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         * :py:func:`minimum_flow_constraint`, and
         * :py:func:`maximum_flow_constraint`.
         """
-        shared_constraints_for_non_convex_flows(self)
+        _shared.shared_constraints_for_non_convex_flows(self)
 
         self.minimum_investment = self._minimum_invest_constraint()
         self.maximum_investment = self._maximum_invest_constraint()
 
-        self.min = minimum_flow_constraint(self)
-        self.max = maximum_flow_constraint(self)
+        self.min = _shared.minimum_flow_constraint(self)
+        self.max = _shared.maximum_flow_constraint(self)
 
         self._linearised_investment_constraints()
 
@@ -313,10 +305,10 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        startup_costs = startup_costs(self)
-        shutdown_costs = shutdown_costs(self)
-        activity_costs = activity_costs(self)
-        inactivity_costs = inactivity_costs(self)
+        startup_costs = _shared.startup_costs(self)
+        shutdown_costs = _shared.shutdown_costs(self)
+        activity_costs = _shared.activity_costs(self)
+        inactivity_costs = _shared.inactivity_costs(self)
         investment_costs = 0
 
         for i, o in self.LINEAR_INVEST_NON_CONVEX_FLOWS:

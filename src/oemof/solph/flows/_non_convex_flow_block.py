@@ -24,15 +24,7 @@ from pyomo.core import Set
 from pyomo.core import Var
 from pyomo.core.base.block import ScalarBlock
 
-from ._shared import activity_costs
-from ._shared import inactivity_costs
-from ._shared import maximum_flow_constraint
-from ._shared import minimum_flow_constraint
-from ._shared import sets_for_non_convex_flows
-from ._shared import shared_constraints_for_non_convex_flows
-from ._shared import shutdown_costs
-from ._shared import startup_costs
-from ._shared import variables_for_non_convex_flows
+from . import _shared
 
 
 class NonConvexFlowBlock(ScalarBlock):
@@ -81,7 +73,7 @@ class NonConvexFlowBlock(ScalarBlock):
             initialize=[(g[0], g[1]) for g in group]
         )
 
-        sets_for_non_convex_flows(self, group)
+        _shared.sets_for_non_convex_flows(self, group)
 
     def _create_variables(self):
         r"""
@@ -116,7 +108,7 @@ class NonConvexFlowBlock(ScalarBlock):
             within=NonNegativeReals,
         )
 
-        variables_for_non_convex_flows(self)
+        _shared.variables_for_non_convex_flows(self)
 
     def _create_constraints(self):
         """
@@ -131,10 +123,10 @@ class NonConvexFlowBlock(ScalarBlock):
         """
 
         self.status_nominal_constraint = self._status_nominal_constraint()
-        self.min = minimum_flow_constraint(self)
-        self.max = maximum_flow_constraint(self)
+        self.min = _shared.minimum_flow_constraint(self)
+        self.max = _shared.maximum_flow_constraint(self)
 
-        shared_constraints_for_non_convex_flows(self)
+        _shared.shared_constraints_for_non_convex_flows(self)
 
     def _objective_expression(self):
         r"""
@@ -148,10 +140,10 @@ class NonConvexFlowBlock(ScalarBlock):
         if not hasattr(self, "FIXED_CAPACITY_NONCONVEX_FLOWS"):
             return 0
 
-        startup_costs = startup_costs(self)
-        shutdown_costs = shutdown_costs(self)
-        activity_costs = activity_costs(self)
-        inactivity_costs = inactivity_costs(self)
+        startup_costs = _shared.startup_costs(self)
+        shutdown_costs = _shared.shutdown_costs(self)
+        activity_costs = _shared.activity_costs(self)
+        inactivity_costs = _shared.inactivity_costs(self)
 
         self.activity_costs = Expression(expr=activity_costs)
         self.inactivity_costs = Expression(expr=inactivity_costs)
