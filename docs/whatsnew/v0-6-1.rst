@@ -25,6 +25,9 @@ Other changes
 * Experimental component `SinkDSM` (unmaintained) has been removed
 * Unmaintained, non-working functionality for three-phase electricity has been
   removed.
+* Make claer `InvestNonConvexFlowBlock` and `NonConvexFlowBlock` are parallel
+  structures and the former is no specialised version of the latter. In particular,
+  the set `NONCONVEX_FLOWS` is now called `FIXED_CAPACITY_NONCONVEX_FLOWS`.
 
 Contributors
 ############
