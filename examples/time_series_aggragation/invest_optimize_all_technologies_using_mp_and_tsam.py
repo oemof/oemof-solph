@@ -313,7 +313,7 @@ def main(optimize=True):
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
-    
+
     if optimize is False:
         return energysystem
 
