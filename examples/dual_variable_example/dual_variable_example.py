@@ -21,11 +21,11 @@ Download source code: :download:`dual_variable_example.py </../examples/dual_var
 Installation requirements
 -------------------------
 
-This example requires the version v0.5.x of oemof.solph:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph[examples]>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 

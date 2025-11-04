@@ -34,8 +34,6 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 from oemof.network import Node
 from oemof.network.network.nodes import QualifiedLabel
 
@@ -111,7 +109,7 @@ class HeatPump(Node):
             )
 
 
-def main():
+def main(optimize=True):
 
     date_time_index = solph.create_time_index(2025, number=2)
 
@@ -130,7 +128,7 @@ def main():
         label=QualifiedLabel(("el_grid",)),
         outputs={el_bus: solph.Flow(variable_costs=0.3)},
     )
-    es.add(house, el_bus, el_source)
+    es.add(house, el_source)
 
     heat_demands = house.subnode(
         Node,
@@ -149,8 +147,8 @@ def main():
         local_name="d_sh",
         inputs={demand_bus_sh: solph.Flow(nominal_capacity=1, fix=[0.4, 2.1])},
     )
-    es.add(heat_demands)
-    hp = house.subnode(
+
+    house.subnode(
         HeatPump,
         local_name="hp",
         el_supply=el_bus,
@@ -159,7 +157,9 @@ def main():
         cpf=0.45,
         el_power_limit=3,
     )
-    es.add(hp)
+
+    if optimize is False:
+        return es
 
     model = solph.Model(es)
     model.solve()

@@ -81,12 +81,14 @@ dev = [
     "furo",
     "matplotlib",
     "nbformat",
+    "openpyxl",
     "pytest",
     "sphinx",
     "sphinx-copybutton",
     "sphinx-design",
     "termcolor",
     "tox",
+    "tsam",
 ]
 
 [project.scripts]

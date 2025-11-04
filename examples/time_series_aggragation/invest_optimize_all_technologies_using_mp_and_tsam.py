@@ -63,11 +63,11 @@ Download data: :download:`storage_investment.csv </../examples/storage_investmen
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
@@ -93,7 +93,7 @@ from oemof.tools import logger
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Read data file
     filename = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -313,6 +313,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
