@@ -4,6 +4,28 @@
 This example gives a simplified idea how subnodes
 might be used to work with discretised temperatures.
 
+Code
+----
+Download source code: :download:`result_object.py </../examples/subnetwork/subnetwork_example.py>`
+
+.. dropdown:: Click to display code
+
+    .. literalinclude:: /../examples/subnetwork/subnetwork_example.py
+        :language: python
+        :lines: 35-
+
+Installation requirements
+-------------------------
+This example requires oemof.solph (at least v0.6.1), install by:
+
+.. code:: bash
+
+    pip install oemof.solph>=0.6.1
+
+License
+-------
+`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-FileCopyrightText: Deutsches Zentrum für Luft- und Raumfahrt (DLR)
 

@@ -14,6 +14,7 @@ are mostly standalone examples, that are not commented in detail.
     examples/time_index.rst
     examples/nametuple.rst
     examples/simple_dispatch.rst
+    examples/nested_nodes.rst
     examples/result_object.rst
     examples/activity_costs.rst
     examples/min_max_runtimes.rst
