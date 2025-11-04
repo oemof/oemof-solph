@@ -37,7 +37,7 @@ Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof. Install by:
 
-    pip install 'oemof.solph>=0.5'
+    pip install oemof.solph>=0.5
 
 """
 
