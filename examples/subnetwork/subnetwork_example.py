@@ -34,8 +34,6 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 
-import matplotlib.pyplot as plt
-
 from oemof.network import Node
 from oemof.network.network.nodes import QualifiedLabel
 
