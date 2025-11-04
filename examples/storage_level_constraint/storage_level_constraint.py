@@ -44,7 +44,7 @@ from oemof.solph.constraints import storage_level_constraint
 from oemof.solph.processing import results
 
 
-def storage_level_constraint_example():
+def main(optimize=True):
     es = EnergySystem(
         timeindex=pd.date_range("2022-01-01", freq="1H", periods=24),
         infer_last_interval=True,
@@ -88,6 +88,9 @@ def storage_level_constraint_example():
         inputs={multiplexer: Flow(nominal_capacity=0.15, variable_costs=-0.1)},
     )
     es.add(out_1)
+
+    if optimize is False:
+        return es
 
     model = Model(es)
 
@@ -136,4 +139,4 @@ def storage_level_constraint_example():
 
 
 if __name__ == "__main__":
-    storage_level_constraint_example()
+    main()

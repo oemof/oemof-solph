@@ -111,7 +111,7 @@ class HeatPump(Node):
             )
 
 
-def main():
+def main(optimize=True):
 
     date_time_index = solph.create_time_index(2025, number=2)
 
@@ -160,6 +160,9 @@ def main():
         el_power_limit=3,
     )
     es.add(hp)
+
+    if optimize is False:
+        return es
 
     model = solph.Model(es)
     model.solve()
