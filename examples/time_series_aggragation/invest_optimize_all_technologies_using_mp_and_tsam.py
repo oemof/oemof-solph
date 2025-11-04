@@ -93,7 +93,7 @@ from oemof.tools import logger
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Read data file
     filename = os.path.join(
         os.path.dirname(os.path.abspath(__file__)),
@@ -313,6 +313,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+    
+    if optimize is False:
+        return energysystem
 
     logging.info("Optimise the energy system")
 
