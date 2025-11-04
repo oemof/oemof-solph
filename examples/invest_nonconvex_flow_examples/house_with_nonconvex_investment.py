@@ -25,11 +25,11 @@ Download source code: :download:`house_with_nonconvex_investment.py </../example
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof.solph. Install by:
+This example requires oemof.solph (at least v0.5.0). Install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph>=0.5,<0.6'
+    pip install 'oemof.solph>=0.5'
 
 """
 

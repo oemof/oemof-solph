@@ -46,11 +46,11 @@ Download data: :download:`time_series.csv </../examples/economic_results/time_se
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.6.x), install by:
+This example requires oemof.solph (at least v0.6.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.6
 
 License
 -------

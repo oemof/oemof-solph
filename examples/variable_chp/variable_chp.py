@@ -28,11 +28,11 @@ Download data: :download:`variable_chp.csv </../examples/variable_chp/variable_c
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 Optional to see the i/o balance plot:
 
