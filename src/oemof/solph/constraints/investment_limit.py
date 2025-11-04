@@ -12,7 +12,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
-
+import warnings
 from pyomo import environ as po
 
 from oemof.solph._plumbing import sequence
@@ -199,6 +199,15 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
+    warnings.warn(
+        "additional_investment_flow_limit() is deprecated "
+        "and will be removed in a future version.\n"
+        "Use additional_total_limit() instead, "
+        "which requires a new structure of costume attributes. "
+        "F.e.custom_attributes={“space”: {“linear”: 1, “offset”: 5}}",
+        DeprecationWarning,
+        stacklevel=2,
+    )
     invest_flows = {}
 
     for i, o in model.flows:
@@ -216,6 +225,171 @@ def additional_investment_flow_limit(model, keyword, limit=None):
                 * getattr(invest_flows[inflow, outflow], keyword)
                 for (inflow, outflow) in invest_flows
                 for p in model.PERIODS
+            )
+        ),
+    )
+
+    setattr(
+        model,
+        limit_name + "_constraint",
+        po.Constraint(expr=(getattr(model, limit_name) <= limit)),
+    )
+
+    return model
+
+
+def additional_total_limit(model, keyword, limit=None, consider_offset=True):
+    r"""
+    Global limit for investment flows and operation flows
+    weighted by an attribute keyword.
+
+    This constraint is  valid for Flows and for an
+    investment storage.
+
+    The attribute named by keyword has to be added to every Investment
+    attribute of the flow you want to take into account.
+    Total value of keyword attributes after optimization can be retrieved
+    calling the `oemof.solph._models.Model.total_limit_${keyword}()`.
+
+    .. math::
+        \sum_{p \in \textrm{PERIODS}}
+        \sum_{i \in IF}  P_{i}(p) \cdot w_i
+        \sum_{i \in F_E} \sum_{t \in T} P_i(p, t) \cdot w_i(t)
+               \cdot \tau(t) \leq limit
+
+    With `IF` being the set of InvestmentFlows considered for the integral
+    limit,  `F_I` being the set of flows considered for the integral limit and
+    `T` being the set of time steps.
+
+    The symbols used are defined as follows
+    (with Variables (V) and Parameters (P)):
+
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | symbol           | attribute                             | type | explanation                                                  |
+    +==================+=======================================+======+==============================================================+
+    | :math:`P_{i}(p)` | `InvestmentFlowBlock.invest[i, o, p]` | V    | invested capacity of investment flow in period p             |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_i`      | `keyword`                             | P    | weight given to investment flow named according to `keyword` |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`limit`    | `limit`                               | P    | global limit given by keyword `limit`                        |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`P_n(p, t)`| `limit`                               | P    | power flow :math:`n` at time index :math:`p, t`              |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`w_N(t)`   | `limit`                               | P    | weight given to Flow named according to `keyword`            |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+    | :math:`\tau(t)`  | `limit`                               | P    | width of time step :math:`t`                                 |
+    +------------------+---------------------------------------+------+--------------------------------------------------------------+
+
+    Parameters
+    ----------
+    model : oemof.solph.Model
+        Model to which constraints are added.
+    keyword : attribute to consider
+        All flows with Investment attribute containing the keyword will be
+        used.
+    limit : numeric
+        Global limit of keyword attribute for the energy system.
+
+    Note
+    ----
+    The Investment attribute of the considered (Investment-)flows requires an
+    attribute named like keyword!
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> from oemof import solph
+    >>> date_time_index = pd.date_range('1/1/2020', periods=6, freq='h')
+    >>> es = solph.EnergySystem(
+    ...     timeindex=date_time_index,
+    ...     infer_last_interval=False,
+    ... )
+    >>> bus = solph.buses.Bus(label='bus_1')
+    >>> sink = solph.components.Sink(label="sink", inputs={bus:
+    ...     solph.flows.Flow(nominal_capacity=10, fix=[10, 20, 30, 40, 50])})
+    >>> src1 = solph.components.Source(
+    ...     label='source_0', outputs={bus: solph.flows.Flow(
+    ...         nominal_capacity=solph.Investment(
+    ...             ep_costs=50, custom_attributes={"space": 4},
+    ...         ))
+    ...     })
+    >>> src2 = solph.components.Source(
+    ...     label='source_1', outputs={bus: solph.flows.Flow(
+    ...         nominal_capacity=solph.Investment(
+    ...              ep_costs=100, custom_attributes={"space": 1},
+    ...         ))
+    ...     })
+    >>> es.add(bus, sink, src1, src2)
+    >>> model = solph.Model(es)
+    >>> model = solph.constraints.additional_investment_flow_limit(
+    ...     model, "space", limit=1500)
+    >>> a = model.solve(solver="cbc")
+    >>> int(round(model.invest_limit_space()))
+    1500
+    """  # noqa: E501
+    invest_flows = {}
+    operational_flows = {}
+    storages = {}
+    for i, o in model.flows:
+        if hasattr(model.flows[i, o].investment, keyword):
+            invest_flows[(i, o)] = model.flows[i, o].investment
+        if hasattr(model.flows[i, o], keyword):
+            operational_flows[(i, o)] = model.flows[i, o]
+    limit_name = "total_limit_" + keyword
+
+    if hasattr(model, "GenericInvestmentStorageBlock"):
+        for st, _ in model.GenericInvestmentStorageBlock.invest:
+            storages[st] = [st]
+
+    setattr(
+        model,
+        limit_name,
+        po.Expression(
+            rule=lambda m: sum(
+                model.InvestmentFlowBlock.invest[inflow, outflow, p]
+                * getattr(invest_flows[inflow, outflow], keyword).get(
+                    "linear", 0
+                )
+                + (
+                    model.InvestmentFlowBlock.invest_status[inflow, outflow, p]
+                    * getattr(invest_flows[inflow, outflow], keyword).get(
+                        "offset", 0
+                    )
+                    if (inflow, outflow, p)
+                    in model.InvestmentFlowBlock.invest_status
+                    else 0
+                )
+                for (inflow, outflow) in invest_flows
+                for p in model.PERIODS
+            )
+            + sum(
+                model.flow[inflow, outflow, t]
+                * model.tsam_weighting[t]
+                * model.timeincrement[t]
+                * sequence(
+                    getattr(operational_flows[inflow, outflow], keyword)
+                )[t]
+                for (inflow, outflow) in operational_flows
+                for p in model.PERIODS
+                for t in model.TIMESTEPS_IN_PERIOD[p]
+            )
+            + sum(
+                (
+                    model.GenericInvestmentStorageBlock.invest[st, p]
+                    * getattr(storages[st][0].investment, keyword).get(
+                        "linear", 0
+                    )
+                    + model.GenericInvestmentStorageBlock.invest_status[st, p]
+                    * getattr(storages[st][0].investment, keyword).get(
+                        "offset", 0
+                    )
+                    if (st, p)
+                    in model.GenericInvestmentStorageBlock.invest_status
+                    else 0
+                )
+                for st in storages
+                for p in model.PERIODS
+                if hasattr(model, "GenericInvestmentStorageBlock")
             )
         ),
     )

@@ -26,21 +26,21 @@ Everything is identical - the costs for the sources, the demand, the efficiency
 of the Converter. And both Converter have an investment at the output.
 The source '\*_1' is in both cases very expensive, so that
 a investment is probably done in the converter.
-Now, both investments share a third resource, which is called "space" in this
+Now, both investments share a third resource, which is called "emission" in this
 example. (This could be anything, and you could use as many additional
 resources as you want.) And this resource is limited. In this case, every
-converter capacity unit, which might be installed, needs 2 space for
-'trafo a', and 1 space per installed capacity for 'trafo b'.
-And the total space is limited to 24.
+converter capacity unit, which might be installed, needs 2 emission for
+'trafo a', and 1 emission per installed capacity for 'trafo b'.
+And the total emission is limited to 24.
 See what happens, have fun ;)
 
 Code
 ----
-Download source code: :download:`example_generic_invest.py </../examples/generic_invest_limit/example_generic_invest.py>`
+Download source code: :download:`emission_constraint_invest.py </../examples/generic_invest_limit/example_generic_flow.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/generic_invest_limit/example_generic_invest.py
+    .. literalinclude:: /../examples/generic_invest_limit/example_generic_flow.py
         :language: python
         :lines: 62-
 
@@ -143,7 +143,7 @@ def main(optimize=True):
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
+                        custom_attributes={"emission": 2},
                     ),
                 )
             },
@@ -160,7 +160,7 @@ def main(optimize=True):
                 bus_b_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
+                        custom_attributes={"emission": 1},
                     ),
                 )
             },
@@ -176,7 +176,7 @@ def main(optimize=True):
 
     # add constraint for generic investment limit
     om = solph.constraints.additional_investment_flow_limit(
-        om, "space", limit=24
+        om, "emission", limit=24
     )
 
     # export lp file
@@ -204,8 +204,8 @@ def main(optimize=True):
         plt.legend()
         plt.show()
 
-    space_used = om.invest_limit_space()
-    print("Space value: ", space_used)
+    emission_used = om.invest_limit_emission()
+    print("Emission value: ", emission_used)
     print(
         "Investment trafo_a: ",
         solph.views.node(results, "trafo_a")["scalars"][0],
