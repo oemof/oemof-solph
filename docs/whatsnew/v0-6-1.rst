@@ -1,5 +1,5 @@
-v0.6.1
-------
+v0.6.1 (November 17th, 2025)
+----------------------------
 
 API changes
 ###########
@@ -15,6 +15,7 @@ New features
 
 Documentation
 #############
+* Add documentation of Results class.
 
 Bug fixes
 #########
@@ -37,6 +38,10 @@ Contributors
 * Patrik Schönfeldt
 * Eva Schischke
 * Lennart Schürmann (UMSICHT)
+* Uwe Krien
+* Antonella Giannitelli
+* Pierre Francois
+* Francesco Witte
 
 Acknowledgements
 ################
