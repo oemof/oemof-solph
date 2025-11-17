@@ -11,10 +11,8 @@ Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
 """
 
-from . import experimental
 from ._flow import Flow
 
 __all__ = [
-    "experimental",
     "Flow",
 ]

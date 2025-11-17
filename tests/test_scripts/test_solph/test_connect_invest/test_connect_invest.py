@@ -71,8 +71,12 @@ def test_connect_invest():
 
     storage = components.GenericStorage(
         label="storage",
-        inputs={bel1: Flow(variable_costs=10e10)},
-        outputs={bel1: Flow(variable_costs=10e10)},
+        inputs={
+            bel1: Flow(variable_costs=10e10, nominal_capacity=Investment())
+        },
+        outputs={
+            bel1: Flow(variable_costs=10e10, nominal_capacity=Investment())
+        },
         loss_rate=0.00,
         initial_storage_level=0,
         invest_relation_input_capacity=1 / 6,

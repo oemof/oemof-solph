@@ -156,8 +156,6 @@ def test_tuples_as_labels_example(
             outputs={bel: solph.flows.Flow(variable_costs=10e10)},
             loss_rate=0.00,
             initial_storage_level=0,
-            invest_relation_input_capacity=1 / 6,
-            invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
         )

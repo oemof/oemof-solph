@@ -23,14 +23,18 @@ from oemof.solph.flows import Flow
 # ********* GenericStorage *********
 
 
-def test_generic_storage_1():
+def test_generic_storage_relations_overdetermined():
     """Duplicate definition inflow."""
     bel = Bus()
     with pytest.raises(AttributeError, match="Overdetermined."):
         components.GenericStorage(
-            label="storage1",
-            inputs={bel: Flow(variable_costs=10e10)},
-            outputs={bel: Flow(variable_costs=10e10)},
+            label="storage",
+            inputs={
+                bel: Flow(variable_costs=10e10, nominal_capacity=Investment())
+            },
+            outputs={
+                bel: Flow(variable_costs=10e10, nominal_capacity=Investment())
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_output=1,
@@ -42,32 +46,123 @@ def test_generic_storage_1():
         )
 
 
-def test_generic_storage_3():
-    """Nominal capacity defined with investment model."""
+def test_generic_storage_input_capacity_relation_without_investment_flow():
+    """invest_relation_input_capacity set without passing an Investment object
+    to the input flow"""
     bel = Bus()
-    components.GenericStorage(
-        label="storage4",
-        nominal_capacity=45,
-        inputs={bel: Flow(nominal_capacity=23, variable_costs=10e10)},
-        outputs={bel: Flow(nominal_capacity=7.5, variable_costs=10e10)},
-        loss_rate=0.00,
-        initial_storage_level=0,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=0.8,
-    )
+    with pytest.raises(
+        AttributeError,
+        match="The input flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1,
+            nominal_capacity=Investment(),
+        )
 
 
-def test_generic_storage_4():
+def test_generic_storage_input_capacity_relation_without_storage_investment():
+    """invest_relation_input_capacity set without passing an Investment object
+    to the storage"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="`nominal_capacity` needs to be an Investment",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow(nominal_capacity=Investment())},
+            outputs={bel: Flow()},
+            invest_relation_input_capacity=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_output_capacity_relation_without_investment_flow():
+    """invest_relation_output_capacity set without passing an Investment
+    object to the output flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The output flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow()},
+            invest_relation_output_capacity=1,
+            nominal_capacity=Investment(),
+        )
+
+
+def test_generic_storage_output_capacity_relation_without_storage_investment():
+    """invest_relation_output_capacity set without passing an Investment object
+    to the storage"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="`nominal_capacity` needs to be an Investment",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow(nominal_capacity=Investment())},
+            invest_relation_output_capacity=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_input_output_relation_without_investment_flow_in():
+    """invest_relation_input_output set without passing an Investment
+    object to the input flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The input flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow()},
+            outputs={bel: Flow(nominal_capacity=Investment())},
+            invest_relation_input_output=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_input_output_relation_without_investment_flow_out():
+    """invest_relation_input_output set without passing an Investment
+    object to the output flow"""
+    bel = Bus()
+    with pytest.raises(
+        AttributeError,
+        match="The output flow needs to have an Investment object",
+    ):
+        components.GenericStorage(
+            label="storage",
+            inputs={bel: Flow(nominal_capacity=Investment())},
+            outputs={bel: Flow()},
+            invest_relation_input_output=1,
+            nominal_capacity=45,
+        )
+
+
+def test_generic_storage_initial_storage_level():
     """Infeasible parameter combination for initial_storage_level"""
     bel = Bus()
     with pytest.raises(
         ValueError, match="initial_storage_level must be greater"
     ):
         components.GenericStorage(
-            label="storage4",
-            nominal_capacity=10,
-            inputs={bel: Flow(variable_costs=10e10)},
-            outputs={bel: Flow(variable_costs=10e10)},
+            label="storage",
+            nominal_capacity=Investment(),
+            inputs={
+                bel: Flow(variable_costs=10e10, nominal_capacity=Investment())
+            },
+            outputs={
+                bel: Flow(variable_costs=10e10, nominal_capacity=Investment())
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             min_storage_level=0.1,
@@ -221,8 +316,8 @@ def test_offsetconverter_investment_not_on_nonconvex():
     with pytest.raises(
         TypeError,
         match=(
-            "`Investment` attribute must be defined only for the NonConvex "
-            "flow!"
+            "`Investment` attribute must be "
+            "defined only for the NonConvex flow!"
         ),
     ):
         b_diesel = Bus(label="bus_diesel")

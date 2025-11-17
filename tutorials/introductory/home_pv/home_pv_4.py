@@ -134,9 +134,9 @@ print(
     + f" = {100 - 100 * annual_grid_supply / annual_demand:.2f} %."
 )
 
-electricity_fows = solph.views.node(results, "electricity")["sequences"]
+electricity_flows = solph.views.node(results, "electricity")["sequences"]
 
-baseline = np.zeros(len(electricity_fows))
+baseline = np.zeros(len(electricity_flows))
 
 plt.figure()
 
@@ -146,55 +146,55 @@ if mode == "dark":
     plt.style.use("dark_background")
 
 plt.fill_between(
-    electricity_fows.index,
+    electricity_flows.index,
     baseline,
-    baseline + electricity_fows[(("grid", "electricity"), "flow")],
+    baseline + electricity_flows[(("grid", "electricity"), "flow")],
     step="pre",
     label="Grid supply",
 )
 
-baseline += electricity_fows[(("grid", "electricity"), "flow")]
+baseline += electricity_flows[(("grid", "electricity"), "flow")]
 
 plt.fill_between(
-    electricity_fows.index,
+    electricity_flows.index,
     baseline,
-    baseline + electricity_fows[(("PV", "electricity"), "flow")],
+    baseline + electricity_flows[(("PV", "electricity"), "flow")],
     step="pre",
     label="PV supply",
 )
 
-baseline += electricity_fows[(("PV", "electricity"), "flow")]
+baseline += electricity_flows[(("PV", "electricity"), "flow")]
 
 plt.fill_between(
-    electricity_fows.index,
+    electricity_flows.index,
     baseline,
-    baseline + electricity_fows[(("Battery", "electricity"), "flow")],
+    baseline + electricity_flows[(("Battery", "electricity"), "flow")],
     step="pre",
     label="Battery supply",
 )
 
 plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")],
+    electricity_flows.index,
+    electricity_flows[(("electricity", "demand"), "flow")],
     "-",
     color="darkgrey",
     label="Electricity demand",
 )
 
 plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")]
-    + electricity_fows[(("electricity", "Battery"), "flow")],
+    electricity_flows.index,
+    electricity_flows[(("electricity", "demand"), "flow")]
+    + electricity_flows[(("electricity", "Battery"), "flow")],
     "--",
     color="darkgrey",
     label="Battery charging",
 )
 
 plt.step(
-    electricity_fows.index,
-    electricity_fows[(("electricity", "demand"), "flow")]
-    + electricity_fows[(("electricity", "Battery"), "flow")]
-    + electricity_fows[(("electricity", "grid"), "flow")],
+    electricity_flows.index,
+    electricity_flows[(("electricity", "demand"), "flow")]
+    + electricity_flows[(("electricity", "Battery"), "flow")]
+    + electricity_flows[(("electricity", "grid"), "flow")],
     ":",
     color="darkgrey",
     label="Feed-In",

@@ -33,11 +33,11 @@ Download data: :download:`solar_generation.csv </../examples/invest_nonconvex_fl
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof.solph. Install by:
+This example requires oemof.solph (at least v0.5.0). Install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 """
 
@@ -213,7 +213,11 @@ def main(optimize=True):
         nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
-        inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
+        inputs={
+            b_el_dc: solph.flows.Flow(
+                variable_costs=0, nominal_capacity=solph.Investment()
+            )
+        },
         outputs={
             b_el_dc: solph.flows.Flow(
                 nominal_capacity=solph.Investment(ep_costs=0)
@@ -409,7 +413,7 @@ def main(optimize=True):
 
     print("\n" + 50 * "*")
     print(
-        f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s"
+        f"Simulation Time:\t {end_simulation_time - start_simulation_time:.2f} s"
     )
     print(50 * "*")
     print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")

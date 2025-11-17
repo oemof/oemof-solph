@@ -105,12 +105,14 @@ class GenericCAES(Node):
         fuel_input,
         electrical_output,
         params,
+        parent_node=None,
         custom_properties=None,
     ):
         super().__init__(
             label=label,
             inputs={},
             outputs={},
+            parent_node=parent_node,
             custom_properties=custom_properties,
         )
 

@@ -21,11 +21,11 @@ Download source code: :download:`storage_costs.py </../examples/storage_costs/st
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x) and matplotlib, install by:
+This example requires oemof.solph (at least v0.5.0) and matplotlib, install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples] matplotlib
+    pip install oemof.solph>=0.5 matplotlib
 
 
 License
