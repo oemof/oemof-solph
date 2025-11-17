@@ -16,10 +16,12 @@ SPDX-FileCopyrightText: Ekaterina Zolotarevskaia
 SPDX-FileCopyrightText: Johannes Kochems
 SPDX-FileCopyrightText: Johannes Giehl
 SPDX-FileCopyrightText: Raul Ciria Aylagas
+SPDX-FileCopyrightText: Lennart Schürmann (Fraunhofer UMSICHT)
 
 SPDX-License-Identifier: MIT
 
 """
+
 import math
 import numbers
 from warnings import warn
@@ -56,19 +58,19 @@ class GenericStorage(Node):
         Absolute nominal capacity of the storage, fixed value or
         object describing parameter of investment optimisations.
     invest_relation_input_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,in}`
-        Ratio between the investment variable of the input Flow and the
+        Ratio between the investment variable of the input flow and the
         investment variable of the storage:
         :math:`\dot{E}_{in,invest} = E_{invest} \cdot r_{cap,in}`
     invest_relation_output_capacity : numeric (iterable or scalar) or None, :math:`r_{cap,out}`
-        Ratio between the investment variable of the output Flow and the
+        Ratio between the investment variable of the output flow and the
         investment variable of the storage:
         :math:`\dot{E}_{out,invest} = E_{invest} \cdot r_{cap,out}`
     invest_relation_input_output : numeric (iterable or scalar) or None, :math:`r_{in,out}`
-        Ratio between the investment variable of the output Flow and the
-        investment variable of the input flow. This ratio used to fix the
+        Ratio between the investment variable of the input flow and the
+        investment variable of the output flow. This ratio used to fix the
         flow investments to each other.
         Values < 1 set the input flow lower than the output and > 1 will
-        set the input flow higher than the output flow. If None no relation
+        set the input flow higher than the output flow. If set to None no relation
         will be set:
         :math:`\dot{E}_{in,invest} = \dot{E}_{out,invest} \cdot r_{in,out}`
     initial_storage_level : numeric, :math:`c(-1)`
@@ -149,8 +151,8 @@ class GenericStorage(Node):
     >>> my_investment_storage = solph.components.GenericStorage(
     ...     label='storage',
     ...     nominal_capacity=solph.Investment(ep_costs=50),
-    ...     inputs={my_bus: solph.flows.Flow()},
-    ...     outputs={my_bus: solph.flows.Flow()},
+    ...     inputs={my_bus: solph.flows.Flow(nominal_capacity=solph.Investment())},
+    ...     outputs={my_bus: solph.flows.Flow(nominal_capacity=solph.Investment())},
     ...     loss_rate=0.02,
     ...     initial_storage_level=None,
     ...     invest_relation_input_capacity=1/6,
@@ -164,6 +166,7 @@ class GenericStorage(Node):
         label=None,
         inputs=None,
         outputs=None,
+        parent_node=None,
         nominal_capacity=None,
         nominal_storage_capacity=None,  # Can be removed for versions >= v0.7
         initial_storage_level=None,
@@ -194,6 +197,7 @@ class GenericStorage(Node):
             label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_attributes,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
@@ -214,6 +218,15 @@ class GenericStorage(Node):
         self.nominal_storage_capacity = None
         self.investment = None
         self._invest_group = False
+        self.invest_relation_input_output = sequence(
+            invest_relation_input_output
+        )
+        self.invest_relation_input_capacity = sequence(
+            invest_relation_input_capacity
+        )
+        self.invest_relation_output_capacity = sequence(
+            invest_relation_output_capacity
+        )
         if isinstance(nominal_capacity, numbers.Real):
             self.nominal_storage_capacity = nominal_capacity
         elif isinstance(nominal_capacity, Investment):
@@ -231,42 +244,105 @@ class GenericStorage(Node):
         self.min_storage_level = sequence(min_storage_level)
         self.fixed_costs = sequence(fixed_costs)
         self.storage_costs = sequence(storage_costs)
-        self.invest_relation_input_output = sequence(
-            invest_relation_input_output
-        )
-        self.invest_relation_input_capacity = sequence(
-            invest_relation_input_capacity
-        )
-        self.invest_relation_output_capacity = sequence(
-            invest_relation_output_capacity
-        )
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
 
         # Check number of flows.
         self._check_number_of_flows()
+        # Check for infeasible invest_relations
+        self._check_invest_relations()
         # Check for infeasible parameter combinations
         self._check_infeasible_parameter_combinations()
 
-        if self._invest_group:
-            self._check_invest_attributes()
+    def _check_number_of_flows(self):
+        """Ensure that there is only one inflow and outflow to the storage"""
+        msg = "Only one {0} flow allowed in the GenericStorage {1}."
+        check_node_object_for_missing_attribute(self, "inputs")
+        check_node_object_for_missing_attribute(self, "outputs")
+        if len(self.inputs) > 1:
+            raise AttributeError(msg.format("input", self.label))
+        if len(self.outputs) > 1:
+            raise AttributeError(msg.format("output", self.label))
 
-    def _set_flows(self):
-        """Define inflow / outflow as investment flows when they are
-        coupled with storage capacity via invest relations
-        """
+    def _check_input_for_investment(self):
+        """Checks the input flow for an investment object. For sanity,
+        this should be executed after _check_number_of_flows()"""
         for flow in self.inputs.values():
-            if self.invest_relation_input_capacity[
-                0
-            ] is not None and not isinstance(flow.investment, Investment):
-                flow.investment = Investment(lifetime=self.lifetime_inflow)
-        for flow in self.outputs.values():
-            if self.invest_relation_output_capacity[
-                0
-            ] is not None and not isinstance(flow.investment, Investment):
-                flow.investment = Investment(lifetime=self.lifetime_outflow)
+            is_investment = isinstance(flow.investment, Investment)
+        return is_investment
 
-    def _check_invest_attributes(self):
+    def _check_output_for_investment(self):
+        """Checks the output flow for an investment object. For sanity,
+        this should be executed after _check_number_of_flows()"""
+        for flow in self.outputs.values():
+            is_investment = isinstance(flow.investment, Investment)
+        return is_investment
+
+    def _check_storage_for_investment(self):
+        """Checks the storage for an investment object (i.e. if investment
+        into the capacity is possible)"""
+        return isinstance(self.investment, Investment)
+
+    def _check_invest_relations(self):
+        """Checks if the passed invest_relation keywords fit the
+        passed Investment objects"""
+        if self.invest_relation_input_capacity[0] is not None:
+            if not self._check_input_for_investment():
+                msg = (
+                    "The input flow needs to have an Investment object "
+                    "if `invest_relation_input_capacity` is set."
+                )
+                raise AttributeError(msg)
+            if not self._check_storage_for_investment():
+                msg = (
+                    "If `invest_relation_input_capacity` is set, "
+                    "`nominal_capacity` needs to be an Investment "
+                    "object as well."
+                )
+                raise AttributeError(msg)
+            self._invest_group = True
+        if self.invest_relation_output_capacity[0] is not None:
+            if not self._check_output_for_investment():
+                msg = (
+                    "The output flow needs to have an Investment object "
+                    "if `invest_relation_output_capacity` is set."
+                )
+                raise AttributeError(msg)
+            if not self._check_storage_for_investment():
+                msg = (
+                    "If `invest_relation_output_capacity` is set, "
+                    "`nominal_capacity` needs to be an Investment "
+                    "object as well."
+                )
+                raise AttributeError(msg)
+            self._invest_group = True
+        if self.invest_relation_input_output[0] is not None:
+            if not self._check_input_for_investment():
+                msg = (
+                    "The input flow needs to have an Investment object "
+                    "if `invest_relation_input_output` is set."
+                )
+                raise AttributeError(msg)
+            if not self._check_output_for_investment():
+                msg = (
+                    "The output flow needs to have an Investment object "
+                    "if `invest_relation_input_output` is set."
+                )
+                raise AttributeError(msg)
+
+    def _check_infeasible_parameter_combinations(self):
+        """Check for infeasible parameter combinations and raise error"""
+        if self.initial_storage_level is not None:
+            if (
+                self.initial_storage_level < self.min_storage_level[0]
+                or self.initial_storage_level > self.max_storage_level[0]
+            ):
+                e1 = (
+                    "initial_storage_level must be greater or equal to "
+                    "min_storage_level and smaller or equal to "
+                    "max_storage_level."
+                )
+                raise ValueError(e1)
         """Raise errors for infeasible investment attribute combinations"""
         if (
             self.invest_relation_input_output[0] is not None
@@ -289,32 +365,6 @@ class GenericStorage(Node):
                 "or investment.minimum has to be non-zero."
             )
             raise AttributeError(e3)
-
-        self._set_flows()
-
-    def _check_number_of_flows(self):
-        """Ensure that there is only one inflow and outflow to the storage"""
-        msg = "Only one {0} flow allowed in the GenericStorage {1}."
-        check_node_object_for_missing_attribute(self, "inputs")
-        check_node_object_for_missing_attribute(self, "outputs")
-        if len(self.inputs) > 1:
-            raise AttributeError(msg.format("input", self.label))
-        if len(self.outputs) > 1:
-            raise AttributeError(msg.format("output", self.label))
-
-    def _check_infeasible_parameter_combinations(self):
-        """Check for infeasible parameter combinations and raise error"""
-        msg = (
-            "initial_storage_level must be greater or equal to "
-            "min_storage_level and smaller or equal to "
-            "max_storage_level."
-        )
-        if self.initial_storage_level is not None:
-            if (
-                self.initial_storage_level < self.min_storage_level[0]
-                or self.initial_storage_level > self.max_storage_level[0]
-            ):
-                raise ValueError(msg)
 
     def constraint_group(self):
         if self._invest_group is True:

@@ -62,11 +62,11 @@ Download data: :download:`storage_investment.csv </../examples/storage_investmen
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
@@ -180,8 +180,12 @@ def main(optimize=True):
     # create storage object representing a battery
     storage = solph.components.GenericStorage(
         label="storage",
-        inputs={bel: solph.Flow(variable_costs=0.0001)},
-        outputs={bel: solph.Flow()},
+        inputs={
+            bel: solph.Flow(
+                variable_costs=0.0001, nominal_capacity=solph.Investment()
+            )
+        },
+        outputs={bel: solph.Flow(nominal_capacity=solph.Investment())},
         loss_rate=0.00,
         initial_storage_level=0,
         invest_relation_input_capacity=1 / 6,  # c-rate of 1/6

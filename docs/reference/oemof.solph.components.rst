@@ -65,14 +65,6 @@ Link
     :undoc-members:
     :show-inheritance:
 
-experimental.ElectricalLine
----------------------------
-
-.. automodule:: oemof.solph.flows.experimental._electrical_line
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 experimental.GenericCAES
 ------------------------
 
@@ -87,12 +79,3 @@ experimental.PiecewiseLinearConverter
     :members:
     :undoc-members:
     :show-inheritance:
-
-experimental.SinkDSM
---------------------
-
-.. automodule:: oemof.solph.components.experimental._sink_dsm
-    :members:
-    :undoc-members:
-    :show-inheritance:
-

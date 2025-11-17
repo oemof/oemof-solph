@@ -34,7 +34,7 @@ This example requires oemof.solph, install by:
 
 .. code:: bash
 
-    pip install oemof.solph
+    pip install oemof.solph>=0.5
 
 """
 import pandas as pd

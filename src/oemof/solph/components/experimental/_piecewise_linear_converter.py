@@ -75,12 +75,14 @@ PiecewiseLinearConverter'>
         conversion_function,
         in_breakpoints,
         pw_repn,
+        parent_node=None,
         custom_properties=None,
     ):
         super().__init__(
             label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_properties,
         )
 

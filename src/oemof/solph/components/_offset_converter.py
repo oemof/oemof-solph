@@ -135,6 +135,7 @@ class OffsetConverter(Node):
         self,
         inputs,
         outputs,
+        parent_node=None,
         label=None,
         conversion_factors=None,
         normed_offsets=None,
@@ -147,6 +148,7 @@ class OffsetConverter(Node):
         super().__init__(
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             label=label,
             custom_properties=custom_properties,
         )
