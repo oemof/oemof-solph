@@ -1,4 +1,4 @@
-__version__ = "0.6.1a2"
+__version__ = "0.6.1"
 
 from . import buses
 from . import components
