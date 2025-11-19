@@ -199,11 +199,14 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
-    invest_flows = {}
+    investments = {}
 
     for i, o in model.flows:
-        if keyword in model.flows[i, o].investment.custom_properties:
-            invest_flows[(i, o)] = model.flows[i, o].investment
+        if (
+            model.flows[i, o].investment is not None
+            and keyword in model.flows[i, o].investment.custom_properties
+        ):
+            investments[(i, o)] = model.flows[i, o].investment
 
     limit_name = "invest_limit_" + keyword
 
@@ -213,8 +216,8 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         po.Expression(
             expr=sum(
                 model.InvestmentFlowBlock.invest[i, o, p]
-                * getattr(invest_flows[i, o], keyword)
-                for (i, o) in invest_flows
+                * investments[i, o].custom_properties[keyword]
+                for (i, o) in investments
                 for p in model.PERIODS
             )
         ),
