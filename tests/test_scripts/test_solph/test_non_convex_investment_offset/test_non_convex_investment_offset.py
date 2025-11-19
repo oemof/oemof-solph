@@ -97,6 +97,7 @@ def test_non_convex_investment_offset():
     # Check Objective
     meta_results = processing.meta_results(model)
 
-    # Cheap heat pump should be built (50+0.1) and dispatched (1). The investment
-    # offset of the expensive heat pump (2000) should be ignored.
+    # Cheap heat pump should be built (50+0.1) and dispatched (1).
+    # The investment offset of the expensive heat pump (2000)
+    # should be ignored.
     assert meta_results["objective"] == pytest.approx(51.1)
