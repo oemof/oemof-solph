@@ -24,7 +24,7 @@ def test_custom_properties():
         FutureWarning,
         match="For backward compatibility,",
     ):
-        flow2 = Flow(custom_properties={"attribute": 1})
+        flow2 = Flow(custom_attributes={"attribute": 1})
         assert flow2.attribute == 1
         assert flow2.custom_properties["attribute"] == 1
 
