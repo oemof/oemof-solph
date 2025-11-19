@@ -18,7 +18,7 @@ from oemof import solph
 
 
 def test_infeasible_model():
-    es = solph.EnergySystem(timeincrement=[1])
+    es = solph.EnergySystem(timeindex=[0,1], infer_last_interval=False)
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
     es.add(
@@ -46,7 +46,7 @@ def test_infeasible_model():
 
 
 def test_unbounded_model():
-    es = solph.EnergySystem(timeincrement=[1])
+    es = solph.EnergySystem(timeindex=[0,1], infer_last_interval=False)
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
     # Add a Sink with a higher demand

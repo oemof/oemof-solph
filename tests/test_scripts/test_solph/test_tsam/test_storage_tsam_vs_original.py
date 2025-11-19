@@ -84,7 +84,7 @@ init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
 # create storage object representing a battery
 storage = solph.components.GenericStorage(
     label="storage",
-    nominal_storage_capacity=2000,
+    nominal_capacity=2000,
     initial_storage_level=init_soc / 2000,
     inputs={bel: solph.Flow()},
     outputs={bel: solph.Flow()},

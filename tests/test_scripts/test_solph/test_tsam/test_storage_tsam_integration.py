@@ -34,9 +34,11 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
+import warnings
 
 import pandas as pd
 import pytest
+from oemof.tools import debugging
 from oemof.tools import logger
 
 from oemof import solph
@@ -51,14 +53,17 @@ logging.info("Initialize the energy system")
 tindex_original = pd.date_range("2022-01-01", periods=8, freq="h")
 tindex = pd.date_range("2022-01-01", periods=4, freq="h")
 
-energysystem = solph.EnergySystem(
-    timeindex=tindex,
-    tsa_parameters={
-        "timesteps_per_period": 2,
-        "order": [0, 1, 1, 0],
-    },
-    infer_last_interval=True,
-)
+with warnings.catch_warnings():
+    warnings.simplefilter("ignore", debugging.ExperimentalFeatureWarning)
+    warnings.simplefilter("ignore", debugging.SuspiciousUsageWarning)
+    energysystem = solph.EnergySystem(
+        timeindex=tindex,
+        tsa_parameters={
+            "timesteps_per_period": 2,
+            "order": [0, 1, 1, 0],
+        },
+        infer_last_interval=True,
+    )
 
 ##########################################################################
 # Create oemof objects
@@ -95,7 +100,7 @@ demand = solph.components.Sink(
 # create storage object representing a battery
 storage = solph.components.GenericStorage(
     label="storage",
-    nominal_storage_capacity=2000,
+    nominal_capacity=2000,
     inputs={bel: solph.Flow()},
     outputs={bel: solph.Flow()},
     loss_rate=0.01,

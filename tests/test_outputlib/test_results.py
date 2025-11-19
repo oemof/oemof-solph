@@ -1,6 +1,9 @@
-import pytest
+import warnings
 
-from oemof.solph import _results
+import pytest
+from oemof.tools.debugging import ExperimentalFeatureWarning
+
+from oemof.solph import Results
 
 from . import optimization_model
 
@@ -8,10 +11,15 @@ from . import optimization_model
 class TestResultsClass:
     @classmethod
     def setup_class(cls):
-        cls.results = _results.Results(optimization_model)
+        with warnings.catch_warnings():
+            warnings.simplefilter(
+                "ignore",
+                category=ExperimentalFeatureWarning,
+            )
+            cls.results = Results(optimization_model)
 
     def test_objective(self):
-        assert int(self.results.objective) == 8495
+        assert self.results.objective == pytest.approx(8495, abs=1)
 
     def test_to_set_objective(self):
         with pytest.raises(AttributeError):
