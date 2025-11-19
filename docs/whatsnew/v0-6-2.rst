@@ -7,8 +7,8 @@ API changes
 New features
 ############
 
-* Class `Flow` now supports `custom_properties`
-  in the way that `Node` classes do.
+* Classes `Flow`, `NonConvex`, and `Investment` now use `custom_properties`
+  in the way that `Node` classes (e.g. `Bus`, or `Converter`) do.
 
 Documentation
 #############
