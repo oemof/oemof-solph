@@ -48,8 +48,8 @@ from oemof import solph
 logger.define_logging()
 logging.info("Initialize the energy system")
 
-tindex_original = pd.date_range("2022-01-01", periods=8, freq="H")
-tindex = pd.date_range("2022-01-01", periods=4, freq="H")
+tindex_original = pd.date_range("2022-01-01", periods=8, freq="h")
+tindex = pd.date_range("2022-01-01", periods=4, freq="h")
 
 energysystem = solph.EnergySystem(
     timeindex=tindex,
@@ -73,7 +73,12 @@ energysystem.add(bel)
 # create fixed source object representing wind power plants
 wind = solph.components.Source(
     label="wind",
-    outputs={bel: solph.Flow(fix=[1000, 0, 0, 50], nominal_value=1)},
+    outputs={
+        bel: solph.Flow(
+            fix=[1000, 0, 0, 50],
+            nominal_capacity=1,
+        )
+    },
 )
 
 # create simple sink object representing the electrical demand
@@ -82,7 +87,7 @@ demand = solph.components.Sink(
     inputs={
         bel: solph.Flow(
             fix=[100] * 4,
-            nominal_value=1,
+            nominal_capacity=1,
         )
     },
 )
@@ -144,32 +149,33 @@ init_soc = (first_input - last_output) / (1 / 0.99 + 0.99)
 
 
 def test_storage_input():
-    assert flows["electricity-storage"][0] == pytest.approx(
-        (first_input - 0.99 * init_soc) / 0.9
-    )
-    assert flows["electricity-storage"][1] == 0
-    assert flows["electricity-storage"][2] == 0
-    assert flows["electricity-storage"][3] == 0
-    assert flows["electricity-storage"][4] == 0
-    assert flows["electricity-storage"][5] == 0
-    assert flows["electricity-storage"][6] == flows["electricity-storage"][0]
-    assert flows["electricity-storage"][7] == 0
+    flow = flows["electricity-storage"]
+    assert flow.iloc[0] == pytest.approx((first_input - 0.99 * init_soc) / 0.9)
+    assert flow.iloc[1] == 0
+    assert flow.iloc[2] == 0
+    assert flow.iloc[3] == 0
+    assert flow.iloc[4] == 0
+    assert flow.iloc[5] == 0
+    assert flow.iloc[6] == flow.iloc[0]
+    assert flow.iloc[7] == 0
 
 
 def test_storage_output():
-    assert flows["storage-electricity"][0] == 0
-    assert flows["storage-electricity"][1] == 100
-    assert flows["storage-electricity"][2] == 100
-    assert flows["storage-electricity"][3] == 50
-    assert flows["storage-electricity"][4] == 100
-    assert flows["storage-electricity"][5] == 50
-    assert flows["storage-electricity"][6] == 0
-    assert flows["storage-electricity"][7] == 100
+    flow = flows["storage-electricity"]
+    assert flow.iloc[0] == 0
+    assert flow.iloc[1] == 100
+    assert flow.iloc[2] == 100
+    assert flow.iloc[3] == 50
+    assert flow.iloc[4] == 100
+    assert flow.iloc[5] == 50
+    assert flow.iloc[6] == 0
+    assert flow.iloc[7] == 100
 
 
 def test_soc():
-    assert flows["storage-None"][0] == pytest.approx(init_soc)
-    assert flows["storage-None"][1] == pytest.approx(
+    flow = flows["storage-None"]
+    assert flow.iloc[0] == pytest.approx(init_soc)
+    assert flow.iloc[1] == pytest.approx(
         (100 * 1 / 0.8) / (1 - 0.01)
         + (100 * 1 / 0.8) / (1 - 0.01) ** 2
         + (50 * 1 / 0.8) / (1 - 0.01) ** 3
@@ -177,27 +183,23 @@ def test_soc():
         + (50 * 1 / 0.8) / (1 - 0.01) ** 5,
         abs=1e-2,
     )
-    assert flows["storage-None"][2] == pytest.approx(
+    assert flow.iloc[2] == pytest.approx(
         (100 * 1 / 0.8) / (1 - 0.01)
         + (50 * 1 / 0.8) / (1 - 0.01) ** 2
         + (100 * 1 / 0.8) / (1 - 0.01) ** 3
         + (50 * 1 / 0.8) / (1 - 0.01) ** 4,
         abs=1e-2,
     )
-    assert flows["storage-None"][3] == pytest.approx(
+    assert flow.iloc[3] == pytest.approx(
         (50 * 1 / 0.8) / (1 - 0.01)
         + (100 * 1 / 0.8) / (1 - 0.01) ** 2
         + (50 * 1 / 0.8) / (1 - 0.01) ** 3,
         abs=1e-2,
     )
-    assert flows["storage-None"][4] == pytest.approx(
+    assert flow.iloc[4] == pytest.approx(
         (100 * 1 / 0.8) / (1 - 0.01) + (50 * 1 / 0.8) / (1 - 0.01) ** 2,
         abs=1e-2,
     )
-    assert flows["storage-None"][5] == pytest.approx(
-        (50 * 1 / 0.8) / (1 - 0.01), abs=1e-2
-    )
-    assert flows["storage-None"][6] == pytest.approx(0, abs=1e-2)
-    assert flows["storage-None"][7] == pytest.approx(
-        (init_soc + (100 * 1 / 0.8)) / 0.99
-    )
+    assert flow.iloc[5] == pytest.approx((50 * 1 / 0.8) / (1 - 0.01), abs=1e-2)
+    assert flow.iloc[6] == pytest.approx(0, abs=1e-2)
+    assert flow.iloc[7] == pytest.approx((init_soc + (100 * 1 / 0.8)) / 0.99)

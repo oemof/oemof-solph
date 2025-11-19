@@ -215,7 +215,7 @@ class Flow(Edge):
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
 
-        need_nominal_value = [
+        need_nominal_capacity = [
             "fix",
             "full_load_time_max",
             "full_load_time_min",
@@ -224,21 +224,20 @@ class Flow(Edge):
         ]
         sequences = ["fix", "variable_costs", "min", "max"]
         if self.investment is None and self.nominal_capacity is None:
-            for attr in need_nominal_value:
+            for attr in need_nominal_capacity:
                 if isinstance(eval(attr), Iterable):
                     the_attr = eval(attr)[0]
                 else:
                     the_attr = eval(attr)
                 if the_attr is not None:
                     raise AttributeError(
-                        f"If {attr} is set in a flow (except InvestmentFlow), "
-                        "nominal_value must be set as well.\n"
-                        "Otherwise, it won't have any effect."
+                        f"If {attr} is set in a flow, "
+                        "nominal_capacity must be set as well."
                     )
         # minimum will be set even without nominal limit
 
         # maximum and minimum (absolute values) should be always set,
-        # as nominal_value or invest might be defined later
+        # as nominal_capacity or invest might be defined later
         if max is None:
             max = 1
         if min is None:
