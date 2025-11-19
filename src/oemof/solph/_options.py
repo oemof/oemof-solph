@@ -97,7 +97,7 @@ class Investment:
         lifetime=None,
         age=0,
         fixed_costs=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---

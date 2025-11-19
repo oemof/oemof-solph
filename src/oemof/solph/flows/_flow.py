@@ -140,7 +140,7 @@ class Flow(Edge):
         lifetime=None,
         age=None,
         fixed_costs=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
