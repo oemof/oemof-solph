@@ -202,7 +202,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     invest_flows = {}
 
     for i, o in model.flows:
-        if hasattr(model.flows[i, o].investment, keyword):
+        if keyword in model.flows[i, o].investment.custom_properties:
             invest_flows[(i, o)] = model.flows[i, o].investment
 
     limit_name = "invest_limit_" + keyword
@@ -212,9 +212,9 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                model.InvestmentFlowBlock.invest[inflow, outflow, p]
-                * getattr(invest_flows[inflow, outflow], keyword)
-                for (inflow, outflow) in invest_flows
+                model.InvestmentFlowBlock.invest[i, o, p]
+                * getattr(invest_flows[i, o], keyword)
+                for (i, o) in invest_flows
                 for p in model.PERIODS
             )
         ),
