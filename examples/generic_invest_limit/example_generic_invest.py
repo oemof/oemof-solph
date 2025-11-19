@@ -143,7 +143,7 @@ def main(optimize=True):
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
+                        custom_properties={"space": 2},
                     ),
                 )
             },
@@ -160,7 +160,7 @@ def main(optimize=True):
                 bus_b_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
+                        custom_properties={"space": 1},
                     ),
                 )
             },

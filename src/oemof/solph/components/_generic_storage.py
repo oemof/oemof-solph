@@ -185,20 +185,20 @@ class GenericStorage(Node):
         storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
         super().__init__(
             label,
             inputs=inputs,
             outputs=outputs,
             parent_node=parent_node,
-            custom_properties=custom_attributes,
+            custom_properties=custom_properties,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if nominal_storage_capacity is not None:

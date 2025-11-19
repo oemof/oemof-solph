@@ -97,10 +97,28 @@ class Investment:
         lifetime=None,
         age=0,
         fixed_costs=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if custom_attributes is not None:
+            msg = (
+                "For backward compatibility,"
+                + " the option custom_attributes overwrites the option"
+                + " custom_properties."
+                + " Both options cannot be set at the same time."
+            )
+            if custom_properties is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            for attribute in custom_attributes.keys():
+                value = custom_attributes.get(attribute)
+                setattr(self, attribute, value)
+
+            custom_properties = custom_attributes
+        # --- END ---
+        self.custom_properties = custom_properties
         self.maximum = sequence(maximum)
         self.minimum = sequence(minimum)
         self.ep_costs = sequence(ep_costs)
@@ -112,10 +130,6 @@ class Investment:
         self.lifetime = lifetime
         self.age = age
         self.fixed_costs = sequence(fixed_costs)
-
-        for attribute in custom_attributes.keys():
-            value = custom_attributes.get(attribute)
-            setattr(self, attribute, value)
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
@@ -247,10 +261,28 @@ class NonConvex:
         inactivity_costs=None,
         negative_gradient_limit=None,
         positive_gradient_limit=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
+        custom_properties=None,
     ):
-        if custom_attributes is None:
-            custom_attributes = {}
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if custom_attributes is not None:
+            msg = (
+                "For backward compatibility,"
+                + " the option custom_attributes overwrites the option"
+                + " custom_properties."
+                + " Both options cannot be set at the same time."
+            )
+            if custom_properties is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            for attribute in custom_attributes.keys():
+                value = custom_attributes.get(attribute)
+                setattr(self, attribute, value)
+
+            custom_properties = custom_attributes
+        # --- END ---
+        self.custom_properties = custom_properties
 
         self.initial_status = initial_status
         self.minimum_uptime = sequence(minimum_uptime)
@@ -264,9 +296,6 @@ class NonConvex:
         self.inactivity_costs = sequence(inactivity_costs)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
-
-        for attribute, value in custom_attributes.items():
-            setattr(self, attribute, value)
 
         if initial_status == 0:
             self.first_flexible_timestep = self.minimum_downtime[0]

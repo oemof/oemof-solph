@@ -45,3 +45,27 @@ def test_check_nonconvex():
                 maximum=1, minimum=0, offset=0, nonconvex=True
             )
         )
+
+
+def test_investment_custom_properties():
+    investment1 = solph.Investment(custom_properties={"prop": 1})
+    assert investment1.custom_properties["prop"] == 1
+
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+    with pytest.warns(
+        FutureWarning,
+        match="For backward compatibility,",
+    ):
+        investment2 = solph.Investment(custom_attributes={"attribute": 1})
+        assert investment2.attribute == 1
+        assert investment2.custom_properties["attribute"] == 1
+
+    with pytest.raises(
+        AttributeError,
+        match="Both options cannot be set at the same time.",
+    ):
+        solph.Investment(
+            custom_attributes={"attribute": 1},
+            custom_properties={"prop": 1},
+        )
+    # --- END ---

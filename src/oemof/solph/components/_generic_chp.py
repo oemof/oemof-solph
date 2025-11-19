@@ -104,16 +104,16 @@ class GenericCHP(Node):
     >>> ccet = solph.components.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
     ...    fuel_input={bgas: solph.flows.Flow(
-    ...        custom_attributes={"H_L_FG_share_max": [0.183]})},
+    ...        custom_properties={"H_L_FG_share_max": [0.183]})},
     ...    electrical_output={bel: solph.flows.Flow(
-    ...        custom_attributes={
+    ...        custom_properties={
     ...            "P_max_woDH": [155.946],
     ...            "P_min_woDH": [68.787],
     ...            "Eta_el_max_woDH": [0.525],
     ...            "Eta_el_min_woDH": [0.444],
     ...        })},
     ...    heat_output={bth: solph.flows.Flow(
-    ...        custom_attributes={"Q_CW_min": [10.552]})},
+    ...        custom_properties={"Q_CW_min": [10.552]})},
     ...    beta=[0.122], back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
@@ -163,10 +163,10 @@ class GenericCHP(Node):
         eb = list(self.electrical_output.keys())[0]
 
         attrs = [
-            self.electrical_output[eb].P_min_woDH,
-            self.electrical_output[eb].Eta_el_min_woDH,
-            self.electrical_output[eb].P_max_woDH,
-            self.electrical_output[eb].Eta_el_max_woDH,
+            self.electrical_output[eb].custom_properties["P_min_woDH"],
+            self.electrical_output[eb].custom_properties["Eta_el_min_woDH"],
+            self.electrical_output[eb].custom_properties["P_max_woDH"],
+            self.electrical_output[eb].custom_properties["Eta_el_max_woDH"],
         ]
 
         length = [len(a) for a in attrs if not isinstance(a, (int, float))]
@@ -178,16 +178,34 @@ class GenericCHP(Node):
             for i in range(0, max_length):
                 A = np.array(
                     [
-                        [1, self.electrical_output[eb].P_min_woDH[i]],
-                        [1, self.electrical_output[eb].P_max_woDH[i]],
+                        [
+                            1,
+                            self.electrical_output[eb].custom_properties[
+                                "P_min_woDH"
+                            ][i],
+                        ],
+                        [
+                            1,
+                            self.electrical_output[eb].custom_properties[
+                                "P_max_woDH"
+                            ][i],
+                        ],
                     ]
                 )
                 b = np.array(
                     [
-                        self.electrical_output[eb].P_min_woDH[i]
-                        / self.electrical_output[eb].Eta_el_min_woDH[i],
-                        self.electrical_output[eb].P_max_woDH[i]
-                        / self.electrical_output[eb].Eta_el_max_woDH[i],
+                        self.electrical_output[eb].custom_properties[
+                            "P_min_woDH"
+                        ][i]
+                        / self.electrical_output[eb].custom_properties[
+                            "Eta_el_min_woDH"
+                        ][i],
+                        self.electrical_output[eb].custom_properties[
+                            "P_max_woDH"
+                        ][i]
+                        / self.electrical_output[eb].custom_properties[
+                            "Eta_el_max_woDH"
+                        ][i],
                     ]
                 )
                 x = np.linalg.solve(A, b)
@@ -403,8 +421,12 @@ class GenericCHPBlock(ScalarBlock):
             expr = 0
             expr += self.H_F[n, t]
             expr += -self.Y[n, t] * (
-                list(n.electrical_output.values())[0].P_max_woDH[t]
-                / list(n.electrical_output.values())[0].Eta_el_max_woDH[t]
+                list(n.electrical_output.values())[0].custom_properties[
+                    "P_max_woDH"
+                ][t]
+                / list(n.electrical_output.values())[0].custom_properties[
+                    "Eta_el_max_woDH"
+                ][t]
             )
             return expr <= 0
 
@@ -417,8 +439,12 @@ class GenericCHPBlock(ScalarBlock):
             expr = 0
             expr += self.H_F[n, t]
             expr += -self.Y[n, t] * (
-                list(n.electrical_output.values())[0].P_min_woDH[t]
-                / list(n.electrical_output.values())[0].Eta_el_min_woDH[t]
+                list(n.electrical_output.values())[0].custom_properties[
+                    "P_min_woDH"
+                ][t]
+                / list(n.electrical_output.values())[0].custom_properties[
+                    "Eta_el_min_woDH"
+                ][t]
             )
             return expr >= 0
 
@@ -432,7 +458,9 @@ class GenericCHPBlock(ScalarBlock):
             expr += -self.H_L_FG_max[n, t]
             expr += (
                 self.H_F[n, t]
-                * list(n.fuel_input.values())[0].H_L_FG_share_max[t]
+                * list(n.fuel_input.values())[0].custom_properties[
+                    "H_L_FG_share_max"
+                ][t]
             )
             return expr == 0
 
@@ -444,7 +472,12 @@ class GenericCHPBlock(ScalarBlock):
             """Set maximum Q depending on fuel and electrical flow."""
             expr = 0
             expr += self.P[n, t] + self.Q[n, t] + self.H_L_FG_max[n, t]
-            expr += list(n.heat_output.values())[0].Q_CW_min[t] * self.Y[n, t]
+            expr += (
+                list(n.heat_output.values())[0].custom_properties["Q_CW_min"][
+                    t
+                ]
+                * self.Y[n, t]
+            )
             expr += -self.H_F[n, t]
             # back-pressure characteristics or one-segment model
             if n.back_pressure is True:
@@ -466,7 +499,9 @@ class GenericCHPBlock(ScalarBlock):
                 expr += -self.H_L_FG_min[n, t]
                 expr += (
                     self.H_F[n, t]
-                    * list(n.fuel_input.values())[0].H_L_FG_share_min[t]
+                    * list(n.fuel_input.values())[0].custom_properties[
+                        "H_L_FG_share_min"
+                    ][t]
                 )
                 return expr == 0
             else:

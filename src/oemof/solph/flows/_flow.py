@@ -140,7 +140,8 @@ class Flow(Edge):
         lifetime=None,
         age=None,
         fixed_costs=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
+        custom_properties=None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
@@ -161,13 +162,28 @@ class Flow(Edge):
             else:
                 warn(msg, FutureWarning)
             nominal_capacity = nominal_value
+
+        if custom_attributes is not None:
+            msg = (
+                "For backward compatibility,"
+                + " the option custom_attributes overwrites the option"
+                + " custom_properties."
+                + " Both options cannot be set at the same time."
+            )
+            if custom_properties is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            custom_properties = custom_attributes
         # --- END ---
 
-        super().__init__()
+        super().__init__(custom_properties=custom_properties)
 
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
             for attribute, value in custom_attributes.items():
                 setattr(self, attribute, value)
+        # --- END ---
 
         self.nominal_capacity = None
         self.investment = None
