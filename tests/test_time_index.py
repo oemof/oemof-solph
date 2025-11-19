@@ -100,7 +100,8 @@ def test_energysystem_with_numeric_index():
             category=FutureWarning,  # timeincrement is deprecated
         )
         es = solph.EnergySystem(
-            timeincrement=time_increments, infer_last_interval=False,
+            timeincrement=time_increments,
+            infer_last_interval=False,
         )
     assert es.timeincrement[1] == 1.0
     assert pd.Series(es.timeincrement).sum() == 5
