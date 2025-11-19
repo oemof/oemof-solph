@@ -33,7 +33,7 @@ def test_custom_properties():
         match="Both options cannot be set at the same time.",
     ):
         Flow(
-            custom_properties={"attribute": 1},
+            custom_attributes={"attribute": 1},
             custom_properties={"prop": 1},
         )
     # --- END ---
