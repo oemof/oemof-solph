@@ -55,7 +55,7 @@ class Flow(Edge):
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_capacity` with :attr:`max`
     min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
-        Normed minimum value of the flow (see :attr:`max`). If 
+        Normed minimum value of the flow (see :attr:`max`). If
         :attr:`bidirectional` is set to `True` the default value will be set
         to `min=-1` instead of `min=0`.
     fix : numeric (iterable or scalar), :math:`f_{fix}`
@@ -65,7 +65,7 @@ class Flow(Edge):
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
     negative_gradient_limit : numeric (iterable, scalar or None)
-        the normed *upper bound* on the negative difference 
+        the normed *upper bound* on the negative difference
         (`flow[t-1] > flow[t]`) of two consecutive flow values.
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Maximum energy transported by the flow expressed as the time (in
