@@ -34,7 +34,6 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
-import warnings
 
 import pandas as pd
 import pytest
@@ -128,10 +127,15 @@ energysystem.add(wind, demand, storage, excess)
 logging.info("Optimise the energy system")
 
 # initialise the operational model
-
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", SuspiciousUsageWarning)
-    om = solph.Model(energysystem)
+with pytest.warns(
+    SuspiciousUsageWarning,
+    match="By default, a discount_rate",
+):
+    with pytest.warns(
+        SuspiciousUsageWarning,
+        match="You did not specify an interest rate",
+    ):
+        om = solph.Model(energysystem)
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")

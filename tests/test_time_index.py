@@ -8,8 +8,6 @@ SPDX-FileCopyrightText: Stephan Günther
 SPDX-License-Identifier: MIT
 """
 
-import warnings
-
 import pandas as pd
 import pytest
 from oemof.tools import debugging
@@ -112,11 +110,10 @@ def test_energysystem_with_numeric_index_non_equidistant_infer_last_interval():
     """
     time_increments = [1, 1, 1, 1, 1, 0.5, 0.5, 0.25, 0.25, 0.5]
 
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,  # timeincrement is deprecated
-        )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
         es = solph.EnergySystem(
             timeincrement=time_increments,
             infer_last_interval=True,
@@ -133,11 +130,10 @@ def test_energysystem_with_numeric_index_non_equidistant():
     """
     time_increments = [1, 1, 1, 1, 1, 0.5, 0.5, 0.25, 0.25, 0.5]
 
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,  # timeincrement is deprecated
-        )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
         es = solph.EnergySystem(
             timeincrement=time_increments,
             infer_last_interval=False,
@@ -196,11 +192,10 @@ def test_overwrite_timeincrement():
 
 
 def test_model_timeincrement_list():
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,  # timeincrement is deprecated
-        )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
         es = solph.EnergySystem(timeincrement=[0.1, 1, 2, 3])
     m = solph._models.Model(es)
     assert m.timeincrement[3] == 3
