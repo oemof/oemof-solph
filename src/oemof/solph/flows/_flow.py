@@ -17,6 +17,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 import math
 import numbers
 from collections.abc import Iterable
@@ -53,11 +54,13 @@ class Flow(Edge):
         will be added to the objective expression of the optimization problem.
     max : numeric (iterable or scalar), default: 1, :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`
+        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`. If
+        :attr:`fix` is set to a different value than `None`, :attr:`min` is set
+        to `None`.
     min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
-        Normed minimum value of the flow (see :attr:`max`). If
-        :attr:`bidirectional` is set to `True` the default value will be set
-        to `min=-1` instead of `min=0`.
+        Normed minimum value of the flow (see :attr:`max`). If :attr:`fix` is
+        set to a different value than `None`, :attr:`min` is set to `None`. If
+        :attr:`bidirectional` is set to `True`, :attr:`min` is set to `-1`.
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_capacity` to get the absolute value.
@@ -216,6 +219,7 @@ class Flow(Edge):
             warn(msg, debugging.SuspiciousUsageWarning)
 
         self.fixed_costs = sequence(fixed_costs)
+        self.variable_costs = sequence(variable_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
 
@@ -227,20 +231,31 @@ class Flow(Edge):
         self.lifetime = lifetime
         self.age = age
 
-        # It is not allowed to define min or max if fix is defined.
-        if fix is not None and (min is not None or max is not None):
-            raise AttributeError(
-                "It is not allowed to define `min`/`max` if `fix` is defined."
-            )
+        if fix is not None:
+            # It is not allowed to define `min` or `max` if `fix` is defined.
+            if min != 0 or max != 1:
+                msg = (
+                    "It is not allowed to define `min`/`max` if `fix` is "
+                    "defined."
+                )
+                raise AttributeError(msg)
+            else:
+                self.max = sequence(None)
+                self.min = sequence(None)
+                self.fix = sequence(fix)
+        else:
+            self.fix = sequence(fix)
+            self.max = sequence(max)
+            if self.bidirectional:
+                self.min = sequence(-1)
+            else:
+                self.min = sequence(min)
 
         need_nominal_value = [
             "fix",
             "full_load_time_max",
             "full_load_time_min",
-            "min",
-            "max",
         ]
-        sequences = ["fix", "variable_costs", "min", "max"]
         if self.investment is None and self.nominal_capacity is None:
             for attr in need_nominal_value:
                 if isinstance(eval(attr), Iterable):
@@ -253,15 +268,6 @@ class Flow(Edge):
                         "nominal_value must be set as well.\n"
                         "Otherwise, it won't have any effect."
                     )
-        # minimum will be set even without nominal limit
-
-        # maximum and minimum (absolute values) should be always set,
-        # as nominal_value or invest might be defined later
-        if bidirectional:
-            min = -1
-
-        for attr in sequences:
-            setattr(self, attr, sequence(eval(attr)))
 
         if self.nominal_capacity is not None and not math.isfinite(
             self.max[0]
