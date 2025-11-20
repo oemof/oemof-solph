@@ -19,7 +19,6 @@ import itertools
 import numbers
 import operator
 import sys
-import warnings
 from collections import abc
 from itertools import groupby
 from typing import Dict
