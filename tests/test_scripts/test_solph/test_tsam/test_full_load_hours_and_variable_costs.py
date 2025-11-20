@@ -25,12 +25,11 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
-import warnings
 
 import pandas as pd
 import pytest
 from oemof.tools import logger
-from oemof.tools.debugging import SuspiciousUsageWarning
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 
@@ -45,8 +44,10 @@ tindex_original = pd.date_range("2022-01-01", periods=8, freq="h")
 tindex = pd.date_range("2022-01-01", periods=4, freq="h")
 
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", SuspiciousUsageWarning)
+with pytest.warns(
+    ExperimentalFeatureWarning,
+    match="tsa_parameters",
+):
     energysystem = solph.EnergySystem(
         timeindex=tindex,
         tsa_parameters={

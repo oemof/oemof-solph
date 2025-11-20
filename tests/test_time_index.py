@@ -80,11 +80,10 @@ def test_energysystem_with_datetimeindex_non_equidistant():
 def test_energysystem_with_numeric_index_infer_last_interval():
     """Test EnergySystem with numeric index (equidistant)"""
     time_increments = [1, 1, 1, 1, 1]
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,  # timeincrement is deprecated
-        )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
         es = solph.EnergySystem(timeincrement=time_increments)
     assert es.timeincrement[1] == 1.0
     assert pd.Series(es.timeincrement).sum() == 5
@@ -94,11 +93,10 @@ def test_energysystem_with_numeric_index():
     """Test EnergySystem with numeric index (equidistant)"""
     time_increments = [1, 1, 1, 1, 1]
 
-    with warnings.catch_warnings():
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,  # timeincrement is deprecated
-        )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
         es = solph.EnergySystem(
             timeincrement=time_increments,
             infer_last_interval=False,

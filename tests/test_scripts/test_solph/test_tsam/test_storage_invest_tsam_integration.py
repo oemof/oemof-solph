@@ -38,7 +38,8 @@ import warnings
 
 import pandas as pd
 import pytest
-from oemof.tools import debugging
+from oemof.tools.debugging import ExperimentalFeatureWarning
+from oemof.tools.debugging import SuspiciousUsageWarning
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -54,20 +55,25 @@ logging.info("Initialize the energy system")
 tindex_original = pd.date_range("2022-01-01", periods=8, freq="h")
 tindex = pd.date_range("2022-01-01", periods=4, freq="h")
 
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", debugging.ExperimentalFeatureWarning)
-    warnings.simplefilter("ignore", debugging.SuspiciousUsageWarning)
-    energysystem = solph.EnergySystem(
-        timeindex=tindex,
-        periods=[tindex],
-        tsa_parameters=[
-            {
-                "timesteps_per_period": 2,
-                "order": [0, 1, 1, 0],
-            },
-        ],
-        infer_last_interval=True,
-    )
+with pytest.warns(
+    ExperimentalFeatureWarning,
+    match="tsa_parameters",
+):
+    with pytest.warns(
+        ExperimentalFeatureWarning,
+        match="periods",
+    ):
+        energysystem = solph.EnergySystem(
+            timeindex=tindex,
+            periods=[tindex],
+            tsa_parameters=[
+                {
+                    "timesteps_per_period": 2,
+                    "order": [0, 1, 1, 0],
+                },
+            ],
+            infer_last_interval=True,
+        )
 
 ##########################################################################
 # Create oemof objects
@@ -124,7 +130,7 @@ logging.info("Optimise the energy system")
 # initialise the operational model
 
 with warnings.catch_warnings():
-    warnings.simplefilter("ignore", debugging.SuspiciousUsageWarning)
+    warnings.simplefilter("ignore", SuspiciousUsageWarning)
     om = solph.Model(energysystem)
 
 # if tee_switch is true solver messages will be displayed
