@@ -37,8 +37,8 @@ import logging
 
 import pandas as pd
 import pytest
-from oemof.tools.debugging import ExperimentalFeatureWarning
 from oemof.tools import logger
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 

@@ -38,10 +38,10 @@ import warnings
 
 import pandas as pd
 import pytest
-from oemof.tools.debugging import ExperimentalFeatureWarning
-from oemof.tools.debugging import SuspiciousUsageWarning
 from oemof.tools import economics
 from oemof.tools import logger
+from oemof.tools.debugging import ExperimentalFeatureWarning
+from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
 
