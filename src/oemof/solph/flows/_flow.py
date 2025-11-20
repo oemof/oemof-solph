@@ -51,11 +51,13 @@ class Flow(Edge):
         The costs associated with one unit of the flow per hour. The
         costs for each timestep (:math:`P_t \cdot c \cdot \delta(t)`)
         will be added to the objective expression of the optimization problem.
-    max : numeric (iterable or scalar), :math:`f_{max}`
+    max : numeric (iterable or scalar), default: 1, :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
         calculated by multiplying :attr:`nominal_capacity` with :attr:`max`
-    min : numeric (iterable or scalar), :math:`f_{min}`
-        Normed minimum value of the flow (see :attr:`max`).
+    min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
+        Normed minimum value of the flow (see :attr:`max`). If 
+        :attr:`bidirectional` is set to `True` the default value will be set
+        to `min=-1` instead of `min=0`.
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_capacity` to get the absolute value.
@@ -63,8 +65,8 @@ class Flow(Edge):
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
     negative_gradient_limit : numeric (iterable, scalar or None)
-            the normed *upper bound* on the negative difference
-            (`flow[t-1] > flow[t]`) of two consecutive flow values.
+        the normed *upper bound* on the negative difference 
+        (`flow[t-1] > flow[t]`) of two consecutive flow values.
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Maximum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
@@ -127,8 +129,8 @@ class Flow(Edge):
         nominal_value=None,
         # --- END ---
         variable_costs=0,
-        min=None,
-        max=None,
+        min=0,
+        max=1,
         fix=None,
         positive_gradient_limit=None,
         negative_gradient_limit=None,
@@ -255,13 +257,8 @@ class Flow(Edge):
 
         # maximum and minimum (absolute values) should be always set,
         # as nominal_value or invest might be defined later
-        if max is None:
-            max = 1
-        if min is None:
-            if bidirectional:
-                min = -1
-            else:
-                min = 0
+        if bidirectional:
+            min = -1
 
         for attr in sequences:
             setattr(self, attr, sequence(eval(attr)))
