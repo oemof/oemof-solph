@@ -646,15 +646,9 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
 
     # Disaggregate segments by linear interpolation and remove
     # last timestep afterwards (only needed for interpolation)
-
-    with warnings.catch_warnings():
-        # interpolate on object dtype is deprecated.
-        # We probably won't fix this before fully moving to the Results object.
-        warnings.simplefilter(
-            "ignore",
-            category=FutureWarning,
-        )
-        interpolated_soc = soc_ts.interpolate()
+    # Note: Interpolate on object dtype is deprecated.
+    # We probably won't fix this before fully moving to the Results object.
+    interpolated_soc = soc_ts.interpolate()
     return interpolated_soc.iloc[:-1]
 
 
