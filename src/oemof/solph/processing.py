@@ -639,11 +639,14 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
         i_offset += len(tsa_period["order"])
         t_offset += i_offset * tsa_period["timesteps"]
     soc_ts = pd.concat(soc_frames)
+
     soc_ts["variable_name"] = "soc"
     soc_ts["timestep"] = range(len(soc_ts))
 
     # Disaggregate segments by linear interpolation and remove
     # last timestep afterwards (only needed for interpolation)
+    # Note: Interpolate on object dtype is deprecated.
+    # We probably won't fix this before fully moving to the Results object.
     interpolated_soc = soc_ts.interpolate()
     return interpolated_soc.iloc[:-1]
 
