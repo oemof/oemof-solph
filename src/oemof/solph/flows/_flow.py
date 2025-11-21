@@ -269,8 +269,10 @@ class Flow(Edge):
                         "Otherwise, it won't have any effect."
                     )
 
-        if self.nominal_capacity is not None and not math.isfinite(
-            self.max[0]
+        if (
+            self.nominal_capacity is not None
+            and self.fix[0] is None
+            and not math.isfinite(self.max[0])
         ):
             raise ValueError(infinite_error_msg.format("max"))
 
