@@ -231,18 +231,12 @@ class Flow(Edge):
         self.lifetime = lifetime
         self.age = age
 
-        if fix is not None:
-            # It is not allowed to define `min` or `max` if `fix` is defined.
-            if min != 0 or max != 1:
-                msg = (
-                    "It is not allowed to define `min`/`max` if `fix` is "
-                    "defined."
-                )
-                raise AttributeError(msg)
-            else:
-                self.max = sequence(None)
-                self.min = sequence(None)
-                self.fix = sequence(fix)
+        # It is not allowed to define `min` or `max` if `fix` is defined.
+        if fix is not None and (min != 0 or max != 1):
+            msg = (
+                "It is not allowed to define `min`/`max` if `fix` is defined."
+            )
+            raise AttributeError(msg)
         else:
             self.fix = sequence(fix)
             self.max = sequence(max)
