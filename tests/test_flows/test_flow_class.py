@@ -40,6 +40,7 @@ def test_custom_properties():
 
 
 def test_source_with_full_load_time_max():
+    # TODO: This does not test anything?
     Flow(nominal_capacity=1, full_load_time_max=2)
 
 
@@ -86,6 +87,29 @@ def test_fix_sequence():
 
 
 def test_fix_sequence_non_nominal():
+    # TODO: This is possibly a duplication with test_solph_network_classes.py
     """Attribute fix needs nominal_capacity"""
     with pytest.raises(AttributeError):
         Flow(fix=[0.3, 0.2, 0.7])
+
+
+def test_bidirectional_with_positive_min():
+    with pytest.raises(
+        AttributeError,
+        match="If `bidirectional` is set to `True`",
+    ):
+        Flow(bidirectional=True, min=0.1, nominal_capacity=1)
+
+
+def test_unidirectional_explicit_with_negative_min():
+    with pytest.raises(
+        AttributeError, match="If `bidirectional` is set to `False`"
+    ):
+        Flow(bidirectional=False, min=-0.1)
+
+
+def test_unidirectional_implicit_with_negative_min():
+    with pytest.raises(
+        AttributeError, match="If `bidirectional` is set to `False`"
+    ):
+        Flow(min=-0.1)

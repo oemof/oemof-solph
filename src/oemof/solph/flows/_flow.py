@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Lennart Schürmann
 
 SPDX-License-Identifier: MIT
 
@@ -58,9 +59,10 @@ class Flow(Edge):
         :attr:`fix` is set to a different value than `None`, :attr:`min` is set
         to `None`.
     min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
-        Normed minimum value of the flow (see :attr:`max`). If :attr:`fix` is
-        set to a different value than `None`, :attr:`min` is set to `None`. If
-        :attr:`bidirectional` is set to `True`, :attr:`min` is set to `-1`.
+        Normed minimum value of the flow (see :attr:`max`). If
+        :attr:`bidirectional` is set to `True`, :attr:`min` needs to be
+        negative (and is automatically set to -1 if no other negative value is
+        provided).
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_capacity` to get the absolute value.
@@ -232,31 +234,63 @@ class Flow(Edge):
         self.age = age
 
         # It is not allowed to define `min` or `max` if `fix` is defined.
+        # HINT: This also allows `flow`s with `fix` to be bidirectional, if
+        # negative values are used in `fix`, despite `min` and `max` having
+        # the default values (0 and 1).
+        # TODO: Is it intended to have bidirectional fixed flows?
         if fix is not None and (min != 0 or max != 1):
             msg = (
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
             raise AttributeError(msg)
-        else:
-            self.fix = sequence(fix)
-            self.max = sequence(max)
-            if self.bidirectional:
-                self.min = sequence(-1)
-            else:
-                self.min = sequence(min)
+
+        if self.bidirectional and min > 0:
+            msg = (
+                "If `bidirectional` is set to `True`, `min` must be negative."
+            )
+            raise AttributeError(msg)
+        elif not self.bidirectional and min < 0:
+            msg = (
+                "If `bidirectional` is set to `False`, `min` must be "
+                "positive or zero."
+            )
+            raise AttributeError(msg)
+        elif self.bidirectional and min == 0:
+            # TODO: Raise warning that `min` is set by `bidirectional`
+            # msg = (
+            #     "If `bidirectional` is set to `True` and `min` is set to zero "
+            #     "(default), `min` is instead set to -1 if no other negative "
+            #     "value is provided."
+            # )
+            # raise debugging.SuspiciousUsageWarning(msg)
+            min = -1
+
+        self.fix = sequence(fix)
+        self.max = sequence(max)
+        self.min = sequence(min)
 
         need_nominal_value = [
             "fix",
             "full_load_time_max",
             "full_load_time_min",
+            "min",
+            "max",
         ]
+        need_nominal_value_defaults = {
+            "fix": None,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
+            "min": -1 if self.bidirectional else 0,
+            "max": 1,
+        }
         if self.investment is None and self.nominal_capacity is None:
             for attr in need_nominal_value:
-                if isinstance(eval(attr), Iterable):
-                    the_attr = eval(attr)[0]
+                if isinstance(getattr(self, attr), Iterable):
+                    the_attr = getattr(self, attr)[0]
                 else:
-                    the_attr = eval(attr)
-                if the_attr is not None:
+                    the_attr = getattr(self, attr)
+                if the_attr != need_nominal_value_defaults[attr]:
+                    # if the_attr is not None:
                     raise AttributeError(
                         f"If {attr} is set in a flow (except InvestmentFlow), "
                         "nominal_value must be set as well.\n"
