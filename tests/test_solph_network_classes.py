@@ -109,23 +109,23 @@ def test_infinite_values():
         solph.flows.Flow(nominal_capacity=1, max=float("+inf"))
 
 
-def test_attributes_needing_nominal_value_get_it():
-    with pytest.raises(AttributeError, match="If fix is set in a flow "):
+def test_attributes_needing_nominal_capacity_get_it():
+    with pytest.raises(AttributeError, match="If fix is set in a flow"):
         solph.flows.Flow(fix=0.3)
 
-    with pytest.raises(AttributeError, match="If max is set in a flow "):
+    with pytest.raises(AttributeError, match="If max is set in a flow"):
         solph.flows.Flow(max=0.3)
 
-    with pytest.raises(AttributeError, match="If min is set in a flow "):
+    with pytest.raises(AttributeError, match="If min is set in a flow"):
         solph.flows.Flow(min=0.3)
 
     with pytest.raises(
-        AttributeError, match="If full_load_time_max is set in a flow "
+        AttributeError, match="If full_load_time_max is set in a flow"
     ):
         solph.flows.Flow(full_load_time_max=0.3)
 
     with pytest.raises(
-        AttributeError, match="If full_load_time_min is set in a flow "
+        AttributeError, match="If full_load_time_min is set in a flow"
     ):
         solph.flows.Flow(full_load_time_min=0.3)
 

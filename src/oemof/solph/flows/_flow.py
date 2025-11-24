@@ -196,8 +196,7 @@ class Flow(Edge):
         self.investment = None
 
         infinite_error_msg = (
-            "{} must be a finite value. Passing an infinite "
-            "value is not allowed."
+            "{} must be a finite value. Passing an infinite value is not allowed."
         )
         if isinstance(nominal_capacity, numbers.Real):
             if not math.isfinite(nominal_capacity):
@@ -239,24 +238,19 @@ class Flow(Edge):
         # the default values (0 and 1).
         # TODO: Is it intended to have bidirectional fixed flows?
         if fix is not None and (min != 0 or max != 1):
-            msg = (
-                "It is not allowed to define `min`/`max` if `fix` is defined."
-            )
+            msg = "It is not allowed to define `min`/`max` if `fix` is defined."
             raise AttributeError(msg)
 
         if self.bidirectional and min > 0:
-            msg = (
-                "If `bidirectional` is set to `True`, `min` must be negative."
-            )
+            msg = "If `bidirectional` is set to `True`, `min` must be negative."
             raise AttributeError(msg)
         elif not self.bidirectional and min < 0:
             msg = (
-                "If `bidirectional` is set to `False`, `min` must be "
-                "positive or zero."
+                "If `bidirectional` is set to `False`, `min` must be positive or zero."
             )
             raise AttributeError(msg)
         elif self.bidirectional and min == 0:
-            # TODO: Raise warning that `min` is set by `bidirectional`
+            # TODO: Raise warning that `min` is set by `bidirectional` implicitly
             # msg = (
             #     "If `bidirectional` is set to `True` and `min` is set to zero "
             #     "(default), `min` is instead set to -1 if no other negative "
@@ -269,7 +263,7 @@ class Flow(Edge):
         self.max = sequence(max)
         self.min = sequence(min)
 
-        need_nominal_value = [
+        need_nominal_capacity = [
             "fix",
             "full_load_time_max",
             "full_load_time_min",
@@ -284,7 +278,7 @@ class Flow(Edge):
             "max": 1,
         }
         if self.investment is None and self.nominal_capacity is None:
-            for attr in need_nominal_value:
+            for attr in need_nominal_capacity:
                 if isinstance(getattr(self, attr), Iterable):
                     the_attr = getattr(self, attr)[0]
                 else:
@@ -292,9 +286,8 @@ class Flow(Edge):
                 if the_attr != need_nominal_value_defaults[attr]:
                     # if the_attr is not None:
                     raise AttributeError(
-                        f"If {attr} is set in a flow (except InvestmentFlow), "
-                        "nominal_value must be set as well.\n"
-                        "Otherwise, it won't have any effect."
+                        f"If {attr} is set in a flow, "
+                        "nominal_capacity must be set as well."
                     )
 
         if (
