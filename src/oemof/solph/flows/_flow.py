@@ -196,7 +196,8 @@ class Flow(Edge):
         self.investment = None
 
         infinite_error_msg = (
-            "{} must be a finite value. Passing an infinite value is not allowed."
+            "{} must be a finite value. Passing an infinite "
+            "value is not allowed."
         )
         if isinstance(nominal_capacity, numbers.Real):
             if not math.isfinite(nominal_capacity):
@@ -238,7 +239,9 @@ class Flow(Edge):
         # the default values (0 and 1).
         # TODO: Is it intended to have bidirectional fixed flows?
         if fix is not None and (min != 0 or max != 1):
-            msg = "It is not allowed to define `min`/`max` if `fix` is defined."
+            msg = (
+                "It is not allowed to define `min`/`max` if `fix` is defined."
+            )
             raise AttributeError(msg)
 
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
@@ -253,7 +256,9 @@ class Flow(Edge):
         # --- END
 
         if sequence(min).min() < 0:
-            msg = "Setting `min` to negative values is an experimental feature."
+            msg = (
+                "Setting `min` to negative values is an experimental feature."
+            )
             warn(msg, debugging.ExperimentalFeatureWarning)
 
         self.fix = sequence(fix)
