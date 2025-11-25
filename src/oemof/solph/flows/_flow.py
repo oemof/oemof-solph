@@ -241,23 +241,20 @@ class Flow(Edge):
             msg = "It is not allowed to define `min`/`max` if `fix` is defined."
             raise AttributeError(msg)
 
-        if self.bidirectional and min > 0:
-            msg = "If `bidirectional` is set to `True`, `min` must be negative."
-            raise AttributeError(msg)
-        elif not self.bidirectional and min < 0:
-            msg = (
-                "If `bidirectional` is set to `False`, `min` must be positive or zero."
-            )
-            raise AttributeError(msg)
-        elif self.bidirectional and min == 0:
-            # TODO: Raise warning that `min` is set by `bidirectional` implicitly
-            # msg = (
-            #     "If `bidirectional` is set to `True` and `min` is set to zero "
-            #     "(default), `min` is instead set to -1 if no other negative "
-            #     "value is provided."
-            # )
-            # raise debugging.SuspiciousUsageWarning(msg)
-            min = -1
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if self.bidirectional:
+            msg = "The `bidirectional` keyword is deprecated and will be "
+            "removed in a future version, as it sets the value of `min` to -1 "
+            "without the users explicit intent. It is recommended to set a "
+            "negative value for `min` explicitly instead."
+            warn(msg, FutureWarning)
+            if min == 0:
+                min = -1
+        # --- END
+
+        if sequence(min).min() < 0:
+            msg = "Setting `min` to negative values is an experimental feature."
+            warn(msg, debugging.ExperimentalFeatureWarning)
 
         self.fix = sequence(fix)
         self.max = sequence(max)
@@ -274,7 +271,10 @@ class Flow(Edge):
             "fix": None,
             "full_load_time_max": None,
             "full_load_time_min": None,
+            # --- BEGIN: The following code can be removed for versions >= v0.7
             "min": -1 if self.bidirectional else 0,
+            # --- END
+            # "min": 0,
             "max": 1,
         }
         if self.investment is None and self.nominal_capacity is None:
