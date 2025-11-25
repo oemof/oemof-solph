@@ -55,14 +55,9 @@ class Flow(Edge):
         will be added to the objective expression of the optimization problem.
     max : numeric (iterable or scalar), default: 1, :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`. If
-        :attr:`fix` is set to a different value than `None`, :attr:`min` is set
-        to `None`.
+        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`.
     min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
-        Normed minimum value of the flow (see :attr:`max`). If
-        :attr:`bidirectional` is set to `True`, :attr:`min` needs to be
-        negative (and is automatically set to -1 if no other negative value is
-        provided).
+        Normed minimum value of the flow (see :attr:`max`).
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
         :attr:`nominal_capacity` to get the absolute value.
@@ -257,7 +252,8 @@ class Flow(Edge):
 
         if sequence(min).min() < 0:
             msg = (
-                "Setting `min` to negative values is an experimental feature."
+                "Setting `min` to negative values allows for the flow to "
+                "become bidirectional, which is an experimental feature."
             )
             warn(msg, debugging.ExperimentalFeatureWarning)
 
@@ -272,7 +268,7 @@ class Flow(Edge):
             "min",
             "max",
         ]
-        need_nominal_value_defaults = {
+        need_nominal_capacity_defaults = {
             "fix": None,
             "full_load_time_max": None,
             "full_load_time_min": None,
@@ -288,17 +284,14 @@ class Flow(Edge):
                     the_attr = getattr(self, attr)[0]
                 else:
                     the_attr = getattr(self, attr)
-                if the_attr != need_nominal_value_defaults[attr]:
-                    # if the_attr is not None:
+                if the_attr != need_nominal_capacity_defaults[attr]:
                     raise AttributeError(
                         f"If {attr} is set in a flow, "
                         "nominal_capacity must be set as well."
                     )
 
-        if (
-            self.nominal_capacity is not None
-            and self.fix[0] is None
-            and not math.isfinite(self.max[0])
+        if self.nominal_capacity is not None and not math.isfinite(
+            self.max[0]
         ):
             raise ValueError(infinite_error_msg.format("max"))
 
