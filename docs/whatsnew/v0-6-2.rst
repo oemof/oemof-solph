@@ -4,8 +4,8 @@ v0.6.2
 API changes
 ###########
 
-* The `Flow` parameter now raises a `FutureWarning`, as it is to be removed
-  in a following version.
+* The `Flow` parameter `bidirectional` now raises a `FutureWarning`,
+  as it is to be removed in a following version.
 
 New features
 ############
