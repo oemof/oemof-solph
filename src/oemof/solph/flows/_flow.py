@@ -137,7 +137,9 @@ class Flow(Edge):
         full_load_time_max=None,
         full_load_time_min=None,
         integer=False,
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         bidirectional=False,
+        # --- END
         nonconvex=None,
         lifetime=None,
         age=None,
@@ -224,7 +226,9 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         self.bidirectional = bidirectional
+        # --- END
         self.lifetime = lifetime
         self.age = age
 
