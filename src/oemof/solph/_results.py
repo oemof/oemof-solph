@@ -59,13 +59,6 @@ class Results:
                     # Case for debugging purposes.
                     # We should avoid useless iterations.
                     pass
-                else:
-                    # Same variable, known occurance but different content.
-                    # The following lines should be unreachable.
-                    raise ValueError(
-                        f"Variable name defined multiple times: {key}"
-                        + f"(last time in '{variable}')"
-                    )
 
         # adss additional keys for the calculation of opex and capex
         # if the keyword eval_economy is True
