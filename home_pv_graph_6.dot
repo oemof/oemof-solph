@@ -1,0 +1,17 @@
+strict digraph {
+electricity [label=electricity];
+demand [label=demand];
+grid [label=grid];
+DC [label=DC];
+PV [label=PV];
+inverter [label=inverter];
+Battery [label=Battery];
+electricity -> demand;
+electricity -> grid;
+electricity -> Battery;
+grid -> electricity;
+DC -> inverter;
+PV -> DC;
+inverter -> electricity;
+Battery -> electricity;
+}

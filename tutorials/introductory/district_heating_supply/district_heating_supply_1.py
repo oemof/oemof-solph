@@ -1,9 +1,12 @@
 from helpers import LCOH
 
 # %%[sec_1_start]
+import os
 import pandas as pd
 
-data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
+file_path = os.path.dirname(__file__)
+filename = os.path.join(file_path, "input_data.csv")
+data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
 # %%[sec_1_end]
 
 # %%[sec_2_start]
