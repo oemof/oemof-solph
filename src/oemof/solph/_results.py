@@ -9,11 +9,9 @@ SPDX-License-Identifier: MIT
 
 """
 
-import warnings
 from functools import cache
 
 import pandas as pd
-from oemof.tools import debugging
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
 from pyomo.opt.results.container import ListContainer
