@@ -9,11 +9,9 @@ SPDX-License-Identifier: MIT
 
 """
 
-import warnings
 from functools import cache
 
 import pandas as pd
-from oemof.tools import debugging
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
 from pyomo.opt.results.container import ListContainer
@@ -28,12 +26,6 @@ class Results:
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
     def __init__(self, model: ConcreteModel):
-        msg = (
-            "The class 'Results' is experimental. Functionality and API can"
-            " be changed without warning during any update."
-        )
-        warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-
         self._solver_results = model.solver_results
         self._variables = {}
         self._model = model
@@ -52,9 +44,14 @@ class Results:
                 elif (
                     key in self._variables
                     and occurence not in self._variables[key]
-                ):  # variable with same name found elsewhere in the model
+                ):
+                    # Variable known name found somewhere new in the model.
+                    # Aligning names is particularly useful when they name
+                    # the same thing in different Blocks.
                     self._variables[key][occurence] = variable
-                elif self._variables[key][occurence] == variable:
+                else:
+                    # Only left option should be
+                    # self._variables[key][occurence] == variable.
                     # Iterated over the same thing twice.
                     # Case for debugging purposes.
                     # We should avoid useless iterations.
@@ -111,6 +108,14 @@ class Results:
                         future_stack=True
                     )
                 )
+            # We assume that varables with the same name
+            # also use the same index but have disjunct values on that index.
+            # For example, the status of a Flow is depending on the type of
+            # Flow is defined in either NonConvexFlowBlock or
+            # InvestNonConvexFlowBlock. As this technical detail does not
+            # interest users, we concatinate all collected DataFrames.
+            # Note that this simplification might lead to unexpected results
+            # if third-party code introduces a variable name collision.
             df = pd.concat(df, axis=1)
 
             # overwrite known indexes
