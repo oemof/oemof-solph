@@ -28,12 +28,6 @@ class Results:
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
     def __init__(self, model: ConcreteModel):
-        msg = (
-            "The class 'Results' is experimental. Functionality and API can"
-            " be changed without warning during any update."
-        )
-        warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-
         self._solver_results = model.solver_results
         self._variables = {}
         self._model = model
