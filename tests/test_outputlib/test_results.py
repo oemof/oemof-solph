@@ -31,3 +31,7 @@ class TestResultsClass:
             self.results.timeindex[3].strftime("%m/%d/%Y, %H")
             == "01/01/2012, 03"
         )
+
+    def test_attribute_checking(self):
+        assert hasattr(self.results, "objective")
+        assert not hasattr(self.results, "non_existing")
