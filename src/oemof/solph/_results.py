@@ -27,6 +27,7 @@ class Results:
     #   compatible.
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
+        self._meta_results = {"objective": model.objective()}
         self._variables = {}
         self._model = model
 
@@ -74,6 +75,7 @@ class Results:
         """
         return (
             self._solver_results.keys()
+            | self._meta_results.keys()
             | self._variables.keys()
             | self._economy.keys()
         )
@@ -214,15 +216,6 @@ class Results:
         return df_opex
 
     @property
-    def objective(self):
-        """Returns objective of model
-
-        Returns:
-            float: optimum of model
-        """
-        return self._model.objective()
-
-    @property
     def timeindex(self):
         """Returns timeindex of energy system
 
@@ -235,5 +228,7 @@ class Results:
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:
             return self._solver_results[key]
+        elif key in self._meta_results:
+            return self._meta_results[key]
         else:
             return self.to_df(key)

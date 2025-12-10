@@ -19,11 +19,11 @@ class TestResultsClass:
             cls.results = Results(optimization_model)
 
     def test_objective(self):
-        assert self.results.objective == pytest.approx(8495, abs=1)
+        assert self.results["objective"] == pytest.approx(8495, abs=1)
 
     def test_to_set_objective(self):
-        with pytest.raises(AttributeError):
-            self.results.objective = 5
+        with pytest.raises(TypeError):
+            self.results["objective"] = 5
 
     def test_time_index(self):
         assert len(self.results.timeindex) == 25
@@ -33,5 +33,5 @@ class TestResultsClass:
         )
 
     def test_attribute_checking(self):
-        assert hasattr(self.results, "objective")
+        assert hasattr(self.results, "timeindex")
         assert not hasattr(self.results, "non_existing")
