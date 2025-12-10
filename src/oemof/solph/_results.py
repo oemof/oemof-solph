@@ -231,10 +231,6 @@ class Results:
         """
         return self._model.es.timeindex
 
-    def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
-        # maps to df
-        return self[key]
-
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:

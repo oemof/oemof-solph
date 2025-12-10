@@ -80,11 +80,5 @@ def test_non_convex_status_variables():
 
     results = solph.Results(model)
 
-    assert (results.status[(boiler, bus_heat)] == [1, 0]).all()
-    assert (results.status[(heat_pump, bus_heat)] == [0, 1]).all()
-
-    print(results.flow)
-
-
-if __name__ == "__main__":
-    test_non_convex_status_variables()
+    assert (results["status"][(boiler, bus_heat)] == [1, 0]).all()
+    assert (results["status"][(heat_pump, bus_heat)] == [0, 1]).all()
