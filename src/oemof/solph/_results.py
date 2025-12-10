@@ -27,7 +27,10 @@ class Results:
     #   compatible.
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
-        self._meta_results = {"objective": model.objective()}
+        self._meta_results = {
+            "objective": model.objective(),
+            "time_index": model.es.timeindex,
+        }
         self._variables = {}
         self._model = model
 
@@ -124,9 +127,9 @@ class Results:
             index_type = tuple(dataset.index_set().subsets())[-1].name
             match index_type:
                 case "TIMEPOINTS":
-                    df.index = self.timeindex
+                    df.index = self._meta_results["time_index"]
                 case "TIMESTEPS":
-                    df.index = self.timeindex[:-1]
+                    df.index = self._meta_results["time_index"][:-1]
                 case _:
                     df.index = df.index.get_level_values(-1)
         return df
@@ -214,15 +217,6 @@ class Results:
                     df_opex[col] = opex
 
         return df_opex
-
-    @property
-    def timeindex(self):
-        """Returns timeindex of energy system
-
-        Returns:
-            float: time index of the model
-        """
-        return self._model.es.timeindex
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         # backward-compatibility with returned results object from Pyomo

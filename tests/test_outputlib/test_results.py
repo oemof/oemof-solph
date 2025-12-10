@@ -26,12 +26,11 @@ class TestResultsClass:
             self.results["objective"] = 5
 
     def test_time_index(self):
-        assert len(self.results.timeindex) == 25
+        assert len(self.results["time_index"]) == 25
         assert (
-            self.results.timeindex[3].strftime("%m/%d/%Y, %H")
+            self.results["time_index"][3].strftime("%m/%d/%Y, %H")
             == "01/01/2012, 03"
         )
 
     def test_attribute_checking(self):
-        assert hasattr(self.results, "timeindex")
         assert not hasattr(self.results, "non_existing")
