@@ -13,10 +13,14 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
+import tsam.timeseriesaggregation as tsam
+from cost_data import investment_costs
 from matplotlib import pyplot as plt
 from oemof.tools import debugging
 from oemof.tools import logger
+from shared import prepare_input_data
 
+from oemof import solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -30,82 +34,117 @@ warnings.filterwarnings(
 )
 logger.define_logging()
 
+# ---------- read cost data ------------------------------------------------------------
+
+investment_costs = investment_costs()
+
+# ---------- read time series data -----------------------------------------------------
+
 file_path = Path(__file__).parent
 
-
-# Load CSV file and parse time column as datetime index
 df = pd.read_csv(
-    Path(file_path, "input_data.csv"),
-    parse_dates=["time"],
-    index_col="time",
+    Path(file_path, "energy.csv"),
 )
-print(df)
-df = df.fillna(0)
+df["time"] = pd.to_datetime(df["Unix Epoch"], unit="s")
+# time als Index setzen
+df = df.set_index("time")
+df = df.drop(columns=["Unix Epoch"])
+# print(df)
 
-# Initial time index from the input data
-initial_index = df.index
-print(f"Initial index length: {len(initial_index)}")
+time_index = df.index
 
-# Number of additional years to add
-years = 20  # Example: add 2 more years
+# Dummy pv profile
+h = np.arange(len(time_index))
+pv_profile = df["PV (W)"]
 
-# Define original start and calculate one-year duration
-original_start = initial_index[0]
-one_year = pd.DateOffset(years=1)
+# Dummy electricity profile
+df["house_elec_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 
-# Build periods: each starts at same time in different years, ends one hour before next year
-periods = []
-for y in range(years + 1):  # include original year
-    start = original_start + pd.DateOffset(years=y)
-    end = start + one_year - pd.Timedelta(hours=1)
-    periods.append(pd.date_range(start, end, freq="h"))
+# Dummy heat profile
+df["house_heat_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 
-# Combine all periods into one long DatetimeIndex
-long_time_index = pd.DatetimeIndex(np.concatenate(periods))
-
-print(f"Total length: {len(long_time_index)}")
-print("First period:", periods[0][:5], "...", periods[0][-5:])
-print("Second period:", periods[1][:5], "...", periods[1][-5:])
-
-# --- Stretch data to match new index ---
-pv_profile_one_year = df["PV (W)"].values
-original_len = len(pv_profile_one_year)
-new_len = len(long_time_index)
-
-repeat_factor = int(np.ceil(new_len / original_len))
-pv_profile_stretched = np.tile(pv_profile_one_year, repeat_factor)[:new_len]
-
-pv_profile = pd.Series(pv_profile_stretched, index=long_time_index)
-
-# Dummy profiles
-house_elec_kw = pd.Series(
-    0.3 + 0.7 * np.random.rand(len(long_time_index)), index=long_time_index
+# EV-Ladeprofil
+df["ev_charge_kW"] = (
+    0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
 )
-house_heat_kw = pd.Series(
-    0.3 + 0.7 * np.random.rand(len(long_time_index)), index=long_time_index
+
+# COP-Profil (konstant, später evtl. temperaturabhängig)
+df["cop_hp"] = 3.5
+
+df = df.resample("1h").mean()
+
+# -------------- Clustering of Input time-series with TSAM -----------------------------
+typical_periods = 40
+hours_per_period = 24
+
+aggregation = tsam.TimeSeriesAggregation(
+    timeSeries=df.iloc[:8760],
+    noTypicalPeriods=typical_periods,
+    hoursPerPeriod=hours_per_period,
+    clusterMethod="k_means",
+    sortValues=False,
+    rescaleClusterPeriods=False,
 )
-ev_charge_kW = pd.Series(0.0, index=long_time_index)
-cop_hp = pd.Series(3.5, index=long_time_index)
+aggregation.createTypicalPeriods()
 
-print(pv_profile.head())
-print(pv_profile.tail())
+# pandas DatTime for the aggregated time series
+tindex_agg_one_year = pd.date_range(
+    "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
+)
 
+# ------------ create timeindex etc. for multiperiod -----------------------------------
+# list with years in which investment is possible
+years = [2025, 2030, 2035, 2040, 2045]
 
-es = EnergySystem(timeindex=long_time_index, periods=periods)
+# stretch time index to include all years (continously)
+tindex_agg_full = pd.date_range(
+    "2022-01-01",
+    periods=typical_periods * hours_per_period * len(years),
+    freq="h",
+)
+
+# list of with time index for each year
+periods = [tindex_agg_one_year] * len(years)
+
+# parameters for time series aggregation in oemof-solph with one dict per year
+tsa_parameters = [
+    {
+        "timesteps_per_period": aggregation.hoursPerPeriod,
+        "order": aggregation.clusterOrder,
+        "timeindex": aggregation.timeIndex,
+    }
+] * len(years)
+
+# ------------------ create energy system ----------------------------------------------
+es = EnergySystem(
+    timeindex=tindex_agg_full,
+    # timeincrement=[1] * len(tindex_agg_full),
+    periods=periods,
+    tsa_parameters=tsa_parameters,
+    infer_last_interval=False,
+)
 
 
 bus_el = Bus(label="electricity")
 bus_heat = Bus(label="heat")
 es.add(bus_el, bus_heat)
 
+new_s = pd.concat(
+    [aggregation.typicalPeriods["PV (W)"]] * len(years), ignore_index=True
+)
+print(new_s)
 pv = cmp.Source(
     label="PV",
     outputs={
         bus_el: Flow(
-            fix=pv_profile,
+            fix=pd.concat(
+                [aggregation.typicalPeriods["PV (W)"]] * len(years),
+                ignore_index=True,
+            ),
             nominal_capacity=Investment(
-                ep_costs=[400, 380, 350],
+                ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")],
                 lifetime=10,
+                fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")],
             ),
         )
     },
@@ -118,7 +157,7 @@ battery = cmp.GenericStorage(
     inputs={bus_el: Flow()},
     outputs={bus_el: Flow()},
     nominal_capacity=Investment(
-        ep_costs=[800, 700, 600],
+        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")],
         lifetime=10,
     ),  # kWh
     # initial_storage_level=0.5,  # 50%
@@ -133,14 +172,30 @@ es.add(battery)
 # Electricity demand
 house_sink = cmp.Sink(
     label="Electricity demand",
-    inputs={bus_el: Flow(fix=house_elec_kw, nominal_capacity=1.0)},
+    inputs={
+        bus_el: Flow(
+            fix=pd.concat(
+                [aggregation.typicalPeriods["house_elec_kW"]] * len(years),
+                ignore_index=True,
+            ),
+            nominal_capacity=1.0,
+        )
+    },
 )
 es.add(house_sink)
 
 # Electric vehicle demand
 wallbox_sink = cmp.Sink(
     label="Electric Vehicle",
-    inputs={bus_el: Flow(fix=ev_charge_kW, nominal_capacity=1.0)},
+    inputs={
+        bus_el: Flow(
+            fix=pd.concat(
+                [aggregation.typicalPeriods["ev_charge_kW"]] * len(years),
+                ignore_index=True,
+            ),
+            nominal_capacity=1.0,
+        )
+    },
 )
 es.add(wallbox_sink)
 
@@ -150,17 +205,33 @@ hp = cmp.Converter(
     inputs={bus_el: Flow()},
     outputs={
         bus_heat: Flow(
-            nominal_capacity=Investment(ep_costs=[500, 400, 300], lifetime=20)
+            nominal_capacity=Investment(
+                ep_costs=investment_costs[
+                    ("heat pump", "specific_costs [Eur/kW]")
+                ],
+                lifetime=20,
+                fixed_costs=investment_costs[
+                    ("heat pump", "fixed_costs [Eur]")
+                ],
+            )
         )
     },
-    conversion_factors={bus_heat: cop_hp},
+    conversion_factors={bus_heat: 3.5},
 )
 es.add(hp)
 
 # Heat demand
 heat_sink = cmp.Sink(
     label="Heat demand",
-    inputs={bus_heat: Flow(fix=house_elec_kw, nominal_capacity=5.0)},
+    inputs={
+        bus_heat: Flow(
+            fix=pd.concat(
+                [aggregation.typicalPeriods["house_heat_kW"]] * len(years),
+                ignore_index=True,
+            ),
+            nominal_capacity=5.0,
+        )
+    },
 )
 es.add(heat_sink)
 
@@ -175,32 +246,13 @@ feed_in = cmp.Sink(
 )
 es.add(feed_in)
 
-# debugging
-
-# Check for NaN in input data
-print("----------debugging------")
-print("df: ", df.isna().sum())  # For original data
-print("pv: ", pv_profile.isna().sum())  # For stretched profile
-print("el: ", house_elec_kw.isna().sum())
-print("heat: ", house_heat_kw.isna().sum())
-
-# Check length consistency
-print("Check length consistency")
-print(
-    len(long_time_index),
-    len(pv_profile),
-    len(house_elec_kw),
-    len(house_heat_kw),
-)
-
-
 # Create Model and solve it
 logging.info("Creating Model...")
 m = Model(es)
 logging.info("Solving Model...")
 m.solve(solver="gurobi", solve_kwargs={"tee": True})
 
-"""
+
 # Create Results
 results = Results(m)
 flow = results.flow
@@ -219,7 +271,7 @@ print("Investment")
 print(investments.squeeze())
 
 investments.squeeze().plot(kind="bar")
-
+""" 
 day = 186  # day of the year
 n = 2  # number of days to plot
 flow = flow[day * 24 * 6 : day * 24 * 6 + n * 24 * 6]
