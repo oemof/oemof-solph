@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+from collections.abc import Hashable
 from functools import cache
 
 import pandas as pd
@@ -241,3 +242,6 @@ class Results:
             return self._solver_results[key]
         else:
             return self.to_df(key)
+
+    def __contains__(self, key: Hashable) -> bool:
+        return key in self._solver_results or key in self._variables
