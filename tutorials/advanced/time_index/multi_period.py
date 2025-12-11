@@ -47,7 +47,7 @@ initial_index = df.index
 print(f"Initial index length: {len(initial_index)}")
 
 # Number of additional years to add
-years = 2  # Example: add 2 more years
+years = 20  # Example: add 2 more years
 
 # Define original start and calculate one-year duration
 original_start = initial_index[0]
