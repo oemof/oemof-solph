@@ -8,13 +8,14 @@ SPDX-License-Identifier: MIT
 from pathlib import Path
 
 import demandlib
+import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from urllib.request import urlretrieve
 from workalendar.europe import Germany
 
 
-def prepare_input_data():
+def prepare_input_data(plot_resampling=False):
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
@@ -73,19 +74,43 @@ def prepare_input_data():
     energy_file = Path(file_path, "energy.csv")
     if not energy_file.exists():
         urlretrieve(url_energy, energy_file)
-    df_engergy = pd.read_csv(
+    df_energy = pd.read_csv(
         energy_file,
         index_col=0,
     )
-    df_engergy.index = pd.to_datetime(
-        df_engergy.index,
+    df_energy.index = pd.to_datetime(
+        df_energy.index,
         unit="s",
         utc=True,
     )
 
-    print(df_engergy)
-    print(df_temperature)
+    if plot_resampling:
+        p_pv = {}
+        resolutions = [
+            "1 min",
+            "5 min",
+            "10 min",
+            "15 min",
+            "30 min",
+            "1 h",
+            "2 h",
+            "3 h",
+            "6 h",
+        ]
+
+        for resolution in resolutions:
+            p_pv[resolution] = df_energy["PV (W)"].resample(resolution).mean()
+            plt.plot(
+                np.linspace(0, 8760, len(p_pv[resolution])),
+                sorted(p_pv[resolution]/1e3)[::-1],
+                label=resolution,
+            )
+
+        plt.xlim(-10, 510)
+        plt.ylim(7, 16)
+        plt.legend()
+        plt.show()
 
 
 if __name__ == "__main__":
-    prepare_input_data()
+    prepare_input_data(plot_resampling=True)
