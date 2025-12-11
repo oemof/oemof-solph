@@ -18,6 +18,20 @@ class TestResultsClass:
             )
             cls.results = Results(optimization_model)
 
+    def test_membership_checking(self):
+        assert "flow" in self.results, (
+            '\nFailed testing `"flow" in results`, where `results` is a'
+            " `Results` instance."
+            '\nExpected: `"flow" in results`'
+            '\nGot     : `"flow" not in results`'
+        )
+        assert "" not in self.results, (
+            '\nFailed testing `"" in results`, where `results` is a'
+            " `Results` instance."
+            '\nExpected: `"" not in results`'
+            '\nGot     : `"" in results`'
+        )
+
     def test_objective(self):
         assert self.results.objective == pytest.approx(8495, abs=1)
 
