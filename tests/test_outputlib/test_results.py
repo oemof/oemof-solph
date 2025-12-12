@@ -19,17 +19,17 @@ class TestResultsClass:
             cls.results = Results(optimization_model)
 
     def test_hasattr(self):
-        assert hasattr(self.results, "flow"), (
-            '\nFailed testing `hasattr(results, "flow")`, where'
+        assert hasattr(self.results, "_variables"), (
+            '\nFailed testing `hasattr(results, "_variables")`, where'
             " `results` is a `Results` instance."
-            '\nExpected: `hasattr(results, "flow")`'
-            '\nGot     : `not hasattr(results, "flow")`'
+            '\nExpected: `hasattr(results, "_variables")`'
+            '\nGot     : `not hasattr(results, "_variables")`'
         )
-        assert not hasattr(self.results, "nonexistent"), (
-            '\nFailed testing `not hasattr(results, "nonexistent")`'
-            ", where `results` is a `Results` instance."
-            '\nExpected: `not hasattr(results, "nonexistent")`'
-            '\nGot     : `hasattr(results, "nonexistent")`'
+        assert not hasattr(self.results, "flow"), (
+            '\nFailed testing `not hasattr(results, "flow")`, where'
+            " `results` is a `Results` instance."
+            '\nExpected: `not hasattr(results, "flow")`'
+            '\nGot     : `hasattr(results, "flow")`'
         )
 
     def test_membership_checking(self):
