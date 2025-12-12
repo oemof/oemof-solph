@@ -234,6 +234,8 @@ class Results:
 
     def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
         # maps to df
+        if key not in self:
+            raise AttributeError(f"'{self}' has no attribute '{key}'")
         return self[key]
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
