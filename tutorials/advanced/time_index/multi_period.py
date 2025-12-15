@@ -14,6 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import tsam.timeseriesaggregation as tsam
+from cost_data import energy_prices
 from cost_data import investment_costs
 from matplotlib import pyplot as plt
 from oemof.tools import debugging
@@ -64,6 +65,7 @@ logger.define_logging()
 # ---------- read cost data ------------------------------------------------------------
 
 investment_costs = investment_costs()
+prices = energy_prices()
 
 # ---------- read time series data and resample-----------------------------------------
 df_temperature, df_energy = prepare_input_data(plot_resampling=False)
@@ -76,6 +78,17 @@ time_series_data_full = pd.concat([df_temperature, df_energy], axis=1)
 time_series_data_full = time_series_data_full.drop(
     columns=["Air Temperature (°C)", "heat demand (kWh)"]
 ).drop(time_series_data_full.index[0])
+
+time_series_data_full = time_series_data_full / 1000
+
+time_series_data_full = time_series_data_full.rename(
+    columns={
+        "heat demand (W)": "heat demand (kW)",
+        "electricity demand (W)": "electricity demand (kW)",
+        "PV (W)": "PV (kW)",
+    }
+)
+
 
 time_index = time_series_data_full.index
 
@@ -101,21 +114,22 @@ tindex_agg = pd.date_range(
 # ------------ create timeindex etc. for multiperiod -----------------------------------
 # list with years in which investment is possible
 years = [2025, 2030, 2035, 2040, 2045]
-# base_year = tindex_agg[0].year
+base_year = tindex_agg[0].year
 
-# # Create a list of shifted copies of the original index, one per investment year
-# shifted = [tindex_agg + pd.DateOffset(years=(y - base_year)) for y in years]
+# Create a list of shifted copies of the original index, one per investment year
+shifted = [tindex_agg + pd.DateOffset(years=(y - base_year)) for y in years]
 
-# # Concatenate them into one DatetimeIndex
-# tindex_agg_full = shifted[0]
-# for s in shifted[1:]:
-#     tindex_agg_full = tindex_agg_full.append(s)
+# Concatenate them into one DatetimeIndex
+tindex_agg_full = shifted[0]
+for s in shifted[1:]:
+    tindex_agg_full = tindex_agg_full.append(s)
 
-tindex_agg_full = pd.date_range(
-    "2025-01-01",
-    periods=typical_periods * hours_per_period * len(years),
-    freq="h",
-)
+# tindex_agg_full = pd.date_range(
+#     "2025-01-01",
+#     periods=typical_periods * hours_per_period * len(years),
+#     freq="h",
+# )
+
 
 # list of with time index for each year
 # periods = determine_periods(tindex_agg_full)
@@ -233,27 +247,25 @@ es = EnergySystem(
 
 bus_el = Bus(label="electricity")
 bus_heat = Bus(label="heat")
-es.add(bus_el, bus_heat)
+bus_gas = Bus(label="gas")
+es.add(bus_el, bus_heat, bus_gas)
 
-# new_s = pd.concat(
-#     [aggregation.typicalPeriods["PV (W)"]] * len(years), ignore_index=True
-# )
-# print(new_s)
 pv = cmp.Source(
     label="PV",
     outputs={
         bus_el: Flow(
             fix=pd.concat(
-                [aggregation.typicalPeriods["PV (W)"]] * len(years),
+                [aggregation.typicalPeriods["PV (kW)"]] * len(years),
                 ignore_index=True,
             ),
             nominal_capacity=Investment(
-                ep_costs=investment_costs[("pv", "specific_costs [Eur/W]")],
+                ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")],
                 lifetime=lifetime_adjusted(
-                    50, investment_period_length_in_years
+                    15, investment_period_length_in_years
                 ),
-                fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")],
-                maximum=500,
+                fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")]
+                / lifetime_adjusted(15, investment_period_length_in_years),
+                overall_maximum=5,
             ),
         )
     },
@@ -266,8 +278,8 @@ battery = cmp.GenericStorage(
     inputs={bus_el: Flow()},
     outputs={bus_el: Flow()},
     nominal_capacity=Investment(
-        ep_costs=investment_costs[("battery", "specific_costs [Eur/Wh]")],
-        lifetime=lifetime_adjusted(50, investment_period_length_in_years),
+        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")],
+        lifetime=lifetime_adjusted(10, investment_period_length_in_years),
     ),
     # kWh
     # initial_storage_level=0.5,  # 50%
@@ -285,7 +297,7 @@ house_sink = cmp.Sink(
     inputs={
         bus_el: Flow(
             fix=pd.concat(
-                [aggregation.typicalPeriods["electricity demand (W)"]]
+                [aggregation.typicalPeriods["electricity demand (kW)"]]
                 * len(years),
                 ignore_index=True,
             ),
@@ -318,14 +330,15 @@ hp = cmp.Converter(
         bus_heat: Flow(
             nominal_capacity=Investment(
                 ep_costs=investment_costs[
-                    ("heat pump", "specific_costs [Eur/W]")
+                    ("heat pump", "specific_costs [Eur/kW]")
                 ],
                 lifetime=lifetime_adjusted(
-                    50, investment_period_length_in_years
+                    20, investment_period_length_in_years
                 ),
                 fixed_costs=investment_costs[
                     ("heat pump", "fixed_costs [Eur]")
-                ],
+                ]
+                / lifetime_adjusted(20, investment_period_length_in_years),
             )
         )
     },
@@ -333,13 +346,52 @@ hp = cmp.Converter(
 )
 es.add(hp)
 
+# Gas Boiler
+gas_boiler = cmp.Converter(
+    label="Gas boiler",
+    inputs={bus_gas: Flow()},
+    outputs={
+        bus_heat: Flow(
+            nominal_capacity=3.5,
+            lifetime=lifetime_adjusted(20, investment_period_length_in_years),
+            age=2,
+        )
+    },
+    conversion_factors={bus_heat: 0.9},
+)
+es.add(gas_boiler)
+
+# Gas Boiler
+new_gas_boiler = cmp.Converter(
+    label="New Gas boiler",
+    inputs={bus_gas: Flow()},
+    outputs={
+        bus_heat: Flow(
+            nominal_capacity=Investment(
+                ep_costs=investment_costs[
+                    ("gas boiler", "specific_costs [Eur/kW]")
+                ],
+                lifetime=lifetime_adjusted(
+                    20, investment_period_length_in_years
+                ),
+                fixed_costs=investment_costs[
+                    ("gas boiler", "fixed_costs [Eur]")
+                ]
+                / lifetime_adjusted(20, investment_period_length_in_years),
+            )
+        )
+    },
+    conversion_factors={bus_heat: 0.9},
+)
+es.add(new_gas_boiler)
+
 # Heat demand
 heat_sink = cmp.Sink(
     label="Heat demand",
     inputs={
         bus_heat: Flow(
             fix=pd.concat(
-                [aggregation.typicalPeriods["heat demand (W)"]] * len(years),
+                [aggregation.typicalPeriods["heat demand (kW)"]] * len(years),
                 ignore_index=True,
             ),
             nominal_capacity=1.0,
@@ -348,16 +400,46 @@ heat_sink = cmp.Sink(
 )
 es.add(heat_sink)
 
+# year_prices = prices['electricity_prices [Eur/kWh]'].copy()
+
+years_in_index = sorted(set(tindex_agg_full.year))
+years_available = set(prices.index)
+
+
+# Strict check: all years in the index must be present in the table
+missing = [y for y in years_in_index if y not in years_available]
+if missing:
+    raise KeyError(f"Missing prices for years in index: {missing}")
+
+# Build a year->price lookup and vectorized map
+s = pd.DataFrame()
+for col in prices.columns:
+    year_prices = prices[col]
+    s[col] = pd.Series(
+        pd.Series(tindex_agg_full.year).map(year_prices).values,
+        index=tindex_agg_full,
+        name=col,
+    )
+
 grid_import = cmp.Source(
-    label="Grid import", outputs={bus_el: Flow(variable_costs=0.30)}
+    label="Grid import",
+    outputs={bus_el: Flow(variable_costs=s["electricity_prices [Eur/kWh]"])},
 )
 es.add(grid_import)
 
 # Grid feed-in
 feed_in = cmp.Sink(
-    label="Grid Feed-in", inputs={bus_el: Flow(variable_costs=-0.08)}
+    label="Grid Feed-in",
+    inputs={bus_el: Flow(variable_costs=s["pv_feed_in [Eur/kWh]"])},
 )
 es.add(feed_in)
+
+# Gas grid
+gas_grid = cmp.Source(
+    label="Gas grid",
+    outputs={bus_gas: Flow(variable_costs=s["gas_prices [Eur/kWh]"])},
+)
+es.add(gas_grid)
 
 # Create Model and solve it
 logging.info("Creating Model...")
@@ -371,3 +453,7 @@ results = Results(m)
 print(results.keys())
 total = results.total
 print(total)
+print(results.invest)
+print(results.old)
+print(results.old_exo)
+print(results.old_end)
