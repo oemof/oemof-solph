@@ -6,12 +6,12 @@ SPDX-License-Identifier: MIT
 """
 
 from pathlib import Path
+from urllib.request import urlretrieve
 
 import demandlib
 import matplotlib.pyplot as plt
-import pandas as pd
 import numpy as np
-from urllib.request import urlretrieve
+import pandas as pd
 from workalendar.europe import Germany
 
 
@@ -38,17 +38,41 @@ def prepare_input_data(plot_resampling=False):
         temperature_file,
         index_col="Unix Epoch",
     )
-    timedelta = np.empty(len(df_temperature))
-    timedelta[:-1] = (
-        df_temperature.index[1:] - df_temperature.index[:-1]
-    ) / 3600
-    timedelta[-1] = np.nan
 
     df_temperature.index = pd.to_datetime(
         df_temperature.index,
         unit="s",
         utc=True,
     )
+
+    # ----- clean up data --------------------------------------------------------------
+    # 1) Duplikate durch Mittelwert ersetzen
+    df_temperature = df_temperature.groupby(df_temperature.index).mean()
+
+    # 2) Regulären 5-Minuten-Index erzeugen (Zeitzone erhalten)
+    tz = df_temperature.index.tz
+    full_idx = pd.date_range(
+        start=df_temperature.index.min(),
+        end=df_temperature.index.max(),
+        freq="5min",
+        tz=tz,
+    )
+
+    # 3) Auf 5-Minuten-Raster reindizieren -> Lücken werden NaN
+    df_regular = df_temperature.reindex(full_idx)
+
+    # 4) Zeitbasierte Interpolation nur für numerische Spalten
+    num_cols = df_regular.select_dtypes(include="number").columns
+
+    # Interpolation (zeitbasiert: berücksichtigt die Zeitabstände im Index)
+    df_regular[num_cols] = df_regular[num_cols].interpolate(method="time")
+
+    # 5) Ränder ohne beidseitige Nachbarn per ffill/bfill schließen
+    df_regular[num_cols] = df_regular[num_cols].ffill().bfill()
+
+    df_temperature = df_regular
+
+    # -------------------------------------------
 
     building_area = 120  # m² (from publication)
     specific_heat_demand = 60  #  kWh/m²/a  (educated guess)
@@ -68,7 +92,7 @@ def prepare_input_data(plot_resampling=False):
     ).get_bdew_profile()
 
     df_temperature["heat demand (W)"] = (
-        df_temperature["heat demand (kWh)"] * 1e3 / timedelta
+        df_temperature["heat demand (kWh)"] * 1e3 / (5 / 60)
     )
 
     energy_file = Path(file_path, "energy.csv")
@@ -102,7 +126,7 @@ def prepare_input_data(plot_resampling=False):
             p_pv[resolution] = df_energy["PV (W)"].resample(resolution).mean()
             plt.plot(
                 np.linspace(0, 8760, len(p_pv[resolution])),
-                sorted(p_pv[resolution]/1e3)[::-1],
+                sorted(p_pv[resolution] / 1e3)[::-1],
                 label=resolution,
             )
 
@@ -110,6 +134,8 @@ def prepare_input_data(plot_resampling=False):
         plt.ylim(7, 16)
         plt.legend()
         plt.show()
+
+    return df_temperature, df_energy
 
 
 if __name__ == "__main__":
