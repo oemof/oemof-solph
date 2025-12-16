@@ -42,7 +42,7 @@ def test_duplicate_label():
     my_label2 = "test_02"
     es.add(solph.Bus(label=my_label1))
     es.add(solph.Bus(label=my_label2))
-    msg = rf"EnergySystem already contains Node\(s\) labeled: "
+    msg = r"EnergySystem already contains Node\(s\) labeled: "
     with pytest.raises(ValueError, match=msg):
         es.add(solph.Bus(label=my_label1), solph.Bus(label=my_label2))
 
@@ -58,6 +58,6 @@ def test_duplicate_qualified_label():
     )
     es.add(solph.Bus(label=my_label1))
     es.add(solph.Bus(label=my_label2))
-    msg = rf"EnergySystem already contains Node\(s\) labeled: \('test"
+    msg = r"EnergySystem already contains Node\(s\) labeled: \('test"
     with pytest.raises(ValueError, match=msg):
         es.add(solph.Bus(label=my_label1), solph.Bus(label=my_label2))
