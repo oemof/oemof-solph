@@ -38,18 +38,27 @@ def test_wrong_logging_level():
 def test_duplicate_label():
     datetimeindex = pd.date_range("1/1/2012", periods=12, freq="h")
     es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
-    my_label = "test_01"
-    es.add(solph.Bus(label=my_label))
-    msg = rf"EnergySystem already contains Node\(s\) labeled: {my_label}"
+    my_label1 = "test_01"
+    my_label2 = "test_02"
+    es.add(solph.Bus(label=my_label1))
+    es.add(solph.Bus(label=my_label2))
+    msg = (
+        rf"EnergySystem already contains Node\(s\) labeled: "
+    )
     with pytest.raises(ValueError, match=msg):
-        es.add(solph.Bus(label=my_label))
+        es.add(solph.Bus(label=my_label1), solph.Bus(label=my_label2))
 
 
 def test_duplicate_qualified_label():
     datetimeindex = pd.date_range("1/1/2012", periods=12, freq="h")
     es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
-    my_label = QualifiedLabel("test_01")
-    es.add(solph.Bus(label=my_label))
-    msg = rf"EnergySystem already contains Node\(s\) labeled: {my_label}"
+    my_label1 = QualifiedLabel("test_01")
+    my_label2 = QualifiedLabel("test_02")
+    es.add(solph.Bus(label=my_label1))
+    es.add(solph.Bus(label=my_label2))
+    msg = (
+        rf"EnergySystem already contains Node\(s\) labeled: {my_label1}, "
+        rf"{my_label2}"
+    )
     with pytest.raises(ValueError, match=msg):
-        es.add(solph.Bus(label=my_label))
+        es.add(solph.Bus(label=my_label1), solph.Bus(label=my_label2))
