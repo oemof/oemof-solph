@@ -13,6 +13,7 @@ import logging
 
 import pandas as pd
 import pytest
+from oemof.network.network.nodes import QualifiedLabel
 
 from oemof import solph
 from oemof import tools
@@ -32,3 +33,23 @@ def test_wrong_logging_level():
     with pytest.raises(LoggingError, match="The root logger level is 'DEBUG'"):
         solph.Model(es)
     my_logger.setLevel("WARNING")
+
+
+def test_duplicate_label():
+    datetimeindex = pd.date_range("1/1/2012", periods=12, freq="h")
+    es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
+    my_label = "test_01"
+    es.add(solph.Bus(label=my_label))
+    msg = rf"EnergySystem already contains Node\(s\) labeled: {my_label}"
+    with pytest.raises(ValueError, match=msg):
+        es.add(solph.Bus(label=my_label))
+
+
+def test_duplicate_qualified_label():
+    datetimeindex = pd.date_range("1/1/2012", periods=12, freq="h")
+    es = solph.EnergySystem(timeindex=datetimeindex, infer_last_interval=True)
+    my_label = QualifiedLabel("test_01")
+    es.add(solph.Bus(label=my_label))
+    msg = rf"EnergySystem already contains Node\(s\) labeled: {my_label}"
+    with pytest.raises(ValueError, match=msg):
+        es.add(solph.Bus(label=my_label))
