@@ -5,7 +5,8 @@ def energy_prices() -> pd.DataFrame:
 
     print("Data is taken from at doi: https://doi.org/10.52202/077185-0033")
 
-    years = [2025, 2030, 2035, 2040, 2045]
+    # years = [2025, 2030, 2035, 2040, 2045]
+    years = [2025, 2026, 2027, 2028, 2029]
     return pd.DataFrame(
         {
             "gas_prices [Eur/kWh]": [
@@ -31,7 +32,8 @@ def energy_prices() -> pd.DataFrame:
 def investment_costs() -> pd.DataFrame:
     print("Data is taken from doi: https://doi.org/10.52202/077185-0033")
 
-    years = [2025, 2030, 2035, 2040, 2045]
+    # years = [2025, 2030, 2035, 2040, 2045]
+    years = [2025, 2026, 2027, 2028, 2029]
     idx = pd.Index(years, name="year")
 
     df = pd.DataFrame(

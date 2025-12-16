@@ -1,27 +1,16 @@
 # -*- coding: utf-8 -*-
-
-"""
-SPDX-FileCopyrightText: Patrik Schönfeldt
-SPDX-FileCopyrightText: DLR e.V.
-
-SPDX-License-Identifier: MIT
-"""
-
 import logging
 import warnings
-from pathlib import Path
 
-import numpy as np
+import matplotlib.pyplot as plt
 import pandas as pd
 import tsam.timeseriesaggregation as tsam
 from cost_data import energy_prices
 from cost_data import investment_costs
-from matplotlib import pyplot as plt
 from oemof.tools import debugging
 from oemof.tools import logger
 from shared import prepare_input_data
 
-from oemof import solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -31,6 +20,7 @@ from oemof.solph import Results
 from oemof.solph import components as cmp
 
 
+# ---------------- some helper functions -----------------------------------------------
 def determine_periods(datetimeindex):
     """Explicitly define and return periods of the energy system
 
@@ -57,6 +47,36 @@ def determine_periods(datetimeindex):
     return periods
 
 
+def lifetime_adjusted(lifetime, investment_period_length_in_years):
+    return int(lifetime / investment_period_length_in_years)
+
+
+def discount_rate_adjusted(discount_rate, investment_period_length_in_years):
+    return (1 + discount_rate) ** investment_period_length_in_years - 1
+
+
+def expand_energy_prices(tindex_agg_full, prices):
+    years_in_index = sorted(set(tindex_agg_full.year))
+    years_available = set(prices.index)
+
+    # Strict check: all years in the index must be present in the table
+    missing = [y for y in years_in_index if y not in years_available]
+    if missing:
+        raise KeyError(f"Missing prices for years in index: {missing}")
+
+    # Build a year->price lookup and vectorized map
+    s = pd.DataFrame()
+    for col in prices.columns:
+        year_prices = prices[col]
+        s[col] = pd.Series(
+            pd.Series(tindex_agg_full.year).map(year_prices).values,
+            index=tindex_agg_full,
+            name=col,
+        )
+    return s
+
+
+# --------------------------------------------------------------------------------------
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
 )
@@ -68,19 +88,24 @@ investment_costs = investment_costs()
 prices = energy_prices()
 
 # ---------- read time series data and resample-----------------------------------------
+
+# read data
 df_temperature, df_energy = prepare_input_data(plot_resampling=False)
 
+# resample to one hour
 df_temperature = df_temperature.resample("1 h").mean()
 df_energy = df_energy.resample("1 h").mean()
 
+# create data as one DataFrame
 time_series_data_full = pd.concat([df_temperature, df_energy], axis=1)
 
+# drop unnecessary columns and time steps of previous year
 time_series_data_full = time_series_data_full.drop(
     columns=["Air Temperature (°C)", "heat demand (kWh)"]
 ).drop(time_series_data_full.index[0])
 
+# convert untis from W to kW
 time_series_data_full = time_series_data_full / 1000
-
 time_series_data_full = time_series_data_full.rename(
     columns={
         "heat demand (W)": "heat demand (kW)",
@@ -89,10 +114,7 @@ time_series_data_full = time_series_data_full.rename(
     }
 )
 
-
-time_index = time_series_data_full.index
-
-# -------------- Clustering of Input time-series with TSAM -----------------------------
+# -------------- Clustering of input time-series with TSAM -----------------------------
 typical_periods = 40
 hours_per_period = 24
 
@@ -106,17 +128,25 @@ aggregation = tsam.TimeSeriesAggregation(
 )
 aggregation.createTypicalPeriods()
 
-# pandas DatTime for the aggregated time series
+# create a time index for the aggregated time series
 tindex_agg = pd.date_range(
     "2025-01-01", periods=typical_periods * hours_per_period, freq="h"
 )
 
 # ------------ create timeindex etc. for multiperiod -----------------------------------
-# list with years in which investment is possible
-years = [2025, 2030, 2035, 2040, 2045]
-base_year = tindex_agg[0].year
+# Note:
+# originally the data provided is for investment periods of 5 years each
+# so years = [2025, 2030, 2035, 2040, 2045]
+# this was causing a bug in the mulit period calculation of the fixed_costs in the
+# INVESTFLOWS, therefore years is set to [2025, 2026, 2027, 2028, 2029] in this eaxample
+# this will be changed, when the bug is fixed
 
+# list with years in which investment is possible
+years = [2025, 2026, 2027, 2028, 2029]
+
+# create a time index for the whole model
 # Create a list of shifted copies of the original index, one per investment year
+base_year = years[0]
 shifted = [tindex_agg + pd.DateOffset(years=(y - base_year)) for y in years]
 
 # Concatenate them into one DatetimeIndex
@@ -124,18 +154,18 @@ tindex_agg_full = shifted[0]
 for s in shifted[1:]:
     tindex_agg_full = tindex_agg_full.append(s)
 
-# tindex_agg_full = pd.date_range(
-#     "2025-01-01",
-#     periods=typical_periods * hours_per_period * len(years),
-#     freq="h",
-# )
+print("------- Time Index of Multi-Period Model --------")
+print("time index: ", tindex_agg_full)
+print("-------------------------------------------------")
 
+# create the list of investent periods for the model
+investment_periods = determine_periods(tindex_agg_full)
 
-# list of with time index for each year
-# periods = determine_periods(tindex_agg_full)
-periods = [tindex_agg] * len(years)
+print("------- Priods of Multi-Period Model --------")
+print("Investment periods: ", investment_periods)
+print("---------------------------------------------")
 
-# parameters for time series aggregation in oemof-solph with one dict per year
+# create parameters for time series aggregation in oemof-solph with one dict per year
 tsa_parameters = [
     {
         "timesteps_per_period": aggregation.hoursPerPeriod,
@@ -144,111 +174,29 @@ tsa_parameters = [
     }
 ] * len(years)
 
-# # ---------- read time series data -----------------------------------------------------
-
-# file_path = Path(__file__).parent
-
-# df = pd.read_csv(
-#     Path(file_path, "energy.csv"),
-# )
-# df["time"] = pd.to_datetime(df["Unix Epoch"], unit="s")
-# # time als Index setzen
-# df = df.set_index("time")
-# df = df.drop(columns=["Unix Epoch"])
-# # print(df)
-
-# time_index = df.index
-
-# # Dummy pv profile
-# h = np.arange(len(time_index))
-# pv_profile = df["PV (W)"]
-
-# # Dummy electricity profile
-# df["house_elec_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
-
-# # Dummy heat profile
-# df["house_heat_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
-
-# # EV-Ladeprofil
-# df["ev_charge_kW"] = (
-#     0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
-# )
-
-# # COP-Profil (konstant, später evtl. temperaturabhängig)
-# df["cop_hp"] = 3.5
-
-# df = df.resample("1h").mean()
-
-# # -------------- Clustering of Input time-series with TSAM -----------------------------
-# typical_periods = 40
-# hours_per_period = 24
-
-# aggregation = tsam.TimeSeriesAggregation(
-#     timeSeries=df.iloc[:8760],
-#     noTypicalPeriods=typical_periods,
-#     hoursPerPeriod=hours_per_period,
-#     clusterMethod="k_means",
-#     sortValues=False,
-#     rescaleClusterPeriods=False,
-# )
-# aggregation.createTypicalPeriods()
-
-# # pandas DatTime for the aggregated time series
-# tindex_agg_one_year = pd.date_range(
-#     "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
-# )
-
-# # ------------ create timeindex etc. for multiperiod -----------------------------------
-# # list with years in which investment is possible
-# years = [2025, 2030, 2035, 2040, 2045]
-
-# # stretch time index to include all years (continously)
-# tindex_agg_full = pd.date_range(
-#     "2022-01-01",
-#     periods=typical_periods * hours_per_period * len(years),
-#     freq="h",
-# )
-
-# # list of with time index for each year
-# periods = [tindex_agg_one_year] * len(years)
-
-# # parameters for time series aggregation in oemof-solph with one dict per year
-# tsa_parameters = [
-#     {
-#         "timesteps_per_period": aggregation.hoursPerPeriod,
-#         "order": aggregation.clusterOrder,
-#         "timeindex": aggregation.timeIndex,
-#     }
-# ] * len(years)
-
 # ------------------ calculate discount rate and lifetime ------------------------------
 
 # the annuity has to be calculated for a period of 5 years
 investment_period_length_in_years = 5
 
-
-def lifetime_adjusted(lifetime, investment_period_length_in_years):
-    return lifetime / investment_period_length_in_years
-
-
-def discount_rate_adjusted(discount_rate, investment_period_length_in_years):
-    return (1 + discount_rate) ** investment_period_length_in_years - 1
-
-
 # ------------------ create energy system ----------------------------------------------
 es = EnergySystem(
     timeindex=tindex_agg_full,
-    timeincrement=[1] * len(tindex_agg_full),
-    periods=periods,
+    periods=investment_periods,
     tsa_parameters=tsa_parameters,
     infer_last_interval=False,
 )
-
 
 bus_el = Bus(label="electricity")
 bus_heat = Bus(label="heat")
 bus_gas = Bus(label="gas")
 es.add(bus_el, bus_heat, bus_gas)
+
+# test_pv = pd.concat(
+#     [aggregation.typicalPeriods["PV (kW)"]] * len(years),
+#     ignore_index=True,
+# )
+# test_pv.plot()
 
 pv = cmp.Source(
     label="PV",
@@ -261,11 +209,11 @@ pv = cmp.Source(
             nominal_capacity=Investment(
                 ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")],
                 lifetime=lifetime_adjusted(
-                    15, investment_period_length_in_years
+                    20, investment_period_length_in_years
                 ),
                 fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")]
-                / lifetime_adjusted(15, investment_period_length_in_years),
-                overall_maximum=5,
+                / lifetime_adjusted(20, investment_period_length_in_years),
+                overall_maximum=10,
             ),
         )
     },
@@ -281,8 +229,6 @@ battery = cmp.GenericStorage(
         ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")],
         lifetime=lifetime_adjusted(10, investment_period_length_in_years),
     ),
-    # kWh
-    # initial_storage_level=0.5,  # 50%
     min_storage_level=0.0,
     max_storage_level=1.0,
     loss_rate=0.001,  # 0.1%/h
@@ -352,21 +298,6 @@ gas_boiler = cmp.Converter(
     inputs={bus_gas: Flow()},
     outputs={
         bus_heat: Flow(
-            nominal_capacity=3.5,
-            lifetime=lifetime_adjusted(20, investment_period_length_in_years),
-            age=2,
-        )
-    },
-    conversion_factors={bus_heat: 0.9},
-)
-es.add(gas_boiler)
-
-# Gas Boiler
-new_gas_boiler = cmp.Converter(
-    label="New Gas boiler",
-    inputs={bus_gas: Flow()},
-    outputs={
-        bus_heat: Flow(
             nominal_capacity=Investment(
                 ep_costs=investment_costs[
                     ("gas boiler", "specific_costs [Eur/kW]")
@@ -378,12 +309,14 @@ new_gas_boiler = cmp.Converter(
                     ("gas boiler", "fixed_costs [Eur]")
                 ]
                 / lifetime_adjusted(20, investment_period_length_in_years),
+                existing=3.5,
+                age=2,
             )
         )
     },
     conversion_factors={bus_heat: 0.9},
 )
-es.add(new_gas_boiler)
+es.add(gas_boiler)
 
 # Heat demand
 heat_sink = cmp.Sink(
@@ -400,44 +333,26 @@ heat_sink = cmp.Sink(
 )
 es.add(heat_sink)
 
-# year_prices = prices['electricity_prices [Eur/kWh]'].copy()
-
-years_in_index = sorted(set(tindex_agg_full.year))
-years_available = set(prices.index)
-
-
-# Strict check: all years in the index must be present in the table
-missing = [y for y in years_in_index if y not in years_available]
-if missing:
-    raise KeyError(f"Missing prices for years in index: {missing}")
-
-# Build a year->price lookup and vectorized map
-s = pd.DataFrame()
-for col in prices.columns:
-    year_prices = prices[col]
-    s[col] = pd.Series(
-        pd.Series(tindex_agg_full.year).map(year_prices).values,
-        index=tindex_agg_full,
-        name=col,
-    )
+# calculate prices for each time step
+p = expand_energy_prices(tindex_agg_full, prices)
 
 grid_import = cmp.Source(
     label="Grid import",
-    outputs={bus_el: Flow(variable_costs=s["electricity_prices [Eur/kWh]"])},
+    outputs={bus_el: Flow(variable_costs=p["electricity_prices [Eur/kWh]"])},
 )
 es.add(grid_import)
 
 # Grid feed-in
 feed_in = cmp.Sink(
     label="Grid Feed-in",
-    inputs={bus_el: Flow(variable_costs=s["pv_feed_in [Eur/kWh]"])},
+    inputs={bus_el: Flow(variable_costs=p["pv_feed_in [Eur/kWh]"])},
 )
 es.add(feed_in)
 
 # Gas grid
 gas_grid = cmp.Source(
     label="Gas grid",
-    outputs={bus_gas: Flow(variable_costs=s["gas_prices [Eur/kWh]"])},
+    outputs={bus_gas: Flow(variable_costs=p["gas_prices [Eur/kWh]"])},
 )
 es.add(gas_grid)
 
@@ -445,15 +360,28 @@ es.add(gas_grid)
 logging.info("Creating Model...")
 m = Model(es)
 logging.info("Solving Model...")
-m.solve(solver="gurobi", solve_kwargs={"tee": True})
+m.solve(
+    solver="gurobi",
+    solve_kwargs={
+        "tee": True,
+        "keepfiles": True,
+        "symbolic_solver_labels": True,
+    },
+)
 
+# ----------------- Post Processing ----------------------------------------------------
 
 # Create Results
 results = Results(m)
 print(results.keys())
 total = results.total
-print(total)
+print(results.total)
 print(results.invest)
-print(results.old)
-print(results.old_exo)
-print(results.old_end)
+print(results.flow)
+results.flow.iloc[:, 6].plot()
+total.plot(kind="bar")
+plt.show()
+# print(results.invest)
+# print(results.old)
+# print(results.old_exo)
+# print(results.old_end)
