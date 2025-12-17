@@ -11,6 +11,8 @@ import logging
 import warnings
 from pathlib import Path
 
+from create_timeseries import reshape_unevenly
+
 import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -39,6 +41,10 @@ df = prepare_input_data(minutes=60)
 time_index = idx = pd.date_range(
     start="2023-01-01 00:00", end="2023-12-31 23:00", freq="h"
 )
+
+df.set_index(time_index, inplace=True)
+
+df_neu = reshape_unevenly(df)
 
 # PV profile
 h = np.arange(len(time_index))

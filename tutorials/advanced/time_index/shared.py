@@ -14,7 +14,9 @@ from urllib.request import urlretrieve
 from workalendar.europe import Germany
 
 
-def prepare_input_data():
+def prepare_input_data(minutes):
+    data = {}
+
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
@@ -33,18 +35,16 @@ def prepare_input_data():
     temperature_file = Path(file_path, "temperature.csv")
     if not temperature_file.exists():
         urlretrieve(url_temperature, temperature_file)
-    df_temperature = pd.read_csv(
+    temperature = pd.read_csv(
         temperature_file,
         index_col="Unix Epoch",
     )
-    timedelta = np.empty(len(df_temperature))
-    timedelta[:-1] = (
-        df_temperature.index[1:] - df_temperature.index[:-1]
-    ) / 3600
+    timedelta = np.empty(len(temperature))
+    timedelta[:-1] = (temperature.index[1:] - temperature.index[:-1]) / 3600
     timedelta[-1] = np.nan
 
-    df_temperature.index = pd.to_datetime(
-        df_temperature.index,
+    temperature.index = pd.to_datetime(
+        temperature.index,
         unit="s",
         utc=True,
     )
@@ -55,10 +55,10 @@ def prepare_input_data():
 
     # We estimate the heat demand from the ambient temperature using demandlib.
     # This returns energy per time step in units of kWh.
-    df_temperature["heat demand (kWh)"] = demandlib.bdew.HeatBuilding(
-        df_temperature.index,
+    temperature["heat demand (kWh)"] = demandlib.bdew.HeatBuilding(
+        temperature.index,
         holidays=holidays,
-        temperature=df_temperature["Air Temperature (°C)"],
+        temperature=temperature["Air Temperature (°C)"],
         shlp_type="EFH",
         building_class=1,
         wind_class=1,
@@ -66,26 +66,42 @@ def prepare_input_data():
         name="EFH",
     ).get_bdew_profile()
 
-    df_temperature["heat demand (W)"] = (
-        df_temperature["heat demand (kWh)"] * 1e3 / timedelta
+    temperature["heat demand (W)"] = (
+        temperature["heat demand (kWh)"] * 1e3 / timedelta
     )
 
     energy_file = Path(file_path, "energy.csv")
     if not energy_file.exists():
         urlretrieve(url_energy, energy_file)
-    df_engergy = pd.read_csv(
+
+    energy = pd.read_csv(
         energy_file,
         index_col=0,
     )
-    df_engergy.index = pd.to_datetime(
-        df_engergy.index,
+    energy.index = pd.to_datetime(
+        energy.index,
         unit="s",
         utc=True,
     )
 
-    print(df_engergy)
-    print(df_temperature)
+    energy[energy == np.inf] = np.nan
+    energy = (
+        energy.resample(f"{minutes} min")
+        .mean()
+        .ffill()
+        .bfill()
+        .reset_index(drop=True)
+    )
+    temperature[temperature == np.inf] = np.nan
+    temperature = (
+        temperature.resample(f"{minutes} min")
+        .mean()[:-1]
+        .ffill()
+        .bfill()
+        .reset_index(drop=True)
+    )
+    return pd.concat([energy, temperature], axis=1)
 
 
 if __name__ == "__main__":
-    prepare_input_data()
+    print(prepare_input_data(5))
