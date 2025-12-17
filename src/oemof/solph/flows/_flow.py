@@ -98,6 +98,10 @@ class Flow(Edge):
         once it reaches its lifetime (considering also
         an initial age), the flow is forced to 0.
         Note: Only applicable for a multi-period model.
+    interest_rate: numeric
+        The discount rate to calculate annuities.
+        If no interest_rate is specified a default value of 0.02 is assumed.
+        Note: Only applicable for a multi-period model.
 
     Notes
     -----
@@ -144,6 +148,7 @@ class Flow(Edge):
         lifetime=None,
         age=None,
         fixed_costs=None,
+        interest_rate=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
