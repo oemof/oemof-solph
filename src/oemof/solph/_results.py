@@ -9,11 +9,10 @@ SPDX-License-Identifier: MIT
 
 """
 
-import warnings
+from collections.abc import Hashable
 from functools import cache
 
 import pandas as pd
-from oemof.tools import debugging
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
 from pyomo.opt.results.container import ListContainer
@@ -28,39 +27,37 @@ class Results:
     #   instances returnable by `model.solve` and still be backwards
     #   compatible.
     def __init__(self, model: ConcreteModel):
-        msg = (
-            "The class 'Results' is experimental. Functionality and API can"
-            " be changed without warning during any update."
-        )
-        warnings.warn(msg, debugging.ExperimentalFeatureWarning)
-
         self._solver_results = model.solver_results
+        self._meta_results = {"objective": model.objective()}
         self._variables = {}
         self._model = model
 
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
+                # name of the variable
                 key = str(variable).split(".")[-1]
+                # where the variable is found in the model
                 occurence = str(variable)[: -(len(key) + 1)]
                 if (
                     key not in self._variables
                     and key not in self._solver_results
-                ):
+                ):  # variable found for the first time
                     self._variables[key] = {occurence: variable}
                 elif (
                     key in self._variables
                     and occurence not in self._variables[key]
                 ):
+                    # Variable known name found somewhere new in the model.
+                    # Aligning names is particularly useful when they name
+                    # the same thing in different Blocks.
                     self._variables[key][occurence] = variable
-                elif self._variables[key][occurence] == variable:
-                    # For debugging purposes.
+                else:
+                    # Only left option should be
+                    # self._variables[key][occurence] == variable.
+                    # Iterated over the same thing twice.
+                    # Case for debugging purposes.
                     # We should avoid useless iterations.
                     pass
-                else:
-                    raise ValueError(
-                        f"Variable name defined multiple times: {key}"
-                        + f"(last time in '{variable}')"
-                    )
 
         # adss additional keys for the calculation of opex and capex
         # if the keyword eval_economy is True
@@ -79,6 +76,7 @@ class Results:
         """
         return (
             self._solver_results.keys()
+            | self._meta_results.keys()
             | self._variables.keys()
             | self._economy.keys()
         )
@@ -113,6 +111,14 @@ class Results:
                         future_stack=True
                     )
                 )
+            # We assume that varables with the same name
+            # also use the same index but have disjunct values on that index.
+            # For example, the status of a Flow is depending on the type of
+            # Flow is defined in either NonConvexFlowBlock or
+            # InvestNonConvexFlowBlock. As this technical detail does not
+            # interest users, we concatinate all collected DataFrames.
+            # Note that this simplification might lead to unexpected results
+            # if third-party code introduces a variable name collision.
             df = pd.concat(df, axis=1)
 
             # overwrite known indexes
@@ -211,15 +217,6 @@ class Results:
         return df_opex
 
     @property
-    def objective(self):
-        """Returns objective of model
-
-        Returns:
-            float: optimum of model
-        """
-        return self._model.objective()
-
-    @property
     def timeindex(self):
         """Returns timeindex of energy system
 
@@ -228,13 +225,14 @@ class Results:
         """
         return self._model.es.timeindex
 
-    def __getattr__(self, key: str) -> pd.DataFrame | ListContainer:
-        # maps to df
-        return self[key]
-
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:
             return self._solver_results[key]
+        elif key in self._meta_results:
+            return self._meta_results[key]
         else:
             return self.to_df(key)
+
+    def __contains__(self, key: Hashable) -> bool:
+        return key in self._solver_results or key in self._variables

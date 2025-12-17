@@ -1,0 +1,35 @@
+v0.6.2
+------
+
+API changes
+###########
+
+* The `Flow` parameter `bidirectional` now raises a `FutureWarning`,
+  as it is to be removed in a following version.
+
+New features
+############
+
+* Classes `Flow`, `NonConvex`, and `Investment` now use `custom_properties`
+  in the way that `Node` classes (e.g. `Bus`, or `Converter`) do.
+
+Documentation
+#############
+
+* The `Flow` parameters `min` and `max` are now listed with their default 
+  values of 0 and 1, respectively, in the `Flow` API documentation.
+
+Bug fixes
+#########
+
+Other changes
+#############
+
+Contributors
+############
+
+* Patrik Schönfeldt
+* Lennart Schürmann
+
+Acknowledgements
+################

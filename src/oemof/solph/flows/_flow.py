@@ -13,10 +13,12 @@ SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-FileCopyrightText: Saeed Sayadi
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Lennart Schürmann
 
 SPDX-License-Identifier: MIT
 
 """
+
 import math
 import numbers
 from collections.abc import Iterable
@@ -51,10 +53,10 @@ class Flow(Edge):
         The costs associated with one unit of the flow per hour. The
         costs for each timestep (:math:`P_t \cdot c \cdot \delta(t)`)
         will be added to the objective expression of the optimization problem.
-    max : numeric (iterable or scalar), :math:`f_{max}`
+    max : numeric (iterable or scalar), default: 1, :math:`f_{max}`
         Normed maximum value of the flow. The flow absolute maximum will be
-        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`
-    min : numeric (iterable or scalar), :math:`f_{min}`
+        calculated by multiplying :attr:`nominal_capacity` with :attr:`max`.
+    min : numeric (iterable or scalar), default: 0, :math:`f_{min}`
         Normed minimum value of the flow (see :attr:`max`).
     fix : numeric (iterable or scalar), :math:`f_{fix}`
         Normed fixed value for the flow variable. Will be multiplied with the
@@ -63,8 +65,8 @@ class Flow(Edge):
         the normed *upper bound* on the positive difference
         (`flow[t-1] < flow[t]`) of two consecutive flow values.
     negative_gradient_limit : numeric (iterable, scalar or None)
-            the normed *upper bound* on the negative difference
-            (`flow[t-1] > flow[t]`) of two consecutive flow values.
+        the normed *upper bound* on the negative difference
+        (`flow[t-1] > flow[t]`) of two consecutive flow values.
     full_load_time_max : numeric, :math:`t_{full\_load,max}`
         Maximum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
@@ -127,20 +129,23 @@ class Flow(Edge):
         nominal_value=None,
         # --- END ---
         variable_costs=0,
-        min=None,
-        max=None,
+        min=0,
+        max=1,
         fix=None,
         positive_gradient_limit=None,
         negative_gradient_limit=None,
         full_load_time_max=None,
         full_load_time_min=None,
         integer=False,
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         bidirectional=False,
+        # --- END
         nonconvex=None,
         lifetime=None,
         age=None,
         fixed_costs=None,
-        custom_attributes=None,
+        custom_attributes=None,  # To be removed for versions >= v0.7
+        custom_properties=None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
@@ -161,13 +166,28 @@ class Flow(Edge):
             else:
                 warn(msg, FutureWarning)
             nominal_capacity = nominal_value
+
+        if custom_attributes is not None:
+            msg = (
+                "For backward compatibility,"
+                + " the option custom_attributes overwrites the option"
+                + " custom_properties."
+                + " Both options cannot be set at the same time."
+            )
+            if custom_properties is not None:
+                raise AttributeError(msg)
+            else:
+                warn(msg, FutureWarning)
+            custom_properties = custom_attributes
         # --- END ---
 
-        super().__init__()
+        super().__init__(custom_properties=custom_properties)
 
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
             for attribute, value in custom_attributes.items():
                 setattr(self, attribute, value)
+        # --- END ---
 
         self.nominal_capacity = None
         self.investment = None
@@ -198,6 +218,7 @@ class Flow(Edge):
             warn(msg, debugging.SuspiciousUsageWarning)
 
         self.fixed_costs = sequence(fixed_costs)
+        self.variable_costs = sequence(variable_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
 
@@ -205,50 +226,73 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         self.bidirectional = bidirectional
+        # --- END
         self.lifetime = lifetime
         self.age = age
 
-        # It is not allowed to define min or max if fix is defined.
-        if fix is not None and (min is not None or max is not None):
-            raise AttributeError(
+        # It is not allowed to define `min` or `max` if `fix` is defined.
+        # HINT: This also allows `flow`s with `fix` to be bidirectional, if
+        # negative values are used in `fix`, despite `min` and `max` having
+        # the default values (0 and 1).
+        # TODO: Is it intended to have bidirectional fixed flows?
+        if fix is not None and (min != 0 or max != 1):
+            msg = (
                 "It is not allowed to define `min`/`max` if `fix` is defined."
             )
+            raise AttributeError(msg)
 
-        need_nominal_value = [
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        if self.bidirectional:
+            msg = "The `bidirectional` keyword is deprecated and will be "
+            "removed in a future version, as it sets the value of `min` to -1 "
+            "without the users explicit intent. It is recommended to set a "
+            "negative value for `min` explicitly instead."
+            warn(msg, FutureWarning)
+            if min == 0:
+                min = -1
+        # --- END
+
+        if sequence(min).min() < 0:
+            msg = (
+                "Setting `min` to negative values allows for the flow to "
+                "become bidirectional, which is an experimental feature."
+            )
+            warn(msg, debugging.ExperimentalFeatureWarning)
+
+        self.fix = sequence(fix)
+        self.max = sequence(max)
+        self.min = sequence(min)
+
+        need_nominal_capacity = [
             "fix",
             "full_load_time_max",
             "full_load_time_min",
             "min",
             "max",
         ]
-        sequences = ["fix", "variable_costs", "min", "max"]
+        need_nominal_capacity_defaults = {
+            "fix": None,
+            "full_load_time_max": None,
+            "full_load_time_min": None,
+            # --- BEGIN: The following code can be removed for versions >= v0.7
+            "min": -1 if self.bidirectional else 0,
+            # --- END
+            # "min": 0,
+            "max": 1,
+        }
         if self.investment is None and self.nominal_capacity is None:
-            for attr in need_nominal_value:
-                if isinstance(eval(attr), Iterable):
-                    the_attr = eval(attr)[0]
+            for attr in need_nominal_capacity:
+                if isinstance(getattr(self, attr), Iterable):
+                    the_attr = getattr(self, attr)[0]
                 else:
-                    the_attr = eval(attr)
-                if the_attr is not None:
+                    the_attr = getattr(self, attr)
+                if the_attr != need_nominal_capacity_defaults[attr]:
                     raise AttributeError(
-                        f"If {attr} is set in a flow (except InvestmentFlow), "
-                        "nominal_value must be set as well.\n"
-                        "Otherwise, it won't have any effect."
+                        f"If {attr} is set in a flow, "
+                        "nominal_capacity must be set as well."
                     )
-        # minimum will be set even without nominal limit
-
-        # maximum and minimum (absolute values) should be always set,
-        # as nominal_value or invest might be defined later
-        if max is None:
-            max = 1
-        if min is None:
-            if bidirectional:
-                min = -1
-            else:
-                min = 0
-
-        for attr in sequences:
-            setattr(self, attr, sequence(eval(attr)))
 
         if self.nominal_capacity is not None and not math.isfinite(
             self.max[0]

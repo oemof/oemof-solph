@@ -182,13 +182,13 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> src1 = solph.components.Source(
     ...     label='source_0', outputs={bus: solph.flows.Flow(
     ...         nominal_capacity=solph.Investment(
-    ...             ep_costs=50, custom_attributes={"space": 4},
+    ...             ep_costs=50, custom_properties={"space": 4},
     ...         ))
     ...     })
     >>> src2 = solph.components.Source(
     ...     label='source_1', outputs={bus: solph.flows.Flow(
     ...         nominal_capacity=solph.Investment(
-    ...              ep_costs=100, custom_attributes={"space": 1},
+    ...              ep_costs=100, custom_properties={"space": 1},
     ...         ))
     ...     })
     >>> es.add(bus, sink, src1, src2)
@@ -199,11 +199,14 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
-    invest_flows = {}
+    investments = {}
 
     for i, o in model.flows:
-        if hasattr(model.flows[i, o].investment, keyword):
-            invest_flows[(i, o)] = model.flows[i, o].investment
+        if (
+            model.flows[i, o].investment is not None
+            and keyword in model.flows[i, o].investment.custom_properties
+        ):
+            investments[(i, o)] = model.flows[i, o].investment
 
     limit_name = "invest_limit_" + keyword
 
@@ -212,9 +215,9 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         limit_name,
         po.Expression(
             expr=sum(
-                model.InvestmentFlowBlock.invest[inflow, outflow, p]
-                * getattr(invest_flows[inflow, outflow], keyword)
-                for (inflow, outflow) in invest_flows
+                model.InvestmentFlowBlock.invest[i, o, p]
+                * investments[i, o].custom_properties[keyword]
+                for (i, o) in investments
                 for p in model.PERIODS
             )
         ),

@@ -337,11 +337,11 @@ def test_generic_chp_without_warning():
     components.GenericCHP(
         label="combined_cycle_extraction_turbine",
         fuel_input={
-            bgas: Flow(custom_attributes={"H_L_FG_share_max": [0.183]})
+            bgas: Flow(custom_properties={"H_L_FG_share_max": [0.183]})
         },
         electrical_output={
             bel: Flow(
-                custom_attributes={
+                custom_properties={
                     "P_max_woDH": [155.946],
                     "P_min_woDH": [68.787],
                     "Eta_el_max_woDH": [0.525],
@@ -349,7 +349,7 @@ def test_generic_chp_without_warning():
                 }
             )
         },
-        heat_output={bth: Flow(custom_attributes={"Q_CW_min": [10.552]})},
+        heat_output={bth: Flow(custom_properties={"Q_CW_min": [10.552]})},
         beta=[0.122],
         back_pressure=False,
     )

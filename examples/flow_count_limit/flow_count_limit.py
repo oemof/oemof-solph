@@ -74,7 +74,7 @@ def main(optimize=True):
                     nominal_capacity=210,
                     variable_costs=[-1, -5, -1, -1],
                     max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": True},
+                    custom_properties={"my_keyword": True},
                 )
             },
         )
@@ -90,7 +90,7 @@ def main(optimize=True):
                     variable_costs=[-2, -1, -2, -2],
                     nominal_capacity=250,
                     max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": False},
+                    custom_properties={"my_keyword": False},
                 )
             },
         )
@@ -117,7 +117,7 @@ def main(optimize=True):
             label="sink2",
             inputs={
                 bel: solph.Flow(
-                    custom_attributes={"my_keyword": True},
+                    custom_properties={"my_keyword": True},
                     fix=[0, 1, 1, 0],
                     nominal_capacity=130,
                 )

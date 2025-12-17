@@ -157,10 +157,10 @@ def main(optimize=True):
     aggregation2.createTypicalPeriods()
 
     t1_agg = pd.date_range(
-        "2022-01-01", periods=typical_periods * hours_per_period, freq="H"
+        "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
     )
     t2_agg = pd.date_range(
-        "2033-01-01", periods=typical_periods * hours_per_period, freq="H"
+        "2033-01-01", periods=typical_periods * hours_per_period, freq="h"
     )
     tindex_agg = t1_agg.append(t2_agg)
 
@@ -273,7 +273,7 @@ def main(optimize=True):
                     ],
                     ignore_index=True,
                 ),
-                nominal_value=1,
+                nominal_capacity=1,
             )
         },
     )
@@ -282,7 +282,7 @@ def main(optimize=True):
     pp_gas = solph.components.Converter(
         label="pp_gas",
         inputs={bgas: solph.Flow()},
-        outputs={bel: solph.Flow(nominal_value=10e10, variable_costs=0)},
+        outputs={bel: solph.Flow(nominal_capacity=10e10, variable_costs=0)},
         conversion_factors={bel: 0.58},
     )
 

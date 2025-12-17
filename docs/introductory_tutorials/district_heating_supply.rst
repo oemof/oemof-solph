@@ -94,7 +94,7 @@ and set its :py:attr:`inputs` argument instead. Also, we do not impose any costs
 (even though we could set the :py:attr:`variable_cost` to a negative value to imply
 a revenue). In order to enforce the heat demand to be covered at any point in time,
 we use the :py:attr:`fix` argument. It takes a normalized time series that gets
-multiplied with the :py:attr:`nominal_value`. Therefore, we set the latter to be
+multiplied with the :py:attr:`nominal_capacity`. Therefore, we set the latter to be
 the maximum value of the time series and divide the whole time series by it when
 setting the :py:attr:`fix` parameter.
 
@@ -110,7 +110,7 @@ model with the :py:class:`solph.components.Converter` class. In contrast to the
 components before, we have to define at least one input *and* one output, which in
 case of the gas boiler is the natural gas burnt and the heat produced from it.
 The connection from the gas network does not need any parametrization. We set the
-:py:attr:`nominal_value` of the heat output to 20 MW (see note on units below) and
+:py:attr:`nominal_capacity` of the heat output to 20 MW (see note on units below) and
 add :py:attr:`variable_cost` of 1.10 €/MWh. To depict energy losses due to thermodynamic
 inefficiencies, we can set the :py:attr:`conversion_factors` keyword argument of
 the :py:class:`solph.components.Converter`. It expects a dictionary, with a key
@@ -656,7 +656,7 @@ Furthermore, we agree to use it in our district heating system every time as
 well. We can model this behavior by adding the :py:attr:`fix` parameter to the
 definition of the waste heat source and passing the amount to it.
 :py:attr:`fix` can also take a time series of values and is multiplied with the
-:py:attr:`nominal_value` elementwise to compute the amount supplied to the
+:py:attr:`nominal_capacity` elementwise to compute the amount supplied to the
 energy system in all time intervals. In this example, we'll do without
 considering any cost for the usage of waste heat, but feel free play around
 with that on your own.

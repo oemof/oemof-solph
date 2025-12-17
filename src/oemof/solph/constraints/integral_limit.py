@@ -128,7 +128,7 @@ def generic_integral_limit(
     >>> bel = solph.buses.Bus(label='electricityBus')
     >>> flow1 = solph.flows.Flow(
     ...     nominal_capacity=100,
-    ...     custom_attributes={"my_factor": 0.8},
+    ...     custom_properties={"my_factor": 0.8},
     ... )
     >>> flow2 = solph.flows.Flow(nominal_capacity=50)
     >>> src1 = solph.components.Source(label='source1', outputs={bel: flow1})
@@ -162,10 +162,10 @@ def generic_integral_limit(
         limit_name,
         po.Expression(
             expr=sum(
-                om.flow[inflow, outflow, t]
+                om.flow[i, o, t]
                 * om.timeincrement[t]
-                * sequence(getattr(flows[inflow, outflow], keyword))[t]
-                for (inflow, outflow) in flows
+                * sequence(flows[i, o].custom_properties[keyword])[t]
+                for (i, o) in flows
                 for t in om.TIMESTEPS
             )
         ),
@@ -248,10 +248,10 @@ def generic_periodical_integral_limit(om, keyword, flows=None, limit=None):
 
     def _periodical_integral_limit_rule(m, p):
         expr = sum(
-            om.flow[inflow, outflow, t]
+            om.flow[i, o, t]
             * om.timeincrement[t]
-            * sequence(getattr(flows[inflow, outflow], keyword))[t]
-            for (inflow, outflow) in flows
+            * sequence(flows[i, o].custom_properties[keyword])[t]
+            for (i, o) in flows
             for t in m.TIMESTEPS_IN_PERIOD[p]
         )
 
@@ -291,12 +291,12 @@ def _check_and_set_flows(om, flows, keyword):
     if flows is None:
         flows = {}
         for i, o in om.flows:
-            if hasattr(om.flows[i, o], keyword):
+            if keyword in om.flows[i, o].custom_properties:
                 flows[(i, o)] = om.flows[i, o]
 
     else:
         for i, o in flows:
-            if not hasattr(flows[i, o], keyword):
+            if keyword not in flows[i, o].custom_properties:
                 raise AttributeError(
                     (
                         "Flow with source: {0} and target: {1} "
