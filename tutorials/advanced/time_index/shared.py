@@ -6,16 +6,17 @@ SPDX-License-Identifier: MIT
 """
 
 from pathlib import Path
-from urllib.request import urlretrieve
 
 import demandlib
-import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
+import numpy as np
+from urllib.request import urlretrieve
 from workalendar.europe import Germany
 
 
-def prepare_input_data(plot_resampling=False):
+def prepare_input_data():
+    data = {}
+
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
@@ -34,45 +35,19 @@ def prepare_input_data(plot_resampling=False):
     temperature_file = Path(file_path, "temperature.csv")
     if not temperature_file.exists():
         urlretrieve(url_temperature, temperature_file)
-    df_temperature = pd.read_csv(
+    temperature = pd.read_csv(
         temperature_file,
         index_col="Unix Epoch",
     )
+    timedelta = np.empty(len(temperature))
+    timedelta[:-1] = (temperature.index[1:] - temperature.index[:-1]) / 3600
+    timedelta[-1] = np.nan
 
-    df_temperature.index = pd.to_datetime(
-        df_temperature.index,
+    temperature.index = pd.to_datetime(
+        temperature.index,
         unit="s",
         utc=True,
     )
-
-    # ----- clean up data --------------------------------------------------------------
-    # 1) Duplikate durch Mittelwert ersetzen
-    df_temperature = df_temperature.groupby(df_temperature.index).mean()
-
-    # 2) Regulären 5-Minuten-Index erzeugen (Zeitzone erhalten)
-    tz = df_temperature.index.tz
-    full_idx = pd.date_range(
-        start=df_temperature.index.min(),
-        end=df_temperature.index.max(),
-        freq="5min",
-        tz=tz,
-    )
-
-    # 3) Auf 5-Minuten-Raster reindizieren -> Lücken werden NaN
-    df_regular = df_temperature.reindex(full_idx)
-
-    # 4) Zeitbasierte Interpolation nur für numerische Spalten
-    num_cols = df_regular.select_dtypes(include="number").columns
-
-    # Interpolation (zeitbasiert: berücksichtigt die Zeitabstände im Index)
-    df_regular[num_cols] = df_regular[num_cols].interpolate(method="time")
-
-    # 5) Ränder ohne beidseitige Nachbarn per ffill/bfill schließen
-    df_regular[num_cols] = df_regular[num_cols].ffill().bfill()
-
-    df_temperature = df_regular
-
-    # -------------------------------------------
 
     building_area = 120  # m² (from publication)
     specific_heat_demand = 60  #  kWh/m²/a  (educated guess)
@@ -80,10 +55,10 @@ def prepare_input_data(plot_resampling=False):
 
     # We estimate the heat demand from the ambient temperature using demandlib.
     # This returns energy per time step in units of kWh.
-    df_temperature["heat demand (kWh)"] = demandlib.bdew.HeatBuilding(
-        df_temperature.index,
+    temperature["heat demand (kWh)"] = demandlib.bdew.HeatBuilding(
+        temperature.index,
         holidays=holidays,
-        temperature=df_temperature["Air Temperature (°C)"],
+        temperature=temperature["Air Temperature (°C)"],
         shlp_type="EFH",
         building_class=1,
         wind_class=1,
@@ -91,52 +66,58 @@ def prepare_input_data(plot_resampling=False):
         name="EFH",
     ).get_bdew_profile()
 
-    df_temperature["heat demand (W)"] = (
-        df_temperature["heat demand (kWh)"] * 1e3 / (5 / 60)
+    temperature["heat demand (W)"] = (
+        temperature["heat demand (kWh)"] * 1e3 / timedelta
     )
 
     energy_file = Path(file_path, "energy.csv")
     if not energy_file.exists():
         urlretrieve(url_energy, energy_file)
-    df_energy = pd.read_csv(
+
+    energy = pd.read_csv(
         energy_file,
         index_col=0,
     )
-    df_energy.index = pd.to_datetime(
-        df_energy.index,
+    energy.index = pd.to_datetime(
+        energy.index,
         unit="s",
         utc=True,
     )
 
-    if plot_resampling:
-        p_pv = {}
-        resolutions = [
-            "1 min",
-            "5 min",
-            "10 min",
-            "15 min",
-            "30 min",
-            "1 h",
-            "2 h",
-            "3 h",
-            "6 h",
-        ]
+    energy[energy == np.inf] = np.nan
+    # ToDo: Auf 1 Minuten samplen und Nan-Werte interpolieren (linear)
+    #  Daten in W
+    #  demand ist absolut
+    #  COP einfügen
+    #  Mobilitätszeitreihe, die zu den Daten passt.
+    #  Zeitstempel beachten ohne Offset!
 
-        for resolution in resolutions:
-            p_pv[resolution] = df_energy["PV (W)"].resample(resolution).mean()
-            plt.plot(
-                np.linspace(0, 8760, len(p_pv[resolution])),
-                sorted(p_pv[resolution] / 1e3)[::-1],
-                label=resolution,
-            )
+    energy = (
+        energy.resample("1 min")
+        .mean()
+    )
+    temperature[temperature == np.inf] = np.nan
+    temperature = (
+        temperature[10:].resample("1 min")
+        .mean()
+    )
+    df = pd.concat([energy, temperature], axis=1)
+    df = df.interpolate()
 
-        plt.xlim(-10, 510)
-        plt.ylim(7, 16)
-        plt.legend()
-        plt.show()
+    # **************** COP calculation **********************************
+    t_supply = 60
+    efficiency = 0.5  # source?
+    cop_max = 7  # source???
 
-    return df_temperature, df_energy
+    cop_hp = (t_supply + 273.15 * efficiency) / (
+        t_supply - df["Air Temperature (°C)"]
+    )
+    cop_hp.loc[cop_hp > cop_max] = cop_max
+
+    df["cop"] = cop_hp
+
+    return df
 
 
 if __name__ == "__main__":
-    prepare_input_data(plot_resampling=True)
+    print(prepare_input_data())
