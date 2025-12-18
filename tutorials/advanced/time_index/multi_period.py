@@ -11,6 +11,7 @@ from oemof.tools import debugging
 from oemof.tools import logger
 from shared import prepare_input_data
 
+from oemof import solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -372,16 +373,27 @@ m.solve(
 # ----------------- Post Processing ----------------------------------------------------
 
 # Create Results
-results = Results(m)
-print(results.keys())
-total = results.total
-print(results.total)
-print(results.invest)
-print(results.flow)
-results.flow.iloc[:, 6].plot()
-total.plot(kind="bar")
-plt.show()
+# results = Results(m)
+# print(results.keys())
+# total = results.total
+# print(results.total)
+# print(results.invest)
+# print(results.flow)
+# results.flow.iloc[:, 6].plot()
+# total.plot(kind="bar")
+# plt.show()
 # print(results.invest)
 # print(results.old)
 # print(results.old_exo)
 # print(results.old_end)
+
+results = solph.processing.results(m)
+
+results_bus_el = solph.views.node(results, bus_el)
+results_bus_heat = solph.views.node(results, bus_heat)
+
+my_results = results_bus_el["period_scalars"]
+
+# installed capacity of pv-system in kW
+pv_invest_kW = results[(pv, bus_el)]["period_scalars"]["invest"]
+print(pv_invest_kW)
