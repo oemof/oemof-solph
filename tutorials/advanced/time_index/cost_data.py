@@ -2,12 +2,11 @@ import pandas as pd
 
 
 def energy_prices() -> pd.DataFrame:
-
     print("Data is taken from at doi: https://doi.org/10.52202/077185-0033")
 
-    # years = [2025, 2030, 2035, 2040, 2045]
-    years = [2025, 2026, 2027, 2028, 2029]
-    return pd.DataFrame(
+    years = [2025, 2030, 2035, 2040, 2045]
+    # years = [2025, 2026, 2027, 2028, 2029]
+    var_cost = pd.DataFrame(
         {
             "gas_prices [Eur/kWh]": [
                 0.116,
@@ -27,13 +26,16 @@ def energy_prices() -> pd.DataFrame:
         },
         index=pd.Index(years, name="year"),
     )
+    return pd.concat(
+        [pd.DataFrame(index=range(2025, 2065)), var_cost], axis=1
+    ).interpolate()
 
 
 def investment_costs() -> pd.DataFrame:
     print("Data is taken from doi: https://doi.org/10.52202/077185-0033")
 
-    # years = [2025, 2030, 2035, 2040, 2045]
-    years = [2025, 2026, 2027, 2028, 2029]
+    years = [2025, 2030, 2035, 2040, 2045]
+    # years = [2025, 2026, 2027, 2028, 2029]
     idx = pd.Index(years, name="year")
 
     df = pd.DataFrame(
@@ -70,4 +72,6 @@ def investment_costs() -> pd.DataFrame:
         index=idx,
     )
 
-    return df
+    return pd.concat(
+        [pd.DataFrame(index=range(2025, 2065)), df], axis=1
+    ).interpolate()
