@@ -15,6 +15,8 @@ from pathlib import Path
 
 import pandas as pd
 import pytz
+from cost_data import energy_prices
+from cost_data import investment_costs
 from create_timeseries import reshape_unevenly
 from matplotlib import pyplot as plt
 from oemof.network import graph
@@ -36,39 +38,78 @@ warnings.filterwarnings(
 logger.define_logging()
 
 
+def calculate_annuity(value):
+    return value / 20
+
+
+def calculate_fix_cost(value):
+    return value / 20
+
+
 def prepare_data(minutes):
     data = namedtuple("data", "even uneven")
     df = prepare_input_data().resample(f"{minutes} min").mean()
-    df["ev charge (W)"] = 0
+    df["ev charge (kW)"] = 0
     df_un = reshape_unevenly(df)
     return data(even=df, uneven=df_un)
 
 
-def solve_model(data):
+def solve_model(data, year=2025):
     es = EnergySystem(timeindex=data.index)
+
+    var_cost = energy_prices()
+
+    # ToDo: Hier muss jetzt noch die Berechnung mit barwert und Annuität her.
+    var_cost = var_cost.loc[year]
+
+    start_year = 2025
+    idx = pd.period_range(start=f"{start_year}", periods=20, freq="Y")
+    df = pd.DataFrame(index=idx)
+    print(df.index)
+
+    # ToDo: Wenn wir von einer Lebensdauer von 20 Jahren ausgehen, dann würde
+    #  hier eine einfache Annuität ohne Ersatzbeschaffung reichen
+    invest_cost = investment_costs().loc[year]
+    # MultiIndex([(  'gas boiler',  'specific_costs [Eur/kW]'),
+    #             (  'gas boiler',        'fixed_costs [Eur]'),
+    #             (   'heat pump',  'specific_costs [Eur/kW]'),
+    #             (   'heat pump',        'fixed_costs [Eur]'),
+    #             ('heat storage',  'specific_costs [Eur/m3]'),
+    #             ('heat storage',        'fixed_costs [Eur]'),
+    #             (          'pv',  'specific_costs [Eur/kW]'),
+    #             (          'pv',        'fixed_costs [Eur]'),
+    #             (     'battery', 'specific_costs [Eur/kWh]'),
+    #             (     'battery',        'fixed_costs [Eur]')],
+    #            )
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            annuity = calculate_annuity(
+                invest_cost[(key, "specific_costs [Eur/kW]")]
+            )
+        except KeyError:
+            annuity = calculate_annuity(
+                invest_cost[(key, "specific_costs [Eur/kWh]")]
+            )
+        fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
+        investments[key] = Investment(ep_costs=annuity, fixed_costs=fix_cost)
 
     # Buses
     bus_el = Bus(label="electricity")
     bus_heat = Bus(label="heat")
-    es.add(bus_el, bus_heat)
+    bus_gas = Bus(label="gas")
+    es.add(bus_el, bus_heat, bus_gas)
 
     # Sources
-    # nv = Investment(ep_costs=5)
-    nv = 12
     es.add(
         cmp.Source(
             label="PV",
             outputs={
                 bus_el: Flow(
-                    fix=data["PV (W/kWp)"],
-                    nominal_capacity=nv,
+                    fix=data["PV (kW/kWp)"],
+                    nominal_capacity=investments["pv"],
                 )
             },
-        )
-    )
-    es.add(
-        cmp.Source(
-            label="Shortage_el", outputs={bus_el: Flow(variable_costs=99)}
         )
     )
     es.add(
@@ -78,7 +119,20 @@ def solve_model(data):
     )
     es.add(
         cmp.Source(
-            label="Grid import", outputs={bus_el: Flow(variable_costs=0.30)}
+            label="Grid import",
+            outputs={
+                bus_el: Flow(
+                    variable_costs=var_cost["electricity_prices [Eur/kWh]"]
+                )
+            },
+        )
+    )
+    es.add(
+        cmp.Source(
+            label="Gas import",
+            outputs={
+                bus_el: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
+            },
         )
     )
 
@@ -88,7 +142,7 @@ def solve_model(data):
             label="Battery",
             inputs={bus_el: Flow()},
             outputs={bus_el: Flow()},
-            nominal_capacity=Investment(ep_costs=10),  # kWh
+            nominal_capacity=investments["battery"],  # kWh
             min_storage_level=0.0,
             max_storage_level=1.0,
             balanced=True,
@@ -106,7 +160,7 @@ def solve_model(data):
             label="Heat demand",
             inputs={
                 bus_heat: Flow(
-                    fix=data["heat demand (W)"], nominal_capacity=5.0
+                    fix=data["heat demand (kW)"], nominal_capacity=5.0
                 )
             },
         )
@@ -116,7 +170,7 @@ def solve_model(data):
             label="Electricity demand",
             inputs={
                 bus_el: Flow(
-                    fix=data["electricity demand (W)"], nominal_capacity=1.0
+                    fix=data["electricity demand (kW)"], nominal_capacity=1.0
                 )
             },
         )
@@ -125,13 +179,18 @@ def solve_model(data):
         cmp.Sink(
             label="Electric Vehicle",
             inputs={
-                bus_el: Flow(fix=data["ev charge (W)"], nominal_capacity=1.0)
+                bus_el: Flow(fix=data["ev charge (kW)"], nominal_capacity=1.0)
             },
         )
     )
     es.add(
         cmp.Sink(
-            label="Grid Feed-in", inputs={bus_el: Flow(variable_costs=-0.08)}
+            label="Grid Feed-in",
+            inputs={
+                bus_el: Flow(
+                    variable_costs=-var_cost["pv_feed_in [Eur/kWh]"] / 1000
+                )
+            },
         )
     )
 
@@ -140,7 +199,20 @@ def solve_model(data):
         cmp.Converter(
             label="Heat pump",
             inputs={bus_el: Flow()},
-            outputs={bus_heat: Flow(nominal_capacity=Investment(ep_costs=50))},
+            outputs={
+                bus_heat: Flow(nominal_capacity=investments["heat pump"])
+            },
+            conversion_factors={bus_heat: data["cop"]},
+        )
+    )
+    # Gas Boiler
+    es.add(
+        cmp.Converter(
+            label="Gas Boiler",
+            inputs={bus_gas: Flow()},
+            outputs={
+                bus_heat: Flow(nominal_capacity=investments["gas boiler"])
+            },
             conversion_factors={bus_heat: data["cop"]},
         )
     )
@@ -217,7 +289,7 @@ def compare_results(even, uneven):
 
 
 if __name__ == "__main__":
-    my_data = prepare_data(60)
+    my_data = prepare_data(30)
     start = datetime.now()
     results_even = solve_model(my_data.even)
     time_even = datetime.now() - start
