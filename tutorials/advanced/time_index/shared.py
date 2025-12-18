@@ -116,6 +116,8 @@ def prepare_input_data():
 
     df["cop"] = cop_hp
 
+    df["PV (W/kWp)"] = df["PV (W)"].div(df["PV (W)"].sum()/60000)
+
     return df
 
 
