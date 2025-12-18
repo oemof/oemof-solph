@@ -116,7 +116,9 @@ def prepare_input_data():
 
     df["cop"] = cop_hp
 
-    df["PV (W/kWp)"] = df["PV (W)"].div(df["PV (W)"].sum()/60000000)
+    df["PV (kW/kWp)"] = df["PV (W)"].div(df["PV (W)"].sum()/60000)
+    for key in ["heat demand (W)", "electricity demand (W)"]:
+        df[key.replace("(W)", "(kW)")] = df[key].div(1000)
 
     return df
 
