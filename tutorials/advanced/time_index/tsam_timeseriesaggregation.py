@@ -56,13 +56,15 @@ df["house_elec_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 df["house_heat_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 
 # EV-Ladeprofil
-df["ev_charge_kW"] = 0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
+df["ev_charge_kW"] = (
+    0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
+)
 
 # COP-Profil (konstant, später evtl. temperaturabhängig)
 df["cop_hp"] = 3.5
 
 df = df.resample("1h").mean()
-#Clustering of Input time-series with TSAM
+# Clustering of Input time-series with TSAM
 typical_periods = 40
 hours_per_period = 24
 
@@ -76,7 +78,7 @@ aggregation = tsam.TimeSeriesAggregation(
 )
 aggregation.createTypicalPeriods()
 tindex_agg = pd.date_range(
-    "2022-01-01", periods=typical_periods * hours_per_period , freq="H"
+    "2022-01-01", periods=typical_periods * hours_per_period, freq="H"
 )
 es = EnergySystem(
     timeindex=tindex_agg,
@@ -99,9 +101,10 @@ es.add(bus_el, bus_heat)
 pv = cmp.Source(
     label="PV",
     outputs={
-        bus_el: Flow(fix=pv_profile, nominal_capacity=Investment(ep_costs=400,
-                                                                 lifetime=20,
-                                                                 maximum=10))
+        bus_el: Flow(
+            fix=pv_profile,
+            nominal_capacity=Investment(ep_costs=400, lifetime=20, maximum=10),
+        )
     },
 )
 es.add(pv)
@@ -111,8 +114,7 @@ battery = cmp.GenericStorage(
     label="Battery",
     inputs={bus_el: Flow()},
     outputs={bus_el: Flow()},
-    nominal_capacity=Investment(ep_costs=500,
-                                lifetime=20),  # kWh
+    nominal_capacity=Investment(ep_costs=500, lifetime=20),  # kWh
     min_storage_level=0.0,
     max_storage_level=1.0,
     loss_rate=0.001,  # 0.1%/h
@@ -124,14 +126,24 @@ es.add(battery)
 # Electricity demand
 house_sink = cmp.Sink(
     label="Electricity demand",
-    inputs={bus_el: Flow(fix=aggregation.typicalPeriods["house_elec_kW"], nominal_capacity=1.0)},
+    inputs={
+        bus_el: Flow(
+            fix=aggregation.typicalPeriods["house_elec_kW"],
+            nominal_capacity=1.0,
+        )
+    },
 )
 es.add(house_sink)
 
 # Electric vehicle demand
 wallbox_sink = cmp.Sink(
     label="Electric Vehicle",
-    inputs={bus_el: Flow(fix=aggregation.typicalPeriods["ev_charge_kW"], nominal_capacity=1.0)},
+    inputs={
+        bus_el: Flow(
+            fix=aggregation.typicalPeriods["ev_charge_kW"],
+            nominal_capacity=1.0,
+        )
+    },
 )
 es.add(wallbox_sink)
 
@@ -139,8 +151,9 @@ es.add(wallbox_sink)
 hp = cmp.Converter(
     label="Heat pump",
     inputs={bus_el: Flow()},
-    outputs={bus_heat: Flow(nominal_capacity=Investment(ep_costs=500,
-                                                        lifetime=20))},
+    outputs={
+        bus_heat: Flow(nominal_capacity=Investment(ep_costs=500, lifetime=20))
+    },
     conversion_factors={bus_heat: aggregation.typicalPeriods["cop_hp"]},
 )
 es.add(hp)
@@ -148,7 +161,12 @@ es.add(hp)
 # Heat demand
 heat_sink = cmp.Sink(
     label="Heat demand",
-    inputs={bus_heat: Flow(fix=aggregation.typicalPeriods["house_heat_kW"], nominal_capacity=5.0)},
+    inputs={
+        bus_heat: Flow(
+            fix=aggregation.typicalPeriods["house_heat_kW"],
+            nominal_capacity=5.0,
+        )
+    },
 )
 es.add(heat_sink)
 
@@ -178,26 +196,22 @@ results_bus_heat = solph.views.node(results, bus_heat)
 my_results = results_bus_el["period_scalars"]
 
 # installed capacity of pv-system in kW
-pv_invest_kW = (
-    results[(pv, bus_el)]["period_scalars"]["invest"]
-)
+pv_invest_kW = results[(pv, bus_el)]["period_scalars"]["invest"]
 
 # installed capacity of storage in kWh
-storage_invest_kWh = (
-    results[(battery, None)]["period_scalars"]["invest"]
-)
+storage_invest_kWh = results[(battery, None)]["period_scalars"]["invest"]
 
 
 # installed capacity of hp in kW
-hp_invest_kW = (
-    results[(hp, bus_heat)]["period_scalars"]["invest"]
-)
+hp_invest_kW = results[(hp, bus_heat)]["period_scalars"]["invest"]
 
-investments = pd.Series({
-    "PV (kW)": pv_invest_kW.iloc[0],
-    "Battery (kWh)": storage_invest_kWh.iloc[0],
-    "HP (kW_th)": hp_invest_kW.iloc[0],
-})
+investments = pd.Series(
+    {
+        "PV (kW)": pv_invest_kW.iloc[0],
+        "Battery (kWh)": storage_invest_kWh.iloc[0],
+        "HP (kW_th)": hp_invest_kW.iloc[0],
+    }
+)
 investments.squeeze().plot(kind="bar")
 
 day = 186  # day of the year
@@ -207,16 +221,18 @@ n = 2
 flows = pd.concat([flow["sequences"] for flow in results.values()], axis=1)
 flows.columns = list(results.keys())
 
-soc = flows[battery,None]
+soc = flows[battery, None]
 flows = flows.drop(columns=[(battery, None)])
 
-supply = flows[[c for c in flows.columns
-                if getattr(c[1], "label", None) == "electricity"]].copy()
+supply = flows[
+    [c for c in flows.columns if getattr(c[1], "label", None) == "electricity"]
+].copy()
 supply.columns = [c[0].label for c in supply.columns]
 
 
-demand = flows[[c for c in flows.columns
-                if getattr(c[0], "label", None) == "electricity"]].copy()
+demand = flows[
+    [c for c in flows.columns if getattr(c[0], "label", None) == "electricity"]
+].copy()
 demand.columns = [c[1].label for c in demand.columns]
 
 # A plot from GPT :-)
@@ -258,12 +274,14 @@ if soc is not None:
     ax2.legend(loc="upper right")
 
 
-hp_heat = flows[[c for c in flows.columns
-                if getattr(c[1], "label", None) == "heat"]].copy()
+hp_heat = flows[
+    [c for c in flows.columns if getattr(c[1], "label", None) == "heat"]
+].copy()
 hp_heat.columns = [c[0].label for c in hp_heat.columns]
 
-heat_dem = flows[[c for c in flows.columns
-                if getattr(c[0], "label", None) == "heat"]].copy()
+heat_dem = flows[
+    [c for c in flows.columns if getattr(c[0], "label", None) == "heat"]
+].copy()
 heat_dem.columns = [c[1].label for c in heat_dem.columns]
 
 axes[1].plot(hp_heat.index, hp_heat, label="HP heat output", linewidth=2)

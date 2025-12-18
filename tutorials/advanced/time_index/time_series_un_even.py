@@ -54,8 +54,9 @@ def prepare_data(minutes):
     return data(even=df, uneven=df_un)
 
 
-def solve_model(data, year=2025):
-    es = EnergySystem(timeindex=data.index)
+def solve_model(data, year=2025, es=None):
+    if es is None:
+        es = EnergySystem(timeindex=data.index)
 
     var_cost = energy_prices()
 
