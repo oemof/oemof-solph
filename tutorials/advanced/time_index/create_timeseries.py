@@ -23,7 +23,4 @@ def reshape_unevenly(df):
     df_mean.index.name = 'timestamp'
     # df_sum.index.name = 'timestamp'
 
-    # interval_hours = df.groupby(buckets).size().sort_index()
-    # interval_hours.name = 'interval_hours'
-
     return df_mean
