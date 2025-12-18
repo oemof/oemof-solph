@@ -11,6 +11,7 @@ from oemof.tools import debugging
 from oemof.tools import logger
 from shared import prepare_input_data
 
+from oemof import solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -20,33 +21,7 @@ from oemof.solph import Results
 from oemof.solph import components as cmp
 
 
-# ---------------- some helper functions -----------------------------------------------
-def determine_periods(datetimeindex):
-    """Explicitly define and return periods of the energy system
-
-    Leap years have 8784 hourly time steps, regular years 8760.
-
-    Parameters
-    ----------
-    datetimeindex : pd.date_range
-        DatetimeIndex of the model comprising all time steps
-
-    Returns
-    -------
-    periods : list
-        periods for the optimization run
-    """
-    years = sorted(list(set(getattr(datetimeindex, "year"))))
-    periods = []
-    filter_series = datetimeindex.to_series()
-    for number, year in enumerate(years):
-        start = filter_series.loc[filter_series.index.year == year].min()
-        end = filter_series.loc[filter_series.index.year == year].max()
-        periods.append(pd.date_range(start, end, freq=datetimeindex.freq))
-
-    return periods
-
-
+# ---------------- some helper functions --------------------------------------
 def lifetime_adjusted(lifetime, investment_period_length_in_years):
     return int(lifetime / investment_period_length_in_years)
 
@@ -76,18 +51,18 @@ def expand_energy_prices(tindex_agg_full, prices):
     return s
 
 
-# --------------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
 )
 logger.define_logging()
 
-# ---------- read cost data ------------------------------------------------------------
+# ---------- read cost data ---------------------------------------------------
 
 investment_costs = investment_costs()
 prices = energy_prices()
 
-# ---------- read time series data and resample-----------------------------------------
+# ---------- read time series data and resample--------------------------------
 
 # read data
 df_temperature, df_energy = prepare_input_data(plot_resampling=False)
@@ -114,7 +89,7 @@ time_series_data_full = time_series_data_full.rename(
     }
 )
 
-# -------------- Clustering of input time-series with TSAM -----------------------------
+# -------------- Clustering of input time-series with TSAM --------------------
 typical_periods = 40
 hours_per_period = 24
 
@@ -133,19 +108,20 @@ tindex_agg = pd.date_range(
     "2025-01-01", periods=typical_periods * hours_per_period, freq="h"
 )
 
-# ------------ create timeindex etc. for multiperiod -----------------------------------
+# ------------ create timeindex etc. for multiperiod --------------------------
 # Note:
 # originally the data provided is for investment periods of 5 years each
 # so years = [2025, 2030, 2035, 2040, 2045]
-# this was causing a bug in the mulit period calculation of the fixed_costs in the
-# INVESTFLOWS, therefore years is set to [2025, 2026, 2027, 2028, 2029] in this eaxample
-# this will be changed, when the bug is fixed
+# this was causing a bug in the mulit period calculation of the fixed_costs in
+# the INVESTFLOWS, therefore years is set to [2025, 2026, 2027, 2028, 2029] in
+# this eaxample this will be changed, when the bug is fixed
 
 # list with years in which investment is possible
 years = [2025, 2026, 2027, 2028, 2029]
 
 # create a time index for the whole model
-# Create a list of shifted copies of the original index, one per investment year
+# Create a list of shifted copies of the original index,
+# one per investment year
 base_year = years[0]
 shifted = [tindex_agg + pd.DateOffset(years=(y - base_year)) for y in years]
 
@@ -159,29 +135,36 @@ print("time index: ", tindex_agg_full)
 print("-------------------------------------------------")
 
 # create the list of investent periods for the model
-investment_periods = determine_periods(tindex_agg_full)
+investment_periods = [
+    tindex_agg + pd.DateOffset(years=i) for i in range(len(years))
+]
+
 
 print("------- Priods of Multi-Period Model --------")
 print("Investment periods: ", investment_periods)
 print("---------------------------------------------")
 
-# create parameters for time series aggregation in oemof-solph with one dict per year
+# create parameters for time series aggregation in oemof-solph
+# with one dict per year
 tsa_parameters = [
     {
         "timesteps_per_period": aggregation.hoursPerPeriod,
         "order": aggregation.clusterOrder,
-        "timeindex": aggregation.timeIndex,
+        "timeindex": tindex_agg + pd.DateOffset(years=i),
     }
-] * len(years)
+    for i in range(len(years))
+]
 
-# ------------------ calculate discount rate and lifetime ------------------------------
+timeincrement = [1] * (len(tindex_agg_full))
 
+# ------------------ calculate discount rate and lifetime ---------------------
 # the annuity has to be calculated for a period of 5 years
 investment_period_length_in_years = 5
 
-# ------------------ create energy system ----------------------------------------------
+# ------------------ create energy system -------------------------------------
 es = EnergySystem(
     timeindex=tindex_agg_full,
+    timeincrement=timeincrement,
     periods=investment_periods,
     tsa_parameters=tsa_parameters,
     infer_last_interval=False,
@@ -191,12 +174,6 @@ bus_el = Bus(label="electricity")
 bus_heat = Bus(label="heat")
 bus_gas = Bus(label="gas")
 es.add(bus_el, bus_heat, bus_gas)
-
-# test_pv = pd.concat(
-#     [aggregation.typicalPeriods["PV (kW)"]] * len(years),
-#     ignore_index=True,
-# )
-# test_pv.plot()
 
 pv = cmp.Source(
     label="PV",
@@ -362,26 +339,57 @@ m = Model(es)
 logging.info("Solving Model...")
 m.solve(
     solver="gurobi",
-    solve_kwargs={
-        "tee": True,
-        "keepfiles": True,
-        "symbolic_solver_labels": True,
-    },
+    solve_kwargs={"tee": True},
 )
 
-# ----------------- Post Processing ----------------------------------------------------
+# ----------------- Post Processing -------------------------------------------
 
 # Create Results
 results = Results(m)
-print(results.keys())
-total = results.total
-print(results.total)
-print(results.invest)
-print(results.flow)
-results.flow.iloc[:, 6].plot()
-total.plot(kind="bar")
+
+# invest and total installed capacity
+invest = results["invest"]
+total = results["total"]
+
+years = [2025, 2030, 2035, 2040, 2045]
+invest.index = years
+total.index = years
+
+fig, (ax1, ax2) = plt.subplots(
+    2, 1, figsize=(10, 7), sharex=True, constrained_layout=True
+)
+
+total.plot(kind="bar", ax=ax1)
+ax1.set_title("Total installed capacity")
+ax1.set_ylabel("kW")
+ax1.grid(True, linewidth=0.3, alpha=0.6)
+ax1.legend().set_visible(False)
+
+invest.plot(kind="bar", ax=ax2)
+ax2.set_title("Invested capacity")
+ax2.set_xlabel("Years")
+ax2.set_ylabel("kW")
+ax2.grid(True, linewidth=0.3, alpha=0.6)
+
 plt.show()
-# print(results.invest)
-# print(results.old)
-# print(results.old_exo)
-# print(results.old_end)
+
+# Note: if you want to extract values for the flow, you have to change
+# to_df() in the class Results() in this way:
+#
+#     # overwrite known indexes
+#     index_type = tuple(dataset.index_set().subsets())[-1].name
+#     match index_type:
+#         case "TIMEPOINTS":
+#             df.index = self.timeindex
+#         case "TIMESTEPS":
+#             # df.index = self.timeindex[:-1]
+#             df.index = self.timeindex
+#         case _:
+#             df.index = df.index.get_level_values(-1)
+#
+# otherwise including the storage leads to Length mismatch Value Error
+# why: no clue, something with TIMESTEPS and TIMEPOINTS for storage
+#
+# if you changed this you can use
+# flows = results["flow"]
+# to look at the time series
