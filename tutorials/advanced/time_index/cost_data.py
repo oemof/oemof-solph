@@ -1,5 +1,17 @@
 import pandas as pd
+import numpy as np
 
+def discounted_average_price(price_series, interest_rate, observation_period):
+
+    discount_factors = 1 / (1 + interest_rate) ** np.arange(observation_period)
+
+    # Formel:
+    # p* = Sum( p_t / (1+r)^(t-1) ) / Sum( 1/(1+r)^(t-1) )
+
+    numerator = np.sum(price_series[:observation_period] * discount_factors)
+    denominator = np.sum(discount_factors)
+
+    return numerator/denominator
 
 def energy_prices() -> pd.DataFrame:
     print("Data is taken from at doi: https://doi.org/10.52202/077185-0033")
