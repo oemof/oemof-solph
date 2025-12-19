@@ -1,17 +1,27 @@
 import pandas as pd
 import numpy as np
+from oemof.tools.economics import annuity
 
-def discounted_average_price(price_series, interest_rate, observation_period):
 
+def discounted_average_price(
+    price_series, interest_rate, observation_period, year_of_investment
+):
     discount_factors = 1 / (1 + interest_rate) ** np.arange(observation_period)
 
     # Formel:
     # p* = Sum( p_t / (1+r)^(t-1) ) / Sum( 1/(1+r)^(t-1) )
 
-    numerator = np.sum(price_series[:observation_period] * discount_factors)
-    denominator = np.sum(discount_factors)
+    numerator = price_series.loc[
+            year_of_investment : year_of_investment + observation_period - 1
+        ].mul(discount_factors, axis=0).sum()
 
-    return numerator/denominator
+    denominator = discount_factors.sum()
+
+    print(annuity(numerator, observation_period, interest_rate))
+    print(numerator / denominator)
+
+    return numerator / denominator
+
 
 def energy_prices() -> pd.DataFrame:
     print("Data is taken from at doi: https://doi.org/10.52202/077185-0033")

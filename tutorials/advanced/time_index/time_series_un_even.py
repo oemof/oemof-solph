@@ -15,6 +15,7 @@ from pathlib import Path
 
 import pandas as pd
 import pytz
+from cost_data import discounted_average_price
 from cost_data import energy_prices
 from cost_data import investment_costs
 from create_timeseries import reshape_unevenly
@@ -22,6 +23,7 @@ from matplotlib import pyplot as plt
 from oemof.network import graph
 from oemof.tools import debugging
 from oemof.tools import logger
+from oemof.tools.economics import annuity
 from shared import prepare_input_data
 
 from oemof.solph import Bus
@@ -46,7 +48,7 @@ def calculate_fix_cost(value):
     return value / 20
 
 
-def prepare_data(minutes):
+def prepare_technical_data(minutes):
     data = namedtuple("data", "even uneven")
     df = prepare_input_data().resample(f"{minutes} min").mean()
     df["ev charge (kW)"] = 0
@@ -54,46 +56,30 @@ def prepare_data(minutes):
     return data(even=df, uneven=df_un)
 
 
-def solve_model(data, year=2025, es=None):
+def prepare_cost_data():
+    pass
+
+
+def solve_model(data, year=2025, es=None, n=20, r=0.05):
     if es is None:
         es = EnergySystem(timeindex=data.index)
 
-    var_cost = energy_prices()
-
-    # ToDo: Hier muss jetzt noch die Berechnung mit barwert und Annuität her.
-    var_cost = var_cost.loc[year]
-
-    start_year = 2025
-    idx = pd.period_range(start=f"{start_year}", periods=20, freq="Y")
-    df = pd.DataFrame(index=idx)
-    print(df.index)
-
-    # ToDo: Wenn wir von einer Lebensdauer von 20 Jahren ausgehen, dann würde
-    #  hier eine einfache Annuität ohne Ersatzbeschaffung reichen
+    var_cost = discounted_average_price(energy_prices(), r, n, year)
     invest_cost = investment_costs().loc[year]
-    # MultiIndex([(  'gas boiler',  'specific_costs [Eur/kW]'),
-    #             (  'gas boiler',        'fixed_costs [Eur]'),
-    #             (   'heat pump',  'specific_costs [Eur/kW]'),
-    #             (   'heat pump',        'fixed_costs [Eur]'),
-    #             ('heat storage',  'specific_costs [Eur/m3]'),
-    #             ('heat storage',        'fixed_costs [Eur]'),
-    #             (          'pv',  'specific_costs [Eur/kW]'),
-    #             (          'pv',        'fixed_costs [Eur]'),
-    #             (     'battery', 'specific_costs [Eur/kWh]'),
-    #             (     'battery',        'fixed_costs [Eur]')],
-    #            )
+
+    # Create Investment objects from cost data
     investments = {}
     for key in ["gas boiler", "heat pump", "battery", "pv"]:
         try:
-            annuity = calculate_annuity(
-                invest_cost[(key, "specific_costs [Eur/kW]")]
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kW]")], n, r
             )
         except KeyError:
-            annuity = calculate_annuity(
-                invest_cost[(key, "specific_costs [Eur/kWh]")]
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kWh]")], n, r
             )
         fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
-        investments[key] = Investment(ep_costs=annuity, fixed_costs=fix_cost)
+        investments[key] = Investment(ep_costs=epc, fixed_costs=fix_cost)
 
     # Buses
     bus_el = Bus(label="electricity")
@@ -224,7 +210,7 @@ def solve_model(data, year=2025, es=None):
     logging.info("Creating Model...")
     m = Model(es)
     logging.info("Solving Model...")
-    m.solve(solver="cbc", solve_kwargs={"tee": True})
+    m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     # Create Results
     return Results(m)
@@ -242,7 +228,7 @@ def process_results(results):
     ).shift(-1)
     intervals.iloc[-1] = (end_time - flow.index[-2]).seconds / 3600 - 1
 
-    print(flow.mul(intervals, axis=0).sum())
+    # print(flow.mul(intervals, axis=0).sum())
 
     soc = results["storage_content"]
     soc.name = "Battery SOC [kWh]"
@@ -259,8 +245,8 @@ def process_results(results):
 def compare_results(even, uneven):
     flow_e = even["flow"]
     flow_u = uneven["flow"]
-    print(flow_e)
-    print(flow_u)
+    # print(flow_e)
+    # print(flow_u)
 
 
 #
@@ -290,7 +276,7 @@ def compare_results(even, uneven):
 
 
 if __name__ == "__main__":
-    my_data = prepare_data(30)
+    my_data = prepare_technical_data(10)
     start = datetime.now()
     results_even = solve_model(my_data.even)
     time_even = datetime.now() - start
