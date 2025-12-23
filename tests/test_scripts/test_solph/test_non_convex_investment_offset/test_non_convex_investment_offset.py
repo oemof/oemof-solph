@@ -57,8 +57,8 @@ def test_non_convex_investment_offset():
                     nonconvex=True,
                 ),
                 variable_costs=1,
-                max=1,
-                min=0.1,
+                maximum=1,
+                minimum=0.1,
                 nonconvex=NonConvex(),
             )
         },
@@ -78,8 +78,8 @@ def test_non_convex_investment_offset():
                     nonconvex=True,
                 ),
                 variable_costs=1,
-                max=1,
-                min=0.1,
+                maximum=1,
+                minimum=0.1,
                 nonconvex=NonConvex(),
             )
         },

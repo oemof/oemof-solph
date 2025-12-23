@@ -362,13 +362,13 @@ class Model(po.ConcreteModel):
                 else:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
-                            self.flows[o, i].max[t]
+                            self.flows[o, i].maximum[t]
                             * self.flows[o, i].nominal_capacity
                         )
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
-                                self.flows[o, i].min[t]
+                                self.flows[o, i].minimum[t]
                                 * self.flows[o, i].nominal_capacity
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:

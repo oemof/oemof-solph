@@ -22,6 +22,7 @@ SPDX-License-Identifier: MIT
 import math
 import numbers
 from collections.abc import Iterable
+from inspect import isbuiltin
 from warnings import warn
 
 import numpy as np
@@ -127,10 +128,12 @@ class Flow(Edge):
         nominal_capacity=None,
         # --- BEGIN: To be removed for versions >= v0.7 ---
         nominal_value=None,
+        min=None,
+        max=None,
         # --- END ---
         variable_costs=0,
-        minimum=0,
-        maximum=1,
+        minimum=None,
+        maximum=None,
         fix=None,
         positive_gradient_limit=None,
         negative_gradient_limit=None,
@@ -180,37 +183,38 @@ class Flow(Edge):
                 warn(msg, FutureWarning)
             custom_properties = custom_attributes
 
-        if min is not None:
+        if min is not None and isbuiltin(min) is False:
             msg = (
                 "For backward compatibility,"
                 + " the option min overwrites the option"
                 + " minimum."
                 + " Both options cannot be set at the same time."
             )
-            if nominal_capacity is not None:
+            if minimum is not None:
                 raise AttributeError(msg)
             else:
                 warn(msg, FutureWarning)
             minimum = min
-       
-        if max is not None:
+
+        if max is not None and isbuiltin(max) is False:
             msg = (
                 "For backward compatibility,"
                 + " the option max overwrites the option"
                 + " maximum."
                 + " Both options cannot be set at the same time."
             )
-            if nominal_capacity is not None:
+            if maximum is not None:
                 raise AttributeError(msg)
             else:
                 warn(msg, FutureWarning)
             maximum = max
 
-        
+        if maximum is None:
+            maximum = 1
+        if minimum is None:
+            minimum = 0
         # --- END ---
-
         super().__init__(custom_properties=custom_properties)
-
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
             for attribute, value in custom_attributes.items():
@@ -260,23 +264,25 @@ class Flow(Edge):
         self.lifetime = lifetime
         self.age = age
 
-        # It is not allowed to define `minimum` or `maximum` if `fix` is defined.
-        # HINT: This also allows `flow`s with `fix` to be bidirectional, if
-        # negative values are used in `fix`, despite `minimum` and `maximum` having
-        # the default values (0 and 1).
+        # It is not allowed to define `minimum` or `maximum` if `fix`
+        # is defined.
+        # HINT: This also allows `flow`s with `fix` to be bidirectional,
+        # if negative values are used in `fix`, despite `minimum` and
+        # having the default values (0 and 1).
         # TODO: Is it intended to have bidirectional fixed flows?
         if fix is not None and (minimum != 0 or maximum != 1):
             msg = (
-                "It is not allowed to define `minimum`/`maximum` if `fix` is defined."
+                "It is not allowed to define `minimum`/`maximum` if `fix` "
+                "is defined."
             )
             raise AttributeError(msg)
 
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if self.bidirectional:
             msg = "The `bidirectional` keyword is deprecated and will be "
-            "removed in a future version, as it sets the value of `minimum` to -1 "
-            "without the users explicit intent. It is recommended to set a "
-            "negative value for `minimum` explicitly instead."
+            "removed in a future version, as it sets the value of `minimum` "
+            "to -1 without the users explicit intent. It is recommended to "
+            "set a negative value for `minimum` explicitly instead."
             warn(msg, FutureWarning)
             if minimum == 0:
                 minimum = -1

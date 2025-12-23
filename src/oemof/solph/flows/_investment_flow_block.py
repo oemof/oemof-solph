@@ -143,7 +143,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
         self.MIN_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].min.min() != 0]
+            initialize=[(g[0], g[1]) for g in group if g[2].minimum.min() != 0]
         )
 
         self.EXISTING_INVESTFLOWS = Set(
@@ -645,7 +645,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        <= self.total[i, o, p] * m.flows[i, o].max[t]
+                        <= self.total[i, o, p] * m.flows[i, o].maximum[t]
                     )
                     self.max.add((i, o, p, t), expr)
 

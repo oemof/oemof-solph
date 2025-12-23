@@ -181,7 +181,7 @@ A component to model a storage with its basic characteristics. The
 GenericStorage is designed for one input and one output.
 The ``nominal_storage_capacity`` of the storage signifies the storage capacity.
 You can either set it to the net capacity or to the gross capacity and limit it
-using the min/max attribute. To limit the input and output flows, you can
+using the minimum/maximum attribute. To limit the input and output flows, you can
 define the ``nominal_capacity`` in the Flow objects. Furthermore, an efficiency
 for loading, unloading and a loss rate can be defined.
 
@@ -401,8 +401,8 @@ Then we can create our component with the buses attached to it.
     ...     inputs={
     ...         bfuel: solph.flows.Flow(
     ...             nominal_capacity=P_out_max,
-    ...             max=l_max,
-    ...             min=l_min,
+    ...             maximum=l_max,
+    ...             minimum=l_min,
     ...             nonconvex=solph.NonConvex()
     ...         )
     ...     },
@@ -422,8 +422,8 @@ Then we can create our component with the buses attached to it.
 
     - the `nominal_capacity` (can be `Investment` in case of investment
       optimization),
-    - the `min` and
-    - the `max` attributes.
+    - the `minimum` and
+    - the `maximum` attributes.
 
     The `conversion_factors` and `normed_offsets` are specified similar to the
     `Converter` API with dictionaries referencing the respective input and

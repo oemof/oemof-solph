@@ -90,8 +90,8 @@ def main(optimize=True):
         outputs={
             b_heat: solph.flows.Flow(
                 nominal_capacity=10,
-                min=0.4,
-                max=1.0,
+                minimum=0.4,
+                maximum=1.0,
                 variable_costs=0.1,
                 nonconvex=solph.NonConvex(
                     minimum_uptime=2,
