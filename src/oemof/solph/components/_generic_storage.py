@@ -1315,9 +1315,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         Conversion factor when (i.e. efficiency) taking stored energy"
         ":math:`c(-1)`", "`initial_storage_level`", "Initial relative
         storage content (before timestep 0)"
-        ":math:`c_{max}`", "`flows[i, o].max[t]`", "Normed maximum
+        ":math:`c_{max}`", "`flows[i, o].maximum[t]`", "Normed maximum
         value of storage content"
-        ":math:`c_{min}`", "`flows[i, o].min[t]`", "Normed minimum
+        ":math:`c_{min}`", "`flows[i, o].minimum[t]`", "Normed minimum
         value of storage content"
         ":math:`l`", "`flows[i, o].investment.lifetime`", "
         Lifetime for investments in storage capacity"

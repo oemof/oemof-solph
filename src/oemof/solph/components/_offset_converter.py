@@ -342,8 +342,8 @@ class OffsetConverter(Node):
         slope = self.conversion_factors[bus][tstep]
         offset = self.normed_offsets[bus][tstep]
 
-        min_load = self._reference_flow.min[tstep]
-        max_load = self._reference_flow.max[tstep]
+        min_load = self._reference_flow.minimum[tstep]
+        max_load = self._reference_flow.maximum[tstep]
 
         infeasible_load = np.linspace(0, min_load)
         feasible_load = np.linspace(min_load, max_load)

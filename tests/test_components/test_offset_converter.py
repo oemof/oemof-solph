@@ -155,7 +155,7 @@ def add_OffsetConverter(
 
         f.nonconvex = solph.NonConvex()
         f.nominal_capacity = nominal_capacity
-        f.min = sequence(minimal_value / nominal_capacity)
+        f.minimum = sequence(minimal_value / nominal_capacity)
 
         oc = solph.components.OffsetConverter(
             label="offset converter",

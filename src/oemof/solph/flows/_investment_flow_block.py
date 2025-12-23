@@ -291,7 +291,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             .. math::
                 &
-                P(p, t) \le ( P_{total}(p) ) \cdot f_{max}(t) \\
+                P(p, t) \le ( P_{total}(p) ) \cdot f_{maximum}(t) \\
                 &
                 \forall p, t \in \textrm{TIMEINDEX}
 
@@ -389,7 +389,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             .. math::
                 &
-                P(p, t) \geq P_{total}(p) \cdot f_{min}(t) \\
+                P(p, t) \geq P_{total}(p) \cdot f_{minimum}(t) \\
                 &\\
                 &
                 \forall p, t \in \textrm{TIMEINDEX}
@@ -662,7 +662,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        >= self.total[i, o, p] * m.flows[i, o].min[t]
+                        >= self.total[i, o, p] * m.flows[i, o].minimum[t]
                     )
                     self.min.add((i, o, p, t), expr)
 
