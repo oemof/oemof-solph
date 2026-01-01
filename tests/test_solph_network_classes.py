@@ -91,8 +91,10 @@ def test_fixed_costs_warning():
 
 
 def test_flow_with_fix_and_min_max():
-    msg = ("It is not allowed to define `minimum`/`maximum` if `fix` is "
-           "defined.")
+    msg = (
+        "It is not allowed to define `minimum`/`maximum` if `fix` is "
+        "defined."
+    )
     with pytest.raises(AttributeError, match=msg):
         solph.flows.Flow(fix=[1, 3], minimum=[0, 5])
     with pytest.raises(AttributeError, match=msg):

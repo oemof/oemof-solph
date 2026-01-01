@@ -86,4 +86,6 @@ def test_maximum_warning():
 def test_maximum_error():
     with pytest.raises(AttributeError, match="maximum"):
         _ = solph.flows.Flow(max=0.5, maximum=0.5)
+
+
 # --- END ---
