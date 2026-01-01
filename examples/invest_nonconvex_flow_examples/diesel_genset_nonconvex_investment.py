@@ -158,8 +158,8 @@ def main(optimize=True):
         outputs={
             b_el_ac: solph.flows.Flow(
                 variable_costs=variable_cost_diesel_genset,
-                min=min_load,
-                max=max_load,
+                minimum=min_load,
+                maximum=max_load,
                 nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,

@@ -6,6 +6,9 @@ API changes
 
 * The `Flow` parameter `bidirectional` now raises a `FutureWarning`,
   as it is to be removed in a following version.
+* The `Flow` parameters `min` and `max` have been renamed to `minimum` and
+  `maximum`, respectively. The old parameters are still available but raise a
+  `FutureWarning`. Please use the new parameter names in future code.
 
 New features
 ############

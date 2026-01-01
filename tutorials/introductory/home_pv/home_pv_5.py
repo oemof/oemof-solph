@@ -73,7 +73,7 @@ pv_panels = solph.components.Source(
     outputs={
         dc_bus: solph.Flow(
             nominal_capacity=solph.Investment(ep_costs=pv_epc, maximum=10),
-            max=input_data["pv yield (kW/kW)"] / 0.95,
+            maximum=input_data["pv yield (kW/kW)"] / 0.95,
         )
     },
 )

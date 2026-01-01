@@ -77,7 +77,7 @@ def main(optimize=True):
             bus: solph.flows.Flow(
                 nominal_capacity=16,
                 variable_costs=0.2,
-                max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
+                maximum=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
         },
     )
@@ -99,7 +99,7 @@ def main(optimize=True):
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_capacity=4, maximum=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
         nominal_capacity=8,

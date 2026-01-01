@@ -45,7 +45,7 @@ def test_non_convex_status_variables():
             bus_heat: solph.Flow(
                 nonconvex=solph.NonConvex(),
                 nominal_capacity=5,
-                min=0.5,
+                minimum=0.5,
                 variable_costs=0.15,
             ),
         },
@@ -58,7 +58,7 @@ def test_non_convex_status_variables():
         outputs={
             bus_heat: solph.Flow(
                 nominal_capacity=solph.Investment(maximum=1, ep_costs=0.1),
-                min=0.5,
+                minimum=0.5,
                 nonconvex=solph.NonConvex(),
                 variable_costs=0.1,
             )
