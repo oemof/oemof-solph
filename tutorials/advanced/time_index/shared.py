@@ -122,4 +122,32 @@ def prepare_input_data():
 
 
 if __name__ == "__main__":
-    print(prepare_input_data())
+    import matplotlib.pyplot as plt
+
+    df =prepare_input_data()
+
+    p_pv = {}
+    resolutions = [
+        "1 min",
+        "5 min",
+        "10 min",
+        "15 min",
+        "30 min",
+        "1 h",
+        "2 h",
+        "3 h",
+        "6 h",
+    ]
+
+    for resolution in resolutions:
+        p_pv[resolution] = df["PV (kW/kWp)"].resample(resolution).mean()
+        plt.plot(
+            np.linspace(0, 8760, len(p_pv[resolution])),
+            sorted(p_pv[resolution])[::-1],
+            label=resolution,
+        )
+
+    # plt.xlim(-10, 510)
+    plt.ylim(0, 1.1)
+    plt.legend()
+    plt.show()
