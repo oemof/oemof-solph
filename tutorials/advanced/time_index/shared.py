@@ -15,6 +15,8 @@ from workalendar.europe import Germany
 
 
 def prepare_input_data():
+    # ToDo: Mobilitätszeitreihe, die zu den Daten passt.
+
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
@@ -30,77 +32,68 @@ def prepare_input_data():
 
     file_path = Path(__file__).parent
 
-    temperature_file = Path(file_path, "temperature.csv")
-    if not temperature_file.exists():
-        urlretrieve(url_temperature, temperature_file)
-    temperature = pd.read_csv(
-        temperature_file,
-        index_col="Unix Epoch",
-    )
-    timedelta = np.empty(len(temperature))
-    timedelta[:-1] = (temperature.index[1:] - temperature.index[:-1]) / 3600
-    timedelta[-1] = np.nan
+    def _temperature_dataframe():
+        temperature_file = Path(file_path, "temperature.csv")
+        if not temperature_file.exists():
+            urlretrieve(url_temperature, temperature_file)
+        temperature = pd.read_csv(
+            temperature_file,
+            index_col="Unix Epoch",
+        )
 
-    temperature.index = pd.to_datetime(
-        temperature.index,
-        unit="s",
-        utc=True,
-    )
+        temperature.index = pd.to_datetime(
+            temperature.index,
+            unit="s",
+            utc=True,
+        )
+
+        temperature[temperature == np.inf] = np.nan
+        temperature = temperature[10:].resample("1 min").mean()
+        return temperature
+
+    def _energy_dataframe():
+        energy_file = Path(file_path, "energy.csv")
+        if not energy_file.exists():
+            urlretrieve(url_energy, energy_file)
+
+        energy = pd.read_csv(
+            energy_file,
+            index_col=0,
+        )
+        energy.index = pd.to_datetime(
+            energy.index,
+            unit="s",
+            utc=True,
+        )
+
+        energy[energy == np.inf] = np.nan
+
+        energy = (
+            energy.resample("1 min")
+            .mean()
+        )
+        return energy
+
+    df = pd.concat([_energy_dataframe(), _temperature_dataframe()], axis=1)
+
+    df = df.interpolate()
 
     building_area = 120  # m² (from publication)
     specific_heat_demand = 60  #  kWh/m²/a  (educated guess)
     holidays = dict(Germany().holidays(2019))
 
     # We estimate the heat demand from the ambient temperature using demandlib.
-    # This returns energy per time step in units of kWh.
-    temperature["heat demand (kWh)"] = demandlib.bdew.HeatBuilding(
-        temperature.index,
+    # This returns energy per time step in units of kWh, but we want kW.
+    df["heat demand (kW)"] = demandlib.bdew.HeatBuilding(
+        df.index,
         holidays=holidays,
-        temperature=temperature["Air Temperature (°C)"],
+        temperature=df["Air Temperature (°C)"],
         shlp_type="EFH",
         building_class=1,
         wind_class=1,
         annual_heat_demand=building_area * specific_heat_demand,
         name="EFH",
-    ).get_bdew_profile()
-
-    temperature["heat demand (kW)"] = (
-        temperature["heat demand (kWh)"] / timedelta
-    )
-
-    energy_file = Path(file_path, "energy.csv")
-    if not energy_file.exists():
-        urlretrieve(url_energy, energy_file)
-
-    energy = pd.read_csv(
-        energy_file,
-        index_col=0,
-    )
-    energy.index = pd.to_datetime(
-        energy.index,
-        unit="s",
-        utc=True,
-    )
-
-    energy[energy == np.inf] = np.nan
-    # ToDo: Auf 1 Minuten samplen und Nan-Werte interpolieren (linear)
-    #  Daten in W
-    #  demand ist absolut
-    #  COP einfügen
-    #  Mobilitätszeitreihe, die zu den Daten passt.
-    #  Zeitstempel beachten ohne Offset!
-
-    energy = (
-        energy.resample("1 min")
-        .mean()
-    )
-    temperature[temperature == np.inf] = np.nan
-    temperature = (
-        temperature[10:].resample("1 min")
-        .mean()
-    )
-    df = pd.concat([energy, temperature], axis=1)
-    df = df.interpolate()
+    ).get_bdew_profile() * 60
 
     # **************** COP calculation **********************************
     t_supply = 60
@@ -123,7 +116,7 @@ def prepare_input_data():
     )
 
     # drop colums that are no longer useful
-    df.drop(columns=["PV (W)", "heat demand (kWh)"], inplace=True)
+    df.drop(columns=["PV (W)"], inplace=True)
 
     return df
 
