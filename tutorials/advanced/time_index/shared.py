@@ -5,6 +5,7 @@ SPDX-FileCopyrightText: DLR e.V.
 SPDX-License-Identifier: MIT
 """
 
+import datetime
 from pathlib import Path
 
 import demandlib
@@ -126,28 +127,34 @@ if __name__ == "__main__":
 
     df =prepare_input_data()
 
+    plt.plot(df["electricity demand (kW)"], "k")
+
     p_pv = {}
     resolutions = [
         "1 min",
-        "5 min",
-        "10 min",
+    #    "5 min",
+    #    "10 min",
         "15 min",
-        "30 min",
+    #    "30 min",
         "1 h",
-        "2 h",
+    #    "2 h",
         "3 h",
-        "6 h",
+    #    "6 h",
     ]
 
     for resolution in resolutions:
         p_pv[resolution] = df["PV (kW/kWp)"].resample(resolution).mean()
+        # plt.plot(
+        #    np.linspace(0, 8760, len(p_pv[resolution])),
+        #    sorted(p_pv[resolution])[::-1],
+        #    label=resolution,
+        # )
         plt.plot(
-            np.linspace(0, 8760, len(p_pv[resolution])),
-            sorted(p_pv[resolution])[::-1],
+            p_pv[resolution],
             label=resolution,
         )
 
-    # plt.xlim(-10, 510)
+    plt.xlim([datetime.date(2019, 4, 10), datetime.date(2019, 4, 11)])
     plt.ylim(0, 1.1)
     plt.legend()
     plt.show()
