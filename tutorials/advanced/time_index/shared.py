@@ -15,8 +15,6 @@ from workalendar.europe import Germany
 
 
 def prepare_input_data():
-    data = {}
-
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
@@ -66,8 +64,8 @@ def prepare_input_data():
         name="EFH",
     ).get_bdew_profile()
 
-    temperature["heat demand (W)"] = (
-        temperature["heat demand (kWh)"] * 1e3 / timedelta
+    temperature["heat demand (kW)"] = (
+        temperature["heat demand (kWh)"] / timedelta
     )
 
     energy_file = Path(file_path, "energy.csv")
@@ -116,9 +114,16 @@ def prepare_input_data():
 
     df["cop"] = cop_hp
 
-    df["PV (kW/kWp)"] = df["PV (W)"].div(df["PV (W)"].sum()/60000)
-    for key in ["heat demand (W)", "electricity demand (W)"]:
-        df[key.replace("(W)", "(kW)")] = df[key].div(1000)
+    df["PV (kW/kWp)"] = df["PV (W)"] / 14.5e3  # Wp from publication
+
+    df["electricity demand (W)"] /= 1000
+    df.rename(
+        columns={"electricity demand (W)": "electricity demand (kW)"},
+        inplace=True,
+    )
+
+    # drop colums that are no longer useful
+    df.drop(columns=["PV (W)", "heat demand (kWh)"], inplace=True)
 
     return df
 
