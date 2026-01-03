@@ -21,13 +21,13 @@ def prepare_input_data():
     url_temperature = (
         "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
     )
-    url_energy = "https://oemof.org/wp-content/uploads/2025/12/energy.csv"
+    url_energy = "https://oemof.org/wp-content/uploads/2026/01/energy.csv"
 
     print(
         "Data is licensed from M. Schlemminger, T. Ohrdes, E. Schneider,"
         " and M. Knoop. Under Creative Commons Attribution 4.0 International"
         " License. It is also available at doi: 10.5281/zenodo.5642902."
-        " (We use single family home 26 plus the south-facing PV"
+        " (We use building 27 plus the south-facing PV"
         " from that dataset.)"
     )
 
@@ -79,7 +79,7 @@ def prepare_input_data():
 
     df = df.interpolate()
 
-    building_area = 120  # m² (from publication)
+    building_area = 110  # m² (from publication)
     specific_heat_demand = 60  #  kWh/m²/a  (educated guess)
     holidays = dict(Germany().holidays(2019))
 
@@ -108,16 +108,16 @@ def prepare_input_data():
 
     df["cop"] = cop_hp
 
-    df["PV (kW/kWp)"] = df["PV (W)"] / 14.5e3  # Wp from publication
+    df["PV (kW/kWp)"] = df["P_PV (W)"] / 14.5e3  # Wp from publication
 
-    df["electricity demand (W)"] /= 1000
+    df["P_tot27 (W)"] /= 1000
     df.rename(
-        columns={"electricity demand (W)": "electricity demand (kW)"},
+        columns={"P_tot27 (W)": "electricity demand (kW)"},
         inplace=True,
     )
 
     # drop colums that are no longer useful
-    df.drop(columns=["PV (W)"], inplace=True)
+    df.drop(columns=["P_PV (W)"], inplace=True)
 
     return df
 
