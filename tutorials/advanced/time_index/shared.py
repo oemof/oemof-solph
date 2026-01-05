@@ -127,7 +127,7 @@ if __name__ == "__main__":
 
     df =prepare_input_data()
 
-    plt.plot(df["electricity demand (kW)"], "k")
+    # plt.plot(df["electricity demand (kW)"], "k")
 
     p_pv = {}
     resolutions = [
@@ -142,19 +142,52 @@ if __name__ == "__main__":
     #    "6 h",
     ]
 
-    for resolution in resolutions:
-        p_pv[resolution] = df["PV (kW/kWp)"].resample(resolution).mean()
+    fig0, ax0 = plt.subplots(figsize=(4, 2), tight_layout=True)
+    fig1, ax1 = plt.subplots(figsize=(4, 2), tight_layout=True)
+
+    for resolution in resolutions[::-1]:
+        time_series = 15.4 * df["PV (kW/kWp)"].resample(resolution).mean()
         # plt.plot(
         #    np.linspace(0, 8760, len(p_pv[resolution])),
         #    sorted(p_pv[resolution])[::-1],
         #    label=resolution,
         # )
-        plt.plot(
-            p_pv[resolution],
-            label=resolution,
+
+        time_series = time_series[
+            datetime.datetime(2019, 11, 3, 0, tzinfo=datetime.timezone.utc)
+            : datetime.datetime(2019, 11, 4, 0, tzinfo=datetime.timezone.utc)
+        ]
+        hour_axis = np.linspace(0, 24, num=len(time_series))
+        ax0.step(
+            x=hour_axis,
+            y=time_series,
+            label=resolution,# + f" ({len(time_series)} steps)",
+            where="post",
+        )
+        ax1.step(
+            x=hour_axis,
+            y=sorted(time_series)[::-1],
+            label=resolution,# + f" ({len(time_series)} steps)",
+            where="post",
         )
 
-    plt.xlim([datetime.date(2019, 4, 10), datetime.date(2019, 4, 11)])
-    plt.ylim(0, 1.1)
-    plt.legend()
+        p_pv[resolution] = time_series
+
+    ax0.set_xlim(5.9, 18.1)
+    ax0.set_xlabel("Time (UTC)")
+    ax0.set_ylabel("Power (kW)")
+    ax0.legend()
+    ax0.grid()
+    fig0.savefig("2019-11-3_PV-timeseries.eps")
+    fig0.savefig("2019-11-3_PV-timeseries.pdf")
+
+    ax1.grid()
+    ax1.set_xlim(-0.1, 12.1)
+    ax1.set_xlabel("Duration (h)")
+    ax1.set_ylabel("Power (kW)")
+    ax1.set_yscale("log")
+    #ax1.legend()
+    fig1.savefig("2019-11-3_PV-duration.eps")
+    fig1.savefig("2019-11-3_PV-duration.pdf")
+
     plt.show()
