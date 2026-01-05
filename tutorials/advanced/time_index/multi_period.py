@@ -82,45 +82,16 @@ prices = prices_new
 
 # ---------- read time series data and resample--------------------------------
 
-df = prepare_input_data()
-print(df)
+data = prepare_input_data()
 
-df = df.resample("1 h").mean()
-print(df)
-
-
-# # read data
-# df_temperature, df_energy = prepare_input_data(plot_resampling=False)
-
-# # resample to one hour
-# df_temperature = df_temperature.resample("1 h").mean()
-# df_energy = df_energy.resample("1 h").mean()
-
-# # create data as one DataFrame
-# df = pd.concat([df_temperature, df_energy], axis=1)
-
-# # drop unnecessary columns and time steps of previous year
-# df = df.drop(
-#     columns=["Air Temperature (°C)", "heat demand (kWh)"]
-# ).drop(df.index[0])
-
-# # convert untis from W to kW
-# df = df / 1000
-# df = df.rename(
-#     columns={
-#         "heat demand (W)": "heat demand (kW)",
-#         "electricity demand (W)": "electricity demand (kW)",
-#         "PV (W)": "PV (kW)",
-#     }
-# )
-
+data = data.resample("1 h").mean()
 
 # -------------- Clustering of input time-series with TSAM --------------------
 typical_periods = 40
 hours_per_period = 24
 
 aggregation = tsam.TimeSeriesAggregation(
-    timeSeries=df.iloc[:8760],
+    timeSeries=data.iloc[:8760],
     noTypicalPeriods=typical_periods,
     hoursPerPeriod=hours_per_period,
     clusterMethod="k_means",
@@ -283,8 +254,12 @@ hp = cmp.Converter(
             )
         )
     },
-    conversion_factors={bus_heat: 3.5},
-    # conversion_factors={bus_heat: [aggregation.typicalPeriods["cop"]] * len(years)}
+    conversion_factors={
+        bus_heat: pd.concat(
+            [aggregation.typicalPeriods["cop"]] * len(years),
+            ignore_index=True,
+        )
+    },
 )
 es.add(hp)
 

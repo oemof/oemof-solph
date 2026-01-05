@@ -7,11 +7,11 @@ SPDX-License-Identifier: MIT
 
 import datetime
 from pathlib import Path
+from urllib.request import urlretrieve
 
 import demandlib
-import pandas as pd
 import numpy as np
-from urllib.request import urlretrieve
+import pandas as pd
 from workalendar.europe import Germany
 
 
@@ -30,6 +30,8 @@ def prepare_input_data():
         " (We use building 27 plus the south-facing PV"
         " from that dataset.)"
     )
+
+    url_car = "https://oemof.org/wp-content/uploads/2025/12/car_charging_with_7kW_minute.csv"
 
     file_path = Path(__file__).parent
 
@@ -69,10 +71,7 @@ def prepare_input_data():
 
         energy[energy == np.inf] = np.nan
 
-        energy = (
-            energy.resample("1 min")
-            .mean()
-        )
+        energy = energy.resample("1 min").mean()
         return energy
 
     df = pd.concat([_energy_dataframe(), _temperature_dataframe()], axis=1)
@@ -85,16 +84,19 @@ def prepare_input_data():
 
     # We estimate the heat demand from the ambient temperature using demandlib.
     # This returns energy per time step in units of kWh, but we want kW.
-    df["heat demand (kW)"] = demandlib.bdew.HeatBuilding(
-        df.index,
-        holidays=holidays,
-        temperature=df["Air Temperature (°C)"],
-        shlp_type="EFH",
-        building_class=1,
-        wind_class=1,
-        annual_heat_demand=building_area * specific_heat_demand,
-        name="EFH",
-    ).get_bdew_profile() * 60
+    df["heat demand (kW)"] = (
+        demandlib.bdew.HeatBuilding(
+            df.index,
+            holidays=holidays,
+            temperature=df["Air Temperature (°C)"],
+            shlp_type="EFH",
+            building_class=1,
+            wind_class=1,
+            annual_heat_demand=building_area * specific_heat_demand,
+            name="EFH",
+        ).get_bdew_profile()
+        * 60
+    )
 
     # **************** COP calculation **********************************
     t_supply = 60
@@ -119,27 +121,42 @@ def prepare_input_data():
     # drop colums that are no longer useful
     df.drop(columns=["P_PV (W)"], inplace=True)
 
+    # add car charging profile
+    def _car_dataframe():
+        car_file = Path(file_path, "car_charging.csv")
+        if not car_file.exists():
+            urlretrieve(url_car, car_file)
+
+        car = pd.read_csv(
+            car_file,
+            index_col=0,
+        )
+        car.index = df.index
+        return car
+
+    df = pd.concat([df, _car_dataframe()], axis=1)
+
     return df
 
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    df =prepare_input_data()
+    df = prepare_input_data()
 
     # plt.plot(df["electricity demand (kW)"], "k")
 
     p_pv = {}
     resolutions = [
         "1 min",
-    #    "5 min",
-    #    "10 min",
+        #    "5 min",
+        #    "10 min",
         "15 min",
-    #    "30 min",
+        #    "30 min",
         "1 h",
-    #    "2 h",
+        #    "2 h",
         "3 h",
-    #    "6 h",
+        #    "6 h",
     ]
 
     fig0, ax0 = plt.subplots(figsize=(4, 2), tight_layout=True)
@@ -154,20 +171,21 @@ if __name__ == "__main__":
         # )
 
         time_series = time_series[
-            datetime.datetime(2019, 11, 3, 0, tzinfo=datetime.timezone.utc)
-            : datetime.datetime(2019, 11, 4, 0, tzinfo=datetime.timezone.utc)
+            datetime.datetime(
+                2019, 11, 3, 0, tzinfo=datetime.timezone.utc
+            ) : datetime.datetime(2019, 11, 4, 0, tzinfo=datetime.timezone.utc)
         ]
         hour_axis = np.linspace(0, 24, num=len(time_series))
         ax0.step(
             x=hour_axis,
             y=time_series,
-            label=resolution,# + f" ({len(time_series)} steps)",
+            label=resolution,  # + f" ({len(time_series)} steps)",
             where="post",
         )
         ax1.step(
             x=hour_axis,
             y=sorted(time_series)[::-1],
-            label=resolution,# + f" ({len(time_series)} steps)",
+            label=resolution,  # + f" ({len(time_series)} steps)",
             where="post",
         )
 
@@ -186,7 +204,7 @@ if __name__ == "__main__":
     ax1.set_xlabel("Duration (h)")
     ax1.set_ylabel("Power (kW)")
     ax1.set_yscale("log")
-    #ax1.legend()
+    # ax1.legend()
     fig1.savefig("2019-11-3_PV-duration.eps")
     fig1.savefig("2019-11-3_PV-duration.pdf")
 
