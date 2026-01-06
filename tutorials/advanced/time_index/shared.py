@@ -6,6 +6,7 @@ SPDX-License-Identifier: MIT
 """
 
 import datetime
+from os import environ
 from pathlib import Path
 from urllib.request import urlretrieve
 
@@ -14,8 +15,16 @@ import numpy as np
 import pandas as pd
 from workalendar.europe import Germany
 
+PROXY_SET = False
 
-def prepare_input_data():
+
+def set_proxy(url, port):
+    proxy = f"{url}:{port}"
+    environ["http_proxy"] = proxy
+    environ["https_proxy"] = proxy
+
+
+def prepare_input_data(proxy_url=None, proxy_port=None):
     # ToDo: Mobilitätszeitreihe, die zu den Daten passt.
 
     url_temperature = (
@@ -32,6 +41,10 @@ def prepare_input_data():
     )
 
     url_car = "https://oemof.org/wp-content/uploads/2025/12/car_charging_with_7kW_minute.csv"
+    global PROXY_SET
+    if PROXY_SET is False and proxy_url is not None:
+        set_proxy(url=proxy_url, port=proxy_port)
+        PROXY_SET = True
 
     file_path = Path(__file__).parent
 
