@@ -276,12 +276,13 @@ def compare_results(even, uneven):
 
 
 if __name__ == "__main__":
+    my_year = 2045
     my_data = prepare_technical_data(10)
     start = datetime.now()
-    results_even = solve_model(my_data.even)
+    results_even = solve_model(my_data.even, year=my_year)
     time_even = datetime.now() - start
     start = datetime.now()
-    results_uneven = solve_model(my_data.uneven)
+    results_uneven = solve_model(my_data.uneven, year=my_year)
     time_uneven = datetime.now() - start
     process_results(results_even)
     process_results(results_uneven)
