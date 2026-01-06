@@ -48,10 +48,13 @@ def calculate_fix_cost(value):
     return value / 20
 
 
-def prepare_technical_data(minutes):
+def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
-    df = prepare_input_data().resample(f"{minutes} min").mean()
-    df["ev charge (kW)"] = 0
+    df = (
+        prepare_input_data(proxy_url=url, proxy_port=port)
+        .resample(f"{minutes} min")
+        .mean()
+    )
     df_un = reshape_unevenly(df)
     return data(even=df, uneven=df_un)
 
@@ -273,10 +276,9 @@ def compare_results(even, uneven):
 # demand = demand.droplevel(0, axis=1)
 # demand.rename(columns={c: c.label for c in demand.columns}, inplace=True)
 
-
 if __name__ == "__main__":
     my_year = 2045
-    my_data = prepare_technical_data(10)
+    my_data = prepare_technical_data(10, None, None)
     start = datetime.now()
     results_even = solve_model(my_data.even, year=my_year)
     time_even = datetime.now() - start
