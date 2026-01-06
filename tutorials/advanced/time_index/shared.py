@@ -40,7 +40,11 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
         " from that dataset.)"
     )
 
-    url_car = "https://oemof.org/wp-content/uploads/2025/12/car_charging_with_7kW_minute.csv"
+    url_car = (
+        "https://oemof.org/wp-content/uploads/2026/01/"
+        "car_charging_with_7kW_minute.csv"
+    )
+
     global PROXY_SET
     if PROXY_SET is False and proxy_url is not None:
         set_proxy(url=proxy_url, port=proxy_port)
@@ -92,7 +96,7 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
     df = df.interpolate()
 
     building_area = 110  # m² (from publication)
-    specific_heat_demand = 60  #  kWh/m²/a  (educated guess)
+    specific_heat_demand = 60  # kWh/m²/a  (educated guess)
     holidays = dict(Germany().holidays(2019))
 
     # We estimate the heat demand from the ambient temperature using demandlib.
@@ -155,7 +159,7 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    df = prepare_input_data()
+    my_df = prepare_input_data()
 
     # plt.plot(df["electricity demand (kW)"], "k")
 
@@ -176,7 +180,7 @@ if __name__ == "__main__":
     fig1, ax1 = plt.subplots(figsize=(4, 2), tight_layout=True)
 
     for resolution in resolutions[::-1]:
-        time_series = 15.4 * df["PV (kW/kWp)"].resample(resolution).mean()
+        time_series = 15.4 * my_df["PV (kW/kWp)"].resample(resolution).mean()
         # plt.plot(
         #    np.linspace(0, 8760, len(p_pv[resolution])),
         #    sorted(p_pv[resolution])[::-1],

@@ -71,13 +71,9 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
     investments = {}
     for key in ["gas boiler", "heat pump", "battery", "pv"]:
         try:
-            epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kW]")], n, r
-            )
+            epc = annuity(invest_cost[(key, "specific_costs [Eur/kW]")], n, r)
         except KeyError:
-            epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kWh]")], n, r
-            )
+            epc = annuity(invest_cost[(key, "specific_costs [Eur/kWh]")], n, r)
         fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
         investments[key] = Investment(ep_costs=epc, fixed_costs=fix_cost)
 
@@ -166,7 +162,10 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
         cmp.Sink(
             label="Electric Vehicle",
             inputs={
-                bus_el: Flow(fix=data["ev charge (kW)"], nominal_capacity=1.0)
+                bus_el: Flow(
+                    fix=data["Electricity for Car Charging_HH1"],
+                    nominal_capacity=1.0,
+                )
             },
         )
     )
