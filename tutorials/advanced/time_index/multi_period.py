@@ -62,39 +62,36 @@ logger.define_logging()
 investment_costs = investment_costs()
 prices = energy_prices()
 
+# Note:
+# originally the data provided is for investment periods of 5 years each
+# so years = [2025, 2030, 2035, 2040, 2045]
+# this was causing a bug in the mulit period calculation of the fixed_costs in
+# the INVESTFLOWS, therefore years is set to [2025, 2026, 2027, 2028, 2029] in
+# this example this will be changed, when the bug is fixed
+
+# list with years in which investment is possible
+years = [2025, 2026, 2027, 2028, 2029]
+
+investment_costs_new = investment_costs.loc[[2025, 2030, 2035, 2040, 2045]]
+investment_costs_new.index = years
+investment_costs = investment_costs_new
+
+prices_new = prices.loc[[2025, 2030, 2035, 2040, 2045]]
+prices_new.index = years
+prices = prices_new
+
 # ---------- read time series data and resample--------------------------------
 
-# read data
-df_temperature, df_energy = prepare_input_data(plot_resampling=False)
+data = prepare_input_data()
 
-# resample to one hour
-df_temperature = df_temperature.resample("1 h").mean()
-df_energy = df_energy.resample("1 h").mean()
-
-# create data as one DataFrame
-time_series_data_full = pd.concat([df_temperature, df_energy], axis=1)
-
-# drop unnecessary columns and time steps of previous year
-time_series_data_full = time_series_data_full.drop(
-    columns=["Air Temperature (°C)", "heat demand (kWh)"]
-).drop(time_series_data_full.index[0])
-
-# convert untis from W to kW
-time_series_data_full = time_series_data_full / 1000
-time_series_data_full = time_series_data_full.rename(
-    columns={
-        "heat demand (W)": "heat demand (kW)",
-        "electricity demand (W)": "electricity demand (kW)",
-        "PV (W)": "PV (kW)",
-    }
-)
+data = data.resample("1 h").mean()
 
 # -------------- Clustering of input time-series with TSAM --------------------
 typical_periods = 40
 hours_per_period = 24
 
 aggregation = tsam.TimeSeriesAggregation(
-    timeSeries=time_series_data_full.iloc[:8760],
+    timeSeries=data.iloc[:8760],
     noTypicalPeriods=typical_periods,
     hoursPerPeriod=hours_per_period,
     clusterMethod="k_means",
@@ -109,15 +106,7 @@ tindex_agg = pd.date_range(
 )
 
 # ------------ create timeindex etc. for multiperiod --------------------------
-# Note:
-# originally the data provided is for investment periods of 5 years each
-# so years = [2025, 2030, 2035, 2040, 2045]
-# this was causing a bug in the mulit period calculation of the fixed_costs in
-# the INVESTFLOWS, therefore years is set to [2025, 2026, 2027, 2028, 2029] in
-# this eaxample this will be changed, when the bug is fixed
 
-# list with years in which investment is possible
-years = [2025, 2026, 2027, 2028, 2029]
 
 # create a time index for the whole model
 # Create a list of shifted copies of the original index,
@@ -180,7 +169,7 @@ pv = cmp.Source(
     outputs={
         bus_el: Flow(
             fix=pd.concat(
-                [aggregation.typicalPeriods["PV (kW)"]] * len(years),
+                [aggregation.typicalPeriods["PV (kW/kWp)"]] * len(years),
                 ignore_index=True,
             ),
             nominal_capacity=Investment(
@@ -265,7 +254,12 @@ hp = cmp.Converter(
             )
         )
     },
-    conversion_factors={bus_heat: 3.5},
+    conversion_factors={
+        bus_heat: pd.concat(
+            [aggregation.typicalPeriods["cop"]] * len(years),
+            ignore_index=True,
+        )
+    },
 )
 es.add(hp)
 
