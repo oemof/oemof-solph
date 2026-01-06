@@ -24,6 +24,18 @@ def set_proxy(url, port):
     environ["https_proxy"] = proxy
 
 
+def get_parameter():
+    return {
+        "n": 20,
+        "r": 0.05,
+        "efficiency_boiler": 0.90,
+        "shortage_heat": 99,
+        "loss_rate_battery": 0.001,
+        "charge_efficiency_battery": 0.95,
+        "discharge_efficiency_battery": 0.95,
+    }
+
+
 def prepare_input_data(proxy_url=None, proxy_port=None):
     # ToDo: Mobilitätszeitreihe, die zu den Daten passt.
 
