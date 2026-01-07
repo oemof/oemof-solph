@@ -92,7 +92,13 @@ def solve_model(data, parameter, year=2025, es=None):
                 parameter["r"],
             )
         fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
-        investments[key] = Investment(ep_costs=epc, fixed_costs=fix_cost)
+        if key == "pv":
+            maxi = parameter["max_capacity_pv"]
+        else:
+            maxi = float("+inf")
+        investments[key] = Investment(
+            ep_costs=epc, fixed_costs=fix_cost, maximum=maxi
+        )
         # ToDo: PV-MAX muss noch eingebaut werden
 
     # Buses
@@ -251,57 +257,69 @@ def process_results(results):
     return investments
 
 
-# def compare_results(even, uneven):
-#     flow_e = even["flow"]
-#     flow_u = uneven["flow"]
-#     print(flow_e.sum())
-#     print(flow_u.sum())
-
-
-#
-# # interval_hours = df.groupby(buckets).size().sort_index()
-# # interval_hours.name = 'interval_hours'
-#
-#
-# print("Energy Balance")
-# print(flow.sum())
-# print("")
-# print("Investment")
-# print(investments.squeeze())
-
-
-# investments.squeeze().plot(kind="bar")
-#
-# day = 186  # day of the year
-# n = 2  # number of days to plot
-# flow = flow[day * 24 * 6 : day * 24 * 6 + n * 24 * 6]
-# soc = soc[day * 24 * 6 : day * 24 * 6 + 48 * 6]
-#
-# supply = flow[[c for c in flow.columns if c[1].label == "electricity"]]
-# supply = supply.droplevel(1, axis=1)
-# supply.rename(columns={c: c.label for c in supply.columns}, inplace=True)
-# demand = flow[[c for c in flow.columns if c[0].label == "electricity"]]
-# demand = demand.droplevel(0, axis=1)
-# demand.rename(columns={c: c.label for c in demand.columns}, inplace=True)
-
-
-if __name__ == "__main__":
-    my_year = 2025
-    my_data = prepare_technical_data(60, None, None)
+def optimise_investment(year, interval, result_path):
+    my_data = prepare_technical_data(interval, None, None)
     start = datetime.now()
-    results_even = solve_model(my_data.even, get_parameter(), year=my_year)
+    results_even = solve_model(my_data.even, get_parameter(), year=year)
     time_even = datetime.now() - start
     start = datetime.now()
-    results_uneven = solve_model(my_data.uneven, get_parameter(), year=my_year)
+    results_uneven = solve_model(my_data.uneven, get_parameter(), year=year)
     time_uneven = datetime.now() - start
-    invest_even = process_results(results_even)
-    invest_uneven = process_results(results_uneven)
+    key_results_even = process_results(results_even)
+    key_results_even["time"] = time_even.seconds
+    key_results_even["objective"] = results_even["objective"]
+    key_results_even["short_interval"] = interval
+    key_results_even["year_of_investment"] = year
+    key_results_uneven = process_results(results_uneven)
+    key_results_uneven["time"] = time_uneven.seconds
+    key_results_uneven["objective"] = results_uneven["objective"]
+    key_results_uneven["short_interval"] = interval
+    key_results_uneven["year_of_investment"] = year
+    results = (
+        pd.concat(
+            [key_results_uneven, key_results_even],
+            keys=["uneven", "even"],
+        )
+        .droplevel(1)
+        .T
+    )
+    result_file = f"time_series_even_uneven_{year}_{interval}min.csv"
+    results.to_csv(Path(result_path, result_file))
+
     # compare_results(results_even, results_uneven)
     print()
     print("*** Investment ***")
-    print("even\n", invest_even.iloc[0])
-    print("uneven\n", invest_uneven.iloc[0])
+    print("even\n", key_results_even.iloc[0])
+    print("uneven\n", key_results_uneven.iloc[0])
     print()
     print("*** Times ****")
     print("even", time_even)
     print("uneven", time_uneven)
+
+
+def read_result_files(year, interval, result_path):
+    result_file = f"time_series_even_uneven_{year}_{interval}min.csv"
+    temp = pd.read_csv(Path(result_path, result_file), index_col=[0])
+    temp = pd.concat([temp], keys=[interval], axis=1)
+    return pd.concat([temp], keys=[year], axis=1)
+
+
+if __name__ == "__main__":
+    my_result_path = Path(Path.home(), ".oemof", "tutorial", "time_series")
+    my_result_path.mkdir(exist_ok=True)
+    intervals = [60]
+    years = [2025]
+
+    for my_year in years:
+        for my_interval in intervals:
+            optimise_investment(my_year, my_interval, my_result_path)
+
+    df = pd.DataFrame()
+    for my_year in years:
+        for my_interval in intervals:
+            df = pd.concat(
+                [df, read_result_files(my_year, my_interval, my_result_path)],
+                axis=1,
+            )
+
+    df.sort_index(axis=1).to_csv(Path(my_result_path, "results_all.csv"))
