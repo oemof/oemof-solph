@@ -24,6 +24,7 @@ from oemof.network import graph
 from oemof.tools import debugging
 from oemof.tools import logger
 from oemof.tools.economics import annuity
+from shared import get_parameter
 from shared import prepare_input_data
 
 from oemof.solph import Bus
@@ -48,10 +49,13 @@ def calculate_fix_cost(value):
     return value / 20
 
 
-def prepare_technical_data(minutes):
+def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
-    df = prepare_input_data().resample(f"{minutes} min").mean()
-    df["ev charge (kW)"] = 0
+    df = (
+        prepare_input_data(proxy_url=url, proxy_port=port)
+        .resample(f"{minutes} min")
+        .mean()
+    )
     df_un = reshape_unevenly(df)
     return data(even=df, uneven=df_un)
 
@@ -60,11 +64,16 @@ def prepare_cost_data():
     pass
 
 
-def solve_model(data, year=2025, es=None, n=20, r=0.05):
+def solve_model(data, parameter, year=2025, es=None):
     if es is None:
         es = EnergySystem(timeindex=data.index)
 
-    var_cost = discounted_average_price(energy_prices(), r, n, year)
+    var_cost = discounted_average_price(
+        price_series=energy_prices(),
+        observation_period=parameter["n"],
+        interest_rate=parameter["r"],
+        year_of_investment=year,
+    )
     invest_cost = investment_costs().loc[year]
 
     # Create Investment objects from cost data
@@ -72,11 +81,15 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
     for key in ["gas boiler", "heat pump", "battery", "pv"]:
         try:
             epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kW]")], n, r
+                invest_cost[(key, "specific_costs [Eur/kW]")],
+                parameter["n"],
+                parameter["r"],
             )
         except KeyError:
             epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kWh]")], n, r
+                invest_cost[(key, "specific_costs [Eur/kWh]")],
+                parameter["n"],
+                parameter["r"],
             )
         fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
         investments[key] = Investment(ep_costs=epc, fixed_costs=fix_cost)
@@ -101,11 +114,6 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
     )
     es.add(
         cmp.Source(
-            label="Shortage_heat", outputs={bus_heat: Flow(variable_costs=99)}
-        )
-    )
-    es.add(
-        cmp.Source(
             label="Grid import",
             outputs={
                 bus_el: Flow(
@@ -118,7 +126,7 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
         cmp.Source(
             label="Gas import",
             outputs={
-                bus_el: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
+                bus_gas: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
             },
         )
     )
@@ -133,21 +141,21 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
             min_storage_level=0.0,
             max_storage_level=1.0,
             balanced=True,
-            loss_rate=0.001,  # 0.1%/h
-            inflow_conversion_factor=0.95,  # Lade-Wirkungsgrad
-            outflow_conversion_factor=0.95,  # Entlade-Wirkungsgrad
+            loss_rate=parameter["loss_rate_battery"],  # 0.1%/h
+            inflow_conversion_factor=parameter["charge_efficiency_battery"],
+            outflow_conversion_factor=parameter[
+                "discharge_efficiency_battery"
+            ],
         )
     )
 
     # Sinks
-    es.add(cmp.Sink(label="Excess_el", inputs={bus_el: Flow()}))
-    es.add(cmp.Sink(label="Excess_heat", inputs={bus_heat: Flow()}))
     es.add(
         cmp.Sink(
             label="Heat demand",
             inputs={
                 bus_heat: Flow(
-                    fix=data["heat demand (kW)"], nominal_capacity=5.0
+                    fix=data["heat demand (kW)"], nominal_capacity=1
                 )
             },
         )
@@ -157,7 +165,7 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
             label="Electricity demand",
             inputs={
                 bus_el: Flow(
-                    fix=data["electricity demand (kW)"], nominal_capacity=1.0
+                    fix=data["electricity demand (kW)"], nominal_capacity=1
                 )
             },
         )
@@ -166,7 +174,10 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
         cmp.Sink(
             label="Electric Vehicle",
             inputs={
-                bus_el: Flow(fix=data["ev charge (kW)"], nominal_capacity=1.0)
+                bus_el: Flow(
+                    fix=data["Electricity for Car Charging_HH1"],
+                    nominal_capacity=1,
+                )
             },
         )
     )
@@ -174,9 +185,7 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
         cmp.Sink(
             label="Grid Feed-in",
             inputs={
-                bus_el: Flow(
-                    variable_costs=-var_cost["pv_feed_in [Eur/kWh]"] / 1000
-                )
+                bus_el: Flow(variable_costs=var_cost["pv_feed_in [Eur/kWh]"]/2)
             },
         )
     )
@@ -200,7 +209,7 @@ def solve_model(data, year=2025, es=None, n=20, r=0.05):
             outputs={
                 bus_heat: Flow(nominal_capacity=investments["gas boiler"])
             },
-            conversion_factors={bus_heat: data["cop"]},
+            conversion_factors={bus_heat: parameter["efficiency_boiler"]},
         )
     )
 
@@ -239,14 +248,14 @@ def process_results(results):
             if isinstance(c, tuple)
         },
     )
-    print(investments)
+    return investments
 
 
 def compare_results(even, uneven):
     flow_e = even["flow"]
     flow_u = uneven["flow"]
-    # print(flow_e)
-    # print(flow_u)
+    print(flow_e.sum())
+    print(flow_u.sum())
 
 
 #
@@ -259,6 +268,7 @@ def compare_results(even, uneven):
 # print("")
 # print("Investment")
 # print(investments.squeeze())
+
 
 # investments.squeeze().plot(kind="bar")
 #
@@ -276,16 +286,22 @@ def compare_results(even, uneven):
 
 
 if __name__ == "__main__":
-    my_data = prepare_technical_data(10)
+    my_year = 2025
+    my_data = prepare_technical_data(10, None, None)
     start = datetime.now()
-    results_even = solve_model(my_data.even)
+    results_even = solve_model(my_data.even, get_parameter(), year=my_year)
     time_even = datetime.now() - start
     start = datetime.now()
-    results_uneven = solve_model(my_data.uneven)
+    results_uneven = solve_model(my_data.uneven, get_parameter(), year=my_year)
     time_uneven = datetime.now() - start
-    process_results(results_even)
-    process_results(results_uneven)
+    invest_even = process_results(results_even)
+    invest_uneven = process_results(results_uneven)
     compare_results(results_even, results_uneven)
+    print()
+    print("*** Investment ***")
+    print("even\n", invest_even.iloc[0])
+    print("uneven\n", invest_uneven.iloc[0])
+    print()
     print("*** Times ****")
     print("even", time_even)
     print("uneven", time_uneven)
