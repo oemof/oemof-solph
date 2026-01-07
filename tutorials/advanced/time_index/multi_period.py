@@ -164,6 +164,9 @@ bus_heat = Bus(label="heat")
 bus_gas = Bus(label="gas")
 es.add(bus_el, bus_heat, bus_gas)
 
+# adjustment factor to make pv cheaper, to see different results
+pv_adjustment_factor = 0.2
+
 pv = cmp.Source(
     label="PV",
     outputs={
@@ -173,11 +176,13 @@ pv = cmp.Source(
                 ignore_index=True,
             ),
             nominal_capacity=Investment(
-                ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")],
+                ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")]
+                * pv_adjustment_factor,
                 lifetime=lifetime_adjusted(
                     20, investment_period_length_in_years
                 ),
                 fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")]
+                * pv_adjustment_factor
                 / lifetime_adjusted(20, investment_period_length_in_years),
                 overall_maximum=10,
             ),
@@ -220,19 +225,25 @@ house_sink = cmp.Sink(
 es.add(house_sink)
 
 # Electric vehicle demand
-# wallbox_sink = cmp.Sink(
-#     label="Electric Vehicle",
-#     inputs={
-#         bus_el: Flow(
-#             fix=pd.concat(
-#                 [aggregation.typicalPeriods["ev_charge_kW"]] * len(years),
-#                 ignore_index=True,
-#             ),
-#             nominal_capacity=1.0,
-#         )
-#     },
-# )
-# es.add(wallbox_sink)
+wallbox_sink = cmp.Sink(
+    label="Electric Vehicle",
+    inputs={
+        bus_el: Flow(
+            fix=pd.concat(
+                [
+                    aggregation.typicalPeriods[
+                        "Electricity for Car Charging in kW"
+                    ]
+                    * 1000
+                ]
+                * len(years),
+                ignore_index=True,
+            ),
+            nominal_capacity=1.0,
+        )
+    },
+)
+es.add(wallbox_sink)
 
 # Heat Pump
 hp = cmp.Converter(
