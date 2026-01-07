@@ -93,6 +93,7 @@ def solve_model(data, parameter, year=2025, es=None):
             )
         fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
         investments[key] = Investment(ep_costs=epc, fixed_costs=fix_cost)
+        # ToDo: PV-MAX muss noch eingebaut werden
 
     # Buses
     bus_el = Bus(label="electricity")
@@ -138,9 +139,6 @@ def solve_model(data, parameter, year=2025, es=None):
             inputs={bus_el: Flow()},
             outputs={bus_el: Flow()},
             nominal_capacity=investments["battery"],  # kWh
-            min_storage_level=0.0,
-            max_storage_level=1.0,
-            balanced=True,
             loss_rate=parameter["loss_rate_battery"],  # 0.1%/h
             inflow_conversion_factor=parameter["charge_efficiency_battery"],
             outflow_conversion_factor=parameter[
@@ -155,7 +153,8 @@ def solve_model(data, parameter, year=2025, es=None):
             label="Heat demand",
             inputs={
                 bus_heat: Flow(
-                    fix=data["heat demand (kW)"], nominal_capacity=1
+                    fix=data["heat demand (kW)"],
+                    nominal_capacity=1,
                 )
             },
         )
@@ -165,7 +164,8 @@ def solve_model(data, parameter, year=2025, es=None):
             label="Electricity demand",
             inputs={
                 bus_el: Flow(
-                    fix=data["electricity demand (kW)"], nominal_capacity=1
+                    fix=data["electricity demand (kW)"],
+                    nominal_capacity=1,
                 )
             },
         )
@@ -185,7 +185,7 @@ def solve_model(data, parameter, year=2025, es=None):
         cmp.Sink(
             label="Grid Feed-in",
             inputs={
-                bus_el: Flow(variable_costs=var_cost["pv_feed_in [Eur/kWh]"]/2)
+                bus_el: Flow(variable_costs=var_cost["pv_feed_in [Eur/kWh]"])
             },
         )
     )
@@ -236,8 +236,8 @@ def process_results(results):
         flow.index.diff().seconds / 3600, index=flow.index
     ).shift(-1)
     intervals.iloc[-1] = (end_time - flow.index[-2]).seconds / 3600 - 1
-
-    # print(flow.mul(intervals, axis=0).sum())
+    print(intervals)
+    print(flow.mul(intervals, axis=0).sum())
 
     soc = results["storage_content"]
     soc.name = "Battery SOC [kWh]"
@@ -251,11 +251,11 @@ def process_results(results):
     return investments
 
 
-def compare_results(even, uneven):
-    flow_e = even["flow"]
-    flow_u = uneven["flow"]
-    print(flow_e.sum())
-    print(flow_u.sum())
+# def compare_results(even, uneven):
+#     flow_e = even["flow"]
+#     flow_u = uneven["flow"]
+#     print(flow_e.sum())
+#     print(flow_u.sum())
 
 
 #
@@ -287,7 +287,7 @@ def compare_results(even, uneven):
 
 if __name__ == "__main__":
     my_year = 2025
-    my_data = prepare_technical_data(10, None, None)
+    my_data = prepare_technical_data(60, None, None)
     start = datetime.now()
     results_even = solve_model(my_data.even, get_parameter(), year=my_year)
     time_even = datetime.now() - start
@@ -296,7 +296,7 @@ if __name__ == "__main__":
     time_uneven = datetime.now() - start
     invest_even = process_results(results_even)
     invest_uneven = process_results(results_uneven)
-    compare_results(results_even, results_uneven)
+    # compare_results(results_even, results_uneven)
     print()
     print("*** Investment ***")
     print("even\n", invest_even.iloc[0])
