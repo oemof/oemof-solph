@@ -59,7 +59,7 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
     Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas boiler kW).
     """
     # --- TSAM clustering ---
-    aggregation = tsam.TimeSeriesAgg regation(
+    aggregation = tsam.TimeSeriesAggregation(
         timeSeries=data.iloc[:8760],
         noTypicalPeriods=typical_periods,
         hoursPerPeriod=hours_per_period,
