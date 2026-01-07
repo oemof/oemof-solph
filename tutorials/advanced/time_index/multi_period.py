@@ -85,6 +85,7 @@ prices = prices_new
 data = prepare_input_data()
 
 data = data.resample("1 h").mean()
+print(data)
 
 # -------------- Clustering of input time-series with TSAM --------------------
 typical_periods = 40
@@ -165,7 +166,7 @@ bus_gas = Bus(label="gas")
 es.add(bus_el, bus_heat, bus_gas)
 
 # adjustment factor to make pv cheaper, to see different results
-pv_adjustment_factor = 0.2
+pv_adjustment_factor = 1
 
 pv = cmp.Source(
     label="PV",
@@ -184,7 +185,7 @@ pv = cmp.Source(
                 fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")]
                 * pv_adjustment_factor
                 / lifetime_adjusted(20, investment_period_length_in_years),
-                overall_maximum=10,
+                # overall_maximum=10,
             ),
         )
     },
@@ -232,7 +233,7 @@ wallbox_sink = cmp.Sink(
             fix=pd.concat(
                 [
                     aggregation.typicalPeriods[
-                        "Electricity for Car Charging in kW"
+                        "Electricity for Car Charging_HH1"
                     ]
                     * 1000
                 ]
@@ -343,7 +344,7 @@ logging.info("Creating Model...")
 m = Model(es)
 logging.info("Solving Model...")
 m.solve(
-    solver="gurobi",
+    solver="cbc",
     solve_kwargs={"tee": True},
 )
 
