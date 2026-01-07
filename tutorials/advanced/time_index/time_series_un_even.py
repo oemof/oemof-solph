@@ -256,43 +256,51 @@ def process_results(results):
 
 
 def optimise_investment(year, interval, result_path):
-    my_data = prepare_technical_data(interval, None, None)
-    start = datetime.now()
-    results_even = solve_model(my_data.even, get_parameter(), year=year)
-    time_even = datetime.now() - start
-    start = datetime.now()
-    results_uneven = solve_model(my_data.uneven, get_parameter(), year=year)
-    time_uneven = datetime.now() - start
-    key_results_even = process_results(results_even)
-    key_results_even["time"] = time_even.seconds
-    key_results_even["objective"] = results_even["objective"]
-    key_results_even["short_interval"] = interval
-    key_results_even["year_of_investment"] = year
-    key_results_uneven = process_results(results_uneven)
-    key_results_uneven["time"] = time_uneven.seconds
-    key_results_uneven["objective"] = results_uneven["objective"]
-    key_results_uneven["short_interval"] = interval
-    key_results_uneven["year_of_investment"] = year
-    results = (
-        pd.concat(
-            [key_results_uneven, key_results_even],
-            keys=["uneven", "even"],
-        )
-        .droplevel(1)
-        .T
-    )
     result_file = f"time_series_even_uneven_{year}_{interval}min.csv"
-    results.to_csv(Path(result_path, result_file))
+    result_fn = Path(result_path, result_file)
 
-    # compare_results(results_even, results_uneven)
-    print()
-    print("*** Investment ***")
-    print("even\n", key_results_even.iloc[0])
-    print("uneven\n", key_results_uneven.iloc[0])
-    print()
-    print("*** Times ****")
-    print("even", time_even)
-    print("uneven", time_uneven)
+    if not result_fn.is_file():
+        # Create empty file
+        file = open(result_fn, "w")
+        file.write(f"Start with {year} - {interval}")
+        file.close()
+
+        my_data = prepare_technical_data(interval, None, None)
+        start = datetime.now()
+        results_even = solve_model(my_data.even, get_parameter(), year=year)
+        time_even = datetime.now() - start
+        start = datetime.now()
+        results_uneven = solve_model(my_data.uneven, get_parameter(), year=year)
+        time_uneven = datetime.now() - start
+        key_results_even = process_results(results_even)
+        key_results_even["time"] = time_even.seconds
+        key_results_even["objective"] = results_even["objective"]
+        key_results_even["short_interval"] = interval
+        key_results_even["year_of_investment"] = year
+        key_results_uneven = process_results(results_uneven)
+        key_results_uneven["time"] = time_uneven.seconds
+        key_results_uneven["objective"] = results_uneven["objective"]
+        key_results_uneven["short_interval"] = interval
+        key_results_uneven["year_of_investment"] = year
+        results = (
+            pd.concat(
+                [key_results_uneven, key_results_even],
+                keys=["uneven", "even"],
+            )
+            .droplevel(1)
+            .T
+        )
+        results.to_csv(result_fn)
+
+        # compare_results(results_even, results_uneven)
+        print()
+        print("*** Investment ***")
+        print("even\n", key_results_even.iloc[0])
+        print("uneven\n", key_results_uneven.iloc[0])
+        print()
+        print("*** Times ****")
+        print("even", time_even)
+        print("uneven", time_uneven)
 
 
 def read_result_files(year, interval, result_path):
