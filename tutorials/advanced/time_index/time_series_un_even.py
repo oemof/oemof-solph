@@ -19,7 +19,6 @@ from cost_data import discounted_average_price
 from cost_data import energy_prices
 from cost_data import investment_costs
 from create_timeseries import reshape_unevenly
-from matplotlib import pyplot as plt
 from oemof.network import graph
 from oemof.tools import debugging
 from oemof.tools import logger
@@ -51,13 +50,13 @@ def calculate_fix_cost(value):
 
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
-    df = (
+    data_table = (
         prepare_input_data(proxy_url=url, proxy_port=port)
         .resample(f"{minutes} min")
         .mean()
     )
-    df_un = reshape_unevenly(df)
-    return data(even=df, uneven=df_un)
+    df_un = reshape_unevenly(data_table)
+    return data(even=data_table, uneven=df_un)
 
 
 def prepare_cost_data():
@@ -99,7 +98,6 @@ def solve_model(data, parameter, year=2025, es=None):
         investments[key] = Investment(
             ep_costs=epc, fixed_costs=fix_cost, maximum=maxi
         )
-        # ToDo: PV-MAX muss noch eingebaut werden
 
     # Buses
     bus_el = Bus(label="electricity")
@@ -238,12 +236,12 @@ def process_results(results):
     end_time = pytz.utc.localize(
         datetime.strptime(f"{year + 1}-01-01 00:00", "%Y-%m-%d %H:%M")
     )
-    intervals = pd.Series(
+    time_intervals = pd.Series(
         flow.index.diff().seconds / 3600, index=flow.index
     ).shift(-1)
-    intervals.iloc[-1] = (end_time - flow.index[-2]).seconds / 3600 - 1
-    print(intervals)
-    print(flow.mul(intervals, axis=0).sum())
+    time_intervals.iloc[-1] = (end_time - flow.index[-2]).seconds / 3600 - 1
+    print(time_intervals)
+    print(flow.mul(time_intervals, axis=0).sum())
 
     soc = results["storage_content"]
     soc.name = "Battery SOC [kWh]"
