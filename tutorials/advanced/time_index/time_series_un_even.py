@@ -312,7 +312,7 @@ def read_result_files(year, interval, result_path):
 
 if __name__ == "__main__":
     my_result_path = Path(Path.home(), ".oemof", "tutorial", "time_series")
-    my_result_path.mkdir(exist_ok=True)
+    my_result_path.mkdir(parents=True, exist_ok=True)
     intervals = [60]
     years = [2025]
 
