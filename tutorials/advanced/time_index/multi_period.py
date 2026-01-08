@@ -88,7 +88,7 @@ data = data.resample("1 h").mean()
 print(data)
 
 # -------------- Clustering of input time-series with TSAM --------------------
-typical_periods = 40
+typical_periods = 365
 hours_per_period = 24
 
 aggregation = tsam.TimeSeriesAggregation(
@@ -165,9 +165,6 @@ bus_heat = Bus(label="heat")
 bus_gas = Bus(label="gas")
 es.add(bus_el, bus_heat, bus_gas)
 
-# adjustment factor to make pv cheaper, to see different results
-pv_adjustment_factor = 1
-
 pv = cmp.Source(
     label="PV",
     outputs={
@@ -178,13 +175,9 @@ pv = cmp.Source(
             ),
             nominal_capacity=Investment(
                 ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")]
-                * pv_adjustment_factor,
-                lifetime=lifetime_adjusted(
-                    20, investment_period_length_in_years
-                ),
-                fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")]
-                * pv_adjustment_factor
-                / lifetime_adjusted(20, investment_period_length_in_years),
+                / 5,
+                lifetime=4,
+                fixed_costs=investment_costs[("pv", "fixed_costs [Eur]")] / 5,
                 # overall_maximum=10,
             ),
         )
@@ -198,8 +191,8 @@ battery = cmp.GenericStorage(
     inputs={bus_el: Flow()},
     outputs={bus_el: Flow()},
     nominal_capacity=Investment(
-        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")],
-        lifetime=lifetime_adjusted(10, investment_period_length_in_years),
+        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
+        lifetime=2,
     ),
     min_storage_level=0.0,
     max_storage_level=1.0,
@@ -235,7 +228,6 @@ wallbox_sink = cmp.Sink(
                     aggregation.typicalPeriods[
                         "Electricity for Car Charging_HH1"
                     ]
-                    * 1000
                 ]
                 * len(years),
                 ignore_index=True,
@@ -255,14 +247,13 @@ hp = cmp.Converter(
             nominal_capacity=Investment(
                 ep_costs=investment_costs[
                     ("heat pump", "specific_costs [Eur/kW]")
-                ],
-                lifetime=lifetime_adjusted(
-                    20, investment_period_length_in_years
-                ),
+                ]
+                / 5,
+                lifetime=4,
                 fixed_costs=investment_costs[
                     ("heat pump", "fixed_costs [Eur]")
                 ]
-                / lifetime_adjusted(20, investment_period_length_in_years),
+                / 5,
             )
         )
     },
@@ -284,14 +275,13 @@ gas_boiler = cmp.Converter(
             nominal_capacity=Investment(
                 ep_costs=investment_costs[
                     ("gas boiler", "specific_costs [Eur/kW]")
-                ],
-                lifetime=lifetime_adjusted(
-                    20, investment_period_length_in_years
-                ),
+                ]
+                / 5,
+                lifetime=4,
                 fixed_costs=investment_costs[
                     ("gas boiler", "fixed_costs [Eur]")
                 ]
-                / lifetime_adjusted(20, investment_period_length_in_years),
+                / 5,
                 existing=3.5,
                 age=2,
             )
