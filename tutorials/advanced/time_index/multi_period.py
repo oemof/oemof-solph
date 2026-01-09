@@ -91,6 +91,8 @@ print(data)
 typical_periods = 365
 hours_per_period = 24
 
+start = datetime.now()
+
 aggregation = tsam.TimeSeriesAggregation(
     timeSeries=data.iloc[:8760],
     noTypicalPeriods=typical_periods,
