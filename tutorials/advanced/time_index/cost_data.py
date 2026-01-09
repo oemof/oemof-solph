@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from oemof.tools.economics import annuity
+from oemof.solph import Investment
 
 
 def discounted_average_price(
@@ -11,9 +12,13 @@ def discounted_average_price(
     # Formel:
     # p* = Sum( p_t / (1+r)^(t-1) ) / Sum( 1/(1+r)^(t-1) )
 
-    numerator = price_series.loc[
+    numerator = (
+        price_series.loc[
             year_of_investment : year_of_investment + observation_period - 1
-        ].mul(discount_factors, axis=0).sum()
+        ]
+        .mul(discount_factors, axis=0)
+        .sum()
+    )
 
     denominator = discount_factors.sum()
 
@@ -97,3 +102,58 @@ def investment_costs() -> pd.DataFrame:
     return pd.concat(
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
+
+
+def create_investment_objects(n, r, year, max_capacity_pv=float("+inf")):
+    invest_cost = investment_costs().loc[year]
+
+    # Create Investment objects from cost data
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kW]")],
+                n=n,
+                wacc=r,
+            )
+        except KeyError:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kWh]")],
+                n=n,
+                wacc=r,
+            )
+        fix_cost = annuity(
+            invest_cost[(key, "fixed_costs [Eur]")],
+            n=n,
+            wacc=r,
+        )
+        if key == "pv":
+            maxi = max_capacity_pv
+        else:
+            maxi = float("+inf")
+        investments[key] = Investment(
+            ep_costs=epc, fixed_costs=fix_cost, maximum=maxi, lifetime=20
+        )
+    return investments
+
+
+def build_investment_objects(invest_cost_row, n, r):
+    """Create oemof.solph.Investment objects for each technology."""
+    inv = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        # ep_costs may be given per kW or per kWh depending on tech
+        try:
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r
+            )
+        except KeyError:
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r
+            )
+
+        fix_cost = calculate_fix_cost(
+            invest_cost_row[(key, "fixed_costs [Eur]")]
+        )
+        inv[key] = Investment(ep_costs=epc, fixed_costs=fix_cost, lifetime=20)
+
+    return inv

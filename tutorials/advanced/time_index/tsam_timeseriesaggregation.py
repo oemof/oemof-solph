@@ -1,19 +1,24 @@
 import logging
 import warnings
+from datetime import datetime
 
-import tsam.timeseriesaggregation as tsam
 import pandas as pd
+import tsam.timeseriesaggregation as tsam
+from cost_data import create_investment_objects
+from cost_data import discounted_average_price
+from cost_data import energy_prices
 from matplotlib import pyplot as plt
-
-from oemof.tools.economics import annuity
-from oemof.tools import debugging, logger
-from oemof.solph import Bus, EnergySystem, Flow, Investment, Model
-from oemof.solph import components as cmp
-from oemof import solph
-
+from oemof.tools import debugging
+from oemof.tools import logger
+from shared import get_parameter
 from shared import prepare_input_data
-from cost_data import discounted_average_price, energy_prices, investment_costs
-from time_series_un_even import calculate_fix_cost
+
+from oemof import solph
+from oemof.solph import Bus
+from oemof.solph import EnergySystem
+from oemof.solph import Flow
+from oemof.solph import Model
+from oemof.solph import components as cmp
 
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
@@ -26,37 +31,17 @@ logger.define_logging()
 data = prepare_input_data()
 data = data.resample("1 h").mean()
 
+PARAMETER = get_parameter()
+
 year = 2025
 n = 20
 r = 0.05
 
 var_cost = discounted_average_price(energy_prices(), r, n, year)
-invest_cost = investment_costs().loc[year]
 
-
-def build_investment_objects(invest_cost_row, n, r):
-    """Create oemof.solph.Investment objects for each technology."""
-    inv = {}
-    for key in ["gas boiler", "heat pump", "battery", "pv"]:
-        # ep_costs may be given per kW or per kWh depending on tech
-        try:
-            epc = annuity(
-                invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r
-            )
-        except KeyError:
-            epc = annuity(
-                invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r
-            )
-
-        fix_cost = calculate_fix_cost(
-            invest_cost_row[(key, "fixed_costs [Eur]")]
-        )
-        inv[key] = Investment(ep_costs=epc, fixed_costs=fix_cost, lifetime=20)
-
-    return inv
-
-
-INV_OBJECTS = build_investment_objects(invest_cost, n, r)
+INV_OBJECTS = create_investment_objects(
+    n=n, r=r, year=year, max_capacity_pv=PARAMETER["max_capacity_pv"]
+)
 
 
 def run_for_typical_periods(
@@ -68,6 +53,7 @@ def run_for_typical_periods(
     Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas
     boiler kW).
     """
+
     # --- TSAM clustering ---
     aggregation = tsam.TimeSeriesAggregation(
         timeSeries=data.iloc[:8760],
@@ -121,11 +107,9 @@ def run_for_typical_periods(
         inputs={bus_el: Flow()},
         outputs={bus_el: Flow()},
         nominal_capacity=INV_OBJECTS["battery"],  # kWh
-        min_storage_level=0.0,
-        max_storage_level=1.0,
-        loss_rate=0.001,
-        inflow_conversion_factor=0.95,
-        outflow_conversion_factor=0.95,
+        loss_rate=PARAMETER["loss_rate_battery"],
+        inflow_conversion_factor=PARAMETER["charge_efficiency_battery"],
+        outflow_conversion_factor=PARAMETER["discharge_efficiency_battery"],
     )
     es.add(battery)
 
@@ -169,6 +153,7 @@ def run_for_typical_periods(
         label="Gas Boiler",
         inputs={bus_gas: Flow()},
         outputs={bus_heat: Flow(nominal_capacity=INV_OBJECTS["gas boiler"])},
+        conversion_factors={bus_heat: PARAMETER["efficiency_boiler"]},
     )
     es.add(gas_boiler)
 
@@ -217,21 +202,21 @@ def run_for_typical_periods(
 
     results = solph.processing.results(m)
 
-    pv_invest_kW = results[(pv, bus_el)]["period_scalars"]["invest"].iloc[0]
-    storage_invest_kWh = results[(battery, None)]["period_scalars"][
+    pv_invest_kw = results[(pv, bus_el)]["period_scalars"]["invest"].iloc[0]
+    storage_invest_kwh = results[(battery, None)]["period_scalars"][
         "invest"
     ].iloc[0]
-    hp_invest_kW = results[(hp, bus_heat)]["period_scalars"]["invest"].iloc[0]
-    gas_boiler_invest_kW = results[(gas_boiler, bus_heat)]["period_scalars"][
+    hp_invest_kw = results[(hp, bus_heat)]["period_scalars"]["invest"].iloc[0]
+    gas_boiler_invest_kw = results[(gas_boiler, bus_heat)]["period_scalars"][
         "invest"
     ].iloc[0]
 
     return pd.Series(
         {
-            "PV": pv_invest_kW,
-            "Battery": storage_invest_kWh,
-            "HP": hp_invest_kW,
-            "Gas boiler": gas_boiler_invest_kW,
+            "PV": pv_invest_kw,
+            "Battery": storage_invest_kwh,
+            "HP": hp_invest_kw,
+            "Gas boiler": gas_boiler_invest_kw,
         },
         name=f"{typical_periods}",
     )
@@ -251,17 +236,22 @@ caps_by_hpp = {}  # store results per hours_per_period
 # -----------------------------
 # Run for multiple typical periods AND multiple hours_per_period
 # -----------------------------
+computation_time = {}
 for cfg in configs:
     hpp = cfg["hours_per_period"]
     tp_list = cfg["typical_periods"]
 
     all_caps = []
     for tp in tp_list:
+        start = datetime.now()
         all_caps.append(run_for_typical_periods(tp, hours_per_period=hpp))
+        computation_time[hpp, tp] = datetime.now() - start
 
-    caps_df = pd.concat(all_caps, axis=1)
-    caps_df.columns = [int(c) for c in caps_df.columns]
-    caps_by_hpp[hpp] = caps_df
+    capas_df = pd.concat(all_caps, axis=1)
+    capas_df.columns = [int(c) for c in capas_df.columns]
+    caps_by_hpp[hpp] = capas_df
+
+print(pd.Series(computation_time))
 
 
 # -----------------------------
