@@ -1,10 +1,7 @@
 import logging
 import warnings
-import datetime
-from pathlib import Path
 
 import tsam.timeseriesaggregation as tsam
-import numpy as np
 import pandas as pd
 from matplotlib import pyplot as plt
 
@@ -18,7 +15,9 @@ from shared import prepare_input_data
 from cost_data import discounted_average_price, energy_prices, investment_costs
 from time_series_un_even import calculate_fix_cost
 
-warnings.filterwarnings("ignore", category=debugging.ExperimentalFeatureWarning)
+warnings.filterwarnings(
+    "ignore", category=debugging.ExperimentalFeatureWarning
+)
 logger.define_logging()
 
 # -----------------------------
@@ -41,11 +40,17 @@ def build_investment_objects(invest_cost_row, n, r):
     for key in ["gas boiler", "heat pump", "battery", "pv"]:
         # ep_costs may be given per kW or per kWh depending on tech
         try:
-            epc = annuity(invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r)
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r
+            )
         except KeyError:
-            epc = annuity(invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r)
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r
+            )
 
-        fix_cost = calculate_fix_cost(invest_cost_row[(key, "fixed_costs [Eur]")])
+        fix_cost = calculate_fix_cost(
+            invest_cost_row[(key, "fixed_costs [Eur]")]
+        )
         inv[key] = Investment(ep_costs=epc, fixed_costs=fix_cost, lifetime=20)
 
     return inv
@@ -54,9 +59,14 @@ def build_investment_objects(invest_cost_row, n, r):
 INV_OBJECTS = build_investment_objects(invest_cost, n, r)
 
 
-def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) -> pd.Series:
-    """Run the full TSAM aggregation + oemof optimization for one typical_periods value.
-    Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas boiler kW).
+def run_for_typical_periods(
+    typical_periods: int, hours_per_period: int = 24
+) -> pd.Series:
+    """
+    Run the full TSAM aggregation + oemof optimization for one typical_periods
+    value.
+    Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas
+    boiler kW).
     """
     # --- TSAM clustering ---
     aggregation = tsam.TimeSeriesAggregation(
@@ -77,11 +87,13 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
         timeindex=tindex_agg,
         timeincrement=[1] * len(tindex_agg),
         periods=[tindex_agg],
-        tsa_parameters=[{
-            "timesteps_per_period": aggregation.hoursPerPeriod,
-            "order": aggregation.clusterOrder,
-            "timeindex": aggregation.timeIndex,
-        }],
+        tsa_parameters=[
+            {
+                "timesteps_per_period": aggregation.hoursPerPeriod,
+                "order": aggregation.clusterOrder,
+                "timeindex": aggregation.timeIndex,
+            }
+        ],
         infer_last_interval=False,
     )
 
@@ -120,20 +132,26 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
     # --- Electricity demand ---
     house_sink = cmp.Sink(
         label="Electricity demand",
-        inputs={bus_el: Flow(
-            fix=aggregation.typicalPeriods["electricity demand (kW)"],
-            nominal_capacity=1.0,
-        )},
+        inputs={
+            bus_el: Flow(
+                fix=aggregation.typicalPeriods["electricity demand (kW)"],
+                nominal_capacity=1.0,
+            )
+        },
     )
     es.add(house_sink)
 
     # --- EV demand ---
     wallbox_sink = cmp.Sink(
         label="Electric Vehicle",
-        inputs={bus_el: Flow(
-            fix=aggregation.typicalPeriods["Electricity for Car Charging in kW"],
-            nominal_capacity=1.0,
-        )},
+        inputs={
+            bus_el: Flow(
+                fix=aggregation.typicalPeriods[
+                    "Electricity for Car Charging_HH1"
+                ],
+                nominal_capacity=1.0,
+            )
+        },
     )
     es.add(wallbox_sink)
 
@@ -157,17 +175,23 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
     # --- Heat demand ---
     heat_sink = cmp.Sink(
         label="Heat demand",
-        inputs={bus_heat: Flow(
-            fix=aggregation.typicalPeriods["heat demand (kW)"],
-            nominal_capacity=1.0,
-        )},
+        inputs={
+            bus_heat: Flow(
+                fix=aggregation.typicalPeriods["heat demand (kW)"],
+                nominal_capacity=1.0,
+            )
+        },
     )
     es.add(heat_sink)
 
     # --- Imports/exports ---
     grid_import = cmp.Source(
         label="Grid import",
-        outputs={bus_el: Flow(variable_costs=var_cost["electricity_prices [Eur/kWh]"])},
+        outputs={
+            bus_el: Flow(
+                variable_costs=var_cost["electricity_prices [Eur/kWh]"]
+            )
+        },
     )
     es.add(grid_import)
 
@@ -179,7 +203,9 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
 
     gas_import = cmp.Source(
         label="Gas import",
-        outputs={bus_gas: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])},
+        outputs={
+            bus_gas: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
+        },
     )
     es.add(gas_import)
 
@@ -187,14 +213,18 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
     logging.info(f"Creating Model for typical_periods={typical_periods} ...")
     m = Model(es)
     logging.info("Solving Model...")
-    m.solve(solver="gurobi", solve_kwargs={"tee": False})
+    m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     results = solph.processing.results(m)
 
     pv_invest_kW = results[(pv, bus_el)]["period_scalars"]["invest"].iloc[0]
-    storage_invest_kWh = results[(battery, None)]["period_scalars"]["invest"].iloc[0]
+    storage_invest_kWh = results[(battery, None)]["period_scalars"][
+        "invest"
+    ].iloc[0]
     hp_invest_kW = results[(hp, bus_heat)]["period_scalars"]["invest"].iloc[0]
-    gas_boiler_invest_kW = results[(gas_boiler, bus_heat)]["period_scalars"]["invest"].iloc[0]
+    gas_boiler_invest_kW = results[(gas_boiler, bus_heat)]["period_scalars"][
+        "invest"
+    ].iloc[0]
 
     return pd.Series(
         {
@@ -211,8 +241,8 @@ def run_for_typical_periods(typical_periods: int, hours_per_period: int = 24) ->
 # Config for both aggregations
 # -----------------------------
 configs = [
-    {"hours_per_period": 24,    "typical_periods": [40, 100, 160, 220, 280, 365]},
-    {"hours_per_period": 24*7,  "typical_periods": [1, 4, 8, 12, 24, 52]},
+    {"hours_per_period": 24, "typical_periods": [40, 100, 160, 220, 280, 365]},
+    {"hours_per_period": 24 * 7, "typical_periods": [1, 4, 8, 12, 24, 52]},
 ]
 
 caps_by_hpp = {}  # store results per hours_per_period
@@ -237,12 +267,14 @@ for cfg in configs:
 # -----------------------------
 # Plotting helper
 # -----------------------------
-def plot_caps(caps_df: pd.DataFrame, hours_per_period: int, filename_prefix: str):
+def plot_caps(
+    caps_df: pd.DataFrame, hours_per_period: int, filename_prefix: str
+):
     fig, ax = plt.subplots(figsize=(4, 2.5), tight_layout=True)
 
     caps_df.plot(kind="bar", ax=ax)
 
-    ax.set_ylabel("Installed capacity")     # explain mixed units in caption
+    ax.set_ylabel("Installed capacity")  # explain mixed units in caption
     ax.set_xlabel(None)
     ax.grid(True, linewidth=0.3, alpha=0.6)
 
@@ -273,10 +305,9 @@ fig_day, ax_day = plot_caps(
 )
 
 fig_week, ax_week = plot_caps(
-    caps_by_hpp[24*7],
-    hours_per_period=24*7,
+    caps_by_hpp[24 * 7],
+    hours_per_period=24 * 7,
     filename_prefix="investments_bar_tp_weekly",
 )
 
 plt.show()
-
