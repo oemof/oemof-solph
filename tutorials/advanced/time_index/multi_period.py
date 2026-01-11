@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 import warnings
+from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -11,7 +12,6 @@ from oemof.tools import debugging
 from oemof.tools import logger
 from shared import prepare_input_data
 
-from oemof import solph
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
@@ -90,6 +90,8 @@ print(data)
 # -------------- Clustering of input time-series with TSAM --------------------
 typical_periods = 365
 hours_per_period = 24
+
+start = datetime.now()
 
 aggregation = tsam.TimeSeriesAggregation(
     timeSeries=data.iloc[:8760],
@@ -196,8 +198,6 @@ battery = cmp.GenericStorage(
         ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
         lifetime=2,
     ),
-    min_storage_level=0.0,
-    max_storage_level=1.0,
     loss_rate=0.001,  # 0.1%/h
     inflow_conversion_factor=0.95,  # Lade-Wirkungsgrad
     outflow_conversion_factor=0.95,  # Entlade-Wirkungsgrad
@@ -347,6 +347,7 @@ results = Results(m)
 # invest and total installed capacity
 invest = results["invest"]
 total = results["total"]
+print(datetime.now() - start)
 
 years = [2025, 2030, 2035, 2040, 2045]
 invest.index = years

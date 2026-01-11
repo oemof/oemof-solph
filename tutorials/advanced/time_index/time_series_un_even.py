@@ -15,21 +15,19 @@ from pathlib import Path
 
 import pandas as pd
 import pytz
+from cost_data import create_investment_objects
 from cost_data import discounted_average_price
 from cost_data import energy_prices
-from cost_data import investment_costs
 from create_timeseries import reshape_unevenly
 from oemof.network import graph
 from oemof.tools import debugging
 from oemof.tools import logger
-from oemof.tools.economics import annuity
 from shared import get_parameter
 from shared import prepare_input_data
 
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
 from oemof.solph import Flow
-from oemof.solph import Investment
 from oemof.solph import Model
 from oemof.solph import Results
 from oemof.solph import components as cmp
@@ -38,10 +36,6 @@ warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
 )
 logger.define_logging()
-
-
-def calculate_annuity(value):
-    return value / 20
 
 
 def calculate_fix_cost(value):
@@ -73,31 +67,11 @@ def solve_model(data, parameter, year=2025, es=None):
         interest_rate=parameter["r"],
         year_of_investment=year,
     )
-    invest_cost = investment_costs().loc[year]
-
-    # Create Investment objects from cost data
-    investments = {}
-    for key in ["gas boiler", "heat pump", "battery", "pv"]:
-        try:
-            epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kW]")],
-                parameter["n"],
-                parameter["r"],
-            )
-        except KeyError:
-            epc = annuity(
-                invest_cost[(key, "specific_costs [Eur/kWh]")],
-                parameter["n"],
-                parameter["r"],
-            )
-        fix_cost = calculate_fix_cost(invest_cost[(key, "fixed_costs [Eur]")])
-        if key == "pv":
-            maxi = parameter["max_capacity_pv"]
-        else:
-            maxi = float("+inf")
-        investments[key] = Investment(
-            ep_costs=epc, fixed_costs=fix_cost, maximum=maxi
-        )
+    investments = create_investment_objects(
+        n=parameter["n"],
+        r=parameter["r"],
+        year=year,
+    )
 
     # Buses
     bus_el = Bus(label="electricity")
@@ -230,29 +204,15 @@ def solve_model(data, parameter, year=2025, es=None):
 
 
 def process_results(results):
-    flow = results["flow"]
-    year = flow.index[0].year
-
-    end_time = pytz.utc.localize(
-        datetime.strptime(f"{year + 1}-01-01 00:00", "%Y-%m-%d %H:%M")
-    )
-    time_intervals = pd.Series(
-        flow.index.diff().seconds / 3600, index=flow.index
-    ).shift(-1)
-    time_intervals.iloc[-1] = (end_time - flow.index[-2]).seconds / 3600 - 1
-    print(time_intervals)
-    print(flow.mul(time_intervals, axis=0).sum())
-
-    soc = results["storage_content"]
-    soc.name = "Battery SOC [kWh]"
-    investments = results["invest"].rename(
+    key_results = results["invest"].rename(
         columns={
             c: c[0].label
             for c in results["invest"].columns
             if isinstance(c, tuple)
         },
     )
-    return investments
+    key_results["objective"] = results["objective"]
+    return key_results
 
 
 def optimise_investment(year, interval, result_path):
@@ -260,28 +220,32 @@ def optimise_investment(year, interval, result_path):
     result_fn = Path(result_path, result_file)
 
     if not result_fn.is_file():
+        logging.info(f"Start with {year} - {interval}")
         # Create empty file
         file = open(result_fn, "w")
         file.write(f"Start with {year} - {interval}")
         file.close()
-
         my_data = prepare_technical_data(interval, None, None)
+
+        logging.info("Start with even....")
         start = datetime.now()
         results_even = solve_model(my_data.even, get_parameter(), year=year)
-        time_even = datetime.now() - start
-        start = datetime.now()
-        results_uneven = solve_model(my_data.uneven, get_parameter(), year=year)
-        time_uneven = datetime.now() - start
         key_results_even = process_results(results_even)
-        key_results_even["time"] = time_even.seconds
-        key_results_even["objective"] = results_even["objective"]
         key_results_even["short_interval"] = interval
         key_results_even["year_of_investment"] = year
+        time_even = datetime.now() - start
+        key_results_even["time"] = time_even.seconds
+
+        logging.info("Start with uneven....")
+        start = datetime.now()
+        results_uneven = solve_model(
+            my_data.uneven, get_parameter(), year=year
+        )
         key_results_uneven = process_results(results_uneven)
+        time_uneven = datetime.now() - start
         key_results_uneven["time"] = time_uneven.seconds
-        key_results_uneven["objective"] = results_uneven["objective"]
-        key_results_uneven["short_interval"] = interval
-        key_results_uneven["year_of_investment"] = year
+
+        logging.info("Create joined results.")
         results = (
             pd.concat(
                 [key_results_uneven, key_results_even],

@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from oemof.tools.economics import annuity
+from oemof.solph import Investment
 
 
 def discounted_average_price(
@@ -11,9 +12,13 @@ def discounted_average_price(
     # Formel:
     # p* = Sum( p_t / (1+r)^(t-1) ) / Sum( 1/(1+r)^(t-1) )
 
-    numerator = price_series.loc[
+    numerator = (
+        price_series.loc[
             year_of_investment : year_of_investment + observation_period - 1
-        ].mul(discount_factors, axis=0).sum()
+        ]
+        .mul(discount_factors, axis=0)
+        .sum()
+    )
 
     denominator = discount_factors.sum()
 
@@ -64,6 +69,7 @@ def investment_costs() -> pd.DataFrame:
         {
             ("gas boiler", "specific_costs [Eur/kW]"): [61] * 5,
             ("gas boiler", "fixed_costs [Eur]"): [4794] * 5,
+            ("gas boiler", "maximum [kW]"): 100,
             ("heat pump", "specific_costs [Eur/kW]"): [
                 1680,
                 1318,
@@ -72,8 +78,10 @@ def investment_costs() -> pd.DataFrame:
                 1048,
             ],
             ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
+            ("heat pump", "maximum [kW]"): 100,
             ("heat storage", "specific_costs [Eur/m3]"): [1120] * 5,
             ("heat storage", "fixed_costs [Eur]"): [806] * 5,
+            ("heat storage", "maximum [kWh]"): 100,
             ("pv", "specific_costs [Eur/kW]"): [
                 1200,
                 1017,
@@ -82,6 +90,7 @@ def investment_costs() -> pd.DataFrame:
                 828,
             ],
             ("pv", "fixed_costs [Eur]"): [3038, 2575, 2347, 2188, 2096],
+            ("pv", "maximum [kW]"): 10,
             ("battery", "specific_costs [Eur/kWh]"): [
                 850,
                 544,
@@ -90,6 +99,7 @@ def investment_costs() -> pd.DataFrame:
                 409,
             ],
             ("battery", "fixed_costs [Eur]"): [0] * 5,
+            ("battery", "maximum [kWh]"): 100,
         },
         index=idx,
     )
@@ -97,3 +107,57 @@ def investment_costs() -> pd.DataFrame:
     return pd.concat(
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
+
+
+def create_investment_objects(n, r, year):
+    invest_cost = investment_costs().loc[year]
+
+    # Create Investment objects from cost data
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kW]")],
+                n=n,
+                wacc=r,
+            )
+            maximum = invest_cost[(key, "maximum [kW]")]
+        except KeyError:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kWh]")],
+                n=n,
+                wacc=r,
+            )
+            maximum = invest_cost[(key, "maximum [kWh]")]
+        fix_cost = annuity(
+            invest_cost[(key, "fixed_costs [Eur]")],
+            n=n,
+            wacc=r,
+        )
+
+        investments[key] = Investment(
+            ep_costs=epc, offset=fix_cost, maximum=maximum, lifetime=20, nonconvex=True
+        )
+    return investments
+
+
+def build_investment_objects(invest_cost_row, n, r):
+    """Create oemof.solph.Investment objects for each technology."""
+    inv = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        # ep_costs may be given per kW or per kWh depending on tech
+        try:
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r
+            )
+        except KeyError:
+            epc = annuity(
+                invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r
+            )
+
+        fix_cost = calculate_fix_cost(
+            invest_cost_row[(key, "fixed_costs [Eur]")]
+        )
+        inv[key] = Investment(ep_costs=epc, fixed_costs=fix_cost, lifetime=20)
+
+    return inv
