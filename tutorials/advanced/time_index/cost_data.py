@@ -109,7 +109,7 @@ def investment_costs() -> pd.DataFrame:
     ).interpolate()
 
 
-def create_investment_objects(n, r, year, max_capacity_pv=float("+inf")):
+def create_investment_objects(n, r, year):
     invest_cost = investment_costs().loc[year]
 
     # Create Investment objects from cost data
@@ -121,23 +121,22 @@ def create_investment_objects(n, r, year, max_capacity_pv=float("+inf")):
                 n=n,
                 wacc=r,
             )
+            maximum = invest_cost[(key, "maximum [kW]")]
         except KeyError:
             epc = annuity(
                 invest_cost[(key, "specific_costs [Eur/kWh]")],
                 n=n,
                 wacc=r,
             )
+            maximum = invest_cost[(key, "maximum [kWh]")]
         fix_cost = annuity(
             invest_cost[(key, "fixed_costs [Eur]")],
             n=n,
             wacc=r,
         )
-        if key == "pv":
-            maxi = max_capacity_pv
-        else:
-            maxi = float("+inf")
+
         investments[key] = Investment(
-            ep_costs=epc, fixed_costs=fix_cost, maximum=maxi, lifetime=20
+            ep_costs=epc, offset=fix_cost, maximum=maximum, lifetime=20, nonconvex=True
         )
     return investments
 

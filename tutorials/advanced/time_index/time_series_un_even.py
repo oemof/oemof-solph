@@ -71,7 +71,6 @@ def solve_model(data, parameter, year=2025, es=None):
         n=parameter["n"],
         r=parameter["r"],
         year=year,
-        max_capacity_pv=parameter["max_capacity_pv"],
     )
 
     # Buses

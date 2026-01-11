@@ -32,7 +32,6 @@ def get_parameter():
         "loss_rate_battery": 0.001,
         "charge_efficiency_battery": 0.95,
         "discharge_efficiency_battery": 0.95,
-        "max_capacity_pv": 10,
     }
 
 
