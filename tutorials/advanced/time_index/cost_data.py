@@ -69,6 +69,7 @@ def investment_costs() -> pd.DataFrame:
         {
             ("gas boiler", "specific_costs [Eur/kW]"): [61] * 5,
             ("gas boiler", "fixed_costs [Eur]"): [4794] * 5,
+            ("gas boiler", "maximum [kW]"): 100,
             ("heat pump", "specific_costs [Eur/kW]"): [
                 1680,
                 1318,
@@ -77,8 +78,10 @@ def investment_costs() -> pd.DataFrame:
                 1048,
             ],
             ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
+            ("heat pump", "maximum [kW]"): 100,
             ("heat storage", "specific_costs [Eur/m3]"): [1120] * 5,
             ("heat storage", "fixed_costs [Eur]"): [806] * 5,
+            ("heat storage", "maximum [kWh]"): 100,
             ("pv", "specific_costs [Eur/kW]"): [
                 1200,
                 1017,
@@ -87,6 +90,7 @@ def investment_costs() -> pd.DataFrame:
                 828,
             ],
             ("pv", "fixed_costs [Eur]"): [3038, 2575, 2347, 2188, 2096],
+            ("pv", "maximum [kW]"): 10,
             ("battery", "specific_costs [Eur/kWh]"): [
                 850,
                 544,
@@ -95,6 +99,7 @@ def investment_costs() -> pd.DataFrame:
                 409,
             ],
             ("battery", "fixed_costs [Eur]"): [0] * 5,
+            ("battery", "maximum [kWh]"): 100,
         },
         index=idx,
     )
