@@ -31,16 +31,19 @@ logger.define_logging()
 data = prepare_input_data()
 data = data.resample("1 h").mean()
 
+year = 2025
 PARAMETER = get_parameter()
 
-year = 2025
-n = 20
-r = 0.05
-
-var_cost = discounted_average_price(energy_prices(), r, n, year)
-
-INV_OBJECTS = create_investment_objects(
-    n=n, r=r, year=year, max_capacity_pv=PARAMETER["max_capacity_pv"]
+VAR_COSTS = discounted_average_price(
+    price_series=energy_prices(),
+    observation_period=PARAMETER["n"],
+    interest_rate=PARAMETER["r"],
+    year_of_investment=year,
+)
+INVESTMENTS = create_investment_objects(
+    n=PARAMETER["n"],
+    r=PARAMETER["r"],
+    year=year,
 )
 
 
@@ -53,7 +56,6 @@ def run_for_typical_periods(
     Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas
     boiler kW).
     """
-
     # --- TSAM clustering ---
     aggregation = tsam.TimeSeriesAggregation(
         timeSeries=data.iloc[:8760],
@@ -95,7 +97,7 @@ def run_for_typical_periods(
         outputs={
             bus_el: Flow(
                 fix=aggregation.typicalPeriods["PV (kW/kWp)"],
-                nominal_capacity=INV_OBJECTS["pv"],
+                nominal_capacity=INVESTMENTS["pv"],
             )
         },
     )
@@ -106,7 +108,7 @@ def run_for_typical_periods(
         label="Battery",
         inputs={bus_el: Flow()},
         outputs={bus_el: Flow()},
-        nominal_capacity=INV_OBJECTS["battery"],  # kWh
+        nominal_capacity=INVESTMENTS["battery"],  # kWh
         loss_rate=PARAMETER["loss_rate_battery"],
         inflow_conversion_factor=PARAMETER["charge_efficiency_battery"],
         outflow_conversion_factor=PARAMETER["discharge_efficiency_battery"],
@@ -143,7 +145,7 @@ def run_for_typical_periods(
     hp = cmp.Converter(
         label="Heat pump",
         inputs={bus_el: Flow()},
-        outputs={bus_heat: Flow(nominal_capacity=INV_OBJECTS["heat pump"])},
+        outputs={bus_heat: Flow(nominal_capacity=INVESTMENTS["heat pump"])},
         conversion_factors={bus_heat: aggregation.typicalPeriods["cop"]},
     )
     es.add(hp)
@@ -152,7 +154,7 @@ def run_for_typical_periods(
     gas_boiler = cmp.Converter(
         label="Gas Boiler",
         inputs={bus_gas: Flow()},
-        outputs={bus_heat: Flow(nominal_capacity=INV_OBJECTS["gas boiler"])},
+        outputs={bus_heat: Flow(nominal_capacity=INVESTMENTS["gas boiler"])},
         conversion_factors={bus_heat: PARAMETER["efficiency_boiler"]},
     )
     es.add(gas_boiler)
@@ -174,7 +176,7 @@ def run_for_typical_periods(
         label="Grid import",
         outputs={
             bus_el: Flow(
-                variable_costs=var_cost["electricity_prices [Eur/kWh]"]
+                variable_costs=VAR_COSTS["electricity_prices [Eur/kWh]"]
             )
         },
     )
@@ -182,14 +184,14 @@ def run_for_typical_periods(
 
     feed_in = cmp.Sink(
         label="Grid Feed-in",
-        inputs={bus_el: Flow(variable_costs=var_cost["pv_feed_in [Eur/kWh]"])},
+        inputs={bus_el: Flow(variable_costs=VAR_COSTS["pv_feed_in [Eur/kWh]"])},
     )
     es.add(feed_in)
 
     gas_import = cmp.Source(
         label="Gas import",
         outputs={
-            bus_gas: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
+            bus_gas: Flow(variable_costs=VAR_COSTS["gas_prices [Eur/kWh]"])
         },
     )
     es.add(gas_import)
@@ -198,7 +200,7 @@ def run_for_typical_periods(
     logging.info(f"Creating Model for typical_periods={typical_periods} ...")
     m = Model(es)
     logging.info("Solving Model...")
-    m.solve(solver="cbc", solve_kwargs={"tee": False})
+    m.solve(solver="gurobi", solve_kwargs={"tee": False})
 
     results = solph.processing.results(m)
 
