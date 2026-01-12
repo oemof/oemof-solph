@@ -88,7 +88,7 @@ data = data.resample("1 h").mean()
 print(data)
 
 # -------------- Clustering of input time-series with TSAM --------------------
-typical_periods = 365
+typical_periods = 100
 hours_per_period = 24
 
 start = datetime.now()
@@ -149,10 +149,6 @@ tsa_parameters = [
 
 timeincrement = [1] * (len(tindex_agg_full))
 
-# ------------------ calculate discount rate and lifetime ---------------------
-# the annuity has to be calculated for a period of 5 years
-investment_period_length_in_years = 5
-
 # ------------------ create energy system -------------------------------------
 es = EnergySystem(
     timeindex=tindex_agg_full,
@@ -160,6 +156,7 @@ es = EnergySystem(
     periods=investment_periods,
     tsa_parameters=tsa_parameters,
     infer_last_interval=False,
+    use_remaining_value=True,
 )
 
 bus_el = Bus(label="electricity")
@@ -281,7 +278,9 @@ gas_boiler = cmp.Converter(
                 ]
                 / 5,
                 lifetime=4,
-                fixed_costs=investment_costs[("gas boiler", "fixed_costs [Eur]")]
+                fixed_costs=investment_costs[
+                    ("gas boiler", "fixed_costs [Eur]")
+                ]
                 / 5,
                 existing=3.5,  # existing cannot be combined with nonconvex
                 age=2,
@@ -353,21 +352,14 @@ years = [2025, 2030, 2035, 2040, 2045]
 invest.index = years
 total.index = years
 
-fig, (ax1, ax2) = plt.subplots(
-    2, 1, figsize=(10, 7), sharex=True, constrained_layout=True
+fig, ax1 = plt.subplots(
+    1, 1, figsize=(8, 2.5), sharex=True, constrained_layout=True
 )
 
 total.plot(kind="bar", ax=ax1)
-ax1.set_title("Total installed capacity")
-ax1.set_ylabel("kW")
+ax1.set_ylabel("Total installed capacity")
 ax1.grid(True, linewidth=0.3, alpha=0.6)
-ax1.legend().set_visible(False)
-
-invest.plot(kind="bar", ax=ax2)
-ax2.set_title("Invested capacity")
-ax2.set_xlabel("Years")
-ax2.set_ylabel("kW")
-ax2.grid(True, linewidth=0.3, alpha=0.6)
+ax1.legend(["heat pump", "gas boiler", "PV", "battery"], loc="best")
 
 plt.show()
 
