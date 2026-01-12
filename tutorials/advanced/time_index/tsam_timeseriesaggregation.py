@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pandas as pd
 import tsam.timeseriesaggregation as tsam
-from cost_data import create_investment_objects
+from cost_data import create_investment_objects_multi_period
 from cost_data import discounted_average_price
 from cost_data import energy_prices
 from matplotlib import pyplot as plt
@@ -40,9 +40,7 @@ VAR_COSTS = discounted_average_price(
     interest_rate=PARAMETER["r"],
     year_of_investment=year,
 )
-INVESTMENTS = create_investment_objects(
-    n=PARAMETER["n"],
-    r=PARAMETER["r"],
+INVESTMENTS = create_investment_objects_multi_period(
     year=year,
 )
 
@@ -68,7 +66,7 @@ def run_for_typical_periods(
     aggregation.createTypicalPeriods()
 
     tindex_agg = pd.date_range(
-        "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
+        "2022-01-01", periods=len(aggregation.clusterPeriodIdx) * hours_per_period, freq="h"
     )
 
     es = EnergySystem(
@@ -133,7 +131,7 @@ def run_for_typical_periods(
         inputs={
             bus_el: Flow(
                 fix=aggregation.typicalPeriods[
-                    "Electricity for Car Charging_HH1"
+                    "Electricity for Car Charging in kW"
                 ],
                 nominal_capacity=1.0,
             )
