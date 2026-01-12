@@ -928,7 +928,9 @@ class InvestmentFlowBlock(ScalarBlock):
                         debugging.SuspiciousUsageWarning,
                     )
                     interest = m.discount_rate
+                    interest = 0.05
                 for p in m.PERIODS:
+
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,
