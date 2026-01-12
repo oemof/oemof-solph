@@ -971,6 +971,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         debugging.SuspiciousUsageWarning,
                     )
                     interest = m.discount_rate
+                    interest = 0.05
                 for p in m.PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
@@ -984,12 +985,17 @@ class InvestmentFlowBlock(ScalarBlock):
                     present_value_factor_remaining = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
                     )
+                    annuity_offset = economics.annuity(
+                        capex=m.flows[i, o].investment.offset[p],
+                        n=lifetime,
+                        wacc=interest,
+                    )
                     investment_costs_increment = (
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
                         + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
+                        * annuity_offset
                     )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
