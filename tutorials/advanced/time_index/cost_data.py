@@ -108,6 +108,26 @@ def investment_costs() -> pd.DataFrame:
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
 
+def create_investment_objects_multi_period(year):
+    invest_cost = investment_costs().loc[year]
+
+    # Create Investment objects from cost data
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            epc = invest_cost[(key, "specific_costs [Eur/kW]")]
+
+            maximum = invest_cost[(key, "maximum [kW]")]
+        except KeyError:
+            epc = invest_cost[(key, "specific_costs [Eur/kWh]")]
+            maximum = invest_cost[(key, "maximum [kWh]")]
+
+        fix_cost = invest_cost[(key, "fixed_costs [Eur]")]
+
+        investments[key] = Investment(
+            ep_costs=epc, offset=fix_cost, maximum=maximum, lifetime=20, nonconvex=True
+        )
+    return investments
 
 def create_investment_objects(n, r, year):
     invest_cost = investment_costs().loc[year]
