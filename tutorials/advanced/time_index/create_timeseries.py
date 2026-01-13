@@ -2,7 +2,6 @@ import pandas as pd
 
 
 def reshape_unevenly(df):
-
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
         h = ts.hour
         d = ts.normalize()
@@ -19,6 +18,6 @@ def reshape_unevenly(df):
     buckets = buckets.where(buckets >= df.index[0], df.index[0])
 
     df_mean = df.groupby(buckets).mean().sort_index()
-    df_mean.index.name = 'timestamp'
+    df_mean.index.name = "timestamp"
 
     return df_mean

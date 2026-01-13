@@ -66,7 +66,9 @@ def run_for_typical_periods(
     aggregation.createTypicalPeriods()
 
     tindex_agg = pd.date_range(
-        "2022-01-01", periods=len(aggregation.clusterPeriodIdx) * hours_per_period, freq="h"
+        "2022-01-01",
+        periods=len(aggregation.clusterPeriodIdx) * hours_per_period,
+        freq="h",
     )
 
     es = EnergySystem(
@@ -182,7 +184,9 @@ def run_for_typical_periods(
 
     feed_in = cmp.Sink(
         label="Grid Feed-in",
-        inputs={bus_el: Flow(variable_costs=VAR_COSTS["pv_feed_in [Eur/kWh]"])},
+        inputs={
+            bus_el: Flow(variable_costs=VAR_COSTS["pv_feed_in [Eur/kWh]"])
+        },
     )
     es.add(feed_in)
 

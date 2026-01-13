@@ -47,13 +47,16 @@ df["house_elec_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 df["house_heat_kW"] = 0.3 + 0.7 * np.random.rand(len(time_index))
 
 # EV-Ladeprofil
-df["ev_charge_kW"] = 0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
+df["ev_charge_kW"] = (
+    0.0  # wird automatisch auf alle Zeitschritte gebroadcastet
+)
 
 # COP-Profil (konstant, später evtl. temperaturabhängig)
 df["cop_hp"] = 3.5
 
-#Clustering of Input time-series with TSAM
-# not a high number of typical periods works with high number of hours per period
+# Clustering of Input time-series with TSAM
+# not a high number of typical periods works with high number of hours per
+# period
 typical_periods = 7
 hours_per_period = 24 * 60
 
@@ -67,12 +70,12 @@ aggregation_no_segmentation = tsam.TimeSeriesAggregation(
 )
 aggregation_no_segmentation.createTypicalPeriods()
 tindex_agg = pd.date_range(
-    "2022-01-01", periods=typical_periods * hours_per_period , freq="H"
+    "2022-01-01", periods=typical_periods * hours_per_period, freq="H"
 )
 
-aggregation_no_segmentation.typicalPeriods["house_elec_kW"]
+print(aggregation_no_segmentation.typicalPeriods["house_elec_kW"])
 
-#aggregation with segmentation
+# aggregation with segmentation
 # has to be hourly values, other values don't work because it is to big
 df = df.resample("1h").mean()
 typical_periods = 40
@@ -90,4 +93,4 @@ aggregation_with_segmentation = tsam.TimeSeriesAggregation(
 )
 aggregation_with_segmentation.createTypicalPeriods()
 
-aggregation_with_segmentation.typicalPeriods["house_elec_kW"]
+print(aggregation_with_segmentation.typicalPeriods["house_elec_kW"])

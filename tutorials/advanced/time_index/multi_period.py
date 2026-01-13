@@ -30,9 +30,9 @@ def discount_rate_adjusted(discount_rate, investment_period_length_in_years):
     return (1 + discount_rate) ** investment_period_length_in_years - 1
 
 
-def expand_energy_prices(tindex_agg_full, prices):
-    years_in_index = sorted(set(tindex_agg_full.year))
-    years_available = set(prices.index)
+def expand_energy_prices(tidx_agg_full, e_prices):
+    years_in_index = sorted(set(tidx_agg_full.year))
+    years_available = set(e_prices.index)
 
     # Strict check: all years in the index must be present in the table
     missing = [y for y in years_in_index if y not in years_available]
@@ -40,15 +40,15 @@ def expand_energy_prices(tindex_agg_full, prices):
         raise KeyError(f"Missing prices for years in index: {missing}")
 
     # Build a year->price lookup and vectorized map
-    s = pd.DataFrame()
-    for col in prices.columns:
-        year_prices = prices[col]
-        s[col] = pd.Series(
-            pd.Series(tindex_agg_full.year).map(year_prices).values,
-            index=tindex_agg_full,
+    df = pd.DataFrame()
+    for col in e_prices.columns:
+        year_prices = e_prices[col]
+        df[col] = pd.Series(
+            pd.Series(tidx_agg_full.year).map(year_prices).values,
+            index=tidx_agg_full,
             name=col,
         )
-    return s
+    return df
 
 
 # -----------------------------------------------------------------------------

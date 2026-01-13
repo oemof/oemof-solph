@@ -108,6 +108,7 @@ def investment_costs() -> pd.DataFrame:
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
 
+
 def create_investment_objects_multi_period(year):
     invest_cost = investment_costs().loc[year]
 
@@ -125,9 +126,14 @@ def create_investment_objects_multi_period(year):
         fix_cost = invest_cost[(key, "fixed_costs [Eur]")]
 
         investments[key] = Investment(
-            ep_costs=epc, offset=fix_cost, maximum=maximum, lifetime=20, nonconvex=True
+            ep_costs=epc,
+            offset=fix_cost,
+            maximum=maximum,
+            lifetime=20,
+            nonconvex=True,
         )
     return investments
+
 
 def create_investment_objects(n, r, year):
     invest_cost = investment_costs().loc[year]
@@ -156,28 +162,10 @@ def create_investment_objects(n, r, year):
         )
 
         investments[key] = Investment(
-            ep_costs=epc, offset=fix_cost, maximum=maximum, lifetime=20, nonconvex=True
+            ep_costs=epc,
+            offset=fix_cost,
+            maximum=maximum,
+            lifetime=20,
+            nonconvex=True,
         )
     return investments
-
-
-def build_investment_objects(invest_cost_row, n, r):
-    """Create oemof.solph.Investment objects for each technology."""
-    inv = {}
-    for key in ["gas boiler", "heat pump", "battery", "pv"]:
-        # ep_costs may be given per kW or per kWh depending on tech
-        try:
-            epc = annuity(
-                invest_cost_row[(key, "specific_costs [Eur/kW]")], n, r
-            )
-        except KeyError:
-            epc = annuity(
-                invest_cost_row[(key, "specific_costs [Eur/kWh]")], n, r
-            )
-
-        fix_cost = calculate_fix_cost(
-            invest_cost_row[(key, "fixed_costs [Eur]")]
-        )
-        inv[key] = Investment(ep_costs=epc, fixed_costs=fix_cost, lifetime=20)
-
-    return inv
