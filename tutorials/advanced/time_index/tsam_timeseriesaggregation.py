@@ -133,7 +133,7 @@ def run_for_typical_periods(
         inputs={
             bus_el: Flow(
                 fix=aggregation.typicalPeriods[
-                    "Electricity for Car Charging in kW"
+                    "Electricity for Car Charging_HH1"
                 ],
                 nominal_capacity=1.0,
             )
@@ -202,7 +202,7 @@ def run_for_typical_periods(
     logging.info(f"Creating Model for typical_periods={typical_periods} ...")
     m = Model(es)
     logging.info("Solving Model...")
-    m.solve(solver="gurobi", solve_kwargs={"tee": False})
+    m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     results = solph.processing.results(m)
 
