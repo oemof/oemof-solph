@@ -331,7 +331,7 @@ es.add(gas_grid)
 
 # Create Model and solve it
 logging.info("Creating Model...")
-m = Model(es)
+m = Model(es, discount_rate=discount_rate_adjusted(0.05, 5))
 logging.info("Solving Model...")
 m.solve(
     solver="cbc",
