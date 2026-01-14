@@ -929,83 +929,23 @@ class InvestmentFlowBlock(ScalarBlock):
                     )
                     interest = m.discount_rate
                 for p in m.PERIODS:
-                    annuity = economics.annuity(
-                        capex=m.flows[i, o].investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor_remaining = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
+                    annuity = m.flows[i, o].investment.ep_costs[p]
                     investment_costs_increment = (
                         self.invest[i, o, p]
                         * annuity
-                        * present_value_factor_remaining
                     )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            i,
-                            o,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
+                    investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
-                lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                for p in m.PERIODS:
-                    annuity = economics.annuity(
-                        capex=m.flows[i, o].investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor_remaining = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
+                    annuity = m.flows[i, o].investment.ep_costs[p]
                     investment_costs_increment = (
                         self.invest[i, o, p]
                         * annuity
-                        * present_value_factor_remaining
                         + self.invest_status[i, o, p]
                         * m.flows[i, o].investment.offset[p]
                     )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            i,
-                            o,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                            nonconvex=True,
-                        )
-                    )
-                    investment_costs += (
-                        investment_costs_increment + remaining_value_difference
-                    )
+                    investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment
 
             for i, o in self.INVESTFLOWS:
