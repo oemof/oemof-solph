@@ -182,4 +182,9 @@ authors:
     family-names: Freißmann
     given-names: Jonas
     alias: "@jfreissmann"
+  -
+    family-names: Hillen
+    given-names: Maximilian
+    alias: "@Maxhi77"
+    orcid: "https://orcid.org/0000-0002-8171-2661"
 ...
