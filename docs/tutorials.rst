@@ -1,4 +1,4 @@
-.. _introductory_tutorials_label:
+.. _tutorials_label:
 
 Introductory Tutorials
 ~~~~~~~~~~~~~~~~~~~~~~

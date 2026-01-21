@@ -77,7 +77,7 @@ The combination of specific modules (often including other packages) is called
 an application (app). For example, it can depict a concrete energy system model.
 You can find a large variety of helpful examples in the in these sections:
 
-- :ref:`introductory tutorials <introductory_tutorials_label>`
+- :ref:`tutorials <tutorials_label>`
 - :ref:`showcase applications <showcase_examples_label>`
 
 You are welcome to contribute your own examples via a

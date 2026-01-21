@@ -196,5 +196,5 @@ Therefore it is also possible to add lists or dictionaries of components.
     >>> my_energysystem.add(*my_dictionary.values())
 
 More information on setting up and handling the EnergySystem are provided in
-the :ref:`introductory tutorials <introductory_tutorials_label>` and the
+the :ref:`tutorials <_tutorials_label>` and the
 respective sections of the API documentation.
