@@ -44,7 +44,7 @@ extensions = [
 project = "oemof.solph"
 year = "2025"
 author = "oemof developer group"
-copyright = "{0}, {1}".format(year, author)
+copyright = author
 
 # The short X.Y version.
 version = oemof.solph.__version__.split(" ")[0]
