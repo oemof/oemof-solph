@@ -1,7 +1,7 @@
 .. _tutorials_label:
 
-Introductory Tutorials
-~~~~~~~~~~~~~~~~~~~~~~
+Tutorials
+~~~~~~~~~
 
 In this section we will introduce how to create your first simple oemof.solph models. The
 subsections are step by step walkthroughs for typical energy system modelling applications.
