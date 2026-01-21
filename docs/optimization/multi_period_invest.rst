@@ -199,8 +199,8 @@ For components that is not invested into, you also can specify some additional a
         outputs={
             electricity_bus: solph.flows.Flow(
                 nominal_capacity=600,
-                max=1,
-                min=0.4,
+                maximum=1,
+                minimum=0.4,
                 lifetime=50,
                 age=46,
                 fixed_costs=100,

@@ -111,7 +111,7 @@ heat_pump = solph.components.Converter(
                 ep_costs=epc(spec_inv_heat_pump), maximum=999
             ),
             variable_costs=1.2,
-            min=0.5,
+            minimum=0.5,
             nonconvex=solph.NonConvex(),
         )
     },

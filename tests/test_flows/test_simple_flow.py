@@ -68,4 +68,24 @@ def test_nominal_capacity_error():
         _ = solph.flows.Flow(nominal_value=2, nominal_capacity=1)
 
 
+def test_minimum_error():
+    with pytest.raises(AttributeError, match="minimum"):
+        _ = solph.flows.Flow(min=0.5, minimum=0.5)
+
+
+def test_minimum_warning():
+    with pytest.warns(FutureWarning, match="min"):
+        _ = solph.flows.Flow(min=2, nominal_capacity=5)
+
+
+def test_maximum_warning():
+    with pytest.warns(FutureWarning, match="max"):
+        _ = solph.flows.Flow(max=2, nominal_capacity=5)
+
+
+def test_maximum_error():
+    with pytest.raises(AttributeError, match="maximum"):
+        _ = solph.flows.Flow(max=0.5, maximum=0.5)
+
+
 # --- END ---

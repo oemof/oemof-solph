@@ -27,7 +27,7 @@ def test_equate_flows():
         inputs={
             b1: solph.Flow(
                 variable_costs=-0.5,
-                max=[0.5, 1],
+                maximum=[0.5, 1],
                 nominal_capacity=4,
                 custom_properties={"keyword1": "group 1"},
             )

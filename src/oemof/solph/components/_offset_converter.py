@@ -108,7 +108,7 @@ class OffsetConverter(Node):
     ...    label='ostf',
     ...    inputs={bel: solph.flows.Flow()},
     ...    outputs={bth: solph.flows.Flow(
-    ...         nominal_capacity=l_nominal, min=l_min, max=l_max,
+    ...         nominal_capacity=l_nominal, minimum=l_min, maximum=l_max,
     ...         nonconvex=solph.NonConvex())},
     ...    conversion_factors={bel: slope},
     ...    normed_offsets={bel: offset},
@@ -278,8 +278,8 @@ class OffsetConverter(Node):
 
         input_bus = list(self.inputs.values())[0].input
         for flow in self.outputs.values():
-            if flow.max.size is not None:
-                target_len = flow.max.size
+            if flow.maximum.size is not None:
+                target_len = flow.maximum.size
             else:
                 target_len = 1
 
@@ -287,18 +287,18 @@ class OffsetConverter(Node):
             offset = []
             for i in range(target_len):
                 eta_at_max = (
-                    flow.max[i]
+                    flow.maximum[i]
                     * coefficients[1][i]
-                    / (flow.max[i] - coefficients[0][i])
+                    / (flow.maximum[i] - coefficients[0][i])
                 )
                 eta_at_min = (
-                    flow.min[i]
+                    flow.minimum[i]
                     * coefficients[1][i]
-                    / (flow.min[i] - coefficients[0][i])
+                    / (flow.minimum[i] - coefficients[0][i])
                 )
 
                 c0, c1 = slope_offset_from_nonconvex_output(
-                    flow.max[i], flow.min[i], eta_at_max, eta_at_min
+                    flow.maximum[i], flow.minimum[i], eta_at_max, eta_at_min
                 )
                 slope.append(c0)
                 offset.append(c1)
@@ -342,8 +342,8 @@ class OffsetConverter(Node):
         slope = self.conversion_factors[bus][tstep]
         offset = self.normed_offsets[bus][tstep]
 
-        min_load = self._reference_flow.min[tstep]
-        max_load = self._reference_flow.max[tstep]
+        min_load = self._reference_flow.minimum[tstep]
+        max_load = self._reference_flow.maximum[tstep]
 
         infeasible_load = np.linspace(0, min_load)
         feasible_load = np.linspace(min_load, max_load)

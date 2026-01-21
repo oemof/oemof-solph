@@ -30,14 +30,14 @@ class, and only the optimal dispatch strategy of an existing asset with a given 
         outputs={b_el: solph.flows.Flow(
             nonconvex=solph.NonConvex(),
             nominal_capacity=30,
-            min=0.5),
+            minimum=0.5),
         b_th: solph.flows.Flow(nominal_capacity=40)},
         conversion_factors={b_el: 0.3, b_th: 0.4})
 
 The class :py:class:`~oemof.solph.options.NonConvex` for the electrical output of the created Converter (i.e., CHP)
 will create a 'status' variable for the flow.
 This will be used to model, for example, minimal/maximal power production constraints if the
-attributes `min`/`max` of the flow are set. It will also be used to include start-up constraints and costs
+attributes `minimum`/`maximum` of the flow are set. It will also be used to include start-up constraints and costs
 if corresponding attributes of the class are provided. For more information, see the API of the
 :py:class:`~oemof.solph.flows.NonConvexFlow` class.
 
@@ -183,7 +183,7 @@ Combination of Dispatch and Investment Optimization
 Since version 'v0.5', it is also possilbe to combine the investment and nonconvex option.
 Therefore, a new constraint block for flows, called :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` has been developed,
 which combines both :py:class:`~oemof.solph._options.Investment` and :py:class:`~oemof.solph._options.NonConvex` classes.
-The new class offers the possibility to perform the investment optimization of an asset considering `min`/`max` values of the flow
+The new class offers the possibility to perform the investment optimization of an asset considering `minimum`/`maximum` values of the flow
 as fractions of the optimal capacity. Moreover, it obtains the optimal 'status' of the flow during the simulation period.
 
 It must be noted that in a straighforward implementation, a binary variable
@@ -203,8 +203,8 @@ This nonlinearity is linearised in the
         outputs={
             b_el: solph.flows.Flow(
                 variable_costs=0.04,
-                min=0.2,
-                max=1,
+                minimum=0.2,
+                maximum=1,
                 nonconvex=solph.NonConvex(),
                 nominal_capacity=solph.Investment(
                     ep_costs=90,
@@ -216,7 +216,7 @@ This nonlinearity is linearised in the
 
 The following diagram shows the duration curve of a typical diesel genset in a hybrid mini-grid system consisting of a diesel genset,
 PV cells, battery, inverter, and rectifier. By using the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class,
-it is possible to obtain the optimal capacity of this component and simultaneously limit its operation between `min` and `max` loads.
+it is possible to obtain the optimal capacity of this component and simultaneously limit its operation between `minimum` and `maximum` loads.
 
 .. 	figure:: /_files/diesel_genset_nonconvex_invest_flow.svg
    :width: 100 %
@@ -239,8 +239,8 @@ oversized diesel genset, which has a 30% larger capacity compared with the optim
    :align: center
 
 
-Solving such an optimisation problem considering `min`/`max` loads without the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, the only possibility is first to obtain the optimal capacity using the
-:py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock` and then implement the `min`/`max` loads using the
+Solving such an optimisation problem considering `minimum`/`maximum` loads without the :py:class:`~oemof.solph.flows._invest_non_convex_flow_block.InvestNonConvexFlowBlock` class, the only possibility is first to obtain the optimal capacity using the
+:py:class:`~oemof.solph.flows._investment_flow_block.InvestmentFlowBlock` and then implement the `minimum`/`maximum` loads using the
 :py:class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock` class. The following duration curve would be obtained by applying
 this method to the same diesel genset.
 

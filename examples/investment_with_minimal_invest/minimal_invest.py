@@ -94,7 +94,7 @@ def main(optimize=True):
                     nonconvex=True,
                     offset=c_fix,
                 ),
-                # min=0.1,
+                # minimum=0.1,
                 # fixed=True,
                 # actual_value=[0.5, 0.5, 0.5, 0.5, 0.5],
             )

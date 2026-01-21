@@ -522,7 +522,7 @@ heat pump. We will begin by enforcing a relative minimum part load and finish
 by constraining the waste heat source.
 
 To implement the minimum part load constraint we have to change the definition
-of our heat pump converter. The :py:attr:`min` keyword takes a relative
+of our heat pump converter. The :py:attr:`minimum` keyword takes a relative
 minimum part load that is multiplied with the nominal capacity or invest
 variable to form a lower bound of the flow. Passing ``0.5`` results in a
 minimum heat production of 50% its nominal value. If we only set this argument,
