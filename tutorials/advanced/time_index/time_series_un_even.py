@@ -14,7 +14,6 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-import pytz
 from cost_data import create_investment_objects
 from cost_data import discounted_average_price
 from cost_data import energy_prices
