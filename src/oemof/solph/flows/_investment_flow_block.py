@@ -996,8 +996,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
-                        + self.invest_status[i, o, p]
-                        * annuity_offset
+                        + self.invest_status[i, o, p] * annuity_offset
                     )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(
