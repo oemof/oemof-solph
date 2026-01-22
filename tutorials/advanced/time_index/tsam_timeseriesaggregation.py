@@ -65,6 +65,18 @@ def run_for_typical_periods(
     )
     aggregation.createTypicalPeriods()
 
+    time_series = {
+        "cop": aggregation.typicalPeriods["cop"],
+        "electricity demand (kW)": aggregation.typicalPeriods[
+            "electricity demand (kW)"
+        ],
+        "heat demand (kW)": aggregation.typicalPeriods["heat demand (kW)"],
+        "pv": aggregation.typicalPeriods["PV (kW/kWp)"],
+        "Electricity for Car Charging_HH1": aggregation.typicalPeriods[
+                    "Electricity for Car Charging_HH1"
+        ],
+    }
+
     tindex_agg = pd.date_range(
         "2022-01-01",
         periods=len(aggregation.clusterPeriodIdx) * hours_per_period,
@@ -96,7 +108,7 @@ def run_for_typical_periods(
         label="PV",
         outputs={
             bus_el: Flow(
-                fix=aggregation.typicalPeriods["PV (kW/kWp)"],
+                fix=time_series["pv"],
                 nominal_capacity=INVESTMENTS["pv"],
             )
         },
@@ -120,7 +132,7 @@ def run_for_typical_periods(
         label="Electricity demand",
         inputs={
             bus_el: Flow(
-                fix=aggregation.typicalPeriods["electricity demand (kW)"],
+                fix=time_series["electricity demand (kW)"],
                 nominal_capacity=1.0,
             )
         },
@@ -132,9 +144,7 @@ def run_for_typical_periods(
         label="Electric Vehicle",
         inputs={
             bus_el: Flow(
-                fix=aggregation.typicalPeriods[
-                    "Electricity for Car Charging_HH1"
-                ],
+                fix=time_series["Electricity for Car Charging_HH1"],
                 nominal_capacity=1.0,
             )
         },
@@ -146,7 +156,7 @@ def run_for_typical_periods(
         label="Heat pump",
         inputs={bus_el: Flow()},
         outputs={bus_heat: Flow(nominal_capacity=INVESTMENTS["heat pump"])},
-        conversion_factors={bus_heat: aggregation.typicalPeriods["cop"]},
+        conversion_factors={bus_heat: time_series["cop"]},
     )
     es.add(hp)
 
@@ -164,7 +174,7 @@ def run_for_typical_periods(
         label="Heat demand",
         inputs={
             bus_heat: Flow(
-                fix=aggregation.typicalPeriods["heat demand (kW)"],
+                fix=time_series["heat demand (kW)"],
                 nominal_capacity=1.0,
             )
         },
