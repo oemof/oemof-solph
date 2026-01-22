@@ -2109,7 +2109,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = 0
+                interest = 0.05
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -2117,39 +2117,20 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
                     interest = m.discount_rate
                 for p in m.PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
+                    annuity = n.investment.ep_costs[p]
+
                     investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
+                        self.invest[n, p] * annuity
                     )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            n,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                        )
-                    )
+
                     investment_costs += (
-                        investment_costs_increment + remaining_value_difference
+                        investment_costs_increment
                     )
                     period_investment_costs[p] += investment_costs_increment
 
             for n in self.NON_CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = 0
+                interest = 0.05
                 if interest == 0:
                     warn(
                         msg.format(m.discount_rate),
@@ -2157,35 +2138,15 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
                     interest = m.discount_rate
                 for p in m.PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
+                    annuity = n.investment.ep_costs[p],
+
                     investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
+                        self.invest[n, p] * annuity
                         + self.invest_status[n, p] * n.investment.offset[p]
                     )
-                    remaining_value_difference = (
-                        self._evaluate_remaining_value_difference(
-                            m,
-                            p,
-                            n,
-                            m.es.end_year_of_optimization,
-                            lifetime,
-                            interest,
-                            nonconvex=True,
-                        )
-                    )
+
                     investment_costs += (
-                        investment_costs_increment + remaining_value_difference
+                        investment_costs_increment
                     )
                     period_investment_costs[p] += investment_costs_increment
 
