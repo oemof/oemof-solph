@@ -167,6 +167,6 @@ def create_investment_objects(n, r, year):
             offset=fix_cost,
             maximum=maximum,
             lifetime=20,
-            nonconvex=True,
+            nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
         )
     return investments

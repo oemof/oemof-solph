@@ -24,12 +24,7 @@ from oemof.tools import logger
 from shared import get_parameter
 from shared import prepare_input_data
 
-from oemof.solph import Bus
-from oemof.solph import EnergySystem
-from oemof.solph import Flow
-from oemof.solph import Model
-from oemof.solph import Results
-from oemof.solph import components as cmp
+from oemof import solph
 
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
@@ -56,9 +51,139 @@ def prepare_cost_data():
     pass
 
 
+def populate_and_solve_energy_system(
+        es: solph.EnergySystem,
+        time_series: dict[list] | pd.DataFrame,
+        investments: dict[solph.Investment],
+        variable_costs: dict,
+):
+
+    parameter = get_parameter()
+
+    bus_el = solph.Bus(label="electricity")
+    bus_heat = solph.Bus(label="heat")
+    bus_gas = solph.Bus(label="gas")
+    es.add(bus_el, bus_heat, bus_gas)
+
+    es.add(
+        solph.components.Source(
+            label="PV",
+            outputs={
+                bus_el: solph.Flow(
+                    fix=time_series["PV (kW/kWp)"],
+                    nominal_capacity=investments["pv"],
+                )
+            },
+        )
+    )
+
+    es.add(
+        solph.components.GenericStorage(
+            label="Battery",
+            inputs={bus_el: solph.Flow()},
+            outputs={bus_el: solph.Flow()},
+            nominal_capacity=investments["battery"],  # kWh
+            loss_rate=parameter["loss_rate_battery"],
+            inflow_conversion_factor=parameter["charge_efficiency_battery"],
+            outflow_conversion_factor=parameter["discharge_efficiency_battery"],
+        )
+    )
+
+    es.add(
+        solph.components.Sink(
+            label="Electricity demand",
+            inputs={
+                bus_el: solph.Flow(
+                    fix=time_series["electricity demand (kW)"],
+                    nominal_capacity=1.0,
+                )
+            },
+        )
+    )
+
+    # --- EV demand ---
+    wallbox_sink = solph.components.Sink(
+        label="Electric Vehicle",
+        inputs={
+            bus_el: solph.Flow(
+                fix=time_series["Electricity for Car Charging_HH1"],
+                nominal_capacity=1.0,
+            )
+        },
+    )
+    es.add(wallbox_sink)
+
+    # --- Heat Pump ---
+    hp = solph.components.Converter(
+        label="Heat pump",
+        inputs={bus_el: solph.Flow()},
+        outputs={bus_heat: solph.Flow(nominal_capacity=investments["heat pump"])},
+        conversion_factors={bus_heat: time_series["cop"]},
+    )
+    es.add(hp)
+
+    # --- Gas Boiler ---
+    gas_boiler = solph.components.Converter(
+        label="Gas Boiler",
+        inputs={bus_gas: solph.Flow()},
+        outputs={bus_heat: solph.Flow(nominal_capacity=investments["gas boiler"])},
+        conversion_factors={bus_heat: parameter["efficiency_boiler"]},
+    )
+    es.add(gas_boiler)
+
+    # --- Heat demand ---
+    heat_sink = solph.components.Sink(
+        label="Heat demand",
+        inputs={
+            bus_heat: solph.Flow(
+                fix=time_series["heat demand (kW)"],
+                nominal_capacity=1.0,
+            )
+        },
+    )
+    es.add(heat_sink)
+
+    # --- Imports/exports ---
+    grid_import = solph.components.Source(
+        label="Grid import",
+        outputs={
+            bus_el: solph.Flow(
+                variable_costs=variable_costs["electricity_prices [Eur/kWh]"]
+            )
+        },
+    )
+    es.add(grid_import)
+
+    feed_in = solph.components.Sink(
+        label="Grid Feed-in",
+        inputs={
+            bus_el: solph.Flow(variable_costs=variable_costs["pv_feed_in [Eur/kWh]"])
+        },
+    )
+    es.add(feed_in)
+
+    gas_import = solph.components.Source(
+        label="Gas import",
+        outputs={
+            bus_gas: solph.Flow(variable_costs=variable_costs["gas_prices [Eur/kWh]"])
+        },
+    )
+    es.add(gas_import)
+
+    # --- Solve ---
+    logging.info(f"Creating Model...")
+    m = solph.Model(es)
+    logging.info("Solving Model...")
+
+    m.solve(solver="cbc", solve_kwargs={"tee": False})
+
+    return m
+
+
+
 def solve_model(data, parameter, year=2025, es=None):
     if es is None:
-        es = EnergySystem(timeindex=data.index)
+        es = solph.EnergySystem(timeindex=data.index)
 
     var_cost = discounted_average_price(
         price_series=energy_prices(),
@@ -71,135 +196,15 @@ def solve_model(data, parameter, year=2025, es=None):
         r=parameter["r"],
         year=year,
     )
-
-    # Buses
-    bus_el = Bus(label="electricity")
-    bus_heat = Bus(label="heat")
-    bus_gas = Bus(label="gas")
-    es.add(bus_el, bus_heat, bus_gas)
-
-    # Sources
-    es.add(
-        cmp.Source(
-            label="PV",
-            outputs={
-                bus_el: Flow(
-                    fix=data["PV (kW/kWp)"],
-                    nominal_capacity=investments["pv"],
-                )
-            },
-        )
+    m = populate_and_solve_energy_system(
+        es=es,
+        time_series=data,
+        investments=investments,
+        variable_costs=var_cost,
     )
-    es.add(
-        cmp.Source(
-            label="Grid import",
-            outputs={
-                bus_el: Flow(
-                    variable_costs=var_cost["electricity_prices [Eur/kWh]"]
-                )
-            },
-        )
-    )
-    es.add(
-        cmp.Source(
-            label="Gas import",
-            outputs={
-                bus_gas: Flow(variable_costs=var_cost["gas_prices [Eur/kWh]"])
-            },
-        )
-    )
-
-    # Battery
-    es.add(
-        cmp.GenericStorage(
-            label="Battery",
-            inputs={bus_el: Flow()},
-            outputs={bus_el: Flow()},
-            nominal_capacity=investments["battery"],  # kWh
-            loss_rate=parameter["loss_rate_battery"],  # 0.1%/h
-            inflow_conversion_factor=parameter["charge_efficiency_battery"],
-            outflow_conversion_factor=parameter[
-                "discharge_efficiency_battery"
-            ],
-        )
-    )
-
-    # Sinks
-    es.add(
-        cmp.Sink(
-            label="Heat demand",
-            inputs={
-                bus_heat: Flow(
-                    fix=data["heat demand (kW)"],
-                    nominal_capacity=1,
-                )
-            },
-        )
-    )
-    es.add(
-        cmp.Sink(
-            label="Electricity demand",
-            inputs={
-                bus_el: Flow(
-                    fix=data["electricity demand (kW)"],
-                    nominal_capacity=1,
-                )
-            },
-        )
-    )
-    es.add(
-        cmp.Sink(
-            label="Electric Vehicle",
-            inputs={
-                bus_el: Flow(
-                    fix=data["Electricity for Car Charging_HH1"],
-                    nominal_capacity=1,
-                )
-            },
-        )
-    )
-    es.add(
-        cmp.Sink(
-            label="Grid Feed-in",
-            inputs={
-                bus_el: Flow(variable_costs=var_cost["pv_feed_in [Eur/kWh]"])
-            },
-        )
-    )
-
-    # Heat Pump
-    es.add(
-        cmp.Converter(
-            label="Heat pump",
-            inputs={bus_el: Flow()},
-            outputs={
-                bus_heat: Flow(nominal_capacity=investments["heat pump"])
-            },
-            conversion_factors={bus_heat: data["cop"]},
-        )
-    )
-    # Gas Boiler
-    es.add(
-        cmp.Converter(
-            label="Gas Boiler",
-            inputs={bus_gas: Flow()},
-            outputs={
-                bus_heat: Flow(nominal_capacity=investments["gas boiler"])
-            },
-            conversion_factors={bus_heat: parameter["efficiency_boiler"]},
-        )
-    )
-
-    graph.create_nx_graph(es, filename=Path(Path.home(), "test_graph.graphml"))
-
-    # Create Model and solve it
-    logging.info("Creating Model...")
-    m = Model(es)
-    logging.info("Solving Model...")
-    m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     # Create Results
-    return Results(m)
+    return solph.Results(m)
 
 
 def process_results(results):

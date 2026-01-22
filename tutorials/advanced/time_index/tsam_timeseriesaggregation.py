@@ -14,11 +14,8 @@ from shared import get_parameter
 from shared import prepare_input_data
 
 from oemof import solph
-from oemof.solph import Bus
-from oemof.solph import EnergySystem
-from oemof.solph import Flow
-from oemof.solph import Model
-from oemof.solph import components as cmp
+
+from time_series_un_even import populate_and_solve_energy_system
 
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
@@ -32,15 +29,15 @@ data = prepare_input_data()
 data = data.resample("1 h").mean()
 
 year = 2025
-PARAMETER = get_parameter()
+parameter = get_parameter()
 
-VAR_COSTS = discounted_average_price(
+variable_costs = discounted_average_price(
     price_series=energy_prices(),
-    observation_period=PARAMETER["n"],
-    interest_rate=PARAMETER["r"],
+    observation_period=parameter["n"],
+    interest_rate=parameter["r"],
     year_of_investment=year,
 )
-INVESTMENTS = create_investment_objects_multi_period(
+investments = create_investment_objects_multi_period(
     year=year,
 )
 
@@ -71,7 +68,7 @@ def run_for_typical_periods(
             "electricity demand (kW)"
         ],
         "heat demand (kW)": aggregation.typicalPeriods["heat demand (kW)"],
-        "pv": aggregation.typicalPeriods["PV (kW/kWp)"],
+        "PV (kW/kWp)": aggregation.typicalPeriods["PV (kW/kWp)"],
         "Electricity for Car Charging_HH1": aggregation.typicalPeriods[
                     "Electricity for Car Charging_HH1"
         ],
@@ -83,7 +80,7 @@ def run_for_typical_periods(
         freq="h",
     )
 
-    es = EnergySystem(
+    es = solph.EnergySystem(
         timeindex=tindex_agg,
         timeincrement=[1] * len(tindex_agg),
         periods=[tindex_agg],
@@ -97,131 +94,27 @@ def run_for_typical_periods(
         infer_last_interval=False,
     )
 
-    # --- Buses ---
-    bus_el = Bus(label="electricity")
-    bus_heat = Bus(label="heat")
-    bus_gas = Bus(label="gas")
-    es.add(bus_el, bus_heat, bus_gas)
-
-    # --- PV ---
-    pv = cmp.Source(
-        label="PV",
-        outputs={
-            bus_el: Flow(
-                fix=time_series["pv"],
-                nominal_capacity=INVESTMENTS["pv"],
-            )
-        },
+    m = populate_and_solve_energy_system(
+        es=es,
+        time_series=time_series,
+        investments=investments,
+        variable_costs=variable_costs,
     )
-    es.add(pv)
-
-    # --- Battery ---
-    battery = cmp.GenericStorage(
-        label="Battery",
-        inputs={bus_el: Flow()},
-        outputs={bus_el: Flow()},
-        nominal_capacity=INVESTMENTS["battery"],  # kWh
-        loss_rate=PARAMETER["loss_rate_battery"],
-        inflow_conversion_factor=PARAMETER["charge_efficiency_battery"],
-        outflow_conversion_factor=PARAMETER["discharge_efficiency_battery"],
-    )
-    es.add(battery)
-
-    # --- Electricity demand ---
-    house_sink = cmp.Sink(
-        label="Electricity demand",
-        inputs={
-            bus_el: Flow(
-                fix=time_series["electricity demand (kW)"],
-                nominal_capacity=1.0,
-            )
-        },
-    )
-    es.add(house_sink)
-
-    # --- EV demand ---
-    wallbox_sink = cmp.Sink(
-        label="Electric Vehicle",
-        inputs={
-            bus_el: Flow(
-                fix=time_series["Electricity for Car Charging_HH1"],
-                nominal_capacity=1.0,
-            )
-        },
-    )
-    es.add(wallbox_sink)
-
-    # --- Heat Pump ---
-    hp = cmp.Converter(
-        label="Heat pump",
-        inputs={bus_el: Flow()},
-        outputs={bus_heat: Flow(nominal_capacity=INVESTMENTS["heat pump"])},
-        conversion_factors={bus_heat: time_series["cop"]},
-    )
-    es.add(hp)
-
-    # --- Gas Boiler ---
-    gas_boiler = cmp.Converter(
-        label="Gas Boiler",
-        inputs={bus_gas: Flow()},
-        outputs={bus_heat: Flow(nominal_capacity=INVESTMENTS["gas boiler"])},
-        conversion_factors={bus_heat: PARAMETER["efficiency_boiler"]},
-    )
-    es.add(gas_boiler)
-
-    # --- Heat demand ---
-    heat_sink = cmp.Sink(
-        label="Heat demand",
-        inputs={
-            bus_heat: Flow(
-                fix=time_series["heat demand (kW)"],
-                nominal_capacity=1.0,
-            )
-        },
-    )
-    es.add(heat_sink)
-
-    # --- Imports/exports ---
-    grid_import = cmp.Source(
-        label="Grid import",
-        outputs={
-            bus_el: Flow(
-                variable_costs=VAR_COSTS["electricity_prices [Eur/kWh]"]
-            )
-        },
-    )
-    es.add(grid_import)
-
-    feed_in = cmp.Sink(
-        label="Grid Feed-in",
-        inputs={
-            bus_el: Flow(variable_costs=VAR_COSTS["pv_feed_in [Eur/kWh]"])
-        },
-    )
-    es.add(feed_in)
-
-    gas_import = cmp.Source(
-        label="Gas import",
-        outputs={
-            bus_gas: Flow(variable_costs=VAR_COSTS["gas_prices [Eur/kWh]"])
-        },
-    )
-    es.add(gas_import)
-
-    # --- Solve ---
-    logging.info(f"Creating Model for typical_periods={typical_periods} ...")
-    m = Model(es)
-    logging.info("Solving Model...")
-    m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     results = solph.processing.results(m)
 
-    pv_invest_kw = results[(pv, bus_el)]["period_scalars"]["invest"].iloc[0]
-    storage_invest_kwh = results[(battery, None)]["period_scalars"][
+    # The keys actually contain the Nodes and not strings,
+    # but as a Node is equal to its string, the following works.
+    pv_invest_kw = results[("PV", "electricity")]["period_scalars"][
         "invest"
     ].iloc[0]
-    hp_invest_kw = results[(hp, bus_heat)]["period_scalars"]["invest"].iloc[0]
-    gas_boiler_invest_kw = results[(gas_boiler, bus_heat)]["period_scalars"][
+    storage_invest_kwh = results[("Battery", None)]["period_scalars"][
+        "invest"
+    ].iloc[0]
+    hp_invest_kw = results[("Heat pump", "heat")]["period_scalars"][
+        "invest"
+    ].iloc[0]
+    gas_boiler_invest_kw = results[("Gas Boiler", "heat")]["period_scalars"][
         "invest"
     ].iloc[0]
 
