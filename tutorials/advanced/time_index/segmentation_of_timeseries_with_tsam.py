@@ -1,9 +1,9 @@
 import warnings
 from pathlib import Path
-import tsam.timeseriesaggregation as tsam
 
 import numpy as np
 import pandas as pd
+import tsam.timeseriesaggregation as tsam
 from oemof.tools import debugging
 from oemof.tools import logger
 
