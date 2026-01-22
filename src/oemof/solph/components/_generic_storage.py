@@ -2138,7 +2138,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
                     interest = m.discount_rate
                 for p in m.PERIODS:
-                    annuity = n.investment.ep_costs[p],
+                    annuity = n.investment.ep_costs[p]
 
                     investment_costs_increment = (
                         self.invest[n, p] * annuity
