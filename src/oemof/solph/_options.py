@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Jonas Freißmann
 SPDX-License-Identifier: MIT
 
 """
+
 from warnings import warn
 
 from oemof.tools import debugging

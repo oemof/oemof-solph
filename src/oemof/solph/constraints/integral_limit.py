@@ -12,6 +12,7 @@ SPDX-FileCopyrightText: Johannes Giehl
 SPDX-License-Identifier: MIT
 
 """
+
 import warnings
 
 from pyomo import environ as po

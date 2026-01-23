@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 
 """
+
 import itertools
 import numbers
 import operator

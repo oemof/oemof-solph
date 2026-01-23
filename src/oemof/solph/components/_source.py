@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from oemof.network import Node
 
 

@@ -17,6 +17,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
