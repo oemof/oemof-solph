@@ -40,6 +40,7 @@ License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import matplotlib.pyplot as plt
 
 from oemof import solph

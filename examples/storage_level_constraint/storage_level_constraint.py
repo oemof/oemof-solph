@@ -29,7 +29,6 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
 
-
 import matplotlib.pyplot as plt
 import pandas as pd
 
