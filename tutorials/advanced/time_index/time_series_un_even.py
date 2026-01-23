@@ -18,7 +18,6 @@ from cost_data import create_investment_objects
 from cost_data import discounted_average_price
 from cost_data import energy_prices
 from create_timeseries import reshape_unevenly
-from oemof.network import graph
 from oemof.tools import debugging
 from oemof.tools import logger
 from shared import get_parameter
@@ -52,10 +51,11 @@ def prepare_cost_data():
 
 
 def populate_and_solve_energy_system(
-        es: solph.EnergySystem,
-        time_series: dict[list] | pd.DataFrame,
-        investments: dict[solph.Investment],
-        variable_costs: dict,
+    es: solph.EnergySystem,
+    time_series: dict[list] | pd.DataFrame,
+    investments: dict[solph.Investment],
+    variable_costs: dict,
+    discount_rate=0.02,
 ):
 
     parameter = get_parameter()
@@ -85,7 +85,9 @@ def populate_and_solve_energy_system(
             nominal_capacity=investments["battery"],  # kWh
             loss_rate=parameter["loss_rate_battery"],
             inflow_conversion_factor=parameter["charge_efficiency_battery"],
-            outflow_conversion_factor=parameter["discharge_efficiency_battery"],
+            outflow_conversion_factor=parameter[
+                "discharge_efficiency_battery"
+            ],
         )
     )
 
@@ -101,7 +103,6 @@ def populate_and_solve_energy_system(
         )
     )
 
-    # --- EV demand ---
     wallbox_sink = solph.components.Sink(
         label="Electric Vehicle",
         inputs={
@@ -113,25 +114,26 @@ def populate_and_solve_energy_system(
     )
     es.add(wallbox_sink)
 
-    # --- Heat Pump ---
     hp = solph.components.Converter(
         label="Heat pump",
         inputs={bus_el: solph.Flow()},
-        outputs={bus_heat: solph.Flow(nominal_capacity=investments["heat pump"])},
+        outputs={
+            bus_heat: solph.Flow(nominal_capacity=investments["heat pump"])
+        },
         conversion_factors={bus_heat: time_series["cop"]},
     )
     es.add(hp)
 
-    # --- Gas Boiler ---
     gas_boiler = solph.components.Converter(
         label="Gas Boiler",
         inputs={bus_gas: solph.Flow()},
-        outputs={bus_heat: solph.Flow(nominal_capacity=investments["gas boiler"])},
+        outputs={
+            bus_heat: solph.Flow(nominal_capacity=investments["gas boiler"])
+        },
         conversion_factors={bus_heat: parameter["efficiency_boiler"]},
     )
     es.add(gas_boiler)
 
-    # --- Heat demand ---
     heat_sink = solph.components.Sink(
         label="Heat demand",
         inputs={
@@ -143,7 +145,6 @@ def populate_and_solve_energy_system(
     )
     es.add(heat_sink)
 
-    # --- Imports/exports ---
     grid_import = solph.components.Source(
         label="Grid import",
         outputs={
@@ -157,7 +158,9 @@ def populate_and_solve_energy_system(
     feed_in = solph.components.Sink(
         label="Grid Feed-in",
         inputs={
-            bus_el: solph.Flow(variable_costs=variable_costs["pv_feed_in [Eur/kWh]"])
+            bus_el: solph.Flow(
+                variable_costs=variable_costs["pv_feed_in [Eur/kWh]"]
+            )
         },
     )
     es.add(feed_in)
@@ -165,20 +168,21 @@ def populate_and_solve_energy_system(
     gas_import = solph.components.Source(
         label="Gas import",
         outputs={
-            bus_gas: solph.Flow(variable_costs=variable_costs["gas_prices [Eur/kWh]"])
+            bus_gas: solph.Flow(
+                variable_costs=variable_costs["gas_prices [Eur/kWh]"]
+            )
         },
     )
     es.add(gas_import)
 
-    # --- Solve ---
+
     logging.info(f"Creating Model...")
-    m = solph.Model(es)
+    m = solph.Model(es, discount_rate=discount_rate)
     logging.info("Solving Model...")
 
     m.solve(solver="cbc", solve_kwargs={"tee": False})
 
     return m
-
 
 
 def solve_model(data, parameter, year=2025, es=None):

@@ -20,6 +20,8 @@ from oemof.solph import Model
 from oemof.solph import Results
 from oemof.solph import components as cmp
 
+from time_series_un_even import populate_and_solve_energy_system
+
 
 # ---------------- some helper functions --------------------------------------
 def lifetime_adjusted(lifetime, investment_period_length_in_years):
@@ -149,6 +151,62 @@ tsa_parameters = [
 
 timeincrement = [1] * (len(tindex_agg_full))
 
+time_series = {
+    "cop": pd.concat(
+        [aggregation.typicalPeriods["cop"]] * len(years),
+        ignore_index=True,
+    ),
+    "electricity demand (kW)": pd.concat(
+        [aggregation.typicalPeriods["electricity demand (kW)"]] * len(years),
+        ignore_index=True,
+    ),
+    "heat demand (kW)": pd.concat(
+        [aggregation.typicalPeriods["heat demand (kW)"]] * len(years),
+        ignore_index=True,
+    ),
+    "PV (kW/kWp)": pd.concat(
+        [aggregation.typicalPeriods["PV (kW/kWp)"]] * len(years),
+        ignore_index=True,
+    ),
+    "Electricity for Car Charging_HH1": pd.concat(
+        [aggregation.typicalPeriods["Electricity for Car Charging_HH1"]]
+        * len(years),
+        ignore_index=True,
+    ),
+}
+
+investments = {
+    "pv": Investment(
+        ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")] / 5,
+        lifetime=4,
+        nonconvex=True,
+        offset=investment_costs[("pv", "fixed_costs [Eur]")] / 5,
+        maximum=10,
+        overall_maximum=10,
+    ),
+    "battery": Investment(
+        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
+        lifetime=2,
+    ),
+    "heat pump": Investment(
+        ep_costs=investment_costs[("heat pump", "specific_costs [Eur/kW]")]
+        / 5,
+        lifetime=4,
+        nonconvex=True,
+        offset=investment_costs[("heat pump", "fixed_costs [Eur]")] / 5,
+        maximum=10,
+        overall_maximum=10,
+    ),
+    "gas boiler": Investment(
+        ep_costs=investment_costs[("gas boiler", "specific_costs [Eur/kW]")]
+        / 5,
+        lifetime=4,
+        fixed_costs=investment_costs[("gas boiler", "fixed_costs [Eur]")] / 5,
+        existing=3.5,  # existing cannot be combined with nonconvex
+        age=2,
+    ),
+}
+
 # ------------------ create energy system -------------------------------------
 es = EnergySystem(
     timeindex=tindex_agg_full,
@@ -159,183 +217,12 @@ es = EnergySystem(
     use_remaining_value=True,
 )
 
-bus_el = Bus(label="electricity")
-bus_heat = Bus(label="heat")
-bus_gas = Bus(label="gas")
-es.add(bus_el, bus_heat, bus_gas)
-
-pv = cmp.Source(
-    label="PV",
-    outputs={
-        bus_el: Flow(
-            fix=pd.concat(
-                [aggregation.typicalPeriods["PV (kW/kWp)"]] * len(years),
-                ignore_index=True,
-            ),
-            nominal_capacity=Investment(
-                ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")]
-                / 5,
-                lifetime=4,
-                nonconvex=True,
-                offset=investment_costs[("pv", "fixed_costs [Eur]")] / 5,
-                maximum=10,
-                overall_maximum=10,
-            ),
-        )
-    },
-)
-es.add(pv)
-
-# Battery
-battery = cmp.GenericStorage(
-    label="Battery",
-    inputs={bus_el: Flow()},
-    outputs={bus_el: Flow()},
-    nominal_capacity=Investment(
-        ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
-        lifetime=2,
-    ),
-    loss_rate=0.001,  # 0.1%/h
-    inflow_conversion_factor=0.95,  # Lade-Wirkungsgrad
-    outflow_conversion_factor=0.95,  # Entlade-Wirkungsgrad
-)
-es.add(battery)
-
-# Electricity demand
-house_sink = cmp.Sink(
-    label="Electricity demand",
-    inputs={
-        bus_el: Flow(
-            fix=pd.concat(
-                [aggregation.typicalPeriods["electricity demand (kW)"]]
-                * len(years),
-                ignore_index=True,
-            ),
-            nominal_capacity=1.0,
-        )
-    },
-)
-es.add(house_sink)
-
-# Electric vehicle demand
-wallbox_sink = cmp.Sink(
-    label="Electric Vehicle",
-    inputs={
-        bus_el: Flow(
-            fix=pd.concat(
-                [
-                    aggregation.typicalPeriods[
-                        "Electricity for Car Charging_HH1"
-                    ]
-                ]
-                * len(years),
-                ignore_index=True,
-            ),
-            nominal_capacity=1.0,
-        )
-    },
-)
-es.add(wallbox_sink)
-
-# Heat Pump
-hp = cmp.Converter(
-    label="Heat pump",
-    inputs={bus_el: Flow()},
-    outputs={
-        bus_heat: Flow(
-            nominal_capacity=Investment(
-                ep_costs=investment_costs[
-                    ("heat pump", "specific_costs [Eur/kW]")
-                ]
-                / 5,
-                lifetime=4,
-                nonconvex=True,
-                offset=investment_costs[("heat pump", "fixed_costs [Eur]")]
-                / 5,
-                maximum=10,
-                overall_maximum=10,
-            )
-        )
-    },
-    conversion_factors={
-        bus_heat: pd.concat(
-            [aggregation.typicalPeriods["cop"]] * len(years),
-            ignore_index=True,
-        )
-    },
-)
-es.add(hp)
-
-# Gas Boiler
-gas_boiler = cmp.Converter(
-    label="Gas boiler",
-    inputs={bus_gas: Flow()},
-    outputs={
-        bus_heat: Flow(
-            nominal_capacity=Investment(
-                ep_costs=investment_costs[
-                    ("gas boiler", "specific_costs [Eur/kW]")
-                ]
-                / 5,
-                lifetime=4,
-                fixed_costs=investment_costs[
-                    ("gas boiler", "fixed_costs [Eur]")
-                ]
-                / 5,
-                existing=3.5,  # existing cannot be combined with nonconvex
-                age=2,
-            )
-        )
-    },
-    conversion_factors={bus_heat: 0.9},
-)
-es.add(gas_boiler)
-
-# Heat demand
-heat_sink = cmp.Sink(
-    label="Heat demand",
-    inputs={
-        bus_heat: Flow(
-            fix=pd.concat(
-                [aggregation.typicalPeriods["heat demand (kW)"]] * len(years),
-                ignore_index=True,
-            ),
-            nominal_capacity=1.0,
-        )
-    },
-)
-es.add(heat_sink)
-
-# calculate prices for each time step
-p = expand_energy_prices(tindex_agg_full, prices)
-
-grid_import = cmp.Source(
-    label="Grid import",
-    outputs={bus_el: Flow(variable_costs=p["electricity_prices [Eur/kWh]"])},
-)
-es.add(grid_import)
-
-# Grid feed-in
-feed_in = cmp.Sink(
-    label="Grid Feed-in",
-    inputs={bus_el: Flow(variable_costs=p["pv_feed_in [Eur/kWh]"])},
-)
-es.add(feed_in)
-
-# Gas grid
-gas_grid = cmp.Source(
-    label="Gas grid",
-    outputs={bus_gas: Flow(variable_costs=p["gas_prices [Eur/kWh]"])},
-)
-es.add(gas_grid)
-
-# Create Model and solve it
-logging.info("Creating Model...")
-m = Model(es, discount_rate=discount_rate_adjusted(0.05, 5))
-logging.info("Solving Model...")
-m.solve(
-    solver="cbc",
-    solve_kwargs={"tee": True},
+populate_and_solve_energy_system(
+    es=es,
+    time_series=time_series,
+    investments=investments,
+    variable_costs=expand_energy_prices(tindex_agg_full, prices),
+    discount_rate=discount_rate_adjusted(0.05, 5),
 )
 
 # ----------------- Post Processing -------------------------------------------

@@ -70,7 +70,7 @@ def run_for_typical_periods(
         "heat demand (kW)": aggregation.typicalPeriods["heat demand (kW)"],
         "PV (kW/kWp)": aggregation.typicalPeriods["PV (kW/kWp)"],
         "Electricity for Car Charging_HH1": aggregation.typicalPeriods[
-                    "Electricity for Car Charging_HH1"
+            "Electricity for Car Charging_HH1"
         ],
     }
 
