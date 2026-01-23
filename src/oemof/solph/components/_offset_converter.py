@@ -19,6 +19,7 @@ SPDX-FileCopyrightText: Francesco Witte
 SPDX-License-Identifier: MIT
 
 """
+
 from warnings import warn
 
 from oemof.network import Node

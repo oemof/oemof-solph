@@ -4,7 +4,6 @@ from helpers import epc
 
 import oemof.solph as solph
 
-
 data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
 
 district_heating_system = solph.EnergySystem(

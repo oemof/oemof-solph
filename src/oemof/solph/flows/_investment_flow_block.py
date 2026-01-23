@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from warnings import warn
 
 import numpy as np
