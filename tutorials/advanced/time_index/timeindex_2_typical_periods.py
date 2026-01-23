@@ -3,15 +3,15 @@ from datetime import datetime
 
 import pandas as pd
 import tsam.timeseriesaggregation as tsam
-from cost_data import create_investment_objects_multi_period
-from cost_data import discounted_average_price
-from cost_data import energy_prices
+from input_data import discounted_average_price
+from input_data import energy_prices
+from input_data import get_parameter
+from input_data import investment_costs
+from input_data import prepare_input_data
 from matplotlib import pyplot as plt
 from oemof.tools import debugging
 from oemof.tools import logger
-from shared import get_parameter
-from shared import prepare_input_data
-from time_series_un_even import populate_and_solve_energy_system
+from timeindex_1_segmentation import populate_and_solve_energy_system
 
 from oemof import solph
 
@@ -35,6 +35,32 @@ variable_costs = discounted_average_price(
     interest_rate=parameter["r"],
     year_of_investment=year,
 )
+
+def create_investment_objects_multi_period(year):
+    invest_cost = investment_costs().loc[year]
+
+    # Create Investment objects from cost data
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            epc = invest_cost[(key, "specific_costs [Eur/kW]")]
+
+            maximum = invest_cost[(key, "maximum [kW]")]
+        except KeyError:
+            epc = invest_cost[(key, "specific_costs [Eur/kWh]")]
+            maximum = invest_cost[(key, "maximum [kWh]")]
+
+        fix_cost = invest_cost[(key, "fixed_costs [Eur]")]
+
+        investments[key] = solph.Investment(
+            ep_costs=epc,
+            offset=fix_cost,
+            maximum=maximum,
+            lifetime=20,
+            nonconvex=True,
+        )
+    return investments
+
 investments = create_investment_objects_multi_period(
     year=year,
 )

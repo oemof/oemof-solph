@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
+SPDX-FileCopyrightText: Uwe Krien
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: DLR e.V.
 
@@ -14,14 +15,14 @@ from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
-from cost_data import create_investment_objects
-from cost_data import discounted_average_price
-from cost_data import energy_prices
-from create_timeseries import reshape_unevenly
+from input_data import discounted_average_price
+from input_data import energy_prices
+from input_data import get_parameter
+from input_data import investment_costs
+from input_data import prepare_input_data
 from oemof.tools import debugging
 from oemof.tools import logger
-from shared import get_parameter
-from shared import prepare_input_data
+from oemof.tools.economics import annuity
 
 from oemof import solph
 
@@ -34,6 +35,26 @@ logger.define_logging()
 def calculate_fix_cost(value):
     return value / 20
 
+def reshape_unevenly(df):
+    def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
+        h = ts.hour
+        d = ts.normalize()
+        if 5 <= h <= 20:
+            return ts
+        if h in (21, 22, 23):
+            return d + pd.Timedelta(hours=21)
+        if h in (0,):
+            return (d - pd.Timedelta(days=1)) + pd.Timedelta(hours=21)
+        # h in (1, 2, 3, 4, 5)
+        return d + pd.Timedelta(hours=1)
+
+    buckets = df.index.map(to_bucket)
+    buckets = buckets.where(buckets >= df.index[0], df.index[0])
+
+    df_mean = df.groupby(buckets).mean().sort_index()
+    df_mean.index.name = "timestamp"
+
+    return df_mean
 
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
@@ -175,7 +196,7 @@ def populate_and_solve_energy_system(
     )
     es.add(gas_import)
 
-    logging.info(f"Creating Model...")
+    logging.info("Creating Model...")
     m = solph.Model(es, discount_rate=discount_rate)
     logging.info("Solving Model...")
 
@@ -194,6 +215,42 @@ def solve_model(data, parameter, year=2025, es=None):
         interest_rate=parameter["r"],
         year_of_investment=year,
     )
+
+    def create_investment_objects(n, r, year):
+        invest_cost = investment_costs().loc[year]
+
+        # Create Investment objects from cost data
+        investments = {}
+        for key in ["gas boiler", "heat pump", "battery", "pv"]:
+            try:
+                epc = annuity(
+                    invest_cost[(key, "specific_costs [Eur/kW]")],
+                    n=n,
+                    wacc=r,
+                )
+                maximum = invest_cost[(key, "maximum [kW]")]
+            except KeyError:
+                epc = annuity(
+                    invest_cost[(key, "specific_costs [Eur/kWh]")],
+                    n=n,
+                    wacc=r,
+                )
+                maximum = invest_cost[(key, "maximum [kWh]")]
+            fix_cost = annuity(
+                invest_cost[(key, "fixed_costs [Eur]")],
+                n=n,
+                wacc=r,
+            )
+
+            investments[key] = solph.Investment(
+                ep_costs=epc,
+                offset=fix_cost,
+                maximum=maximum,
+                lifetime=20,
+                nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
+            )
+        return investments
+
     investments = create_investment_objects(
         n=parameter["n"],
         r=parameter["r"],

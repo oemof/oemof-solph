@@ -5,15 +5,14 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
 import tsam.timeseriesaggregation as tsam
-from cost_data import energy_prices
-from cost_data import investment_costs
+from input_data import energy_prices
+from input_data import investment_costs
+from input_data import prepare_input_data
 from oemof.tools import debugging
 from oemof.tools import logger
-from shared import prepare_input_data
-from time_series_un_even import populate_and_solve_energy_system
+from timeindex_1_segmentation import populate_and_solve_energy_system
 
-from oemof.solph import EnergySystem
-from oemof.solph import Investment
+from oemof import solph
 from oemof.solph import Results
 
 
@@ -170,7 +169,7 @@ time_series = {
 }
 
 investments = {
-    "pv": Investment(
+    "pv": solph.Investment(
         ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")] / 5,
         lifetime=4,
         nonconvex=True,
@@ -178,11 +177,11 @@ investments = {
         maximum=10,
         overall_maximum=10,
     ),
-    "battery": Investment(
+    "battery": solph.Investment(
         ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
         lifetime=2,
     ),
-    "heat pump": Investment(
+    "heat pump": solph.Investment(
         ep_costs=investment_costs[("heat pump", "specific_costs [Eur/kW]")]
         / 5,
         lifetime=4,
@@ -191,7 +190,7 @@ investments = {
         maximum=10,
         overall_maximum=10,
     ),
-    "gas boiler": Investment(
+    "gas boiler": solph.Investment(
         ep_costs=investment_costs[("gas boiler", "specific_costs [Eur/kW]")]
         / 5,
         lifetime=4,
@@ -202,7 +201,7 @@ investments = {
 }
 
 # ------------------ create energy system -------------------------------------
-es = EnergySystem(
+es = solph.EnergySystem(
     timeindex=tindex_agg_full,
     timeincrement=timeincrement,
     periods=investment_periods,
@@ -211,7 +210,7 @@ es = EnergySystem(
     use_remaining_value=True,
 )
 
-populate_and_solve_energy_system(
+m = populate_and_solve_energy_system(
     es=es,
     time_series=time_series,
     investments=investments,
@@ -243,6 +242,7 @@ ax1.grid(True, linewidth=0.3, alpha=0.6)
 ax1.legend(["heat pump", "gas boiler", "PV", "battery"], loc="best")
 
 plt.show()
+
 
 # Note: if you want to extract values for the flow, you have to change
 # to_df() in the class Results() in this way:
