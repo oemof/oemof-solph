@@ -38,6 +38,7 @@ Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import logging
 
 import pandas as pd
