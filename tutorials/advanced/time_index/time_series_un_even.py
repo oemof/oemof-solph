@@ -175,7 +175,6 @@ def populate_and_solve_energy_system(
     )
     es.add(gas_import)
 
-
     logging.info(f"Creating Model...")
     m = solph.Model(es, discount_rate=discount_rate)
     logging.info("Solving Model...")
@@ -207,7 +206,6 @@ def solve_model(data, parameter, year=2025, es=None):
         variable_costs=var_cost,
     )
 
-    # Create Results
     return solph.Results(m)
 
 

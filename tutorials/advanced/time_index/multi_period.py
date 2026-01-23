@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import logging
 import warnings
 from datetime import datetime
 
@@ -11,16 +10,11 @@ from cost_data import investment_costs
 from oemof.tools import debugging
 from oemof.tools import logger
 from shared import prepare_input_data
-
-from oemof.solph import Bus
-from oemof.solph import EnergySystem
-from oemof.solph import Flow
-from oemof.solph import Investment
-from oemof.solph import Model
-from oemof.solph import Results
-from oemof.solph import components as cmp
-
 from time_series_un_even import populate_and_solve_energy_system
+
+from oemof.solph import EnergySystem
+from oemof.solph import Investment
+from oemof.solph import Results
 
 
 # ---------------- some helper functions --------------------------------------

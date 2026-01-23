@@ -1,4 +1,3 @@
-import logging
 import warnings
 from datetime import datetime
 
@@ -12,10 +11,9 @@ from oemof.tools import debugging
 from oemof.tools import logger
 from shared import get_parameter
 from shared import prepare_input_data
+from time_series_un_even import populate_and_solve_energy_system
 
 from oemof import solph
-
-from time_series_un_even import populate_and_solve_energy_system
 
 warnings.filterwarnings(
     "ignore", category=debugging.ExperimentalFeatureWarning
