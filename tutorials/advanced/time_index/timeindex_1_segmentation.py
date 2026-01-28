@@ -35,6 +35,7 @@ logger.define_logging()
 def calculate_fix_cost(value):
     return value / 20
 
+
 def reshape_unevenly(df):
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
         h = ts.hour
@@ -55,6 +56,7 @@ def reshape_unevenly(df):
     df_mean.index.name = "timestamp"
 
     return df_mean
+
 
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")

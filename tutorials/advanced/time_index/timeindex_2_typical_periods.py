@@ -36,6 +36,7 @@ variable_costs = discounted_average_price(
     year_of_investment=year,
 )
 
+
 def create_investment_objects_multi_period(year):
     invest_cost = investment_costs().loc[year]
 
@@ -60,6 +61,7 @@ def create_investment_objects_multi_period(year):
             nonconvex=True,
         )
     return investments
+
 
 investments = create_investment_objects_multi_period(
     year=year,

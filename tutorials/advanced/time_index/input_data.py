@@ -48,14 +48,10 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
     )
 
     url = {
-        "temperature.csv":
-            "https://oemof.org/wp-content/uploads/2025/12/temperature.csv",
-        "energy.csv":
-            "https://oemof.org/wp-content/uploads/2026/01/energy.csv",
-
-        "car_charging.csv":
-            "https://oemof.org/wp-content/uploads/2026/01/"
-            + "car_charging_with_7kW_minute.csv",
+        "temperature.csv": "https://oemof.org/wp-content/uploads/2025/12/temperature.csv",
+        "energy.csv": "https://oemof.org/wp-content/uploads/2026/01/energy.csv",
+        "car_charging.csv": "https://oemof.org/wp-content/uploads/2026/01/"
+        + "car_charging_with_7kW_minute.csv",
     }
 
     global PROXY_SET
