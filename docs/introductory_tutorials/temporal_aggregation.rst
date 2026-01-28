@@ -49,7 +49,7 @@ we use N+1 points in time to define N time intervals.
 At the first glance, this might seem to add extra complication,
 but being explicit and clear helps formulating models
 that are precise, comprehensible, and physically correct.
-The function `solph.create_time_index` takes the number of
+The function `solph.create_time_index()` takes the number of
 time intervals as a imput, so you can take a shortcut here:
 
 .. code-block:: python
@@ -67,13 +67,13 @@ time intervals as a imput, so you can take a shortcut here:
 It should be mentioned that the exact time stamp mostly helps with data
 processing. If they do not matter, you can simply give a number of ascending
 values. The time increment then is the difference between those.
+Except for the time index, the following energy system will produce exactly
+the same results.
 
 .. code-block:: python
 
     >>> from oemof import solph
-    >>> es = solph.EnergySystem(
-    ...    timeindex=[2, 2.5, 3]
-    ... )
+    >>> es = solph.EnergySystem(timeindex=[2, 2.5, 3])
     >>> print(es.timeindex)
     [2, 2.5, 3]
     >>> print(list(es.timeincrement))
