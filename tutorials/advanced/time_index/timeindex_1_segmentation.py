@@ -36,7 +36,7 @@ def calculate_fix_cost(value):
     return value / 20
 
 
-def reshape_unevenly(df):
+def reshape_unevenly(data):
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
         h = ts.hour
         d = ts.normalize()
@@ -49,13 +49,13 @@ def reshape_unevenly(df):
         # h in (1, 2, 3, 4, 5)
         return d + pd.Timedelta(hours=1)
 
-    buckets = df.index.map(to_bucket)
-    buckets = buckets.where(buckets >= df.index[0], df.index[0])
+    buckets = data.index.map(to_bucket)
+    buckets = buckets.where(buckets >= data.index[0], data.index[0])
 
-    df_mean = df.groupby(buckets).mean().sort_index()
-    df_mean.index.name = "timestamp"
+    data_mean = data.groupby(buckets).mean().sort_index()
+    data_mean.index.name = "timestamp"
 
-    return df_mean
+    return data_mean
 
 
 def prepare_technical_data(minutes, url, port):
@@ -75,9 +75,9 @@ def prepare_cost_data():
 
 def populate_and_solve_energy_system(
     es: solph.EnergySystem,
-    time_series: dict[list] | pd.DataFrame,
-    investments: dict[solph.Investment],
-    variable_costs: dict,
+    time_series: dict[str, list] | dict[str, pd.DataFrame],
+    investments: dict[str, solph.Investment],
+    variable_costs: dict | pd.DataFrame,
     discount_rate=0.02,
 ):
 
@@ -217,42 +217,6 @@ def solve_model(data, parameter, year=2025, es=None):
         interest_rate=parameter["r"],
         year_of_investment=year,
     )
-
-    def create_investment_objects(n, r, year):
-        invest_cost = investment_costs().loc[year]
-
-        # Create Investment objects from cost data
-        investments = {}
-        for key in ["gas boiler", "heat pump", "battery", "pv"]:
-            try:
-                epc = annuity(
-                    invest_cost[(key, "specific_costs [Eur/kW]")],
-                    n=n,
-                    wacc=r,
-                )
-                maximum = invest_cost[(key, "maximum [kW]")]
-            except KeyError:
-                epc = annuity(
-                    invest_cost[(key, "specific_costs [Eur/kWh]")],
-                    n=n,
-                    wacc=r,
-                )
-                maximum = invest_cost[(key, "maximum [kWh]")]
-            fix_cost = annuity(
-                invest_cost[(key, "fixed_costs [Eur]")],
-                n=n,
-                wacc=r,
-            )
-
-            investments[key] = solph.Investment(
-                ep_costs=epc,
-                offset=fix_cost,
-                maximum=maximum,
-                lifetime=20,
-                nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
-            )
-        return investments
-
     investments = create_investment_objects(
         n=parameter["n"],
         r=parameter["r"],
@@ -266,6 +230,42 @@ def solve_model(data, parameter, year=2025, es=None):
     )
 
     return solph.Results(m)
+
+
+def create_investment_objects(n, r, year):
+    invest_cost = investment_costs().loc[year]
+
+    # Create Investment objects from cost data
+    investments = {}
+    for key in ["gas boiler", "heat pump", "battery", "pv"]:
+        try:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kW]")],
+                n=n,
+                wacc=r,
+            )
+            maximum = invest_cost[(key, "maximum [kW]")]
+        except KeyError:
+            epc = annuity(
+                invest_cost[(key, "specific_costs [Eur/kWh]")],
+                n=n,
+                wacc=r,
+            )
+            maximum = invest_cost[(key, "maximum [kWh]")]
+        fix_cost = annuity(
+            invest_cost[(key, "fixed_costs [Eur]")],
+            n=n,
+            wacc=r,
+        )
+
+        investments[key] = solph.Investment(
+            ep_costs=epc,
+            offset=fix_cost,
+            maximum=maximum,
+            lifetime=20,
+            nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
+        )
+    return investments
 
 
 def process_results(results):
