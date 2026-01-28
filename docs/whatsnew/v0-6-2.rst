@@ -25,8 +25,12 @@ Documentation
 Bug fixes
 #########
 
+* Fixed that processing.results failed when using Pandas 3 with TSAM.
+
 Other changes
 #############
+
+* Support Python 3.14 instead of Python 3.10.
 
 Contributors
 ############
