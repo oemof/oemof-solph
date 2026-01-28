@@ -37,8 +37,8 @@ variable_costs = discounted_average_price(
 )
 
 
-def create_investment_objects_multi_period(year):
-    invest_cost = investment_costs().loc[year]
+def create_investment_objects_multi_period(year_of_invest):
+    invest_cost = investment_costs().loc[year_of_invest]
 
     # Create Investment objects from cost data
     investments = {}
@@ -63,8 +63,8 @@ def create_investment_objects_multi_period(year):
     return investments
 
 
-investments = create_investment_objects_multi_period(
-    year=year,
+investment_objects = create_investment_objects_multi_period(
+    year_of_invest=year,
 )
 
 
@@ -123,7 +123,7 @@ def run_for_typical_periods(
     m = populate_and_solve_energy_system(
         es=es,
         time_series=time_series,
-        investments=investments,
+        investments=investment_objects,
         variable_costs=variable_costs,
     )
 
