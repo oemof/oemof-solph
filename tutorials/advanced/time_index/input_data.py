@@ -68,7 +68,7 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
         file = Path(file_path, filename)
         if not file.exists():
             data = open(file, "w")
-            data.write(requests.get(url[filename]).text)
+            data.write(requests.get(url[filename], timeout=10).text)
         df = pd.read_csv(
             file,
             index_col=0,
