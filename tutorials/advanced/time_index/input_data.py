@@ -61,12 +61,13 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
 
     def _get_data(filename):
         file_path = Path(__file__).parent
-        file = Path(file_path, filename)
-        if not file.exists():
-            data = open(file, "w")
-            data.write(requests.get(url[filename], timeout=10).text)
+        file_path = Path(file_path, filename)
+        if not file_path.exists():
+            data_file = open(file_path, "w")
+            data_file.write(requests.get(url[filename], timeout=10).text)
+            data_file.close()
         df = pd.read_csv(
-            file,
+            file_path,
             index_col=0,
         )
         return df
