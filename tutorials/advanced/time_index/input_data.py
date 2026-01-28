@@ -8,7 +8,7 @@ SPDX-License-Identifier: MIT
 import datetime
 from os import environ
 from pathlib import Path
-from urllib.request import urlretrieve
+import requests
 
 import demandlib
 import numpy as np
@@ -39,11 +39,6 @@ def get_parameter():
 def prepare_input_data(proxy_url=None, proxy_port=None):
     # ToDo: Mobilitätszeitreihe, die zu den Daten passt.
 
-    url_temperature = (
-        "https://oemof.org/wp-content/uploads/2025/12/temperature.csv"
-    )
-    url_energy = "https://oemof.org/wp-content/uploads/2026/01/energy.csv"
-
     print(
         "Data is licensed from M. Schlemminger, T. Ohrdes, E. Schneider,"
         " and M. Knoop. Under Creative Commons Attribution 4.0 International"
@@ -52,26 +47,36 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
         " from that dataset.)"
     )
 
-    url_car = (
-        "https://oemof.org/wp-content/uploads/2026/01/"
-        "car_charging_with_7kW_minute.csv"
-    )
+    url = {
+        "temperature.csv":
+            "https://oemof.org/wp-content/uploads/2025/12/temperature.csv",
+        "energy.csv":
+            "https://oemof.org/wp-content/uploads/2026/01/energy.csv",
+
+        "car_charging.csv":
+            "https://oemof.org/wp-content/uploads/2026/01/"
+            + "car_charging_with_7kW_minute.csv",
+    }
 
     global PROXY_SET
     if PROXY_SET is False and proxy_url is not None:
         set_proxy(url=proxy_url, port=proxy_port)
         PROXY_SET = True
 
-    file_path = Path(__file__).parent
+    def _get_data(filename):
+        file_path = Path(__file__).parent
+        file = Path(file_path, filename)
+        if not file.exists():
+            data = open(file, "w")
+            data.write(requests.get(url[filename]).text)
+        df = pd.read_csv(
+            file,
+            index_col=0,
+        )
+        return df
 
     def _temperature_dataframe():
-        temperature_file = Path(file_path, "temperature.csv")
-        if not temperature_file.exists():
-            urlretrieve(url_temperature, temperature_file)
-        temperature = pd.read_csv(
-            temperature_file,
-            index_col="Unix Epoch",
-        )
+        temperature = _get_data("temperature.csv")
 
         temperature.index = pd.to_datetime(
             temperature.index,
@@ -84,14 +89,8 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
         return temperature
 
     def _energy_dataframe():
-        energy_file = Path(file_path, "energy.csv")
-        if not energy_file.exists():
-            urlretrieve(url_energy, energy_file)
+        energy = _get_data("energy.csv")
 
-        energy = pd.read_csv(
-            energy_file,
-            index_col=0,
-        )
         energy.index = pd.to_datetime(
             energy.index,
             unit="s",
@@ -152,14 +151,7 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
 
     # add car charging profile
     def _car_dataframe():
-        car_file = Path(file_path, "car_charging.csv")
-        if not car_file.exists():
-            urlretrieve(url_car, car_file)
-
-        car = pd.read_csv(
-            car_file,
-            index_col=0,
-        )
+        car = _get_data("car_charging.csv")
         car.index = df.index
         return car
 
