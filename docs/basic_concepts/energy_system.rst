@@ -131,7 +131,7 @@ datetime index:
     >>> from oemof.solph import create_time_index
     >>> my_index_from_solph = create_time_index(2025)
     >>> type(my_index_from_solph)
-    <class 'pandas.core.indexes.datetimes.DatetimeIndex'>
+    <class 'pandas.DatetimeIndex'>
 
 By default, the function creates an hourly index for one year. But it is
 possible to change the length of the interval to quarter hours for example. The
@@ -148,7 +148,7 @@ helper function provided by oemof.solph.
     >>> import pandas as pd
     >>> my_index_from_pandas = pd.date_range('1/1/2025', periods=8761, freq='h')
     >>> type(my_index_from_pandas)
-    <class 'pandas.core.indexes.datetimes.DatetimeIndex'>
+    <class 'pandas.DatetimeIndex'>
     >>> (my_index_from_pandas == my_index_from_solph).all()
     np.True_
 
