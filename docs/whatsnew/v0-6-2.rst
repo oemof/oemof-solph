@@ -21,6 +21,7 @@ Documentation
 
 * The `Flow` parameters `min` and `max` are now listed with their default 
   values of 0 and 1, respectively, in the `Flow` API documentation.
+* A tutorial focusing on time indexes and aggregation is added.
 
 Bug fixes
 #########
@@ -37,6 +38,9 @@ Contributors
 
 * Patrik Schönfeldt
 * Lennart Schürmann
+* Uwe Krien
+* Maximilian Hillen
+* Eva Schischke
 
 Acknowledgements
 ################
