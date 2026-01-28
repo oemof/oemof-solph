@@ -56,11 +56,12 @@ time intervals as a imput, so you can take a shortcut here:
 
     >>> from oemof import solph
     >>> es = solph.EnergySystem(
-    >>>    timeindex=solph.create_time_index(2025, interval=0.5, number=2)
-    >>> )
-    >>> print(es.timeindex)
-    ["2025-01-01T00:00:00", "2025-01-01T00:30:00", "2025-01-01T01:00:00"]
-    >>> print(es.timeincrement)
+    ...    timeindex=solph.create_time_index(2025, interval=0.5, number=2)
+    ... )
+    >>> print(list(es.timeindex))
+    [Timestamp('2025-01-01 00:00:00'), Timestamp('2025-01-01 00:30:00'), Timestamp('2025-01-01 01:00:00')]
+
+    >>> print(list(es.timeincrement))
     [0.5, 0.5]
 
 It should be mentioned that the exact time stamp mostly helps with data
@@ -71,11 +72,11 @@ values. The time increment then is the difference between those.
 
     >>> from oemof import solph
     >>> es = solph.EnergySystem(
-    >>>    timeindex=[2, 2.5, 3]
-    >>> )
+    ...    timeindex=[2, 2.5, 3]
+    ... )
     >>> print(es.timeindex)
     [2, 2.5, 3]
-    >>> print(es.timeincrement)
+    >>> print(list(es.timeincrement))
     [0.5, 0.5]
 
 
