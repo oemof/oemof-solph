@@ -258,9 +258,6 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
-        # --- BEGIN: To be removed for versions >= v0.7 ---
-        self.bidirectional = bidirectional
-        # --- END
         self.lifetime = lifetime
         self.age = age
 
@@ -277,23 +274,25 @@ class Flow(Edge):
             )
             raise AttributeError(msg)
 
-        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
-        if self.bidirectional:
-            msg = "The `bidirectional` keyword is deprecated and will be "
-            "removed in a future version, as it sets the value of `minimum` "
-            "to -1 without the users explicit intent. It is recommended to "
-            "set a negative value for `minimum` explicitly instead."
-            warn(msg, FutureWarning)
-            if minimum == 0:
-                minimum = -1
-        # --- END
-
         if sequence(minimum).min() < 0:
             msg = (
                 "Setting `minimum` to negative values allows for the flow to "
                 "become bidirectional, which is an experimental feature."
             )
             warn(msg, debugging.ExperimentalFeatureWarning)
+            self.bidirectional = True
+        # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+        elif bidirectional:
+            msg = "The `bidirectional` keyword is deprecated and will be "
+            "removed in a future version. It is recommended to "
+            "set a negative value for `minimum` instead."
+            warn(msg, FutureWarning)
+            self.bidirectional = True
+            if minimum == 0:
+                minimum = -1
+        # --- END
+        else:
+            self.bidirectional = False
 
         self.fix = sequence(fix)
         self.maximum = sequence(maximum)

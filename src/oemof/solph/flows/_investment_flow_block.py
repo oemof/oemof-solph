@@ -913,23 +913,17 @@ class InvestmentFlowBlock(ScalarBlock):
                     )
 
         else:
+            interest = 0.05
             msg = (
                 "You did not specify an interest rate.\n"
-                "It will be set equal to the discount_rate of {} "
-                "of the model as a default.\nThis corresponds to a "
-                "social planner point of view and does not reflect "
-                "microeconomic interest requirements."
+                "It will be set to {}."
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                    interest = 0.05
+                warn(
+                    msg.format(interest),
+                    debugging.SuspiciousUsageWarning,
+                )
                 for p in m.PERIODS:
 
                     annuity = economics.annuity(
@@ -967,14 +961,10 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
-                    interest = 0.05
+                warn(
+                    msg.format(interest),
+                    debugging.SuspiciousUsageWarning,
+                )
                 for p in m.PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
