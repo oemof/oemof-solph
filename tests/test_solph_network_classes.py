@@ -140,9 +140,7 @@ def test_min_max_values_for_bidirectional_flow():
         ExperimentalFeatureWarning,
         match="allows for the flow to become bidirectional",
     ):
-        b = solph.flows.Flow(
-            nominal_capacity=1, minimum=-0.8, maximum=0.9
-        )
+        b = solph.flows.Flow(nominal_capacity=1, minimum=-0.8, maximum=0.9)
     assert a.bidirectional
     assert a.maximum[0] == 1
     assert a.minimum[0] == -1
