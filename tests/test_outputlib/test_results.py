@@ -1,5 +1,6 @@
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
+from pyomo.opt.results.container import ListContainer
 
 from oemof.solph import Results
 
@@ -47,13 +48,11 @@ class TestResultsClass:
             self.results["objective"] = 5
 
     def test_solver_result_access(self):
-        solver_problem = self.results["solver_results"]["Problem"]
-
         with pytest.warns(
             FutureWarning,
             match="Direct access to Pyomo results",
         ):
-            assert solver_problem == self.results["Problem"]
+            assert isinstance(self.results["Problem"], ListContainer)
 
     def test_economic_calculations(self):
         with pytest.warns(

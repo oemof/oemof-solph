@@ -27,7 +27,6 @@ class Results:
         self._solver_results = model.solver_results
         self._meta_results = {
             "objective": model.objective(),
-            "solver_results": model.solver_results,
         }
         self._variables = {}
         self._model = model
@@ -145,8 +144,7 @@ class Results:
     def _direct_pyomo_result_waring():
         warnings.warn(
             "Direct access to Pyomo results is only provided as a"
-            + " compatibility layer and is planed to be removed."
-            + " Use key 'solver_results' instead.",
+            + " compatibility layer and is planed to be removed.",
             category=FutureWarning,
         )
 
