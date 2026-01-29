@@ -40,6 +40,7 @@ License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import matplotlib.pyplot as plt
 
 from oemof import solph
@@ -62,7 +63,7 @@ def main(optimize=True):
             bus: solph.flows.Flow(
                 nominal_capacity=2,
                 variable_costs=0.2,
-                max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
+                maximum=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
             )
         },
     )

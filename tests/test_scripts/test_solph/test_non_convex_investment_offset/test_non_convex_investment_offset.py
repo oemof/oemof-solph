@@ -9,6 +9,7 @@ SPDX-License-Identifier: MIT
 """
 
 import pandas as pd
+import pytest
 
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
@@ -56,8 +57,8 @@ def test_non_convex_investment_offset():
                     nonconvex=True,
                 ),
                 variable_costs=1,
-                max=1,
-                min=0.1,
+                maximum=1,
+                minimum=0.1,
                 nonconvex=NonConvex(),
             )
         },
@@ -70,11 +71,15 @@ def test_non_convex_investment_offset():
         outputs={
             b_th: Flow(
                 nominal_capacity=Investment(
-                    ep_costs=50, maximum=1, minimum=0, nonconvex=True
+                    ep_costs=50,
+                    maximum=1,
+                    offset=0.1,
+                    minimum=0,
+                    nonconvex=True,
                 ),
                 variable_costs=1,
-                max=1,
-                min=0.1,
+                maximum=1,
+                minimum=0.1,
                 nonconvex=NonConvex(),
             )
         },
@@ -92,6 +97,7 @@ def test_non_convex_investment_offset():
     # Check Objective
     meta_results = processing.meta_results(model)
 
-    # Cheap heat pump should be built (50) and dispatched (1). The investment
-    # offset of the expensive heat pump (2000) should be ignored.
-    assert meta_results["objective"] == 51.0
+    # Cheap heat pump should be built (50+0.1) and dispatched (1).
+    # The investment offset of the expensive heat pump (2000)
+    # should be ignored.
+    assert meta_results["objective"] == pytest.approx(51.1)

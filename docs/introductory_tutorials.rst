@@ -23,7 +23,7 @@ you have any questions please reach out to the
 .. grid:: 2
     :gutter: 1
 
-    .. grid-item-card::  Tutorial 1
+    .. grid-item-card::  District heating portfolio
         :link: district_heating_portfolio_optimization_label
         :link-type: ref
 
@@ -33,7 +33,7 @@ you have any questions please reach out to the
         .. image:: /_files/tutorial_dhs_2_darkmode.svg
             :class: only-dark
 
-    .. grid-item-card::  Tutorial 2
+    .. grid-item-card::  Home PV and battery
         :link: home_pv_battery_system_label
         :link-type: ref
 

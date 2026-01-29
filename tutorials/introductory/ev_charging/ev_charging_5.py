@@ -101,7 +101,7 @@ charger230V = solph.components.Source(
         bus_car: solph.Flow(
             nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
             variable_costs=dynamic_price,
-            max=car_at_home,
+            maximum=car_at_home,
         )
     },
 )
@@ -112,7 +112,7 @@ discharger230V = solph.components.Sink(
         bus_car: solph.Flow(
             nominal_capacity=3.68,  # 230 V * 16 A = 3.68 kW
             variable_costs=-dynamic_price,
-            max=car_at_home,
+            maximum=car_at_home,
         )
     },
 )
@@ -137,7 +137,7 @@ charger11kW = solph.components.Source(
     outputs={
         bus_car: solph.Flow(
             nominal_capacity=11,  # 11 kW
-            max=car_at_work,
+            maximum=car_at_work,
         )
     },
 )

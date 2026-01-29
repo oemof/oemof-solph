@@ -182,7 +182,7 @@ class EnergySystem(es.EnergySystem):
                 "now. If you find anything suspicious or any bugs, "
                 "please report them."
             )
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+            warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
             if isinstance(tsa_parameters, dict):
                 # Set up tsa_parameters for single period:

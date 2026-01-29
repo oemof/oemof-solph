@@ -4,7 +4,6 @@ from helpers import epc
 
 import oemof.solph as solph
 
-
 data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
 
 district_heating_system = solph.EnergySystem(
@@ -34,7 +33,7 @@ heat_sink = solph.components.Sink(
     label="heat sink",
     inputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=data["heat demand"].max(),
+            nominal_capacity=data["heat demand"].max(),
             fix=data["heat demand"] / data["heat demand"].max(),
         )
     },
@@ -57,7 +56,7 @@ gas_boiler = solph.components.Converter(
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=epc(spec_inv_gas_boiler), maximum=50
             ),
             variable_costs=var_cost_gas_boiler,
@@ -107,11 +106,11 @@ heat_pump = solph.components.Converter(
     },
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=solph.Investment(
+            nominal_capacity=solph.Investment(
                 ep_costs=epc(spec_inv_heat_pump), maximum=999
             ),
             variable_costs=1.2,
-            min=0.5,
+            minimum=0.5,
             nonconvex=solph.NonConvex(),
         )
     },

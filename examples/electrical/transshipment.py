@@ -36,6 +36,7 @@ Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt

@@ -10,6 +10,7 @@ License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 ###########################################################################
 # imports
 ###########################################################################
@@ -110,7 +111,7 @@ def main():
         components.Sink(
             label="Heat Demand",
             inputs={
-                bus_heat: flows.Flow(fix=data["demand_el"], nominal_value=2)
+                bus_heat: flows.Flow(fix=data["demand_el"], nominal_capacity=2)
             },
         )
     )
@@ -137,7 +138,7 @@ def main():
             label="Pv Plant",
             outputs={
                 bus_electricity: flows.Flow(
-                    fix=data["pv"], nominal_value=582000
+                    fix=data["pv"], nominal_capacity=582000
                 )
             },
         )
@@ -150,7 +151,7 @@ def main():
             label="Electricity Demand",
             inputs={
                 bus_electricity: flows.Flow(
-                    fix=data["demand_el"], nominal_value=1
+                    fix=data["demand_el"], nominal_capacity=1
                 )
             },
         )

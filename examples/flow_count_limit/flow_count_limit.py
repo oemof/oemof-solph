@@ -36,6 +36,7 @@ License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import pandas as pd
 
 import oemof.solph as solph
@@ -73,8 +74,8 @@ def main(optimize=True):
                     nonconvex=solph.NonConvex(),
                     nominal_capacity=210,
                     variable_costs=[-1, -5, -1, -1],
-                    max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": True},
+                    maximum=[1, 1, 1, 0],
+                    custom_properties={"my_keyword": True},
                 )
             },
         )
@@ -89,8 +90,8 @@ def main(optimize=True):
                     nonconvex=solph.NonConvex(),
                     variable_costs=[-2, -1, -2, -2],
                     nominal_capacity=250,
-                    max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": False},
+                    maximum=[1, 1, 1, 0],
+                    custom_properties={"my_keyword": False},
                 )
             },
         )
@@ -104,7 +105,7 @@ def main(optimize=True):
                 bel: solph.Flow(
                     variable_costs=1,
                     nonconvex=solph.NonConvex(),
-                    max=[1, 1, 1, 0],
+                    maximum=[1, 1, 1, 0],
                     nominal_capacity=145,
                 )
             },
@@ -117,7 +118,7 @@ def main(optimize=True):
             label="sink2",
             inputs={
                 bel: solph.Flow(
-                    custom_attributes={"my_keyword": True},
+                    custom_properties={"my_keyword": True},
                     fix=[0, 1, 1, 0],
                     nominal_capacity=130,
                 )

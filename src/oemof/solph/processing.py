@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-License-Identifier: MIT
 
 """
+
 import itertools
 import numbers
 import operator
@@ -639,12 +640,11 @@ def _calculate_soc_from_inter_and_intra_soc(soc, storage, tsa_parameters):
         i_offset += len(tsa_period["order"])
         t_offset += i_offset * tsa_period["timesteps"]
     soc_ts = pd.concat(soc_frames)
-    soc_ts["variable_name"] = "soc"
-    soc_ts["timestep"] = range(len(soc_ts))
 
-    # Disaggregate segments by linear interpolation and remove
-    # last timestep afterwards (only needed for interpolation)
+    soc_ts["timestep"] = range(len(soc_ts))
     interpolated_soc = soc_ts.interpolate()
+    interpolated_soc["variable_name"] = "soc"
+
     return interpolated_soc.iloc[:-1]
 
 

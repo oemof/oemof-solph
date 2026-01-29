@@ -29,6 +29,7 @@ import logging
 import pandas as pd
 import pytest
 from oemof.tools import logger
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 
@@ -39,17 +40,22 @@ from oemof import solph
 logger.define_logging()
 logging.info("Initialize the energy system")
 
-tindex_original = pd.date_range("2022-01-01", periods=8, freq="H")
-tindex = pd.date_range("2022-01-01", periods=4, freq="H")
+tindex_original = pd.date_range("2022-01-01", periods=8, freq="h")
+tindex = pd.date_range("2022-01-01", periods=4, freq="h")
 
-energysystem = solph.EnergySystem(
-    timeindex=tindex,
-    tsa_parameters={
-        "timesteps_per_period": 2,
-        "order": [1, 1, 1, 0],
-    },
-    infer_last_interval=True,
-)
+
+with pytest.warns(
+    ExperimentalFeatureWarning,
+    match="tsa_parameters",
+):
+    energysystem = solph.EnergySystem(
+        timeindex=tindex,
+        tsa_parameters={
+            "timesteps_per_period": 2,
+            "order": [1, 1, 1, 0],
+        },
+        infer_last_interval=True,
+    )
 
 ##########################################################################
 # Create oemof objects
@@ -68,7 +74,7 @@ source = solph.components.Source(
         bel: solph.Flow(
             full_load_time_min=0.8,
             full_load_time_max=0.8,
-            nominal_value=100,
+            nominal_capacity=100,
             variable_costs=[0.1, 0.2, 0.3, 0.4],
         )
     },
@@ -118,11 +124,11 @@ def test_weighted_full_load_hours():
 def test_weighted_variable_costs():
     """Tests if variable costs are weighted accordingly to TSAM occurrences"""
     assert meta_results["objective"] == (
-        flows["source-electricity"][6] * 0.1
-        + flows["source-electricity"][7] * 0.2
+        flows["source-electricity"].iloc[6] * 0.1
+        + flows["source-electricity"].iloc[7] * 0.2
         + (
-            flows["source-electricity"][0] * 0.3
-            + flows["source-electricity"][1] * 0.4
+            flows["source-electricity"].iloc[0] * 0.3
+            + flows["source-electricity"].iloc[1] * 0.4
         )
         * 3
     )

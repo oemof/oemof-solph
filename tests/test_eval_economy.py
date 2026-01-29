@@ -25,7 +25,10 @@ def results_opex():
     demand = solph.components.Sink(
         "heat_demand",
         inputs={
-            heat_bus: solph.flows.Flow(fix=[15, 42, 3, 9, 12], nominal_value=1)
+            heat_bus: solph.flows.Flow(
+                fix=[15, 42, 3, 9, 12],
+                nominal_capacity=1,
+            )
         },
     )
 
@@ -75,7 +78,9 @@ def results_capex():
     demand = solph.components.Sink(
         "heat_demand",
         inputs={
-            heat_bus: solph.flows.Flow(fix=[15, 42, 3, 9, 12], nominal_value=1)
+            heat_bus: solph.flows.Flow(
+                fix=[15, 42, 3, 9, 12], nominal_capacity=1
+            )
         },
     )
 
@@ -115,13 +120,13 @@ def results_storage():
     source = solph.components.Source(
         "source",
         outputs={
-            bus: solph.flows.Flow(fix=[20, 20, 10, 0, 0], nominal_value=1)
+            bus: solph.flows.Flow(fix=[20, 20, 10, 0, 0], nominal_capacity=1)
         },
     )
 
     demand = solph.components.Sink(
         "demand",
-        inputs={bus: solph.flows.Flow(fix=10, nominal_value=1)},
+        inputs={bus: solph.flows.Flow(fix=10, nominal_capacity=1)},
     )
 
     storage = solph.components.GenericStorage(

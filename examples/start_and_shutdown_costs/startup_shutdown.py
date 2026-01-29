@@ -29,6 +29,7 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -93,8 +94,8 @@ def main(optimize=True):
         outputs={
             bel: solph.Flow(
                 nominal_capacity=10,
-                min=0.5,
-                max=1.0,
+                minimum=0.5,
+                maximum=1.0,
                 variable_costs=10,
                 nonconvex=solph.NonConvex(startup_costs=5, shutdown_costs=5),
             )
