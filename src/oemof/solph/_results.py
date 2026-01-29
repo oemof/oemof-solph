@@ -11,7 +11,9 @@ SPDX-License-Identifier: MIT
 
 from collections.abc import Hashable
 from functools import cache
+import warnings
 
+from oemof.tools.debugging import ExperimentalFeatureWarning
 import pandas as pd
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
@@ -21,14 +23,12 @@ import oemof.solph
 
 
 class Results:
-    # TODO:
-    #   Defer attribute references not present as variables to
-    #   attributes of `model.solver_results` in order to make `Results`
-    #   instances returnable by `model.solve` and still be backwards
-    #   compatible.
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
-        self._meta_results = {"objective": model.objective()}
+        self._meta_results = {
+            "objective": model.objective(),
+            "solver_results": model.solver_results,
+        }
         self._variables = {}
         self._model = model
 
@@ -132,10 +132,31 @@ class Results:
                     df.index = df.index.get_level_values(-1)
         return df
 
-    def _calc_capex(self):
+    @staticmethod
+    def _economy_calculation_waring():
+        warnings.warn(
+            "Economic calculations in results are experimental."
+            + " Details such as naming conventions or programming interface"
+            + " can change with without notice.",
+            category=ExperimentalFeatureWarning,
+        )
 
+    @staticmethod
+    def _direct_pyomo_result_waring():
+        warnings.warn(
+            "Direct access to Pyomo results is only provided as a"
+            + " compatibility layer and is planed to be removed."
+            + " Use key 'solver_results' instead.",
+            category=FutureWarning,
+        )
+
+    def _calc_capex(self):
+        self._economy_calculation_waring()
         # extract the the optimized investment sizes
-        invest_values = self.to_df("invest")
+        try:
+            invest_values = self.to_df("invest")
+        except KeyError:  # no investments
+            return pd.DataFrame()
 
         # Initialize an empty dictionary to collect results
         capex_data = {}
@@ -199,6 +220,7 @@ class Results:
         return df_capex
 
     def _calc_variable_costs(self):
+        self._economy_calculation_waring()
         df_opex = pd.DataFrame()
 
         # extract the the optimized flow values
@@ -228,6 +250,7 @@ class Results:
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:
+            self._direct_pyomo_result_waring()
             return self._solver_results[key]
         elif key in self._meta_results:
             return self._meta_results[key]
