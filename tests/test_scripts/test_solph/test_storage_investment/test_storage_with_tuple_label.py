@@ -168,9 +168,9 @@ def test_tuples_as_labels_example(
     energysystem.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    energysystem.dump()
+    energysystem.dump(filename="./es_dump.oemof", consider_dpath=False)
     es = solph.EnergySystem()
-    es.restore()
+    es.restore(filename="./es_dump.oemof", consider_dpath=False)
 
     # Results
     results = es.results["main"]

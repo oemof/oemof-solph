@@ -191,7 +191,7 @@ def plot_dispatch_invest(csv_path, mode="dark"):
 
     if "Time" not in df.columns:
         df["Time"] = pd.date_range(
-            start="2020-01-01", periods=len(df), freq="H"
+            start="2020-01-01", periods=len(df), freq="h"
         )
 
     if mode.lower() == "dark":

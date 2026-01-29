@@ -318,7 +318,7 @@ def test_invest_content_maximum():
         inputs={
             bus: solph.Flow(
                 nominal_capacity=2,
-                variable_costs=[-2 + i * 0.01 for i in range(0, 11)],
+                variable_costs=[-2 + i * 0.01 for i in range(0, 10)],
             )
         },
         outputs={bus: solph.Flow(nominal_capacity=0.1, variable_costs=0.1)},

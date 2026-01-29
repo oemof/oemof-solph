@@ -7,6 +7,7 @@ SPDX-FileCopyrightText: DLR e.V.
 
 SPDX-License-Identifier: MIT
 """
+
 # %%[imports]
 import os
 import matplotlib.pyplot as plt
@@ -77,7 +78,7 @@ pv_system = solph.components.Source(
     outputs={
         el_bus: solph.Flow(
             nominal_capacity=solph.Investment(ep_costs=pv_epc, maximum=10),
-            max=input_data["pv yield (kW/kW)"],
+            maximum=input_data["pv yield (kW/kW)"],
         )
     },
 )

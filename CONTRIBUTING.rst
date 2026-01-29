@@ -121,9 +121,7 @@ Available standard environments are::
     clean
     check
     docs
-    py39
-    py310
-    py311
+    py3
 
 To run a subset of tests::
 

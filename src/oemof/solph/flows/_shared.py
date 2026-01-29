@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -66,7 +67,7 @@ def sets_for_non_convex_flows(block, group):
         `negative_gradient` being not None.
     """
     block.MIN_FLOWS = Set(
-        initialize=[(g[0], g[1]) for g in group if g[2].min[0] is not None]
+        initialize=[(g[0], g[1]) for g in group if g[2].minimum[0] is not None]
     )
     block.STARTUPFLOWS = Set(
         initialize=[
@@ -521,7 +522,7 @@ def maximum_flow_constraint(block):
     def _maximum_flow_rule(_, i, o, t):
         """Rule definition for MILP maximum flow constraints."""
         expr = (
-            block.status_nominal[i, o, t] * m.flows[i, o].max[t]
+            block.status_nominal[i, o, t] * m.flows[i, o].maximum[t]
             >= m.flow[i, o, t]
         )
         return expr
@@ -542,7 +543,7 @@ def minimum_flow_constraint(block):
     def _minimum_flow_rule(_, i, o, t):
         """Rule definition for MILP minimum flow constraints."""
         expr = (
-            block.status_nominal[i, o, t] * m.flows[i, o].min[t]
+            block.status_nominal[i, o, t] * m.flows[i, o].minimum[t]
             <= m.flow[i, o, t]
         )
         return expr

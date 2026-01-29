@@ -84,8 +84,8 @@ def main(optimize=True):
         label="fireplace",
         outputs={
             b_heat: solph.flows.Flow(
-                max=1.0,
-                min=0.9,
+                maximum=1.0,
+                minimum=0.9,
                 variable_costs=0.1,
                 nonconvex=solph.NonConvex(
                     minimum_uptime=5,
@@ -104,7 +104,7 @@ def main(optimize=True):
         label="boiler",
         outputs={
             b_heat: solph.flows.Flow(
-                nominal_capacity=10, min=0.3, variable_costs=0.2
+                nominal_capacity=10, minimum=0.3, variable_costs=0.2
             )
         },
     )

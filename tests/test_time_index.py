@@ -78,7 +78,11 @@ def test_energysystem_with_datetimeindex_non_equidistant():
 def test_energysystem_with_numeric_index_infer_last_interval():
     """Test EnergySystem with numeric index (equidistant)"""
     time_increments = [1, 1, 1, 1, 1]
-    es = solph.EnergySystem(timeincrement=time_increments)
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
+        es = solph.EnergySystem(timeincrement=time_increments)
     assert es.timeincrement[1] == 1.0
     assert pd.Series(es.timeincrement).sum() == 5
 
@@ -86,9 +90,15 @@ def test_energysystem_with_numeric_index_infer_last_interval():
 def test_energysystem_with_numeric_index():
     """Test EnergySystem with numeric index (equidistant)"""
     time_increments = [1, 1, 1, 1, 1]
-    es = solph.EnergySystem(
-        timeincrement=time_increments, infer_last_interval=False
-    )
+
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
+        es = solph.EnergySystem(
+            timeincrement=time_increments,
+            infer_last_interval=False,
+        )
     assert es.timeincrement[1] == 1.0
     assert pd.Series(es.timeincrement).sum() == 5
 
@@ -100,9 +110,14 @@ def test_energysystem_with_numeric_index_non_equidistant_infer_last_interval():
     """
     time_increments = [1, 1, 1, 1, 1, 0.5, 0.5, 0.25, 0.25, 0.5]
 
-    es = solph.EnergySystem(
-        timeincrement=time_increments, infer_last_interval=True
-    )
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
+        es = solph.EnergySystem(
+            timeincrement=time_increments,
+            infer_last_interval=True,
+        )
     assert pd.Series(es.timeincrement).sum() == 7.0
     assert es.timeincrement[0] == 1
     assert es.timeincrement[6] == 0.5
@@ -110,13 +125,19 @@ def test_energysystem_with_numeric_index_non_equidistant_infer_last_interval():
 
 def test_energysystem_with_numeric_index_non_equidistant():
     """
-    Test EnergySystem with DatetimeIndex (non-equidistant)
+    Test EnergySystem with timeincrement
     'infer_last_interval=True/False' does not have any effect.
     """
     time_increments = [1, 1, 1, 1, 1, 0.5, 0.5, 0.25, 0.25, 0.5]
-    es = solph.EnergySystem(
-        timeincrement=time_increments, infer_last_interval=False
-    )
+
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
+        es = solph.EnergySystem(
+            timeincrement=time_increments,
+            infer_last_interval=False,
+        )
     assert pd.Series(es.timeincrement).sum() == 7.0
     assert es.timeincrement[0] == 1
     assert es.timeincrement[8] == 0.25
@@ -171,7 +192,11 @@ def test_overwrite_timeincrement():
 
 
 def test_model_timeincrement_list():
-    es = solph.EnergySystem(timeincrement=[0.1, 1, 2, 3])
+    with pytest.warns(
+        FutureWarning,
+        match="timeincrement",
+    ):
+        es = solph.EnergySystem(timeincrement=[0.1, 1, 2, 3])
     m = solph._models.Model(es)
     assert m.timeincrement[3] == 3
 

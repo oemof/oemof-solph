@@ -29,6 +29,7 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -60,7 +61,7 @@ def main(optimize=True):
                     nominal_capacity=100,
                     variable_costs=10,
                     fix=[0.1, 0.2, 0.3],
-                    custom_attributes={"emission_factor": 0.01},
+                    custom_properties={"emission_factor": 0.01},
                 )
             },
         )
@@ -73,7 +74,7 @@ def main(optimize=True):
             outputs={
                 bgas: solph.Flow(
                     variable_costs=10,
-                    custom_attributes={"emission_factor": 0.2},
+                    custom_properties={"emission_factor": 0.2},
                 )
             },
         )

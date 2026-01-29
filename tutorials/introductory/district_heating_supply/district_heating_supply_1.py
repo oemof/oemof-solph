@@ -27,12 +27,11 @@ gas_source = solph.components.Source(
     outputs={gas_bus: solph.flows.Flow(variable_costs=data["gas price"])},
 )
 
-# nominal_value -> nominal_capacity
 heat_sink = solph.components.Sink(
     label="heat sink",
     inputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=data["heat demand"].max(),
+            nominal_capacity=data["heat demand"].max(),
             fix=data["heat demand"] / data["heat demand"].max(),
         )
     },
@@ -47,7 +46,7 @@ gas_boiler = solph.components.Converter(
     inputs={gas_bus: solph.flows.Flow()},
     outputs={
         heat_bus: solph.flows.Flow(
-            nominal_value=data["heat demand"].max(), variable_costs=1.10
+            nominal_capacity=data["heat demand"].max(), variable_costs=1.10
         )
     },
     conversion_factors={gas_bus: 0.95},

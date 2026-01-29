@@ -19,6 +19,7 @@ SPDX-FileCopyrightText: Jonas Freißmann
 SPDX-License-Identifier: MIT
 
 """
+
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint

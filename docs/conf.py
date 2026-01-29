@@ -7,7 +7,6 @@ import oemof.solph
 import matplotlib
 from sphinx.ext.autodoc import between
 
-
 matplotlib.use("agg")
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
@@ -44,7 +43,7 @@ extensions = [
 project = "oemof.solph"
 year = "2025"
 author = "oemof developer group"
-copyright = "{0}, {1}".format(year, author)
+copyright = author
 
 # The short X.Y version.
 version = oemof.solph.__version__.split(" ")[0]

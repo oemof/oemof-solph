@@ -185,20 +185,20 @@ class GenericStorage(Node):
         storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
-        custom_attributes=None,
+        custom_properties=None,
     ):
         if inputs is None:
             inputs = {}
         if outputs is None:
             outputs = {}
-        if custom_attributes is None:
-            custom_attributes = {}
+        if custom_properties is None:
+            custom_properties = {}
         super().__init__(
             label,
             inputs=inputs,
             outputs=outputs,
             parent_node=parent_node,
-            custom_properties=custom_attributes,
+            custom_properties=custom_properties,
         )
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if nominal_storage_capacity is not None:
@@ -1315,9 +1315,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         Conversion factor when (i.e. efficiency) taking stored energy"
         ":math:`c(-1)`", "`initial_storage_level`", "Initial relative
         storage content (before timestep 0)"
-        ":math:`c_{max}`", "`flows[i, o].max[t]`", "Normed maximum
+        ":math:`c_{max}`", "`flows[i, o].maximum[t]`", "Normed maximum
         value of storage content"
-        ":math:`c_{min}`", "`flows[i, o].min[t]`", "Normed minimum
+        ":math:`c_{min}`", "`flows[i, o].minimum[t]`", "Normed minimum
         value of storage content"
         ":math:`l`", "`flows[i, o].investment.lifetime`", "
         Lifetime for investments in storage capacity"

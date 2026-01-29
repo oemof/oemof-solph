@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
+|tox-pytest| |tox-checks| |coveralls| |codecov|
 
 |scrutinizer| |codacy|
 
@@ -24,10 +24,6 @@
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
 
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
