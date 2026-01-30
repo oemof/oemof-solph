@@ -1,7 +1,7 @@
-.. _introductory_tutorials_label:
+.. _tutorials_label:
 
-Introductory Tutorials
-~~~~~~~~~~~~~~~~~~~~~~
+Tutorials
+~~~~~~~~~
 
 In this section we will introduce how to create your first simple oemof.solph models. The
 subsections are step by step walkthroughs for typical energy system modelling applications.
@@ -18,6 +18,7 @@ you have any questions please reach out to the
     introductory_tutorials/district_heating_supply.rst
     introductory_tutorials/home_pv_battery_system.rst
     introductory_tutorials/ev_charging.rst
+    introductory_tutorials/temporal_aggregation.rst
 
 
 .. grid:: 2
@@ -47,3 +48,9 @@ you have any questions please reach out to the
         :link-type: ref
 
         .. image:: /_files/tutorial_ev-charging/ev_charging_graph_4.svg
+
+    .. grid-item-card::  Time indexes
+        :link: temporal_aggregation_tutorial_label
+        :link-type: ref
+
+        .. image:: /_files/tutorial_temporal-aggregation/non_equidistant.png

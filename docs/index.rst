@@ -12,7 +12,7 @@
     :hidden:
 
     installation
-    introductory_tutorials
+    tutorials
     examples
     showcase_examples
     support
