@@ -1,13 +1,9 @@
 
-|tox-pytest| |tox-checks| |coveralls| |codecov|
+|tox-pytest| |tox-checks| |packaging| |coveralls|
 
-|scrutinizer| |codacy|
+|docs| |version| |supported-versions|
 
-|wheel| |packaging| |supported-versions|
-
-|docs| |zenodo|
-
-|version| |commits-since| |chat|
+|zenodo| |commits-since| |chat|
 
 
 ------------------------------
@@ -29,20 +25,8 @@
     :alt: Coverage Status
     :target: https://coveralls.io/github/oemof/oemof-solph
 
-.. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
-    :alt: Coverage Status
-    :target: https://codecov.io/gh/oemof/oemof-solph
-
-.. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
-    :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
-    :alt: Codacy Code Quality Status
-
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof.solph
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.solph.svg
-    :alt: PyPI Wheel
     :target: https://pypi.org/project/oemof.solph
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.solph.svg
@@ -60,10 +44,6 @@
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
-
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
-    :alt: Scrutinizer Status
-    :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
 .. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat
