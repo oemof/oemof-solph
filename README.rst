@@ -1,7 +1,5 @@
 
-|tox-pytest| |tox-checks| |coveralls|
-
-|scrutinizer| |codacy|
+|tox-pytest| |tox-checks| |coveralls| |codacy|
 
 |wheel| |packaging| |supported-versions|
 
@@ -56,10 +54,6 @@
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
-
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
-    :alt: Scrutinizer Status
-    :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
 .. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat
