@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |coveralls| |codecov|
+|tox-pytest| |tox-checks| |coveralls|
 
 |scrutinizer| |codacy|
 
@@ -28,10 +28,6 @@
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
     :target: https://coveralls.io/github/oemof/oemof-solph
-
-.. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
-    :alt: Coverage Status
-    :target: https://codecov.io/gh/oemof/oemof-solph
 
 .. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
     :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
