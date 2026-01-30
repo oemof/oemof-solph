@@ -1,7 +1,7 @@
 
 |tox-pytest| |tox-checks| |coveralls|
 
-|wheel| |packaging| |supported-versions|
+|packaging| |supported-versions|
 
 |docs| |zenodo|
 
@@ -29,10 +29,6 @@
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof.solph
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.solph.svg
-    :alt: PyPI Wheel
     :target: https://pypi.org/project/oemof.solph
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.solph.svg
