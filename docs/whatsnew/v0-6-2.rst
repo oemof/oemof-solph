@@ -1,14 +1,17 @@
-v0.6.2
-------
+v0.6.2 (January 28th, 2025)
+---------------------------
 
 API changes
 ###########
 
 * The `Flow` parameter `bidirectional` now raises a `FutureWarning`,
   as it is to be removed in a following version.
+  (You can still set a negative minimum, which is now explicitly
+  marked experimental - but has never been officially stable.)
 * The `Flow` parameters `min` and `max` have been renamed to `minimum` and
   `maximum`, respectively. The old parameters are still available but raise a
   `FutureWarning`. Please use the new parameter names in future code.
+* The class solph.Results is no longer marked as experimental.
 
 New features
 ############
@@ -21,7 +24,6 @@ Documentation
 
 * The `Flow` parameters `min` and `max` are now listed with their default 
   values of 0 and 1, respectively, in the `Flow` API documentation.
-* A tutorial focusing on time indexes and aggregation is added.
 
 Bug fixes
 #########
@@ -38,9 +40,5 @@ Contributors
 
 * Patrik Schönfeldt
 * Lennart Schürmann
-* Uwe Krien
-* Maximilian Hillen
-* Eva Schischke
-
-Acknowledgements
-################
+* Stephan Günther
+* Antonella Giannitelli

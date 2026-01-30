@@ -1,7 +1,6 @@
-import warnings
-
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
+from pyomo.opt.results.container import ListContainer
 
 from oemof.solph import Results
 
@@ -11,12 +10,7 @@ from . import optimization_model
 class TestResultsClass:
     @classmethod
     def setup_class(cls):
-        with warnings.catch_warnings():
-            warnings.simplefilter(
-                "ignore",
-                category=ExperimentalFeatureWarning,
-            )
-            cls.results = Results(optimization_model)
+        cls.results = Results(optimization_model)
 
     def test_hasattr(self):
         assert hasattr(self.results, "_variables"), (
@@ -52,6 +46,22 @@ class TestResultsClass:
     def test_to_set_objective(self):
         with pytest.raises(TypeError):
             self.results["objective"] = 5
+
+    def test_solver_result_access(self):
+        with pytest.warns(
+            FutureWarning,
+            match="Direct access to Pyomo results",
+        ):
+            assert isinstance(self.results["Problem"], ListContainer)
+
+    def test_economic_calculations(self):
+        with pytest.warns(
+            ExperimentalFeatureWarning,
+            match="Economic calculations in results are experimental.",
+        ):
+            assert sum(self.results["investment_costs"].sum()) == 0
+            total_variable_costs = sum(self.results["variable_costs"].sum())
+            assert total_variable_costs == pytest.approx(8495, abs=1)
 
     def test_time_index(self):
         assert len(self.results.timeindex) == 25

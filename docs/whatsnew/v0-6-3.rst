@@ -1,0 +1,36 @@
+v0.6.3
+------
+
+API changes
+###########
+
+
+New features
+############
+
+
+Documentation
+#############
+
+* A tutorial focusing on time indexes and aggregation is added.
+
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Uwe Krien
+* Patrik Schönfeldt
+* Maximilian Hillen
+* Eva Schischke
+
+Acknowledgements
+################
+
