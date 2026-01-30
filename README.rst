@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |coveralls| |codacy|
+|tox-pytest| |tox-checks| |coveralls|
 
 |wheel| |packaging| |supported-versions|
 
@@ -26,10 +26,6 @@
 .. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
     :alt: Coverage Status
     :target: https://coveralls.io/github/oemof/oemof-solph
-
-.. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
-    :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
-    :alt: Codacy Code Quality Status
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
