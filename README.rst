@@ -1,11 +1,9 @@
 
-|tox-pytest| |tox-checks| |coveralls|
+|tox-pytest| |tox-checks| |packaging| |coveralls|
 
-|packaging| |supported-versions|
+|docs| |version| |supported-versions|
 
-|docs| |zenodo|
-
-|version| |commits-since| |chat|
+|zenodo| |commits-since| |chat|
 
 
 ------------------------------
