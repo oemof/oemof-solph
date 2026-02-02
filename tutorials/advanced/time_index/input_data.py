@@ -261,37 +261,24 @@ def investment_costs() -> pd.DataFrame:
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
 
-
+# %%[main]
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     my_df = prepare_input_data()
 
-    # plt.plot(df["electricity demand (kW)"], "k")
-
-    p_pv = {}
     resolutions = [
         "1 min",
-        #    "5 min",
-        #    "10 min",
         "15 min",
-        #    "30 min",
         "1 h",
-        #    "2 h",
         "3 h",
-        #    "6 h",
     ]
 
     fig0, ax0 = plt.subplots(figsize=(4, 2), tight_layout=True)
     fig1, ax1 = plt.subplots(figsize=(4, 2), tight_layout=True)
 
-    for resolution in resolutions[::-1]:
+    for resolution in resolutions:
         time_series = 15.4 * my_df["PV (kW/kWp)"].resample(resolution).mean()
-        # plt.plot(
-        #    np.linspace(0, 8760, len(p_pv[resolution])),
-        #    sorted(p_pv[resolution])[::-1],
-        #    label=resolution,
-        # )
 
         time_series = time_series[
             datetime.datetime(
@@ -302,33 +289,27 @@ if __name__ == "__main__":
         ax0.step(
             x=hour_axis,
             y=time_series,
-            label=resolution,  # + f" ({len(time_series)} steps)",
+            label=resolution,
             where="post",
         )
         ax1.step(
             x=hour_axis,
             y=sorted(time_series)[::-1],
-            label=resolution,  # + f" ({len(time_series)} steps)",
+            label=resolution,
             where="post",
         )
-
-        p_pv[resolution] = time_series
 
     ax0.set_xlim(5.9, 18.1)
     ax0.set_xlabel("Time (UTC)")
     ax0.set_ylabel("Power (kW)")
     ax0.legend()
     ax0.grid()
-    fig0.savefig("2019-11-3_PV-timeseries.eps")
-    fig0.savefig("2019-11-3_PV-timeseries.pdf")
 
     ax1.grid()
     ax1.set_xlim(-0.1, 12.1)
     ax1.set_xlabel("Duration (h)")
     ax1.set_ylabel("Power (kW)")
     ax1.set_yscale("log")
-    # ax1.legend()
-    fig1.savefig("2019-11-3_PV-duration.eps")
-    fig1.savefig("2019-11-3_PV-duration.pdf")
+    ax1.legend()
 
     plt.show()

@@ -44,7 +44,7 @@ License.
     :alt: Illustrative sketch of the time index definitions.
 
 But first, let us go through some basics about the time index.
-As mentioned in :link:`basic_concepts_energy_system_label`,
+As mentioned in :ref:`basic_concepts_energy_system_label`,
 we use N+1 points in time to define N time intervals.
 At the first glance, this might seem to add extra complication,
 but being explicit and clear helps formulating models
@@ -85,8 +85,18 @@ for the time intervals. Often, time steps are chosen to have the same length.
 This is advantegous as they make the model easy to comprehend,
 as you can convert between counting indexes and time by multiplying a constant.
 This particularly simplifies formulations of constraints to the extend
-that some use cases of solph are curently bound to fixed intervals.
+that some uncommon use cases of solph are curently bound to fixed intervals.
+Let us go through this based on our input data.
 
+.. literalinclude:: /../tutorials/advanced/time_index/input_data.py
+    :language: python
+    :start-after: [main]
+
+The script reads in the data, defines desired resolutions,
+and then creates two figures, one for a time series plot,
+one for a duration curve. In the loop, it resamples the data
+to the set resolution and produces the step graphs for the two types of plots.
+An example output is included in the following:
 
 .. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.png
     :align: center
