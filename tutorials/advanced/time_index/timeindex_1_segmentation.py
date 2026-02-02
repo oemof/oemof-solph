@@ -36,6 +36,7 @@ def calculate_fix_cost(value):
     return value / 20
 
 
+# %%[reshape_unevenly]
 def reshape_unevenly(data):
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
         h = ts.hour
@@ -57,7 +58,7 @@ def reshape_unevenly(data):
 
     return data_mean
 
-
+# %%[prepare_technical_data]
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
     data_table = (

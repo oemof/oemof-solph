@@ -98,15 +98,34 @@ one for a duration curve. In the loop, it resamples the data
 to the set resolution and produces the step graphs for the two types of plots.
 An example output is included in the following:
 
-.. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-duration.svg
-    :align: right
-    :alt: Duration of solar PV data aggregated with different time resolutions.
 .. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.svg
     :align: left
     :alt: Time series of solar PV data aggregated with different time resolutions.
+.. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-duration.svg
+    :align: right
+    :alt: Duration of solar PV data aggregated with different time resolutions.
 
 Of course, one day is not representative, but it is clearly visible that even
 the resolution of 15-minutes cannot preserve the dynamics of the data.
 Further, it should be noted that by construction averaging the power values
 reduces the peaks, while the total energy is preserved. Thus,
 the lower resolutions systematically overestimate low loads.
+Also note that we cut of the night from the graph,
+because in the corresponding hours the PV data of course shows a flat zero.
+So, what if we also just drop the nights from our data?
+This is done by the following function, which just hardcodes the day to be
+between 5 am and 9 pm. There are two nocturnal time steps of four hours each,
+which extend from 9pm to 1 am and from 1 am to 5 am.
+This is a conservative assumption, that should work all year long,
+but already reduces the number of time steps by 25 %.
+
+.. literalinclude:: /../tutorials/advanced/time_index/timeindex_1_segmentation.py
+    :language: python
+    :start-after: [reshape_unevenly]
+    :end-before: [prepare_technical_data]
+
+Now, how will an optimisation problem react to this reduction?
+Let us have a look!
+
+Step 2: Setting up the Energy System Model
+------------------------------------------
