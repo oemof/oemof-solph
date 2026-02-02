@@ -287,9 +287,8 @@ def optimise_investment(year, interval, result_path):
     if not result_fn.is_file():
         logging.info(f"Start with {year} - {interval}")
         # Create empty file
-        file = open(result_fn, "w")
-        file.write(f"Start with {year} - {interval}")
-        file.close()
+        with open(result_fn, "w")  as file:
+            file.write(f"Start with {year} - {interval}")
         my_data = prepare_technical_data(interval, None, None)
 
         logging.info("Start with even....")
