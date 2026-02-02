@@ -98,6 +98,6 @@ one for a duration curve. In the loop, it resamples the data
 to the set resolution and produces the step graphs for the two types of plots.
 An example output is included in the following:
 
-.. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.png
+.. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.svg
     :align: center
     :alt: Solar PV data aggregated with different time resolutions.
