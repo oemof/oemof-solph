@@ -100,12 +100,9 @@ An example output is included in the following:
 
 .. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-duration.svg
     :align: right
-    :width: 45%
     :alt: Duration of solar PV data aggregated with different time resolutions.
-
 .. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.svg
     :align: left
-    :width: 45%
     :alt: Time series of solar PV data aggregated with different time resolutions.
 
 Of course, one day is not representative, but it is clearly visible that even
