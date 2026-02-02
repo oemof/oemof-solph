@@ -34,7 +34,7 @@ from the one-minute resolution dataset described of the
 `Dataset on electrical single-family house and heat pump load profiles in
 Germany <https://doi.org/10.1038/s41597-022-01156-1>`_,
 which is also available at
-`doi: 10.5281/zenodo.5642902 <https://doi.org/10.5281/zenodo.5642902>`.
+`doi: 10.5281/zenodo.5642902 <https://doi.org/10.5281/zenodo.5642902>`_.
 The data is licensed from M. Schlemminger, T. Ohrdes, E. Schneider,
 and M. Knoop under Creative Commons Attribution 4.0 International
 License.
@@ -44,7 +44,7 @@ License.
     :alt: Illustrative sketch of the time index definitions.
 
 But first, let us go through some basics about the time index.
-As mentioned in :link: basic_concepts_energy_system_label,
+As mentioned in :link:`basic_concepts_energy_system_label`,
 we use N+1 points in time to define N time intervals.
 At the first glance, this might seem to add extra complication,
 but being explicit and clear helps formulating models
@@ -64,9 +64,10 @@ time intervals as a imput, so you can take a shortcut here:
     >>> print(list(es.timeincrement))
     [0.5, 0.5]
 
-It should be mentioned that the exact time stamp mostly helps with data
-processing. If they do not matter, you can simply give a number of ascending
-values. The time increment then is the difference between those.
+It should be mentioned that the exact time stamp helps with data
+processing but is not relevant for the optimisation.
+Thus, you can also give a number of ascending values.
+The time increment then is the difference between those.
 Except for the time index, the following energy system will produce exactly
 the same results.
 
@@ -78,6 +79,13 @@ the same results.
     [2, 2.5, 3]
     >>> print(list(es.timeincrement))
     [0.5, 0.5]
+
+Now, that we know how time steps are defined, let us look in a good choice
+for the time intervals. Often, time steps are chosen to have the same length.
+This is advantegous as they make the model easy to comprehend,
+as you can convert between counting indexes and time by multiplying a constant.
+This particularly simplifies formulations of constraints to the extend
+that some use cases of solph are curently bound to fixed intervals.
 
 
 .. figure:: /./_files/tutorial_temporal-aggregation/2019-11-3_PV-timeseries.png
