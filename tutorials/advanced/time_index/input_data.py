@@ -304,12 +304,13 @@ if __name__ == "__main__":
     ax0.set_ylabel("Power (kW)")
     ax0.legend()
     ax0.grid()
+    fig0.savefig("2019-11-3_PV-timeseries.svg")
 
     ax1.grid()
     ax1.set_xlim(-0.1, 12.1)
     ax1.set_xlabel("Duration (h)")
     ax1.set_ylabel("Power (kW)")
     ax1.set_yscale("log")
-    ax1.legend()
+    fig1.savefig("2019-11-3_PV-duration.svg")
 
     plt.show()
