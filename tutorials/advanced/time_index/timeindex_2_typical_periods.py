@@ -221,13 +221,13 @@ def plot_caps(
 # -----------------------------
 # Create TWO plots
 # -----------------------------
-fig_day, ax_day = plot_caps(
+plot_caps(
     caps_by_hpp[24],
     hours_per_period=24,
     filename_prefix="investments_bar_tp_daily",
 )
 
-fig_week, ax_week = plot_caps(
+plot_caps(
     caps_by_hpp[24 * 7],
     hours_per_period=24 * 7,
     filename_prefix="investments_bar_tp_weekly",
