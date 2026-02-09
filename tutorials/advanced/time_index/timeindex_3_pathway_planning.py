@@ -21,10 +21,12 @@ def lifetime_adjusted(lifetime, investment_period_length_in_years):
     return int(lifetime / investment_period_length_in_years)
 
 
+# %% [discount]
 def discount_rate_adjusted(discount_rate, investment_period_length_in_years):
     return (1 + discount_rate) ** investment_period_length_in_years - 1
 
 
+# %% [expand]
 def expand_energy_prices(tidx_agg_full, e_prices):
     years_in_index = sorted(set(tidx_agg_full.year))
     years_available = set(e_prices.index)
@@ -83,6 +85,7 @@ data = data.resample("1 h").mean()
 print(data)
 
 # -------------- Clustering of input time-series with TSAM --------------------
+# %%[tsam]
 typical_periods = 100
 hours_per_period = 24
 
@@ -104,7 +107,7 @@ tindex_agg = pd.date_range(
 )
 
 # ------------ create timeindex etc. for multiperiod --------------------------
-
+# %%[time_series_multiperiod]
 
 # create a time index for the whole model
 # Create a list of shifted copies of the original index,
@@ -121,7 +124,7 @@ print("------- Time Index of Multi-Period Model --------")
 print("time index: ", tindex_agg_full)
 print("-------------------------------------------------")
 
-# create the list of investent periods for the model
+# create the list of investment periods for the model
 investment_periods = [
     tindex_agg + pd.DateOffset(years=i) for i in range(len(years))
 ]
@@ -142,6 +145,7 @@ tsa_parameters = [
     for i in range(len(years))
 ]
 
+# %% [time_series_data]
 timeincrement = [1] * (len(tindex_agg_full))
 
 time_series = {
@@ -168,6 +172,7 @@ time_series = {
     ),
 }
 
+# %% [investments]
 investments = {
     "pv": solph.Investment(
         ep_costs=investment_costs[("pv", "specific_costs [Eur/kW]")] / 5,
@@ -201,6 +206,7 @@ investments = {
 }
 
 # ------------------ create energy system -------------------------------------
+# %% [energy_system]
 es = solph.EnergySystem(
     timeindex=tindex_agg_full,
     timeincrement=timeincrement,
@@ -210,6 +216,7 @@ es = solph.EnergySystem(
     use_remaining_value=True,
 )
 
+# %% [solve]
 m = populate_and_solve_energy_system(
     es=es,
     time_series=time_series,
@@ -219,7 +226,7 @@ m = populate_and_solve_energy_system(
 )
 
 # ----------------- Post Processing -------------------------------------------
-
+# %% [results]
 # Create Results
 results = Results(m)
 
