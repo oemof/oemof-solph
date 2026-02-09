@@ -130,15 +130,141 @@ Let us have a look!
 Step 2: Setting up the Energy System Model
 ------------------------------------------
 
+Step 3: Optimization using time series aggregation
+------------------------------------------
+In this section, we introduce *time series aggregation* with
+`tsam - time series aggregation module
+<https://tsam.readthedocs.io/en/latest/>`_.
+
+At the time of writing, the TSAM integration in ``oemof.solph`` is implemented via
+the *multi-period* (pathway planning) interface. For Step 3, we use **exactly one**
+investment period. This means that investment decisions are still made *once* for
+the whole horizon (as in the standard upfront-investment approach from Step 2),
+but the **operational time series** are replaced by an aggregated representation.
+
+Please note that this feature is still **experimental** and may therefore contain bugs.
+
+We use the same input data and energy system setup as in Step 1 and Step 2.
+
+Concept: clustering to typical periods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The basic idea of time series aggregation for energy system design is to replace a
+long time series (e.g. one year of hourly data) by a **small set of representative
+periods** (often called *typical periods*). The optimisation problem is then solved
+only for these typical periods, while the objective function accounts for how often
+each typical period occurs in the original time set.
+
+Example:
+A full year (365 days) can be clustered into 10 typical periods of length 24 hours.
+In other words, the year is represented by 10 typical days ``(A, B, C, ...)`` plus an
+*order* that maps each original day to one of these typical days in th year:
+
+``(A, A, B, A, A, C, A ..., C)``
+
+Variable flows in the objective function are weighted according to the frequency of
+their corresponding typical periods in the original time set.
+
+If a **storage** is included, the typical periods must be linked to represent storage
+carry-over between periods. For this, we use an approach introduced by
+Kotzur et al. by splitting the storage state into two parts:
+
+* **intra storage level**: the change of storage level *within* a typical period
+* **inter storage level**: the storage level in between two periodd in the
+  original sequence of periods
+
+The total storage level is represented as a superposition of both. For details, see
+`Time series aggregation for energy system design: Modeling seasonal storage
+<https://www.sciencedirect.com/science/article/pii/S0306261918300242>`_.
+
+Effect on the optimisation model
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To explain on a high level the influence on our optimization model,
+we use the 10 typical days example ``(A, B, C, ...)``:
+
+*Without storage*, the operational part of the model is reduced because only the
+flows for the typical days are optimised (10 × 24 hours), instead of all 365 days.
+
+*With storage*, the model still optimises the flows for the typical periods. In addition,
+the intra storage level is optimised for each representative period (10 × 24 hours).
+In our example with 24-hour periods, the original time set is split into 365 periods.
+Therefore the inter-period storage level occurs 365 times (one value per original day).
+Overall, this typically leads to a significant reduction in runtime.,
+
+If you add constraints with **binary variables**, an important modelling question is
+which time grid these binaries should use when using TSAM. For a first insight,
+see `Operational Optimization of Seasonal Ice-Storage Systems with Time-Series Aggregation
+<https://www.mdpi.com/1996-1073/18/22/5988>`_.
+
+Clustering the input time series with TSAM
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To cluster input time series with TSAM, you need to define:
+
+* ``noTypicalPeriods``: the number of typical periods (e.g. 10 typical days)
+* ``hoursPerPeriod``: the length of each period in hours (e.g. 24 for typical days)
+* ``clusterMethod``: the clustering algorithm
+
+These parameter names follow TSAM’s terminology. In this tutorial we use hourly data.
+Non-hourly resolutions might be possible to solve, but isn't tested in detail.
+
+The influence of different aggregation methods is discussed in
+`Impact of different time series aggregation methods on optimal energy system design
+<https://www.sciencedirect.com/science/article/pii/S0960148117309783>`_.
+
+The clustering step can then be implemented as follows:
+
+.. literalinclude:: /../tutorials/advanced/time_index/timeindex_2_typical_periods.py
+    :language: python
+    :start-after: [tsam_aggregation_start]
+    :end-before: [tsam_aggregation_end]
+
+Building the energy system with an aggregated time index
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Compared to the standard approach, setting up the ``EnergySystem`` differs slightly.
+In addition to the aggregated ``timeindex``, you need to provide:
+
+* ``timesteps_per_period``: number of time steps per typical period
+* ``order``: mapping from original periods to typical periods
+
+This is shown in the following snippet:
+
+.. literalinclude:: /../tutorials/advanced/time_index/timeindex_2_typical_periods.py
+    :language: python
+    :start-after: [ti_index_and_energy_system_start]
+    :end-before: [ti_index_and_energy_system_end]
+
+Post-processing and sensitivity to aggregation choices
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+In post-processing, the optimised flows and storage levels are **disaggregated**
+back to the original time grid. This means you can process and plot results in the
+same way as in the non-aggregated examples.
+
+However, the choice of aggregation parameters (number and length of typical periods)
+can have a strong influence on the results. To illustrate this, we run the optimisation
+for different numbers of typical periods, using typical period lengths of **24 hours**
+and **168 hours**:
+
+.. figure:: /./_files/tutorial_temporal-aggregation/investment_bar_tsam_typical_periods_length_24.png
+    :align: right
+    :alt: Investments for different numbers of typical periods (24-hour periods).
+
+.. figure:: /./_files/tutorial_temporal-aggregation/investment_bar_tsam_typical_periods_length_168.png
+    :align: right
+    :alt: Investments for different numbers of typical periods (168-hour periods).
+
 Step 4: Pathway planning using time series aggregation
 ------------------------------------------------------
 
 In this section, we introduce *pathway planning*. Please note that this
-feature is still experimental and may therefore contain bugs  
+feature is still experimental and may therefore contain bugs
 (known issues discovered while preparing this tutorial will be discussed).
 
 Pathway planning differs from the previous examples in an important way:
-**investment variables become time-dependent**.  
+**investment variables become time-dependent**.
 In the previous cases, all investment decisions were made *once* for the entire
 optimization horizon. In pathway planning, investments may change at predefined
 points in time. These points represent the years or periods in which new
@@ -176,18 +302,18 @@ To implement pathway planning in ``solph``, three additional steps are required:
 2. Create a **list of time indices**, one for each investment period.
 3. Create a **dictionary of TSAM parameters**, also one entry per investment period.
 
-Suppose you want to allow investment changes every five years, e.g. in  
-``[2025, 2030, 2035, 2040, 2045]``.  
+Suppose you want to allow investment changes every five years, e.g. in
+``[2025, 2030, 2035, 2040, 2045]``.
 To reduce runtime, each 5‑year period will be represented by *one aggregated year*.
 
 Currently, ``oemof.solph`` does not support "skipping" years directly.
 Therefore, you must as a work around define investment years as a continuous
 sequence, e.g.:
 
-``[2025, 2026, 2027, 2028, 2029]`` 
+``[2025, 2026, 2027, 2028, 2029]``
 
-These then can be mapped to your intenden resolution of five years. This will 
-require some preprocessing in cost data etc., which will be explained further 
+These then can be mapped to your intenden resolution of five years. This will
+require some preprocessing in cost data etc., which will be explained further
 down.
 
 You can then perform the three steps described above:
@@ -204,7 +330,7 @@ Next, you can build your energy system:
     :start-after: [energy_system]
     :end-before: [solve]
 
-Now the hardest part is done! 
+Now the hardest part is done!
 
 From here, you can construct your system exactly as in previous examples.
 However, keep in mind:
@@ -222,13 +348,13 @@ length of the horizon:
     :end-before: [investments]
 
 Although the model internally treats each period as one year, investment
-decisions actually represent five-year steps (as discussedabove). To maintain 
+decisions actually represent five-year steps (as discussedabove). To maintain
 the correct ratio of investment costs to variable costs,
-we scale the **lifetime** and **investment costs** by the length of the 
+we scale the **lifetime** and **investment costs** by the length of the
 investment period.
 
-Example:  
-A battery has a real lifetime of 10 years.  
+Example:
+A battery has a real lifetime of 10 years.
 Since one model "year" represents 5 real years:
 
 * Effective lifetime in the model: ``10 / 5 = 2``

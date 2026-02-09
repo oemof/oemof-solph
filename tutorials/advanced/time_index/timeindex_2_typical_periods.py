@@ -77,6 +77,7 @@ def run_for_typical_periods(
     Returns installed capacities as a Series (PV kW, Battery kWh, HP kW, Gas
     boiler kW).
     """
+    # %%[tsam_aggregation_start]
     # --- TSAM clustering ---
     aggregation = tsam.TimeSeriesAggregation(
         timeSeries=data.iloc[:8760],
@@ -87,7 +88,7 @@ def run_for_typical_periods(
         rescaleClusterPeriods=False,
     )
     aggregation.createTypicalPeriods()
-
+    # %%[tsam_aggregation_end]
     time_series = {
         "cop": aggregation.typicalPeriods["cop"],
         "electricity demand (kW)": aggregation.typicalPeriods[
@@ -99,7 +100,7 @@ def run_for_typical_periods(
             "Electricity for Car Charging_HH1"
         ],
     }
-
+    # %%[ti_index_and_energy_system_start]
     tindex_agg = pd.date_range(
         "2022-01-01",
         periods=len(aggregation.clusterPeriodIdx) * hours_per_period,
@@ -119,7 +120,7 @@ def run_for_typical_periods(
         ],
         infer_last_interval=False,
     )
-
+    # %%[ti_index_and_energy_system_end]
     m = populate_and_solve_energy_system(
         es=es,
         time_series=time_series,
