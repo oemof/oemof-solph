@@ -49,8 +49,7 @@ def test_nominal_capacity_validation():
         ValueError,
         match="Parameter nominal_capacity must be either",
     ):
-        Flow(nominal_capacity=[1,2])
-
+        Flow(nominal_capacity=[1, 2])
 
 
 def test_nonconvex_positive_gradient_error():

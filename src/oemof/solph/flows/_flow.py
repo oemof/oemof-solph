@@ -232,7 +232,9 @@ class Flow(Edge):
         if nominal_capacity is not None:
             if isinstance(nominal_capacity, numbers.Real):
                 if not math.isfinite(nominal_capacity):
-                    raise ValueError(infinite_error_msg.format("nominal_capacity"))
+                    raise ValueError(
+                        infinite_error_msg.format("nominal_capacity")
+                    )
                 self.nominal_capacity = nominal_capacity
             elif isinstance(nominal_capacity, Investment):
                 self.investment = nominal_capacity
