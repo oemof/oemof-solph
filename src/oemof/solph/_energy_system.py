@@ -118,7 +118,7 @@ class EnergySystem(es.EnergySystem):
                 )
             # AttributeError: timeindex has no freq
             # TypeError: adding freq failed
-            except AttributeError, TypeError:
+            except (AttributeError, TypeError):
                 msg = (
                     "The argument interval_last_interval requires that"
                     + " the timeindex is a valid pd.DatetimeIndex"
