@@ -220,7 +220,6 @@ class EnergySystem(es.EnergySystem):
         self.timeindex = timeindex
         self.timeincrement = timeincrement
 
-
         self.periods = periods
         if self.periods is not None:
             msg = (
