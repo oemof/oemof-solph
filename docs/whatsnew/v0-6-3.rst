@@ -8,6 +8,8 @@ API changes
 New features
 ############
 
+* Introduced imput validation for nominal_capacity.
+
 
 Documentation
 #############
@@ -23,6 +25,8 @@ Other changes
 
 Contributors
 ############
+
+* Patrik Schönfeldt
 
 
 Acknowledgements
