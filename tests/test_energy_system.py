@@ -75,7 +75,7 @@ def test_infer_last_interval_no_freq():
         )
     with pytest.raises(AttributeError, match=msg):
         EnergySystem(
-            timeindex=[1,2,3],
+            timeindex=[1, 2, 3],
             infer_last_interval=True,
         )
 

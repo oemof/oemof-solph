@@ -110,12 +110,12 @@ class EnergySystem(es.EnergySystem):
                     timeindex.freq = pd.infer_freq(timeindex)
 
                 timeindex = timeindex.union(
-                        pd.date_range(
-                            timeindex[-1] + timeindex.freq,
-                            periods=1,
-                            freq=timeindex.freq,
-                        )
+                    pd.date_range(
+                        timeindex[-1] + timeindex.freq,
+                        periods=1,
+                        freq=timeindex.freq,
                     )
+                )
             # AttributeError: timeindex has no freq
             # TypeError: adding freq failed
             except AttributeError, TypeError:
