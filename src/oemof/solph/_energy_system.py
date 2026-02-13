@@ -105,7 +105,6 @@ class EnergySystem(es.EnergySystem):
 
         if infer_last_interval is True and timeindex is not None:
             try:
-                # Add one time interval to the timeindex by adding one time point.
                 if timeindex.freq is None:
                     timeindex.freq = pd.infer_freq(timeindex)
 
