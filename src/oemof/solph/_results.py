@@ -80,7 +80,6 @@ class Results:
             | self._economy.keys()
         )
 
-    @cache
     def get(
         self,
         variable: str,
