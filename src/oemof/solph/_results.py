@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import warnings
 from collections.abc import Hashable
-from functools import cache
 
 import pandas as pd
 from oemof.tools.debugging import ExperimentalFeatureWarning
