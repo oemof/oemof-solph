@@ -127,9 +127,9 @@ class Results:
             index_type = tuple(dataset.index_set().subsets())[-1].name
             match index_type:
                 case "TIMEPOINTS":
-                    rv.index = self.timeindex
+                    rv.index = self._model.es.timeindex
                 case "TIMESTEPS":
-                    rv.index = self.timeindex[:-1]
+                    rv.index = self._model.es.timeindex[:-1]
                 case _:
                     rv.index = rv.index.get_level_values(-1)
         else:
@@ -148,6 +148,7 @@ class Results:
         if df is None:
             raise KeyError(f"Key '{variable}' not in Results.")
         return df
+
     #  --- END ---
 
     @staticmethod
@@ -255,6 +256,7 @@ class Results:
 
         return df_opex
 
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
     @property
     def timeindex(self):
         """Returns timeindex of energy system
@@ -262,7 +264,14 @@ class Results:
         Returns:
             float: time index of the model
         """
+        warnings.warn(
+            "Results.timeindex will be removed in a future version."
+            + " Use index of particular results instead.",
+            FutureWarning,
+        )
         return self._model.es.timeindex
+
+    # --- END ---
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         # backward-compatibility with returned results object from Pyomo

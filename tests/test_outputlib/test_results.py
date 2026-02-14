@@ -94,8 +94,10 @@ class TestResultsClass:
             assert total_variable_costs == pytest.approx(8495, abs=1)
 
     def test_time_index(self):
-        assert len(self.results.timeindex) == 25
-        assert (
-            self.results.timeindex[3].strftime("%m/%d/%Y, %H")
-            == "01/01/2012, 03"
-        )
+        with pytest.warns(
+            FutureWarning,
+            match="Results.timeindex will be removed in a future version.",
+        ):
+            timeindex = self.results.timeindex
+        assert len(timeindex) == 25
+        assert timeindex[3].strftime("%m/%d/%Y, %H") == "01/01/2012, 03"
