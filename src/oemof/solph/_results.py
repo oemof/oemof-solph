@@ -81,7 +81,7 @@ class Results:
         )
 
     @cache
-    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+    def get(self, variable: str) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
         #   - Support `Var`s as arguments?
@@ -131,6 +131,17 @@ class Results:
                     df.index = df.index.get_level_values(-1)
         return df
 
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+        """Compatibility wrapper for Results.get."""
+        warnings.warn(
+            "Function name 'Results.to_df(str)' is outdatet,"
+            + " use 'Results.get(str)' instead.",
+            category=FutureWarning,
+        )
+        return self.get(variable)
+    #  --- END ---
+
     @staticmethod
     def _economy_calculation_waring():
         warnings.warn(
@@ -152,7 +163,7 @@ class Results:
         self._economy_calculation_waring()
         # extract the the optimized investment sizes
         try:
-            invest_values = self.to_df("invest")
+            invest_values = self.get("invest")
         except KeyError:  # no investments
             return pd.DataFrame()
 
@@ -222,7 +233,7 @@ class Results:
         df_opex = pd.DataFrame()
 
         # extract the the optimized flow values
-        flow_values = self.to_df("flow")
+        flow_values = self.get("flow")
 
         for i, o in self._model.FLOWS:
             # access the variable costs of each flow
@@ -253,7 +264,7 @@ class Results:
         elif key in self._meta_results:
             return self._meta_results[key]
         else:
-            return self.to_df(key)
+            return self.get(key)
 
     def __contains__(self, key: Hashable) -> bool:
         return key in self._solver_results or key in self._variables

@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.opt.results.container import ListContainer
@@ -42,6 +43,15 @@ class TestResultsClass:
 
     def test_objective(self):
         assert self.results["objective"] == pytest.approx(8495, abs=1)
+
+    def test_get(self):
+        flows = self.results.get("flow")
+        assert isinstance(flows, pd.DataFrame)
+
+    def test_to_df(self):
+        with pytest.warns(FutureWarning, match="Results.get\(str\)"):
+            flows = self.results.to_df("flow")
+        assert isinstance(flows, pd.DataFrame)
 
     def test_to_set_objective(self):
         with pytest.raises(TypeError):

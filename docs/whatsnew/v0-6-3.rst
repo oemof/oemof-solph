@@ -4,6 +4,9 @@ v0.6.3
 API changes
 ###########
 
+* You can now access results using Results.get(key).
+  This is planned to replace Results.to_df(key).
+
 
 New features
 ############
