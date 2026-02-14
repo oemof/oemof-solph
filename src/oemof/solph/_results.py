@@ -172,7 +172,7 @@ class Results:
         self._economy_calculation_waring()
         # extract the the optimized investment sizes
         try:
-            invest_values = self.get("invest")
+            invest_values = self["invest"]
         except KeyError:  # no investments
             return pd.DataFrame()
 
@@ -242,7 +242,7 @@ class Results:
         df_opex = pd.DataFrame()
 
         # extract the the optimized flow values
-        flow_values = self.get("flow")
+        flow_values = self.get("flow", pd.DataFrame())
 
         for i, o in self._model.FLOWS:
             # access the variable costs of each flow
