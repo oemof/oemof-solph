@@ -48,6 +48,26 @@ class TestResultsClass:
         flows = self.results.get("flow")
         assert isinstance(flows, pd.DataFrame)
 
+    def test_get_default(self):
+        rv = self.results.get("non_existing_key")
+        assert rv is None
+
+    def test_get_custom(self):
+        rv = self.results.get("non_existing_key", 42)
+        assert rv == 42
+
+    def test_getitem(self):
+        flows = self.results["flow"]
+        assert isinstance(flows, pd.DataFrame)
+
+    def test_to_getitem_fails(self):
+        with pytest.raises(KeyError, match="not in Results"):
+            self.results["non_existing_key"]
+
+    def test_to_df_fails(self):
+        with pytest.raises(KeyError, match="not in Results"):
+            self.results.to_df("non_existing_key")
+
     def test_to_df(self):
         with pytest.warns(FutureWarning, match="Results.get\(str\)"):
             flows = self.results.to_df("flow")

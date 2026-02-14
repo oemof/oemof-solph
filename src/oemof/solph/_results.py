@@ -81,7 +81,11 @@ class Results:
         )
 
     @cache
-    def get(self, variable: str) -> pd.DataFrame | pd.Series:
+    def get(
+        self,
+        variable: str,
+        value: any = None,
+    ) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
         #   - Support `Var`s as arguments?
@@ -97,15 +101,14 @@ class Results:
         """
 
         if variable == "variable_costs":
-            df = self._calc_variable_costs()
+            rv = self._calc_variable_costs()
         elif variable == "investment_costs":
-            df = self._calc_capex()
-
-        else:
-            df = []
+            rv = self._calc_capex()
+        elif variable in self._variables:
+            rv = []
             for occurence in self._variables[variable]:
                 dataset = self._variables[variable][occurence]
-                df.append(
+                rv.append(
                     pd.DataFrame(dataset.extract_values(), index=[0]).stack(
                         future_stack=True
                     )
@@ -118,18 +121,20 @@ class Results:
             # interest users, we concatinate all collected DataFrames.
             # Note that this simplification might lead to unexpected results
             # if third-party code introduces a variable name collision.
-            df = pd.concat(df, axis=1)
+            rv = pd.concat(rv, axis=1)
 
             # overwrite known indexes
             index_type = tuple(dataset.index_set().subsets())[-1].name
             match index_type:
                 case "TIMEPOINTS":
-                    df.index = self.timeindex
+                    rv.index = self.timeindex
                 case "TIMESTEPS":
-                    df.index = self.timeindex[:-1]
+                    rv.index = self.timeindex[:-1]
                 case _:
-                    df.index = df.index.get_level_values(-1)
-        return df
+                    rv.index = rv.index.get_level_values(-1)
+        else:
+            rv = value
+        return rv
 
     # --- BEGIN: The following code can be removed for versions >= v0.7 ---
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
@@ -139,7 +144,10 @@ class Results:
             + " use 'Results.get(str)' instead.",
             category=FutureWarning,
         )
-        return self.get(variable)
+        df = self.get(variable)
+        if df is None:
+            raise KeyError(f"Key '{variable}' not in Results.")
+        return df
     #  --- END ---
 
     @staticmethod
@@ -264,7 +272,10 @@ class Results:
         elif key in self._meta_results:
             return self._meta_results[key]
         else:
-            return self.get(key)
+            rv = self.get(key)
+            if rv is None:
+                raise KeyError(f"Key '{key}' not in Results.")
+            return rv
 
     def __contains__(self, key: Hashable) -> bool:
         return key in self._solver_results or key in self._variables
