@@ -69,7 +69,7 @@ class TestResultsClass:
             self.results.to_df("non_existing_key")
 
     def test_to_df(self):
-        with pytest.warns(FutureWarning, match="Results.get\(str\)"):
+        with pytest.warns(FutureWarning, match="Results.get\\(str\\)"):
             flows = self.results.to_df("flow")
         assert isinstance(flows, pd.DataFrame)
 
