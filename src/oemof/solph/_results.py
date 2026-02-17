@@ -81,8 +81,8 @@ class Results:
 
     def get(
         self,
-        variable: str,
-        value: any = None,
+        key: str,
+        default: any = None,
     ) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
@@ -91,21 +91,30 @@ class Results:
         #       source, target, timestep etc.
         """Return a `DataFrame` view of the model's `variable`.
 
-        This is the function that attribute and dictionary access to
-        variables as `DataFrame`s is based on. Use it if you like to be
-        explicit.
-        For convenience you can also replace `results.to_df("variable")`
-        with the equivalent `results.variable` or `results["variable"]`.
+            The function signature mimics the function `get` of a `dict`,
+            similarly, you can also replace `results.get("variable")`
+            with the equivalent `results["variable"]`.
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+        default : any
+            value to return if key is not found
+
+        Returns
+        -------
+        pd.DataFrame or pd.Series: Result including corresponding time axis
         """
 
-        if variable == "variable_costs":
+        if key == "variable_costs":
             rv = self._calc_variable_costs()
-        elif variable == "investment_costs":
+        elif key == "investment_costs":
             rv = self._calc_capex()
-        elif variable in self._variables:
+        elif key in self._variables:
             rv = []
-            for occurence in self._variables[variable]:
-                dataset = self._variables[variable][occurence]
+            for occurence in self._variables[key]:
+                dataset = self._variables[key][occurence]
                 rv.append(
                     pd.DataFrame(dataset.extract_values(), index=[0]).stack(
                         future_stack=True
@@ -131,7 +140,7 @@ class Results:
                 case _:
                     rv.index = rv.index.get_level_values(-1)
         else:
-            rv = value
+            rv = default
         return rv
 
     # --- BEGIN: The following code can be removed for versions >= v0.7 ---
@@ -263,8 +272,8 @@ class Results:
             float: time index of the model
         """
         warnings.warn(
-            "Results.timeindex will be removed in a future version."
-            + " Use index of particular results instead.",
+            "Results.timeindex will be removed in a future version. Use index"
+            + " of results returned by Results.get('variable') instead.",
             FutureWarning,
         )
         return self._model.es.timeindex
@@ -272,6 +281,18 @@ class Results:
     # --- END ---
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
+        """
+        Allows dictionary like access results['variable']
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+
+        Returns
+        -------
+        pd.DataFrame, pd.Series, or ListContainer: Result
+        """
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:
             self._direct_pyomo_result_waring()
