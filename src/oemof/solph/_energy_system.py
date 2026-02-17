@@ -9,6 +9,7 @@ SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
 
@@ -103,23 +104,29 @@ class EnergySystem(es.EnergySystem):
         groupings = GROUPINGS + groupings
 
         if infer_last_interval is True and timeindex is not None:
-            # Add one time interval to the timeindex by adding one time point.
-            if timeindex.freq is None:
+            try:
+                if timeindex.freq is None:
+                    timeindex.freq = pd.infer_freq(timeindex)
+
+                timeindex = timeindex.union(
+                    pd.date_range(
+                        timeindex[-1] + timeindex.freq,
+                        periods=1,
+                        freq=timeindex.freq,
+                    )
+                )
+            # AttributeError: timeindex has no freq
+            # TypeError: adding freq failed
+            except (AttributeError, TypeError):
                 msg = (
-                    "You cannot infer the last interval if the 'freq' "
-                    "attribute of your DatetimeIndex is None. Set "
-                    " 'infer_last_interval=False' or specify a DatetimeIndex "
-                    "with a valid frequency."
+                    "The argument interval_last_interval requires that"
+                    + " the timeindex is a valid pd.DatetimeIndex"
+                    + " either with the paramter 'freq' already set "
+                    + " or with a constant step width, so that the frequency"
+                    + " can be infered. Please set 'infer_last_interval=False'"
+                    + " or specify a DatetimeIndex with a valid frequency."
                 )
                 raise AttributeError(msg)
-
-            timeindex = timeindex.union(
-                pd.date_range(
-                    timeindex[-1] + timeindex.freq,
-                    periods=1,
-                    freq=timeindex.freq,
-                )
-            )
 
         # catch wrong combinations and infer timeincrement from timeindex.
         if timeincrement is not None:

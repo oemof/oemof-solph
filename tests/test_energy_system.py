@@ -39,6 +39,47 @@ def test_add_periods():
     )
 
 
+def test_infer_last_interval_known_freq():
+    timeindex = pd.date_range(start="2025-01-01", periods=25, freq="h")
+    es = EnergySystem(
+        timeindex=timeindex[:24],
+        infer_last_interval=True,
+    )
+    assert len(es.timeindex) == 25
+    assert es.timeindex[-1] == timeindex[-1]
+
+
+def test_infer_last_interval_infer_freq():
+    timeindex = pd.date_range(start="2025-01-01", periods=25, freq="h")
+    timeindex.freq = None
+
+    es = EnergySystem(
+        timeindex=timeindex[:-1],
+        infer_last_interval=True,
+    )
+    assert len(es.timeindex) == 25
+    assert es.timeindex[-1] == timeindex[-1]
+
+
+def test_infer_last_interval_no_freq():
+    timeindex1 = pd.date_range(start="2025-01-01", periods=24, freq="h")
+    timeindex2 = pd.date_range(start="2025-01-02", periods=48, freq="30min")
+    timeindex = timeindex1.append(timeindex2)
+
+    msg = "interval_last_interval requires that the timeindex"
+
+    with pytest.raises(AttributeError, match=msg):
+        EnergySystem(
+            timeindex=timeindex,
+            infer_last_interval=True,
+        )
+    with pytest.raises(AttributeError, match=msg):
+        EnergySystem(
+            timeindex=[1, 2, 3],
+            infer_last_interval=True,
+        )
+
+
 @pytest.mark.filterwarnings(
     "ignore:Ensure that your timeindex and timeincrement are"
     " consistent.:UserWarning"
