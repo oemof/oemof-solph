@@ -223,9 +223,9 @@ class EnergySystem(es.EnergySystem):
         )
         super().__init__(
             groupings=groupings,
-            timeindex=timeindex,
-            timeincrement=timeincrement,
         )
+        self.timeindex = timeindex
+        self.timeincrement = timeincrement
 
         self.periods = periods
         if self.periods is not None:
