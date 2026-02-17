@@ -63,6 +63,14 @@ def test_generic_storage_input_capacity_relation_without_investment_flow():
         )
 
 
+def test_nominal_capacity_validation():
+    with pytest.raises(
+        ValueError,
+        match="Parameter nominal_capacity must be either",
+    ):
+        components.GenericStorage(nominal_capacity=[1, 2])
+
+
 def test_generic_storage_input_capacity_relation_without_storage_investment():
     """invest_relation_input_capacity set without passing an Investment object
     to the storage"""

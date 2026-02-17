@@ -11,6 +11,7 @@ API changes
 New features
 ############
 
+* Introduced imput validation for nominal_capacity.
 * Argument infer_last_interval of EnergySystem now works even if freq of a
   DatetimeIndex is not explicitly set. This is particularly the case if
   equally sampled data is read in from a file.
