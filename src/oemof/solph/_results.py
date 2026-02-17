@@ -4,6 +4,7 @@
 
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
+SPDX-FileCopyrightText: Eva Schischke
 
 SPDX-License-Identifier: MIT
 
@@ -22,6 +23,22 @@ import oemof.solph
 
 
 class Results:
+    """provides functionality for results processing
+
+    Takes pyomo results and uses keys to access different types of results.
+    Some of these keys are related to meta_results of the solver,
+    and some of the variables are related to the oemof.solph model.
+    Examples are 'flow', 'storage_content', and 'invest'.
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> energysystem = solph.EnergySystem(timeindex=[1,2,3])
+    >>> energysystem_model = solph.Model(energysystem)
+    >>> _ = energysystem_model.solve()
+    >>> results = solph.Results(energysystem_model)
+    >>> results.get("flow")  # with the equivalent `results["flow"]`
+    """
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
         self._meta_results = {

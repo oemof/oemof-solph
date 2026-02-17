@@ -65,8 +65,9 @@ class TestResultsClass:
             self.results["non_existing_key"]
 
     def test_to_df_fails(self):
-        with pytest.raises(KeyError, match="not in Results"):
-            self.results.to_df("non_existing_key")
+        with pytest.warns(FutureWarning):
+            with pytest.raises(KeyError, match="not in Results"):
+                self.results.to_df("non_existing_key")
 
     def test_to_df(self):
         with pytest.warns(FutureWarning, match="Results.get\\(str\\)"):
