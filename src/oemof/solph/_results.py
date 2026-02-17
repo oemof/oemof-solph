@@ -92,8 +92,8 @@ class Results:
         """Return a `DataFrame` view of the model's `variable`.
 
             The function signature mimics the function `get` of a `dict`,
-            similarly, you can also replace `results.get("variable")`
-            with the equivalent `results["variable"]`.
+            similarly, you can also replace e.g. `results.get("flow")`
+            with the equivalent `results["flow"]`.
 
         Parameters
         ----------
@@ -282,7 +282,7 @@ class Results:
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         """
-        Allows dictionary like access results['variable']
+        Allows dictionary like access, as in results['invest']
 
         Parameters
         ----------
