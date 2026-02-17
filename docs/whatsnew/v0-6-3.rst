@@ -11,6 +11,10 @@ API changes
 New features
 ############
 
+* Argument infer_last_interval of EnergySystem now works even if freq of a
+  DatetimeIndex is not explicitly set. This is particularly the case if
+  equally sampled data is read in from a file.
+
 
 Documentation
 #############
@@ -26,6 +30,8 @@ Other changes
 
 Contributors
 ############
+
+* Patrik Schönfeldt
 
 
 Acknowledgements
