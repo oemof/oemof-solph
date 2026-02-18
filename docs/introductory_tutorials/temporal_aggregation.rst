@@ -130,8 +130,31 @@ Let us have a look!
 Step 2: Setting up the Energy System Model
 ------------------------------------------
 
+Setting up energy systems has already been discussed in the other tutorials.
+Thus, we only stay on the surface here.
+The model describes a (potentially all-electric) single-family home.
+There are demands that cannot be optimised, in contrast to the EV
+tutorial, here we also consider the wall box a fixed demand.
+
+.. figure:: /./_files/tutorial_temporal-aggregation/example_energy_system.png
+    :alt: Time series of solar PV data aggregated with different time resolutions.
+
+The energy system allows investments into battery (``GenericStorage``),
+pv (``Flow`` out of a ``Source``), as well as a heat pump and a gas boiler
+(boths ``Flow``s out of ``Converter`` s).
+For reference, you can have a look at the full code until here:
+
+:download:`timeindex_1_segmentation.py </../tutorials/advanced/time_index/timeindex_1_segmentation.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/advanced/time_index/timeindex_1_segmentation.py
+        :language: python
+
+
+
 Step 3: Optimization using time series aggregation
-------------------------------------------
+--------------------------------------------------
 In this section, we introduce *time series aggregation* with
 `tsam - time series aggregation module
 <https://tsam.readthedocs.io/en/latest/>`_.
@@ -178,7 +201,7 @@ The total storage level is represented as a superposition of both. For details, 
 <https://www.sciencedirect.com/science/article/pii/S0306261918300242>`_.
 
 Effect on the optimisation model
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To explain on a high level the influence on our optimization model,
 we use the 10 typical days example ``(A, B, C, ...)``:
@@ -195,10 +218,11 @@ Overall, this typically leads to a significant reduction in runtime.,
 If you add constraints with **binary variables**, an important modelling question is
 which time grid these binaries should use when using TSAM. For a first insight,
 see `Operational Optimization of Seasonal Ice-Storage Systems with Time-Series Aggregation
-<https://www.mdpi.com/1996-1073/18/22/5988>`_.
+<https://doi.org/10.3390/en18225988>`_.
+
 
 Clustering the input time series with TSAM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To cluster input time series with TSAM, you need to define:
 
@@ -255,6 +279,16 @@ and **168 hours**:
 .. figure:: /./_files/tutorial_temporal-aggregation/investment_bar_tsam_typical_periods_length_168.png
     :align: right
     :alt: Investments for different numbers of typical periods (168-hour periods).
+
+The complete code for this step can be found at:
+
+:download:`timeindex_2_typical_periods.py </../tutorials/advanced/time_index/timeindex_2_typical_periods.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/advanced/time_index/timeindex_2_typical_periods.py
+        :language: python
+
 
 Step 4: Pathway planning using time series aggregation
 ------------------------------------------------------
@@ -381,3 +415,12 @@ Now you can solve the model and plot the results:
 .. figure:: /./_files/tutorial_temporal-aggregation/multi_period_results.png
     :align: right
     :alt: results of pathway planning.
+
+The complete code for this step can be found at:
+
+:download:`timeindex_3_pathway_planning.py </../tutorials/advanced/time_index/timeindex_3_pathway_planning.py>`
+
+.. dropdown:: Click to display the code
+
+    .. literalinclude:: /../tutorials/advanced/time_index/timeindex_3_pathway_planning.py
+        :language: python
