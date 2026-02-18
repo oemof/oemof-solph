@@ -33,10 +33,6 @@ plt.show()
 
 # %%[energy_system]
 
-# parse_dates does not set the freq attribute.
-# However, we want to use it for the EnergySystem.
-input_data.index.freq = pd.infer_freq(input_data.index)
-
 energy_system = solph.EnergySystem(
     timeindex=input_data.index,
     infer_last_interval=True,

@@ -6,7 +6,7 @@ GenericStorage and associated individual constraints (blocks) and groupings.
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
-SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-FileCopyrightText: FranziPl
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: Stephan Günther
@@ -227,11 +227,17 @@ class GenericStorage(Node):
         self.invest_relation_output_capacity = sequence(
             invest_relation_output_capacity
         )
-        if isinstance(nominal_capacity, numbers.Real):
-            self.nominal_storage_capacity = nominal_capacity
-        elif isinstance(nominal_capacity, Investment):
-            self.investment = nominal_capacity
-            self._invest_group = True
+        if nominal_capacity is not None:
+            if isinstance(nominal_capacity, numbers.Real):
+                self.nominal_storage_capacity = nominal_capacity
+            elif isinstance(nominal_capacity, Investment):
+                self.investment = nominal_capacity
+                self._invest_group = True
+            else:
+                raise ValueError(
+                    "Parameter nominal_capacity must be either"
+                    " a constant value or an Investment object."
+                )
 
         self.initial_storage_level = initial_storage_level
         self.balanced = balanced
