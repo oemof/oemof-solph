@@ -1,10 +1,10 @@
-v0.6.3
-------
+v0.6.3 (February 19th, 2026)
+----------------------------
 
 API changes
 ###########
 
-* You can now access results using Results.get(key).
+* You can now access results using Results.get(key, default).
   This is planned to replace Results.to_df(key).
 
 
@@ -23,14 +23,6 @@ Documentation
 * A tutorial focusing on time indexes and aggregation is added.
 
 
-Bug fixes
-#########
-
-
-Other changes
-#############
-
-
 Contributors
 ############
 
@@ -38,7 +30,4 @@ Contributors
 * Patrik Schönfeldt
 * Maximilian Hillen
 * Eva Schischke
-
-Acknowledgements
-################
 
