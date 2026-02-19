@@ -198,7 +198,7 @@ Kotzur et al. by splitting the storage state into two parts:
 
 The total storage level is represented as a superposition of both. For details, see
 `Time series aggregation for energy system design: Modeling seasonal storage
-<https://www.sciencedirect.com/science/article/pii/S0306261918300242>`_.
+<https://doi.org/10.1016/j.apenergy.2018.01.023>`_.
 
 Effect on the optimisation model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -235,7 +235,7 @@ Non-hourly resolutions might be possible to solve, but isn't tested in detail.
 
 The influence of different aggregation methods is discussed in
 `Impact of different time series aggregation methods on optimal energy system design
-<https://www.sciencedirect.com/science/article/pii/S0960148117309783>`_.
+<https://doi.org/10.1016/j.renene.2017.10.017>`_.
 
 The clustering step can then be implemented as follows:
 
