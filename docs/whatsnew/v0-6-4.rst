@@ -1,0 +1,30 @@
+v0.6.3
+------
+
+API changes
+###########
+
+
+New features
+############
+
+
+Documentation
+#############
+
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+
+Acknowledgements
+################
+
