@@ -6,7 +6,7 @@ Home PV installation with battery storage
 To get in touch with basic functionalities in oemof.solph, we will use this
 tutorial to model the electricity supply of a single family household that
 intents to install a PV plant in combination with a battery storage.
-Therefore several spteps are considered:
+Therefore several steps are considered:
 
 * Step 1: Definition of the scenario
 * Step 2: Adding fixed size PV

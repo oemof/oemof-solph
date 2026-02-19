@@ -1,7 +1,6 @@
-from helpers import LCOH
-
 # %%[sec_1_start]
 import pandas as pd
+from helpers import LCOH
 
 data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
 # %%[sec_1_end]

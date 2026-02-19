@@ -10,11 +10,12 @@ SPDX-License-Identifier: MIT
 
 # %%[imports]
 import os
+
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from oemof.network.graph import create_nx_graph
 import pandas as pd
+from oemof.network.graph import create_nx_graph
 
 from oemof import solph
 
@@ -31,10 +32,6 @@ plt.xlim(pd.Timestamp("2020-03-01 00:00"), pd.Timestamp("2020-03-07 00:00"))
 plt.show()
 
 # %%[energy_system]
-
-# parse_dates does not set the freq attribute.
-# However, we want to use it for the EnergySystem.
-input_data.index.freq = pd.infer_freq(input_data.index)
 
 energy_system = solph.EnergySystem(
     timeindex=input_data.index,

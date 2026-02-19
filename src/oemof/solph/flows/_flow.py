@@ -4,6 +4,7 @@
 solph version of oemof.network.Edge
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-FileCopyrightText: Simon Hilpert
 SPDX-FileCopyrightText: Cord Kaldemeyer
 SPDX-FileCopyrightText: Stephan Günther
@@ -228,12 +229,20 @@ class Flow(Edge):
             "{} must be a finite value. Passing an infinite "
             "value is not allowed."
         )
-        if isinstance(nominal_capacity, numbers.Real):
-            if not math.isfinite(nominal_capacity):
-                raise ValueError(infinite_error_msg.format("nominal_capacity"))
-            self.nominal_capacity = nominal_capacity
-        elif isinstance(nominal_capacity, Investment):
-            self.investment = nominal_capacity
+        if nominal_capacity is not None:
+            if isinstance(nominal_capacity, numbers.Real):
+                if not math.isfinite(nominal_capacity):
+                    raise ValueError(
+                        infinite_error_msg.format("nominal_capacity")
+                    )
+                self.nominal_capacity = nominal_capacity
+            elif isinstance(nominal_capacity, Investment):
+                self.investment = nominal_capacity
+            else:
+                raise ValueError(
+                    "Parameter nominal_capacity must be either"
+                    + " a constant value or an Investment object."
+                )
 
         if fixed_costs is not None:
             msg = (

@@ -47,7 +47,7 @@ def results_opex():
 
     results = solph.Results(energysystem_model)
 
-    assert results.to_df("variable_costs").iloc[:, 2].values == [
+    assert results.get("variable_costs").iloc[:, 2].values == [
         50,
         210,
         20,
@@ -103,7 +103,7 @@ def results_capex():
 
     results = solph.Results(energysystem_model)
 
-    assert results.to_df("investment_costs").iloc[0, 0] == 42 * 100 + 200
+    assert results.get("investment_costs").iloc[0, 0] == 42 * 100 + 200
 
 
 def results_storage():
@@ -143,5 +143,5 @@ def results_storage():
 
     results = solph.Results(energysystem_model)
 
-    assert results.to_df("investment_costs").iloc[0, 0] == 100
-    assert results.to_df("investment_costs").iloc[0, 1] == 2000
+    assert results.get("investment_costs").iloc[0, 0] == 100
+    assert results.get("investment_costs").iloc[0, 1] == 2000

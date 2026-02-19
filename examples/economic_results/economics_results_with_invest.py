@@ -265,8 +265,8 @@ def main(optimize=True):
     print("\n********* Evaluating economics *********")
 
     # -------------- variable costs ---------------------------
-    variable_costs = results.to_df("variable_costs")
-    values = results.to_df("flow")
+    variable_costs = results.get("variable_costs")
+    values = results.get("flow")
 
     var_costs_dict = {}
     for i, o in energysystem_model.FLOWS:
@@ -304,10 +304,10 @@ def main(optimize=True):
 
     # -------------- Investment Costs ---------------------------
 
-    invest = results.to_df("invest")
+    invest = results.get("invest")
     print(invest)
 
-    investment_costs = results.to_df("investment_costs")
+    investment_costs = results.get("investment_costs")
 
     annual_costs_dict = {}
     for i, o in energysystem_model.FLOWS:
@@ -336,7 +336,7 @@ def main(optimize=True):
     fig2, axs2 = plt.subplots(1, 3, figsize=(10, 6))
 
     # First subplot for invest decisions
-    results.to_df("invest").plot(ax=axs2[0], kind="bar")
+    results.get("invest").plot(ax=axs2[0], kind="bar")
     axs2[0].set_title("Yearly Investment Installation")
     axs2[0].set_ylabel("installed capacity in kW")
 

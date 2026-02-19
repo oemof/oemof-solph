@@ -178,7 +178,9 @@ class Model(po.ConcreteModel):
         self.rc = None
 
         if energysystem.periods is not None:
-            self._set_discount_rate_with_warning()
+            self.discount_rate = kwargs.get("discount_rate")
+            if self.discount_rate is None:
+                self._set_discount_rate_with_warning()
         else:
             pass
 
