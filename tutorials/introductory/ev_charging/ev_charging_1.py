@@ -3,9 +3,9 @@
 import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
-from oemof.network.graph import create_nx_graph
 import pandas as pd
 from helpers import plot_results
+from oemof.network.graph import create_nx_graph
 
 # %%[imports_end]
 # %%[create_time_index_set_up_energysystem_start]

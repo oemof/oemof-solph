@@ -4,6 +4,7 @@
 
 SPDX-FileCopyrightText: Stephan Günther
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
+SPDX-FileCopyrightText: Eva Schischke
 
 SPDX-License-Identifier: MIT
 
@@ -11,7 +12,6 @@ SPDX-License-Identifier: MIT
 
 import warnings
 from collections.abc import Hashable
-from functools import cache
 
 import pandas as pd
 from oemof.tools.debugging import ExperimentalFeatureWarning
@@ -23,6 +23,22 @@ import oemof.solph
 
 
 class Results:
+    """provides functionality for results processing
+
+    Takes pyomo results and uses keys to access different types of results.
+    Some of these keys are related to meta_results of the solver,
+    and some of the variables are related to the oemof.solph model.
+    Examples are 'flow', 'storage_content', and 'invest'.
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> energysystem = solph.EnergySystem(timeindex=[1,2,3])
+    >>> energysystem_model = solph.Model(energysystem)
+    >>> _ = energysystem_model.solve()
+    >>> results = solph.Results(energysystem_model)
+    >>> results.get("flow")  # with the equivalent `results["flow"]`
+    """
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
         self._meta_results = {
@@ -80,8 +96,11 @@ class Results:
             | self._economy.keys()
         )
 
-    @cache
-    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+    def get(
+        self,
+        key: str,
+        default: any = None,
+    ) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
         #   - Support `Var`s as arguments?
@@ -89,23 +108,31 @@ class Results:
         #       source, target, timestep etc.
         """Return a `DataFrame` view of the model's `variable`.
 
-        This is the function that attribute and dictionary access to
-        variables as `DataFrame`s is based on. Use it if you like to be
-        explicit.
-        For convenience you can also replace `results.to_df("variable")`
-        with the equivalent `results.variable` or `results["variable"]`.
+            The function signature mimics the function `get` of a `dict`,
+            similarly, you can also replace e.g. `results.get("flow")`
+            with the equivalent `results["flow"]`.
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+        default : any
+            value to return if key is not found
+
+        Returns
+        -------
+        pd.DataFrame or pd.Series: Result including corresponding time axis
         """
 
-        if variable == "variable_costs":
-            df = self._calc_variable_costs()
-        elif variable == "investment_costs":
-            df = self._calc_capex()
-
-        else:
-            df = []
-            for occurence in self._variables[variable]:
-                dataset = self._variables[variable][occurence]
-                df.append(
+        if key == "variable_costs":
+            rv = self._calc_variable_costs()
+        elif key == "investment_costs":
+            rv = self._calc_capex()
+        elif key in self._variables:
+            rv = []
+            for occurence in self._variables[key]:
+                dataset = self._variables[key][occurence]
+                rv.append(
                     pd.DataFrame(dataset.extract_values(), index=[0]).stack(
                         future_stack=True
                     )
@@ -118,18 +145,35 @@ class Results:
             # interest users, we concatinate all collected DataFrames.
             # Note that this simplification might lead to unexpected results
             # if third-party code introduces a variable name collision.
-            df = pd.concat(df, axis=1)
+            rv = pd.concat(rv, axis=1)
 
             # overwrite known indexes
             index_type = tuple(dataset.index_set().subsets())[-1].name
             match index_type:
                 case "TIMEPOINTS":
-                    df.index = self.timeindex
+                    rv.index = self._model.es.timeindex
                 case "TIMESTEPS":
-                    df.index = self.timeindex[:-1]
+                    rv.index = self._model.es.timeindex[:-1]
                 case _:
-                    df.index = df.index.get_level_values(-1)
+                    rv.index = rv.index.get_level_values(-1)
+        else:
+            rv = default
+        return rv
+
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+        """Compatibility wrapper for Results.get."""
+        warnings.warn(
+            "Function name 'Results.to_df(str)' is outdatet,"
+            + " use 'Results.get(str)' instead.",
+            category=FutureWarning,
+        )
+        df = self.get(variable)
+        if df is None:
+            raise KeyError(f"Key '{variable}' not in Results.")
         return df
+
+    #  --- END ---
 
     @staticmethod
     def _economy_calculation_waring():
@@ -152,7 +196,7 @@ class Results:
         self._economy_calculation_waring()
         # extract the the optimized investment sizes
         try:
-            invest_values = self.to_df("invest")
+            invest_values = self["invest"]
         except KeyError:  # no investments
             return pd.DataFrame()
 
@@ -222,7 +266,7 @@ class Results:
         df_opex = pd.DataFrame()
 
         # extract the the optimized flow values
-        flow_values = self.to_df("flow")
+        flow_values = self.get("flow", pd.DataFrame())
 
         for i, o in self._model.FLOWS:
             # access the variable costs of each flow
@@ -236,6 +280,7 @@ class Results:
 
         return df_opex
 
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
     @property
     def timeindex(self):
         """Returns timeindex of energy system
@@ -243,9 +288,28 @@ class Results:
         Returns:
             float: time index of the model
         """
+        warnings.warn(
+            "Results.timeindex will be removed in a future version. Use index"
+            + " of results returned by Results.get('variable') instead.",
+            FutureWarning,
+        )
         return self._model.es.timeindex
 
+    # --- END ---
+
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
+        """
+        Allows dictionary like access, as in results['invest']
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+
+        Returns
+        -------
+        pd.DataFrame, pd.Series, or ListContainer: Result
+        """
         # backward-compatibility with returned results object from Pyomo
         if key in self._solver_results:
             self._direct_pyomo_result_waring()
@@ -253,7 +317,10 @@ class Results:
         elif key in self._meta_results:
             return self._meta_results[key]
         else:
-            return self.to_df(key)
+            rv = self.get(key)
+            if rv is None:
+                raise KeyError(f"Key '{key}' not in Results.")
+            return rv
 
     def __contains__(self, key: Hashable) -> bool:
         return key in self._solver_results or key in self._variables

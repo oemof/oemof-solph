@@ -44,6 +44,14 @@ def test_source_with_full_load_time_max():
     Flow(nominal_capacity=1, full_load_time_max=2)
 
 
+def test_nominal_capacity_validation():
+    with pytest.raises(
+        ValueError,
+        match="Parameter nominal_capacity must be either",
+    ):
+        Flow(nominal_capacity=[1, 2])
+
+
 def test_nonconvex_positive_gradient_error():
     """Testing nonconvex positive gradient error."""
     msg = (

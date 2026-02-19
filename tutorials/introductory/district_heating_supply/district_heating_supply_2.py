@@ -1,5 +1,6 @@
 import pandas as pd
-from helpers import LCOH, epc
+from helpers import LCOH
+from helpers import epc
 
 import oemof.solph as solph
 

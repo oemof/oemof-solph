@@ -1,3 +1,4 @@
+import pandas as pd
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.opt.results.container import ListContainer
@@ -43,6 +44,36 @@ class TestResultsClass:
     def test_objective(self):
         assert self.results["objective"] == pytest.approx(8495, abs=1)
 
+    def test_get(self):
+        flows = self.results.get("flow")
+        assert isinstance(flows, pd.DataFrame)
+
+    def test_get_default(self):
+        rv = self.results.get("non_existing_key")
+        assert rv is None
+
+    def test_get_custom(self):
+        rv = self.results.get("non_existing_key", 42)
+        assert rv == 42
+
+    def test_getitem(self):
+        flows = self.results["flow"]
+        assert isinstance(flows, pd.DataFrame)
+
+    def test_to_getitem_fails(self):
+        with pytest.raises(KeyError, match="not in Results"):
+            self.results["non_existing_key"]
+
+    def test_to_df_fails(self):
+        with pytest.warns(FutureWarning):
+            with pytest.raises(KeyError, match="not in Results"):
+                self.results.to_df("non_existing_key")
+
+    def test_to_df(self):
+        with pytest.warns(FutureWarning, match="Results.get\\(str\\)"):
+            flows = self.results.to_df("flow")
+        assert isinstance(flows, pd.DataFrame)
+
     def test_to_set_objective(self):
         with pytest.raises(TypeError):
             self.results["objective"] = 5
@@ -64,8 +95,10 @@ class TestResultsClass:
             assert total_variable_costs == pytest.approx(8495, abs=1)
 
     def test_time_index(self):
-        assert len(self.results.timeindex) == 25
-        assert (
-            self.results.timeindex[3].strftime("%m/%d/%Y, %H")
-            == "01/01/2012, 03"
-        )
+        with pytest.warns(
+            FutureWarning,
+            match="Results.timeindex will be removed in a future version.",
+        ):
+            timeindex = self.results.timeindex
+        assert len(timeindex) == 25
+        assert timeindex[3].strftime("%m/%d/%Y, %H") == "01/01/2012, 03"

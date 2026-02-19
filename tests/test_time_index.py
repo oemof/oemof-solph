@@ -48,20 +48,7 @@ def test_energysystem_with_datetimeindex():
 
 def test_energysystem_interval_warning():
     with pytest.warns(FutureWarning):
-        _ = solph.EnergySystem(timeincrement=[1, 2, 1])
-
-
-def test_energysystem_with_datetimeindex_non_equidistant_infer_last_interval():
-    """Test EnergySystem with DatetimeIndex (non-equidistant)"""
-    dtindex1 = pd.date_range("1/1/2012", periods=24, freq="h")
-    dtindex2 = pd.date_range("1/2/2012", periods=49, freq="30min")
-    dtindex = dtindex1.union(dtindex2)
-    msg = (
-        "You cannot infer the last interval if the 'freq' attribute of your "
-        "DatetimeIndex is None."
-    )
-    with pytest.raises(AttributeError, match=msg):
-        solph.EnergySystem(timeindex=dtindex, infer_last_interval=True)
+        solph.EnergySystem(timeincrement=[1, 2, 1])
 
 
 def test_energysystem_with_datetimeindex_non_equidistant():

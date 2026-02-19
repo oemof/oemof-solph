@@ -166,7 +166,7 @@ def main(optimize=True):
 
     results = solph.Results(model)
 
-    print(results.flow.columns)
+    print(results["flow"].columns)
 
 
 if __name__ == "__main__":
