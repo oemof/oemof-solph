@@ -34,6 +34,7 @@ The results chapter consists of three parts:
     :depth: 1
     :local:
     :backlinks: top
+    :class: this-will-duplicate-information-and-it-is-still-useful-here
 
 The first step is the processing of the results
 (:ref:`results_collect_results_label`). This is followed by basic examples of
