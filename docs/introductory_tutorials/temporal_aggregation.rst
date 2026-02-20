@@ -170,7 +170,7 @@ Please note that this feature is still **experimental** and may therefore contai
 We use the same input data and energy system setup as in Step 1 and Step 2.
 
 Concept: clustering to typical periods
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------
 
 The basic idea of time series aggregation for energy system design is to replace a
 long time series (e.g. one year of hourly data) by a **small set of representative
@@ -201,7 +201,7 @@ The total storage level is represented as a superposition of both. For details, 
 <https://doi.org/10.1016/j.apenergy.2018.01.023>`_.
 
 Effect on the optimisation model
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------
 
 To explain on a high level the influence on our optimization model,
 we use the 10 typical days example ``(A, B, C, ...)``:
@@ -222,7 +222,7 @@ see `Operational Optimization of Seasonal Ice-Storage Systems with Time-Series A
 
 
 Clustering the input time series with TSAM
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------
 
 To cluster input time series with TSAM, you need to define:
 
@@ -245,7 +245,7 @@ The clustering step can then be implemented as follows:
     :end-before: [tsam_aggregation_end]
 
 Building the energy system with an aggregated time index
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+--------------------------------------------------------
 
 Compared to the standard approach, setting up the ``EnergySystem`` differs slightly.
 In addition to the aggregated ``timeindex``, you need to provide:
@@ -261,7 +261,7 @@ This is shown in the following snippet:
     :end-before: [ti_index_and_energy_system_end]
 
 Post-processing and sensitivity to aggregation choices
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------------------------------------
 
 In post-processing, the optimised flows and storage levels are **disaggregated**
 back to the original time grid. This means you can process and plot results in the
