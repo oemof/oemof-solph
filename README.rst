@@ -105,7 +105,7 @@ Installation
 
 
 If you have a working Python installation, use pypi to install the latest version of oemof.solph.
-Python >= 3.8 is recommended. Lower versions may work but are not tested.
+Python >= 3.11 is recommended. Lower versions may work but are not tested.
 
 We highly recommend to use virtual environments.
 Please refer to the documentation of your Python distribution (e.g. Anaconda,
