@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |packaging|
+|tox-pytest| |tox-checks| |packaging| |coverage|
 
 |docs| |version| |supported-versions|
 
@@ -16,6 +16,9 @@
 
 .. |packaging| image:: https://github.com/oemof/oemof-solph/actions/workflows/packaging.yml/badge.svg
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
+
+.. |coverage| image:: https://raw.githubusercontent.com/oemof/oemof-solph/python-coverage-comment-action-data/badge.svg
+    :target: https://htmlpreview.github.io/?https://github.com/oemof/oemof-solph/blob/python-coverage-comment-action-data/htmlcov/index.html
 
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
