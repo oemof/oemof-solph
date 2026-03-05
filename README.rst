@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |packaging| |coveralls|
+|tox-pytest| |tox-checks| |packaging|
 
 |docs| |version| |supported-versions|
 
@@ -20,10 +20,6 @@
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
-    :alt: Coverage Status
-    :target: https://coveralls.io/github/oemof/oemof-solph
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
