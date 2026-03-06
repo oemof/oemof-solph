@@ -6,6 +6,9 @@ General description
 This script implements the method to cosider offering storage capacity
 at a flexibility market that is described in https://elib.dlr.de/212741/.
 
+
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-License-Identifier: MIT
 """
 
 import numpy as np
