@@ -70,9 +70,6 @@ class Investment:
     age : int, :math:`a`
         Units start age, given in years at the beginning of the optimization;
         only applicable for multi-period models
-    fixed_costs : float or list of float, :math:`c_{fixed}(p)`
-        Fixed costs in each period (given in nominal terms);
-        only applicable for multi-period models
 
 
     For the variables, constraints and parts of the objective function, which
@@ -97,7 +94,6 @@ class Investment:
         overall_minimum=None,
         lifetime=None,
         age=0,
-        fixed_costs=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
@@ -130,7 +126,6 @@ class Investment:
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        self.fixed_costs = sequence(fixed_costs)
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
