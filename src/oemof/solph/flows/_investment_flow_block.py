@@ -829,8 +829,6 @@ class InvestmentFlowBlock(ScalarBlock):
                     &\\
                     &
                     \forall p \in \textrm{CAPACITY_PERIODS}
-<<<<<<< HEAD
-=======
 
             * :attr:`fixed_costs` not None for investments
 
@@ -850,6 +848,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     \cdot DF^{-pp}
 >>>>>>> f0264a2a (Rename PERIODS to CAPACITY_PERIODS)
 
+=======
+>>>>>>> 08903257 (Remove parameter fixed_costs)
 
         where:
 
