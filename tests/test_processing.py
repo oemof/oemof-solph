@@ -94,15 +94,8 @@ class TestParameterResult:
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
         meta = processing.meta_results(self.om)
-        assert "MIPGap" in meta["problem"], (
-            'No "MIPGap" in `meta_results`.'
-            " Maybe you're using solver other than cbc or gurobi?"
-        )
-        assert meta["problem"]["MIPGap"] == 0, (
-            "Incorrect MIPGap value."
-            "\nExpected: `0`"
-            f"\nGot: `{meta['problem']['MIPGap']}`"
-        )
+        assert "MIPGap" in meta["problem"]
+        assert meta["problem"]["MIPGap"] == 0
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups["b_el2"]

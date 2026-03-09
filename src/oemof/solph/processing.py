@@ -788,7 +788,10 @@ def meta_results(om, undefined=False):
             - meta_res["problem"]["Lower bound"]
         ) / meta_res["problem"]["Lower bound"]
     except KeyError:
-        pass
+        meta_res["problem"]["MIPGap"] = (
+            "Could not calculate 'MIPGap'."
+            + " Maybe you're using solver other than cbc or gurobi?"
+        )
 
     return meta_res
 
