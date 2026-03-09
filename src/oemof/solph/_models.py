@@ -54,11 +54,6 @@ class Model(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
-    objective_weighting : array like (optional)
-        Weights used for temporal objective function
-        expressions. If nothing is passed, `timeincrement` will be used which
-        is calculated from the freq length of the energy system timeindex or
-        can be directly passed as a sequence.
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
@@ -154,7 +149,6 @@ class Model(po.ConcreteModel):
 
         self.es = energysystem
         self.timeincrement = self.es.timeincrement
-        self.objective_weighting = self.timeincrement
 
         if constraint_groups is None:
             constraint_groups = []
