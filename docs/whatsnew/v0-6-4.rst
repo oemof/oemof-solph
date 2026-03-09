@@ -8,6 +8,8 @@ API changes
 New features
 ############
 
+* Mipgap is calculated in the meta results
+
 
 Documentation
 #############
@@ -27,6 +29,7 @@ Contributors
 ############
 
 * Jonas Freißmann
+* Lena Rosin
 
 Acknowledgements
 ################

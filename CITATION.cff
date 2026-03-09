@@ -188,4 +188,8 @@ authors:
     given-names: Maximilian
     alias: "@Maxhi77"
     orcid: "https://orcid.org/0000-0002-8171-2661"
+  -
+    family-names: Rosin
+    given-names: Lena
+    alias: "@leroum"
 ...
