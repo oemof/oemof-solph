@@ -782,24 +782,16 @@ def meta_results(om, undefined=False):
                     meta_res[k1][k2] = msg.format(
                         type(om.es.results[k1][0][k2])
                     )
-    try:
-        meta_res["problem"]["MIPGap"] = abs(
+    meta_res["problem"]["MIPGap"] = abs(
+        meta_res["problem"]["Upper bound"]
+        - meta_res["problem"]["Lower bound"]
+    ) / (
+        abs(
             meta_res["problem"]["Upper bound"]
-            - meta_res["problem"]["Lower bound"]
-        ) / (
-            abs(
-                meta_res["problem"]["Upper bound"]
-                + meta_res["problem"]["Lower bound"]
-            )
-            / 2
+            + meta_res["problem"]["Lower bound"]
         )
-    except KeyError:
-        meta_res["problem"]["MIPGap"] = (
-            "Could not calculate 'MIPGap'."
-            + " Maybe you're using solver other than cbc or gurobi?"
-        )
-
-    return meta_res
+        / 2
+    )
 
 
 def __separate_attrs(
