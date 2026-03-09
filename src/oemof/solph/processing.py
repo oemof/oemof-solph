@@ -783,8 +783,7 @@ def meta_results(om, undefined=False):
                         type(om.es.results[k1][0][k2])
                     )
     meta_res["problem"]["MIPGap"] = abs(
-        meta_res["problem"]["Upper bound"]
-        - meta_res["problem"]["Lower bound"]
+        meta_res["problem"]["Upper bound"] - meta_res["problem"]["Lower bound"]
     ) / (
         abs(
             meta_res["problem"]["Upper bound"]
@@ -792,6 +791,7 @@ def meta_results(om, undefined=False):
         )
         / 2
     )
+    return meta_res
 
 
 def __separate_attrs(

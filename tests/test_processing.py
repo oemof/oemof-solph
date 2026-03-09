@@ -93,7 +93,6 @@ class TestParameterResult:
         cls.model_glpk = Model(cls.es)
         cls.model_glpk.solve(solver="glpk")
 
-
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
         meta_cbc = processing.meta_results(self.model_cbc)
