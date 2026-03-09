@@ -87,11 +87,7 @@ def results_capex():
     hp = solph.components.Converter(
         "heat_pump",
         inputs={el_bus: solph.flows.Flow()},
-        outputs={
-            heat_bus: solph.flows.Flow(
-                solph.Investment(ep_costs=100)
-            )
-        },
+        outputs={heat_bus: solph.flows.Flow(solph.Investment(ep_costs=100))},
         conversion_factors={el_bus: 1 / 3},
     )
 

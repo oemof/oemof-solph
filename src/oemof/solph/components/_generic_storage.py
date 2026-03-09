@@ -2236,9 +2236,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
         self.investment_costs = Expression(expr=investment_costs)
         self.period_investment_costs = period_investment_costs
-        self.costs = Expression(
-            expr=investment_costs + storage_costs
-        )
+        self.costs = Expression(expr=investment_costs + storage_costs)
 
         return self.costs
 

@@ -24,6 +24,7 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
+from oemof.solph import EnergySystem
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
@@ -121,14 +122,21 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(
+        self,
+        energysystem: EnergySystem,
+        *,
+        constraint_groups: list[po.ScalarBlock] = None,
+        auto_construct: bool = True,
+        debug: bool = False,
+    ):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
         # model will take up to a 100 times longer if the root logger is set
         # to DEBUG
 
-        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+        if getLogger().level <= 10 and debug is False:
             msg = (
                 "The root logger level is 'DEBUG'.\nDue to a communication "
                 "problem between solph and the pyomo package,\nusing the "
@@ -144,24 +152,15 @@ class Model(po.ConcreteModel):
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get("name", type(self).__name__)
-
         self.es = energysystem
+        self.timeincrement = self.es.timeincrement
+        self.objective_weighting = self.timeincrement
 
-        if kwargs.get("timeincrement"):
-            msg = "Resetting timeincrement from EnergySystem in Model."
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        if constraint_groups is None:
+            constraint_groups = []
 
-            self.timeincrement = kwargs.get("timeincrement")
-        else:
-            self.timeincrement = self.es.timeincrement
-
-        self.objective_weighting = kwargs.get(
-            "objective_weighting", self.timeincrement
-        )
-
-        self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
-            "constraint_groups", []
+        self._constraint_groups = (
+            type(self).CONSTRAINT_GROUPS + constraint_groups
         )
 
         self._constraint_groups += [
@@ -178,13 +177,11 @@ class Model(po.ConcreteModel):
         self.rc = None
 
         if energysystem.periods is not None:
-            self.discount_rate = kwargs.get("discount_rate")
-            if self.discount_rate is None:
-                self._set_discount_rate_with_warning()
+            self._set_discount_rate_with_warning()
         else:
             pass
 
-        if kwargs.get("auto_construct", True):
+        if auto_construct is True:
             self._construct()
 
     def _construct(self):
