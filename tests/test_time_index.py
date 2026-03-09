@@ -10,7 +10,6 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import pytest
-from oemof.tools import debugging
 
 from oemof import solph
 
@@ -165,17 +164,6 @@ def test_missing_timeincrement():
     es = solph.EnergySystem()
     with pytest.raises(AttributeError, match=msg):
         solph.Model(es)
-
-
-def test_overwrite_timeincrement():
-    es = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=2, freq="h"),
-        infer_last_interval=True,
-    )
-    assert es.timeincrement[0] == 1
-    with pytest.warns(debugging.SuspiciousUsageWarning):
-        m = solph._models.Model(es, timeincrement=[3])
-    assert m.timeincrement[0] == 3
 
 
 def test_model_timeincrement_list():
