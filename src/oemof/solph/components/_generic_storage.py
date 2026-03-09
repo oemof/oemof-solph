@@ -182,6 +182,8 @@ class GenericStorage(Node):
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
         fixed_costs=0,
+        constant_soc_until=None,
+        fraction_of_charge_at_full_storage=None,
         storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
@@ -246,6 +248,13 @@ class GenericStorage(Node):
         self.storage_costs = sequence(storage_costs)
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
+        self.constant_soc_until = constant_soc_until
+        self.fraction_of_charge_at_full_storage = (
+            fraction_of_charge_at_full_storage
+        )
+        self.max_charge_capacity = next(
+            v.nominal_capacity for k, v in self.inputs.items()
+        )
 
         # Check number of flows.
         self._check_number_of_flows()
@@ -522,6 +531,10 @@ class GenericStorageBlock(ScalarBlock):
             ]
         )
 
+        self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT = Set(
+            initialize=[n for n in group if n.constant_soc_until is not None]
+        )
+
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
             initialize=[
                 n
@@ -796,9 +809,9 @@ class GenericStorageBlock(ScalarBlock):
             for n in self.STORAGES_WITH_INVEST_FLOW_REL:
                 for p in m.PERIODS:
                     expr = (
-                        m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output[p] == (
-                        m.InvestmentFlowBlock.total[i[n], n, p]
+                        (m.InvestmentFlowBlock.total[n, o[n], p])
+                        * n.invest_relation_input_output[p]
+                        == (m.InvestmentFlowBlock.total[i[n], n, p])
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -807,6 +820,45 @@ class GenericStorageBlock(ScalarBlock):
         )
 
         self.power_coupled_build = BuildAction(rule=_power_coupled)
+
+        def _soc_dependent_charge_limit_rule(block, n, t):
+            """
+            Rule definition for SOC-dependent charge limit.
+            Limits the charging power based on the remaining storage capacity.
+
+            The constraint ensures that the charging power does not exceed
+            a factor times the remaining capacity to the maximum storage level.
+            """
+            a = -(
+                n.max_charge_capacity
+                * (1 - n.fraction_of_charge_at_full_storage)
+            ) / (
+                n.nominal_storage_capacity
+                * n.max_storage_level[t]
+                * (1 - n.constant_soc_until)
+            )
+            b = n.max_charge_capacity * (
+                (1 - n.fraction_of_charge_at_full_storage)
+                / (1 - n.constant_soc_until)
+                + n.fraction_of_charge_at_full_storage
+            )
+            return m.flow[i[n], n, t] <= a * block.storage_content[n, t+1] + b
+
+        if not m.TSAM_MODE:
+            self.soc_charge_limit = Constraint(
+                self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT,
+                m.TIMESTEPS,
+                rule=_soc_dependent_charge_limit_rule,
+            )
+        else:
+            if len(self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT):
+                msg = (
+                    "An SOC-dependent charge limit is not implemented in "
+                    "TSAM_MODE."
+                )
+                raise NotImplementedError(msg)
+
+        return None
 
     def _objective_expression(self):
         r"""
@@ -1855,9 +1907,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.PERIODS:
                     expr = (
-                        m.InvestmentFlowBlock.total[n, o[n], p]
-                    ) * n.invest_relation_input_output[p] == (
-                        m.InvestmentFlowBlock.total[i[n], n, p]
+                        (m.InvestmentFlowBlock.total[n, o[n], p])
+                        * n.invest_relation_input_output[p]
+                        == (m.InvestmentFlowBlock.total[i[n], n, p])
                     )
                     self.power_coupled.add((n, p), expr)
 
