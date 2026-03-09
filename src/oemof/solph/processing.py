@@ -782,7 +782,15 @@ def meta_results(om, undefined=False):
                     meta_res[k1][k2] = msg.format(
                         type(om.es.results[k1][0][k2])
                     )
-
+    meta_res["problem"]["MIPGap"] = abs(
+        meta_res["problem"]["Upper bound"] - meta_res["problem"]["Lower bound"]
+    ) / (
+        abs(
+            meta_res["problem"]["Upper bound"]
+            + meta_res["problem"]["Lower bound"]
+        )
+        / 2
+    )
     return meta_res
 
 

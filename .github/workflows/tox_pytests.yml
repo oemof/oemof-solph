@@ -24,7 +24,7 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: Install cbc
-      run: sudo apt install coinor-cbc
+      run: sudo apt install coinor-cbc glpk-utils
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
       with:
