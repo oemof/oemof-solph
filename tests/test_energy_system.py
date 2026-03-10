@@ -30,11 +30,11 @@ def test_add_periods():
     es = EnergySystem(
         timeindex=timeindex, periods=periods, infer_last_interval=True
     )
-    assert len(es.periods) == 2
-    assert es.periods[0].equals(
+    assert len(es.capacity_periods) == 2
+    assert es.capacity_periods[0].equals(
         pd.date_range(start="2012-01-01", periods=8784, freq="h")
     )
-    assert es.periods[1].equals(
+    assert es.capacity_periods[1].equals(
         pd.date_range(start="2013-01-01", periods=1217, freq="h")
     )
 
@@ -87,8 +87,8 @@ def test_infer_last_interval_no_freq():
 @pytest.mark.filterwarnings(
     "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
 )
-def test_extract_periods_years():
-    """test method _extract_periods_years of energy system"""
+def test_extract_period_years():
+    """test method _extract_period_years of energy system"""
     t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h").to_series()
     t_idx_2 = pd.date_range("1/1/2041", periods=3, freq="h").to_series()
     t_idx_3 = pd.date_range("1/1/2050", periods=3, freq="h").to_series()
@@ -100,5 +100,5 @@ def test_extract_periods_years():
         infer_last_interval=False,
         periods=periods,
     )
-    periods_years = [0, 21, 30]
-    assert es.periods_years == periods_years
+    period_years = [0, 21, 30]
+    assert es.capacity_period_years == period_years

@@ -170,7 +170,7 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if energysystem.periods is not None:
+        if energysystem.capacity_periods is not None:
             self._set_discount_rate_with_warning()
         else:
             pass
@@ -225,7 +225,7 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.periods is None:
+        if self.es.capacity_periods is None:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
@@ -238,8 +238,8 @@ class Model(po.ConcreteModel):
             self.CAPACITY_PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
-                [k] * len(self.es.periods[k])
-                for k in range(len(self.es.periods))
+                [k] * len(self.es.capacity_periods[k])
+                for k in range(len(self.es.capacity_periods))
             ]
             flattened_list = [
                 item for sublist in nested_list for item in sublist
@@ -251,7 +251,9 @@ class Model(po.ConcreteModel):
                 ordered=True,
             )
             self.CAPACITY_PERIODS = po.Set(
-                initialize=sorted(list(set(range(len(self.es.periods)))))
+                initialize=sorted(
+                    list(set(range(len(self.es.capacity_periods))))
+                )
             )
 
         # (Re-)Map timesteps to periods

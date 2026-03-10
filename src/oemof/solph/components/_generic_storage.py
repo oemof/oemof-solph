@@ -1273,7 +1273,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         m = self.parent_block()
 
         # ########################## CHECKS ###################################
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
             for n in group:
                 error_fixed_absolute_losses = (
                     "For a multi-period investment model, fixed absolute"
@@ -1410,7 +1410,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=0,
         )
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
             # Old capacity to be decommissioned (due to lifetime)
             self.old = Var(
                 self.INVESTSTORAGES,
@@ -1472,7 +1472,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         # multi-period storage implementation for time intervals
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
 
             def _old_storage_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -1502,7 +1502,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         raise ValueError(msg)
                     # get the period matrix describing the temporal distance
                     # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
+                    capacity_periods_matrix = m.es.capacity_periods_matrix
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
@@ -1511,8 +1511,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     # condition is not met in any row, min value will be zero
                     decomm_periods = np.argmin(
                         np.where(
-                            (periods_matrix >= lifetime),
-                            periods_matrix,
+                            (capacity_periods_matrix >= lifetime),
+                            capacity_periods_matrix,
                             np.inf,
                         ),
                         axis=1,
@@ -1590,7 +1590,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         if p == 0:
                             expr = self.old_exo[n, p] == 0
                             self.old_rule_exo.add((n, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
+                        elif lifetime - age <= m.es.capacity_period_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
@@ -1775,7 +1775,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
 
-        if m.es.periods is None and not m.TSAM_MODE:
+        if m.es.capacity_periods is None and not m.TSAM_MODE:
 
             def _balanced_storage_rule(block, n):
                 return (
@@ -1889,7 +1889,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=smallest_invest,
         )
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
 
             def _overall_storage_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -1937,7 +1937,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def _add_storage_limit_constraints(self):
         m = self.parent_block()
         if not m.TSAM_MODE:
-            if m.es.periods is None:
+            if m.es.capacity_periods is None:
 
                 def _max_storage_content_invest_rule(_, n, t):
                     """
@@ -2088,7 +2088,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         storage_costs = 0
         period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
 
-        if m.es.periods is None:
+        if m.es.capacity_periods is None:
             for n in self.CONVEX_INVESTSTORAGES:
                 for p in m.CAPACITY_PERIODS:
                     investment_costs += (
@@ -2125,7 +2125,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        m.es.end_year_of_optimization
+                        - m.es.capacity_period_years[p],
                         lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(
@@ -2153,7 +2154,8 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        m.es.end_year_of_optimization
+                        - m.es.capacity_period_years[p],
                         lifetime,
                     )
                     present_value_factor = 1 / economics.annuity(

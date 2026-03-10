@@ -222,8 +222,8 @@ class EnergySystem(es.EnergySystem):
         self.timeindex = timeindex
         self.timeincrement = timeincrement
 
-        self.periods = periods
-        if self.periods is not None:
+        self.capacity_periods = periods
+        if self.capacity_periods is not None:
             msg = (
                 "CAUTION! You specified the 'periods' attribute for your "
                 "energy system.\n This will lead to creating "
@@ -243,17 +243,17 @@ class EnergySystem(es.EnergySystem):
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices
 
-        Attribute `periods_years` of type list is set. It contains
+        Attribute `capacity_period_years` of type list is set. It contains
         the year of the start of each period, relative to the
         start of the optimization run and starting with 0.
         """
         periods_years = [0]
-        start_year = self.periods[0].min().year
-        for k, v in enumerate(self.periods):
+        start_year = self.capacity_periods[0].min().year
+        for k, v in enumerate(self.capacity_periods):
             if k >= 1:
                 periods_years.append(v.min().year - start_year)
 
-        self.periods_years = periods_years
+        self.capacity_period_years = periods_years
 
     def _extract_periods_matrix(self):
         """Determines a matrix describing the temporal distance to each period.
@@ -263,13 +263,13 @@ class EnergySystem(es.EnergySystem):
         decommissioning periods. The values describe the temporal distance
         between each investment period to each decommissioning period.
         """
-        periods_matrix = []
-        period_years = np.array(self.periods_years)
+        capacity_periods_matrix = []
+        period_years = np.array(self.capacity_period_years)
         for v in period_years:
             row = period_years - v
             row = np.where(row < 0, 0, row)
-            periods_matrix.append(row)
-        self.periods_matrix = np.array(periods_matrix)
+            capacity_periods_matrix.append(row)
+        self.capacity_periods_matrix = np.array(capacity_periods_matrix)
 
     def _extract_end_year_of_optimization(self):
         """Extract the end of the optimization in years
@@ -278,7 +278,7 @@ class EnergySystem(es.EnergySystem):
         """
         duration_last_period = self.get_period_duration(-1)
         self.end_year_of_optimization = (
-            self.periods_years[-1] + duration_last_period
+            self.capacity_period_years[-1] + duration_last_period
         )
 
     def get_period_duration(self, period):
@@ -295,8 +295,8 @@ class EnergySystem(es.EnergySystem):
             Duration of the period
         """
         return (
-            self.periods[period].max().year
-            - self.periods[period].min().year
+            self.capacity_periods[period].max().year
+            - self.capacity_periods[period].min().year
             + 1
         )
 

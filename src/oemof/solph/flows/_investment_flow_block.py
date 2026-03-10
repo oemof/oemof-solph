@@ -243,7 +243,7 @@ class InvestmentFlowBlock(ScalarBlock):
             self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
             self.old = Var(
                 self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
@@ -467,7 +467,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
         self.total_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
 
             def _old_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
@@ -498,7 +498,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
                     # get the period matrix describing the temporal distance
                     # between all period combinations.
-                    periods_matrix = m.es.periods_matrix
+                    capacity_periods_matrix = m.es.capacity_periods_matrix
 
                     # get the index of the minimum value in each row greater
                     # equal than the lifetime. This value equals the
@@ -507,8 +507,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     # condition is not met in any row, min value will be zero
                     decomm_periods = np.argmin(
                         np.where(
-                            (periods_matrix >= lifetime),
-                            periods_matrix,
+                            (capacity_periods_matrix >= lifetime),
+                            capacity_periods_matrix,
                             np.inf,
                         ),
                         axis=1,
@@ -583,7 +583,7 @@ class InvestmentFlowBlock(ScalarBlock):
                         if p == 0:
                             expr = self.old_exo[i, o, p] == 0
                             self.old_rule_exo.add((i, o, p), expr)
-                        elif lifetime - age <= m.es.periods_years[p]:
+                        elif lifetime - age <= m.es.capacity_period_years[p]:
                             # Track decommissioning status
                             if not is_decommissioned:
                                 expr = (
@@ -705,7 +705,7 @@ class InvestmentFlowBlock(ScalarBlock):
             rule=_full_load_time_min_investflow_rule,
         )
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
 
             def _overall_maximum_investflow_rule(block):
                 """Rule definition for maximum overall investment
@@ -845,7 +845,7 @@ class InvestmentFlowBlock(ScalarBlock):
         investment_costs = 0
         period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
 
-        if m.es.periods is None:
+        if m.es.capacity_periods is None:
             for i, o in self.CONVEX_INVESTFLOWS:
                 for p in m.CAPACITY_PERIODS:
                     investment_costs += (
@@ -883,7 +883,8 @@ class InvestmentFlowBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        m.es.end_year_of_optimization
+                        - m.es.capacity_period_years[p],
                         lifetime,
                     )
                     present_value_factor_remaining = 1 / economics.annuity(
@@ -910,7 +911,8 @@ class InvestmentFlowBlock(ScalarBlock):
                         wacc=interest,
                     )
                     duration = min(
-                        m.es.end_year_of_optimization - m.es.periods_years[p],
+                        m.es.end_year_of_optimization
+                        - m.es.capacity_period_years[p],
                         lifetime,
                     )
                     present_value_factor_remaining = 1 / economics.annuity(

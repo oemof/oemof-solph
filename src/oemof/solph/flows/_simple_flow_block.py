@@ -340,13 +340,16 @@ class SimpleFlowBlock(ScalarBlock):
             self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
         )
 
-        if m.es.periods is not None:
+        if m.es.capacity_periods is not None:
 
             def _lifetime_output_rule(_):
                 """Force flow value to zero when lifetime is reached"""
                 for inp, out in self.LIFETIME_FLOWS:
                     for p, ts in m.TIMEINDEX:
-                        if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
+                        if (
+                            m.flows[inp, out].lifetime
+                            <= m.es.capacity_period_years[p]
+                        ):
                             lhs = m.flow[inp, out, ts]
                             rhs = 0
                             self.lifetime_output.add(
@@ -368,7 +371,7 @@ class SimpleFlowBlock(ScalarBlock):
                     for p, ts in m.TIMEINDEX:
                         if (
                             m.flows[inp, out].lifetime - m.flows[inp, out].age
-                            <= m.es.periods_years[p]
+                            <= m.es.capacity_period_years[p]
                         ):
                             lhs = m.flow[inp, out, ts]
                             rhs = 0
@@ -420,7 +423,7 @@ class SimpleFlowBlock(ScalarBlock):
 
         variable_costs = 0
 
-        if m.es.periods is None:
+        if m.es.capacity_periods is None:
             for i, o in m.FLOWS:
                 if valid_sequence(
                     m.flows[i, o].variable_costs, len(m.TIMESTEPS)
@@ -444,7 +447,10 @@ class SimpleFlowBlock(ScalarBlock):
                             * m.timeincrement[t]
                             * m.tsam_weighting[t]
                             * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
+                            * (
+                                (1 + m.discount_rate)
+                                ** -m.es.capacity_period_years[p]
+                            )
                         )
 
         self.variable_costs = Expression(expr=variable_costs)
