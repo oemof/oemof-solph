@@ -81,7 +81,9 @@ def main():
     from matplotlib import pyplot as plt
 
     print(results["flow"].sum())
-    ax = results["flow"].plot()
+    ax = results["flow"][
+        [c for c in results["flow"].columns if "storage" in str(c)]
+    ].plot()
     results["storage_content"].div(10).plot(ax=ax)
     plt.show()
 
