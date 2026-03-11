@@ -64,7 +64,7 @@ def main():
         initial_storage_level=0,
         balanced=True,
         constant_soc_until=0.4,
-        fraction_of_charge_at_full_storage=0.2,
+        fraction_saturation_charging=0.2,
     )
 
     energysystem.add(excess, shortage, volatile, demand, storage)

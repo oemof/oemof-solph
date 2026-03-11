@@ -183,7 +183,7 @@ class GenericStorage(Node):
         outflow_conversion_factor=1,
         fixed_costs=0,
         constant_soc_until=None,
-        fraction_of_charge_at_full_storage=None,
+        fraction_saturation_charging=None,
         storage_costs=None,
         lifetime_inflow=None,
         lifetime_outflow=None,
@@ -249,8 +249,8 @@ class GenericStorage(Node):
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
         self.constant_soc_until = constant_soc_until
-        self.fraction_of_charge_at_full_storage = (
-            fraction_of_charge_at_full_storage
+        self.fraction_saturation_charging = (
+            fraction_saturation_charging
         )
         self.max_charge_capacity = next(
             v.nominal_capacity for k, v in self.inputs.items()
@@ -831,16 +831,16 @@ class GenericStorageBlock(ScalarBlock):
             """
             a = -(
                 n.max_charge_capacity
-                * (1 - n.fraction_of_charge_at_full_storage)
+                * (1 - n.fraction_saturation_charging)
             ) / (
                 n.nominal_storage_capacity
                 * n.max_storage_level[t]
                 * (1 - n.constant_soc_until)
             )
             b = n.max_charge_capacity * (
-                (1 - n.fraction_of_charge_at_full_storage)
+                (1 - n.fraction_saturation_charging)
                 / (1 - n.constant_soc_until)
-                + n.fraction_of_charge_at_full_storage
+                + n.fraction_saturation_charging
             )
             return m.flow[i[n], n, t] <= a * block.storage_content[n, t+1] + b
 
