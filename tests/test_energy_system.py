@@ -18,25 +18,23 @@ from oemof.solph import EnergySystem
     " consistent.:UserWarning"
 )
 @pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+    "ignore:CAUTION! You specified the 'investment_times':UserWarning"
 )
 def test_add_periods():
     """test method _add_periods of energy system"""
     timeindex = pd.date_range(start="2012-01-01", periods=10000, freq="h")
     periods = [
-        pd.date_range(start="2012-01-01", periods=8784, freq="h"),
-        pd.date_range(start="2013-01-01", periods=1217, freq="h"),
+        timeindex[:8784],
+        timeindex[8784:-1],
     ]
     es = EnergySystem(
-        timeindex=timeindex, periods=periods, infer_last_interval=True
+        timeindex=timeindex,
+        investment_times=[timeindex[0], timeindex[8784], timeindex[-1]],
+        infer_last_interval=False,
     )
     assert len(es.capacity_periods) == 2
-    assert es.capacity_periods[0].equals(
-        pd.date_range(start="2012-01-01", periods=8784, freq="h")
-    )
-    assert es.capacity_periods[1].equals(
-        pd.date_range(start="2013-01-01", periods=1217, freq="h")
-    )
+    assert (es.capacity_periods[0] == periods[0]).all()
+    assert (es.capacity_periods[1] == periods[1]).all()
 
 
 def test_infer_last_interval_known_freq():
@@ -85,20 +83,25 @@ def test_infer_last_interval_no_freq():
     " consistent.:UserWarning"
 )
 @pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+    "ignore:CAUTION! You specified the 'investment_times':UserWarning"
 )
 def test_extract_period_years():
     """test method _extract_period_years of energy system"""
     t_idx_1 = pd.date_range("1/1/2020", periods=3, freq="h").to_series()
     t_idx_2 = pd.date_range("1/1/2041", periods=3, freq="h").to_series()
-    t_idx_3 = pd.date_range("1/1/2050", periods=3, freq="h").to_series()
+    t_idx_3 = pd.date_range("1/1/2050", periods=4, freq="h").to_series()
     timeindex = pd.concat([t_idx_1, t_idx_2, t_idx_3]).index
-    periods = [t_idx_1, t_idx_2, t_idx_3]
+    periods = [
+        t_idx_1.iloc[0],
+        t_idx_2.iloc[0],
+        t_idx_3.iloc[0],
+        t_idx_3.iloc[-1],
+    ]
     es = EnergySystem(
         timeindex=timeindex,
         timeincrement=[1] * len(timeindex),
         infer_last_interval=False,
-        periods=periods,
+        investment_times=periods,
     )
     period_years = [0, 21, 30]
     assert es.capacity_period_years == period_years

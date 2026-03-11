@@ -52,16 +52,10 @@ class EnergySystem(es.EnergySystem):
         a 'freq' attribute that is not None. The parameter has no effect on the
         timeincrement parameter.
 
-    periods : list or None
-        The periods of a multi-period model.
-        If this is explicitly specified, it leads to creating a multi-period
-        model, providing a respective user warning as a feedback.
-
-        list of pd.date_range objects carrying the timeindex for the
-        respective period;
-
-        For a standard model, periods are not (to be) declared, i.e. None.
-        A list with one entry is derived, i.e. [0].
+    investment_times : list or None
+        The point in time, an investment can be made.
+        If this is specified, it leads to creating a pathway-planning model,
+        providing a respective user warning as a feedback.
 
     tsa_parameters : list of dicts, dict or None
         Parameter can be set in order to use aggregated timeseries from TSAM.
@@ -85,7 +79,7 @@ class EnergySystem(es.EnergySystem):
         timeindex=None,
         timeincrement=None,
         infer_last_interval=False,
-        periods=None,
+        investment_times=None,
         tsa_parameters=None,
         groupings=None,
     ):
@@ -133,7 +127,7 @@ class EnergySystem(es.EnergySystem):
                 warnings.warn(msg, FutureWarning)
                 timeindex = np.cumsum([0] + list(timeincrement))
             else:
-                if periods is None:
+                if investment_times is None:
                     msg = (
                         "Specifying the timeincrement and the timeindex"
                         " parameter at the same time is not allowed since"
@@ -191,8 +185,8 @@ class EnergySystem(es.EnergySystem):
                 tsa_parameters = [tsa_parameters]
 
             # Construct occurrences of typical periods
-            if periods is not None:
-                for p in range(len(periods)):
+            if investment_times is not None:
+                for p in range(len(investment_times) - 1):
                     tsa_parameters[p]["occurrences"] = collections.Counter(
                         tsa_parameters[p]["order"]
                     )
@@ -214,7 +208,7 @@ class EnergySystem(es.EnergySystem):
         self.tsa_parameters = tsa_parameters
 
         timeincrement = self._init_timeincrement(
-            timeincrement, timeindex, periods, tsa_parameters
+            timeincrement, timeindex, tsa_parameters
         )
         super().__init__(
             groupings=groupings,
@@ -222,22 +216,42 @@ class EnergySystem(es.EnergySystem):
         self.timeindex = timeindex
         self.timeincrement = timeincrement
 
-        self.capacity_periods = periods
-        if self.capacity_periods is not None:
+        if investment_times is not None:
             msg = (
-                "CAUTION! You specified the 'periods' attribute for your "
-                "energy system.\n This will lead to creating "
-                "a multi-period optimization modeling which can be "
-                "used e.g. for long-term investment modeling.\n"
+                "CAUTION! You specified the 'investment_times' attribute for "
+                "your energy system.\n This will lead to creating "
+                "a pathway planning model which can be "
+                "used e.g. for long-term investment optimisation.\n"
                 "Please be aware that the feature is experimental as of "
                 "now. If you find anything suspicious or any bugs, "
                 "please report them."
             )
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
+
+            # This is a very inefficient algorithm.
+            # However, I think it will be replaced soon anyway,
+            # so I will put no time into runtime optimisation here.
+            capacity_periods = []
+            investment_index = 1
+            investment_time = investment_times[investment_index]
+            capacity_period = []
+            for time_point in timeindex:
+                if time_point < investment_time:
+                    capacity_period.append(time_point)
+                else:
+                    if investment_time < investment_times[-1]:
+                        investment_index += 1
+                        investment_time = investment_times[investment_index]
+                    capacity_periods.append(pd.DatetimeIndex(capacity_period))
+                    capacity_period = [time_point]
+
+            self.capacity_periods = capacity_periods
+
             self._extract_periods_years()
             self._extract_periods_matrix()
             self._extract_end_year_of_optimization()
         else:
+            self.capacity_periods = None
             self.end_year_of_optimization = 1
 
     def _extract_periods_years(self):
@@ -301,7 +315,7 @@ class EnergySystem(es.EnergySystem):
         )
 
     @staticmethod
-    def _init_timeincrement(timeincrement, timeindex, periods, tsa_parameters):
+    def _init_timeincrement(timeincrement, timeindex, tsa_parameters):
         """Check and initialize timeincrement"""
 
         # Timeincrement in TSAM mode
