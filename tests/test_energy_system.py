@@ -9,8 +9,9 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import pytest
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
-from oemof.solph import EnergySystem
+from oemof import solph
 
 
 @pytest.mark.filterwarnings(
@@ -27,7 +28,7 @@ def test_add_periods():
         timeindex[:8784],
         timeindex[8784:-1],
     ]
-    es = EnergySystem(
+    es = solph.EnergySystem(
         timeindex=timeindex,
         investment_times=[timeindex[0], timeindex[8784], timeindex[-1]],
         infer_last_interval=False,
@@ -39,7 +40,7 @@ def test_add_periods():
 
 def test_infer_last_interval_known_freq():
     timeindex = pd.date_range(start="2025-01-01", periods=25, freq="h")
-    es = EnergySystem(
+    es = solph.EnergySystem(
         timeindex=timeindex[:24],
         infer_last_interval=True,
     )
@@ -51,7 +52,7 @@ def test_infer_last_interval_infer_freq():
     timeindex = pd.date_range(start="2025-01-01", periods=25, freq="h")
     timeindex.freq = None
 
-    es = EnergySystem(
+    es = solph.EnergySystem(
         timeindex=timeindex[:-1],
         infer_last_interval=True,
     )
@@ -67,15 +68,74 @@ def test_infer_last_interval_no_freq():
     msg = "interval_last_interval requires that the timeindex"
 
     with pytest.raises(AttributeError, match=msg):
-        EnergySystem(
+        solph.EnergySystem(
             timeindex=timeindex,
             infer_last_interval=True,
         )
     with pytest.raises(AttributeError, match=msg):
-        EnergySystem(
+        solph.EnergySystem(
             timeindex=[1, 2, 3],
             infer_last_interval=True,
         )
+
+
+def test_capacity_period_of_timestep_numeric():
+    timeindex = list(range(0, 13))
+
+    with pytest.warns(ExperimentalFeatureWarning, match="investment_times"):
+        es = solph.EnergySystem(
+            timeindex=timeindex,
+            infer_last_interval=False,
+            investment_times=[0, 5, 6, 10, 15],
+        )
+    assert len(es.capacity_periods) == 4
+
+    assert es.capacity_period_of_timestep(0) == 0
+    assert es.capacity_period_of_timestep(1) == 0
+    assert es.capacity_period_of_timestep(2) == 0
+    assert es.capacity_period_of_timestep(3) == 0
+    assert es.capacity_period_of_timestep(4) == 0
+    assert es.capacity_period_of_timestep(5) == 1
+    assert es.capacity_period_of_timestep(6) == 2
+    assert es.capacity_period_of_timestep(7) == 2
+    assert es.capacity_period_of_timestep(8) == 2
+    assert es.capacity_period_of_timestep(9) == 2
+    assert es.capacity_period_of_timestep(10) == 3
+    assert es.capacity_period_of_timestep(11) == 3
+
+    with pytest.raises(ValueError, match="12 not in capacity range."):
+        es.capacity_period_of_timestep(12)
+
+
+def test_capacity_period_of_timestep_datetime():
+    timeindex = solph.create_time_index(2025, 1, 12)
+
+    with pytest.warns(ExperimentalFeatureWarning, match="investment_times"):
+        es = solph.EnergySystem(
+            timeindex=timeindex,
+            infer_last_interval=False,
+            investment_times=[
+                timeindex[0],
+                timeindex[5],
+                timeindex[6],
+                timeindex[10],
+                timeindex[-1],
+            ],
+        )
+    assert es.capacity_period_of_timestep(0) == 0
+    assert es.capacity_period_of_timestep(1) == 0
+    assert es.capacity_period_of_timestep(2) == 0
+    assert es.capacity_period_of_timestep(3) == 0
+    assert es.capacity_period_of_timestep(4) == 0
+    assert es.capacity_period_of_timestep(5) == 1
+    assert es.capacity_period_of_timestep(6) == 2
+    assert es.capacity_period_of_timestep(7) == 2
+    assert es.capacity_period_of_timestep(8) == 2
+    assert es.capacity_period_of_timestep(9) == 2
+    assert es.capacity_period_of_timestep(10) == 3
+    assert es.capacity_period_of_timestep(11) == 3
+    with pytest.raises(ValueError, match="12 not in capacity range."):
+        es.capacity_period_of_timestep(12)
 
 
 @pytest.mark.filterwarnings(
@@ -97,7 +157,7 @@ def test_extract_period_years():
         t_idx_3.iloc[0],
         t_idx_3.iloc[-1],
     ]
-    es = EnergySystem(
+    es = solph.EnergySystem(
         timeindex=timeindex,
         timeincrement=[1] * len(timeindex),
         infer_last_interval=False,

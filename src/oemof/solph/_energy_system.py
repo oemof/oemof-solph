@@ -228,6 +228,8 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
+            self.investment_times = investment_times
+
             # This is a very inefficient algorithm.
             # However, I think it will be replaced soon anyway,
             # so I will put no time into runtime optimisation here.
@@ -235,7 +237,7 @@ class EnergySystem(es.EnergySystem):
             investment_index = 1
             investment_time = investment_times[investment_index]
             capacity_period = []
-            for time_point in timeindex:
+            for time_point in timeindex[:-1]:
                 if time_point < investment_time:
                     capacity_period.append(time_point)
                 else:
@@ -244,6 +246,9 @@ class EnergySystem(es.EnergySystem):
                         investment_time = investment_times[investment_index]
                     capacity_periods.append(pd.DatetimeIndex(capacity_period))
                     capacity_period = [time_point]
+
+            if capacity_period[-1] < investment_times[-1]:
+                capacity_periods.append(pd.DatetimeIndex(capacity_period))
 
             self.capacity_periods = capacity_periods
 
@@ -294,6 +299,21 @@ class EnergySystem(es.EnergySystem):
         self.end_year_of_optimization = (
             self.capacity_period_years[-1] + duration_last_period
         )
+
+    def capacity_period_of_timestep(
+            self,
+            ts: int,
+    ) -> int:
+        # This is a very inefficient algorithm.
+        # However, I think it will be replaced soon anyway,
+        # so I will put no time into runtime optimisation here.
+        period_end = 0
+        for p, capacity_period in enumerate(self.capacity_periods):
+            period_end += len(capacity_period)
+            if ts < period_end:
+                return p
+
+        raise ValueError(f"Time step {ts} not in capacity range.")
 
     def get_period_duration(self, period):
         """Get duration of a period in full years
