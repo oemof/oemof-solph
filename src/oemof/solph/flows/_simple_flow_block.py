@@ -111,22 +111,6 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[(g[0], g[1]) for g in group if g[2].integer]
         )
 
-        self.LIFETIME_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].lifetime is not None and g[2].age is None
-            ]
-        )
-
-        self.LIFETIME_AGE_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].lifetime is not None and g[2].age is not None
-            ]
-        )
-
     def _create_variables(self, group):
         r"""Creates all variables for standard flows.
 
@@ -339,52 +323,6 @@ class SimpleFlowBlock(ScalarBlock):
         self.integer_flow_constr = Constraint(
             self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
         )
-
-        if m.es.capacity_periods is not None:
-
-            def _lifetime_output_rule(_):
-                """Force flow value to zero when lifetime is reached"""
-                for inp, out in self.LIFETIME_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if (
-                            m.flows[inp, out].lifetime
-                            <= m.es.capacity_period_years[p]
-                        ):
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_output = Constraint(
-                self.LIFETIME_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_output_build = BuildAction(
-                rule=_lifetime_output_rule
-            )
-
-            def _lifetime_age_output_rule(block):
-                """Force flow value to zero when lifetime is reached
-                considering initial age
-                """
-                for inp, out in self.LIFETIME_AGE_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if (
-                            m.flows[inp, out].lifetime - m.flows[inp, out].age
-                            <= m.es.capacity_period_years[p]
-                        ):
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_age_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_age_output = Constraint(
-                self.LIFETIME_AGE_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_age_output_build = BuildAction(
-                rule=_lifetime_age_output_rule
-            )
 
     def _objective_expression(self):
         r"""Objective expression for all standard flows with fixed costs

@@ -136,8 +136,6 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         default_attributes = {
-            "age": None,
-            "lifetime": None,
             "integer": False,
             "investment": None,
             "nominal_capacity": 1,

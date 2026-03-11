@@ -141,8 +141,6 @@ class Flow(Edge):
         bidirectional=False,
         # --- END
         nonconvex=None,
-        lifetime=None,
-        age=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
@@ -247,8 +245,6 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
-        self.lifetime = lifetime
-        self.age = age
 
         # It is not allowed to define `minimum` or `maximum` if `fix`
         # is defined.
