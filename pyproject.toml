@@ -94,6 +94,12 @@ dev = [
 [project.scripts]
 oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation"
 
+[tool.ruff]
+extend-exclude = ["static", "ci/templates"]
+line-length = 79
+src = ["src", "tests", "examples"]
+target-version = "py313"
+
 [tool.black]
 line-length = 79
 include = '\.pyi?$'
