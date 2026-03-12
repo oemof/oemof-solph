@@ -54,10 +54,10 @@ def test_unbounded_model():
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bel = solph.buses.Bus(label="bus")
     es.add(bel)
-    # Add a Sink with a higher demand
+    # unbound Sink
     es.add(solph.components.Sink(inputs={bel: solph.flows.Flow()}))
 
-    # Add a Source with a very high supply
+    # unbound Source with a revenue
     es.add(
         solph.components.Source(
             outputs={bel: solph.flows.Flow(variable_costs=-5)}
@@ -69,6 +69,36 @@ def test_unbounded_model():
         RuntimeError, match="The solver did not return an optimal solution"
     ):
         m.solve(solver="cbc", allow_nonoptimal=False)
+
+
+def test_cmdline_options(capsys):
+    es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
+    bel = solph.buses.Bus(label="bus")
+    es.add(bel)
+    # bound Sink
+    es.add(
+        solph.components.Sink(
+            inputs={bel: solph.flows.Flow(nominal_capacity=4)}
+        )
+    )
+
+    # Source with a revenue
+    es.add(
+        solph.components.Source(
+            outputs={bel: solph.flows.Flow(variable_costs=-5)}
+        )
+    )
+    m = solph.Model(es)
+
+    m.solve(
+        solver="cbc",
+        cmdline_options={"ratio": 0.01},
+        solve_kwargs={"tee": True},  # need to set to see command line
+    )
+
+    captured = capsys.readouterr()
+
+    assert "-ratio 0.01" in captured.out
 
 
 @pytest.mark.filterwarnings(
