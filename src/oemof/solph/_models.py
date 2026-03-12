@@ -432,7 +432,12 @@ class Model(po.ConcreteModel):
         return processing.results(self)
 
     def solve(
-        self, solver="cbc", solver_io="lp", allow_nonoptimal=False, **kwargs
+        self,
+        solver="cbc",
+        solver_io="lp",
+        allow_nonoptimal=False,
+        solve_kwargs=None,
+        cmdline_options=None,
     ):
         r"""Takes care of communication with solver to solve the model.
 
@@ -445,11 +450,6 @@ class Model(po.ConcreteModel):
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
             True: If no optimal solution is found, there will be a warning.
-        \**kwargs : keyword arguments
-            Possible keys can be set see below:
-
-        Other Parameters
-        ----------------
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {"tee":True}
@@ -468,14 +468,16 @@ class Model(po.ConcreteModel):
                 FutureWarning,
             )
 
-        solve_kwargs = kwargs.get("solve_kwargs", {})
-        solver_cmdline_options = kwargs.get("cmdline_options", {})
+        if solve_kwargs is None:
+            solve_kwargs = {}
+        if cmdline_options is None:
+            cmdline_options = {}
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
         options = opt.options
-        for k in solver_cmdline_options:
-            options[k] = solver_cmdline_options[k]
+        for k in cmdline_options:
+            options[k] = cmdline_options[k]
 
         solver_results = opt.solve(self, **solve_kwargs)
 
@@ -490,8 +492,8 @@ class Model(po.ConcreteModel):
         else:
             msg = (
                 f"The solver did not return an optimal solution. "
-                f"Instead the optimization ended with\n "
-                f"      - status: {status}\n"
+                f"Instead the optimization ended with\n"
+                f"       - status: {status}\n"
                 f"       - termination condition: {termination_condition}"
             )
 
