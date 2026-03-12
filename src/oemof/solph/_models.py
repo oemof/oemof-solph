@@ -34,6 +34,8 @@ from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
+from ._results import Results
+
 
 class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
@@ -458,6 +460,14 @@ class Model(po.ConcreteModel):
             \Gurobi solver takes numeric parameter values such as
             {"method": 2}
         """
+        if allow_nonoptimal:
+            warnings.warn(
+                "Setting allow_nonoptimal does not allow to guearntee that"
+                + " results are returned. Thus, it is depreciated and will be"
+                + " removed in a future version.",
+                FutureWarning,
+            )
+
         solve_kwargs = kwargs.get("solve_kwargs", {})
         solver_cmdline_options = kwargs.get("cmdline_options", {})
         opt = SolverFactory(solver, solver_io=solver_io)
@@ -489,10 +499,11 @@ class Model(po.ConcreteModel):
                 warnings.warn(
                     msg.format(status, termination_condition), UserWarning
                 )
+                return solver_results
             else:
                 raise RuntimeError(msg)
 
-        return solver_results
+        return Results(self)
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""

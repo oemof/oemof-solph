@@ -13,6 +13,7 @@ import warnings
 
 import pandas as pd
 import pytest
+from pyomo.opt.results import SolverResults
 
 from oemof import solph
 
@@ -37,7 +38,11 @@ def test_infeasible_model():
     with pytest.warns(
         UserWarning, match="The solver did not return an optimal solution"
     ):
-        m.solve(solver="cbc", allow_nonoptimal=True)
+        with pytest.warns(
+            FutureWarning, match="allow_nonoptimal",
+        ):
+            result = m.solve(solver="cbc", allow_nonoptimal=True)
+            assert isinstance(result, SolverResults)
 
     with pytest.raises(
         RuntimeError, match="The solver did not return an optimal solution"
