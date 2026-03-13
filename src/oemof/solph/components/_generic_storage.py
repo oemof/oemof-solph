@@ -479,7 +479,14 @@ class GenericStorageBlock(ScalarBlock):
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT} \\
           \forall p \in \textrm{PERIODS}
 
-
+    Apply soc-dependent charging power. These Constraints are build if
+    :attr:`om.constant_soc_until[n, t]` and
+    :attr:`om.fraction_saturation_charging[n, t]` are set.
+    The equation follows the basic linear equation: $y = a*x + b$
+        .. math::
+            a = -\frac{P_{\max} \cdot (1-f_{end})}{E_{\nom} \cdot (1-f_{lim})}
+            b = P_{\max} \cdot \frac{1 - f_{end} \cdot f_{lim}}{1-f_{lim}}
+            
 
     =========================== ======================= =========
     symbol                      explanation             attribute
