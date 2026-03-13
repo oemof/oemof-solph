@@ -891,20 +891,11 @@ class GenericStorageBlock(ScalarBlock):
                 m.flow[i[n], n, t] <= a * block.storage_content[n, t + 1] + b
             )
 
-        if not m.TSAM_MODE:
-            self.soc_charge_limit = Constraint(
-                self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT,
-                m.TIMESTEPS,
-                rule=_soc_dependent_charge_limit_rule,
-            )
-        else:
-            if len(self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT):
-                msg = (
-                    "An SOC-dependent charge limit is not implemented in "
-                    "TSAM_MODE."
-                )
-                raise NotImplementedError(msg)
-
+        self.soc_charge_limit = Constraint(
+            self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT,
+            m.TIMESTEPS,
+            rule=_soc_dependent_charge_limit_rule,
+        )
         return None
 
     def _objective_expression(self):
