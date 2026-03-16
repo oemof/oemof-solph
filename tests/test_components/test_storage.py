@@ -37,10 +37,9 @@ def test_relative_losses():
         model = solph.Model(es)
         model.solve("cbc")
 
-        result = solph.processing.results(model)[(storage, None)]["sequences"][
-            "storage_content"
-        ]
-        case["result"] = np.array(result)
+        result = solph.Results(model)
+
+        case["result"] = np.array(result["storage_content"][storage])
 
     for i in range(500):
         assert (
@@ -85,15 +84,14 @@ def test_invest_power_uncoupled():
     model = solph.Model(es)
     model.solve("cbc")
 
-    result = solph.processing.results(model)
-    storage_content = result[(storage, None)]["sequences"]["storage_content"]
-    assert (storage_content == np.arange(0, 10.5, 1)).all()
+    result = solph.Results(model)
+    assert (result["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = result[(bus, storage)]["scalars"]["invest"]
-    assert invest_inflow == pytest.approx(1)
+    invest_inflow = result["invest"][(bus, storage)]
+    assert invest_inflow[0] == pytest.approx(1)
 
-    invest_outflow = result[(storage, bus)]["scalars"]["invest"]
-    assert invest_outflow == pytest.approx(0)
+    invest_outflow = result["invest"][(storage, bus)]
+    assert invest_outflow[0] == pytest.approx(0)
 
 
 def test_invest_power_coupled():
@@ -132,15 +130,15 @@ def test_invest_power_coupled():
     model = solph.Model(es)
     model.solve("cbc")
 
-    result = solph.processing.results(model)
-    storage_content = result[(storage, None)]["sequences"]["storage_content"]
+    result = solph.Results(model)
+    storage_content = result["storage_content"][storage]
     assert (storage_content == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = result[(bus, storage)]["scalars"]["invest"]
-    assert invest_inflow == pytest.approx(1)
+    invest_inflow = result["invest"][(bus, storage)]
+    assert invest_inflow[0] == pytest.approx(1)
 
-    invest_outflow = result[(storage, bus)]["scalars"]["invest"]
-    assert invest_outflow == pytest.approx(2)
+    invest_outflow = result["invest"][(storage, bus)]
+    assert invest_outflow[0] == pytest.approx(2)
 
 
 def test_storage_charging():
