@@ -170,7 +170,7 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if energysystem.capacity_periods is not None:
+        if not self.es.transitional_single_period:
             self._set_discount_rate_with_warning()
         else:
             pass
@@ -225,7 +225,7 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.capacity_periods is None:
+        if self.es.transitional_single_period:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(

@@ -254,7 +254,7 @@ def results(model, remove_last_time_point=False):
     if model.es.tsa_parameters:
         for p, period_data in enumerate(model.es.tsa_parameters):
             if p == 0:
-                if model.es.capacity_periods is None:
+                if model.es.transitional_single_period:
                     timeindex = model.es.timeindex
                 else:
                     timeindex = model.es.capacity_periods[0]
@@ -280,8 +280,8 @@ def results(model, remove_last_time_point=False):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
 
-    # Standard model results extraction
-    if model.es.capacity_periods is None:
+    # single period model results extraction
+    if model.es.transitional_single_period:
         result = _extract_standard_model_result(
             df_dict, result, result_index, remove_last_time_point
         )
@@ -310,7 +310,7 @@ def results(model, remove_last_time_point=False):
             duals = [
                 model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
-            if model.es.capacity_periods is None:
+            if model.es.transitional_single_period:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             # TODO: Align with standard model
             else:

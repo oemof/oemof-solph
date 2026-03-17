@@ -216,7 +216,11 @@ class EnergySystem(es.EnergySystem):
         self.timeindex = timeindex
         self.timeincrement = timeincrement
 
-        if investment_times is not None:
+        if investment_times is None:
+            investment_times = [timeindex[0]] + [timeindex[-1]]
+            self.transitional_single_period = True
+        else:
+            self.transitional_single_period = False
             msg = (
                 "CAUTION! You specified the 'investment_times' attribute for "
                 "your energy system.\n This will lead to creating "
@@ -228,36 +232,33 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
-            self.investment_times = investment_times
+        self.investment_times = investment_times
 
-            # This is a very inefficient algorithm.
-            # However, I think it will be replaced soon anyway,
-            # so I will put no time into runtime optimisation here.
-            capacity_periods = []
-            investment_index = 1
-            investment_time = investment_times[investment_index]
-            capacity_period = []
-            for time_point in timeindex[:-1]:
-                if time_point < investment_time:
-                    capacity_period.append(time_point)
-                else:
-                    if investment_time < investment_times[-1]:
-                        investment_index += 1
-                        investment_time = investment_times[investment_index]
-                    capacity_periods.append(pd.DatetimeIndex(capacity_period))
-                    capacity_period = [time_point]
-
-            if capacity_period[-1] < investment_times[-1]:
+        # This is a very inefficient algorithm.
+        # However, I think it will be replaced soon anyway,
+        # so I will put no time into runtime optimisation here.
+        capacity_periods = []
+        investment_index = 1
+        investment_time = investment_times[investment_index]
+        capacity_period = []
+        for time_point in timeindex[:-1]:
+            if time_point < investment_time:
+                capacity_period.append(time_point)
+            else:
+                if investment_time < investment_times[-1]:
+                    investment_index += 1
+                    investment_time = investment_times[investment_index]
                 capacity_periods.append(pd.DatetimeIndex(capacity_period))
+                capacity_period = [time_point]
 
-            self.capacity_periods = capacity_periods
+        if capacity_period[-1] < investment_times[-1]:
+            capacity_periods.append(pd.DatetimeIndex(capacity_period))
 
-            self._extract_periods_years()
-            self._extract_periods_matrix()
-            self._extract_end_year_of_optimization()
-        else:
-            self.capacity_periods = None
-            self.end_year_of_optimization = 1
+        self.capacity_periods = capacity_periods
+
+        self._extract_periods_years()
+        self._extract_periods_matrix()
+        self._extract_end_year_of_optimization()
 
     def _extract_periods_years(self):
         """Map years in optimization to respective period based on time indices
@@ -301,8 +302,8 @@ class EnergySystem(es.EnergySystem):
         )
 
     def capacity_period_of_timestep(
-            self,
-            ts: int,
+        self,
+        ts: int,
     ) -> int:
         # This is a very inefficient algorithm.
         # However, I think it will be replaced soon anyway,
