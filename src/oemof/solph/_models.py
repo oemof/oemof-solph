@@ -450,6 +450,8 @@ class Model(po.ConcreteModel):
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
             True: If no optimal solution is found, there will be a warning.
+            This is an option for experts. There will be no results in case
+            no optimum is found.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {"tee":True}
@@ -460,14 +462,6 @@ class Model(po.ConcreteModel):
             \Gurobi solver takes numeric parameter values such as
             {"method": 2}
         """
-        if allow_nonoptimal:
-            warnings.warn(
-                "Setting allow_nonoptimal does not allow to guearntee that"
-                + " results are returned. Thus, it is depreciated and will be"
-                + " removed in a future version.",
-                FutureWarning,
-            )
-
         if solve_kwargs is None:
             solve_kwargs = {}
         if cmdline_options is None:
