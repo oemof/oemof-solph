@@ -121,29 +121,19 @@ def run_for_typical_periods(
         infer_last_interval=False,
     )
     # %%[ti_index_and_energy_system_end]
-    m = populate_and_solve_energy_system(
+    results = populate_and_solve_energy_system(
         es=es,
         time_series=time_series,
         investments=investment_objects,
         variable_costs=variable_costs,
     )
 
-    results = solph.processing.results(m)
-
     # The keys actually contain the Nodes and not strings,
     # but as a Node is equal to its string, the following works.
-    pv_invest_kw = results[("PV", "electricity")]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    storage_invest_kwh = results[("Battery", None)]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    hp_invest_kw = results[("Heat pump", "heat")]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    gas_boiler_invest_kw = results[("Gas Boiler", "heat")]["period_scalars"][
-        "invest"
-    ].iloc[0]
+    pv_invest_kw = results["invest"][("PV", "electricity")][0]
+    storage_invest_kwh = results["invest"]["Battery"][0]
+    hp_invest_kw = results["invest"][("Heat pump", "heat")][0]
+    gas_boiler_invest_kw = results["invest"][("Gas Boiler", "heat")][0]
 
     return pd.Series(
         {
