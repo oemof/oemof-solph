@@ -290,7 +290,7 @@ class TestParameterResult:
         results_processing = processing.results(self.model_cbc)
         with pytest.warns(
             FutureWarning,
-            match="Model.results\(\) is deprecated.",
+            match=r"Model.results\(\) is deprecated.",
         ):
             results_model = self.model_cbc.results()
 
