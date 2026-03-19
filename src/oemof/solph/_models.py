@@ -429,6 +429,11 @@ class Model(po.ConcreteModel):
         """Returns a nested dictionary of the results of this optimization.
         See the processing module for more information on results extraction.
         """
+        warnings.warn(
+            "Model.results() is deprecated."
+            + " Please use results returned by Model.solve().",
+            FutureWarning,
+        )
         return processing.results(self)
 
     def solve(

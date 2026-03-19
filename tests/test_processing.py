@@ -286,6 +286,19 @@ class TestParameterResult:
             param_results[(diesel, None)]["sequences"], pandas.DataFrame()
         )
 
+    def test_model_results(self):
+        results_processing = processing.results(self.model_cbc)
+        with pytest.warns(
+            FutureWarning,
+            match="Model.results\(\) is deprecated.",
+        ):
+            results_model = self.model_cbc.results()
+
+        # We just compare the keys as the nested values contain Series,
+        # that do not define (global) equality. As the function is deprecated
+        # anyway, this should be okay.
+        assert results_processing.keys() == results_model.keys()
+
     def test_parameter_with_node_view(self):
         param_results = processing.parameter_as_dict(
             self.es, exclude_none=True

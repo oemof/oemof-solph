@@ -99,9 +99,6 @@ def test_dispatch_one_time_step(solver="cbc"):
     # solve problem
     optimization_model.solve(solver=solver)
 
-    # write back results from optimization object to energysystem
-    optimization_model.results()
-
     # ################################ results ################################
     data = views.node(processing.results(model=optimization_model), "b_el")
 

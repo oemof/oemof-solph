@@ -205,7 +205,7 @@ def main(optimize=True):
     )
 
     # write back results from optimization object to energysystem
-    optimization_model.results()
+    results = optimization_model.results()
 
     # ################################ results ################################
 
@@ -214,12 +214,12 @@ def main(optimize=True):
     # investment values within a pandas.Series object.
     # in this case the entry data['scalars'] does not exist since no investment
     # variables are used
-    data = views.node(optimization_model.results(), "bel")
+    data = views.node(results, "bel")
     data["sequences"].info()
     print("Optimization successful. Showing some results:")
 
     # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    node_results_bel = views.node(optimization_model.results(), "bel")
+    node_results_bel = views.node(results, "bel")
     node_results_flows = node_results_bel["sequences"]
 
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -248,7 +248,7 @@ def main(optimize=True):
 
     plt.show()
 
-    node_results_bth = views.node(optimization_model.results(), "bth")
+    node_results_bth = views.node(results, "bth")
     node_results_flows = node_results_bth["sequences"]
 
     fig, ax = plt.subplots(figsize=(10, 5))
