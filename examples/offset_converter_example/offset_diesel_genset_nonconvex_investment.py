@@ -37,7 +37,7 @@ Installation requirements
 -------------------------
 This example requires the version v0.5.x of oemof. Install by:
 
-    pip install 'oemof.solph>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 """
 
@@ -69,7 +69,7 @@ def get_data_from_file_path(file_path: str) -> pd.DataFrame:
     return data
 
 
-def offset_converter_example():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -178,8 +178,8 @@ def offset_converter_example():
         outputs={
             b_el_ac: solph.flows.Flow(
                 variable_costs=variable_cost_diesel_genset,
-                min=min_load,
-                max=max_load,
+                minimum=min_load,
+                maximum=max_load,
                 nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,
@@ -234,7 +234,11 @@ def offset_converter_example():
         nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
-        inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
+        inputs={
+            b_el_dc: solph.flows.Flow(
+                variable_costs=0, nominal_capacity=solph.Investment()
+            )
+        },
         outputs={
             b_el_dc: solph.flows.Flow(
                 nominal_capacity=solph.Investment(ep_costs=0)
@@ -284,6 +288,9 @@ def offset_converter_example():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energy_system
 
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
@@ -455,7 +462,7 @@ def offset_converter_example():
     if __name__ == "__main__":
         print("\n" + 50 * "*")
         print(
-            f"Simulation Time: {end_simulation_time-start_simulation_time:.2f} s"
+            f"Simulation Time: {end_simulation_time - start_simulation_time:.2f} s"
         )
         print(50 * "*")
         print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")
@@ -570,7 +577,7 @@ def offset_converter_example():
                 linestyle="--",
             )
             min_efficiency_annotation_text = (
-                f"minimum efficiency: {min_efficiency*100:0.0f}%"
+                f"minimum efficiency: {min_efficiency * 100:0.0f}%"
             )
             ax.annotate(
                 min_efficiency_annotation_text,
@@ -588,7 +595,7 @@ def offset_converter_example():
                 linestyle="--",
             )
             max_efficiency_annotation_text = (
-                f"maximum efficiency: {max_efficiency*100:0.0f}%"
+                f"maximum efficiency: {max_efficiency * 100:0.0f}%"
             )
             ax.annotate(
                 max_efficiency_annotation_text,
@@ -612,4 +619,4 @@ def offset_converter_example():
 
 
 if __name__ == "__main__":
-    offset_converter_example()
+    main()

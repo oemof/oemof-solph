@@ -1,6 +1,8 @@
-============
-Contributing
-============
+.. _contribute_label:
+
+=================
+How to contribute
+=================
 
 Contributions are welcome, and they are greatly appreciated! Every
 little bit helps, and credit will always be given.
@@ -51,17 +53,17 @@ To set up `oemof-solph` for local development:
 
    Now you can make your changes locally.
 
-4. When you're done making changes run all the checks and docs builder with `tox <https://tox.wiki/en/latest/installation.html>`_ one command::
+4. When you're done making changes run all the checks and docs builder with `tox <https://tox.wiki/en/stable/>`_ one command::
 
     tox
 
-5. Commit your changes and push your branch to GitHub. Please do not forget to write a descriptive commit message that eventually explains design decisions::
+5. Commit your changes and push your branch to GitHub. Please do not forget to write a descriptive commit message that explains design decisions::
 
     git add $(changed_files)
-    git commin
-    git push origin name-of-your-bugfix-or-feature 
+    git commit
+    git push origin name-of-your-bugfix-or-feature
 
-6. Submit a pull request through the GitHub website.
+6. Submit a pull request through the GitHub website. Please check the box to allow changes by maintainers.
 
 Pull Request Guidelines
 -----------------------
@@ -119,9 +121,7 @@ Available standard environments are::
     clean
     check
     docs
-    py39
-    py310
-    py311
+    py3
 
 To run a subset of tests::
 

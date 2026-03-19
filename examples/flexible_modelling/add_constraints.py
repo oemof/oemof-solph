@@ -20,11 +20,11 @@ Download source code: :download:`add_constraints.py </../examples/flexible_model
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 To draw the graph pygraphviz is required, installed by:
 
@@ -38,6 +38,7 @@ Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import logging
 
 import pandas as pd
@@ -50,7 +51,7 @@ from oemof.solph import Model
 from oemof.solph import components as cmp
 
 
-def run_add_constraints_example(solver="cbc", nologg=False):
+def main(solver="cbc", nologg=False, optimize=True):
     if not nologg:
         logging.basicConfig(level=logging.INFO)
     # ##### creating an oemof solph optimization model, nothing special here ##
@@ -85,6 +86,9 @@ def run_add_constraints_example(solver="cbc", nologg=False):
     )
 
     es.add(sink, pp_oil, pp_lig)
+
+    if optimize is False:
+        return es
 
     # create the model
     om = Model(energysystem=es)
@@ -155,4 +159,4 @@ def run_add_constraints_example(solver="cbc", nologg=False):
 
 
 if __name__ == "__main__":
-    run_add_constraints_example()
+    main()

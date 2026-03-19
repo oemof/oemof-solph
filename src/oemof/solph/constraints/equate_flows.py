@@ -97,7 +97,7 @@ def equate_flows_by_keyword(
     for n, keyword in enumerate([keyword1, keyword2]):
         flows[n] = []
         for i, o in model.flows:
-            if hasattr(model.flows[i, o], keyword):
+            if keyword in model.flows[i, o].custom_properties:
                 flows[n].append((i, o))
 
     return equate_flows(model, flows[0], flows[1], factor1=factor1, name=name)

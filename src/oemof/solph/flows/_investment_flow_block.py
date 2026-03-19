@@ -15,6 +15,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from warnings import warn
 
 import numpy as np
@@ -143,7 +144,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
         self.MIN_INVESTFLOWS = Set(
-            initialize=[(g[0], g[1]) for g in group if g[2].min.min() != 0]
+            initialize=[(g[0], g[1]) for g in group if g[2].minimum.min() != 0]
         )
 
         self.EXISTING_INVESTFLOWS = Set(
@@ -291,7 +292,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             .. math::
                 &
-                P(p, t) \le ( P_{total}(p) ) \cdot f_{max}(t) \\
+                P(p, t) \le ( P_{total}(p) ) \cdot f_{maximum}(t) \\
                 &
                 \forall p, t \in \textrm{TIMEINDEX}
 
@@ -389,7 +390,7 @@ class InvestmentFlowBlock(ScalarBlock):
 
             .. math::
                 &
-                P(p, t) \geq P_{total}(p) \cdot f_{min}(t) \\
+                P(p, t) \geq P_{total}(p) \cdot f_{minimum}(t) \\
                 &\\
                 &
                 \forall p, t \in \textrm{TIMEINDEX}
@@ -645,7 +646,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        <= self.total[i, o, p] * m.flows[i, o].max[t]
+                        <= self.total[i, o, p] * m.flows[i, o].maximum[t]
                     )
                     self.max.add((i, o, p, t), expr)
 
@@ -662,7 +663,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        >= self.total[i, o, p] * m.flows[i, o].min[t]
+                        >= self.total[i, o, p] * m.flows[i, o].minimum[t]
                     )
                     self.min.add((i, o, p, t), expr)
 
@@ -912,23 +913,19 @@ class InvestmentFlowBlock(ScalarBlock):
                     )
 
         else:
+            interest = 0.05
             msg = (
                 "You did not specify an interest rate.\n"
-                "It will be set equal to the discount_rate of {} "
-                "of the model as a default.\nThis corresponds to a "
-                "social planner point of view and does not reflect "
-                "microeconomic interest requirements."
+                "It will be set to {}."
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
+                warn(
+                    msg.format(interest),
+                    debugging.SuspiciousUsageWarning,
+                )
                 for p in m.PERIODS:
+
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,
@@ -964,13 +961,10 @@ class InvestmentFlowBlock(ScalarBlock):
 
             for i, o in self.NON_CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
+                warn(
+                    msg.format(interest),
+                    debugging.SuspiciousUsageWarning,
+                )
                 for p in m.PERIODS:
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
@@ -984,12 +978,16 @@ class InvestmentFlowBlock(ScalarBlock):
                     present_value_factor_remaining = 1 / economics.annuity(
                         capex=1, n=duration, wacc=interest
                     )
+                    annuity_offset = economics.annuity(
+                        capex=m.flows[i, o].investment.offset[p],
+                        n=lifetime,
+                        wacc=interest,
+                    )
                     investment_costs_increment = (
                         self.invest[i, o, p]
                         * annuity
                         * present_value_factor_remaining
-                        + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
+                        + self.invest_status[i, o, p] * annuity_offset
                     )
                     remaining_value_difference = (
                         self._evaluate_remaining_value_difference(

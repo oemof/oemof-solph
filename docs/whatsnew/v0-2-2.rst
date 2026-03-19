@@ -19,7 +19,7 @@ New features
 * We added a new attribute `existing` to the `solph.options.Investement` class.
   It will now be possible to run investment optimization based on already
   installed capacity of a component.
-  Take a look on :ref:`investment_mode_label` for usage of this option.
+  Take a look on :ref:`optimization_invest_label` for usage of this option.
   (`Issue #489 <https://github.com/oemof/oemof-solph/pull/489>`_).
 
 * Investement variables for the capacity and the flows are now decoupled to
@@ -51,9 +51,11 @@ Documentation
 ####################
 
 * The documentation of the storage
-  `storage component <https://oemof-solph.readthedocs.io/en/latest/usage.html#genericstorage-component>`_ has been improved.
+  :ref:`storage component <oemof_solph_components_generic_storage_label>` has
+  been improved.
 * The documentation of the
-  `Extraction Turbine <https://oemof-solph.readthedocs.io/en/latest/usage.html#extractionturbinechp-component>`_ has been improved.
+  :ref:`Extraction Turbine <oemof_solph_components_extraction_turbine_chp_label>`
+  has been improved.
 
 Known issues
 ####################
@@ -99,4 +101,3 @@ Contributors
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien
-

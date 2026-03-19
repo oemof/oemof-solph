@@ -21,16 +21,17 @@ Download source code: :download:`dual_variable_example.py </../examples/dual_var
 Installation requirements
 -------------------------
 
-This example requires the version v0.5.x of oemof.solph:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph[examples]>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 
 SPDX-License-Identifier: MIT
 """
+
 ###########################################################################
 # imports
 ###########################################################################
@@ -47,7 +48,7 @@ from oemof.solph import flows
 from oemof.solph import processing
 
 
-def main():
+def main(optimize=True):
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
@@ -240,8 +241,11 @@ def main():
     energysystem.add(storage)
 
     ##########################################################################
-    # Optimise the energy system and plot the results
+    # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = Model(energysystem)

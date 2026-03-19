@@ -1,13 +1,9 @@
 
-|tox-pytest| |tox-checks| |appveyor| |coveralls| |codecov|
+|tox-pytest| |tox-checks| |packaging| |coverage|
 
-|scrutinizer| |codacy| |codeclimate|
+|docs| |version| |supported-versions|
 
-|wheel| |packaging| |supported-versions|
-
-|docs| |zenodo|
-
-|version| |commits-since| |chat|
+|zenodo| |commits-since| |chat|
 
 
 ------------------------------
@@ -21,36 +17,15 @@
 .. |packaging| image:: https://github.com/oemof/oemof-solph/actions/workflows/packaging.yml/badge.svg
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
+.. |coverage| image:: https://raw.githubusercontent.com/oemof/oemof-solph/python-coverage-comment-action-data/badge.svg
+    :target: https://htmlpreview.github.io/?https://github.com/oemof/oemof-solph/blob/python-coverage-comment-action-data/htmlcov/index.html
+
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
 
-.. |appveyor| image:: https://ci.appveyor.com/api/projects/status/github/oemof/oemof-solph?branch=dev&svg=true
-    :alt: AppVeyor Build Status
-    :target: https://ci.appveyor.com/project/oemof-developer/oemof-solph
-
-.. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
-    :alt: Coverage Status
-    :target: https://coveralls.io/github/oemof/oemof-solph
-
-.. |codecov| image:: https://codecov.io/gh/oemof/oemof-solph/branch/dev/graphs/badge.svg?branch=dev
-    :alt: Coverage Status
-    :target: https://codecov.io/gh/oemof/oemof-solph
-
-.. |codacy| image:: https://api.codacy.com/project/badge/Grade/a6e5cb2dd2694c73895e142e4cf680d5
-    :target: https://app.codacy.com/gh/oemof/oemof-solph/dashboard
-    :alt: Codacy Code Quality Status
-
-.. |codeclimate| image:: https://codeclimate.com/github/oemof/oemof-solph/badges/gpa.svg
-   :target: https://codeclimate.com/github/oemof/oemof-solph
-   :alt: CodeClimate Quality Status
-
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
-    :target: https://pypi.org/project/oemof.solph
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/oemof.solph.svg
-    :alt: PyPI Wheel
     :target: https://pypi.org/project/oemof.solph
 
 .. |supported-versions| image:: https://img.shields.io/pypi/pyversions/oemof.solph.svg
@@ -68,10 +43,6 @@
 .. |zenodo| image:: https://zenodo.org/badge/DOI/10.5281/zenodo.596235.svg
     :alt: Zenodo DOI
     :target: https://doi.org/10.5281/zenodo.596235
-
-.. |scrutinizer| image:: https://img.shields.io/scrutinizer/quality/g/oemof/oemof-solph/dev.svg
-    :alt: Scrutinizer Status
-    :target: https://scrutinizer-ci.com/g/oemof/oemof-solph/
 
 .. |chat| image:: https://img.shields.io/badge/chat-oemof:matrix.org-%238ADCF7
      :alt: matrix-chat
@@ -128,15 +99,12 @@ Documentation
 =============
 The `oemof.solph documentation <https://oemof-solph.readthedocs.io/>`_ is powered by readthedocs. Use the `project site <https://readthedocs.org/projects/oemof>`_ of oemof.solph to choose the version of the documentation. Go to the `download page <https://readthedocs.org/projects/oemof/downloads/>`_ to download different versions and formats (pdf, html, epub) of the documentation.
 
-
-.. _installation_label:
-
 Installation
 ============
 
 
 If you have a working Python installation, use pypi to install the latest version of oemof.solph.
-Python >= 3.8 is recommended. Lower versions may work but are not tested.
+Python >= 3.11 is recommended. Lower versions may work but are not tested.
 
 We highly recommend to use virtual environments.
 Please refer to the documentation of your Python distribution (e.g. Anaconda,
@@ -179,7 +147,7 @@ To install the solvers have a look at the package repository of your Linux distr
  1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_
  2. Download `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
  3. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
- 4. Add the path of the executable files of both solvers to the PATH variable using `this tutorial <https://www.computerhope.com/issues/ch000549.htm>`_
+ 4. Add the path of the executable files of both solvers to the PATH variable (cf. `setting environment variables as user <https://learn.microsoft.com/en-us/troubleshoot/windows-client/performance/cannot-modify-user-environment-variables-system-properties>`_)
  5. Restart Windows
 
 Check the solver installation by executing the test_installation example (see the `Installation test` section).
@@ -198,7 +166,7 @@ If you install the CBC solver via brew (highly recommended), it should work with
 
 **conda**
 
-Provided you are using a Linux or MacOS, the CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
+The CBC-solver can also be installed in a `conda` environment. Please note, that it is highly recommended to `use pip after conda <https://www.anaconda.com/blog/using-pip-in-a-conda-environment>`_, so:
 
 .. code:: console
 

@@ -54,7 +54,7 @@ class TestsGrouping:
                     b: solph.flows.Flow(
                         full_load_time_max=2.3,
                         variable_costs=25,
-                        max=0.8,
+                        maximum=0.8,
                         nominal_capacity=Investment(
                             ep_costs=500, maximum=10e5
                         ),

@@ -46,11 +46,11 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
@@ -70,7 +70,7 @@ except ModuleNotFoundError:
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
@@ -143,7 +143,7 @@ def main():
                 bus_a_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 2},
+                        custom_properties={"space": 2},
                     ),
                 )
             },
@@ -160,13 +160,16 @@ def main():
                 bus_b_1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
-                        custom_attributes={"space": 1},
+                        custom_properties={"space": 1},
                     ),
                 )
             },
             conversion_factors={bus_a_1: 0.8},
         )
     )
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

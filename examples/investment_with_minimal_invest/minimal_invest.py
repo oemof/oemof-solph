@@ -14,11 +14,11 @@ Download source code: :download:`minimal_invest.py </../examples/investment_with
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
@@ -37,7 +37,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
@@ -94,7 +94,7 @@ def main():
                     nonconvex=True,
                     offset=c_fix,
                 ),
-                # min=0.1,
+                # minimum=0.1,
                 # fixed=True,
                 # actual_value=[0.5, 0.5, 0.5, 0.5, 0.5],
             )
@@ -102,6 +102,10 @@ def main():
         conversion_factors={bus_1: eta},
     )
     es.add(trafo)
+
+    if optimize is False:
+        return es
+
     # create an optimization problem and solve it
     om = solph.Model(es)
 

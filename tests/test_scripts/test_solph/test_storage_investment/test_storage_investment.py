@@ -136,8 +136,16 @@ def test_optimise_storage_size(
     es.add(
         solph.components.GenericStorage(
             label="storage",
-            inputs={bel: solph.flows.Flow(variable_costs=10e10)},
-            outputs={bel: solph.flows.Flow(variable_costs=10e10)},
+            inputs={
+                bel: solph.flows.Flow(
+                    variable_costs=10e10, nominal_capacity=solph.Investment()
+                )
+            },
+            outputs={
+                bel: solph.flows.Flow(
+                    variable_costs=10e10, nominal_capacity=solph.Investment()
+                )
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_capacity=1 / 6,
@@ -159,13 +167,13 @@ def test_optimise_storage_size(
     es.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    es.dump()
+    es.dump(filename="./es_dump.oemof", consider_dpath=False)
 
 
 def test_results_with_recent_dump():
     test_optimise_storage_size()
     energysystem = solph.EnergySystem()
-    energysystem.restore()
+    energysystem.restore(filename="./es_dump.oemof", consider_dpath=False)
 
     # Results
     results = energysystem.results["main"]
@@ -201,9 +209,9 @@ def test_results_with_recent_dump():
     # Problem results
     assert meta["problem"]["Lower bound"] == 4.231675777e17
     assert meta["problem"]["Upper bound"], 4.231675777e17
-    assert meta["problem"]["Number of variables"] == 2808
+    assert meta["problem"]["Number of variables"] == 2807
     assert meta["problem"]["Number of constraints"] == 2809
-    assert meta["problem"]["Number of nonzeros"] == 1199
+    assert meta["problem"]["Number of nonzeros"] == 1197
     assert meta["problem"]["Number of objectives"] == 1
     assert str(meta["problem"]["Sense"]) == "minimize"
 
@@ -216,7 +224,7 @@ def test_solph_converter_attributes_before_dump_and_after_restore():
     of `solph.components.Converter`"""
     test_optimise_storage_size()
     energysystem = solph.EnergySystem()
-    energysystem.restore()
+    energysystem.restore(filename="./es_dump.oemof", consider_dpath=False)
 
     trsf_attr_before_dump = sorted([x for x in dir(PP_GAS) if "__" not in x])
 

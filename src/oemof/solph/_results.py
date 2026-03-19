@@ -1,0 +1,372 @@
+# -*- coding: utf-8 -*-
+
+"""Modules for providing a convenient data structure for solph results.
+
+SPDX-FileCopyrightText: Stephan Günther
+SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
+SPDX-FileCopyrightText: Eva Schischke
+
+SPDX-License-Identifier: MIT
+
+"""
+
+import warnings
+from collections.abc import Callable, Hashable
+
+import pandas as pd
+from oemof.tools.debugging import ExperimentalFeatureWarning
+from pyomo.core.base.var import Var
+from pyomo.environ import ConcreteModel
+from pyomo.opt.results.container import ListContainer
+
+import oemof.solph
+
+
+class Filters(dict):
+    def updating(
+        self, filters: dict[str, Callable[[object], bool]]
+    ) -> "Filters":
+        result = Filters(self)
+        result.update(filters)
+        return result
+
+    @staticmethod
+    def nofilter(*args, **kwargs):
+        return True
+
+    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
+        return self.get(variable, self.nofilter)
+
+
+class Results:
+    """provides functionality for results processing
+
+    Takes pyomo results and uses keys to access different types of results.
+    Some of these keys are related to meta_results of the solver,
+    and some of the variables are related to the oemof.solph model.
+    Examples are 'flow', 'storage_content', and 'invest'.
+
+    Example
+    -------
+    >>> from oemof import solph
+    >>> energysystem = solph.EnergySystem(timeindex=[1,2,3])
+    >>> energysystem_model = solph.Model(energysystem)
+    >>> _ = energysystem_model.solve()
+    >>> results = solph.Results(energysystem_model)
+    >>> results.get("flow")  # with the equivalent `results["flow"]`
+    """
+
+    filters = Filters(
+        {
+            "flow": lambda column: getattr(
+                column[0].outputs[column[1]], "visible", True
+            ),
+        }
+    )
+
+    def __init__(self, model: ConcreteModel):
+        self._solver_results = model.solver_results
+        self._meta_results = {
+            "objective": model.objective(),
+        }
+        self._variables = {}
+        self._model = model
+        self._dfs = {}
+
+        for vardata in model.component_data_objects(Var):
+            for variable in [vardata.parent_component()]:
+                # name of the variable
+                key = str(variable).split(".")[-1]
+                # where the variable is found in the model
+                occurence = str(variable)[: -(len(key) + 1)]
+                if (
+                    key not in self._variables
+                    and key not in self._solver_results
+                ):  # variable found for the first time
+                    self._variables[key] = {occurence: variable}
+                elif (
+                    key in self._variables
+                    and occurence not in self._variables[key]
+                ):
+                    # Variable known name found somewhere new in the model.
+                    # Aligning names is particularly useful when they name
+                    # the same thing in different Blocks.
+                    self._variables[key][occurence] = variable
+                else:
+                    # Only left option should be
+                    # self._variables[key][occurence] == variable.
+                    # Iterated over the same thing twice.
+                    # Case for debugging purposes.
+                    # We should avoid useless iterations.
+                    pass
+
+        # adss additional keys for the calculation of opex and capex
+        # if the keyword eval_economy is True
+        # checks if investment optimization is happing to add capex as key
+        # TODO: add keyword for multiperiod
+
+        self._economy = {"variable_costs": None}
+        if "invest" in self._variables.keys():
+            self._economy["investment_costs"] = None
+
+    def keys(self):
+        """Method returning keys of the result object
+
+        Returns:
+            set: keys that can be used to access results
+        """
+        return (
+            self._solver_results.keys()
+            | self._meta_results.keys()
+            | self._variables.keys()
+            | self._economy.keys()
+        )
+
+    def get(
+        self,
+        key: str,
+        default: any = None,
+        filters: Filters = None,
+    ) -> pd.DataFrame | pd.Series:
+        # TODO:
+        #   - Figure out why `Results.init_content` is a `pd.Series`.
+        #   - Support `Var`s as arguments?
+        #   - Add column (level) and index names like:
+        #       source, target, timestep etc.
+        """Return a `DataFrame` view of the model's `variable`.
+
+            The function signature mimics the function `get` of a `dict`,
+            similarly, you can also replace e.g. `results.get("flow")`
+            with the equivalent `results["flow"]`.
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+        default : any
+            value to return if key is not found
+
+        Returns
+        -------
+        pd.DataFrame or pd.Series: Result including corresponding time axis
+        """
+        # TODO: Refactor this hacky solution to a more sensible one.
+        # The original logic checked for `variable not in self._dfs` in order
+        # to run code extracting the `DataFrame` only for that case. Now that
+        # the `DataFrame` extraction code has grown quite a bit, keeping that
+        # logic would've meant a much to invasive change for the merge commit.
+        # So instead, reverse the logic to check for `variable in self._dfs`
+        # and skip the extraction code for that case by making sure that `key`
+        # will not be found.
+        # As this might be a bit hard to follow, refactor this code to be more
+        # straightforward.
+        variable = key
+        if variable in self._dfs:
+            default = self._dfs[variable]
+            key = object()
+
+        if key == "variable_costs":
+            rv = self._calc_variable_costs()
+        elif key == "investment_costs":
+            rv = self._calc_capex()
+        elif key in self._variables:
+            rv = []
+            for occurence in self._variables[key]:
+                dataset = self._variables[key][occurence]
+                rv.append(
+                    pd.DataFrame(dataset.extract_values(), index=[0]).stack(
+                        future_stack=True
+                    )
+                )
+            # We assume that varables with the same name
+            # also use the same index but have disjunct values on that index.
+            # For example, the status of a Flow is depending on the type of
+            # Flow is defined in either NonConvexFlowBlock or
+            # InvestNonConvexFlowBlock. As this technical detail does not
+            # interest users, we concatinate all collected DataFrames.
+            # Note that this simplification might lead to unexpected results
+            # if third-party code introduces a variable name collision.
+            rv = pd.concat(rv, axis=1)
+
+            # overwrite known indexes
+            index_type = tuple(dataset.index_set().subsets())[-1].name
+            match index_type:
+                case "TIMEPOINTS":
+                    rv.index = self._model.es.timeindex
+                case "TIMESTEPS":
+                    rv.index = self._model.es.timeindex[:-1]
+                case _:
+                    rv.index = rv.index.get_level_values(-1)
+        else:
+            rv = default
+
+        filters = self.filters if filters is None else filters
+        filter = filters[variable]
+        columns = [column for column in rv.columns if filter(column)]
+
+        return rv.loc[:, columns]
+
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+    def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
+        """Compatibility wrapper for Results.get."""
+        warnings.warn(
+            "Function name 'Results.to_df(str)' is outdatet,"
+            + " use 'Results.get(str)' instead.",
+            category=FutureWarning,
+        )
+        df = self.get(variable)
+        if df is None:
+            raise KeyError(f"Key '{variable}' not in Results.")
+        return df
+
+    #  --- END ---
+
+    @staticmethod
+    def _economy_calculation_waring():
+        warnings.warn(
+            "Economic calculations in results are experimental."
+            + " Details such as naming conventions or programming interface"
+            + " can change with without notice.",
+            category=ExperimentalFeatureWarning,
+        )
+
+    @staticmethod
+    def _direct_pyomo_result_waring():
+        warnings.warn(
+            "Direct access to Pyomo results is only provided as a"
+            + " compatibility layer and is planed to be removed.",
+            category=FutureWarning,
+        )
+
+    def _calc_capex(self):
+        self._economy_calculation_waring()
+        # extract the the optimized investment sizes
+        try:
+            invest_values = self["invest"]
+        except KeyError:  # no investments
+            return pd.DataFrame()
+
+        # Initialize an empty dictionary to collect results
+        capex_data = {}
+
+        # calculate yearly investment costs associated with investment FLOWS
+        # and store data in capex_data dictionary
+
+        # TODO: is it really necessary to loop over all flows again or is it
+        # possible to use the flows of 'invest_values'?
+        for i, o in self._model.FLOWS:
+
+            # access the costs of each investment flow
+            if hasattr(self._model.flows[i, o], "investment"):
+
+                # map investment and costs and multiply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        pass
+                    else:
+                        if col[0] == i and col[1] == o:
+                            invest_size = invest_values[col][0]
+
+                            investment_costs = (
+                                self._model.flows[i, o].investment.ep_costs[0]
+                                * invest_size
+                                + self._model.flows[i, o].investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = investment_costs
+
+            else:
+                pass
+
+        # calculate yearly investment costs associated with GenericStorages
+        # and store data in capex_data dictionary
+        for node in self._model.nodes:
+            if isinstance(
+                node,
+                oemof.solph.components._generic_storage.GenericStorage,
+            ):
+
+                # map investment and costs and mulitply
+                for col in invest_values.columns:
+                    if isinstance(col, oemof.solph.components.GenericStorage):
+                        if col == node:
+                            invest_size = invest_values[col][0]
+
+                            investment_costs = (
+                                node.investment.ep_costs[0] * invest_size
+                                + node.investment.offset[0]
+                            )
+
+                            # Save values to dictionary
+                            capex_data[col] = investment_costs
+                    else:
+                        pass
+
+        df_capex = pd.DataFrame([capex_data])
+
+        return df_capex
+
+    def _calc_variable_costs(self):
+        self._economy_calculation_waring()
+        df_opex = pd.DataFrame()
+
+        # extract the the optimized flow values
+        flow_values = self.get("flow", pd.DataFrame())
+
+        for i, o in self._model.FLOWS:
+            # access the variable costs of each flow
+            variable_costs = self._model.flows[i, o].variable_costs
+
+            # map flows and variable costs and mulitply
+            for col in flow_values.columns:
+                if col[0] == i and col[1] == o:
+                    opex = flow_values[col] * variable_costs
+                    df_opex[col] = opex
+
+        return df_opex
+
+    # --- BEGIN: The following code can be removed for versions >= v0.7 ---
+    @property
+    def timeindex(self):
+        """Returns timeindex of energy system
+
+        Returns:
+            float: time index of the model
+        """
+        warnings.warn(
+            "Results.timeindex will be removed in a future version. Use index"
+            + " of results returned by Results.get('variable') instead.",
+            FutureWarning,
+        )
+        return self._model.es.timeindex
+
+    # --- END ---
+
+    def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
+        """
+        Allows dictionary like access, as in results['invest']
+
+        Parameters
+        ----------
+        key : string
+            name of a result (e.g. pyomo variable or derived quantity)
+
+        Returns
+        -------
+        pd.DataFrame, pd.Series, or ListContainer: Result
+        """
+        # backward-compatibility with returned results object from Pyomo
+        if key in self._solver_results:
+            self._direct_pyomo_result_waring()
+            return self._solver_results[key]
+        elif key in self._meta_results:
+            return self._meta_results[key]
+        else:
+            rv = self.get(key)
+            if rv is None:
+                raise KeyError(f"Key '{key}' not in Results.")
+            return rv
+
+    def __contains__(self, key: Hashable) -> bool:
+        return key in self.keys()

@@ -27,11 +27,11 @@ Download source code: :download:`house_without_nonconvex_investment.py </../exam
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof.solph. Install by:
+This example requires oemof.solph (at least v0.5.0). Install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 """
 
@@ -50,7 +50,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -90,8 +90,8 @@ def main():
         outputs={
             b_heat: solph.flows.Flow(
                 nominal_capacity=10,
-                min=0.4,
-                max=1.0,
+                minimum=0.4,
+                maximum=1.0,
                 variable_costs=0.1,
                 nonconvex=solph.NonConvex(
                     minimum_uptime=2,
@@ -134,6 +134,9 @@ def main():
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

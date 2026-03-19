@@ -156,8 +156,6 @@ def test_tuples_as_labels_example(
             outputs={bel: solph.flows.Flow(variable_costs=10e10)},
             loss_rate=0.00,
             initial_storage_level=0,
-            invest_relation_input_capacity=1 / 6,
-            invest_relation_output_capacity=1 / 6,
             inflow_conversion_factor=1,
             outflow_conversion_factor=0.8,
         )
@@ -170,9 +168,9 @@ def test_tuples_as_labels_example(
     energysystem.results["meta"] = processing.meta_results(om)
 
     # Check dump and restore
-    energysystem.dump()
+    energysystem.dump(filename="./es_dump.oemof", consider_dpath=False)
     es = solph.EnergySystem()
-    es.restore()
+    es.restore(filename="./es_dump.oemof", consider_dpath=False)
 
     # Results
     results = es.results["main"]

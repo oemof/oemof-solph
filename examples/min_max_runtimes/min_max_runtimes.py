@@ -18,11 +18,11 @@ Download source code: :download:`min_max_runtimes.py </../examples/min_max_runti
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
@@ -30,12 +30,13 @@ License
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
+
 from matplotlib import pyplot as plt
 
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     # Create demand data
     demand_el = [0] * 24
     for n in [10, 15, 19]:
@@ -62,8 +63,8 @@ def main():
         outputs={
             bel: solph.Flow(
                 nominal_capacity=10,
-                min=0.5,
-                max=1.0,
+                minimum=0.5,
+                maximum=1.0,
                 variable_costs=10,
                 nonconvex=solph.NonConvex(
                     minimum_downtime=4, initial_status=0
@@ -77,8 +78,8 @@ def main():
         outputs={
             bel: solph.Flow(
                 nominal_capacity=10,
-                min=0.5,
-                max=1.0,
+                minimum=0.5,
+                maximum=1.0,
                 variable_costs=10,
                 nonconvex=solph.NonConvex(minimum_uptime=2, initial_status=1),
             )
@@ -86,6 +87,9 @@ def main():
     )
 
     es.add(bel, dummy_el, demand_el, pp1, pp2)
+
+    if optimize is False:
+        return es
 
     # create an optimization problem and solve it
     om = solph.Model(es)

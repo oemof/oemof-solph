@@ -31,12 +31,12 @@ jobs:
       - name: Install LaTeX
         run: sudo apt install dvipng rubber texlive-latex-extra
       - name: Git clone
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python ${{ env.default_python || '3.10' }}
-        uses: actions/setup-python@v5
+      - name: Set up Python ${{ env.default_python || '3.14' }}
+        uses: actions/setup-python@v6
         with:
-          python-version: "${{ env.default_python || '3.10' }}"
+          python-version: "${{ env.default_python || '3.14' }}"
 
       - name: Pip cache
         uses: actions/cache@v4

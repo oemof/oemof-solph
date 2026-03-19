@@ -13,6 +13,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 from oemof.network import Node
 
 
@@ -59,14 +60,19 @@ class Source(Node):
     201
     """
 
-    def __init__(self, label=None, *, outputs, custom_properties=None):
+    def __init__(
+        self, label=None, *, outputs, parent_node=None, custom_properties=None
+    ):
         if outputs is None:
             outputs = {}
         if custom_properties is None:
             custom_properties = {}
 
         super().__init__(
-            label=label, outputs=outputs, custom_properties=custom_properties
+            label=label,
+            outputs=outputs,
+            parent_node=parent_node,
+            custom_properties=custom_properties,
         )
 
     def constraint_group(self):

@@ -18,11 +18,11 @@ Download source code: :download:`transshipment.py </../examples/electrical/trans
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 To draw the graph pygraphviz is required, installed by:
 
@@ -36,6 +36,7 @@ Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -128,7 +129,7 @@ def draw_graph(
         plt.show()
 
 
-def main():
+def main(optimize=True):
     datetimeindex = pd.date_range("1/1/2017", periods=3, freq="h")
 
     es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
@@ -178,6 +179,9 @@ def main():
             inputs={b_1: Flow(nominal_capacity=150, fix=[1, 0])},
         )
     )
+
+    if optimize is False:
+        return es
 
     m = Model(energysystem=es)
 

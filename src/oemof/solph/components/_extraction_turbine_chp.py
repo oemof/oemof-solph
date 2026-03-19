@@ -76,6 +76,7 @@ class ExtractionTurbineCHP(Converter):
         label=None,
         inputs=None,
         outputs=None,
+        parent_node=None,
         conversion_factors=None,
         custom_properties=None,
     ):
@@ -83,6 +84,7 @@ class ExtractionTurbineCHP(Converter):
             label=label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             conversion_factors=conversion_factors,
             custom_properties=custom_properties,
         )

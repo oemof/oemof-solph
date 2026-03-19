@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 import warnings
 
 import pytest
+from oemof.tools.debugging import ExperimentalFeatureWarning
 from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
@@ -91,53 +92,58 @@ def test_fixed_costs_warning():
 
 
 def test_flow_with_fix_and_min_max():
-    msg = "It is not allowed to define `min`/`max` if `fix` is defined."
+    msg = (
+        "It is not allowed to define `minimum`/`maximum` if `fix` is "
+        "defined."
+    )
     with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(fix=[1, 3], min=[0, 5])
+        solph.flows.Flow(fix=[1, 3], minimum=[0, 5])
     with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(fix=[1, 3], max=[0, 5])
+        solph.flows.Flow(fix=[1, 3], maximum=[0, 5])
     with pytest.raises(AttributeError, match=msg):
-        solph.flows.Flow(fix=[1, 3], max=[0, 5], min=[4, 9])
+        solph.flows.Flow(fix=[1, 3], maximum=[0, 5], minimum=[4, 9])
 
 
 def test_infinite_values():
     msg1 = "nominal_capacity must be a finite value"
-    msg2 = "max must be a finite value"
+    msg2 = "maximum must be a finite value"
     with pytest.raises(ValueError, match=msg1):
         solph.flows.Flow(nominal_capacity=float("+inf"))
     with pytest.raises(ValueError, match=msg2):
-        solph.flows.Flow(nominal_capacity=1, max=float("+inf"))
+        solph.flows.Flow(nominal_capacity=1, maximum=float("+inf"))
 
 
-def test_attributes_needing_nominal_value_get_it():
-    with pytest.raises(AttributeError, match="If fix is set in a flow "):
+def test_attributes_needing_nominal_capacity_get_it():
+    with pytest.raises(AttributeError, match="If fix is set in a flow"):
         solph.flows.Flow(fix=0.3)
 
-    with pytest.raises(AttributeError, match="If max is set in a flow "):
-        solph.flows.Flow(max=0.3)
+    with pytest.raises(AttributeError, match="If maximum is set in a flow"):
+        solph.flows.Flow(maximum=0.3)
 
-    with pytest.raises(AttributeError, match="If min is set in a flow "):
-        solph.flows.Flow(min=0.3)
-
+    with pytest.raises(AttributeError, match="If minimum is set in a flow"):
+        solph.flows.Flow(minimum=0.3)
     with pytest.raises(
-        AttributeError, match="If full_load_time_max is set in a flow "
+        AttributeError, match="If full_load_time_max is set in a flow"
     ):
         solph.flows.Flow(full_load_time_max=0.3)
 
     with pytest.raises(
-        AttributeError, match="If full_load_time_min is set in a flow "
+        AttributeError, match="If full_load_time_min is set in a flow"
     ):
         solph.flows.Flow(full_load_time_min=0.3)
 
 
 def test_min_max_values_for_bidirectional_flow():
-    a = solph.flows.Flow(bidirectional=True)  # use default values
-    b = solph.flows.Flow(
-        bidirectional=True, nominal_capacity=1, min=-0.8, max=0.9
-    )
+    with pytest.warns(FutureWarning, match="keyword is deprecated"):
+        a = solph.flows.Flow(bidirectional=True)  # use default values
+    with pytest.warns(
+        ExperimentalFeatureWarning,
+        match="allows for the flow to become bidirectional",
+    ):
+        b = solph.flows.Flow(nominal_capacity=1, minimum=-0.8, maximum=0.9)
     assert a.bidirectional
-    assert a.max[0] == 1
-    assert a.min[0] == -1
+    assert a.maximum[0] == 1
+    assert a.minimum[0] == -1
     assert b.bidirectional
-    assert b.max[0] == 0.9
-    assert b.min[0] == -0.8
+    assert b.maximum[0] == 0.9
+    assert b.minimum[0] == -0.8

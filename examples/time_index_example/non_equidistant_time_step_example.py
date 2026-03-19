@@ -34,9 +34,10 @@ This example requires oemof.solph, install by:
 
 .. code:: bash
 
-    pip install oemof.solph
+    pip install oemof.solph>=0.5
 
 """
+
 import pandas as pd
 
 from oemof import solph
@@ -47,7 +48,7 @@ except ModuleNotFoundError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
@@ -77,7 +78,7 @@ def main():
             bus: solph.flows.Flow(
                 nominal_capacity=16,
                 variable_costs=0.2,
-                max=[0, 0, 0, 0, 0, 0, 0, 1, 1],
+                maximum=[0, 0, 0, 0, 0, 0, 0, 1, 1],
             )
         },
     )
@@ -99,7 +100,7 @@ def main():
         inputs={bus: solph.flows.Flow()},
         outputs={
             bus: solph.flows.Flow(
-                nominal_capacity=4, max=[0, 0, 0, 0, 0, 0, 0, 1, 1]
+                nominal_capacity=4, maximum=[0, 0, 0, 0, 0, 0, 0, 1, 1]
             )
         },
         nominal_capacity=8,
@@ -118,6 +119,14 @@ def main():
     )
 
     energy_system.add(bus, source, sink, storage_relative, storage_fixed)
+
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
+
+    if optimize is False:
+        return energy_system
+
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 

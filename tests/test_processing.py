@@ -59,8 +59,12 @@ class TestParameterResult:
 
         batt = GenericStorage(
             label="storage",
-            inputs={b_el1: Flow(variable_costs=3)},
-            outputs={b_el2: Flow(variable_costs=2.5)},
+            inputs={
+                b_el1: Flow(variable_costs=3, nominal_capacity=Investment())
+            },
+            outputs={
+                b_el2: Flow(variable_costs=2.5, nominal_capacity=Investment())
+            },
             loss_rate=0.00,
             initial_storage_level=0,
             invest_relation_input_capacity=1 / 6,
@@ -81,11 +85,23 @@ class TestParameterResult:
             },
         )
         cls.es.add(dg, batt, demand)
-        cls.om = Model(cls.es)
-        cls.om.receive_duals()
-        cls.om.solve()
-        cls.mod = Model(cls.es)
-        cls.mod.solve()
+        cls.model_duals = Model(cls.es)
+        cls.model_duals.receive_duals()
+        cls.model_duals.solve()
+        cls.model_cbc = Model(cls.es)
+        cls.model_cbc.solve(solver="cbc")
+        cls.model_glpk = Model(cls.es)
+        cls.model_glpk.solve(solver="glpk")
+
+    def test_mipgap(self):
+        """Test that one can access the MIPGap."""
+        meta_cbc = processing.meta_results(self.model_cbc)
+        assert "MIPGap" in meta_cbc["problem"]
+        assert meta_cbc["problem"]["MIPGap"] == 0
+
+        meta_glpk = processing.meta_results(self.model_glpk)
+        assert "MIPGap" in meta_glpk["problem"]
+        assert meta_glpk["problem"]["MIPGap"] == 0
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups["b_el2"]
@@ -100,8 +116,8 @@ class TestParameterResult:
                     "bidirectional": False,
                     "integer": False,
                     "nominal_capacity": 1,
-                    "max": 1,
-                    "min": 0,
+                    "maximum": 1,
+                    "minimum": 0,
                     "variable_costs": 0,
                     "label": str(b_el2.outputs[demand].label),
                 }
@@ -129,8 +145,8 @@ class TestParameterResult:
             "bidirectional": False,
             "full_load_time_max": None,
             "full_load_time_min": None,
-            "max": 1,
-            "min": 0,
+            "maximum": 1,
+            "minimum": 0,
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
@@ -163,6 +179,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_age": 0,
                     "investment_existing": 0,
@@ -202,6 +219,7 @@ class TestParameterResult:
             pandas.Series(
                 {
                     "balanced": True,
+                    "depth": 0,
                     "initial_storage_level": 0,
                     "investment_age": 0,
                     "investment_existing": 0,
@@ -238,7 +256,9 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
+                    "parent": None,
                     "conversion_factors_b_el1": 2,
                     "conversion_factors_b_diesel": 1,
                 }
@@ -257,6 +277,7 @@ class TestParameterResult:
             param_results[(diesel, None)]["scalars"],
             pandas.Series(
                 {
+                    "depth": 0,
                     "label": "diesel",
                 }
             ),
@@ -279,7 +300,7 @@ class TestParameterResult:
         assert bel1_m["scalars"][("b_el1", "storage", "variable_costs")] == 3
 
     def test_multiindex_sequences(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         bel1 = views.node(results, "b_el1", multiindex=True)
         assert (
             int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()) == 2875
@@ -288,17 +309,17 @@ class TestParameterResult:
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]
-        self.mod.flow[trsf, bus, 5] = float("nan")
+        self.model_cbc.flow[trsf, bus, 5] = float("nan")
         with pytest.raises(ValueError):
-            processing.results(self.mod)
+            processing.results(self.model_cbc)
 
     def test_duals(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         bel = views.node(results, "b_el1", multiindex=True)
         assert int(bel["sequences"]["b_el1", "None", "duals"].sum()) == 48
 
     def test_node_weight_by_type(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         storage_content = views.node_weight_by_type(
             results, node_type=GenericStorage
         )
@@ -307,7 +328,7 @@ class TestParameterResult:
         ).all()
 
     def test_output_by_type_view(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         converter_output = views.node_output_by_type(
             results, node_type=Converter
         )
@@ -317,7 +338,7 @@ class TestParameterResult:
         assert converter_output.sum().iloc[0] == pytest.approx(compare.sum())
 
     def test_input_by_type_view(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         sink_input = views.node_input_by_type(results, node_type=Sink)
         compare = views.node(results, "demand_el", multiindex=True)
         assert sink_input.sum().iloc[0] == pytest.approx(
@@ -325,7 +346,7 @@ class TestParameterResult:
         )
 
     def test_net_storage_flow(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         storage_flow = views.net_storage_flow(
             results, node_type=GenericStorage
         )
@@ -347,23 +368,23 @@ class TestParameterResult:
         )
 
     def test_output_by_type_view_empty(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         view = views.node_output_by_type(results, node_type=Flow)
         assert view is None
 
     def test_input_by_type_view_empty(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         view = views.node_input_by_type(results, node_type=Flow)
         assert view is None
 
     def test_net_storage_flow_empty(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         view = views.net_storage_flow(results, node_type=Sink)
         assert view is None
         view2 = views.net_storage_flow(results, node_type=Flow)
         assert view2 is None
 
     def test_node_weight_by_type_empty(self):
-        results = processing.results(self.om)
+        results = processing.results(self.model_duals)
         view = views.node_weight_by_type(results, node_type=Flow)
         assert view is None

@@ -18,24 +18,25 @@ Download source code: :download:`startup_shutdown.py </../examples/start_and_shu
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     demand_el = [
         0,
         0,
@@ -93,14 +94,18 @@ def main():
         outputs={
             bel: solph.Flow(
                 nominal_capacity=10,
-                min=0.5,
-                max=1.0,
+                minimum=0.5,
+                maximum=1.0,
                 variable_costs=10,
                 nonconvex=solph.NonConvex(startup_costs=5, shutdown_costs=5),
             )
         },
     )
     es.add(bel, demand_el, pp1, pp2)
+
+    if optimize is False:
+        return es
+
     # create an optimization problem and solve it
     om = solph.Model(es)
 

@@ -14,6 +14,7 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 
 """
+
 import logging
 from collections import OrderedDict
 from enum import Enum

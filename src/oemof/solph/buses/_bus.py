@@ -46,6 +46,7 @@ class Bus(Node):
         *,
         inputs=None,
         outputs=None,
+        parent_node=None,
         balanced=True,
         custom_properties=None,
     ):
@@ -57,6 +58,7 @@ class Bus(Node):
             label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_properties,
         )
         self.balanced = balanced

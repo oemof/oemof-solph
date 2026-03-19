@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-""" This example shows how to create an energysystem with oemof objects and
+"""This example shows how to create an energysystem with oemof objects and
 solve it with the solph module.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
@@ -76,7 +76,7 @@ def test_dispatch_one_time_step(solver="cbc"):
         conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
     )
 
-    energysystem = EnergySystem(timeincrement=[1])
+    energysystem = EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     energysystem.add(
         bgas,
         bel,

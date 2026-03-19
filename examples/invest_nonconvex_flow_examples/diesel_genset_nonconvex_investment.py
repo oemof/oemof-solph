@@ -33,11 +33,11 @@ Download data: :download:`solar_generation.csv </../examples/invest_nonconvex_fl
 
 Installation requirements
 -------------------------
-This example requires the version v0.5.x of oemof.solph. Install by:
+This example requires oemof.solph (at least v0.5.0). Install by:
 
 .. code:: bash
 
-    pip install 'oemof.solph>=0.5,<0.6'
+    pip install oemof.solph>=0.5
 
 """
 
@@ -61,7 +61,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -84,7 +84,8 @@ def main():
     end_datetime = start_datetime + timedelta(days=n_days)
 
     # Import data.
-    filename = os.path.join(os.getcwd(), "solar_generation.csv")
+
+    filename = os.path.join(os.path.dirname(__file__), "solar_generation.csv")
     data = pd.read_csv(filename)
 
     # Change the index of data to be able to select data based on the time
@@ -157,8 +158,8 @@ def main():
         outputs={
             b_el_ac: solph.flows.Flow(
                 variable_costs=variable_cost_diesel_genset,
-                min=min_load,
-                max=max_load,
+                minimum=min_load,
+                maximum=max_load,
                 nominal_capacity=solph.Investment(
                     ep_costs=epc_diesel_genset * n_days / n_days_in_year,
                     maximum=2 * peak_demand,
@@ -212,7 +213,11 @@ def main():
         nominal_capacity=solph.Investment(
             ep_costs=epc_battery * n_days / n_days_in_year
         ),
-        inputs={b_el_dc: solph.flows.Flow(variable_costs=0)},
+        inputs={
+            b_el_dc: solph.flows.Flow(
+                variable_costs=0, nominal_capacity=solph.Investment()
+            )
+        },
         outputs={
             b_el_dc: solph.flows.Flow(
                 nominal_capacity=solph.Investment(ep_costs=0)
@@ -267,6 +272,9 @@ def main():
     # but the less accurate the results would be.
     solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
     solver = "cbc"
+
+    if optimize is False:
+        return energysystem
 
     model = solph.Model(energysystem)
     model.solve(
@@ -405,7 +413,7 @@ def main():
 
     print("\n" + 50 * "*")
     print(
-        f"Simulation Time:\t {end_simulation_time-start_simulation_time:.2f} s"
+        f"Simulation Time:\t {end_simulation_time - start_simulation_time:.2f} s"
     )
     print(50 * "*")
     print(f"Peak Demand:\t {sequences_demand.max():.0f} kW")

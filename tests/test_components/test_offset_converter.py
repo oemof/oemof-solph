@@ -15,7 +15,6 @@ from oemof.solph.components._offset_converter import (
 
 
 def create_energysystem_stub(num_in, num_out):
-
     es = solph.EnergySystem(
         timeindex=solph.create_time_index(year=2023, number=9),
         infer_last_interval=True,
@@ -156,7 +155,7 @@ def add_OffsetConverter(
 
         f.nonconvex = solph.NonConvex()
         f.nominal_capacity = nominal_capacity
-        f.min = sequence(minimal_value / nominal_capacity)
+        f.minimum = sequence(minimal_value / nominal_capacity)
 
         oc = solph.components.OffsetConverter(
             label="offset converter",
@@ -504,7 +503,6 @@ def test_two_OffsetConverters_with_and_without_investment():
 
 
 def test_OffsetConverter_05x_compatibility():
-
     num_in = 1
     num_out = 1
     es = create_energysystem_stub(num_in, num_out)
@@ -537,7 +535,7 @@ def test_OffsetConverter_05x_compatibility():
             es.groups["bus output 0"]: solph.Flow(
                 nonconvex=solph.NonConvex(),
                 nominal_capacity=nominal_capacity,
-                min=minimal_value / nominal_capacity,
+                minimum=minimal_value / nominal_capacity,
             )
         },
         coefficients=(offset, slope),
@@ -571,7 +569,6 @@ def test_OffsetConverter_05x_compatibility():
 
 
 def test_error_handling():
-
     input_bus = solph.Bus("bus1")
     output_bus = solph.Bus("bus2")
 
@@ -584,7 +581,7 @@ def test_error_handling():
                 output_bus: solph.Flow(
                     nonconvex=solph.NonConvex(),
                     nominal_capacity=10,
-                    min=0.3,
+                    minimum=0.3,
                 )
             },
             # values are arbitarty just to test the error
@@ -604,7 +601,7 @@ def test_error_handling():
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
                         nominal_capacity=10,
-                        min=0.3,
+                        minimum=0.3,
                     )
                 },
                 conversion_factors={input_bus: 1, output_bus: 1},
@@ -621,7 +618,7 @@ def test_error_handling():
                     output_bus: solph.Flow(
                         nonconvex=solph.NonConvex(),
                         nominal_capacity=10,
-                        min=0.3,
+                        minimum=0.3,
                     )
                 },
                 conversion_factors={input_bus: 1},

@@ -26,16 +26,17 @@ Download source code: :download:`flow_count_limit.py </../examples/flow_count_li
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import pandas as pd
 
 import oemof.solph as solph
@@ -48,7 +49,7 @@ except ImportError:
     plt = None
 
 
-def main():
+def main(optimize=True):
     energy_system = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=4, freq="h")
     )
@@ -73,8 +74,8 @@ def main():
                     nonconvex=solph.NonConvex(),
                     nominal_capacity=210,
                     variable_costs=[-1, -5, -1, -1],
-                    max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": True},
+                    maximum=[1, 1, 1, 0],
+                    custom_properties={"my_keyword": True},
                 )
             },
         )
@@ -89,8 +90,8 @@ def main():
                     nonconvex=solph.NonConvex(),
                     variable_costs=[-2, -1, -2, -2],
                     nominal_capacity=250,
-                    max=[1, 1, 1, 0],
-                    custom_attributes={"my_keyword": False},
+                    maximum=[1, 1, 1, 0],
+                    custom_properties={"my_keyword": False},
                 )
             },
         )
@@ -104,7 +105,7 @@ def main():
                 bel: solph.Flow(
                     variable_costs=1,
                     nonconvex=solph.NonConvex(),
-                    max=[1, 1, 1, 0],
+                    maximum=[1, 1, 1, 0],
                     nominal_capacity=145,
                 )
             },
@@ -117,13 +118,16 @@ def main():
             label="sink2",
             inputs={
                 bel: solph.Flow(
-                    custom_attributes={"my_keyword": True},
+                    custom_properties={"my_keyword": True},
                     fix=[0, 1, 1, 0],
                     nominal_capacity=130,
                 )
             },
         )
     )
+
+    if optimize is False:
+        return energy_system
 
     model = solph.Model(energy_system)
 

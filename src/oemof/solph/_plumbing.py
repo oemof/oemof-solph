@@ -10,6 +10,7 @@ SPDX-FileCopyrightText: henhuy
 SPDX-License-Identifier: MIT
 
 """
+
 import warnings
 from collections import abc
 from itertools import repeat

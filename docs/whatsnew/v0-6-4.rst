@@ -1,0 +1,36 @@
+v0.6.4
+------
+
+API changes
+###########
+
+
+New features
+############
+
+* Mipgap is calculated in the meta results
+
+
+Documentation
+#############
+
+* Fix Furo error when displaying the table of contents of the result handling
+  tutorial
+
+Bug fixes
+#########
+
+
+Other changes
+#############
+
+
+Contributors
+############
+
+* Jonas Freißmann
+* Lena Rosin
+
+Acknowledgements
+################
+

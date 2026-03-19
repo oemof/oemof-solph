@@ -96,6 +96,7 @@ class Converter(Node):
         label=None,
         inputs=None,
         outputs=None,
+        parent_node=None,
         conversion_factors=None,
         custom_properties=None,
     ):
@@ -110,6 +111,7 @@ class Converter(Node):
             label=label,
             inputs=inputs,
             outputs=outputs,
+            parent_node=parent_node,
             custom_properties=custom_properties,
         )
         if not inputs:

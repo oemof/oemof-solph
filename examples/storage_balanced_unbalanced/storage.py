@@ -17,11 +17,11 @@ Download source code: :download:`storage.py </../examples/storage_balanced_unbal
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
@@ -60,7 +60,7 @@ DATA = [
 PARAMETER = {"el_price": 10, "ex_price": 5, "nominal_storage_capacity": 7}
 
 
-def storage_example():
+def main(optimize=True):
     timeseries = pd.DataFrame(
         {"demand_el": [7, 6, 6, 7], "pv_el": [3, 5, 3, 12]}
     )
@@ -126,6 +126,9 @@ def storage_example():
             )
         )
 
+    if optimize is False:
+        return es
+
     # create an optimization problem and solve it
     om = solph.Model(es)
 
@@ -172,4 +175,4 @@ def storage_example():
 
 
 if __name__ == "__main__":
-    storage_example()
+    main()

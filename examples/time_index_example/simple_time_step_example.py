@@ -29,23 +29,24 @@ Download source code: :download:`non_equidistant_time_step_example.py </../examp
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 """
+
 import matplotlib.pyplot as plt
 
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
@@ -62,7 +63,7 @@ def main():
             bus: solph.flows.Flow(
                 nominal_capacity=2,
                 variable_costs=0.2,
-                max=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
+                maximum=[0, 0, 0, 0, 1, 0.25, 0.75, 1],
             )
         },
     )
@@ -85,6 +86,14 @@ def main():
     )
 
     energy_system.add(bus, source, sink, storage)
+
+    ##########################################################################
+    # Optimise the energy system
+    ##########################################################################
+
+    if optimize is False:
+        return energy_system
+
     model = solph.Model(energy_system)
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 

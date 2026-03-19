@@ -25,6 +25,14 @@ InvestmentFlow
     :undoc-members:
     :show-inheritance:
 
+NonConvexFlow (shared)
+----------------------
+
+.. automodule:: oemof.solph.flows._shared
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 NonConvexFlow
 -------------
 

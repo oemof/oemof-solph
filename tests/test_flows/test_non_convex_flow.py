@@ -28,7 +28,7 @@ def test_initial_status_off():
 def test_maximum_shutdowns():
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.5,
+        minimum=0.5,
         nonconvex=solph.NonConvex(maximum_shutdowns=1),
         variable_costs=[1, -2, 1, 1, 1, -5, 1, 1, 1, -2],
     )
@@ -40,7 +40,7 @@ def test_maximum_shutdowns():
 def test_maximum_startups():
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.5,
+        minimum=0.5,
         nonconvex=solph.NonConvex(maximum_startups=1),
         variable_costs=[1, -4, 1, 1, 1, -5, 1, 1, 5, -3],
     )
@@ -53,7 +53,7 @@ def test_initial_status_on():
     # positive costs but turned on initially
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.5,
+        minimum=0.5,
         nonconvex=solph.NonConvex(initial_status=1, minimum_uptime=3),
         variable_costs=1,
     )
@@ -66,8 +66,8 @@ def test_activity_costs():
     # activity costs higher then revenue for first time steps
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.1,
-        max=[0.1] + [i * 0.1 for i in range(1, 10)],
+        minimum=0.1,
+        maximum=[0.1] + [i * 0.1 for i in range(1, 10)],
         nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
         variable_costs=-0.45,
     )
@@ -80,7 +80,7 @@ def test_inactivity_costs():
     # inactivity costs lower then running costs for middle time steps
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=[i * 0.1 for i in range(10)],
+        minimum=[i * 0.1 for i in range(10)],
         nonconvex=solph.NonConvex(inactivity_costs=9 * [1] + [10]),
         variable_costs=0.45,
     )
@@ -95,7 +95,7 @@ def test_startup_costs_start_off():
     # startup costs higher then effect of shutting down
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.1,
+        minimum=0.1,
         nonconvex=solph.NonConvex(startup_costs=5, initial_status=0),
         variable_costs=price_pattern,
     )
@@ -110,7 +110,7 @@ def test_startup_costs_start_on():
     # startup costs higher then effect of shutting down
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.1,
+        minimum=0.1,
         nonconvex=solph.NonConvex(startup_costs=5, initial_status=1),
         variable_costs=price_pattern,
     )
@@ -125,7 +125,7 @@ def test_shutdown_costs_start_on():
     # shutdown costs higher then effect of shutting down
     flow = solph.flows.Flow(
         nominal_capacity=10,
-        min=0.1,
+        minimum=0.1,
         nonconvex=solph.NonConvex(shutdown_costs=5, initial_status=1),
         variable_costs=price_pattern,
     )

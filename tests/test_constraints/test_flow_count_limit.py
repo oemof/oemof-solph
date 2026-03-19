@@ -28,9 +28,9 @@ def test_flow_count_limit():
             b1: solph.Flow(
                 variable_costs=[-0.5, 0.5],
                 nominal_capacity=4,
-                min=0.5,
+                minimum=0.5,
                 nonconvex=solph.NonConvex(),
-                custom_attributes={"keyword1": "group 1"},
+                custom_properties={"keyword1": "group 1"},
             )
         },
     )
@@ -40,9 +40,9 @@ def test_flow_count_limit():
             b1: solph.Flow(
                 variable_costs=[-0.2, 0.2],
                 nominal_capacity=2,
-                min=0.5,
+                minimum=0.5,
                 nonconvex=solph.NonConvex(),
-                custom_attributes={"keyword1": "also group 1"},
+                custom_properties={"keyword1": "also group 1"},
             )
         },
     )
@@ -52,9 +52,9 @@ def test_flow_count_limit():
             b1: solph.Flow(
                 variable_costs=[-0.1, 0.1],
                 nominal_capacity=3,
-                min=0.5,
+                minimum=0.5,
                 nonconvex=solph.NonConvex(),
-                custom_attributes={"keyword1": "still group 1"},
+                custom_properties={"keyword1": "still group 1"},
             )
         },
     )
@@ -64,9 +64,9 @@ def test_flow_count_limit():
             b1: solph.Flow(
                 variable_costs=[-0.1, 0.2],
                 nominal_capacity=3,
-                min=0.5,
+                minimum=0.5,
                 nonconvex=solph.NonConvex(),
-                custom_attributes={"keyword2": "not in group 1"},
+                custom_properties={"keyword2": "not in group 1"},
             )
         },
     )

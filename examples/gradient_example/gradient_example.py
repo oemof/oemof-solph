@@ -20,11 +20,11 @@ Download source code: :download:`gradient_example.py </../examples/gradient_exam
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 
 License
@@ -43,7 +43,7 @@ from oemof.solph import flows
 from oemof.solph import processing
 
 
-def main():
+def main(optimize=True):
     # The gradient for the output of the natural gas power plant.
     # Change the gradient between 0.1 and 0.0001 and check the results. The
     # more flexible the power plant can be run the less the storage will be
@@ -165,6 +165,9 @@ def main():
 
     energysystem.add(storage)
 
+    if optimize is False:
+        return energysystem
+
     # initialise the operational model
     model = Model(energysystem)
 
@@ -204,7 +207,6 @@ def main():
         axis=1,
     )
 
-    print(my_flows)
     my_flows.plot()
     plt.show()
 

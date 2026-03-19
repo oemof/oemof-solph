@@ -14,16 +14,13 @@ SPDX-FileCopyrightText: Lennart Schürmann
 SPDX-License-Identifier: MIT
 
 """
+
 import logging
 import warnings
-from collections.abc import Callable
 from logging import getLogger
-from typing import TypeAlias
 
-import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
-from pyomo.core.base.var import Var
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
@@ -181,7 +178,9 @@ class Model(po.ConcreteModel):
         self.rc = None
 
         if energysystem.periods is not None:
-            self._set_discount_rate_with_warning()
+            self.discount_rate = kwargs.get("discount_rate")
+            if self.discount_rate is None:
+                self._set_discount_rate_with_warning()
         else:
             pass
 
@@ -269,6 +268,59 @@ class Model(po.ConcreteModel):
             timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
 
+        # Set up disaggregated timesteps from original timeseries
+        self.TSAM_MODE = False
+        if self.es.tsa_parameters is None:
+            self.tsam_weighting = [1] * len(self.timeincrement)
+        else:
+            self.TSAM_MODE = True
+
+            # Construct weighting from occurrences and order
+            self.tsam_weighting = list(
+                self.es.tsa_parameters[p]["occurrences"][k]
+                for p in self.PERIODS
+                for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
+                for _ in range(self.es.tsa_parameters[p]["timesteps"])
+            )
+            self.CLUSTERS = po.Set(
+                initialize=list(
+                    range(
+                        sum(
+                            len(self.es.tsa_parameters[p]["order"])
+                            for p in self.PERIODS
+                        )
+                    )
+                )
+            )
+            self.CLUSTERS_OFFSET = po.Set(
+                initialize=list(
+                    range(
+                        sum(
+                            len(self.es.tsa_parameters[p]["order"])
+                            for p in self.PERIODS
+                        )
+                        + 1
+                    )
+                )
+            )
+            self.TYPICAL_CLUSTERS = po.Set(
+                initialize=[
+                    (p, i)
+                    for p in self.PERIODS
+                    for i in range(
+                        len(self.es.tsa_parameters[p]["occurrences"])
+                    )
+                ]
+            )
+
+            self.TIMEINDEX_CLUSTER = self.get_cluster_index("order", 0)
+            self.TIMEINDEX_TYPICAL_CLUSTER = self.get_cluster_index(
+                "occurrences", 0
+            )
+            self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET = self.get_cluster_index(
+                "occurrences", 1
+            )
+
         # previous timesteps
         previous_timesteps = [x - 1 for x in self.TIMESTEPS]
         previous_timesteps[0] = self.TIMESTEPS.last()
@@ -313,13 +365,13 @@ class Model(po.ConcreteModel):
                 else:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].setub(
-                            self.flows[o, i].max[t]
+                            self.flows[o, i].maximum[t]
                             * self.flows[o, i].nominal_capacity
                         )
                     if not self.flows[o, i].nonconvex:
                         for t in self.TIMESTEPS:
                             self.flow[o, i, t].setlb(
-                                self.flows[o, i].min[t]
+                                self.flows[o, i].minimum[t]
                                 * self.flows[o, i].nominal_capacity
                             )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
@@ -388,6 +440,9 @@ class Model(po.ConcreteModel):
             solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
         solver_io : string
             pyomo solver interface file format: "lp", "python", "nl", etc.
+        allow_nonoptimal : bool
+            False: If no optimal solution is found, an error will be risen.
+            True: If no optimal solution is found, there will be a warning.
         \**kwargs : keyword arguments
             Possible keys can be set see below:
 
@@ -446,78 +501,23 @@ class Model(po.ConcreteModel):
 
         return self
 
+    def get_timestep_from_tsam_timestep(self, p, ik, g):
+        """Return original timestep from cluster-based timestep"""
+        t = (
+            p * len(self.TIMESTEPS_IN_PERIOD[p])
+            + ik * self.es.tsa_parameters[p]["timesteps"]
+            + g
+        )
+        return t
 
-class Filters(dict):
-    def updating(
-        self, filters: dict[str, Callable[[object], bool]]
-    ) -> "Filters":
-        result = Filters(self)
-        result.update(filters)
-        return result
-
-    @staticmethod
-    def nofilter(*args, **kwargs):
-        return True
-
-    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
-        return self.get(variable, self.nofilter)
-
-
-class Results:
-    filters = Filters(
-        {
-            "flow": lambda column: getattr(
-                column[0].outputs[column[1]], "visible", True
-            ),
-        }
-    )
-
-    # TODO:
-    #   Defer attribute references not present as variables to
-    #   attributes of `model.solver_results` in order to make `Results`
-    #   instances returnable by `model.solve` and still be backwards
-    #   compatible.
-    def __init__(self, model: Model):
-        # TODO: Disambiguate colliding variable names.
-        self.variables = {
-            str(variable).split(".")[-1]: variable
-            for vardata in model.component_data_objects(Var)
-            for variable in [vardata.parent_component()]
-        }
-        self._dfs = {}
-
-    def to_df(
-        self, variable: str, filters: Filters = None
-    ) -> pd.DataFrame | pd.Series:
-        # TODO:
-        #   - Figure out why `Results.init_content` is a `pd.Series`.
-        #   - Support `Var`s as arguments?
-        #   - Add column (level) and index names like:
-        #       source, target, timestep etc.
-        """Return a `DataFrame` view of the model's `variable`.
-
-        This is the function that attribute and dictionary access to
-        variables as `DataFrame`s is based on. Use it if you like to be
-        explicit. Also, if you want to override the default filtering of the
-        resulting `DataFrame`'s columns, this is the function to use.
-        For convenience you can also replace `results.to_df("variable")`
-        with the equivalent `results.variable` or `results["variable"]`.
+    def get_cluster_index(self, cluster_type, offset):
         """
-        if variable not in self._dfs:
-            values = self.variables[variable].extract_values()
-            df = pd.DataFrame(values, index=[0]).stack(future_stack=True)
-            df.index = df.index.get_level_values(-1)
-            self._dfs[variable] = df
-        df = self._dfs[variable]
-
-        filters = self.filters if filters is None else filters
-        filter = filters[variable]
-        columns = [column for column in df.columns if filter(column)]
-
-        return df.loc[:, columns]
-
-    def __getattr__(self, variable: str) -> pd.DataFrame | pd.Series:
-        return self[variable]
-
-    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
-        return self.to_df(variable)
+        Return cluster index for original or typical periods with or
+        without offset
+        """
+        return [
+            (p, k, t)
+            for p in range(len(self.es.tsa_parameters))
+            for k in range(len(self.es.tsa_parameters[p][cluster_type]))
+            for t in range(self.es.tsa_parameters[p]["timesteps"] + offset)
+        ]

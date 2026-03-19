@@ -1,3 +1,9 @@
+[tool.ruff]
+extend-exclude = ["static", "ci/templates"]
+line-length = 79
+src = ["src", "tests"]
+target-version = "py313"
+
 [build-system]
 requires = ["flit_core >=3.2,<4"]
 build-backend = "flit_core.buildapi"
@@ -17,13 +23,13 @@ include = [
     "examples/",
     "src/",
     "tests/",
+    "tutorials/",
     ".bumpversion.cfg",
     ".coveragerc",
     ".editorconfig",
     ".flake8",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
-    ".scrutinizer.yml",
 ]
 exclude = ["docs/_build"]
 
@@ -39,7 +45,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: Unix",
     "Operating System :: POSIX",
     "Operating System :: Microsoft :: Windows",
@@ -47,10 +52,10 @@ classifiers = [
     "Operating System :: OS Independent",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Topic :: Utilities",
 ]
@@ -63,9 +68,12 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.0",
+    "oemof.network >= 0.5.1b2",
 ]
-license = {text = "MIT"}
+license = "MIT"
+license-files = [
+    "LICENSE",
+]
 
 [project.urls]
 Homepage = "https://github.com/oemof/oemof-solph"
@@ -76,15 +84,17 @@ Changelog = "https://oemof-solph.readthedocs.io/en/latest/changelog.html"
 [project.optional-dependencies]
 dev = [
     "flit",
+    "furo",
     "matplotlib",
     "nbformat",
+    "openpyxl",
     "pytest",
     "sphinx",
-    "sphinx_rtd_theme",
     "sphinx-copybutton",
     "sphinx-design",
     "termcolor",
     "tox",
+    "tsam",
 ]
 
 [project.scripts]
@@ -92,7 +102,6 @@ oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation
 
 [tool.black]
 line-length = 79
-target-version = ['py39', 'py310', 'py311']
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -118,6 +127,7 @@ norecursedirs = [
     "dist",
     "build",
     "docs/_build",
+    "docs/_files/code",
     "migrations",
     "examples",
 ]

@@ -18,17 +18,18 @@ Download source code: :download:`emission_constraint.py </../examples/emission_c
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
 `MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
 
 """
+
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -36,7 +37,7 @@ from oemof import solph
 from oemof.solph import constraints
 
 
-def main():
+def main(optimize=True):
     # create energy system
     energysystem = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
@@ -60,7 +61,7 @@ def main():
                     nominal_capacity=100,
                     variable_costs=10,
                     fix=[0.1, 0.2, 0.3],
-                    custom_attributes={"emission_factor": 0.01},
+                    custom_properties={"emission_factor": 0.01},
                 )
             },
         )
@@ -73,7 +74,7 @@ def main():
             outputs={
                 bgas: solph.Flow(
                     variable_costs=10,
-                    custom_attributes={"emission_factor": 0.2},
+                    custom_properties={"emission_factor": 0.2},
                 )
             },
         )
@@ -101,6 +102,9 @@ def main():
             conversion_factors={bel: 0.58},
         )
     )
+
+    if optimize is False:
+        return energysystem
 
     # initialise the operational model
     model = solph.Model(energysystem)

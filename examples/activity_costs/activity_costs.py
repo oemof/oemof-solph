@@ -28,11 +28,11 @@ Download source code: :download:`activity_costs.py </../examples/activity_costs/
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (v0.5.x), install by:
+This example requires oemof.solph (at least v0.5.0), install by:
 
 .. code:: bash
 
-    pip install oemof.solph[examples]
+    pip install oemof.solph>=0.5
 
 License
 -------
@@ -47,7 +47,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main():
+def main(optimize=True):
     ##########################################################################
     # Calculate parameters and initialize the energy system and
     ##########################################################################
@@ -94,6 +94,8 @@ def main():
     # Optimise the energy system
     ##########################################################################
 
+    if optimize is False:
+        return es
     # create an optimization problem and solve it
     om = solph.Model(es)
 
