@@ -4,6 +4,8 @@ v0.6.4
 API changes
 ###########
 
+* `Model.solve()` now directly returns the optimisation `Results`. (For some
+  time, they will be backwards compatible with the old meta_results.)
 
 New features
 ############
@@ -30,6 +32,7 @@ Contributors
 
 * Jonas Freißmann
 * Lena Rosin
+* Patrik Schönfeldt
 
 Acknowledgements
 ################
