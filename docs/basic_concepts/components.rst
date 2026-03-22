@@ -241,22 +241,15 @@ after the optimisation, you need to check the ``storage_content`` in the results
 
 .. code-block:: python
 
-    from oemof.solph import processing, views
-    results = processing.results(om)
-    column_name = (('your_storage_label', 'None'), 'storage_content')
-    SC = views.node(results, 'your_storage_label')['sequences'][column_name]
+    from oemof import solph
+    results = model.solve()
+    results["storage_content"]("your_storage_label")
 
 The ``storage_content`` is the absolute value of the current stored energy.
-By calling:
 
-.. code-block:: python
-
-    views.node(results, 'your_storage_label')['scalars']
-
-you get the results of the scalar values of your storage, e.g. the initial
-storage content before time step zero (``init_content``).
-
-For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the :ref:`examples_label`.
+For more information see the definition of the
+:py:class:`~oemof.solph.components._generic_storage.GenericStorage` class
+or check the :ref:`examples_label`.
 
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
