@@ -46,11 +46,11 @@ Download data: :download:`time_series.csv </../examples/economic_results/time_se
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.6.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.6
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -71,7 +71,6 @@ from oemof.tools import logger
 from oemof.solph import EnergySystem
 from oemof.solph import Investment
 from oemof.solph import Model
-from oemof.solph import Results
 from oemof.solph import buses
 from oemof.solph import components
 from oemof.solph import create_time_index
@@ -239,16 +238,11 @@ def main(optimize=True):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    energysystem_model.solve(
+    results = energysystem_model.solve(
         solver=solver, solve_kwargs={"tee": solver_verbose}
     )
 
     logging.info("Store the energy system with the results.")
-
-    # The processing module of the outputlib can be used to extract the results
-    # from the model transfer them into a homogeneous structured dictionary.
-
-    results = Results(energysystem_model)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************

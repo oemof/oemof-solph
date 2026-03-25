@@ -24,15 +24,15 @@ Download source code: :download:`activity_costs.py </../examples/activity_costs/
 
     .. literalinclude:: /../examples/activity_costs/activity_costs.py
         :language: python
-        :lines: 43-118
+        :lines: 43-
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -61,7 +61,7 @@ def main(optimize=True):
     activity_costs = np.full(periods, 5)
     activity_costs[18:] = 0
 
-    es = solph.EnergySystem(timeindex=time)
+    es = solph.EnergySystem(timeindex=time, infer_last_interval=True)
 
     b_heat = solph.Bus(label="b_heat")
 
@@ -100,17 +100,14 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     ##########################################################################
     # Check and plot the results
     ##########################################################################
 
-    results = solph.processing.results(om)
+    ax = results["flow"].plot(kind="line", drawstyle="steps-post", grid=True, rot=0)
 
-    # plot data
-    data = solph.views.node(results, "b_heat")["sequences"]
-    ax = data.plot(kind="line", drawstyle="steps-post", grid=True, rot=0)
     ax.set_xlabel("Time")
     ax.set_ylabel("Heat (arb. units)")
     plt.show()

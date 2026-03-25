@@ -18,11 +18,11 @@ Download source code: :download:`transshipment.py </../examples/electrical/trans
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 To draw the graph pygraphviz is required, installed by:
 
@@ -49,8 +49,6 @@ from oemof.solph import Flow
 from oemof.solph import Investment
 from oemof.solph import Model
 from oemof.solph import components as cmp
-from oemof.solph import processing
-from oemof.solph import views
 from oemof.solph.components import Link
 
 try:
@@ -187,9 +185,7 @@ def main(optimize=True):
 
     # m.write('transshipment.lp', io_options={'symbolic_solver_labels': True})
 
-    m.solve(solver="cbc", solve_kwargs={"tee": True, "keepfiles": False})
-
-    m.results()
+    results = m.solve(solver="cbc", solve_kwargs={"tee": True, "keepfiles": False})
 
     graph = create_nx_graph(es, m)
 
@@ -202,15 +198,15 @@ def main(optimize=True):
             node_color={"b_0": "#cd3333", "b_1": "#7EC0EE", "b_2": "#eeac7e"},
         )
 
-    results = processing.results(m)
+    print(results["flow"][("gen_0", "b_0")])
+    print(results["flow"][("gen_1", "b_1")])
 
-    print(views.node(results, "gen_0"))
-    print(views.node(results, "gen_1"))
-
-    views.node(results, "line_0")["sequences"].plot(kind="bar")
+    results["flow"].plot(kind="bar")
 
     # look at constraints of Links in the pyomo model LinkBlock
     m.LinkBlock.pprint()
+
+    plt.show()
 
 
 if __name__ == "__main__":
