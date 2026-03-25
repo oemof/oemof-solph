@@ -62,17 +62,13 @@ district_heating_system.add(gas_boiler)
 # %%[sec_6_start]
 model = solph.Model(district_heating_system)
 results = model.solve(solver="cbc", solve_kwargs={"tee": True})
+
 # %%[sec_6_end]
-
-# %%[sec_7_start]
-solph.processing.results(model)
-
-flows = results["flow"]
-
-# %%[sec_7_end]
 
 
 # %%[sec_8_start]
+flows = results["flow"]
+
 import matplotlib.pyplot as plt
 
 # plt.style.use('dark_background')

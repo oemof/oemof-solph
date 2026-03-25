@@ -139,10 +139,9 @@ district_heating_system.add(heat_storage)
 model = solph.Model(district_heating_system)
 results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 
-flows = results["flow"]
-
 # %%[sec_6_start]
 
+flows = results["flow"]
 cap_gas_boiler = results["invest"][("gas boiler", "heat network")][0]
 cap_heat_pump = results["invest"][("heat pump", "heat network")][0]
 cap_storage = results["invest"]["heat storage"][0]
