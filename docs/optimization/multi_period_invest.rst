@@ -227,14 +227,10 @@ So it works like this:
     )
 
     om = solph.Model(my_energysystem)
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
-
-    # Obtain results
-    results = solph.processing.results(om)
-    hydrogen_results = solph.views.node(results, "hydrogen_pp")
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # Show investment plan for hydrogen power plants
-    print(hydrogen_results["period_scalars"])
+    print(results["invest"])
 
 The keys in the results dict in a multi-period model are "sequences" and "period_scalars".
 So for sequences, it is all the same, while for scalar values, we now have values for each period.
