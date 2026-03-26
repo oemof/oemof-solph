@@ -18,6 +18,10 @@ Documentation
 
 * Fix Furo error when displaying the table of contents of the result handling
   tutorial
+* Use `solph.Results` in documentation, examples, and tutorials,
+  where previously `solph.processing.results` was used.
+  (Documentation of the processing module is still available
+  as part of the API reference.)
 
 Bug fixes
 #########
