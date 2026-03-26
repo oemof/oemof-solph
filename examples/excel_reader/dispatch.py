@@ -27,11 +27,11 @@ Download data: :download:`scenario.xlsx </../examples/excel_reader/scenario.xlsx
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
     pip install openpyxl
 
 
@@ -42,8 +42,7 @@ using:
 
     pip install pygraphviz
 
-For pygraphviz under Windows, some hints are available in the oemof Wiki:
-https://github.com/oemof/oemof/wiki/Windows---general
+(Additional steps might be required, especially on Windows systems.)
 
 License
 -------
@@ -403,7 +402,7 @@ def main(optimize=True):
     om.receive_duals()
 
     # solving the linear problem using the given solver
-    om.solve(solver="cbc")
+    results = om.solve(solver="cbc")
 
     # create graph of esys
     # You can use argument filename='/home/somebody/my_graph.graphml'
@@ -420,16 +419,25 @@ def main(optimize=True):
     )
 
     # print and plot some results
-    results = solph.processing.results(om)
 
-    region2 = solph.views.node(results, "R2_bus_el")
-    region1 = solph.views.node(results, "R1_bus_el")
+    flows = results["flow"]
 
-    print(region2["sequences"].sum())
-    print(region1["sequences"].sum())
+    region1 = (flows.T[
+        (flows.columns.get_level_values(0)
+        == "R1_bus_el") | (flows.columns.get_level_values(1)
+        == "R1_bus_el")
+    ]).T
+    region2 = (flows.T[
+        (flows.columns.get_level_values(0)
+        == "R2_bus_el") | (flows.columns.get_level_values(1)
+        == "R2_bus_el")
+    ]).T
+
+    print(region2.sum())
+    print(region1.sum())
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    region1["sequences"].plot(ax=ax)
+    region1.plot(ax=ax)
     ax.legend(
         loc="upper center", prop={"size": 8}, bbox_to_anchor=(0.5, 1.4), ncol=3
     )
