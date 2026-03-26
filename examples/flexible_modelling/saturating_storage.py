@@ -14,16 +14,16 @@ Download source code: :download:`saturating_storage.py </../examples/flexible_mo
 
     .. literalinclude:: /../examples/flexible_modelling/saturating_storage.py
         :language: python
-        :lines: 34-140
+        :lines: 34-
 
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.6.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.6
+    pip install oemof.solph>=0.6.4
 
 
 License
@@ -114,18 +114,17 @@ def main(optimize=True):
     )
 
     # solve model
-    model.solve(solver="cbc")
+    results = model.solve(solver="cbc")
 
-    # create result object
-    results = solph.processing.results(model)
+    # visualise results
 
     plt.plot(
-        results[(battery, None)]["sequences"]["storage_content"],
+        results["storage_content"][battery],
         "r--",
         label="content",
     )
     plt.step(
-        20 * results[(bel, battery)]["sequences"]["flow"],
+        20 * results["flow"][(bel, battery)],
         "b-",
         label="20*inflow",
     )
@@ -134,8 +133,8 @@ def main(optimize=True):
 
     plt.figure()
     plt.plot(
-        results[(battery, None)]["sequences"]["storage_content"][1:],
-        results[(bel, battery)]["sequences"]["flow"][:-1],
+        results["storage_content"][battery][1:],
+        results["flow"][(bel, battery)],
         "b-",
     )
     plt.grid()
