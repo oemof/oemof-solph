@@ -185,7 +185,9 @@ def main(optimize=True):
 
     # m.write('transshipment.lp', io_options={'symbolic_solver_labels': True})
 
-    results = m.solve(solver="cbc", solve_kwargs={"tee": True, "keepfiles": False})
+    results = m.solve(
+        solver="cbc", solve_kwargs={"tee": True, "keepfiles": False}
+    )
 
     graph = create_nx_graph(es, m)
 

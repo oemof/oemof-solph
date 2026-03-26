@@ -106,7 +106,9 @@ def main(optimize=True):
     # Check and plot the results
     ##########################################################################
 
-    ax = results["flow"].plot(kind="line", drawstyle="steps-post", grid=True, rot=0)
+    ax = results["flow"].plot(
+        kind="line", drawstyle="steps-post", grid=True, rot=0
+    )
 
     ax.set_xlabel("Time")
     ax.set_ylabel("Heat (arb. units)")
