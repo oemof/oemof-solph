@@ -79,20 +79,15 @@ Quickly plotting the Node balance
 ---------------------------------
 
 The following code snippet is meant to give an idea how results can be
-visualised. It also gives an idea how to migrate from ``solph.views``.
-That modeule was designed to extract node specific from
-the nested result dictionary that is returned by calling
-``solph.processing.results(Model)``. With the new results object,
-this approach is no longer advised. Instead, you can extract flows
-directly from the results:
+visualised. See how you can extract flows from the results to plot them:
 
 .. code-block:: python
 
     [...]
     results = model.solve(solver=solver)
     flows = results["flow"]
-    outflows = flows.xs("my_node", axis=1, level=0, drop_level=False)
-    inflows = flows.xs("my_node", axis=1, level=1, drop_level=False)
+    outflows = flows.xs("b_el", axis=1, level=0, drop_level=False)
+    inflows = flows.xs("b_el", axis=1, level=1, drop_level=False)
 
     fig = plt.figure()
     ax = fig.add_subplot()
@@ -106,3 +101,21 @@ directly from the results:
 
     ax.legend()
     plt.show()
+
+If you want to have a DataFrame that contains all flows fromand to
+a specific node, you can also use masking.
+
+.. code-block:: python
+
+    [...]
+    mask_bel = (
+        flows.columns.to_frame(index=False).eq("b_el").any(axis=1).to_numpy()
+    )
+
+    flows_bel = flows.loc[:, mask_bel]
+
+This way, you can also migrate from ``solph.views``.
+That modeule was designed to extract node specific from
+the nested result dictionary that is returned by calling
+``solph.processing.results(Model)``. With the new results object,
+this approach is no longer advised.
