@@ -422,16 +422,18 @@ def main(optimize=True):
 
     flows = results["flow"]
 
-    region1 = (flows.T[
-        (flows.columns.get_level_values(0)
-        == "R1_bus_el") | (flows.columns.get_level_values(1)
-        == "R1_bus_el")
-    ]).T
-    region2 = (flows.T[
-        (flows.columns.get_level_values(0)
-        == "R2_bus_el") | (flows.columns.get_level_values(1)
-        == "R2_bus_el")
-    ]).T
+    region1 = (
+        flows.T[
+            (flows.columns.get_level_values(0) == "R1_bus_el")
+            | (flows.columns.get_level_values(1) == "R1_bus_el")
+        ]
+    ).T
+    region2 = (
+        flows.T[
+            (flows.columns.get_level_values(0) == "R2_bus_el")
+            | (flows.columns.get_level_values(1) == "R2_bus_el")
+        ]
+    ).T
 
     print(region2.sum())
     print(region1.sum())
