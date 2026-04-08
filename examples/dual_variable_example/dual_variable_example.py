@@ -44,7 +44,7 @@ from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
-from oemof.solph import flows
+from oemof.solph import Flow
 from oemof.solph import processing
 
 
@@ -184,14 +184,14 @@ def main(optimize=True):
 
     # create excess component for the electricity bus to allow overproduction
     energysystem.add(
-        cmp.Sink(label="excess_bel", inputs={bus_elec: flows.Flow()})
+        cmp.Sink(label="excess_bel", inputs={bus_elec: Flow()})
     )
 
     # create source object representing the gas commodity (annual limit)
     energysystem.add(
         cmp.Source(
             label="rgas",
-            outputs={bus_gas: flows.Flow(variable_costs=38)},
+            outputs={bus_gas: Flow(variable_costs=38)},
         )
     )
 
@@ -199,7 +199,7 @@ def main(optimize=True):
     energysystem.add(
         cmp.Source(
             label="pv",
-            outputs={bus_elec: flows.Flow(fix=pv, nominal_capacity=700)},
+            outputs={bus_elec: Flow(fix=pv, nominal_capacity=700)},
         )
     )
 
@@ -207,7 +207,7 @@ def main(optimize=True):
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bus_elec: flows.Flow(fix=demand, nominal_capacity=1)},
+            inputs={bus_elec: Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
@@ -215,8 +215,8 @@ def main(optimize=True):
     energysystem.add(
         cmp.Converter(
             label="pp_gas",
-            inputs={bus_gas: flows.Flow()},
-            outputs={bus_elec: flows.Flow(nominal_capacity=400)},
+            inputs={bus_gas: Flow()},
+            outputs={bus_elec: Flow(nominal_capacity=400)},
             conversion_factors={bus_elec: 0.5},
         )
     )
@@ -226,9 +226,9 @@ def main(optimize=True):
     storage = cmp.GenericStorage(
         nominal_capacity=cap,
         label="storage",
-        inputs={bus_elec: flows.Flow(nominal_capacity=cap / 6)},
+        inputs={bus_elec: Flow(nominal_capacity=cap / 6)},
         outputs={
-            bus_elec: flows.Flow(
+            bus_elec: Flow(
                 nominal_capacity=cap / 6, variable_costs=0.001
             )
         },
@@ -253,38 +253,22 @@ def main(optimize=True):
     model.receive_duals()
 
     # if tee_switch is true solver messages will be displayed
-    model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+    results = model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
+
+    result_dict = processing.results(model)
 
     # add results to the energy system to make it possible to store them.
-    results = processing.results(model)
+    flows = results["flow"]
 
-    flows_to_bus = pd.DataFrame(
-        {
-            str(k[0].label): v["sequences"]["flow"]
-            for k, v in results.items()
-            if k[1] is not None and k[1] == bus_elec
-        }
-    )
-    flows_from_bus = pd.DataFrame(
-        {
-            str(k[1].label): v["sequences"]["flow"]
-            for k, v in results.items()
-            if k[1] is not None and k[0] == bus_elec
-        }
-    )
+    flows_to_bus = flows.loc[:, flows.columns.get_level_values(1) == bus_elec]
+    flows_from_bus = flows.loc[:, flows.columns.get_level_values(0) == bus_elec]
 
-    storage = pd.DataFrame(
-        {
-            str(k[0].label): v["sequences"]["storage_content"]
-            for k, v in results.items()
-            if k[1] is None and k[0] == storage
-        }
-    )
+    storage = results["storage_content"]
 
     duals = pd.DataFrame(
         {
             str(k[0].label): v["sequences"]["duals"]
-            for k, v in results.items()
+            for k, v in result_dict.items()
             if k[1] is None and isinstance(k[0], buses.Bus)
         }
     )
