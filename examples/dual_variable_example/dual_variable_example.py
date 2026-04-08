@@ -183,9 +183,7 @@ def main(optimize=True):
     energysystem.add(bus_gas, bus_elec)
 
     # create excess component for the electricity bus to allow overproduction
-    energysystem.add(
-        cmp.Sink(label="excess_bel", inputs={bus_elec: Flow()})
-    )
+    energysystem.add(cmp.Sink(label="excess_bel", inputs={bus_elec: Flow()}))
 
     # create source object representing the gas commodity (annual limit)
     energysystem.add(
@@ -228,9 +226,7 @@ def main(optimize=True):
         label="storage",
         inputs={bus_elec: Flow(nominal_capacity=cap / 6)},
         outputs={
-            bus_elec: Flow(
-                nominal_capacity=cap / 6, variable_costs=0.001
-            )
+            bus_elec: Flow(nominal_capacity=cap / 6, variable_costs=0.001)
         },
         loss_rate=0.00,
         initial_storage_level=0,
@@ -261,7 +257,9 @@ def main(optimize=True):
     flows = results["flow"]
 
     flows_to_bus = flows.loc[:, flows.columns.get_level_values(1) == bus_elec]
-    flows_from_bus = flows.loc[:, flows.columns.get_level_values(0) == bus_elec]
+    flows_from_bus = flows.loc[
+        :, flows.columns.get_level_values(0) == bus_elec
+    ]
 
     storage = results["storage_content"]
 
