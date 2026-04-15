@@ -28,6 +28,9 @@ Documentation
 Bug fixes
 #########
 
+* Remove pydot usage from tutorial scripts. As pydot is not named as a
+  dependency and the scripts do not actually use the generated dot-file,
+  the only effect was that the scripts often do not work.
 
 Other changes
 #############

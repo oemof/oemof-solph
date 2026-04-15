@@ -95,7 +95,6 @@ energy_system.add(battery)
 # %%[graph_plotting]
 plt.figure()
 graph = energy_system.to_networkx()
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_4.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
@@ -180,8 +179,7 @@ plt.step(
 
 plt.step(
     flows.index,
-    flows[("electricity", "demand")]
-    + flows[("electricity", "Battery")],
+    flows[("electricity", "demand")] + flows[("electricity", "Battery")],
     "--",
     color="darkgrey",
     label="Battery charging",

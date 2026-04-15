@@ -119,7 +119,6 @@ ev_energy_system.add(charger11kW)
 # %%[graph_start]
 plt.figure()
 graph = create_nx_graph(ev_energy_system)
-nx.drawing.nx_pydot.write_dot(graph, "ev_carging_graph_3.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[graph_end]
 # %%[solve_start]

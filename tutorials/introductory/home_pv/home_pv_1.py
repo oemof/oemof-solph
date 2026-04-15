@@ -63,7 +63,6 @@ energy_system.add(grid)
 # %%[graph_plotting]
 plt.figure()
 graph = energy_system.to_networkx()
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_1.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 plt.show()
 # %%[model_optimisation]
