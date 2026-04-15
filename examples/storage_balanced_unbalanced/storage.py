@@ -133,22 +133,10 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # solve model
-    om.solve(solver="cbc")
+    results = om.solve(solver="cbc")
 
-    # create result object
-    results = solph.processing.results(om)
-
-    components = [x for x in results if x[1] is None]
-
-    storage_cap = pd.DataFrame()
-    balance = pd.Series(dtype=float)
-
-    storages = [x[0] for x in components if "storage" in x[0].label]
-
-    for s in storages:
-        name = s.label
-        storage_cap[name] = results[s, None]["sequences"]["storage_content"]
-        balance[name] = storage_cap.iloc[0][name] - storage_cap.iloc[-1][name]
+    storage_cap = results["storage_content"]
+    balance = storage_cap.iloc[0] - storage_cap.iloc[-1]
 
     storage_cap.plot(
         drawstyle="steps-mid",
