@@ -136,8 +136,6 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         default_attributes = {
-            "age": None,
-            "lifetime": None,
             "integer": False,
             "investment": None,
             "nominal_capacity": 1,
@@ -150,7 +148,6 @@ class TestParameterResult:
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
-            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),
@@ -190,7 +187,6 @@ class TestParameterResult:
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
@@ -230,7 +226,6 @@ class TestParameterResult:
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,

@@ -40,7 +40,6 @@ import pytest
 from oemof.tools import economics
 from oemof.tools import logger
 from oemof.tools.debugging import ExperimentalFeatureWarning
-from oemof.tools.debugging import SuspiciousUsageWarning
 
 from oemof import solph
 
@@ -58,21 +57,16 @@ with pytest.warns(
     ExperimentalFeatureWarning,
     match="tsa_parameters",
 ):
-    with pytest.warns(
-        ExperimentalFeatureWarning,
-        match="periods",
-    ):
-        energysystem = solph.EnergySystem(
-            timeindex=tindex,
-            periods=[tindex],
-            tsa_parameters=[
-                {
-                    "timesteps_per_period": 2,
-                    "order": [0, 1, 1, 0],
-                },
-            ],
-            infer_last_interval=True,
-        )
+    energysystem = solph.EnergySystem(
+        timeindex=tindex,
+        tsa_parameters=[
+            {
+                "timesteps_per_period": 2,
+                "order": [0, 1, 1, 0],
+            },
+        ],
+        infer_last_interval=True,
+    )
 
 ##########################################################################
 # Create oemof objects
@@ -105,8 +99,8 @@ demand = solph.components.Sink(
 epc = economics.annuity(capex=1000, n=20, wacc=0.05)
 storage = solph.components.GenericStorage(
     label="storage",
-    inputs={bel: solph.Flow(lifetime=20)},
-    outputs={bel: solph.Flow(lifetime=20)},
+    inputs={bel: solph.Flow()},
+    outputs={bel: solph.Flow()},
     nominal_capacity=solph.Investment(ep_costs=epc, lifetime=20),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
@@ -127,15 +121,7 @@ energysystem.add(wind, demand, storage, excess)
 logging.info("Optimise the energy system")
 
 # initialise the operational model
-with pytest.warns(
-    SuspiciousUsageWarning,
-    match="By default, a discount_rate",
-):
-    with pytest.warns(
-        SuspiciousUsageWarning,
-        match="You did not specify an interest rate",
-    ):
-        om = solph.Model(energysystem)
+om = solph.Model(energysystem)
 
 # if tee_switch is true solver messages will be displayed
 logging.info("Solve the optimization problem")
@@ -168,9 +154,9 @@ init_soc = 0
 
 def test_storage_investment():
     """Make sure that max SOC investment equals max load"""
-    assert results[storage, None]["period_scalars"]["invest"].iloc[
-        0
-    ] == pytest.approx(first_input)
+    assert results[storage, None]["scalars"]["invest"] == pytest.approx(
+        first_input
+    )
 
 
 def test_storage_input():

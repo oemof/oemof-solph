@@ -213,7 +213,6 @@ es = solph.EnergySystem(
     periods=investment_periods,
     tsa_parameters=tsa_parameters,
     infer_last_interval=False,
-    use_remaining_value=True,
 )
 
 # %% [solve]

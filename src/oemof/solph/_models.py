@@ -24,6 +24,7 @@ from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
+from oemof.solph import EnergySystem
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
@@ -55,11 +56,6 @@ class Model(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
-    objective_weighting : array like (optional)
-        Weights used for temporal objective function
-        expressions. If nothing is passed, `timeincrement` will be used which
-        is calculated from the freq length of the energy system timeindex or
-        can be directly passed as a sequence.
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
@@ -93,7 +89,7 @@ class Model(po.ConcreteModel):
     TIMESTEPS
         A set with all timesteps of the given time horizon.
 
-    PERIODS
+    CAPACITY_PERIODS
         A set with all investment periods of the given time horizon.
 
     TIMEINDEX
@@ -123,14 +119,21 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(
+        self,
+        energysystem: EnergySystem,
+        *,
+        constraint_groups: list[po.ScalarBlock] = None,
+        auto_construct: bool = True,
+        debug: bool = False,
+    ):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
         # model will take up to a 100 times longer if the root logger is set
         # to DEBUG
 
-        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+        if getLogger().level <= 10 and debug is False:
             msg = (
                 "The root logger level is 'DEBUG'.\nDue to a communication "
                 "problem between solph and the pyomo package,\nusing the "
@@ -146,24 +149,14 @@ class Model(po.ConcreteModel):
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get("name", type(self).__name__)
-
         self.es = energysystem
+        self.timeincrement = self.es.timeincrement
 
-        if kwargs.get("timeincrement"):
-            msg = "Resetting timeincrement from EnergySystem in Model."
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        if constraint_groups is None:
+            constraint_groups = []
 
-            self.timeincrement = kwargs.get("timeincrement")
-        else:
-            self.timeincrement = self.es.timeincrement
-
-        self.objective_weighting = kwargs.get(
-            "objective_weighting", self.timeincrement
-        )
-
-        self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
-            "constraint_groups", []
+        self._constraint_groups = (
+            type(self).CONSTRAINT_GROUPS + constraint_groups
         )
 
         self._constraint_groups += [
@@ -179,14 +172,12 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if energysystem.periods is not None:
-            self.discount_rate = kwargs.get("discount_rate")
-            if self.discount_rate is None:
-                self._set_discount_rate_with_warning()
+        if not self.es.transitional_single_period:
+            self._set_discount_rate_with_warning()
         else:
             pass
 
-        if kwargs.get("auto_construct", True):
+        if auto_construct is True:
             self._construct()
 
     def _construct(self):
@@ -213,7 +204,8 @@ class Model(po.ConcreteModel):
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
-        Also create sets PERIODS and TIMEINDEX used for multi-period models.
+        Also create sets CAPACITY_PERIODS and TIMEINDEX used for
+        formulti-period models.
         """
         self.nodes = list(self.es.nodes)
 
@@ -235,7 +227,7 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.periods is None:
+        if self.es.transitional_single_period:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
@@ -245,11 +237,11 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(initialize=[0])
+            self.CAPACITY_PERIODS = po.Set(initialize=[0])
         else:
             nested_list = [
-                [k] * len(self.es.periods[k])
-                for k in range(len(self.es.periods))
+                [k] * len(self.es.capacity_periods[k])
+                for k in range(len(self.es.capacity_periods))
             ]
             flattened_list = [
                 item for sublist in nested_list for item in sublist
@@ -260,12 +252,14 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(
-                initialize=sorted(list(set(range(len(self.es.periods)))))
+            self.CAPACITY_PERIODS = po.Set(
+                initialize=sorted(
+                    list(set(range(len(self.es.capacity_periods))))
+                )
             )
 
         # (Re-)Map timesteps to periods
-        timesteps_in_period = {p: [] for p in self.PERIODS}
+        timesteps_in_period = {p: [] for p in self.CAPACITY_PERIODS}
         for p, t in self.TIMEINDEX:
             timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
@@ -280,7 +274,7 @@ class Model(po.ConcreteModel):
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(
                 self.es.tsa_parameters[p]["occurrences"][k]
-                for p in self.PERIODS
+                for p in self.CAPACITY_PERIODS
                 for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
                 for _ in range(self.es.tsa_parameters[p]["timesteps"])
             )
@@ -289,7 +283,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                     )
                 )
@@ -299,7 +293,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                         + 1
                     )
@@ -308,7 +302,7 @@ class Model(po.ConcreteModel):
             self.TYPICAL_CLUSTERS = po.Set(
                 initialize=[
                     (p, i)
-                    for p in self.PERIODS
+                    for p in self.CAPACITY_PERIODS
                     for i in range(
                         len(self.es.tsa_parameters[p]["occurrences"])
                     )

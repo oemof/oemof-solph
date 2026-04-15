@@ -103,7 +103,7 @@ def test_cmdline_options(capsys):
     " consistent.:UserWarning"
 )
 @pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+    "ignore:CAUTION! You specified the 'investment_times':UserWarning"
 )
 def test_multi_period_default_discount_rate():
     """Test error being thrown for default multi-period discount rate"""
@@ -111,7 +111,7 @@ def test_multi_period_default_discount_rate():
     es = solph.EnergySystem(
         timeindex=timeindex,
         timeincrement=[1] * len(timeindex),
-        periods=[timeindex],
+        investment_times=[timeindex[0], timeindex[-1]],
         infer_last_interval=False,
     )
     bel = solph.buses.Bus(label="bus")

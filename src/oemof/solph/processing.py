@@ -254,17 +254,17 @@ def results(model, remove_last_time_point=False):
     if model.es.tsa_parameters:
         for p, period_data in enumerate(model.es.tsa_parameters):
             if p == 0:
-                if model.es.periods is None:
+                if model.es.transitional_single_period:
                     timeindex = model.es.timeindex
                 else:
-                    timeindex = model.es.periods[0]
+                    timeindex = model.es.capacity_periods[0]
                 result_index = _disaggregate_tsa_timeindex(
                     timeindex, period_data
                 )
             else:
                 result_index = result_index.union(
                     _disaggregate_tsa_timeindex(
-                        model.es.periods[p], period_data
+                        model.es.capacity_periods[p], period_data
                     )
                 )
     else:
@@ -280,8 +280,8 @@ def results(model, remove_last_time_point=False):
     # dataframe dict into a series for scalar data and dataframe for sequences
     result = {}
 
-    # Standard model results extraction
-    if model.es.periods is None:
+    # single period model results extraction
+    if model.es.transitional_single_period:
         result = _extract_standard_model_result(
             df_dict, result, result_index, remove_last_time_point
         )
@@ -310,7 +310,7 @@ def results(model, remove_last_time_point=False):
             duals = [
                 model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
             ]
-            if model.es.periods is None:
+            if model.es.transitional_single_period:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             # TODO: Align with standard model
             else:
@@ -420,8 +420,8 @@ def _extract_multi_period_model_result(
         ]
         # map periods to their start years for displaying period results
         d = {
-            key: val + model.es.periods[0].min().year
-            for key, val in enumerate(model.es.periods_years)
+            key: val + model.es.capacity_periods[0].min().year
+            for key, val in enumerate(model.es.capacity_period_years)
         }
         period_scalars = df_dict[k].loc[:, period_cols].dropna()
         sequences = df_dict[k].loc[

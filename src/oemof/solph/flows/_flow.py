@@ -86,10 +86,6 @@ class Flow(Edge):
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
-    fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
-        The fixed costs associated with a flow.
-        Note: These are only applicable for a multi-period model
-        and given on a yearly basis.
     lifetime : int, :math:`l`
         The lifetime of a flow (usually given in years);
         once it reaches its lifetime (considering also
@@ -145,9 +141,6 @@ class Flow(Edge):
         bidirectional=False,
         # --- END
         nonconvex=None,
-        lifetime=None,
-        age=None,
-        fixed_costs=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
@@ -244,21 +237,6 @@ class Flow(Edge):
                     + " a constant value or an Investment object."
                 )
 
-        if fixed_costs is not None:
-            msg = (
-                "Be aware that the fixed costs attribute is only\n"
-                "meant to be used for multi-period models to depict "
-                "fixed costs that occur on a yearly basis.\n"
-                "If you wish to set up a multi-period model, explicitly "
-                "set the `periods` attribute of your energy system.\n"
-                "It has been decided to remove the `fixed_costs` "
-                "attribute with v0.2 for regular uses.\n"
-                "If you specify `fixed_costs` for a regular model, "
-                "this will simply be silently ignored."
-            )
-            warn(msg, debugging.SuspiciousUsageWarning)
-
-        self.fixed_costs = sequence(fixed_costs)
         self.variable_costs = sequence(variable_costs)
         self.positive_gradient_limit = sequence(positive_gradient_limit)
         self.negative_gradient_limit = sequence(negative_gradient_limit)
@@ -267,8 +245,6 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
-        self.lifetime = lifetime
-        self.age = age
 
         # It is not allowed to define `minimum` or `maximum` if `fix`
         # is defined.

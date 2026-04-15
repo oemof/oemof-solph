@@ -87,11 +87,7 @@ def results_capex():
     hp = solph.components.Converter(
         "heat_pump",
         inputs={el_bus: solph.flows.Flow()},
-        outputs={
-            heat_bus: solph.flows.Flow(
-                solph.Investment(ep_costs=100, fixed_costs=200)
-            )
-        },
+        outputs={heat_bus: solph.flows.Flow(solph.Investment(ep_costs=100))},
         conversion_factors={el_bus: 1 / 3},
     )
 
@@ -103,7 +99,7 @@ def results_capex():
 
     results = solph.Results(energysystem_model)
 
-    assert results.get("investment_costs").iloc[0, 0] == 42 * 100 + 200
+    assert results.get("investment_costs").iloc[0, 0] == 42 * 100
 
 
 def results_storage():

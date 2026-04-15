@@ -64,7 +64,7 @@ def investment_limit_per_period(model, limit=None):
 
     .. math::
         \sum_{investment\_costs(p)} \leq limit(p)
-        \forall p \in \textrm{PERIODS}
+        \forall p \in \textrm{CAPACITY_PERIODS}
 
     Parameters
     ----------
@@ -75,7 +75,7 @@ def investment_limit_per_period(model, limit=None):
         (i.e. RHS of constraint)
     """
 
-    if model.es.periods is None:
+    if model.es.transitional_single_period:
         msg = (
             "investment_limit_per_period is only applicable "
             "for multi-period models.\nIn order to create such a model, "
@@ -114,7 +114,7 @@ def investment_limit_per_period(model, limit=None):
         return expr <= limit[p]
 
     model.investment_limit_per_period = po.Constraint(
-        model.PERIODS, rule=investment_period_rule
+        model.CAPACITY_PERIODS, rule=investment_period_rule
     )
 
     return model
@@ -133,7 +133,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     calling the `oemof.solph._models.Model.invest_limit_${keyword}()`.
 
     .. math::
-        \sum_{p \in \textrm{PERIODS}}
+        \sum_{p \in \textrm{CAPACITY_PERIODS}}
         \sum_{i \in IF}  P_{i}(p) \cdot w_i \leq limit
 
     With `IF` being the set of InvestmentFlows considered for the integral
@@ -199,14 +199,14 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501
-    investments = {}
+    invest_flows = {}
 
     for i, o in model.flows:
         if (
             model.flows[i, o].investment is not None
             and keyword in model.flows[i, o].investment.custom_properties
         ):
-            investments[(i, o)] = model.flows[i, o].investment
+            invest_flows[(i, o)] = model.flows[i, o].investment
 
     limit_name = "invest_limit_" + keyword
 
@@ -216,9 +216,9 @@ def additional_investment_flow_limit(model, keyword, limit=None):
         po.Expression(
             expr=sum(
                 model.InvestmentFlowBlock.invest[i, o, p]
-                * investments[i, o].custom_properties[keyword]
-                for (i, o) in investments
-                for p in model.PERIODS
+                * invest_flows[i, o].custom_properties[keyword]
+                for (i, o) in invest_flows
+                for p in model.CAPACITY_PERIODS
             )
         ),
     )

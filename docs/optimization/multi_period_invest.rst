@@ -128,7 +128,6 @@ but with a few minor additions and modifications in the investment object itself
   free to reinvest or choose another option to fill up the missing capacity.
 * You can define an initial `age` if you have `existing` capacity. If you do not specify anything, the default value 0 will be used,
   meaning your `existing` capacity has just been newly invested.
-* You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage.
 
 Here is an example
 
@@ -143,7 +142,6 @@ Here is an example
                     maximum=1000,
                     ep_costs=1e6,
                     lifetime=30,
-                    fixed_costs=100,
                 ),
                 variable_costs=3,
             )
@@ -161,7 +159,7 @@ Here is an example
     Annuities are calculated within the model. You do not have to do that.
     Also the model takes care of discounting future expenses / cashflows.
 
-Below is what it would look like if you altered `ep_costs` and `fixed_costs` per period. This can be done by simply
+Below is what it would look like if you altered `ep_costs` per period. This can be done by simply
 providing a list. Note that the length of the list must equal the number of periods of your model.
 This would mean that for investments in the particular period, these values would be the one that are applied over their lifetime.
 
@@ -176,7 +174,6 @@ This would mean that for investments in the particular period, these values woul
                     maximum=1000,
                     ep_costs=[1e6, 1.1e6],
                     lifetime=30,
-                    fixed_costs=[100, 110],
                 ),
                 variable_costs=3,
             )
@@ -188,8 +185,6 @@ For components that is not invested into, you also can specify some additional a
 
 * You can specify a `lifetime` attribute. This can be used to depict existing plants going offline when reaching their lifetime.
 * You can define an initial `age`. Also, this can be used for existing plants.
-* You also can define `fixed_costs`, i.e. costs that occur every period independent of the plants usage. How they are handled
-  depends on whether the flow has a limited or an unlimited lifetime.
 
 .. code-block:: python
 
@@ -203,7 +198,6 @@ For components that is not invested into, you also can specify some additional a
                 minimum=0.4,
                 lifetime=50,
                 age=46,
-                fixed_costs=100,
                 variable_costs=3,
             )
         },
@@ -257,11 +251,6 @@ Besides the `invest` variable, new variables are introduced as well. These are:
       has not yet been tested.
     * For now, both, the `timeindex` as well as the `timeincrement` of an energy system have to be defined since they
       have to be of the same length for a multi-period model.
-    * You can choose whether to re-evaluate assets at the end of the optimization horizon. If you set attribute
-      `use_remaining_value` of the energy system to True (defaults to False), this leads to the model evaluating the
-      difference in the asset value at the end of the optimization horizon vs. at the time the investment was made.
-      The difference in value is added to or subtracted from the respective investment costs increment,
-      assuming assets are to be liquidated / re-evaluated at the end of the optimization horizon.
     * Also please be aware, that periods correspond to years by default. You could also choose
       monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
       this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
