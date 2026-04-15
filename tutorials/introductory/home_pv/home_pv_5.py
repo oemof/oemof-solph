@@ -113,7 +113,6 @@ energy_system.add(battery)
 # %%[graph_plotting]
 plt.figure()
 graph = create_nx_graph(energy_system)
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_5.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
