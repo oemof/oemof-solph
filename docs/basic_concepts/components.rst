@@ -243,7 +243,7 @@ after the optimisation, you need to check the ``storage_content`` in the results
 
     from oemof import solph
     results = model.solve()
-    results["storage_content"]("your_storage_label")
+    results["storage_content"]["your_storage_label"]
 
 The ``storage_content`` is the absolute value of the current stored energy.
 
