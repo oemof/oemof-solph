@@ -30,11 +30,11 @@ Download data: :download:`input_data.csv </../examples/simple_dispatch/input_dat
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 
 License
