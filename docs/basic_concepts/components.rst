@@ -236,6 +236,21 @@ the second configuration:
         initial_storage_level=0.5, balanced=True,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8)
 
+It is also possible to model a storage with a soc-dependent charging power.
+
+.. code-block:: python
+
+    solph.components.GenericStorage(
+        label="SOC-dependent",
+        inputs={bus: solph.Flow(10)},
+        outputs={bus: solph.Flow(10)},
+        nominal_capacity=100,
+        constant_soc_until=0.2,
+        fraction_saturation_charging=0.3,
+
+.. image:: ../_files/soc_dependent_charging.svg
+
+
 If you want to view the temporal course of the state of charge of your storage
 after the optimisation, you need to check the ``storage_content`` in the results:
 
