@@ -11,13 +11,16 @@ New features
 ############
 
 * Mipgap is calculated in the meta results
+* The `GenericStorage` now allows reducing the inflow based on the
+  storage_level. The feature does not work with all investments, yet.
+  See documentation for details.
 
 
 Documentation
 #############
 
 * Fix Furo error when displaying the table of contents of the result handling
-  tutorial
+  tutorial.
 
 Bug fixes
 #########
