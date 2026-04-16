@@ -84,7 +84,6 @@ energy_system.add(pv_system)
 # %%[graph_plotting]
 plt.figure()
 graph = energy_system.to_networkx()
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_3.dot")
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
@@ -161,8 +160,7 @@ plt.step(
 
 plt.step(
     flows.index,
-    flows[("electricity", "demand")]
-    + flows[("electricity", "grid")],
+    flows[("electricity", "demand")] + flows[("electricity", "grid")],
     ":",
     color="darkgrey",
     label="Feed-In",

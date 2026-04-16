@@ -243,7 +243,7 @@ after the optimisation, you need to check the ``storage_content`` in the results
 
     from oemof import solph
     results = model.solve()
-    results["storage_content"]("your_storage_label")
+    results["storage_content"]["your_storage_label"]
 
 The ``storage_content`` is the absolute value of the current stored energy.
 
@@ -282,7 +282,7 @@ You should not set all 3 parameters at the same time, since it will lead to
 overdetermination.
 
 The following example pictures a Pumped Hydroelectric Energy Storage (PHES).
-oth flows and the storage itself (representing: pump, turbine, basin) are free
+Both, flows and the storage itself, (representing: pump, turbine, basin) are free
 in their investment. You can set the parameters to `None` or delete them as
 `None` is the default value.
 
@@ -294,22 +294,25 @@ in their investment. You can set the parameters to `None` or delete them as
         outputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment(ep_costs=500)},
         loss_rate=0.001,
         inflow_conversion_factor=0.98, outflow_conversion_factor=0.8),
-        investment = solph.Investment(ep_costs=40))
+        nominal_capacity=solph.Investment(ep_costs=40),
+    )
 
 The following example describes a battery with flows coupled to the capacity of the storage.
+Note that the capacity of the flows depends on an investment but has no assigned costs.
 
 .. code-block:: python
 
     solph.components.GenericStorage(
         label='battery',
-        inputs={b_el: solph.flows.Flow()},
-        outputs={b_el: solph.flows.Flow()},
+        inputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment())},
+        outputs={b_el: solph.flows.Flow(nominal_capacity=solph.Investment())},
         loss_rate=0.001,
         inflow_conversion_factor=0.98,
          outflow_conversion_factor=0.8,
         invest_relation_input_capacity = 1/6,
         invest_relation_output_capacity = 1/6,
-        investment = solph.Investment(ep_costs=400))
+        nominal_capacity=solph.Investment(ep_costs=400),
+    )
 
 
 .. note:: See the :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class for all parameters and the mathematical background.
