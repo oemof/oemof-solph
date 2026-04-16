@@ -14,16 +14,16 @@ Download source code: :download:`saturating_storage.py </../examples/flexible_mo
 
     .. literalinclude:: /../examples/flexible_modelling/saturating_storage.py
         :language: python
-        :lines: 34-140
+        :lines: 34-
 
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.6.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.6
+    pip install oemof.solph>=0.6.4
 
 
 License
@@ -115,6 +115,8 @@ def main(optimize=True):
 
     # solve model
     results = model.solve(solver="cbc")
+
+    # visualise results
 
     plt.plot(
         results["storage_content"][battery],

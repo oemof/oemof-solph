@@ -42,8 +42,7 @@ using:
 
     pip install pygraphviz
 
-For pygraphviz under Windows, some hints are available in the oemof Wiki:
-https://github.com/oemof/oemof/wiki/Windows---general
+(Additional steps might be required, especially on Windows systems.)
 
 License
 -------

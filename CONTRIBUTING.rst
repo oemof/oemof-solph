@@ -74,8 +74,8 @@ For merging, you should:
 
 1. Include passing tests (run ``tox``) [1]_.
 2. Update documentation when there's new API, functionality etc.
-3. Add a note about the changes to ``docs/whatsnew/next_version.rst``.
-4. Add your name to ``AUTHORS.rst`` and ``CITATION.cff``.
+3. Add a note about the changes and your name (or nickname) to ``docs/whatsnew/next_version.rst``.
+4. Optionally, you may also add your name to ``AUTHORS.rst`` and ``CITATION.cff``.
 
 .. [1] If you don't have all the necessary python versions available locally,
        you can rely on the CI pipeline at GitHub.

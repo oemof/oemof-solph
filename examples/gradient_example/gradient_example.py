@@ -16,7 +16,7 @@ Download source code: :download:`gradient_example.py </../examples/gradient_exam
 
     .. literalinclude:: /../examples/gradient_example/gradient_example.py
         :language: python
-        :lines: 35-211
+        :lines: 35-
 
 Installation requirements
 -------------------------
@@ -39,8 +39,7 @@ from oemof.solph import EnergySystem
 from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
-from oemof.solph import flows
-from oemof.solph import processing
+from oemof.solph import Flow
 
 
 def main(optimize=True):
@@ -117,13 +116,13 @@ def main(optimize=True):
     energysystem.add(bgas, bel)
 
     # create excess component for the electricity bus to allow overproduction
-    energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: flows.Flow()}))
+    energysystem.add(cmp.Sink(label="excess_bel", inputs={bel: Flow()}))
 
     # create source object representing the gas commodity (annual limit)
     energysystem.add(
         cmp.Source(
             label="rgas",
-            outputs={bgas: flows.Flow(variable_costs=5)},
+            outputs={bgas: Flow(variable_costs=5)},
         )
     )
 
@@ -131,7 +130,7 @@ def main(optimize=True):
     energysystem.add(
         cmp.Sink(
             label="demand",
-            inputs={bel: flows.Flow(fix=demand, nominal_capacity=1)},
+            inputs={bel: Flow(fix=demand, nominal_capacity=1)},
         )
     )
 
@@ -139,9 +138,9 @@ def main(optimize=True):
     energysystem.add(
         cmp.Converter(
             label="pp_gas",
-            inputs={bgas: flows.Flow()},
+            inputs={bgas: Flow()},
             outputs={
-                bel: flows.Flow(
+                bel: Flow(
                     nominal_capacity=10e5,
                     negative_gradient_limit=gradient,
                     positive_gradient_limit=gradient,
@@ -155,8 +154,8 @@ def main(optimize=True):
     storage = cmp.GenericStorage(
         nominal_capacity=999999999,
         label="storage",
-        inputs={bel: flows.Flow()},
-        outputs={bel: flows.Flow()},
+        inputs={bel: Flow()},
+        outputs={bel: Flow()},
         loss_rate=0.0,
         initial_storage_level=None,
         inflow_conversion_factor=1,
@@ -172,42 +171,18 @@ def main(optimize=True):
     model = Model(energysystem)
 
     # solve
-    model.solve(solver="cbc")
-
-    # processing the results
-    results = processing.results(model)
+    results = model.solve(solver="cbc")
 
     # *** Create a table with all sequences and store it into a file (csv/xlsx)
-    flows_to_bus = pd.DataFrame(
-        {
-            str(k[0].label): v["sequences"]["flow"]
-            for k, v in results.items()
-            if k[1] is not None and k[1] == bel
-        }
-    )
-    flows_from_bus = pd.DataFrame(
-        {
-            str(k[1].label): v["sequences"]["flow"]
-            for k, v in results.items()
-            if k[1] is not None and k[0] == bel
-        }
-    )
+    flows = results["flow"]
 
-    storage = pd.DataFrame(
-        {
-            str(k[0].label): v["sequences"]["storage_content"]
-            for k, v in results.items()
-            if k[1] is None and k[0] == storage
-        }
-    )
+    my_flows = flows.loc[
+        :, flows.columns.to_frame(index=False).eq(bel).any(axis=1).to_numpy()
+    ]
 
-    my_flows = pd.concat(
-        [flows_to_bus, flows_from_bus, storage],
-        keys=["to_bus", "from_bus", "content", "duals"],
-        axis=1,
-    )
-
-    my_flows.plot()
+    my_flows.plot(drawstyle="steps-post")
+    ax = plt.twinx()
+    results["storage_content"].plot(ax=ax)
     plt.show()
 
 

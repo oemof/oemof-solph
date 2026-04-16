@@ -5,7 +5,6 @@ Results handling
 ~~~~~~~~~~~~~~~~
 
 The main purpose of the processing module is to collect and organise results.
-The views module will provide some typical representations of the results.
 Plots are not part of solph, because plots are highly individual. However, the
 provided pandas.DataFrames are a good start for plots. Some basic functions
 for plotting of optimisation results can be found in the separate repository
@@ -75,3 +74,48 @@ the following code can be used:
             storage_inflow_columns.append(column)
 
     storage_inflows = flows[storage_inflow_columns]
+
+Quickly plotting the Node balance
+---------------------------------
+
+The following code snippet is meant to give an idea how results can be
+visualised. See how you can extract flows from the results to plot them:
+
+.. code-block:: python
+
+    [...]
+    results = model.solve(solver=solver)
+    flows = results["flow"]
+    outflows = flows.xs("b_el", axis=1, level=0, drop_level=False)
+    inflows = flows.xs("b_el", axis=1, level=1, drop_level=False)
+
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.stackplot(
+        inflows.index,
+        inflows.T,
+        labels=[f"supply: {col[0]}" for col in inflows.columns],
+    )
+    ax.plot(outflows, "k--", label="demand")
+
+    ax.legend()
+    plt.show()
+
+If you want to have a DataFrame that contains all flows fromand to
+a specific node, you can also use masking.
+
+.. code-block:: python
+
+    [...]
+    mask_bel = (
+        flows.columns.to_frame(index=False).eq("b_el").any(axis=1).to_numpy()
+    )
+
+    flows_bel = flows.loc[:, mask_bel]
+
+This way, you can also migrate from ``solph.views``.
+That modeule was designed to extract node specific from
+the nested result dictionary that is returned by calling
+``solph.processing.results(Model)``. With the new results object,
+this approach is no longer advised.
