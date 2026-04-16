@@ -369,4 +369,73 @@ def test_capacity_keyword_wrapper_error():
         )
 
 
-# --- END ---
+def test_soc_dependent_charging_with_investment():
+    with pytest.raises(
+        NotImplementedError, match="has to be fixed not variable"
+    ):
+        bus = solph.Bus()
+        _ = solph.components.GenericStorage(
+            label="storage",
+            inputs={bus: solph.Flow()},
+            outputs={bus: solph.Flow()},
+            nominal_capacity=solph.Investment(),
+            constant_soc_until=0.4,
+            fraction_saturation_charging=0.2,
+        )
+
+
+def test_soc_dependent_charging_without_inputs():
+    with pytest.raises(
+        NotImplementedError, match="adding Flows later"
+    ):
+        bus = solph.Bus()
+        _ = solph.components.GenericStorage(
+            label="storage",
+            inputs={bus: "This is not a Flow"},
+            outputs={bus: solph.Flow()},
+            nominal_capacity=1,
+            constant_soc_until=0.4,
+            fraction_saturation_charging=0.2,
+        )
+
+
+def test_soc_dependent_charging():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(
+            year=2023,
+            number=10,
+        ),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        label="Constant",
+        inputs={bus: solph.Flow(10, variable_costs=-1)},
+        outputs={bus: solph.Flow(10, variable_costs=2)},
+        nominal_capacity=100,
+        balanced=False,
+    )
+    storage_new = solph.components.GenericStorage(
+        label="SOC-dependent",
+        inputs={bus: solph.Flow(10, variable_costs=-1)},
+        outputs={bus: solph.Flow(10, variable_costs=2)},
+        nominal_capacity=100,
+        balanced=False,
+        constant_soc_until=0.2,
+        fraction_saturation_charging=0.3,
+    )
+    es.add(storage, storage_new)
+
+    model = solph.Model(es)
+    model.solve("cbc")
+    results = solph.Results(model)
+    cols = sorted([c for c in results["flow"].columns if bus == c[0]])
+    assert results["flow"][cols].iloc[0].to_list() == [10.0, 10.0]
+    assert results["flow"][cols].iloc[-1].round(2).to_list() == [10.0, 5.11]
+
+    storage_content = results["storage_content"].sort_index(axis=1)
+    assert storage_content.iloc[0].to_list() == [0.0, 0.0]
+    assert storage_content.iloc[-1].round(2).to_list() == [100.0, 75.87]
