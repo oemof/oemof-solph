@@ -46,11 +46,11 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -187,13 +187,20 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    # create result object
-    results = solph.processing.results(om)
+    flows = results["flow"]
+    mask_bus1 = (
+        (flows.columns.get_level_values(0) == "bus_a_1")
+        | (flows.columns.get_level_values(1) == "bus_a_1")
+    )
+    bus1 = flows.loc[:, mask_bus1]
 
-    bus1 = solph.views.node(results, "bus_a_1")["sequences"]
-    bus2 = solph.views.node(results, "bus_b_1")["sequences"]
+    mask_bus2 = (
+        (flows.columns.get_level_values(0) == "bus_b_1")
+        | (flows.columns.get_level_values(1) == "bus_b_1")
+    )
+    bus2 = flows.loc[:, mask_bus2]
 
     # plot the time series (sequences) of a specific component/bus
     if plt is not None:
@@ -208,11 +215,11 @@ def main(optimize=True):
     print("Space value: ", space_used)
     print(
         "Investment trafo_a: ",
-        solph.views.node(results, "trafo_a")["scalars"][0],
+        results["invest"]["trafo_a"],
     )
     print(
         "Investment trafo_b: ",
-        solph.views.node(results, "trafo_b")["scalars"][0],
+        results["invest"]["trafo_b"],
     )
 
 
