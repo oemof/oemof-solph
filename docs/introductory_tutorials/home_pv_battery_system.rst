@@ -160,8 +160,9 @@ To no surprise the numbers are the same:
     "Total annual costs",                  "€", 629.90
 
 To have a look at the flows from and to the "electricity" bus.
-The function ``solph.views.node(...)`` can help.
-It compiles the respective ``DataFrame`` so that it can be directly used.
+You can use ``DataFrame.xs(...)``. For example
+``flows_from = flows.xs("electricity", axis=1, level=0, drop_level=False)``,
+and with `level=1` for flows entering the bus.
 
 .. figure:: /./_files/tutorial_home-pv/home_pv_result-1_light.svg
     :align: center
