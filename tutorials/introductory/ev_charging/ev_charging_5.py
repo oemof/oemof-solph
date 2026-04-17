@@ -151,9 +151,7 @@ nx.draw(graph, with_labels=True, font_size=8)
 # %%[graph_end]
 # %%[solve_and_plot_start]
 model = solph.Model(ev_energy_system)
-model.solve()
-results = solph.processing.results(model)
-
+results = model.solve()
 
 plot_results(
     results=results,

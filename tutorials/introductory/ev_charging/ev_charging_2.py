@@ -101,8 +101,7 @@ nx.draw(graph, with_labels=True, font_size=8)
 # %%[graph_end]
 # %%[solve_start]# %%[solve_start]
 model = solph.Model(ev_energy_system)
-model.solve(solver="cbc", solve_kwargs={"tee": True})
-results = solph.processing.results(model)
+results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 # %%[solve_end]
 # %%[plot_results_start]
 plot_results(

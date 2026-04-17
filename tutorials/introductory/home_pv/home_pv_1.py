@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-from oemof.network.graph import create_nx_graph
 
 from oemof import solph
 
@@ -63,26 +62,25 @@ grid = solph.Bus(
 energy_system.add(grid)
 # %%[graph_plotting]
 plt.figure()
-graph = create_nx_graph(energy_system)
+graph = energy_system.to_networkx()
 nx.draw(graph, with_labels=True, font_size=8)
 plt.show()
 # %%[model_optimisation]
 model = solph.Model(energy_system)
 
-model.solve(solver="cbc", solve_kwargs={"tee": True})
-results = solph.processing.results(model)
-meta_results = solph.processing.meta_results(model)
+results = model.solve(solver="cbc", solve_kwargs={"tee": True})
+
 
 # %%[results]
 
-tce = meta_results["objective"]
+tce = results["objective"]
 print(f"The total annual costs are {tce:.2f} €.")
-el_costs = 0.3 * results[(grid, el_bus)]["sequences"]["flow"].sum()
+el_costs = 0.3 * results["flow"][(grid, el_bus)].sum()
 print(f"The annual costs for grid electricity are {el_costs:.2f} €.")
 
-electricity_flows = solph.views.node(results, "electricity")["sequences"]
+flows = results["flow"]
 
-baseline = np.zeros(len(electricity_flows))
+baseline = np.zeros(len(flows))
 
 mode = "light"
 # mode = "dark"
@@ -90,16 +88,16 @@ if mode == "dark":
     plt.style.use("dark_background")
 
 plt.fill_between(
-    electricity_flows.index,
+    flows.index,
     baseline,
-    electricity_flows[(("grid", "electricity"), "flow")],
+    flows[("grid", "electricity")],
     step="pre",
     label="Grid supply",
 )
 
 plt.step(
-    electricity_flows.index,
-    electricity_flows[(("electricity", "demand"), "flow")],
+    flows.index,
+    flows[("electricity", "demand")],
     "-",
     color="darkgrey",
     label="Electricity demand",

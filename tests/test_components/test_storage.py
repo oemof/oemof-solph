@@ -35,12 +35,9 @@ def test_relative_losses():
         es.add(storage)
 
         model = solph.Model(es)
-        model.solve("cbc")
+        results = model.solve()
 
-        result = solph.processing.results(model)[(storage, None)]["sequences"][
-            "storage_content"
-        ]
-        case["result"] = np.array(result)
+        case["result"] = np.array(results["storage_content"][storage])
 
     for i in range(500):
         assert (
@@ -83,17 +80,15 @@ def test_invest_power_uncoupled():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_content = result[(storage, None)]["sequences"]["storage_content"]
-    assert (storage_content == np.arange(0, 10.5, 1)).all()
+    assert (results["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = result[(bus, storage)]["scalars"]["invest"]
-    assert invest_inflow == pytest.approx(1)
+    invest_inflow = results["invest"][(bus, storage)]
+    assert invest_inflow[0] == pytest.approx(1)
 
-    invest_outflow = result[(storage, bus)]["scalars"]["invest"]
-    assert invest_outflow == pytest.approx(0)
+    invest_outflow = results["invest"][(storage, bus)]
+    assert invest_outflow[0] == pytest.approx(0)
 
 
 def test_invest_power_coupled():
@@ -130,17 +125,16 @@ def test_invest_power_coupled():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_content = result[(storage, None)]["sequences"]["storage_content"]
+    storage_content = results["storage_content"][storage]
     assert (storage_content == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = result[(bus, storage)]["scalars"]["invest"]
-    assert invest_inflow == pytest.approx(1)
+    invest_inflow = results["invest"][(bus, storage)]
+    assert invest_inflow[0] == pytest.approx(1)
 
-    invest_outflow = result[(storage, bus)]["scalars"]["invest"]
-    assert invest_outflow == pytest.approx(2)
+    invest_outflow = results["invest"][(storage, bus)]
+    assert invest_outflow[0] == pytest.approx(2)
 
 
 def test_storage_charging():
@@ -149,7 +143,6 @@ def test_storage_charging():
             year=2023,
             number=10,
         ),
-        infer_last_interval=False,
     )
 
     bus = solph.Bus("slack_bus", balanced=False)
@@ -166,14 +159,12 @@ def test_storage_charging():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
-    assert list(storage_inflow)[:-1] == 10 * [2]
+    assert list(results["flow"][(bus, storage)]) == 10 * [2]
 
     storage_content = list(
-        result[(storage, None)]["sequences"]["storage_content"]
+        results["storage_content"][storage]
     )
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
 
@@ -203,17 +194,16 @@ def test_invest_content_uncoupled():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
-    assert list(storage_inflow)[:-1] == 10 * [2]
+    storage_inflow = results["flow"][(bus, storage)]
+    assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_capacity == pytest.approx(19)
+    invest_capacity = results["invest"][storage]
+    assert invest_capacity[0] == pytest.approx(19)
 
     storage_content = list(
-        result[(storage, None)]["sequences"]["storage_content"]
+        results["storage_content"][storage]
     )
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
 
@@ -224,7 +214,6 @@ def test_invest_content_minimum():
             year=2023,
             number=10,
         ),
-        infer_last_interval=False,
     )
 
     bus = solph.Bus("slack_bus", balanced=False)
@@ -244,18 +233,15 @@ def test_invest_content_minimum():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
-    assert list(storage_inflow)[:-1] == 10 * [2]
+    storage_inflow = results["flow"][(bus, storage)]
+    assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_capacity == pytest.approx(32)
+    invest_capacity = results["invest"][storage]
+    assert invest_capacity[0] == pytest.approx(32)
 
-    storage_content = list(
-        result[(storage, None)]["sequences"]["storage_content"]
-    )
+    storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 2 for i in range(0, 11)])
 
 
@@ -265,7 +251,6 @@ def test_invest_content_minimum_nonconvex():
             year=2023,
             number=10,
         ),
-        infer_last_interval=False,
     )
 
     bus = solph.Bus("slack_bus", balanced=False)
@@ -286,18 +271,14 @@ def test_invest_content_minimum_nonconvex():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
-    storage_inflow = result[(bus, storage)]["sequences"]["flow"]
-    assert list(storage_inflow)[:-1] == 10 * [0]
+    storage_inflow = results["flow"][(bus, storage)]
+    assert list(storage_inflow) == 10 * [0]
 
-    invest_capacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_capacity == pytest.approx(0)
+    assert results["invest"][storage][0] == pytest.approx(0)
 
-    storage_content = list(
-        result[(storage, None)]["sequences"]["storage_content"]
-    )
+    storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx(11 * [0])
 
 
@@ -307,7 +288,6 @@ def test_invest_content_maximum():
             year=2023,
             number=10,
         ),
-        infer_last_interval=False,
     )
 
     bus = solph.Bus("slack_bus", balanced=False)
@@ -332,16 +312,12 @@ def test_invest_content_maximum():
     es.add(storage)
 
     model = solph.Model(es)
-    model.solve("cbc")
+    results = model.solve()
 
-    result = solph.processing.results(model)
+    invest_capacity = results["invest"][storage]
+    assert invest_capacity[0] == pytest.approx(10)
 
-    invest_capacity = result[(storage, None)]["scalars"]["invest"]
-    assert invest_capacity == pytest.approx(10)
-
-    storage_content = list(
-        result[(storage, None)]["sequences"]["storage_content"]
-    )
+    storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx(
         [min(i * 1.9, 10) for i in range(0, 11)]
     )

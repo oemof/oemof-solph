@@ -256,11 +256,15 @@ after the optimisation, you need to check the ``storage_content`` in the results
 
 .. code-block:: python
 
-    from oemof.solph import Results
-    results = Results(model)
-    print(results["storage_content"])
+    from oemof import solph
+    results = model.solve()
+    results["storage_content"]["your_storage_label"]
 
-For more information see the definition of the  :py:class:`~oemof.solph.components._generic_storage.GenericStorage` class or check the :ref:`examples_label`.
+The ``storage_content`` is the absolute value of the current stored energy.
+
+For more information see the definition of the
+:py:class:`~oemof.solph.components._generic_storage.GenericStorage` class
+or check the :ref:`examples_label`.
 
 Using an investment object with the GenericStorage component
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
