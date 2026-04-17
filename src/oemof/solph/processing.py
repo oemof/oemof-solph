@@ -495,8 +495,6 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     # (status, startup, etc.) alongside `flow`, so we need to group by
     # variable_name first, otherwise iloc slicing doesnt line up.
     for flow in flow_dict:
-        if flow_dict[flow].empty:
-            continue
         disaggregated_parts = []
         for var_name in flow_dict[flow]["variable_name"].unique():
             var_df = flow_dict[flow][

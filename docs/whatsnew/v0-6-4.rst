@@ -38,6 +38,7 @@ Contributors
 * Jonas Freißmann
 * Lena Rosin
 * Patrik Schönfeldt
+* Jelmer de Wit
 
 Acknowledgements
 ################
