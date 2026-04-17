@@ -36,7 +36,7 @@ from oemof.solph.components._generic_storage import GenericStorage
 from ._plumbing import _FakeSequence
 from .helpers import flatten
 
-PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo")
+PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo", "invest_status")
 
 
 def get_tuple(x):
@@ -491,28 +491,40 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
     for key in multiplexer_keys:
         del flow_dict[key]
 
-    # Disaggregate flows
+    # Note: flows from NonConvexFlowBlock carry extra per-timestep fields
+    # (status, startup, etc.) alongside `flow`, so we need to group by
+    # variable_name first, otherwise iloc slicing doesnt line up.
     for flow in flow_dict:
-        disaggregated_flow_frames = []
-        period_offset = 0
-        for tsa_period in tsa_parameters:
-            for k in tsa_period["order"]:
-                flow_k = flow_dict[flow].iloc[
-                    period_offset
-                    + k * tsa_period["timesteps"] : period_offset
-                    + (k + 1) * tsa_period["timesteps"]
-                ]
-                # Disaggregate segmentation
-                if "segments" in tsa_period:
-                    flow_k = _disaggregate_segmentation(
-                        flow_k, tsa_period["segments"], k
-                    )
-                disaggregated_flow_frames.append(flow_k)
-            period_offset += tsa_period["timesteps"] * len(
-                tsa_period["occurrences"]
-            )
-        ts = pd.concat(disaggregated_flow_frames)
-        ts.timestep = range(len(ts))
+        disaggregated_parts = []
+        for var_name in flow_dict[flow]["variable_name"].unique():
+            var_df = flow_dict[flow][
+                flow_dict[flow]["variable_name"] == var_name
+            ].reset_index(drop=True)
+
+            var_frames = []
+            period_offset = 0
+            for tsa_period in tsa_parameters:
+                for k in tsa_period["order"]:
+                    flow_k = var_df.iloc[
+                        period_offset
+                        + k * tsa_period["timesteps"] : period_offset
+                        + (k + 1) * tsa_period["timesteps"]
+                    ]
+                    # Disaggregate segmentation
+                    if "segments" in tsa_period:
+                        flow_k = _disaggregate_segmentation(
+                            flow_k, tsa_period["segments"], k
+                        )
+                    var_frames.append(flow_k)
+                period_offset += tsa_period["timesteps"] * len(
+                    tsa_period["occurrences"]
+                )
+
+            var_result = pd.concat(var_frames).copy()
+            var_result["timestep"] = range(len(var_result))
+            disaggregated_parts.append(var_result)
+
+        ts = pd.concat(disaggregated_parts)
         ts = ts.set_index("timestep")  # Have to set and reset index as
         # interpolation in pandas<2.1.0 cannot handle NANs in index
         flow_dict[flow] = ts.ffill().reset_index("timestep")
