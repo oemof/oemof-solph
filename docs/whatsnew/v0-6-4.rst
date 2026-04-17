@@ -1,5 +1,5 @@
-v0.6.4
-------
+v0.6.4 (April 17th, 2026)
+-------------------------
 
 API changes
 ###########
@@ -35,10 +35,6 @@ Bug fixes
   dependency and the scripts do not actually use the generated dot-file,
   the only effect was that the scripts often do not work.
 
-Other changes
-#############
-
-
 Contributors
 ############
 
@@ -50,3 +46,5 @@ Contributors
 Acknowledgements
 ################
 
+Thanks to the participants of the seminar "Future Power Supply" at
+Oldenburg University for feedback about the tutorials.
