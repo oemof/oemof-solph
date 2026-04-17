@@ -16,6 +16,8 @@ Documentation
 Bug fixes
 #########
 
+* Fix TSAM result disaggregation for ``NonConvex`` and ``InvestNonConvex``
+  flows, which silently dropped per-timestep variables from the output.
 
 Other changes
 #############
@@ -23,6 +25,8 @@ Other changes
 
 Contributors
 ############
+
+* Jelmer de Wit
 
 
 Acknowledgements
