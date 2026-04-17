@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/oemof/solph/_results.py: 73.26%</title>
+    <title>Coverage for src/oemof/solph/_results.py: 75.00%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
     <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src&#8201;/&#8201;oemof&#8201;/&#8201;solph&#8201;/&#8201;_results.py</b>:
-            <span class="pc_cov">73.26%</span>
+            <span class="pc_cov">75.00%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -56,10 +56,10 @@
         </aside>
         <h2>
             <span class="text">116 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">91<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">25<span class="text"> missing</span></button>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">93<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">23<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
-            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">1<span class="text"> partial</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
         </h2>
         <p class="text">
             <a id="prevFileLink" class="nav" href="z_0144dbb63943ee6f__plumbing_py.html">&#xab; prev</a> &nbsp; &nbsp;
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_fd3850e12f729d5f___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-16 18:31 +0000
+            created at 2026-04-17 06:13 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -237,10 +237,10 @@
     <p class="run"><span class="n"><a id="t153" href="#t153">153</a></span><span class="t">            <span class="key">match</span> <span class="nam">index_type</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t154" href="#t154">154</a></span><span class="t">                <span class="key">case</span> <span class="str">"TIMEPOINTS"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t155" href="#t155">155</a></span><span class="t">                    <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_model</span><span class="op">.</span><span class="nam">es</span><span class="op">.</span><span class="nam">timeindex</span>&nbsp;</span><span class="r"></span></p>
-    <p class="par run show_par"><span class="n"><a id="t156" href="#t156">156</a></span><span class="t">                <span class="key">case</span> <span class="str">"TIMESTEPS"</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">156&#x202F;&#x219B;&#x202F;158</span><span class="annotate long">line 156 didn't jump to line 158 because the pattern on line 156 always matched</span></span></p>
+    <p class="run"><span class="n"><a id="t156" href="#t156">156</a></span><span class="t">                <span class="key">case</span> <span class="str">"TIMESTEPS"</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t157" href="#t157">157</a></span><span class="t">                    <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span> <span class="op">=</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_model</span><span class="op">.</span><span class="nam">es</span><span class="op">.</span><span class="nam">timeindex</span><span class="op">[</span><span class="op">:</span><span class="op">-</span><span class="num">1</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">                <span class="key">case</span> <span class="nam">_</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                    <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span> <span class="op">=</span> <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span><span class="op">.</span><span class="nam">get_level_values</span><span class="op">(</span><span class="op">-</span><span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t158" href="#t158">158</a></span><span class="t">                <span class="key">case</span> <span class="nam">_</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t159" href="#t159">159</a></span><span class="t">                    <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span> <span class="op">=</span> <span class="nam">rv</span><span class="op">.</span><span class="nam">index</span><span class="op">.</span><span class="nam">get_level_values</span><span class="op">(</span><span class="op">-</span><span class="num">1</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t160" href="#t160">160</a></span><span class="t">        <span class="key">else</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t161" href="#t161">161</a></span><span class="t">            <span class="nam">rv</span> <span class="op">=</span> <span class="nam">default</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t162" href="#t162">162</a></span><span class="t">        <span class="key">return</span> <span class="nam">rv</span>&nbsp;</span><span class="r"></span></p>
@@ -418,7 +418,7 @@
             <a class="nav" href="z_fd3850e12f729d5f___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-16 18:31 +0000
+            created at 2026-04-17 06:13 +0000
         </p>
     </div>
 </footer>
