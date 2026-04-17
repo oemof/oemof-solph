@@ -23,7 +23,7 @@ accessible freely, so other users can explore and learn from your project.
       :alt: openplan-tool
       :target: https://open-plan-tool.org
 
-    The OpenPlan Tool is an online app with a grafical user interface, that
+    The OpenPlan Tool is an online app with a graphical user interface, that
     let's you create, solve and explore your :code:`EnergySystem`
     interactively. You can use the online variant or clone it to run it on
     self-hosted servers.
@@ -46,9 +46,9 @@ accessible freely, so other users can explore and learn from your project.
       :class: only-dark
       :target: https://owp-inno-nord.streamlit.app
 
-    The streamlit dashboard supports the creation of heating supply system 
-    concepts. This user-friendly tool is developed as part of a research 
-    project at the Flensburg University of Applied Sciences with the aim of 
+    The streamlit dashboard supports the creation of heating supply system
+    concepts. This user-friendly tool is developed as part of a research
+    project at the Flensburg University of Applied Sciences with the aim of
     lowering the entry barrier to energy system analysis for non-experts.
 
     +++
