@@ -1,0 +1,50 @@
+v0.6.4 (April 17th, 2026)
+-------------------------
+
+API changes
+###########
+
+* `Model.solve()` now directly returns the optimisation `Results`. (For some
+  time, they will be backwards compatible with the old meta_results.)
+
+New features
+############
+
+* Mipgap is calculated in the meta results
+* The `GenericStorage` now allows reducing the inflow based on the
+  storage_level. The feature does not work with all investments, yet.
+  See documentation for details.
+
+
+Documentation
+#############
+
+* Fix Furo error when displaying the table of contents of the result handling
+  tutorial.
+* Use `solph.Results` in the
+  :ref:`Results section of the documentation <basic_concepts_results_label>`,
+  in examples (partally), and tutorials (all of them),
+  where previously `solph.processing.results` was used.
+  (Documentation of the processing module is still available
+  as part of the API reference.)
+
+Bug fixes
+#########
+
+* Remove pydot usage from tutorial scripts. As pydot is not named as a
+  dependency and the scripts do not actually use the generated dot-file,
+  the only effect was that the scripts often do not work.
+
+Contributors
+############
+
+* Jonas Freißmann
+* Lena Rosin
+* Patrik Schönfeldt
+* Uwe Krien
+
+Acknowledgements
+################
+
+Thanks to the participants of the seminar "Future Power Supply" at
+Oldenburg University for feedback about the tutorials.

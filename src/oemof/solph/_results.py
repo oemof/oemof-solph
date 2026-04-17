@@ -39,6 +39,7 @@ class Results:
     >>> results = solph.Results(energysystem_model)
     >>> results.get("flow")  # with the equivalent `results["flow"]`
     """
+
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
         self._meta_results = {

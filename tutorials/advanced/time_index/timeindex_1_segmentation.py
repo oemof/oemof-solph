@@ -203,9 +203,9 @@ def populate_and_solve_energy_system(
     m = solph.Model(es, discount_rate=discount_rate)
     logging.info("Solving Model...")
 
-    m.solve(solver="cbc", solve_kwargs={"tee": False})
+    results = m.solve(solver="cbc", solve_kwargs={"tee": False})
 
-    return m
+    return results
 
 
 def solve_model(data, parameter, year=2025, es=None):
@@ -223,14 +223,14 @@ def solve_model(data, parameter, year=2025, es=None):
         r=parameter["r"],
         year=year,
     )
-    m = populate_and_solve_energy_system(
+    results = populate_and_solve_energy_system(
         es=es,
         time_series=data,
         investments=investments,
         variable_costs=var_cost,
     )
 
-    return solph.Results(m)
+    return results
 
 
 def create_investment_objects(n, r, year):

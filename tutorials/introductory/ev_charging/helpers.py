@@ -5,14 +5,12 @@ import oemof.solph as solph
 
 def plot_results(results, plot_title, dark_mode=False):
 
-    battery_series = solph.views.node(results, "Car Battery")["sequences"]
-
     plt.figure()
     if dark_mode:
         plt.style.use("dark_background")
     plt.title(plot_title)
     (line1,) = plt.plot(
-        battery_series[(("Car Battery", "None"), "storage_content")],
+        results["storage_content"]["Car Battery"],
         label="Battery SOC",
     )
 
@@ -20,12 +18,8 @@ def plot_results(results, plot_title, dark_mode=False):
     plt.ylim(0, 55)
     plt.twinx()
     plt.ylim(0, 12)
-    energy_enters_battery = battery_series[
-        (("Car Electricity", "Car Battery"), "flow")
-    ]
-    energy_leaves_battery = battery_series[
-        (("Car Battery", "Car Electricity"), "flow")
-    ]
+    energy_enters_battery = results["flow"][("Car Electricity", "Car Battery")]
+    energy_leaves_battery = results["flow"][("Car Battery", "Car Electricity")]
     (line2,) = plt.step(
         energy_leaves_battery.index,
         energy_leaves_battery,

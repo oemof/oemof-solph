@@ -22,15 +22,15 @@ Download source code: :download:`flow_count_limit.py </../examples/flow_count_li
 
     .. literalinclude:: /../examples/flow_count_limit/flow_count_limit.py
         :language: python
-        :lines: 39-159
+        :lines: 39-
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -40,8 +40,6 @@ License
 import pandas as pd
 
 import oemof.solph as solph
-from oemof.solph import processing
-from oemof.solph import views
 
 try:
     import matplotlib.pyplot as plt
@@ -51,7 +49,8 @@ except ImportError:
 
 def main(optimize=True):
     energy_system = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=4, freq="h")
+        timeindex=pd.date_range("1/1/2012", periods=4, freq="h"),
+        infer_last_interval=True,
     )
 
     bel = solph.Bus(label="bel")
@@ -136,21 +135,23 @@ def main(optimize=True):
         model, "my_keyword", lower_limit=0, upper_limit=1
     )
 
-    model.solve()
+    results = model.solve()
 
-    results = processing.results(model)
+    print(results["status"])
 
     if plt is not None:
-        data = views.node(results, "bel")["sequences"]
-        ax = data.plot(kind="line", grid=True)
+        ax = results["flow"].plot(
+            kind="line",
+            drawstyle="steps-post",
+            grid=True,
+        )
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("P (MW)")
 
-        plt.figure()
-        ax = plt.gca()
-        plt.plot(
-            results[("my_keyword", "my_keyword")]["sequences"],
-            label="my_keyword_count",
+        ax = results["my_keyword"].plot(
+            kind="line",
+            drawstyle="steps-post",
+            grid=True,
         )
         ax.set_xlabel("Time (h)")
         ax.set_ylabel("Count (1)")

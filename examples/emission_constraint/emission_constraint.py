@@ -18,11 +18,11 @@ Download source code: :download:`emission_constraint.py </../examples/emission_c
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -40,7 +40,8 @@ from oemof.solph import constraints
 def main(optimize=True):
     # create energy system
     energysystem = solph.EnergySystem(
-        timeindex=pd.date_range("1/1/2012", periods=3, freq="h")
+        timeindex=pd.date_range("1/1/2012", periods=3, freq="h"),
+        infer_last_interval=True,
     )
 
     # create gas bus
@@ -87,7 +88,7 @@ def main(optimize=True):
                 bel: solph.Flow(
                     nominal_capacity=200,
                     variable_costs=10,
-                    fix=[0.1, 0.2, 0.3],
+                    fix=[0.1, 0.2, 0.4],
                 )
             },
         )
@@ -117,15 +118,27 @@ def main(optimize=True):
     model.integral_limit_emission_factor.pprint()
 
     # solve the model
-    model.solve()
+    results = model.solve()
 
     # print out the amount of emissions from the emission constraint
     print(model.integral_limit_emission_factor())
 
-    results = solph.processing.results(model)
+    data = results["flow"]
+    outflows = data.xs("electricity", axis=1, level=0, drop_level=False)
+    inflows = data.xs("electricity", axis=1, level=1, drop_level=False)
 
-    data = solph.views.node(results, "electricity")["sequences"]
-    ax = data.plot(kind="line", grid=True)
+    fig = plt.figure()
+    ax = fig.add_subplot()
+
+    ax.stackplot(
+        inflows.index,
+        inflows.T,
+        labels=[f"supply: {col[0]}" for col in inflows.columns],
+    )
+    ax.plot(outflows, "k--", label="demand")
+
+    ax.legend()
+
     ax.set_xlabel("Time (h)")
     ax.set_ylabel("P (MW)")
     plt.show()

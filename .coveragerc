@@ -3,9 +3,9 @@ source = src
 
 [run]
 branch = true
+relative_files = true
 source =
     src
-    tests
 parallel = true
 omit = */experimental/*
        *test*

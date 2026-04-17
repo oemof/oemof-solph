@@ -280,7 +280,7 @@ def main(optimize=True):
     print(
         f"{result_dict[(storage, None)]['sequences'][start_time : end_time]}\n"
     )
-    print(f"{results["storage_content"][storage][start_time : end_time]}\n")
+    print(f"{results['storage_content'][storage][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
     custom_storage = views.node(result_dict, "battery_storage")

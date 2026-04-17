@@ -18,11 +18,11 @@ Download source code: :download:`startup_shutdown.py </../examples/start_and_shu
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -113,24 +113,21 @@ def main(optimize=True):
     # om.write('problem.lp', io_options={'symbolic_solver_labels': True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
-
-    # create result object
-    results = solph.processing.results(om)
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # plot electrical bus
     to_bus = pd.DataFrame(
         {
-            k[0].label: v["sequences"]["flow"]
-            for k, v in results.items()
-            if k[1] == bel
+            source.label: results["flow"][(source, bel)]
+            for source, target in results["flow"].columns
+            if target == bel
         }
     )
     from_bus = pd.DataFrame(
         {
-            k[1].label: v["sequences"]["flow"] * -1
-            for k, v in results.items()
-            if k[0] == bel
+            target.label: results["flow"][(bel, target)] * -1
+            for source, target in results["flow"].columns
+            if source == bel
         }
     )
     data = pd.concat([from_bus, to_bus], axis=1)

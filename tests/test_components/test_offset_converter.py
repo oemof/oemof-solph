@@ -40,7 +40,8 @@ def create_energysystem_stub(num_in, num_out):
 def solve_and_extract_results(es):
     model = solph.Model(es)
     model.solve("cbc")
-    results = solph.views.convert_keys_to_strings(model.results())
+    results = solph.processing.results(model)
+    results = solph.views.convert_keys_to_strings(results)
 
     assert (
         model.solver_results["Solver"][0]["Termination condition"]

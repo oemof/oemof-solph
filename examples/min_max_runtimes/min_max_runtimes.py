@@ -18,11 +18,11 @@ Download source code: :download:`min_max_runtimes.py </../examples/min_max_runti
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 
 License
@@ -98,21 +98,17 @@ def main(optimize=True):
     # om.write('problem.lp', io_options={'symbolic_solver_labels': True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
-
-    # create result object
-    results = solph.processing.results(om)
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # plot data
-    data = solph.views.node(results, "bel")["sequences"]
-    data[[(("bel", "demand_el"), "flow"), (("bel", "dummy_el"), "flow")]] *= -1
-    exclude = ["dummy_el", "status"]
-    columns = [
-        c
-        for c in data.columns
-        if not any(s in c[0] or s in c[1] for s in exclude)
-    ]
-    data = data[columns]
+    flows = results["flow"]
+    mask = (
+        (flows.columns.get_level_values(0) == "bel")
+        | (flows.columns.get_level_values(1) == "bel")
+    )
+    data = flows.loc[:, mask]
+    data[[("bel", "demand_el"), ("bel", "dummy_el")]] *= -1
+
     fig, ax = plt.subplots(figsize=(10, 5))
     data.plot(ax=ax, kind="line", drawstyle="steps-post", grid=True, rot=0)
     ax.set_xlabel("Hour")

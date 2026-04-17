@@ -96,7 +96,7 @@ to learn about which solvers are supported.
       also install a solver. If you want to install the solver externally (not
       via conda), you can follow these steps:
 
-      - CBC-solver: https://projects.coin-or.org/Cbc
+      - CBC-solver: https://github.com/coin-or/Cbc
       - GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
 
       If you install the CBC solver via brew (highly recommended), it should
