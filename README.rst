@@ -1,5 +1,5 @@
 
-|tox-pytest| |tox-checks| |packaging| |coveralls|
+|tox-pytest| |tox-checks| |packaging| |coverage|
 
 |docs| |version| |supported-versions|
 
@@ -17,13 +17,12 @@
 .. |packaging| image:: https://github.com/oemof/oemof-solph/actions/workflows/packaging.yml/badge.svg
      :target: https://github.com/oemof/oemof-solph/actions?query=workflow%3Apackaging
 
+.. |coverage| image:: https://raw.githubusercontent.com/oemof/oemof-solph/python-coverage-comment-action-data/badge.svg
+    :target: https://htmlpreview.github.io/?https://github.com/oemof/oemof-solph/blob/python-coverage-comment-action-data/htmlcov/index.html
+
 .. |docs| image:: https://readthedocs.org/projects/oemof-solph/badge/?style=flat
     :target: https://readthedocs.org/projects/oemof-solph
     :alt: Documentation Status
-
-.. |coveralls| image:: https://coveralls.io/repos/oemof/oemof-solph/badge.svg?branch=dev&service=github
-    :alt: Coverage Status
-    :target: https://coveralls.io/github/oemof/oemof-solph
 
 .. |version| image:: https://img.shields.io/pypi/v/oemof.solph.svg
     :alt: PyPI Package latest release
@@ -105,7 +104,7 @@ Installation
 
 
 If you have a working Python installation, use pypi to install the latest version of oemof.solph.
-Python >= 3.8 is recommended. Lower versions may work but are not tested.
+Python >= 3.11 is recommended. Lower versions may work but are not tested.
 
 We highly recommend to use virtual environments.
 Please refer to the documentation of your Python distribution (e.g. Anaconda,

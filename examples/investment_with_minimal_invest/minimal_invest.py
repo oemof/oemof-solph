@@ -14,11 +14,11 @@ Download source code: :download:`minimal_invest.py </../examples/investment_with
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -117,12 +117,14 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    # create result object
-    results = solph.processing.results(om)
-
-    bus1 = solph.views.node(results, "bus_1")["sequences"]
+    flows = results["flow"]
+    mask_bus1 = (
+        (flows.columns.get_level_values(0) == "bus_1")
+        | (flows.columns.get_level_values(1) == "bus_1")
+    )
+    bus1 = flows.loc[:, mask_bus1]
 
     # plot the time series (sequences) of a specific component/bus
     if plt is not None:
@@ -132,22 +134,14 @@ def main(optimize=True):
 
     # Nachvollziehen der Berechnung
     # Kosten Invest
-    p_invest = solph.views.node(results, "converter")["scalars"][
-        (("converter", "bus_1"), "invest")
-    ]
-    invest_binary = solph.views.node(results, "converter")["scalars"][
-        (("converter", "bus_1"), "invest_status")
-    ]
+    p_invest = results["invest"]["converter"]
+    invest_binary = results["invest_status"]["converter"]
     c_invest = p_invest * c_var + c_fix * invest_binary
 
     # costs analysis
-    e_source_0 = solph.views.node(results, "source_0")["sequences"][
-        (("source_0", "bus_0"), "flow")
-    ].sum()
+    e_source_0 = results["flow"][("source_0", "bus_0")].sum()
     c_source_0 = c_0 * e_source_0
-    e_source_1 = solph.views.node(results, "source_1")["sequences"][
-        (("source_1", "bus_1"), "flow")
-    ].sum()
+    e_source_1 = results["flow"][("source_1", "bus_1")].sum()
     c_source_1 = c_1 * e_source_1
 
     c_total = c_invest + c_source_0 + c_source_1
@@ -163,20 +157,16 @@ def main(optimize=True):
     print("")
     print("Max. zulässige Investleistung", p_install_max)
     print("Erforderlicher Mindest-Invest", p_install_min)
-    print("Installierte Leistung:", p_invest)
+    print("Installierte Leistung:", p_invest[bus_1][0])
     print(
         "Maximale Leistung - demand:",
-        solph.views.node(results, "bus_1")["sequences"][
-            (("bus_1", "demand"), "flow")
-        ].max(),
+        results["flow"][("bus_1", "demand")].max(),
     )
     print(
         "Maximale Leistung im Einsatz",
-        solph.views.node(results, "converter")["sequences"][
-            (("converter", "bus_1"), "flow")
-        ].max(),
+        results["flow"][("converter", "bus_1")].max(),
     )
-    if p_invest > max(data):
+    if p_invest[bus_1][0] > max(data):
         print("Anlage wurde überdimensioniert")
 
 

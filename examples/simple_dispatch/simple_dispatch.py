@@ -30,11 +30,11 @@ Download data: :download:`input_data.csv </../examples/simple_dispatch/input_dat
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 
 License
@@ -52,7 +52,6 @@ from oemof.solph import EnergySystem
 from oemof.solph import Flow
 from oemof.solph import Model
 from oemof.solph import create_time_index
-from oemof.solph import views
 from oemof.solph.components import Converter
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
@@ -187,7 +186,7 @@ def main(optimize=True):
             label="heat_pump",
             inputs={bel: Flow(), b_heat_source: Flow()},
             outputs={bth: Flow(nominal_capacity=10)},
-            conversion_factors={bel: 1 / 3, b_heat_source: (cop - 1) / cop},
+            conversion_factors={bel: 1 / cop, b_heat_source: (cop - 1) / cop},
         )
     )
 
@@ -200,80 +199,51 @@ def main(optimize=True):
     optimization_model = Model(energysystem=energysystem)
 
     # solve problem
-    optimization_model.solve(
+    results = optimization_model.solve(
         solver=solver, solve_kwargs={"tee": True, "keepfiles": False}
     )
-
-    # write back results from optimization object to energysystem
-    optimization_model.results()
 
     # ################################ results ################################
 
     # subset of results that includes all flows into and from electrical bus
     # sequences are stored within a pandas.DataFrames and scalars e.g.
     # investment values within a pandas.Series object.
-    # in this case the entry data['scalars'] does not exist since no investment
-    # variables are used
-    data = views.node(optimization_model.results(), "bel")
-    data["sequences"].info()
     print("Optimization successful. Showing some results:")
 
-    # see: https://pandas.pydata.org/pandas-docs/stable/visualization.html
-    node_results_bel = views.node(optimization_model.results(), "bel")
-    node_results_flows = node_results_bel["sequences"]
+    # the Results contain all results accessible by their variable name
+    flows = results["flow"]
+
+    # column indexes for the flows are (from_node, to_node), thus you can use a
+    # mask to filter all flows connected (in and out) to a specific node
+    mask = (flows.columns.get_level_values(0) == "bel") | (
+        flows.columns.get_level_values(1) == "bel"
+    )
+    result_flows_el = flows.loc[:, mask]
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    node_results_flows.plot(
-        ax=ax, kind="bar", stacked=True, linewidth=0, width=1
-    )
+    result_flows_el.plot.area(ax=ax, stacked=True)
     ax.set_title("Sums for optimization period")
     ax.legend(loc="upper right", bbox_to_anchor=(1, 1))
     ax.set_xlabel("Energy (MWh)")
     ax.set_ylabel("Flow")
     plt.legend(loc="center left", prop={"size": 8}, bbox_to_anchor=(1, 0.5))
     fig.subplots_adjust(right=0.8)
-
-    dates = node_results_flows.index
-    tick_distance = int(len(dates) / 7) - 1
-    ax.set_xticks(range(0, len(dates), tick_distance), minor=False)
-    if tick_distance > 0:
-        ax.set_xticklabels(
-            [
-                item.strftime("%d-%m-%Y")
-                for item in dates.tolist()[0::tick_distance]
-            ],
-            rotation=90,
-            minor=False,
-        )
 
     plt.show()
 
-    node_results_bth = views.node(optimization_model.results(), "bth")
-    node_results_flows = node_results_bth["sequences"]
+    mask = (flows.columns.get_level_values(0) == "bth") | (
+        flows.columns.get_level_values(1) == "bth"
+    )
+    result_flows_th = flows.loc[:, mask]
 
     fig, ax = plt.subplots(figsize=(10, 5))
-    node_results_flows.plot(
-        ax=ax, kind="bar", stacked=True, linewidth=0, width=1
-    )
+    result_flows_th.plot.area(ax=ax, stacked=True)
     ax.set_title("Sums for optimization period")
     ax.legend(loc="upper right", bbox_to_anchor=(1, 1))
     ax.set_xlabel("Energy (MWh)")
     ax.set_ylabel("Flow")
     plt.legend(loc="center left", prop={"size": 8}, bbox_to_anchor=(1, 0.5))
     fig.subplots_adjust(right=0.8)
-
-    dates = node_results_flows.index
-    tick_distance = int(len(dates) / 7) - 1
-    ax.set_xticks(range(0, len(dates), tick_distance), minor=False)
-    if tick_distance > 0:
-        ax.set_xticklabels(
-            [
-                item.strftime("%d-%m-%Y")
-                for item in dates.tolist()[0::tick_distance]
-            ],
-            rotation=90,
-            minor=False,
-        )
 
     plt.show()
 

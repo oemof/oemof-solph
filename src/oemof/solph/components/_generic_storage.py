@@ -43,6 +43,7 @@ from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import sequence
 from oemof.solph._plumbing import valid_sequence
+from oemof.solph.flows import Flow
 
 
 class GenericStorage(Node):
@@ -107,6 +108,15 @@ class GenericStorage(Node):
         To set different values in every time step use a sequence.
     max_storage_level : numeric (iterable or scalar), :math:`c_{max}(t)`
         see: min_storage_level
+    constant_soc_until : float
+        The proportional charge level between 0 and 1 at which the linear
+        reduction in charging power begins. Up to this charge level, the
+        charging power remains constant, after which it drops linearly to the
+        value specified by `fraction_saturation_charging`.
+    fraction_saturation_charging : float
+        The fraction of charging capacity shortly before the storage tank is
+        completely full. This value is therefore between 0 and 1, where 1 means
+        that there is no reduction in charging power as the SOC increases.
     storage_costs : numeric (iterable or scalar), :math:`c_{storage}(t)`
         Cost (per energy) for having energy in the storage, starting from
         time point :math:`t_{1}`. (:math:`t_{0}` is left out to avoid counting
@@ -181,6 +191,8 @@ class GenericStorage(Node):
         fixed_losses_absolute=0,
         inflow_conversion_factor=1,
         outflow_conversion_factor=1,
+        constant_soc_until=None,
+        fraction_saturation_charging=None,
         fixed_costs=0,
         storage_costs=None,
         lifetime_inflow=None,
@@ -252,6 +264,8 @@ class GenericStorage(Node):
         self.storage_costs = sequence(storage_costs)
         self.lifetime_inflow = lifetime_inflow
         self.lifetime_outflow = lifetime_outflow
+        self.constant_soc_until = constant_soc_until
+        self.fraction_saturation_charging = fraction_saturation_charging
 
         # Check number of flows.
         self._check_number_of_flows()
@@ -259,6 +273,13 @@ class GenericStorage(Node):
         self._check_invest_relations()
         # Check for infeasible parameter combinations
         self._check_infeasible_parameter_combinations()
+
+        # Check whether a value for a decreasing loading capacity has been
+        # defined for an InvestmentStorage.
+        if self._apply_soc_dependent_charging():
+            flow = next(v for k, v in self.inputs.items())
+            self.max_charge_capacity = flow.nominal_capacity
+            self.relative_charge_limit = flow.maximum
 
     def _check_number_of_flows(self):
         """Ensure that there is only one inflow and outflow to the storage"""
@@ -372,6 +393,34 @@ class GenericStorage(Node):
             )
             raise AttributeError(e3)
 
+    def _apply_soc_dependent_charging(self):
+        attributes_not_none = (
+            self.constant_soc_until is not None
+            or self.fraction_saturation_charging is not None
+        )
+        investment_active = self.investment is not None
+        input_flows = [
+            v for k, v in self.inputs.items() if isinstance(v, Flow)
+        ]
+        if attributes_not_none and investment_active:
+            msg = (
+                f"GenericStorage: {self.label}. It is not allowed to define "
+                f"soc dependent charging power with an Investment object. If "
+                f"the parameters 'constant_soc_until' or "
+                f"'fraction_saturation_charging' are set, the nominal value "
+                f"has to be fixed not variable."
+            )
+            raise NotImplementedError(msg)
+        if attributes_not_none and len(input_flows) != 1:
+            msg = (
+                f"GenericStorage: {self.label}. It is not allowed to define "
+                f"a storage without an input if you want to use "
+                f"soc-dependent charging. So far this is not compatible with"
+                f"adding Flows later."
+            )
+            raise NotImplementedError(msg)
+        return attributes_not_none
+
     def constraint_group(self):
         if self._invest_group is True:
             return GenericInvestmentStorageBlock
@@ -436,7 +485,14 @@ class GenericStorageBlock(ScalarBlock):
           \forall n \in \textrm{INVEST\_REL\_IN\_OUT} \\
           \forall p \in \textrm{PERIODS}
 
+    Apply soc-dependent charging power. These Constraints are build if
+    :attr:`om.constant_soc_until[n, t]` and
+    :attr:`om.fraction_saturation_charging[n, t]` are set.
+    The equation follows the basic linear equation: $y = a*x + b$
 
+        .. math::
+           a = -\frac{P_{\max} \cdot (1-f_{end})}{E_{\nom} \cdot (1-f_{lim})} \\
+           b = P_{\max} \cdot \frac{1 - f_{end} \cdot f_{lim}}{1-f_{lim}}
 
     =========================== ======================= =========
     symbol                      explanation             attribute
@@ -526,6 +582,10 @@ class GenericStorageBlock(ScalarBlock):
             initialize=[
                 n for n in group if n.initial_storage_level is not None
             ]
+        )
+
+        self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT = Set(
+            initialize=[n for n in group if n.constant_soc_until is not None]
         )
 
         self.STORAGES_WITH_INVEST_FLOW_REL = Set(
@@ -813,6 +873,43 @@ class GenericStorageBlock(ScalarBlock):
         )
 
         self.power_coupled_build = BuildAction(rule=_power_coupled)
+
+        def _soc_dependent_charge_limit_rule(block, n, t):
+            """
+            Rule definition for SOC-dependent charge limit.
+            Limits the charging power based on the remaining storage capacity.
+
+            The constraint ensures that the charging power does not exceed
+            a factor times the remaining capacity to the maximum storage level.
+            """
+            a = -(
+                n.max_charge_capacity
+                * n.relative_charge_limit[t]
+                * (1 - n.fraction_saturation_charging)
+            ) / (
+                n.nominal_storage_capacity
+                * n.max_storage_level[t]
+                * (1 - n.constant_soc_until)
+            )
+            b = (
+                n.max_charge_capacity
+                * n.relative_charge_limit[t]
+                * (
+                    (1 - n.fraction_saturation_charging)
+                    / (1 - n.constant_soc_until)
+                    + n.fraction_saturation_charging
+                )
+            )
+            return (
+                m.flow[i[n], n, t] <= a * block.storage_content[n, t + 1] + b
+            )
+
+        self.soc_charge_limit = Constraint(
+            self.STORAGES_WITH_SOC_DEPENDENT_CHARGE_LIMIT,
+            m.TIMESTEPS,
+            rule=_soc_dependent_charge_limit_rule,
+        )
+        return None
 
     def _objective_expression(self):
         r"""
