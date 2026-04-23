@@ -36,7 +36,14 @@ from oemof.solph.components._generic_storage import GenericStorage
 from ._plumbing import _FakeSequence
 from .helpers import flatten
 
-PERIOD_INDEXES = ("invest", "total", "old", "old_end", "old_exo", "invest_status")
+PERIOD_INDEXES = (
+    "invest",
+    "total",
+    "old",
+    "old_end",
+    "old_exo",
+    "invest_status",
+)
 
 
 def get_tuple(x):

@@ -421,15 +421,13 @@ def main(optimize=True):
     # print and plot some results
     flows = results["flow"]
 
-    mask_r2 = (
-        (flows.columns.get_level_values(0) == "R2_bus_el")
-        | (flows.columns.get_level_values(1) == "R2_bus_el")
+    mask_r2 = (flows.columns.get_level_values(0) == "R2_bus_el") | (
+        flows.columns.get_level_values(1) == "R2_bus_el"
     )
     region2_flows = flows.loc[:, mask_r2]
 
-    mask_r1 = (
-        (flows.columns.get_level_values(0) == "R1_bus_el")
-        | (flows.columns.get_level_values(1) == "R1_bus_el")
+    mask_r1 = (flows.columns.get_level_values(0) == "R1_bus_el") | (
+        flows.columns.get_level_values(1) == "R1_bus_el"
     )
     region1_flows = flows.loc[:, mask_r1]
 

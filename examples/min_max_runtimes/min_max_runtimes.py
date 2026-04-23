@@ -102,9 +102,8 @@ def main(optimize=True):
 
     # plot data
     flows = results["flow"]
-    mask = (
-        (flows.columns.get_level_values(0) == "bel")
-        | (flows.columns.get_level_values(1) == "bel")
+    mask = (flows.columns.get_level_values(0) == "bel") | (
+        flows.columns.get_level_values(1) == "bel"
     )
     data = flows.loc[:, mask]
     data[[("bel", "demand_el"), ("bel", "dummy_el")]] *= -1

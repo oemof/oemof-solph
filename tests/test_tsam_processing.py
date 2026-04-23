@@ -58,7 +58,17 @@ def test_disaggregate_tsa_result_single_sequence_flow():
         disaggregated["variable_name"] == "flow", "value"
     ].tolist()
     # order [1, 0, 1] picks period 1, then period 0, then period 1
-    assert flow_values == [20.0, 21.0, 22.0, 10.0, 11.0, 12.0, 20.0, 21.0, 22.0]
+    assert flow_values == [
+        20.0,
+        21.0,
+        22.0,
+        10.0,
+        11.0,
+        12.0,
+        20.0,
+        21.0,
+        22.0,
+    ]
 
 
 def test_disaggregate_tsa_result_multi_sequence_flow():
@@ -77,7 +87,9 @@ def test_disaggregate_tsa_result_multi_sequence_flow():
     status_nominal_df = _make_melted_var(
         "status_nominal", [100.0, 100.0, 100.0, 0.0, 150.0, 150.0]
     )
-    combined = pd.concat([flow_df, status_df, status_nominal_df], ignore_index=True)
+    combined = pd.concat(
+        [flow_df, status_df, status_nominal_df], ignore_index=True
+    )
     df_dict = {("source", "target"): combined}
     tsa_parameters = [
         {"timesteps": 3, "order": [1, 0, 1], "occurrences": {0: 1, 1: 2}},
@@ -91,10 +103,28 @@ def test_disaggregate_tsa_result_multi_sequence_flow():
             disaggregated["variable_name"] == var, "value"
         ].tolist()
 
-    assert _values("flow") == [20.0, 21.0, 22.0, 10.0, 11.0, 12.0, 20.0, 21.0, 22.0]
+    assert _values("flow") == [
+        20.0,
+        21.0,
+        22.0,
+        10.0,
+        11.0,
+        12.0,
+        20.0,
+        21.0,
+        22.0,
+    ]
     assert _values("status") == [0, 1, 1, 1, 1, 1, 0, 1, 1]
     assert _values("status_nominal") == [
-        0.0, 150.0, 150.0, 100.0, 100.0, 100.0, 0.0, 150.0, 150.0,
+        0.0,
+        150.0,
+        150.0,
+        100.0,
+        100.0,
+        100.0,
+        0.0,
+        150.0,
+        150.0,
     ]
 
 

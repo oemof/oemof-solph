@@ -120,9 +120,8 @@ def main(optimize=True):
     results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     flows = results["flow"]
-    mask_bus1 = (
-        (flows.columns.get_level_values(0) == "bus_1")
-        | (flows.columns.get_level_values(1) == "bus_1")
+    mask_bus1 = (flows.columns.get_level_values(0) == "bus_1") | (
+        flows.columns.get_level_values(1) == "bus_1"
     )
     bus1 = flows.loc[:, mask_bus1]
 
