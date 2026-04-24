@@ -57,6 +57,8 @@ def sequence(iterable_or_scalar):
             "on.\nPlease notice that a table with one column is still a table "
             "with 2 dimensions and not a Series."
         )
+    if iterable_or_scalar is None:
+        return None
     if isinstance(iterable_or_scalar, str):
         return iterable_or_scalar
     elif isinstance(iterable_or_scalar, abc.Iterable):
@@ -71,7 +73,7 @@ def valid_sequence(sequence, length: int) -> bool:
     If unset, the latter is set to the required lenght.
 
     """
-    if sequence[0] is None:
+    if sequence is None:
         return False
 
     if isinstance(sequence, _FakeSequence):

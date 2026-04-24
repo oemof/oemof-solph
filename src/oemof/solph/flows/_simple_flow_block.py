@@ -95,7 +95,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].negative_gradient_limit[0] is not None
+                if g[2].negative_gradient_limit is not None
             ]
         )
 
@@ -103,7 +103,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].positive_gradient_limit[0] is not None
+                if g[2].positive_gradient_limit is not None
             ]
         )
 
@@ -467,7 +467,7 @@ class SimpleFlowBlock(ScalarBlock):
 
                 # Fixed costs for units with no lifetime limit
                 if (
-                    m.flows[i, o].fixed_costs[0] is not None
+                    m.flows[i, o].fixed_costs is not None
                     and m.flows[i, o].nominal_capacity is not None
                     and (i, o) not in self.LIFETIME_FLOWS
                     and (i, o) not in self.LIFETIME_AGE_FLOWS
