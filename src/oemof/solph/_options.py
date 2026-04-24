@@ -22,6 +22,11 @@ from oemof.tools import debugging
 
 from oemof.solph._plumbing import sequence
 
+_msg_experimental_arithmetics = (
+    "Athithmetic operators for Investment objects are experimental."
+    + " In particular, the Result processing API is not considered, yet."
+)
+
 
 class Investment:
     """Defines an Investment object holding all the specifications needed
@@ -203,6 +208,41 @@ class Investment:
                     "1, even if the `nominal_capacity` is optimized to 0."
                 )
                 warn(msg, debugging.SuspiciousUsageWarning)
+
+    def __mul__(self, other):
+        """This is defined inverse to the intuitive logic as we absorb the
+        correction factor" instead of considering it after optimisation
+        (which was the intuitive way to interpret the operation).
+        Consider the following example:
+
+        `nominal_capacity=Investment(ep_costs=200)` can for example be
+        interpreted as 200 €/kW. To give values of 0.25 kW/m² and 50 €/m²,
+        it would be `nominal_capacity=0.25*Investment(ep_costs=50)`.
+        As the Investment object is never evalutated to an area,
+        the value of 50 €/m² needs to be divided by 0.25 kW/m².
+        """
+        warn(
+            _msg_experimental_arithmetics,
+            debugging.ExperimentalFeatureWarning,
+        )
+        self.minimum /= other
+        self.maximum /= other
+        self.ep_costs /= other
+        self.existing /= other
+        self.offset /= other
+        if self.overall_maximum is not None:
+            self.overall_maximum /= other
+        if self.overall_minimum is not None:
+            self.overall_minimum /= other
+        if self.fixed_costs is not None:
+            self.fixed_costs /= other
+
+        return self
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        return self * (1 / other)
 
 
 class NonConvex:
