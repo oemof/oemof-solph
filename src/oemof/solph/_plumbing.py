@@ -173,6 +173,8 @@ class _FakeSequence:
         self._value *= other
         return self
 
+    __rmul__ = __mul__
+
     def __truediv__(self, other):
         self._value /= other
         return self
