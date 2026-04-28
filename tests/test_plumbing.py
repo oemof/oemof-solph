@@ -17,40 +17,45 @@ from oemof.solph._plumbing import valid_sequence
 
 
 def test_fake_sequence():
-    seq0 = _FakeSequence(42)
-    assert seq0[0] == 42
-    assert seq0.size is None
+    seq0 = _FakeSequence(42.0)
+    seq_mul = 2 * _FakeSequence(21.0)
+    seq_rmul = _FakeSequence(2.0) * 21
+    seq_div = _FakeSequence(84.0) / 2
 
-    assert seq0[10] == 42
-    assert seq0.size is None
+    for seq in [seq0, seq_mul, seq_rmul, seq_div]:
+        assert seq[0] == 42
+        assert seq.size is None
 
-    assert seq0.max() == 42
-    assert seq0.min() == 42
-    assert seq0.value == 42
-    assert seq0.sum() == np.inf
+        assert seq[10] == 42
+        assert seq.size is None
 
-    assert str(seq0) == "[42, 42, ..., 42]"
+        assert seq.max() == 42
+        assert seq.min() == 42
+        assert seq.value == 42
+        assert seq.sum() == np.inf
 
-    with pytest.raises(TypeError):
-        seq0.to_numpy()
-    assert (seq0.to_numpy(length=5) == np.array(5 * [42])).all()
+        assert str(seq) == "[42.0, 42.0, ..., 42.0]"
 
-    with pytest.raises(TypeError):
-        len(seq0)
+        with pytest.raises(TypeError):
+            seq.to_numpy()
+        assert (seq.to_numpy(length=5) == np.array(5 * [42])).all()
 
-    seq0.size = 2
-    assert seq0.size == 2
-    assert len(seq0) == 2
+        with pytest.raises(TypeError):
+            len(seq)
 
-    assert seq0.max() == 42
-    assert seq0.min() == 42
-    assert seq0.value == 42
-    assert seq0.sum() == 84
+        seq.size = 2
+        assert seq.size == 2
+        assert len(seq) == 2
 
-    assert str(seq0) == "[42, 42]"
+        assert seq.max() == 42
+        assert seq.min() == 42
+        assert seq.value == 42
+        assert seq.sum() == 84
 
-    assert (seq0.to_numpy() == np.array(2 * [42])).all()
-    assert (seq0.to_numpy(length=5) == np.array(5 * [42])).all()
+        assert str(seq) == "[42.0, 42.0]"
+
+        assert (seq.to_numpy() == np.array(2 * [42])).all()
+        assert (seq.to_numpy(length=5) == np.array(5 * [42])).all()
 
 
 def test_sequence():
