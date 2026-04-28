@@ -169,6 +169,16 @@ class _FakeSequence:
         else:
             return np.full(len(self), self._value)
 
+    def __mul__(self, other):
+        self._value *= other
+        return self
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        self._value /= other
+        return self
+
     @property
     def value(self):
         return self._value
