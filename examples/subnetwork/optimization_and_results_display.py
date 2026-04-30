@@ -373,11 +373,41 @@ def main(optimize=True):
     #   (like "('internal_bus', 'My_DSO') ('feedin_sink', 'My_DSO')")
 
     print("\n--- Filtered ---\n")
+
     # This is achievable by using the following filter function, which
     # returns `True` if the source or the target of a `(source, target)`
     # pair is not an internal node, i.e. has a depth of 0.
     def hide_internal(column):
         return column[0].depth == 0 or column[1].depth == 0
+
+    def hide_and_rename(df, depth=0):
+        filtered = df[
+            [
+                column
+                for column in df.columns
+                if any(
+                    level.depth == depth
+                    for level in (
+                        column if isinstance(column, tuple) else (column,)
+                    )
+                )
+            ]
+        ]
+
+        for n in range(df.columns.nlevels):
+            filtered.rename(
+                columns={
+                    obj: obj.parent
+                    for c in filtered.columns
+                    for obj in [(c if isinstance(c, tuple) else (c,))[n]]
+                    if obj.parent is not None
+                },
+                level=n,
+                inplace=True,
+            )
+        return filtered
+
+    res_flow = results["flow"]
 
     # This filter function can be added to the default `filters` installed
     # on the `Results` class via
@@ -398,6 +428,10 @@ def main(optimize=True):
             "flow", filters=results.filters | {"flow": hide_internal}
         ).sum()
     )
+
+    print(hide_and_rename(results["flow"]).sum())
+    print(hide_and_rename(results["invest"]).sum())
+
     # or one can be created from scratch by importing the filters class from
     # the module holding the tools facilitating results processing:
     #
