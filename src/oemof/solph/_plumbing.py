@@ -70,8 +70,6 @@ def sequence(iterable_or_scalar, length=None):
                 return iterable_or_scalar
             else:
                 return np.array(iterable_or_scalar)
-    elif isinstance(iterable_or_scalar, abc.Iterable):
-        return np.array(iterable_or_scalar)
     else:
         return _FakeSequence(value=iterable_or_scalar, length=length)
 
