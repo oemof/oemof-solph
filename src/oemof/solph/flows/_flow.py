@@ -343,9 +343,9 @@ class Flow(Edge):
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
-            if self.nonconvex.positive_gradient_limit[0] is not None and (
-                self.positive_gradient_limit[0] is not None
-                or self.negative_gradient_limit[0] is not None
+            if self.nonconvex.positive_gradient_limit is not None and (
+                self.positive_gradient_limit is not None
+                or self.negative_gradient_limit is not None
             ):
                 raise ValueError(
                     "You specified a positive gradient in your nonconvex "
@@ -353,9 +353,9 @@ class Flow(Edge):
                     "negative gradient for a standard flow!"
                 )
 
-            if self.nonconvex.negative_gradient_limit[0] is not None and (
-                self.positive_gradient_limit[0] is not None
-                or self.negative_gradient_limit[0] is not None
+            if self.nonconvex.negative_gradient_limit is not None and (
+                self.positive_gradient_limit is not None
+                or self.negative_gradient_limit is not None
             ):
                 raise ValueError(
                     "You specified a negative gradient in your nonconvex "

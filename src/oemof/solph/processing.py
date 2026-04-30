@@ -931,7 +931,7 @@ def __separate_attrs(
             if value is None:
                 del com["scalars"][ckey]
         for ckey, value in list(com["sequences"].items()):
-            if len(value) == 0 or value[0] is None:
+            if len(value) == 0:
                 del com["sequences"][ckey]
 
     # Check if system is es or om:

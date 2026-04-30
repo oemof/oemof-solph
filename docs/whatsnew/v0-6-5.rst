@@ -22,11 +22,14 @@ Bug fixes
 Other changes
 #############
 
+* Interenally, sequences of 'None' are now avoided and a simple 'None'
+  is used instead. We expect no effect for end users.
 
 Contributors
 ############
 
 * Jelmer de Wit
+* Patrik Schönfeldt
 
 
 Acknowledgements
