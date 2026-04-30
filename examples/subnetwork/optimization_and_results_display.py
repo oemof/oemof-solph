@@ -168,7 +168,9 @@ class DSO(Node):
         )
 
         self.subnode(
-            components.Sink, inputs={internal_bus: Flow()}, local_name="feedin_sink"
+            components.Sink,
+            inputs={internal_bus: Flow()},
+            local_name="feedin_sink",
         )
 
         self.subnode(
@@ -241,7 +243,6 @@ def main(optimize=True):
         )
     )
 
-
     # create excess component for the electricity bus to allow overproduction
     energysystem.add(
         components.Sink(
@@ -275,9 +276,7 @@ def main(optimize=True):
         components.Source(
             label="pv",
             outputs={
-                bus_electricity: Flow(
-                    fix=data["pv"], nominal_capacity=582000
-                )
+                bus_electricity: Flow(fix=data["pv"], nominal_capacity=582000)
             },
         )
     )
@@ -355,7 +354,6 @@ def main(optimize=True):
 
     results = Results(energysystem_model)
 
-
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************
     # *************************************************************************
@@ -368,12 +366,17 @@ def main(optimize=True):
 
     print("\n********* Summary of flows *********")
     print(results["flow"].sum())
-    # TODO @gnn: here I would like to only see "electricity My_DSO" instead of "electricity ('feedin_converter', 'My_DSO')"
-    #  for feedin and "DSO electricity" for consumption, but none of the internal flows (like "('internal_bus', 'My_DSO') ('feedin_sink', 'My_DSO')")
+    # TODO @gnn:
+    #   here I would like to only see "electricity My_DSO" instead of
+    #   "electricity ('feedin_converter', 'My_DSO')" for feedin and "DSO
+    #   electricity" for consumption, but none of the internal flows
+    #   (like "('internal_bus', 'My_DSO') ('feedin_sink', 'My_DSO')")
     print("\n********* Summary of investments *********")
     print(results["invest"])
-    # TODO @gnn: here I would like to not have the "(pp_gas, electricity)" column label for the investment of the pp_gas
-    #  but rather simply "pp_gas"
+    # TODO @gnn:
+    #   here I would like to not have the "(pp_gas, electricity)" column
+    #   label for the investment of the pp_gas but rather simply
+    #   "pp_gas"
 
     # Evaluating the economics of the solution
     print("\n********* Evaluating economics *********")
