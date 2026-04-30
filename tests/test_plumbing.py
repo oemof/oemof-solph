@@ -57,6 +57,8 @@ def test_fake_sequence():
         assert (seq.to_numpy() == np.array(2 * [42])).all()
         assert (seq.to_numpy(length=5) == np.array(5 * [42])).all()
 
+        seq2 = np.array([2, 2]) * seq
+        assert (seq2 == np.array(2 * [84])).all()
 
 def test_sequence():
     seq0 = sequence(0)
@@ -64,10 +66,14 @@ def test_sequence():
     assert seq0.value == 0
     assert seq0.size is None
 
+    with pytest.raises(ValueError, match="Length mismatch"):
+        _ = sequence([1, 3], length= 3)
     seq13 = sequence([1, 3])
     assert isinstance(seq13, np.ndarray)
     assert (seq13 == np.array([1, 3])).all()
 
+    with pytest.raises(ValueError, match="Length mismatch"):
+        _ = sequence("ab", length=3)
     seq_ab = sequence("ab")
     assert isinstance(seq_ab, str)
     assert seq_ab == "ab"

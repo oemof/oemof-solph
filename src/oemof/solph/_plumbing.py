@@ -18,7 +18,7 @@ from itertools import repeat
 import numpy as np
 
 
-def sequence(iterable_or_scalar):
+def sequence(iterable_or_scalar, length=None):
     """Checks if an object is iterable (except string) or scalar and returns
     the an numpy array of the sequence if object is an iterable or an
     'emulated'  sequence object of class _FakeSequence if object is a scalar.
@@ -59,12 +59,21 @@ def sequence(iterable_or_scalar):
         )
     if iterable_or_scalar is None:
         return None
-    if isinstance(iterable_or_scalar, str):
-        return iterable_or_scalar
+    if isinstance(iterable_or_scalar, abc.Iterable):
+        if length and length is not len(iterable_or_scalar):
+            raise ValueError(
+                f"Length mismatch: Cannot create sequence of length {length}"
+                + " from input {iterable_or_scalar}."
+            )
+        else:
+            if isinstance(iterable_or_scalar, str):
+                return iterable_or_scalar
+            else:
+                return np.array(iterable_or_scalar)
     elif isinstance(iterable_or_scalar, abc.Iterable):
         return np.array(iterable_or_scalar)
     else:
-        return _FakeSequence(value=iterable_or_scalar)
+        return _FakeSequence(value=iterable_or_scalar, length=length)
 
 
 def valid_sequence(sequence, length: int) -> bool:
@@ -170,7 +179,7 @@ class _FakeSequence:
             return np.full(len(self), self._value)
 
     def __mul__(self, other):
-        return sequence(self._value * other)
+        return sequence(self._value * other, length=self._length)
 
     __rmul__ = __mul__
 
