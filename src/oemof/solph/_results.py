@@ -210,7 +210,7 @@ class Results:
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
         """Compatibility wrapper for Results.get."""
         warnings.warn(
-            "Function name 'Results.to_df(str)' is outdatet,"
+            "Function name 'Results.to_df(str)' is outdated,"
             + " use 'Results.get(str)' instead.",
             category=FutureWarning,
         )
