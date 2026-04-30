@@ -371,6 +371,42 @@ def main(optimize=True):
     #   "electricity ('feedin_converter', 'My_DSO')" for feedin and "DSO
     #   electricity" for consumption, but none of the internal flows
     #   (like "('internal_bus', 'My_DSO') ('feedin_sink', 'My_DSO')")
+
+    print("\n--- Filtered ---\n")
+    # This is achievable by using the following filter function, which
+    # returns `True` if the source or the target of a `(source, target)`
+    # pair is not an internal node, i.e. has a depth of 0.
+    def hide_internal(column):
+        return column[0].depth == 0 or column[1].depth == 0
+
+    # This filter function can be added to the default `filters` installed
+    # on the `Results` class via
+    #
+    #   Results.filters.update({"flow": hide_internal})
+    #
+    # in which case
+    #
+    #   print(results["flow"].sum())
+    #
+    # would print the filtered dataframe.
+
+    # This is not recommended though. Instead, the intended usage is to use
+    # a `Filters` instance as an argument to `Results.get`. Such an instance
+    # can be created by modifying the default filters:
+    print(
+        results.get(
+            "flow", filters=results.filters | {"flow": hide_internal}
+        ).sum()
+    )
+    # or one can be created from scratch by importing the filters class from
+    # the module holding the tools facilitating results processing:
+    #
+    #   from oemof.solph._results import Filters
+    #
+    #   print(
+    #     results.get("flow", filters=Filters({"flow": hide_internal})).sum()
+    #   )
+
     print("\n********* Summary of investments *********")
     print(results["invest"])
     # TODO @gnn:
