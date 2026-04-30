@@ -346,7 +346,7 @@ def main(optimize=True):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    res = energysystem_model.solve(
+    energysystem_model.solve(
         solver=solver, solve_kwargs={"tee": solver_verbose}
     )
 
