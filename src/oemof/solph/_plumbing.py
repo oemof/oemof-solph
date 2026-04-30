@@ -170,14 +170,12 @@ class _FakeSequence:
             return np.full(len(self), self._value)
 
     def __mul__(self, other):
-        self._value *= other
-        return self
+        return sequence(self._value * other)
 
     __rmul__ = __mul__
 
     def __truediv__(self, other):
-        self._value /= other
-        return self
+        return 1 / other * self
 
     @property
     def value(self):
