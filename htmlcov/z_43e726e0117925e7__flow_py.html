@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_43e726e0117925e7__invest_non_convex_flow_block_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-29 18:50 +0000
+            created at 2026-04-30 18:37 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -427,9 +427,9 @@
     <p class="pln"><span class="n"><a id="t343" href="#t343">343</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t344" href="#t344">344</a></span><span class="t">        <span class="com"># Checking for impossible gradient combinations</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t345" href="#t345">345</a></span><span class="t">        <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">nonconvex</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">nonconvex</span><span class="op">.</span><span class="nam">positive_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">positive_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t">                <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">negative_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t346" href="#t346">346</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">nonconvex</span><span class="op">.</span><span class="nam">positive_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t347" href="#t347">347</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">positive_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t348" href="#t348">348</a></span><span class="t">                <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">negative_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t349" href="#t349">349</a></span><span class="t">            <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">                    <span class="str">"You specified a positive gradient in your nonconvex "</span>&nbsp;</span><span class="r"></span></p>
@@ -437,9 +437,9 @@
     <p class="run run2"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">                    <span class="str">"negative gradient for a standard flow!"</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">                <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t356" href="#t356">356</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">nonconvex</span><span class="op">.</span><span class="nam">negative_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t357" href="#t357">357</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">positive_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t358" href="#t358">358</a></span><span class="t">                <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">negative_gradient_limit</span><span class="op">[</span><span class="num">0</span><span class="op">]</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t356" href="#t356">356</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">nonconvex</span><span class="op">.</span><span class="nam">negative_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span> <span class="key">and</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t357" href="#t357">357</a></span><span class="t">                <span class="nam">self</span><span class="op">.</span><span class="nam">positive_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t358" href="#t358">358</a></span><span class="t">                <span class="key">or</span> <span class="nam">self</span><span class="op">.</span><span class="nam">negative_gradient_limit</span> <span class="key">is</span> <span class="key">not</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t359" href="#t359">359</a></span><span class="t">            <span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t360" href="#t360">360</a></span><span class="t">                <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t361" href="#t361">361</a></span><span class="t">                    <span class="str">"You specified a negative gradient in your nonconvex "</span>&nbsp;</span><span class="r"></span></p>
@@ -465,7 +465,7 @@
             <a class="nav" href="z_43e726e0117925e7__invest_non_convex_flow_block_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.5">coverage.py v7.13.5</a>,
-            created at 2026-04-29 18:50 +0000
+            created at 2026-04-30 18:37 +0000
         </p>
     </div>
 </footer>
