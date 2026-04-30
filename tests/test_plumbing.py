@@ -60,6 +60,7 @@ def test_fake_sequence():
         seq2 = np.array([2, 2]) * seq
         assert (seq2 == np.array(2 * [84])).all()
 
+
 def test_sequence():
     seq0 = sequence(0)
     assert isinstance(seq0, _FakeSequence)
@@ -67,7 +68,7 @@ def test_sequence():
     assert seq0.size is None
 
     with pytest.raises(ValueError, match="Length mismatch"):
-        _ = sequence([1, 3], length= 3)
+        _ = sequence([1, 3], length=3)
     seq13 = sequence([1, 3])
     assert isinstance(seq13, np.ndarray)
     assert (seq13 == np.array([1, 3])).all()
