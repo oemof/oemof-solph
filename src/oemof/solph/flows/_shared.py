@@ -67,13 +67,13 @@ def sets_for_non_convex_flows(block, group):
         `negative_gradient` being not None.
     """
     block.MIN_FLOWS = Set(
-        initialize=[(g[0], g[1]) for g in group if g[2].minimum[0] is not None]
+        initialize=[(g[0], g[1]) for g in group if g[2].minimum is not None]
     )
     block.STARTUPFLOWS = Set(
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.startup_costs[0] is not None
+            if g[2].nonconvex.startup_costs is not None
             or g[2].nonconvex.maximum_startups is not None
         ]
     )
@@ -88,7 +88,7 @@ def sets_for_non_convex_flows(block, group):
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.shutdown_costs[0] is not None
+            if g[2].nonconvex.shutdown_costs is not None
             or g[2].nonconvex.maximum_shutdowns is not None
         ]
     )
@@ -117,21 +117,21 @@ def sets_for_non_convex_flows(block, group):
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.negative_gradient_limit[0] is not None
+            if g[2].nonconvex.negative_gradient_limit is not None
         ]
     )
     block.POSITIVE_GRADIENT_FLOWS = Set(
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.positive_gradient_limit[0] is not None
+            if g[2].nonconvex.positive_gradient_limit is not None
         ]
     )
     block.ACTIVITYCOSTFLOWS = Set(
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.activity_costs[0] is not None
+            if g[2].nonconvex.activity_costs is not None
         ]
     )
 
@@ -139,7 +139,7 @@ def sets_for_non_convex_flows(block, group):
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.inactivity_costs[0] is not None
+            if g[2].nonconvex.inactivity_costs is not None
         ]
     )
 

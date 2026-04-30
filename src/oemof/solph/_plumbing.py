@@ -57,6 +57,8 @@ def sequence(iterable_or_scalar):
             "on.\nPlease notice that a table with one column is still a table "
             "with 2 dimensions and not a Series."
         )
+    if iterable_or_scalar is None:
+        return None
     if isinstance(iterable_or_scalar, str):
         return iterable_or_scalar
     elif isinstance(iterable_or_scalar, abc.Iterable):
@@ -71,7 +73,7 @@ def valid_sequence(sequence, length: int) -> bool:
     If unset, the latter is set to the required lenght.
 
     """
-    if sequence[0] is None:
+    if sequence is None:
         return False
 
     if isinstance(sequence, _FakeSequence):
@@ -166,6 +168,16 @@ class _FakeSequence:
             return np.full(length, self._value)
         else:
             return np.full(len(self), self._value)
+
+    def __mul__(self, other):
+        self._value *= other
+        return self
+
+    __rmul__ = __mul__
+
+    def __truediv__(self, other):
+        self._value /= other
+        return self
 
     @property
     def value(self):

@@ -4,6 +4,12 @@ v0.6.5
 API changes
 ###########
 
+* The option `solph.Investment` now has the multiplication operator (`*`)
+  defined. Imagine, you have a PV capacity of 500 W/panel, now you can give
+  the investment costs per panel without having to calculate the specific
+  costs: `nominal_capacity=Investment(ep_costs=200)  # 200 €/kW` and
+  `nominal_capacity=0.5*Investment(ep_costs=100)  # 0.5 kW/panel, 100 €/panel`.
+
 
 New features
 ############
@@ -22,11 +28,14 @@ Bug fixes
 Other changes
 #############
 
+* Interenally, sequences of 'None' are now avoided and a simple 'None'
+  is used instead. We expect no effect for end users.
 
 Contributors
 ############
 
 * Jelmer de Wit
+* Patrik Schönfeldt
 
 
 Acknowledgements
