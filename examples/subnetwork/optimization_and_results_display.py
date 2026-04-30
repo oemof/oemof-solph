@@ -359,7 +359,7 @@ def main(optimize=True):
     # *************************************************************************
 
     # These are the keys to access information from the Results()
-    keys = results.keys()
+    keys = sorted(results.keys())
     print("\n********* Keys to access information from Results() *********")
     for key in keys:
         print("Key: {}".format(key))
