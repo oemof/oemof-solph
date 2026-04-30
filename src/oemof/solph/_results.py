@@ -34,7 +34,7 @@ class Filters(dict):
     def nofilter(*args, **kwargs):
         return True
 
-    def __getitem__(self, variable: str) -> pd.DataFrame | pd.Series:
+    def __getitem__(self, variable: str) -> Callable[[pd.Index], bool]:
         return self.get(variable, self.nofilter)
 
 
