@@ -313,7 +313,7 @@ class GenericStorage(Node):
     def _check_invest_relations(self):
         """Checks if the passed invest_relation keywords fit the
         passed Investment objects"""
-        if self.invest_relation_input_capacity[0] is not None:
+        if self.invest_relation_input_capacity is not None:
             if not self._check_input_for_investment():
                 msg = (
                     "The input flow needs to have an Investment object "
@@ -328,7 +328,7 @@ class GenericStorage(Node):
                 )
                 raise AttributeError(msg)
             self._invest_group = True
-        if self.invest_relation_output_capacity[0] is not None:
+        if self.invest_relation_output_capacity is not None:
             if not self._check_output_for_investment():
                 msg = (
                     "The output flow needs to have an Investment object "
@@ -343,7 +343,7 @@ class GenericStorage(Node):
                 )
                 raise AttributeError(msg)
             self._invest_group = True
-        if self.invest_relation_input_output[0] is not None:
+        if self.invest_relation_input_output is not None:
             if not self._check_input_for_investment():
                 msg = (
                     "The input flow needs to have an Investment object "
@@ -372,9 +372,9 @@ class GenericStorage(Node):
                 raise ValueError(e1)
         """Raise errors for infeasible investment attribute combinations"""
         if (
-            self.invest_relation_input_output[0] is not None
-            and self.invest_relation_output_capacity[0] is not None
-            and self.invest_relation_input_capacity[0] is not None
+            self.invest_relation_input_output is not None
+            and self.invest_relation_output_capacity is not None
+            and self.invest_relation_input_capacity is not None
         ):
             e2 = (
                 "Overdetermined. Three investment object will be coupled"
@@ -592,7 +592,7 @@ class GenericStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_output[0] is not None
+                if n.invest_relation_input_output is not None
             ]
         )
 
@@ -1489,7 +1489,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_capacity[0] is not None
+                if n.invest_relation_input_capacity is not None
             ]
         )
 
@@ -1497,7 +1497,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_output_capacity[0] is not None
+                if n.invest_relation_output_capacity is not None
             ]
         )
 
@@ -1505,7 +1505,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             initialize=[
                 n
                 for n in group
-                if n.invest_relation_input_output[0] is not None
+                if n.invest_relation_input_output is not None
             ]
         )
 

@@ -357,7 +357,7 @@ class Model(po.ConcreteModel):
 
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_capacity is not None:
-                if self.flows[o, i].fix[self.TIMESTEPS.at(1)] is not None:
+                if self.flows[o, i].fix is not None:
                     for t in self.TIMESTEPS:
                         self.flow[o, i, t].value = (
                             self.flows[o, i].fix[t]

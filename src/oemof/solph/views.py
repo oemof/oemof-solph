@@ -299,7 +299,7 @@ def node_input_by_type(results, node_type, droplevel=None):
     group = {
         k: v["sequences"]
         for k, v in results.items()
-        if isinstance(k[1], node_type) and k[0] is not None
+        if isinstance(k[1], node_type) and k is not None
     }
 
     if not group:
