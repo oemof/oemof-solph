@@ -411,7 +411,7 @@ Then we can create our component with the buses attached to it.
     ...     label='boiler',
     ...     inputs={
     ...         bfuel: solph.flows.Flow(
-    ...             nominal_capacity=P_out_max,
+    ...             nominal_capacity=P_in_max,
     ...             maximum=l_max,
     ...             minimum=l_min,
     ...             nonconvex=solph.NonConvex()

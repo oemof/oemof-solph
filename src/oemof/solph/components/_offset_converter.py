@@ -32,9 +32,10 @@ from oemof.solph._plumbing import sequence
 
 
 class OffsetConverter(Node):
-    r"""An object with one input and multiple outputs and two coefficients
-    per output to model part load behaviour.
-    The output must contain a NonConvex object.
+    r"""An object with one or more inputs and one or more outputs to allow
+    modeling part-load dependend efficiency. One of all the input and output
+    flows connected must be NonConvex. All provided conversion_factors and
+    normed_offsets are relative to the flow with the NonConvex object.
 
     Parameters
     ----------
@@ -59,7 +60,8 @@ class OffsetConverter(Node):
 
     .. math::
 
-        m = \frac{(l_{max}/\eta_{max}-l_{min}/\eta_{min}}{l_{max}-l_{min}}
+        m = \frac{l_\text{max}/\eta_\text{max}-l_\text{min}/\eta_\text{min}}
+        {l_\text{max}-l_\text{min}}
 
         y_\text{0,normed} = \frac{1}{\eta_{max}} - m
 
@@ -80,7 +82,8 @@ class OffsetConverter(Node):
     >>> from oemof.solph.components import slope_offset_from_nonconvex_output
 
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
+
+    - :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
 
     Examples
     --------
