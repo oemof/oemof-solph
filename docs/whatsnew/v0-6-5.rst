@@ -24,6 +24,7 @@ Other changes
 
 * Interenally, sequences of 'None' are now avoided and a simple 'None'
   is used instead. We expect no effect for end users.
+* Updated respective examples ant tutorials to use current TSAM API (v3).
 
 Contributors
 ############
