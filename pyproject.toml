@@ -94,7 +94,7 @@ dev = [
     "sphinx-design",
     "termcolor",
     "tox",
-    "tsam",
+    "tsam>=3.0",
 ]
 
 [project.scripts]
