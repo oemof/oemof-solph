@@ -4,7 +4,7 @@ from datetime import datetime
 
 import matplotlib.pyplot as plt
 import pandas as pd
-import tsam.timeseriesaggregation as tsam
+import tsam
 from input_data import energy_prices
 from input_data import investment_costs
 from input_data import prepare_input_data
@@ -91,15 +91,12 @@ hours_per_period = 24
 
 start = datetime.now()
 
-aggregation = tsam.TimeSeriesAggregation(
-    timeSeries=data.iloc[:8760],
-    noTypicalPeriods=typical_periods,
-    hoursPerPeriod=hours_per_period,
-    clusterMethod="k_means",
-    sortValues=False,
-    rescaleClusterPeriods=False,
+aggregation = tsam.aggregate(
+    data=data.iloc[:8760],
+    n_clusters=typical_periods,
+    period_duration=hours_per_period,
 )
-aggregation.createTypicalPeriods()
+representatives = aggregation.cluster_representatives
 
 # create a time index for the aggregated time series
 tindex_agg = pd.date_range(
@@ -138,8 +135,8 @@ print("---------------------------------------------")
 # with one dict per year
 tsa_parameters = [
     {
-        "timesteps_per_period": aggregation.hoursPerPeriod,
-        "order": aggregation.clusterOrder,
+        "timesteps_per_period": aggregation.n_timesteps_per_period,
+        "order": aggregation.cluster_assignments,
         "timeindex": tindex_agg + pd.DateOffset(years=i),
     }
     for i in range(len(years))
@@ -150,23 +147,23 @@ timeincrement = [1] * (len(tindex_agg_full))
 
 time_series = {
     "cop": pd.concat(
-        [aggregation.typicalPeriods["cop"]] * len(years),
+        [representatives["cop"]] * len(years),
         ignore_index=True,
     ),
     "electricity demand (kW)": pd.concat(
-        [aggregation.typicalPeriods["electricity demand (kW)"]] * len(years),
+        [representatives["electricity demand (kW)"]] * len(years),
         ignore_index=True,
     ),
     "heat demand (kW)": pd.concat(
-        [aggregation.typicalPeriods["heat demand (kW)"]] * len(years),
+        [representatives["heat demand (kW)"]] * len(years),
         ignore_index=True,
     ),
     "PV (kW/kWp)": pd.concat(
-        [aggregation.typicalPeriods["PV (kW/kWp)"]] * len(years),
+        [representatives["PV (kW/kWp)"]] * len(years),
         ignore_index=True,
     ),
     "Electricity for Car Charging_HH1": pd.concat(
-        [aggregation.typicalPeriods["Electricity for Car Charging_HH1"]]
+        [representatives["Electricity for Car Charging_HH1"]]
         * len(years),
         ignore_index=True,
     ),
