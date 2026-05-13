@@ -87,6 +87,7 @@ dev = [
     "furo",
     "matplotlib",
     "nbformat",
+    "oemof.demand",
     "openpyxl",
     "pytest",
     "sphinx",
@@ -95,6 +96,7 @@ dev = [
     "termcolor",
     "tox",
     "tsam>=3.0",
+    "workalendar",
 ]
 
 [project.scripts]
