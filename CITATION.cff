@@ -75,10 +75,6 @@ authors:
     given-names: Pierre-François
     alias: "@Bachibouzouk"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@steffenGit"
-  -
     family-names: Fritz
     given-names: Malte
     alias: "@maltefritz"
@@ -140,91 +136,51 @@ authors:
     given-names: Tobi
     alias: "@tobirohrer"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@lmilletb"
-  -
     familiy-names: Haas
     given-names: Sabine
     alias: "@SabineHaas"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@mloenneberga"
   -
     family-names: Gering
     given-names: Marie-Claire
     alias: "@MaGering"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@Siebenfrucht"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@MedinavonLevetzow"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@RD-OTH"
-  -
     family-names: Delfs
     given-names: Jens-Olaf
     alias: "@drjod"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@paulapreuss"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@richartkeil"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@jdwit"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@pranaykasturi"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@stefansc1"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@escalacjo"
   -
     family-names: Smalla
     given-names: Tjark
     alias: "@ChillkroeteTTS"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@ajimenezUCLA"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@elisapap"
-  -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@vjangle"
-  -
     family-names: Wolf
     given-names: Jakob
     alias: "@jakob-wo"
   -
-    family-names: Developer
-    given-names: Anonymous
+    family-names: Aylagas
+    given-names: Raul Ciria
     alias: "@Raul-Ciria-Aylagas"
   -
     family-names: Gaudchau
     given-names: Elisa
     alias: "@elisagaudchau"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@chrisflei"
+    family-names: Developers
+    given-names: Unnamed
+    aliases:
+      - "@steffenGit"
+      - "@lmilletb"
+      - "@mloenneberga"
+      - "@Siebenfrucht"
+      - "@MedinavonLevetzow"
+      - "@RD-OTH"
+      - "@paulapreuss"
+      - "@richartkeil"
+      - "@pranaykasturi"
+      - "@stefansc1"
+      - "@jdwit"
+      - "@escalacjo"
+      - "@ajimenezUCLA"
+      - "@elisapap"
+      - "@vjangle"
+      - "@chrisflei"
 ...
