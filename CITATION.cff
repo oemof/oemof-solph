@@ -14,19 +14,25 @@ authors:
     alias: "@uvchik"
     orcid: "https://orcid.org/0000-0002-1241-4425"
   -
-    family-names: Kaldemeyer
-    given-names: Cord
-    alias: "@ckaldemeyer"
-  -
-    family-names: "Günther"
-    given-names: Stephan
-    alias: "@gnn"
-  -
     family-names: "Schönfeldt"
     given-names: Patrik
     alias: "@p-snft"
     affiliation: "Deutsches Zentrum für Luft- und Raumfart (DLR)"
     orcid: "https://orcid.org/0000-0002-4311-2753"
+  -
+    family-names: Kaldemeyer
+    given-names: Cord
+    aliases:
+      - "@ckaldemeyer"
+      - "@ckaldemeyer-ane"
+  -
+    family-names: "Günther"
+    given-names: Stephan
+    alias: "@gnn"
+  -
+    family-names: Kochems
+    given-names: Johannes
+    alias: "@jokochems"
   -
     family-names: Simon
     given-names: Hilpert
@@ -36,6 +42,10 @@ authors:
     given-names: Jann
     alias: "@jnnr"
   -
+    family-names: Witte
+    given-names: Francesco
+    alias: "@fwitte"
+  -
     family-names: "Röder"
     given-names: Johannes
     alias: "@joroeder"
@@ -44,53 +54,66 @@ authors:
     given-names: Caroline
     alias: "@c-moeller"
   -
-    family-names: Kochems
-    given-names: Johannes
-    alias: "@jokochems"
-  -
     family-names: Huyskens
     given-names: Hendrik
     alias: "@henhuy"
   -
-    family-names: Developer
-    given-names: Anonymous
-    alias: "@steffenGit"
+    family-names: "Schürmann"
+    given-names: Lennart
+    alias: "@lensum"
   -
-    family-names: Schachler
-    given-names: Birgit
-    alias: "@birgits"
+    family-names: Freißmann
+    given-names: Jonas
+    alias: "@jfreissmann"
   -
-    family-names: Pl
-    given-names: Franzi
-    alias: "@FranziPl"
-  -
-    family-names: Sayadi
-    given-names: Saeed
-    alias: "@sasa821"
+    family-names: Hillen
+    given-names: Maximilian
+    alias: "@Maxhi77"
+    orcid: "https://orcid.org/0000-0002-8171-2661"
   -
     family-names: Duc
     given-names: Pierre-François
     alias: "@Bachibouzouk"
   -
-    family-names: Endres
-    given-names: Julian
-    alias: "@nailend"
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@steffenGit"
+  -
+    family-names: Fritz
+    given-names: Malte
+    alias: "@maltefritz"
+  -
+    family-names: Schischke
+    given-names: Eva
+    alias: "@esske"
+  -
+    familiy-names: Giannitelli
+    given-names: Antonella
+    alias: "@AntonellaGia"
+  -
+    family-names: Sayadi
+    given-names: Saeed
+    alias: "@sasa821"
+  -
+    family-names: Pl
+    given-names: Franzi
+    alias: "@FranziPl"
   -
     family-names: "Büllesbach"
     given-names: Fabian
     alias: "@FabianTU"
   -
+    family-names: Berendes
+    given-names: Sarah
+    alias: "@srhbrnds"
+  -
     family-names: "Fuhrländer"
     given-names: David
     alias: "@DFuh"
   -
-    family-names: Developer
-    given-names: Anonymous
+    family-names: Plessmann
+    given-names: Guido
     alias: "@gplssm"
-  -
-    family-names: Witte
-    given-names: Francesco
-    alias: "@fwitte"
   -
     family-names: Kassing
     given-names: Phillip
@@ -100,29 +123,46 @@ authors:
     given-names: Ekatarina
     alias: "@e-zolotarevskaya"
   -
-    family-names: Berendes
-    given-names: Sarah
-    alias: "@srhbrnds"
-  -
     family-names: Lancien
     given-names: Bryan
     alias: "@bmlancien"
   -
-    family-names: Developer
-    given-names: Anonymous
+    family-names: Rosin
+    given-names: Lena
+    alias: "@leroum"
+  -
+    family-names: Amme
+    given-names: Jonathan
     alias: "@nesnoj"
+    orcid: "https://orcid.org/0000-0002-8563-5261"
+  -
+    family-names: Rohrer
+    given-names: Tobi
+    alias: "@tobirohrer"
   -
     family-names: Developer
     given-names: Anonymous
     alias: "@lmilletb"
   -
+    familiy-names: Haas
+    given-names: Sabine
+    alias: "@SabineHaas"
+  -
     family-names: Developer
     given-names: Anonymous
     alias: "@mloenneberga"
   -
-    family-names: "Schürmann"
-    given-names: Lennart
-    alias: "@lensum"
+    family-names: Gering
+    given-names: Marie-Claire
+    alias: "@MaGering"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@Siebenfrucht"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@MedinavonLevetzow"
   -
     family-names: Developer
     given-names: Anonymous
@@ -131,6 +171,22 @@ authors:
     family-names: Delfs
     given-names: Jens-Olaf
     alias: "@drjod"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@paulapreuss"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@richartkeil"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@jdwit"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@pranaykasturi"
   -
     family-names: Developer
     given-names: Anonymous
@@ -148,13 +204,21 @@ authors:
     given-names: Anonymous
     alias: "@ajimenezUCLA"
   -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@elisapap"
+  -
+    family-names: Developer
+    given-names: Anonymous
+    alias: "@vjangle"
+  -
     family-names: Wolf
     given-names: Jakob
     alias: "@jakob-wo"
   -
     family-names: Developer
     given-names: Anonymous
-    alias: "@elisapap"
+    alias: "@Raul-Ciria-Aylagas"
   -
     family-names: Gaudchau
     given-names: Elisa
@@ -163,33 +227,4 @@ authors:
     family-names: Developer
     given-names: Anonymous
     alias: "@chrisflei"
-  -
-    family-names: Rohrer
-    given-names: Tobi
-    alias: "@tobirohrer"
-  -
-    family-names: Gering
-    given-names: Marie-Claire
-    alias: "@MaGering"
-  -
-    family-names: Schischke
-    given-names: Eva
-    alias: "@esske"
-  -
-    family-names: Fritz
-    given-names: Malte
-    alias: "@maltefritz"
-  -
-    family-names: Freißmann
-    given-names: Jonas
-    alias: "@jfreissmann"
-  -
-    family-names: Hillen
-    given-names: Maximilian
-    alias: "@Maxhi77"
-    orcid: "https://orcid.org/0000-0002-8171-2661"
-  -
-    family-names: Rosin
-    given-names: Lena
-    alias: "@leroum"
 ...
