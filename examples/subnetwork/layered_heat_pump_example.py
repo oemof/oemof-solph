@@ -2,7 +2,7 @@
 
 """
 This example gives a simplified idea how subnodes
-might be used to work with discretised temperatures.
+might be used to work with discretised temperatures in a heat pump.
 
 Code
 ----
