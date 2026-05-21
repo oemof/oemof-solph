@@ -44,11 +44,11 @@ class Filters(dict):
         return result
 
     @staticmethod
-    def nofilter(*args, **kwargs):
+    def noop(*args, **kwargs):
         return True
 
     def __getitem__(self, variable: str) -> Callable[[pd.Index], bool]:
-        return self.get(variable, self.nofilter)
+        return self.get(variable, self.noop)
 
 
 class Results:
