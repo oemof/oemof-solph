@@ -380,7 +380,7 @@ def main(optimize=True):
     def hide_internal(column):
         return column[0].depth == 0 or column[1].depth == 0
 
-    def hide_and_rename(df, depth=0):
+    def hide_and_rename(df, results, depth=0):
         filtered = df.loc[
             :,
             [
@@ -430,8 +430,16 @@ def main(optimize=True):
         ).sum()
     )
 
-    print(hide_and_rename(results["flow"]).sum())
-    print(hide_and_rename(results["invest"]).sum())
+    print(
+        results.get(
+            "flow", filters={}, callbacks={"flow": hide_and_rename}
+        ).sum()
+    )
+    print(
+        results.get(
+            "invest", filters={}, callbacks={"invest": hide_and_rename}
+        ).sum()
+    )
 
     # or one can be created from scratch by importing the filters class from
     # the module holding the tools facilitating results processing:
