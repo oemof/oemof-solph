@@ -178,7 +178,8 @@ def main(optimize=True):
     print(results["flow"].sum())
 
     def hide_and_rename(df, depth=0):
-        filtered = df[
+        filtered = df.loc[
+            :,
             [
                 column
                 for column in df.columns
@@ -188,7 +189,7 @@ def main(optimize=True):
                         column if isinstance(column, tuple) else (column,)
                     )
                 )
-            ]
+            ],
         ]
 
         for n in range(df.columns.nlevels):
