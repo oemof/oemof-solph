@@ -103,7 +103,11 @@ class HeatPump(Node):
             self.subnode(
                 solph.components.Converter,
                 local_name=f"hp_{temperature}",
-                inputs={el_bus: solph.Flow()},
+                inputs={
+                    el_bus: solph.Flow(
+                        nominal_capacity=solph.Investment(ep_costs=1)
+                    )
+                },
                 outputs={target: solph.Flow()},
                 conversion_factors={target: cop},
             )
@@ -125,8 +129,13 @@ def main(optimize=True):
         local_name="el",
     )
     el_source = solph.components.Source(
-        label=QualifiedLabel(("el_grid",)),
-        outputs={el_bus: solph.Flow(variable_costs=0.3)},
+        label="el_grid",
+        outputs={
+            el_bus: solph.Flow(
+                nominal_capacity=solph.Investment(ep_costs=2),
+                variable_costs=0.3,
+            )
+        },
     )
     es.add(house, el_source)
 
@@ -166,7 +175,41 @@ def main(optimize=True):
 
     results = solph.Results(model)
 
-    print(results["flow"].columns)
+    print(results["flow"].sum())
+
+    def hide_and_rename(df, depth=0):
+        filtered = df.loc[
+            :,
+            [
+                column
+                for column in df.columns
+                if any(
+                    level.depth == depth
+                    for level in (
+                        column if isinstance(column, tuple) else (column,)
+                    )
+                )
+            ],
+        ]
+
+        for n in range(df.columns.nlevels):
+            filtered.rename(
+                columns={
+                    obj: obj.parent
+                    for c in filtered.columns
+                    for obj in [(c if isinstance(c, tuple) else (c,))[n]]
+                    if obj.parent is not None
+                },
+                level=n,
+                inplace=True,
+            )
+        return filtered
+
+    print("*1**********************************")
+    print(hide_and_rename(results["flow"]).sum())
+    print("*2**********************************")
+    print(hide_and_rename(results["invest"]).sum())
+    print("*3**********************************")
 
 
 if __name__ == "__main__":

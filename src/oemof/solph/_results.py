@@ -11,7 +11,7 @@ SPDX-License-Identifier: MIT
 """
 
 import warnings
-from collections.abc import Hashable
+from collections.abc import Callable, Hashable
 
 import pandas as pd
 from oemof.tools.debugging import ExperimentalFeatureWarning
@@ -20,6 +20,35 @@ from pyomo.environ import ConcreteModel
 from pyomo.opt.results.container import ListContainer
 
 import oemof.solph
+
+
+class Callbacks(dict):
+    @staticmethod
+    def noop(df_or_s, results):
+        return df_or_s
+
+    def __getitem__(
+        self, variable: str
+    ) -> Callable[
+        [pd.DataFrame | pd.Series, "Results"], pd.DataFrame | pd.Series
+    ]:
+        return self.get(variable, self.noop)
+
+
+class Filters(dict):
+    def updated(
+        self, filters: dict[str, Callable[[object], bool]]
+    ) -> "Filters":
+        result = Filters(self)
+        result.update(filters)
+        return result
+
+    @staticmethod
+    def noop(*args, **kwargs):
+        return True
+
+    def __getitem__(self, variable: str) -> Callable[[pd.Index], bool]:
+        return self.get(variable, self.noop)
 
 
 class Results:
@@ -40,6 +69,15 @@ class Results:
     >>> results.get("flow")  # with the equivalent `results["flow"]`
     """
 
+    callbacks = Callbacks()
+    filters = Filters(
+        {
+            "flow": lambda column: getattr(
+                column[0].outputs[column[1]], "visible", True
+            ),
+        }
+    )
+
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
         self._meta_results = {
@@ -47,6 +85,7 @@ class Results:
         }
         self._variables = {}
         self._model = model
+        self._dfs = {}
 
         for vardata in model.component_data_objects(Var):
             for variable in [vardata.parent_component()]:
@@ -101,6 +140,8 @@ class Results:
         self,
         key: str,
         default: any = None,
+        callbacks: Callbacks = None,
+        filters: Filters = None,
     ) -> pd.DataFrame | pd.Series:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
@@ -124,6 +165,20 @@ class Results:
         -------
         pd.DataFrame or pd.Series: Result including corresponding time axis
         """
+        # TODO: Refactor this hacky solution to a more sensible one.
+        # The original logic checked for `variable not in self._dfs` in order
+        # to run code extracting the `DataFrame` only for that case. Now that
+        # the `DataFrame` extraction code has grown quite a bit, keeping that
+        # logic would've meant a much to invasive change for the merge commit.
+        # So instead, reverse the logic to check for `variable in self._dfs`
+        # and skip the extraction code for that case by making sure that `key`
+        # will not be found.
+        # As this might be a bit hard to follow, refactor this code to be more
+        # straightforward.
+        variable = key
+        if variable in self._dfs:
+            default = self._dfs[variable]
+            key = object()
 
         if key == "variable_costs":
             rv = self._calc_variable_costs()
@@ -159,13 +214,22 @@ class Results:
                     rv.index = rv.index.get_level_values(-1)
         else:
             rv = default
-        return rv
+
+        callbacks = self.callbacks if callbacks is None else callbacks
+        callback = Callbacks(callbacks)[variable]
+        rv = callback(rv, self)
+
+        filters = self.filters if filters is None else filters
+        filter = Filters(filters)[variable]
+        columns = [column for column in rv.columns if filter(column)]
+
+        return rv.loc[:, columns]
 
     # --- BEGIN: The following code can be removed for versions >= v0.7 ---
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
         """Compatibility wrapper for Results.get."""
         warnings.warn(
-            "Function name 'Results.to_df(str)' is outdatet,"
+            "Function name 'Results.to_df(str)' is outdated,"
             + " use 'Results.get(str)' instead.",
             category=FutureWarning,
         )
@@ -324,4 +388,4 @@ class Results:
             return rv
 
     def __contains__(self, key: Hashable) -> bool:
-        return key in self._solver_results or key in self._variables
+        return key in self.keys()
