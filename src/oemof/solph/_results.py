@@ -23,7 +23,7 @@ import oemof.solph
 
 
 class Filters(dict):
-    def updating(
+    def updated(
         self, filters: dict[str, Callable[[object], bool]]
     ) -> "Filters":
         result = Filters(self)
