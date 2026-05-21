@@ -216,11 +216,11 @@ class Results:
             rv = default
 
         callbacks = self.callbacks if callbacks is None else callbacks
-        callback = callbacks[variable]
+        callback = Callbacks(callbacks)[variable]
         rv = callback(rv, self)
 
         filters = self.filters if filters is None else filters
-        filter = filters[variable]
+        filter = Filters(filters)[variable]
         columns = [column for column in rv.columns if filter(column)]
 
         return rv.loc[:, columns]
