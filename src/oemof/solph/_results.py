@@ -22,6 +22,19 @@ from pyomo.opt.results.container import ListContainer
 import oemof.solph
 
 
+class Callbacks(dict):
+    @staticmethod
+    def noop(df_or_s, results):
+        return df_or_s
+
+    def __getitem__(
+        self, variable: str
+    ) -> Callable[
+        [pd.DataFrame | pd.Series, "Results"], pd.DataFrame | pd.Series
+    ]:
+        return self.get(variable, self.noop)
+
+
 class Filters(dict):
     def updated(
         self, filters: dict[str, Callable[[object], bool]]
@@ -56,6 +69,7 @@ class Results:
     >>> results.get("flow")  # with the equivalent `results["flow"]`
     """
 
+    callbacks = Callbacks()
     filters = Filters(
         {
             "flow": lambda column: getattr(
@@ -126,6 +140,7 @@ class Results:
         self,
         key: str,
         default: any = None,
+        callbacks: Callbacks = None,
         filters: Filters = None,
     ) -> pd.DataFrame | pd.Series:
         # TODO:
@@ -199,6 +214,10 @@ class Results:
                     rv.index = rv.index.get_level_values(-1)
         else:
             rv = default
+
+        callbacks = self.callbacks if callbacks is None else callbacks
+        callback = callbacks[variable]
+        rv = callback(rv, self)
 
         filters = self.filters if filters is None else filters
         filter = filters[variable]
