@@ -24,6 +24,8 @@ Other changes
 
 * Interenally, sequences of 'None' are now avoided and a simple 'None'
   is used instead. We expect no effect for end users.
+* _FakeSequences with no defined length will now evaluate to have
+  ``len(fake_sequence) == 0``, as len is defined to return integers only.
 * Updated respective examples ant tutorials to use current TSAM API (v3).
 
 Contributors
