@@ -6,11 +6,11 @@ might be used to work with discretised temperatures in a heat pump.
 
 Code
 ----
-Download source code: :download:`result_object.py </../examples/subnetwork/subnetwork_example.py>`
+Download source code: :download:`result_object.py </../examples/subnetwork/layered_heat_pump_example.py>`
 
 .. dropdown:: Click to display code
 
-    .. literalinclude:: /../examples/subnetwork/subnetwork_example.py
+    .. literalinclude:: /../examples/subnetwork/layered_heat_pump_example.py
         :language: python
         :lines: 35-
 
