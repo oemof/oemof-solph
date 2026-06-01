@@ -153,7 +153,10 @@ class _FakeSequence:
             return f"[{self._value}, {self._value}, ..., {self._value}]"
 
     def __len__(self):
-        return self._length
+        if self._length is not None:
+            return self._length
+        else:
+            return 0
 
     def __iter__(self):
         return repeat(self._value, self._length)
@@ -173,8 +176,12 @@ class _FakeSequence:
     def to_numpy(self, length=None):
         if length is not None:
             return np.full(length, self._value)
+        elif self._length is not None:
+            return np.full(self._length, self._value)
         else:
-            return np.full(len(self), self._value)
+            raise ValueError(
+                "Length needs to be defined for casting to numpy."
+            )
 
     def __mul__(self, other):
         return sequence(self._value * other, length=self._length)

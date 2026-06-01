@@ -36,12 +36,11 @@ def test_fake_sequence():
 
         assert str(seq) == "[42.0, 42.0, ..., 42.0]"
 
-        with pytest.raises(TypeError):
+        with pytest.raises(ValueError, match="Length needs to be defined"):
             seq.to_numpy()
         assert (seq.to_numpy(length=5) == np.array(5 * [42])).all()
 
-        with pytest.raises(TypeError):
-            len(seq)
+        assert len(seq) == 0
 
         seq.size = 2
         assert seq.size == 2
