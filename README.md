@@ -11,7 +11,7 @@
 | src/oemof/solph/\_helpers.py                                |       26 |        2 |       10 |        0 |     94.44% |   118-120 |
 | src/oemof/solph/\_models.py                                 |      159 |        4 |       58 |        5 |     95.85% |184-\>189, 189-\>exit, 379-\>358, 383-\>358, 408, 511-514 |
 | src/oemof/solph/\_options.py                                |       84 |        0 |       30 |        0 |    100.00% |           |
-| src/oemof/solph/\_plumbing.py                               |       74 |        0 |       30 |        0 |    100.00% |           |
+| src/oemof/solph/\_plumbing.py                               |       78 |        0 |       34 |        0 |    100.00% |           |
 | src/oemof/solph/\_results.py                                |      116 |       23 |       56 |        0 |     75.00% |93, 205-263 |
 | src/oemof/solph/buses/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/buses/\_bus.py                              |       38 |        0 |       16 |        2 |     96.30% |53-\>55, 55-\>57 |
@@ -42,7 +42,7 @@
 | src/oemof/solph/helpers.py                                  |       20 |        1 |        8 |        2 |     89.29% |28, 37-\>39 |
 | src/oemof/solph/processing.py                               |      352 |       42 |      154 |       13 |     87.55% |59, 62-\>exit, 74, 108-110, 158-164, 198-203, 272, 324, 331, 438, 450-455, 499, 546, 672-686, 725-728, 795, 798-801, 898, 935 |
 | src/oemof/solph/views.py                                    |      132 |        3 |       50 |        5 |     95.60% |68, 91, 96, 296-\>299, 340-\>342 |
-| **TOTAL**                                                   | **3338** |  **488** | **1304** |  **121** | **83.05%** |           |
+| **TOTAL**                                                   | **3342** |  **488** | **1308** |  **121** | **83.08%** |           |
 
 
 ## Setup coverage badge
