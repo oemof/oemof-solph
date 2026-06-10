@@ -78,11 +78,12 @@ class Results:
         }
     )
 
-    def __init__(self, model: ConcreteModel):
+    def __init__(self, model: ConcreteModel, apply_postprocessing: bool=False):
         self._solver_results = model.solver_results
         self._meta_results = {
             "objective": model.objective(),
         }
+        self.apply_postprocessing = apply_postprocessing
         self._variables = {}
         self._model = model
         self._dfs = {}
@@ -214,6 +215,20 @@ class Results:
                     rv.index = rv.index.get_level_values(-1)
         else:
             rv = default
+
+        if isinstance(rv, pd.DataFrame):
+            # use Nodes as column labels
+            groups = self._model.es.groups
+            rv.rename(columns=groups, inplace=True)
+
+        if self.apply_postprocessing is True:
+            # filter depth 0 components, which have subnodes
+            subnetworks = [n for n in self._model.es.nodes if n.depth==0 and n.subnodes]
+            for sn in subnetworks:
+                sn.post_processing(self, key)
+            # filter depth 0 components, find out which ones are parents, go through their children,
+            # find out if they have a postprocessing method apply it, then apply the postprocessing method of the parent
+            # then the postprocessing method of the nodes
 
         callbacks = self.callbacks if callbacks is None else callbacks
         callback = Callbacks(callbacks)[variable]
