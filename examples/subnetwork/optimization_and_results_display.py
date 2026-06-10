@@ -185,7 +185,12 @@ class DSO(Node):
             outputs={internal_bus: Flow()},
             local_name="consumption_source",
         )
-
+    def post_processing(self, results, key):
+        super().post_processing()
+        # alter results.filters or results.callbacks here for the key
+        # this would require the possibility to append to a list of filters/callbacks
+        # otherwise the later post_processing would trump the previous ones
+        pass
 
 def main(optimize=True):
 
@@ -352,7 +357,7 @@ def main(optimize=True):
 
     logging.info("Extract the results energy system with the results.")
 
-    results = Results(energysystem_model)
+    results = Results(energysystem_model, apply_postprocessing=True)
 
     # *************************************************************************
     # ********** PART 2 - Processing the results ******************************
