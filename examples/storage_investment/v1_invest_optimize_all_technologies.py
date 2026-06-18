@@ -220,7 +220,7 @@ def main(optimize=True):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    om.solve(solver="scip", solve_kwargs={"tee": True})
 
     ##########################################################################
     # Check and plot the results
