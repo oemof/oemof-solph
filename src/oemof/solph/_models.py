@@ -554,7 +554,6 @@ class Model(po.ConcreteModel):
         cmdline_options,
     ):
         opt = SolverFactory(solver, solver_io=solver_io)
-        opt = SolverFactory(solver, **solver_io)
 
         # set command line options
         options = opt.options
