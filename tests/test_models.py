@@ -16,7 +16,6 @@ import pytest
 from pyomo.opt.results import SolverResults
 
 from oemof import solph
-from oemof.solph._results import Results
 
 
 # ---------------------------------------------------------------------------
@@ -117,7 +116,7 @@ def _make_mip_es():
 def test_feasible_returns_results(solver):
     """A feasible model must return a solph.Results object for any solver."""
     result = solph.Model(_make_feasible_es()).solve(solver=solver)
-    assert isinstance(result, Results)
+    assert isinstance(result, solph.Results)
 
 
 @pytest.mark.parametrize("solver", ["cbc", "highs"])
