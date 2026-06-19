@@ -437,17 +437,13 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    def solve_highs(
+    def _solve_highs(
         self,
-        solver_io="lp",
-        allow_nonoptimal=False,
-        solve_kwargs=None,
-        cmdline_options=None,
+        solver_io,
+        allow_nonoptimal,
+        solve_kwargs,
+        cmdline_options,
     ):
-        if solve_kwargs is None:
-            solve_kwargs = {}
-        if cmdline_options is None:
-            cmdline_options = {}
 
         opt = appsi.solvers.Highs()
         opt.config.load_solution = False
