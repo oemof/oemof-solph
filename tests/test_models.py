@@ -25,7 +25,7 @@ from oemof.solph._results import Results
 
 
 def _make_infeasible_es():
-    """Source capacity (4) < sink demand (5) → infeasible."""
+    """Source capacity (4) < sink demand (5) -> infeasible."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -43,7 +43,7 @@ def _make_infeasible_es():
 
 
 def _make_unbounded_es():
-    """Negative variable cost with no upper bound → unbounded."""
+    """Negative variable cost with no upper bound -> unbounded."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -81,7 +81,7 @@ def _make_feasible_es():
 
 
 def _make_mip_es():
-    """Same as feasible LP but with a NonConvex flow → MIP."""
+    """Same as feasible LP but with a NonConvex flow -> MIP."""
     es = solph.EnergySystem(timeindex=[0, 1, 2], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
