@@ -15,7 +15,10 @@ SPDX-License-Identifier: MIT
 
 """
 
+import contextlib
+import io
 import logging
+import sys
 import warnings
 from logging import getLogger
 
@@ -36,6 +39,47 @@ from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 from ._results import Results
+
+
+@contextlib.contextmanager
+def _ensure_std_streams():
+    """Ensure sys.stdout/stderr and fd 2 are valid for pyomo's appsi HiGHS.
+
+    In console-less Windows environments (pythonw.exe, .pyw scripts, some IDEs)
+    sys.stdout and sys.stderr are None and fd 2 may point to an invalid Windows
+    handle. pyomo's appsi.Highs.solve() calls stream.flush() and
+    os.fdopen(os.dup(2), 'w') unconditionally, so both must be valid.
+    """
+    import os as _os
+
+    orig_stdout, orig_stderr = sys.stdout, sys.stderr
+    if sys.stdout is None:
+        sys.stdout = io.StringIO()
+    if sys.stderr is None:
+        sys.stderr = io.StringIO()
+
+    # Also fix fd 2 if its underlying OS handle is not writable.
+    # pyomo calls os.fdopen(os.dup(2), 'w') regardless of stream_solver.
+    fd2_fixed = False
+    try:
+        duped = _os.dup(2)
+        try:
+            _os.fdopen(duped, "w", closefd=False)
+            _os.close(duped)
+        except OSError:
+            _os.close(duped)
+            raise
+    except OSError:
+        null_fd = _os.open(_os.devnull, _os.O_WRONLY)
+        _os.dup2(null_fd, 2)
+        _os.close(null_fd)
+        fd2_fixed = True
+
+    try:
+        yield
+    finally:
+        sys.stdout, sys.stderr = orig_stdout, orig_stderr
+        # fd 2 was invalid before; leaving it pointing to devnull is fine.
 
 
 class LoggingError(BaseException):
@@ -453,7 +497,8 @@ class Model(po.ConcreteModel):
 
         opt.highs_options = cmdline_options
 
-        appsi_results = opt.solve(self)
+        with _ensure_std_streams():
+            appsi_results = opt.solve(self)
         tc = appsi_results.termination_condition
 
         solver_results_dict = {
