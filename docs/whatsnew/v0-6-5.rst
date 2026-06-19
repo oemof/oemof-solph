@@ -8,6 +8,13 @@ API changes
 New features
 ############
 
+* HiGHS is now a fully supported solver. ``model.solve(solver="highs")``
+  returns a ``solph.Results`` object compatible with the full results API,
+  including ``receive_duals()`` for dual variables and reduced costs,
+  ``cmdline_options`` to pass native HiGHS options, and
+  ``solve_kwargs={"tee": True}`` for solver output streaming.
+  Requires the ``highspy`` package. To check whether HiGHS is available
+  in your installation, run ``oemof_installation_test``.
 
 Documentation
 #############
@@ -22,11 +29,13 @@ Bug fixes
 Other changes
 #############
 
-
 Contributors
 ############
 
+* Francesco Witte
 * Jelmer de Wit
+* Patrik Schönfeldt
+* Uwe Krien
 
 
 Acknowledgements
