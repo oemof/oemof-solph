@@ -534,13 +534,29 @@ class Model(po.ConcreteModel):
         if cmdline_options is None:
             cmdline_options = {}
         if solver == "highs":
-            return self.solve_highs(
+            return self._solve_highs(
+                solver_io=solver_io,
+                allow_nonoptimal=allow_nonoptimal,
+                solve_kwargs=solve_kwargs,
+                cmdline_options=cmdline_options,
+            )
+        else:
+            return self._solve_traditional(
+                solver=solver,
                 solver_io=solver_io,
                 allow_nonoptimal=allow_nonoptimal,
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
             )
 
+    def _solve_traditional(
+        self,
+        solver,
+        solver_io,
+        allow_nonoptimal,
+        solve_kwargs,
+        cmdline_options,
+    ):
         if "appsi" in solver:
             solver_io = {}
         else:
