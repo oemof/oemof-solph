@@ -95,7 +95,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].negative_gradient_limit[0] is not None
+                if g[2].negative_gradient_limit is not None
             ]
         )
 
@@ -103,7 +103,7 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[
                 (g[0], g[1])
                 for g in group
-                if g[2].positive_gradient_limit[0] is not None
+                if g[2].positive_gradient_limit is not None
             ]
         )
 

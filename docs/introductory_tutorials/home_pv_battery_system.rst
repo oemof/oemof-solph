@@ -39,7 +39,7 @@ The full dataset (which has 10-minute resolution) is described in the paper
 `Dataset on electrical single-family house and heat pump load profiles in
 Germany <https://doi.org/10.1038/s41597-022-01156-1>`_.
 The PV time series has been created using
-`PVGIS <https://re.jrc.ec.europa.eu/pvg_tools/en/>`_.
+`PVGIS <https://doi.org/10.1016/j.solener.2012.03.006>`_.
 
 First, let us import all needed packages:
 ``os`` is handy to for file handling,
@@ -160,8 +160,9 @@ To no surprise the numbers are the same:
     "Total annual costs",                  "€", 629.90
 
 To have a look at the flows from and to the "electricity" bus.
-The function ``solph.views.node(...)`` can help.
-It compiles the respective ``DataFrame`` so that it can be directly used.
+You can use ``DataFrame.xs(...)``. For example
+``flows_from = flows.xs("electricity", axis=1, level=0, drop_level=False)``,
+and with `level=1` for flows entering the bus.
 
 .. figure:: /./_files/tutorial_home-pv/home_pv_result-1_light.svg
     :align: center

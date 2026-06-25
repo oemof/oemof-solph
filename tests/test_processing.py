@@ -177,21 +177,20 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
+                    "fixed_losses_absolute": 0,
+                    "fixed_losses_relative": 0,
+                    "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "investment_age": 0,
-                    "investment_existing": 0,
-                    "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,
+                    "investment_existing": 0,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
-                    "fixed_losses_absolute": 0,
-                    "fixed_losses_relative": 0,
-                    "inflow_conversion_factor": 1,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
@@ -216,21 +215,20 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
+                    "fixed_losses_absolute": 0,
+                    "fixed_losses_relative": 0,
+                    "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
+                    "invest_relation_input_capacity": 1 / 6,
+                    "invest_relation_output_capacity": 1 / 6,
                     "investment_age": 0,
-                    "investment_existing": 0,
-                    "investment_nonconvex": False,
                     "investment_ep_costs": 0.4,
+                    "investment_existing": 0,
                     "investment_maximum": float("inf"),
                     "investment_minimum": 0,
                     "investment_nonconvex": False,
                     "investment_offset": 0,
                     "label": "storage",
-                    "fixed_losses_absolute": 0,
-                    "fixed_losses_relative": 0,
-                    "inflow_conversion_factor": 1,
-                    "invest_relation_input_capacity": 1 / 6,
-                    "invest_relation_output_capacity": 1 / 6,
                     "loss_rate": 0,
                     "max_storage_level": 1,
                     "min_storage_level": 0,
@@ -280,6 +278,19 @@ class TestParameterResult:
         assert_frame_equal(
             param_results[(diesel, None)]["sequences"], pandas.DataFrame()
         )
+
+    def test_model_results(self):
+        results_processing = processing.results(self.model_cbc)
+        with pytest.warns(
+            FutureWarning,
+            match=r"Model.results\(\) is deprecated.",
+        ):
+            results_model = self.model_cbc.results()
+
+        # We just compare the keys as the nested values contain Series,
+        # that do not define (global) equality. As the function is deprecated
+        # anyway, this should be okay.
+        assert results_processing.keys() == results_model.keys()
 
     def test_parameter_with_node_view(self):
         param_results = processing.parameter_as_dict(

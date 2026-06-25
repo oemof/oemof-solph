@@ -1,15 +1,20 @@
 # %%[sec_1_start]
+import os
+
 import pandas as pd
 from helpers import LCOH
 
-data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
+file_path = os.path.dirname(__file__)
+filename = os.path.join(file_path, "input_data.csv")
+
+data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
 # %%[sec_1_end]
 
 # %%[sec_2_start]
 import oemof.solph as solph
 
 district_heating_system = solph.EnergySystem(
-    timeindex=data.index, infer_last_interval=False
+    timeindex=data.index, infer_last_interval=True,
 )
 # %%[sec_2_end]
 
@@ -56,18 +61,14 @@ district_heating_system.add(gas_boiler)
 
 # %%[sec_6_start]
 model = solph.Model(district_heating_system)
-model.solve(solver="cbc", solve_kwargs={"tee": True})
+results = model.solve(solver="cbc", solve_kwargs={"tee": True})
+
 # %%[sec_6_end]
-
-# %%[sec_7_start]
-results = solph.processing.results(model)
-
-data_gas_bus = solph.views.node(results, "gas network")["sequences"]
-data_heat_bus = solph.views.node(results, "heat network")["sequences"]
-# %%[sec_7_end]
 
 
 # %%[sec_8_start]
+flows = results["flow"]
+
 import matplotlib.pyplot as plt
 
 # plt.style.use('dark_background')
@@ -75,8 +76,8 @@ import matplotlib.pyplot as plt
 fig, ax = plt.subplots(figsize=[10, 6])
 
 ax.bar(
-    data_heat_bus.index,
-    data_heat_bus[(("gas boiler", "heat network"), "flow")],
+    flows.index,
+    flows[("gas boiler", "heat network")],
     label="gas boiler",
     color="#EC6707",
 )
@@ -97,14 +98,12 @@ var_cost_gas_boiler = 1.10
 
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
-    var_cost_gas_boiler
-    * data_heat_bus[(("gas boiler", "heat network"), "flow")].sum()
+    var_cost_gas_boiler * flows[("gas boiler", "heat network")].sum()
     + (
-        data["gas price"]
-        * data_gas_bus[(("gas network", "gas boiler"), "flow")]
+        data["gas price"] * flows[("gas network", "gas boiler")]
     ).sum()
 )
-heat_produced = data_heat_bus[(("heat network", "heat sink"), "flow")].sum()
+heat_produced = flows[("heat network", "heat sink")].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f"LCOH: {lcoh:.2f} €/MWh")

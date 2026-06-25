@@ -15,7 +15,6 @@ import matplotlib.pyplot as plt
 import networkx as nx
 import numpy as np
 import pandas as pd
-from oemof.network.graph import create_nx_graph
 
 from oemof import solph
 
@@ -120,32 +119,29 @@ energy_system.add(battery)
 
 # %%[graph_plotting]
 plt.figure()
-graph = create_nx_graph(energy_system)
-nx.drawing.nx_pydot.write_dot(graph, "home_pv_graph_6.dot")
+graph = energy_system.to_networkx()
 nx.draw(graph, with_labels=True, font_size=8)
 # %%[model_optimisation]
 model = solph.Model(energy_system)
 
-model.solve(solver="cbc", solve_kwargs={"tee": True})
-results = solph.processing.results(model)
-meta_results = solph.processing.meta_results(model)
+results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 
 # %%[results]
 
-pv_size = results[(pv_panels, dc_bus)]["scalars"]["invest"]
+pv_size = results["invest"][(pv_panels, dc_bus)][0]
 pv_annuity = pv_epc * pv_size
 
-inverter_size = results[(dc_bus, inverter)]["scalars"]["invest"]
+inverter_size = results["invest"][(dc_bus, inverter)][0]
 inverter_annuity = inverter_epc * inverter_size
 
-battery_size = results[(battery, None)]["scalars"]["invest"]
+battery_size = results["invest"][battery][0]
 battery_annuity = battery_epc * battery_size
 
-annual_grid_supply = results[(grid, ac_bus)]["sequences"]["flow"].sum()
+annual_grid_supply = results["flow"][(grid, ac_bus)].sum()
 el_costs = 0.3 * annual_grid_supply
-el_revenue = 0.1 * results[(ac_bus, grid)]["sequences"]["flow"].sum()
+el_revenue = 0.1 * results["flow"][(ac_bus, grid)].sum()
 
-tce = meta_results["objective"]
+tce = results["objective"]
 
 print(f"The optimal PV size is {pv_size:.2f} kW.")
 print(f"The optimal inverter size is {inverter_size:.2f} kW.")
@@ -165,9 +161,9 @@ print(
 )
 
 
-electricity_flows = solph.views.node(results, "electricity")["sequences"]
+flows = results["flow"]
 
-baseline = np.zeros(len(electricity_flows))
+baseline = np.zeros(len(flows))
 
 plt.figure()
 
@@ -177,55 +173,54 @@ if mode == "dark":
     plt.style.use("dark_background")
 
 plt.fill_between(
-    electricity_flows.index,
+    flows.index,
     baseline,
-    baseline + electricity_flows[(("grid", "electricity"), "flow")],
+    baseline + flows[("grid", "electricity")],
     step="pre",
     label="Grid supply",
 )
 
-baseline += electricity_flows[(("grid", "electricity"), "flow")]
+baseline += flows[("grid", "electricity")]
 
 plt.fill_between(
-    electricity_flows.index,
+    flows.index,
     baseline,
-    baseline + electricity_flows[(("inverter", "electricity"), "flow")],
+    baseline + flows[("inverter", "electricity")],
     step="pre",
     label="PV supply",
 )
 
-baseline += electricity_flows[(("inverter", "electricity"), "flow")]
+baseline += flows[("inverter", "electricity")]
 
 plt.fill_between(
-    electricity_flows.index,
+    flows.index,
     baseline,
-    baseline + electricity_flows[(("Battery", "electricity"), "flow")],
+    baseline + flows[("Battery", "electricity")],
     step="pre",
     label="Battery supply",
 )
 
 plt.step(
-    electricity_flows.index,
-    electricity_flows[(("electricity", "demand"), "flow")],
+    flows.index,
+    flows[("electricity", "demand")],
     "-",
     color="darkgrey",
     label="Electricity demand",
 )
 
 plt.step(
-    electricity_flows.index,
-    electricity_flows[(("electricity", "demand"), "flow")]
-    + electricity_flows[(("electricity", "Battery"), "flow")],
+    flows.index,
+    flows[("electricity", "demand")] + flows[("electricity", "Battery")],
     "--",
     color="darkgrey",
     label="Battery charging",
 )
 
 plt.step(
-    electricity_flows.index,
-    electricity_flows[(("electricity", "demand"), "flow")]
-    + electricity_flows[(("electricity", "Battery"), "flow")]
-    + electricity_flows[(("electricity", "grid"), "flow")],
+    flows.index,
+    flows[("electricity", "demand")]
+    + flows[("electricity", "Battery")]
+    + flows[("electricity", "grid")],
     ":",
     color="darkgrey",
     label="Feed-In",
@@ -236,6 +231,6 @@ plt.ylabel("Power (kW)")
 plt.xlim(pd.Timestamp("2020-02-21 00:00"), pd.Timestamp("2020-02-28 00:00"))
 plt.gcf().autofmt_xdate()
 
-plt.savefig(f"home_pv_result-4_{mode}.svg")
+plt.savefig(f"home_pv_result-6_{mode}.svg")
 
 plt.show()

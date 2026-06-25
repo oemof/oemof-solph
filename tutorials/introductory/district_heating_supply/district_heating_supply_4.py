@@ -1,13 +1,19 @@
+import os
+
 import pandas as pd
 from helpers import LCOH
 from helpers import epc
 
 import oemof.solph as solph
 
-data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
+file_path = os.path.dirname(__file__)
+filename = os.path.join(file_path, "input_data.csv")
+
+data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
 
 district_heating_system = solph.EnergySystem(
-    timeindex=data.index, infer_last_interval=False
+    timeindex=data.index,
+    infer_last_interval=True,
 )
 
 heat_bus = solph.Bus(label="heat network")
@@ -125,7 +131,7 @@ district_heating_system.add(heat_pump)
 
 # solve model
 model = solph.Model(district_heating_system)
-model.solve(
+results = model.solve(
     solver="cbc",
     solve_kwargs={"tee": True},
     cmdline_options={"ratio": 0.01},
@@ -133,7 +139,8 @@ model.solve(
 )
 
 # results
-results = solph.processing.results(model)
+
+flows = results["flow"]
 
 data_gas_bus = solph.views.node(results, "gas network")["sequences"]
 data_heat_bus = solph.views.node(results, "heat network")["sequences"]

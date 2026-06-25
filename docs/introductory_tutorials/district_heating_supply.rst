@@ -133,7 +133,7 @@ As our system is complete for this step, its time to start the unit commitment
 optimization. For that, we first have to create a :py:class:`solph.Model` instance
 from our ``district_heating_system``. Then we can use its :py:func:`solve` method
 to run the optimization. We decide to use the open source solver
-`CBC <https://projects.coin-or.org/Cbc>`_ and add the additional :py:attr:`solve_kwargs`
+`CBC <https://coin-or.github.io/Cbc/>`_ and add the additional :py:attr:`solve_kwargs`
 parameter ``'tee'`` to ``True``, in order to get a more verbose solver logging
 output in the console.
 
@@ -142,18 +142,7 @@ output in the console.
     :start-after: [sec_6_start]
     :end-before: [sec_6_end]
 
-To receive the results, we pass the ``model`` into the ``results`` method
-of the ``solph.processing`` submodule. We then use the ``node`` method of the
-``solph.views`` submodule to access the results of the two buses ``'gas network'``
-and ``'heat network'``. Specifically, we need the optimized unit commitment time
-series, so we access the ``'sequences'`` key.
-
-.. literalinclude:: /../tutorials/introductory/district_heating_supply/district_heating_supply_1.py
-    :language: python
-    :start-after: [sec_7_start]
-    :end-before: [sec_7_end]
-
-Now, let's have a look at those results. We will create a simple bar plot of
+Now, let's have a look at the results. We will create a simple bar plot of
 the gas boilers unit commitment. To achieve this, we have to import a plotting
 library like ``matplotlib``. We use its ``subplots`` method to create a figure
 ``fig`` and an axes ``ax`` and set the plots size to be ten by six inches.
@@ -161,9 +150,9 @@ Then, we pass the index of `data_heat_bus` and the column containing the gas
 boiler's heat production into the axes ``bar`` method.
 
 .. note::
-    In ``oemof.solph``, indexing works by passing a tuple containing two items:
-    at first, another tuple containing the string labels of the two nodes of
-    interest and second, the the ``oemof.solph`` variable name to be extracted.
+    In ``oemof.solph.Results``, indexing works by passing the ``oemof.solph``
+    variable name to be extracted.
+    You will get a ``DataFrame`` that uses Nodes as specifier.
     In case of the example below, we are looking for the ``'flow'`` between the
     ``'gas boiler'`` and ``'heat network'`` nodes.
 

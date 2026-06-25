@@ -46,11 +46,11 @@ Download source code: :download:`example_generic_invest.py </../examples/generic
 
 Installation requirements
 -------------------------
-This example requires oemof.solph (at least v0.5.0), install by:
+This example requires oemof.solph (at least v0.6.4), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.5
+    pip install oemof.solph>=0.6.4
 
 License
 -------
@@ -84,53 +84,53 @@ def main(optimize=True):
     epc_invest = 500
 
     # commodity a
-    bus_a_0 = solph.Bus(label="bus_a_0")
-    bus_a_1 = solph.Bus(label="bus_a_1")
-    es.add(bus_a_0, bus_a_1)
+    bus_a0 = solph.Bus(label="bus_a_0")
+    bus_a1 = solph.Bus(label="bus_a_1")
+    es.add(bus_a0, bus_a1)
 
     es.add(
         solph.components.Source(
             label="source_a_0",
-            outputs={bus_a_0: solph.Flow(variable_costs=c_0)},
+            outputs={bus_a0: solph.Flow(variable_costs=c_0)},
         )
     )
 
     es.add(
         solph.components.Source(
             label="source_a_1",
-            outputs={bus_a_1: solph.Flow(variable_costs=c_1)},
+            outputs={bus_a1: solph.Flow(variable_costs=c_1)},
         )
     )
 
     es.add(
         solph.components.Sink(
             label="demand_a",
-            inputs={bus_a_1: solph.Flow(fix=data, nominal_capacity=1)},
+            inputs={bus_a1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
     # commodity b
-    bus_b_0 = solph.Bus(label="bus_b_0")
-    bus_b_1 = solph.Bus(label="bus_b_1")
-    es.add(bus_b_0, bus_b_1)
+    bus_b0 = solph.Bus(label="bus_b_0")
+    bus_b1 = solph.Bus(label="bus_b_1")
+    es.add(bus_b0, bus_b1)
     es.add(
         solph.components.Source(
             label="source_b_0",
-            outputs={bus_b_0: solph.Flow(variable_costs=c_0)},
+            outputs={bus_b0: solph.Flow(variable_costs=c_0)},
         )
     )
 
     es.add(
         solph.components.Source(
             label="source_b_1",
-            outputs={bus_b_1: solph.Flow(variable_costs=c_1)},
+            outputs={bus_b1: solph.Flow(variable_costs=c_1)},
         )
     )
 
     es.add(
         solph.components.Sink(
             label="demand_b",
-            inputs={bus_b_1: solph.Flow(fix=data, nominal_capacity=1)},
+            inputs={bus_b1: solph.Flow(fix=data, nominal_capacity=1)},
         )
     )
 
@@ -138,16 +138,16 @@ def main(optimize=True):
     es.add(
         solph.components.Converter(
             label="trafo_a",
-            inputs={bus_a_0: solph.Flow()},
+            inputs={bus_a0: solph.Flow()},
             outputs={
-                bus_a_1: solph.Flow(
+                bus_a1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_properties={"space": 2},
                     ),
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
+            conversion_factors={bus_a1: 0.8},
         )
     )
 
@@ -155,16 +155,16 @@ def main(optimize=True):
     es.add(
         solph.components.Converter(
             label="trafo_b",
-            inputs={bus_b_0: solph.Flow()},
+            inputs={bus_b0: solph.Flow()},
             outputs={
-                bus_b_1: solph.Flow(
+                bus_b1: solph.Flow(
                     nominal_capacity=solph.Investment(
                         ep_costs=epc_invest,
                         custom_properties={"space": 1},
                     ),
                 )
             },
-            conversion_factors={bus_a_1: 0.8},
+            conversion_factors={bus_b1: 0.8},
         )
     )
 
@@ -187,32 +187,48 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    # create result object
-    results = solph.processing.results(om)
+    # get flow DataFrame
+    flows = results["flow"]
 
-    bus1 = solph.views.node(results, "bus_a_1")["sequences"]
-    bus2 = solph.views.node(results, "bus_b_1")["sequences"]
+    # use masking to filter for flows from/to a specific Node
+    mask_a1 = (
+        flows.columns.to_frame(index=False).eq(bus_a1).any(axis=1).to_numpy()
+    )
+
+    # The Node can also be denoted by its label.
+    mask_b2 = (
+        flows.columns.to_frame(index=False)
+        .eq("bus_b_1")
+        .any(axis=1)
+        .to_numpy()
+    )
+
+    flows_a1 = flows.loc[:, mask_a1]
+    flows_b1 = flows.loc[:, mask_b2]
 
     # plot the time series (sequences) of a specific component/bus
     if plt is not None:
-        bus1.plot(kind="line", drawstyle="steps-mid")
+        flows_a1.plot(kind="line", drawstyle="steps-mid")
         plt.legend()
         plt.show()
-        bus2.plot(kind="line", drawstyle="steps-mid")
+        flows_b1.plot(kind="line", drawstyle="steps-mid")
         plt.legend()
         plt.show()
 
     space_used = om.invest_limit_space()
     print("Space value: ", space_used)
+
+    # You have to select slice 0 because in other models,
+    # there might be more investment times.
     print(
         "Investment trafo_a: ",
-        solph.views.node(results, "trafo_a")["scalars"][0],
+        results["invest"][("trafo_a", "bus_a_1")][0],
     )
     print(
         "Investment trafo_b: ",
-        solph.views.node(results, "trafo_b")["scalars"][0],
+        results["invest"][("trafo_b", "bus_b_1")][0],
     )
 
 

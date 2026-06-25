@@ -338,9 +338,9 @@ The final energy system graph now looks like this:
 
 Looking at the results:
 
-- The charging and discharing within the beginning does not accure anymore
+- The charging and discharing within the beginning does not occure anymore
 - The battery will be loaded for free within the working period
-- There is a discharging at home at the evening to save money
+- There is a discharging at home in the evening to save money
 
 .. figure:: /./_files/tutorial_ev-charging/driving_bidirectional_constant_costs.svg
     :align: center
@@ -372,7 +372,7 @@ Step 5: Variable electricity prices
 ------------------------------------
 
 Within the last step we want to regard dynamic prices for the the charging and discharging at home.
-So the optimization is going to load when the prices are are load and discharge if the prices are high.
+So the optimization is going to load when the prices are load and discharge if the prices are high.
 Assuming the following prices:
 
 - Before 6 a.m.: 5 ct/kWh

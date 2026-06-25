@@ -213,8 +213,13 @@ class EnergySystem(es.EnergySystem):
         super().__init__(
             groupings=groupings,
         )
+
         self.timeindex = timeindex
         self.timeincrement = timeincrement
+
+        if timeindex is None:
+            self.transitional_single_period = None
+            return
 
         if investment_times is None:
             investment_times = [timeindex[0]] + [timeindex[-1]]

@@ -27,7 +27,8 @@ from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._helpers import warn_if_missing_attribute
-from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import Apply
+from oemof.solph._plumbing import SequenceDict
 
 
 class Converter(Node):
@@ -91,6 +92,8 @@ class Converter(Node):
      * :py:class:`~oemof.solph.components._converter.ConverterBlock`
     """
 
+    conversion_factors = Apply(SequenceDict)
+
     def __init__(
         self,
         label=None,
@@ -122,16 +125,14 @@ class Converter(Node):
         if conversion_factors is None:
             conversion_factors = {}
 
-        self.conversion_factors = {
-            k: sequence(v) for k, v in conversion_factors.items()
-        }
+        self.conversion_factors = {k: v for k, v in conversion_factors.items()}
 
         missing_conversion_factor_keys = (
             set(self.outputs) | set(self.inputs)
         ) - set(self.conversion_factors)
 
         for cf in missing_conversion_factor_keys:
-            self.conversion_factors[cf] = sequence(1)
+            self.conversion_factors[cf] = 1
 
     def constraint_group(self):
         return ConverterBlock

@@ -1,0 +1,51 @@
+v0.6.5
+------
+
+API changes
+###########
+
+* Removed the wrapper that still allowed initialising the `OffsetConverter`
+  using a tuple named `coefficient`. (This breaks compatibility with solph
+  API before v0.5.3 from June 25th, 2024.)
+
+New features
+############
+
+
+Documentation
+#############
+
+
+Bug fixes
+#########
+
+* Fix TSAM result disaggregation for ``NonConvex`` and ``InvestNonConvex``
+  flows, which silently dropped per-timestep variables from the output.
+* Fix inconsistency in the assignment of sequences using scalar variables;
+  e.g. `flow = Flow(variable_costs=5)` worked, but `flow.variable_costs = 5`
+  failed when constructing the model.
+* Name the TSA-disaggregated storage SOC result ``storage_content`` to match
+  non-clustered ``GenericStorage`` results, so result readers (e.g. ``views``)
+  find it by the same key regardless of clustering.
+
+Other changes
+#############
+
+* Internally, sequences of 'None' are now avoided and a simple 'None'
+  is used instead. We expect no effect for end users.
+* _FakeSequences can no longer have a defined length. It has "every length"
+  by convention. Thus, it can now be reliably cast; not to an array but to
+  a scalar float. We expect no effect for end users.
+* Updated respective examples and tutorials to use current TSAM API (v3).
+
+Contributors
+############
+
+* Jelmer de Wit
+* Patrik Schönfeldt
+* Pierre Francois Bachibouzouk
+* Stephan Günther
+* Diana Maldonado Castro
+
+Acknowledgements
+################

@@ -86,7 +86,7 @@ import pprint as pp
 import warnings
 
 import pandas as pd
-import tsam.timeseriesaggregation as tsam
+import tsam
 from oemof.tools import economics
 from oemof.tools import logger
 
@@ -131,30 +131,28 @@ def main(optimize=True):
     typical_periods = 40
     hours_per_period = 24
 
-    aggregation1 = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[:8760],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="k_means",
-        sortValues=False,
-        rescaleClusterPeriods=False,
-        extremePeriodMethod="replace_cluster_center",
-        addPeakMin=["wind", "pv"],
-        representationMethod="durationRepresentation",
+    aggregation1 = tsam.aggregate(
+        data=data.iloc[:8760],
+        n_clusters=typical_periods,
+        period_duration=hours_per_period,
+        cluster=tsam.ClusterConfig(method="kmeans"),
+        extremes=tsam.ExtremeConfig(
+            method="replace",
+            min_value=["wind", "pv"],
+        ),
     )
-    aggregation1.createTypicalPeriods()
-    aggregation2 = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[8760:],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="hierarchical",
-        sortValues=False,
-        rescaleClusterPeriods=False,
-        extremePeriodMethod="replace_cluster_center",
-        addPeakMin=["wind", "pv"],
-        representationMethod="durationRepresentation",
+    aggregation2 = tsam.aggregate(
+        data=data.iloc[:8760],
+        n_clusters=typical_periods,
+        period_duration=hours_per_period,
+        cluster=tsam.ClusterConfig(method="hierarchical"),
+        extremes=tsam.ExtremeConfig(
+            method="replace",
+            min_value=["wind", "pv"],
+        ),
     )
-    aggregation2.createTypicalPeriods()
+    representatives1 = aggregation1.cluster_representatives
+    representatives2 = aggregation2.cluster_representatives
 
     t1_agg = pd.date_range(
         "2022-01-01", periods=typical_periods * hours_per_period, freq="h"
@@ -170,14 +168,14 @@ def main(optimize=True):
         periods=[t1_agg, t2_agg],
         tsa_parameters=[
             {
-                "timesteps_per_period": aggregation1.hoursPerPeriod,
-                "order": aggregation1.clusterOrder,
-                "timeindex": aggregation1.timeIndex,
+                "timesteps_per_period": aggregation1.n_timesteps_per_period,
+                "order": aggregation1.cluster_assignments,
+                "timeindex": aggregation1.cluster_representatives.index,
             },
             {
-                "timesteps_per_period": aggregation2.hoursPerPeriod,
-                "order": aggregation2.clusterOrder,
-                "timeindex": aggregation2.timeIndex,
+                "timesteps_per_period": aggregation2.n_timesteps_per_period,
+                "order": aggregation2.cluster_assignments,
+                "timeindex": aggregation2.cluster_representatives.index,
             },
         ],
         infer_last_interval=False,
@@ -216,8 +214,8 @@ def main(optimize=True):
 
     wind_profile = pd.concat(
         [
-            aggregation1.typicalPeriods["wind"],
-            aggregation2.typicalPeriods["wind"],
+            representatives1["wind"],
+            representatives2["wind"],
         ],
         ignore_index=True,
     )
@@ -237,7 +235,7 @@ def main(optimize=True):
     )
 
     pv_profile = pd.concat(
-        [aggregation1.typicalPeriods["pv"], aggregation2.typicalPeriods["pv"]],
+        [representatives1["pv"], representatives2["pv"]],
         ignore_index=True,
     )
     pv_profile.iloc[-24:] = 0
@@ -249,8 +247,8 @@ def main(optimize=True):
             bel: solph.Flow(
                 fix=pd.concat(
                     [
-                        aggregation1.typicalPeriods["pv"],
-                        aggregation2.typicalPeriods["pv"],
+                        representatives1["pv"],
+                        representatives2["pv"],
                     ],
                     ignore_index=True,
                 ),
@@ -268,8 +266,8 @@ def main(optimize=True):
             bel: solph.Flow(
                 fix=pd.concat(
                     [
-                        aggregation1.typicalPeriods["demand_el"],
-                        aggregation2.typicalPeriods["demand_el"],
+                        representatives1["demand_el"],
+                        representatives2["demand_el"],
                     ],
                     ignore_index=True,
                 ),

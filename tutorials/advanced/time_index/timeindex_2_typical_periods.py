@@ -2,7 +2,7 @@ import warnings
 from datetime import datetime
 
 import pandas as pd
-import tsam.timeseriesaggregation as tsam
+import tsam
 from input_data import discounted_average_price
 from input_data import energy_prices
 from input_data import get_parameter
@@ -79,31 +79,30 @@ def run_for_typical_periods(
     """
     # %%[tsam_aggregation_start]
     # --- TSAM clustering ---
-    aggregation = tsam.TimeSeriesAggregation(
-        timeSeries=data.iloc[:8760],
-        noTypicalPeriods=typical_periods,
-        hoursPerPeriod=hours_per_period,
-        clusterMethod="k_means",
-        sortValues=False,
-        rescaleClusterPeriods=False,
+    aggregation = tsam.aggregate(
+        data=data.iloc[:8760],
+        n_clusters=typical_periods,
+        period_duration=hours_per_period,
     )
-    aggregation.createTypicalPeriods()
+    representatives = aggregation.cluster_representatives
     # %%[tsam_aggregation_end]
     time_series = {
-        "cop": aggregation.typicalPeriods["cop"],
-        "electricity demand (kW)": aggregation.typicalPeriods[
+        "cop": representatives["cop"],
+        "electricity demand (kW)": representatives[
             "electricity demand (kW)"
         ],
-        "heat demand (kW)": aggregation.typicalPeriods["heat demand (kW)"],
-        "PV (kW/kWp)": aggregation.typicalPeriods["PV (kW/kWp)"],
-        "Electricity for Car Charging_HH1": aggregation.typicalPeriods[
+        "heat demand (kW)": representatives[
+            "heat demand (kW)"
+        ],
+        "PV (kW/kWp)": representatives["PV (kW/kWp)"],
+        "Electricity for Car Charging_HH1": representatives[
             "Electricity for Car Charging_HH1"
         ],
     }
     # %%[ti_index_and_energy_system_start]
     tindex_agg = pd.date_range(
         "2022-01-01",
-        periods=len(aggregation.clusterPeriodIdx) * hours_per_period,
+        periods=typical_periods * hours_per_period,
         freq="h",
     )
 
@@ -113,37 +112,27 @@ def run_for_typical_periods(
         periods=[tindex_agg],
         tsa_parameters=[
             {
-                "timesteps_per_period": aggregation.hoursPerPeriod,
-                "order": aggregation.clusterOrder,
-                "timeindex": aggregation.timeIndex,
+                "timesteps_per_period": aggregation.n_timesteps_per_period,
+                "order": aggregation.cluster_assignments,
+                "timeindex": aggregation.cluster_representatives.index,
             }
         ],
         infer_last_interval=False,
     )
     # %%[ti_index_and_energy_system_end]
-    m = populate_and_solve_energy_system(
+    results = populate_and_solve_energy_system(
         es=es,
         time_series=time_series,
         investments=investment_objects,
         variable_costs=variable_costs,
     )
 
-    results = solph.processing.results(m)
-
     # The keys actually contain the Nodes and not strings,
     # but as a Node is equal to its string, the following works.
-    pv_invest_kw = results[("PV", "electricity")]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    storage_invest_kwh = results[("Battery", None)]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    hp_invest_kw = results[("Heat pump", "heat")]["period_scalars"][
-        "invest"
-    ].iloc[0]
-    gas_boiler_invest_kw = results[("Gas Boiler", "heat")]["period_scalars"][
-        "invest"
-    ].iloc[0]
+    pv_invest_kw = results["invest"][("PV", "electricity")][0]
+    storage_invest_kwh = results["invest"]["Battery"][0]
+    hp_invest_kw = results["invest"][("Heat pump", "heat")][0]
+    gas_boiler_invest_kw = results["invest"][("Gas Boiler", "heat")][0]
 
     return pd.Series(
         {

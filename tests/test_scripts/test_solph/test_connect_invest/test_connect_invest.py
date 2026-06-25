@@ -117,7 +117,7 @@ def test_connect_invest():
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc", tee=True)
+    om.solve(solver="cbc", solve_kwargs={"tee": True})
 
     # check if the new result object is working for custom components
     results = processing.results(om)

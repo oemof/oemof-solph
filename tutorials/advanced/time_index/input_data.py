@@ -10,7 +10,7 @@ from os import environ
 from pathlib import Path
 import requests
 
-import demandlib
+from oemof.demand.bdew import HeatBuilding
 import numpy as np
 import pandas as pd
 from oemof.tools.economics import annuity
@@ -106,10 +106,11 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
     specific_heat_demand = 60  # kWh/m²/a  (educated guess)
     holidays = dict(Germany().holidays(2019))
 
-    # We estimate the heat demand from the ambient temperature using demandlib.
-    # This returns energy per time step in units of kWh, but we want kW.
+    # We estimate the heat demand from the ambient temperature using
+    # oemof.demand. This returns energy per time step in units of kWh,
+    # but we want kW.
     df["heat demand (kW)"] = (
-        demandlib.bdew.HeatBuilding(
+        HeatBuilding(
             df.index,
             holidays=holidays,
             temperature=df["Air Temperature (°C)"],

@@ -1,13 +1,19 @@
+import os
+
 import pandas as pd
 from helpers import LCOH
 from helpers import epc
 
 import oemof.solph as solph
 
-data = pd.read_csv("input_data.csv", sep=";", index_col=0, parse_dates=True)
+file_path = os.path.dirname(__file__)
+filename = os.path.join(file_path, "input_data.csv")
+
+data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
 
 district_heating_system = solph.EnergySystem(
-    timeindex=data.index, infer_last_interval=False
+    timeindex=data.index,
+    infer_last_interval=True,
 )
 
 heat_bus = solph.Bus(label="heat network")
@@ -125,7 +131,7 @@ district_heating_system.add(heat_pump)
 # %%[sec_2_start]
 # solve model
 model = solph.Model(district_heating_system)
-model.solve(
+results = model.solve(
     solver="cbc",
     solve_kwargs={"tee": True},
     cmdline_options={"ratio": 0.01},
@@ -134,19 +140,13 @@ model.solve(
 # %%[sec_2_end]
 
 # results
-results = solph.processing.results(model)
 
-data_gas_bus = solph.views.node(results, "gas network")["sequences"]
-data_heat_bus = solph.views.node(results, "heat network")["sequences"]
-data_el_bus = solph.views.node(results, "electricity network")["sequences"]
-data_caps = solph.views.node(results, "heat network")["scalars"]
+flows = results["flow"]
 
-cap_gas_boiler = data_caps[("gas boiler", "heat network"), "invest"]
-cap_heat_pump = data_caps[("heat pump", "heat network"), "invest"]
-cap_storage = solph.views.node(results, "heat storage")["scalars"][
-    (("heat storage", "None"), "invest")
-]
-cap_storage_out = data_caps[("heat storage", "heat network"), "invest"]
+cap_gas_boiler = results["invest"][("gas boiler", "heat network")][0]
+cap_heat_pump = results["invest"][("heat pump", "heat network")][0]
+cap_storage = results["invest"]["heat storage"][0]
+cap_storage_out = results["invest"][("heat storage", "heat network")][0]
 
 print(f"capacity gas boiler: {cap_gas_boiler:.1f} MW")
 print(f"capacity heat pump: {cap_heat_pump:.1f} MW")
@@ -160,23 +160,23 @@ invest_cost = (
 )
 operation_cost = (
     var_cost_gas_boiler
-    * data_heat_bus[(("gas boiler", "heat network"), "flow")].sum()
+    * flows[("gas boiler", "heat network")].sum()
     + (
         data["gas price"]
-        * data_gas_bus[(("gas network", "gas boiler"), "flow")]
+        * flows[("gas network", "gas boiler")]
     ).sum()
     + var_cost_heat_pump
-    * data_heat_bus[(("heat pump", "heat network"), "flow")].sum()
+    * flows[("heat pump", "heat network")].sum()
     + (
         data["el_spot_price"]
-        * data_el_bus[(("electricity network", "heat pump"), "flow")]
+        * flows[("electricity network", "heat pump")]
     ).sum()
     + var_cost_storage
-    * data_heat_bus[(("heat storage", "heat network"), "flow")].sum()
+    * flows[("heat storage", "heat network")].sum()
     + var_cost_storage
-    * data_heat_bus[(("heat network", "heat storage"), "flow")].sum()
+    * flows[("heat network", "heat storage")].sum()
 )
-heat_produced = data_heat_bus[(("heat network", "heat sink"), "flow")].sum()
+heat_produced = flows[("heat network", "heat sink")].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f"LCOH: {lcoh:.2f} €/MWh")
@@ -198,18 +198,18 @@ bottom = 0
 for unit in ["heat pump", "gas boiler", "heat storage"]:
     unit_label = f"{unit} (discharge)" if "storage" in unit else unit
     ax.bar(
-        data_heat_bus.index,
-        data_heat_bus[((unit, "heat network"), "flow")],
+        flows.index,
+        flows[(unit, "heat network")],
         label=unit_label,
         color=unit_colors[unit_label],
         bottom=bottom,
     )
-    bottom += data_heat_bus[((unit, "heat network"), "flow")]
+    bottom += flows[(unit, "heat network")]
 
 unit_label = "heat storage (charge)"
 ax.bar(
-    data_heat_bus.index,
-    -1 * data_heat_bus[(("heat network", "heat storage"), "flow")],
+    flows.index,
+    -1 * flows[("heat network", "heat storage")],
     label=unit_label,
     color=unit_colors[unit_label],
 )
@@ -224,10 +224,8 @@ ax.set_ylabel("Hourly heat production in MWh")
 
 fig, ax = plt.subplots(figsize=[10, 6])
 
-data_heat_storage = solph.views.node(results, "heat storage")["sequences"]
-
 ax.plot(
-    data_heat_storage[(("heat storage", "None"), "storage_content")],
+    results["storage_content"]["heat storage"],
     color="#00395B",
 )
 

@@ -7,8 +7,33 @@ import oemof.solph
 import matplotlib
 from sphinx.ext.autodoc import between
 
+
+import yaml
+
 matplotlib.use("agg")
 sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
+
+
+def update_author_list():
+    with open('../CITATION.cff', 'r') as file:
+        data = yaml.safe_load(file)
+
+    authors = data["authors"]
+
+    with open("../AUTHORS.rst", "w") as f:
+
+        f.write("Authors\n")
+        f.write("=======\n")
+        f.write("\n")
+        f.write("--**in alphabetical order**--\n")
+        f.write("\n")
+        for author in authors[:-1]:
+            f.write(
+                "* "
+                + author["given-names"] + " "
+                + author["family-names"] + "\n"
+            )
+update_author_list()
 
 
 def setup(app):
