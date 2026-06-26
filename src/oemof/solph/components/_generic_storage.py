@@ -28,7 +28,6 @@ from warnings import warn
 
 import numpy as np
 from oemof.network import Node
-from oemof.tools import debugging
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
@@ -2203,22 +2202,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                     )
 
         else:
-            msg = (
-                "You did not specify an interest rate.\n"
-                "It will be set equal to the discount_rate of {} "
-                "of the model as a default.\nThis corresponds to a "
-                "social planner point of view and does not reflect "
-                "microeconomic interest requirements."
-            )
             for n in self.CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
+                interest = 0.02
                 for p in m.CAPACITY_PERIODS:
                     annuity = economics.annuity(
                         capex=n.investment.ep_costs[p],
@@ -2241,13 +2227,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
 
             for n in self.NON_CONVEX_INVESTSTORAGES:
                 lifetime = n.investment.lifetime
-                interest = 0
-                if interest == 0:
-                    warn(
-                        msg.format(m.discount_rate),
-                        debugging.SuspiciousUsageWarning,
-                    )
-                    interest = m.discount_rate
+                interest = 0.02
                 for p in m.CAPACITY_PERIODS:
                     annuity = economics.annuity(
                         capex=n.investment.ep_costs[p],

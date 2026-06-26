@@ -19,7 +19,6 @@ import logging
 import warnings
 from logging import getLogger
 
-from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
@@ -172,11 +171,6 @@ class Model(po.ConcreteModel):
         self.dual = None
         self.rc = None
 
-        if not self.es.transitional_single_period:
-            self._set_discount_rate_with_warning()
-        else:
-            pass
-
         if auto_construct is True:
             self._construct()
 
@@ -188,19 +182,6 @@ class Model(po.ConcreteModel):
         self._add_parent_block_variables()
         self._add_child_blocks()
         self._add_objective()
-
-    def _set_discount_rate_with_warning(self):
-        """
-        Sets the discount rate to the standard value and raises a warning.
-        """
-        self.discount_rate = 0.02
-        msg = (
-            f"By default, a discount_rate of {self.discount_rate} "
-            f"is used for a multi-period model. "
-            f"If you want to use another value, "
-            f"you have to specify the `discount_rate` attribute."
-        )
-        warnings.warn(msg, debugging.SuspiciousUsageWarning)
 
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.

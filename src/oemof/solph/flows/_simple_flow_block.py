@@ -369,35 +369,17 @@ class SimpleFlowBlock(ScalarBlock):
 
         variable_costs = 0
 
-        if m.es.transitional_single_period:
-            for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for t in m.TIMESTEPS:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.timeincrement[t]
-                            * m.tsam_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                        )
-
-        else:
-            for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for p, t in m.TIMEINDEX:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.timeincrement[t]
-                            * m.tsam_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                            * (
-                                (1 + m.discount_rate)
-                                ** -m.es.capacity_period_years[p]
-                            )
-                        )
+        for i, o in m.FLOWS:
+            if valid_sequence(
+                m.flows[i, o].variable_costs, len(m.TIMESTEPS)
+            ):
+                for t in m.TIMESTEPS:
+                    variable_costs += (
+                        m.flow[i, o, t]
+                        * m.timeincrement[t]
+                        * m.tsam_weighting[t]
+                        * m.flows[i, o].variable_costs[t]
+                    )
 
         self.variable_costs = Expression(expr=variable_costs)
         self.costs = Expression(expr=variable_costs)

@@ -863,7 +863,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     )
 
         else:
-            interest = 0.05
+            interest = 0.02
             msg = (
                 "You did not specify an interest rate.\n"
                 "It will be set to {}."
