@@ -880,7 +880,7 @@ class GenericStorageBlock(ScalarBlock):
             a factor times the remaining capacity to the maximum storage level.
             """
             a = -(
-                n.max_charge_capacity
+                n.max_charge_capacity[m.es.capacity_period_of_timestep(t)]
                 * n.relative_charge_limit[t]
                 * (1 - n.fraction_saturation_charging)
             ) / (
@@ -889,7 +889,7 @@ class GenericStorageBlock(ScalarBlock):
                 * (1 - n.constant_soc_until)
             )
             b = (
-                n.max_charge_capacity
+                n.max_charge_capacity[m.es.capacity_period_of_timestep(t)]
                 * n.relative_charge_limit[t]
                 * (
                     (1 - n.fraction_saturation_charging)

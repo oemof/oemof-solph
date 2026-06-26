@@ -237,7 +237,7 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.CAPACITY_PERIODS = po.Set(initialize=[0])
+            self.CAPACITY_PERIODS = po.Set(initialize=[0], ordered=True)
         else:
             nested_list = [
                 [k] * len(self.es.capacity_periods[k])
@@ -255,7 +255,8 @@ class Model(po.ConcreteModel):
             self.CAPACITY_PERIODS = po.Set(
                 initialize=sorted(
                     list(set(range(len(self.es.capacity_periods))))
-                )
+                ),
+                ordered=True,
             )
 
         # (Re-)Map timesteps to periods
@@ -352,31 +353,36 @@ class Model(po.ConcreteModel):
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_capacity is not None:
                 if self.flows[o, i].fix is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_capacity
-                        )
-                        self.flow[o, i, t].fix()
-                else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
-                            self.flows[o, i].maximum[t]
-                            * self.flows[o, i].nominal_capacity
-                        )
-                    if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
-                                self.flows[o, i].minimum[t]
-                                * self.flows[o, i].nominal_capacity
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].value = (
+                                self.flows[o, i].fix[t]
+                                * self.flows[o, i].nominal_capacity[p]
                             )
+                            self.flow[o, i, t].fix()
+                else:
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].setub(
+                                self.flows[o, i].maximum[t]
+                                * self.flows[o, i].nominal_capacity[p]
+                            )
+                    if not self.flows[o, i].nonconvex:
+                        for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                            for t in timesteps:
+                                self.flow[o, i, t].setlb(
+                                    self.flows[o, i].minimum[t]
+                                    * self.flows[o, i].nominal_capacity[p]
+                                )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                            for t in timesteps:
+                                self.flow[o, i, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].setlb(0)
 
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have

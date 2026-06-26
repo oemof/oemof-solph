@@ -86,15 +86,6 @@ def test_flow_with_fix_and_min_max():
         solph.flows.Flow(fix=[1, 3], maximum=[0, 5], minimum=[4, 9])
 
 
-def test_infinite_values():
-    msg1 = "nominal_capacity must be a finite value"
-    msg2 = "maximum must be a finite value"
-    with pytest.raises(ValueError, match=msg1):
-        solph.flows.Flow(nominal_capacity=float("+inf"))
-    with pytest.raises(ValueError, match=msg2):
-        solph.flows.Flow(nominal_capacity=1, maximum=float("+inf"))
-
-
 def test_attributes_needing_nominal_capacity_get_it():
     with pytest.raises(AttributeError, match="If fix is set in a flow"):
         solph.flows.Flow(fix=0.3)

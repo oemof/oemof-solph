@@ -20,8 +20,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-import math
-import numbers
 from collections.abc import Iterable
 from inspect import isbuiltin
 from warnings import warn
@@ -124,6 +122,7 @@ class Flow(Edge):
     fix = Apply(sequence)
     maximum = Apply(sequence)
     minimum = Apply(sequence)
+    nominal_capacity = Apply(sequence)
 
     variable_costs = Apply(sequence)
 
@@ -228,24 +227,11 @@ class Flow(Edge):
         self.nominal_capacity = None
         self.investment = None
 
-        infinite_error_msg = (
-            "{} must be a finite value. Passing an infinite "
-            "value is not allowed."
-        )
         if nominal_capacity is not None:
-            if isinstance(nominal_capacity, numbers.Real):
-                if not math.isfinite(nominal_capacity):
-                    raise ValueError(
-                        infinite_error_msg.format("nominal_capacity")
-                    )
-                self.nominal_capacity = nominal_capacity
-            elif isinstance(nominal_capacity, Investment):
+            if isinstance(nominal_capacity, Investment):
                 self.investment = nominal_capacity
             else:
-                raise ValueError(
-                    "Parameter nominal_capacity must be either"
-                    + " a constant value or an Investment object."
-                )
+                self.nominal_capacity = nominal_capacity
 
         self.variable_costs = variable_costs
         self.positive_gradient_limit = positive_gradient_limit
@@ -321,11 +307,6 @@ class Flow(Edge):
                         f"If {attr} is set in a flow, "
                         "nominal_capacity must be set as well."
                     )
-
-        if self.nominal_capacity is not None and not math.isfinite(
-            self.maximum[0]
-        ):
-            raise ValueError(infinite_error_msg.format("maximum"))
 
         # Checking for impossible gradient combinations
         if self.nonconvex:

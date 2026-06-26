@@ -164,14 +164,20 @@ class SimpleFlowBlock(ScalarBlock):
             ):
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient_limit[t] * f.nominal_capacity
+                        f.positive_gradient_limit[t]
+                        * f.nominal_capacity[
+                            m.es.capacity_period_of_timestep(t)
+                        ]
                     )
             if valid_sequence(
                 m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
             ):
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient_limit[t] * f.nominal_capacity
+                        f.negative_gradient_limit[t]
+                        * f.nominal_capacity[
+                            m.es.capacity_period_of_timestep(t)
+                        ]
                     )
 
     def _create_constraints(self):
@@ -211,9 +217,10 @@ class SimpleFlowBlock(ScalarBlock):
                     * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
+                # FIXME: hardcoded single period
                 rhs = (
                     m.flows[inp, out].full_load_time_max
-                    * m.flows[inp, out].nominal_capacity
+                    * m.flows[inp, out].nominal_capacity[0]
                 )
                 self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
@@ -233,9 +240,10 @@ class SimpleFlowBlock(ScalarBlock):
                     * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
+                # FIXME: hardcoded single period
                 rhs = (
                     m.flows[inp, out].full_load_time_min
-                    * m.flows[inp, out].nominal_capacity
+                    * m.flows[inp, out].nominal_capacity[0]
                 )
                 self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
