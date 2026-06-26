@@ -237,6 +237,17 @@ class EnergySystem(es.EnergySystem):
             )
             warnings.warn(msg, debugging.ExperimentalFeatureWarning)
 
+            if investment_times[0] > timeindex[0] or (
+                investment_times[-1] < timeindex[-1]
+            ):
+                raise ValueError(
+                    "Time horizon cannot exceed capacity periods (defined by "
+                    + " 'investment_times')."
+                    + f" Got capacity definded betwen {investment_times[0]},"
+                    + f" {investment_times[-1]} but time index spans time"
+                    + f" between {timeindex[0]} and {timeindex[-1]}."
+                )
+
         self.investment_times = investment_times
 
         # This is a very inefficient algorithm.

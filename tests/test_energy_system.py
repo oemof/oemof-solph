@@ -107,6 +107,30 @@ def test_capacity_period_of_timestep_numeric():
         es.capacity_period_of_timestep(12)
 
 
+def test_short_capacity_period():
+    timeindex = list(range(0, 10))
+
+    with pytest.raises(
+        ValueError,
+        match="Time horizon cannot exceed capacity periods",
+    ):
+        solph.EnergySystem(
+            timeindex=timeindex,
+            infer_last_interval=False,
+            investment_times=[2, 15],
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="Time horizon cannot exceed capacity periods",
+    ):
+        solph.EnergySystem(
+            timeindex=timeindex,
+            infer_last_interval=False,
+            investment_times=[0, 5],
+        )
+
+
 def test_capacity_period_of_timestep_datetime():
     timeindex = solph.create_time_index(2025, 1, 12)
 
