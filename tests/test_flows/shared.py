@@ -7,8 +7,10 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
 """
+import warnings
 
 import pandas as pd
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 
@@ -24,11 +26,14 @@ def _run_flow_model(flow, multi_period=False):
         )
     else:
         investment_times = None
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index,
-        investment_times=investment_times,
-        infer_last_interval=False,
-    )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
+        energysystem = solph.EnergySystem(
+            timeindex=date_time_index,
+            investment_times=investment_times,
+            infer_last_interval=False,
+        )
     bus = solph.buses.Bus(label="bus", balanced=False)
     energysystem.add(bus)
 
