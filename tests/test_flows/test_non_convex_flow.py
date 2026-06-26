@@ -22,7 +22,7 @@ def test_initial_status_off():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == 5 * [0] + 5 * [10]).all()
+    assert flow_result == 5 * [0] + 5 * [10]
 
 
 def test_maximum_shutdowns():
@@ -34,7 +34,7 @@ def test_maximum_shutdowns():
     )
     flow_result = _run_flow_model(flow)
 
-    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 1]
+    assert flow_result == [0, 10, 5, 5, 5, 10, 0, 0, 0, 10]
 
 
 def test_maximum_startups():
@@ -46,7 +46,7 @@ def test_maximum_startups():
     )
     flow_result = _run_flow_model(flow)
 
-    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    assert flow_result == [0, 10, 5, 5, 5, 10, 0, 0, 0, 0]
 
 
 def test_initial_status_on():
@@ -59,7 +59,7 @@ def test_initial_status_on():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == 3 * [5] + 7 * [0]).all()
+    assert flow_result == 3 * [5] + 7 * [0]
 
 
 def test_activity_costs():
@@ -71,9 +71,9 @@ def test_activity_costs():
         nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
         variable_costs=-0.45,
     )
-    flow_result = _run_flow_model(flow)["flow"][:-1]
+    flow_result = _run_flow_model(flow)
 
-    assert (flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]).all()
+    assert flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]
 
 
 def test_inactivity_costs():
@@ -84,9 +84,9 @@ def test_inactivity_costs():
         nonconvex=solph.NonConvex(inactivity_costs=9 * [1] + [10]),
         variable_costs=0.45,
     )
-    flow_result = _run_flow_model(flow)["flow"][:-1]
+    flow_result = _run_flow_model(flow)
 
-    assert (flow_result == [0, 1, 2, 0, 0, 0, 0, 0, 0, 9]).all()
+    assert flow_result == [0, 1, 2, 0, 0, 0, 0, 0, 0, 9]
 
 
 def test_startup_costs_start_off():
@@ -101,7 +101,7 @@ def test_startup_costs_start_off():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [0, 0, 0, 10, 1, 1, 1, 10, 0, 0]).all()
+    assert flow_result == [0, 0, 0, 10, 1, 1, 1, 10, 0, 0]
 
 
 def test_startup_costs_start_on():
@@ -116,7 +116,7 @@ def test_startup_costs_start_on():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [1, 1, 1, 10, 1, 1, 1, 10, 0, 0]).all()
+    assert flow_result == [1, 1, 1, 10, 1, 1, 1, 10, 0, 0]
 
 
 def test_shutdown_costs_start_on():
@@ -131,4 +131,4 @@ def test_shutdown_costs_start_on():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [1, 1, 1, 10, 1, 1, 1, 10, 1, 1]).all()
+    assert flow_result == [1, 1, 1, 10, 1, 1, 1, 10, 1, 1]
