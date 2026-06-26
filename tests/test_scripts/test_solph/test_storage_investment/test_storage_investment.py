@@ -41,7 +41,6 @@ import pandas as pd
 import pytest
 from oemof.tools import economics
 
-from oemof import network
 from oemof import solph
 from oemof.solph import processing
 from oemof.solph import views

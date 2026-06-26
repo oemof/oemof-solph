@@ -467,7 +467,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
         self.total_rule_build = BuildAction(rule=_total_capacity_rule)
 
-        if not m.es.transitional_single_period is not None:
+        if not m.es.transitional_single_period:
 
             def _old_capacity_rule_end(block):
                 """Rule definition for determining old endogenously installed
