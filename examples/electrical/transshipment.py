@@ -3,7 +3,7 @@
 """
 General description:
 ---------------------
-This script shows how use the custom component `solph.custom.Link` to build
+This script shows how use the component `solph.components.Link` to build
 a simple transshipment model.
 
 Code
@@ -204,9 +204,6 @@ def main(optimize=True):
     print(results["flow"][("gen_1", "b_1")])
 
     results["flow"].plot(kind="bar")
-
-    # look at constraints of Links in the pyomo model LinkBlock
-    m.LinkBlock.pprint()
 
     plt.show()
 

@@ -30,6 +30,7 @@ from oemof.solph._helpers import warn_if_missing_attribute
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 
+from ._converter import Converter
 
 class Link(Node):
     """A Link object with 2 inputs and 2 outputs.
@@ -67,20 +68,7 @@ class Link(Node):
     ...    outputs={bel0: solph.flows.Flow(),
     ...             bel1: solph.flows.Flow()},
     ...    conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.9})
-    >>> print(sorted([x[1][5] for x in link.conversion_factors.items()]))
-    [0.8, 0.9]
-
-    >>> type(link)
-    <class 'oemof.solph.components._link.Link'>
-
-    >>> sorted([str(i) for i in link.inputs])
-    ['el0', 'el1']
-
-    >>> link.conversion_factors[(bel0, bel1)][3]
-    0.8
     """
-
-    conversion_factors = Apply(SequenceDict)
 
     def __init__(
         self,
@@ -100,22 +88,12 @@ class Link(Node):
             custom_properties = {}
         super().__init__(
             label,
-            inputs=inputs,
-            outputs=outputs,
             parent_node=parent_node,
             custom_properties=custom_properties,
         )
-        if not inputs:
-            warn_if_missing_attribute(self, "inputs")
-        if not outputs:
-            warn_if_missing_attribute(self, "outputs")
-        if conversion_factors is None:
-            warn_if_missing_attribute(self, "conversion_factors")
-            conversion_factors = {}
 
-        self.conversion_factors = {k: v for k, v in conversion_factors.items()}
         msg = (
-            "Component `Link` should have exactly "
+            "Component `Link` must have exactly "
             + "2 inputs, 2 outputs, and 2 "
             + "conversion factors connecting these. You are initializing "
             + "a `Link`without obeying this specification. "
@@ -124,88 +102,19 @@ class Link(Node):
         )
 
         if (
-            len(self.inputs) != 2
-            or len(self.outputs) != 2
-            or len(self.conversion_factors) != 2
+            len(inputs) != 2
+            or len(outputs) != 2
+            or len(conversion_factors) != 2
         ):
-            warn(msg, debugging.SuspiciousUsageWarning)
+            raise ValueError(msg)
 
-    def constraint_group(self):
-        return LinkBlock
-
-
-class LinkBlock(ScalarBlock):
-    r"""Block for the relation of nodes with type
-    :class:`~oemof.solph.components.Link`
-
-    **The following constraints are created:**
-
-    .. _Link-equations:
-
-    .. math::
-        &
-        (1) \qquad P_{\mathrm{in},n}(p, t) = c_n(t)
-        \times P_{\mathrm{out},n}(p, t)
-            \quad \forall t \in T, \forall n in {1,2} \\
-        &
-
-    """
-
-    CONSTRAINT_GROUP = True
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    def _create(self, group=None):
-        """Creates the relation for the class:`Link`.
-
-        Parameters
-        ----------
-        group : list
-            List of oemof.solph.components.Link objects for which
-            the relation of inputs and outputs is createdBuildAction
-            e.g. group = [link1, link2, link3, ...]. The components inside
-            the list need to hold an attribute `conversion_factors` of type
-            dict containing the conversion factors for all inputs to outputs.
-        """
-        if group is None:
-            return None
-
-        m = self.parent_block()
-
-        all_conversions = {}
-        for n in group:
-            all_conversions[n] = {
-                k: v for k, v in n.conversion_factors.items()
-            }
-
-        self.LINKS = Set(initialize=[g for g in group])
-
-        def _input_output_relation(block):
-            for t in m.TIMESTEPS:
-                for n, conversion in all_conversions.items():
-                    for cidx, c in conversion.items():
-                        try:
-                            expr = (
-                                m.flow[n, cidx[1], t]
-                                == c[t] * m.flow[cidx[0], n, t]
-                            )
-                        except KeyError:
-                            raise KeyError(
-                                "Error in constraint creation "
-                                f"from: {cidx[0]}, to: {cidx[1]}, via: {n}. "
-                                "Check if all connected buses match "
-                                "the conversion factors.",
-                            )
-                        block.relation.add((n, cidx[0], cidx[1], t), expr)
-
-        self.relation = Constraint(
-            [
-                (n, cidx[0], cidx[1], t)
-                for t in m.TIMESTEPS
-                for n, conversion in all_conversions.items()
-                for cidx, c in conversion.items()
-            ],
-            noruleinit=True,
-        )
-        self.relation_build = BuildAction(rule=_input_output_relation)
+        for k, v in conversion_factors.items():
+            from_node = k[0]
+            to_node = k[1]
+            self.subnode(
+                Converter,
+                f"({k[0].label}) -> {k[1].label})",
+                inputs={from_node: inputs[from_node]},
+                outputs={to_node: outputs[to_node]},
+                conversion_factors={to_node: v},
+            )
