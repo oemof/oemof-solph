@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
-import pandas as pd
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
@@ -123,18 +122,11 @@ def test_link_raise_key_error_in_Linkblock(warning_fixture):
     """Link raises KeyError if conversion factors don't match the connected
     busses."""
 
-    date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index,
-        infer_last_interval=True,
-    )
     bel0 = solph.buses.Bus(label="el0")
     bel1 = solph.buses.Bus(label="el1")
     look_out = solph.buses.Bus(label="look_out")
 
-    msg = "el1"
-
-    with pytest.raises(KeyError, match=msg):
+    with pytest.raises(KeyError, match="el1"):
         _ = solph.components.Link(
             label="transshipment_link",
             inputs={
