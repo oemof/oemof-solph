@@ -37,6 +37,8 @@ Other changes
   by convention. Thus, it can now be reliably cast; not to an array but to
   a scalar float. We expect no effect for end users.
 * Updated respective examples and tutorials to use current TSAM API (v3).
+* The component ``Link`` now uses the nested Node capability and is internally
+  represented by two ``Converter`` s.
 
 Contributors
 ############
