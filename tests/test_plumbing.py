@@ -176,6 +176,48 @@ def test_fake_sequence_compare():
     assert other < seq_gt
 
 
+def test_fake_sequence_logic_operators():
+    # only _FakeSequence
+    assert _FakeSequence(True)
+    assert not _FakeSequence(False)
+
+    # _FakeSequence & bool
+    assert _FakeSequence(True) & True
+    assert not (_FakeSequence(True) & False)
+    assert not (_FakeSequence(False) & True)
+    assert not (_FakeSequence(False) & False)
+
+    # bool & _FakeSequence
+    assert True & _FakeSequence(True)
+    assert not (True & _FakeSequence(False))
+    assert not (False & _FakeSequence(True))
+    assert not (False & _FakeSequence(False))
+
+    # _FakeSequence & _FakeSequence
+    assert _FakeSequence(True) & _FakeSequence(True)
+    assert not (_FakeSequence(True) & _FakeSequence(False))
+    assert not (_FakeSequence(False) & _FakeSequence(True))
+    assert not (_FakeSequence(False) & _FakeSequence(False))
+
+    # _FakeSequence | bool
+    assert _FakeSequence(True) | True
+    assert _FakeSequence(True) | False
+    assert _FakeSequence(False) | True
+    assert not (_FakeSequence(False) | False)
+
+    # bool | _FakeSequence
+    assert True | _FakeSequence(True)
+    assert True | _FakeSequence(False)
+    assert False | _FakeSequence(True)
+    assert not (False | _FakeSequence(False))
+
+    # _FakeSequence | _FakeSequence
+    assert _FakeSequence(True) | _FakeSequence(True)
+    assert _FakeSequence(True) | _FakeSequence(False)
+    assert _FakeSequence(False) or _FakeSequence(True)
+    assert not (_FakeSequence(False) | _FakeSequence(False))
+
+
 def test_fake_sequence_addition():
     n1 = 12
     seq1_var = _FakeSequence(12)

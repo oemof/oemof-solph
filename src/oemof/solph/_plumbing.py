@@ -99,7 +99,7 @@ def valid_sequence(sequence, length: int) -> bool:
             warnings.warn(
                 "Sequence longer than needed"
                 f" ({sequence.size} items instead of {length})."
-                " This will be trated as an error in the future.",
+                " This will be treated as an error in the future.",
                 FutureWarning,
             )
             return True
@@ -222,6 +222,16 @@ class _FakeSequence:
 
     def __abs__(self):
         return _FakeSequence(abs(self.value))
+
+    def __and__(self, other):
+        return sequence(self.value & other)
+
+    __rand__ = __and__
+
+    def __or__(self, other):
+        return sequence(self.value | other)
+
+    __ror__ = __or__
 
     def __eq__(self, other):
         return sequence(self.value == other)
