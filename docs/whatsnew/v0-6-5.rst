@@ -31,12 +31,13 @@ Bug fixes
 Other changes
 #############
 
+* Updated respective examples and tutorials to use current TSAM API (v3).
 * Internally, sequences of 'None' are now avoided and a simple 'None'
   is used instead. We expect no effect for end users.
 * _FakeSequences can no longer have a defined length. It has "every length"
   by convention. Thus, it can now be reliably cast; not to an array but to
   a scalar float. We expect no effect for end users.
-* Updated respective examples and tutorials to use current TSAM API (v3).
+* _FakeSequences have operators defined. We expect no effect for end users.
 
 Contributors
 ############

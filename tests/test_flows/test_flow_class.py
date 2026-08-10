@@ -51,6 +51,13 @@ def test_flow_nominal_capacity():
     assert flow.nominal_capacity == capacity_scalar
 
 
+def test_source_with_full_load_time_max():
+    flow = Flow(nominal_capacity=1, full_load_time_max=2)
+
+    assert flow.nominal_capacity == 1
+    assert flow.full_load_time_max == 2
+
+
 def test_fix_flow():
     fix_values = [1, 2, 3]
 

@@ -53,7 +53,7 @@ gas_boiler = solph.components.Converter(
             nominal_capacity=data["heat demand"].max(), variable_costs=1.10
         )
     },
-    conversion_factors={gas_bus: 0.95},
+    conversion_factors={heat_bus: 0.95},
 )
 
 district_heating_system.add(gas_boiler)

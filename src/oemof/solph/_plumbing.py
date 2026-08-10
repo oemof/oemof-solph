@@ -14,6 +14,7 @@ SPDX-License-Identifier: MIT
 import warnings
 from collections import UserDict
 from collections import abc
+from numbers import Number
 
 import numpy as np
 
@@ -99,7 +100,7 @@ def valid_sequence(sequence, length: int) -> bool:
             warnings.warn(
                 "Sequence longer than needed"
                 f" ({sequence.size} items instead of {length})."
-                " This will be trated as an error in the future.",
+                " This will be treated as an error in the future.",
                 FutureWarning,
             )
             return True
@@ -180,7 +181,7 @@ class _FakeSequence:
     42
     """
 
-    def __init__(self, value):
+    def __init__(self, value: Number):
         self._value = value
 
     def __getitem__(self, i):
@@ -203,7 +204,10 @@ class _FakeSequence:
         return f"[{self._value}, {self._value}, ..., {self._value}]"
 
     def __float__(self):
-        return self._value
+        return float(self._value)
+
+    def __int__(self):
+        return int(self._value)
 
     def max(self):
         return self._value
@@ -222,6 +226,16 @@ class _FakeSequence:
 
     def __abs__(self):
         return _FakeSequence(abs(self.value))
+
+    def __and__(self, other):
+        return sequence(self.value & other)
+
+    __rand__ = __and__
+
+    def __or__(self, other):
+        return sequence(self.value | other)
+
+    __ror__ = __or__
 
     def __eq__(self, other):
         return sequence(self.value == other)
