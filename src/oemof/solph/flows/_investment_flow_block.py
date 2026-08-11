@@ -16,11 +16,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-from warnings import warn
-
-import numpy as np
-from oemof.tools import debugging
-from oemof.tools import economics
 from pyomo.core import Binary
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
@@ -245,16 +240,6 @@ class InvestmentFlowBlock(ScalarBlock):
 
         if m.es.capacity_periods is not None:
             self.old = Var(
-                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
-            )
-
-            # Old endogenous capacity to be decommissioned (due to lifetime)
-            self.old_end = Var(
-                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
-            )
-
-            # Old exogenous capacity to be decommissioned (due to lifetime)
-            self.old_exo = Var(
                 self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
             )
 
@@ -726,7 +711,8 @@ class InvestmentFlowBlock(ScalarBlock):
                     investment_costs_increment = (
                         self.invest[i, o, p]
                         * m.flows[i, o].investment.ep_costs[p]
-                        + self.invest_status[i, o, p] * m.flows[i, o].investment.offset[p]
+                        + self.invest_status[i, o, p]
+                        * m.flows[i, o].investment.offset[p]
                     )
                     investment_costs += investment_costs_increment
                     period_investment_costs[p] += investment_costs_increment

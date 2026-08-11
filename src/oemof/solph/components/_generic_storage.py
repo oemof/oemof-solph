@@ -26,7 +26,6 @@ import math
 import numbers
 from warnings import warn
 
-import numpy as np
 from oemof.network import Node
 from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
