@@ -142,10 +142,10 @@ results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 # %%[sec_6_start]
 
 flows = results["flow"]
-cap_gas_boiler = results["invest"][("gas boiler", "heat network")][0]
-cap_heat_pump = results["invest"][("heat pump", "heat network")][0]
-cap_storage = results["invest"]["heat storage"][0]
-cap_storage_out = results["invest"][("heat storage", "heat network")][0]
+cap_gas_boiler = results["capacity"][("gas boiler", "heat network")][0]
+cap_heat_pump = results["capacity"][("heat pump", "heat network")][0]
+cap_storage = results["capacity"]["heat storage"][0]
+cap_storage_out = results["capacity"][("heat storage", "heat network")][0]
 
 print(f"capacity gas boiler: {cap_gas_boiler:.1f} MW")
 print(f"capacity heat pump: {cap_heat_pump:.1f} MW")

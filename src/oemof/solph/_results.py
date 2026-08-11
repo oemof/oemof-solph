@@ -131,6 +131,15 @@ class Results:
         elif key == "investment_costs":
             return self._calc_capex()
         elif key in self._variables:
+            # --- BEGIN: The following code can be removed for versions >= v0.7
+            if key == "invest":
+                warnings.warn(
+                    "Variable 'invest' (for added capacity) is deprecated,"
+                    + " use 'capacity' (for total capacity) instead.",
+                    category=FutureWarning,
+                )
+            #  --- END ---
+
             rv = []
             for occurence in self._variables[key]:
                 dataset = self._variables[key][occurence]
