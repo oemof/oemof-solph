@@ -234,7 +234,7 @@ class InvestmentFlowBlock(ScalarBlock):
         )
 
         # Total capacity
-        self.total = Var(
+        self.capacity = Var(
             self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
@@ -420,22 +420,20 @@ class InvestmentFlowBlock(ScalarBlock):
 
         # Handle unit lifetimes
         def _total_capacity_rule(block):
-            """Rule definition for determining total installed
-            capacity (taking decommissioning into account)
-            """
+            """Rule definition for determining total installed capacity"""
             for i, o in self.INVESTFLOWS:
                 for p in m.CAPACITY_PERIODS:
                     expr = (
-                        self.total[i, o, p]
+                        self.capacity[i, o, p]
                         == self.invest[i, o, p]
                         + m.flows[i, o].investment.existing
                     )
-                    self.total_rule.add((i, o, p), expr)
+                    self.total_capacity_rule.add((i, o, p), expr)
 
-        self.total_rule = Constraint(
+        self.total_capacity_rule = Constraint(
             self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True
         )
-        self.total_rule_build = BuildAction(rule=_total_capacity_rule)
+        self.total_capacity_rule_build = BuildAction(rule=_total_capacity_rule)
 
         def _investflow_fixed_rule(block):
             """Rule definition of constraint to fix flow variable
@@ -445,7 +443,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        == self.total[i, o, p] * m.flows[i, o].fix[t]
+                        == self.capacity[i, o, p] * m.flows[i, o].fix[t]
                     )
                     self.fixed.add((i, o, p, t), expr)
 
@@ -462,7 +460,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        <= self.total[i, o, p] * m.flows[i, o].maximum[t]
+                        <= self.capacity[i, o, p] * m.flows[i, o].maximum[t]
                     )
                     self.max.add((i, o, p, t), expr)
 
@@ -479,7 +477,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p, t in m.TIMEINDEX:
                     expr = (
                         m.flow[i, o, t]
-                        >= self.total[i, o, p] * m.flows[i, o].minimum[t]
+                        >= self.capacity[i, o, p] * m.flows[i, o].minimum[t]
                     )
                     self.min.add((i, o, p, t), expr)
 
@@ -496,7 +494,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) <= (
                 m.flows[i, o].full_load_time_max
-                * sum(self.total[i, o, p] for p in m.CAPACITY_PERIODS)
+                * sum(self.capacity[i, o, p] for p in m.CAPACITY_PERIODS)
             )
             return expr
 
@@ -512,7 +510,7 @@ class InvestmentFlowBlock(ScalarBlock):
             expr = sum(
                 m.flow[i, o, t] * m.timeincrement[t] for t in m.TIMESTEPS
             ) >= (
-                sum(self.total[i, o, p] for p in m.CAPACITY_PERIODS)
+                sum(self.capacity[i, o, p] for p in m.CAPACITY_PERIODS)
                 * m.flows[i, o].full_load_time_min
             )
             return expr
@@ -531,7 +529,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 for i, o in self.OVERALL_MAXIMUM_INVESTFLOWS:
                     for p in m.CAPACITY_PERIODS:
                         expr = (
-                            self.total[i, o, p]
+                            self.capacity[i, o, p]
                             <= m.flows[i, o].investment.overall_maximum
                         )
                         self.overall_maximum.add((i, o, p), expr)
@@ -553,7 +551,7 @@ class InvestmentFlowBlock(ScalarBlock):
                 """
                 expr = (
                     m.flows[i, o].investment.overall_minimum
-                    <= self.total[i, o, m.CAPACITY_PERIODS[-1]]
+                    <= self.capacity[i, o, m.CAPACITY_PERIODS[-1]]
                 )
                 return expr
 
