@@ -238,11 +238,6 @@ class InvestmentFlowBlock(ScalarBlock):
             self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
         )
 
-        if m.es.capacity_periods is not None:
-            self.old = Var(
-                self.INVESTFLOWS, m.CAPACITY_PERIODS, within=NonNegativeReals
-            )
-
         # create status variable for a non-convex investment flow
         self.invest_status = Var(
             self.NON_CONVEX_INVESTFLOWS, m.CAPACITY_PERIODS, within=Binary
@@ -430,22 +425,12 @@ class InvestmentFlowBlock(ScalarBlock):
             """
             for i, o in self.INVESTFLOWS:
                 for p in m.CAPACITY_PERIODS:
-                    if p == 0:
-                        expr = (
-                            self.total[i, o, p]
-                            == self.invest[i, o, p]
-                            + m.flows[i, o].investment.existing
-                        )
-                        self.total_rule.add((i, o, p), expr)
-                    # applicable for multi-period model only
-                    else:
-                        expr = (
-                            self.total[i, o, p]
-                            == self.invest[i, o, p]
-                            + self.total[i, o, p - 1]
-                            - self.old[i, o, p]
-                        )
-                        self.total_rule.add((i, o, p), expr)
+                    expr = (
+                        self.total[i, o, p]
+                        == self.invest[i, o, p]
+                        + m.flows[i, o].investment.existing
+                    )
+                    self.total_rule.add((i, o, p), expr)
 
         self.total_rule = Constraint(
             self.INVESTFLOWS, m.CAPACITY_PERIODS, noruleinit=True

@@ -1513,20 +1513,11 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             """
             for n in self.INVESTSTORAGES:
                 for p in m.CAPACITY_PERIODS:
-                    if p == 0:
-                        expr = (
-                            self.storage_capacity[n, p]
-                            == self.invest[n, p] + n.investment.existing
-                        )
-                        self.total_storage_rule.add((n, p), expr)
-                    else:
-                        expr = (
-                            self.storage_capacity[n, p]
-                            == self.invest[n, p]
-                            + self.storage_capacity[n, p - 1]
-                            - self.old[n, p]
-                        )
-                        self.total_storage_rule.add((n, p), expr)
+                    expr = (
+                        self.storage_capacity[n, p]
+                        == self.invest[n, p] + n.investment.existing
+                    )
+                    self.total_storage_rule.add((n, p), expr)
 
         self.total_storage_rule = Constraint(
             self.INVESTSTORAGES, m.CAPACITY_PERIODS, noruleinit=True
