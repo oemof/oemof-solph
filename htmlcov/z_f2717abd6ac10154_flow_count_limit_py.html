@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_f2717abd6ac10154_integral_limit_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
-            created at 2026-08-08 05:33 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.4">coverage.py v7.15.4</a>,
+            created at 2026-08-13 06:50 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -84,9 +84,9 @@
 <main id="source">
     <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="com"># -*- coding: utf-8 -*-</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">"""Constraints to limit active (nonconvex) Flows.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">&quot;&quot;&quot;Constraints to limit active (nonconvex) Flows.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Uwe Krien &lt;krien@uni-bremen.de></span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Uwe Krien &lt;krien@uni-bremen.de&gt;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Simon Hilpert</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Patrik Sch&#246;nfeldt</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Johannes R&#246;der</span>&nbsp;</span><span class="r"></span></p>
@@ -94,7 +94,7 @@
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t"><span class="str">SPDX-License-Identifier: MIT</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="key">from</span> <span class="nam">pyomo</span> <span class="key">import</span> <span class="nam">environ</span> <span class="key">as</span> <span class="nam">po</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -102,7 +102,7 @@
     <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="key">def</span> <span class="nam">limit_active_flow_count</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="nam">model</span><span class="op">,</span> <span class="nam">constraint_name</span><span class="op">,</span> <span class="nam">flows</span><span class="op">,</span> <span class="nam">lower_limit</span><span class="op">=</span><span class="num">0</span><span class="op">,</span> <span class="nam">upper_limit</span><span class="op">=</span><span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="str">r"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="str">r&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="str">    Set limits (lower and/or upper) for the number of concurrently</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="str">    active NonConvex flows. The flows are given as a list.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -151,7 +151,7 @@
     <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t"><span class="str">    +-------------------+------+--------------------------------------------------------------+</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t"><span class="str">    | :math:`N_{X,max}` | P    | upper_limit                                                  |</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t"><span class="str">    +-------------------+------+--------------------------------------------------------------+</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t"><span class="str">    """</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">    <span class="com"># number of concurrent active flows</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">    <span class="nam">setattr</span><span class="op">(</span><span class="nam">model</span><span class="op">,</span> <span class="nam">constraint_name</span><span class="op">,</span> <span class="nam">po</span><span class="op">.</span><span class="nam">Var</span><span class="op">(</span><span class="nam">model</span><span class="op">.</span><span class="nam">TIMESTEPS</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
@@ -160,7 +160,7 @@
     <p class="run"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">        <span class="nam">getattr</span><span class="op">(</span><span class="nam">model</span><span class="op">,</span> <span class="nam">constraint_name</span><span class="op">)</span><span class="op">[</span><span class="nam">t</span><span class="op">]</span><span class="op">.</span><span class="nam">setlb</span><span class="op">(</span><span class="nam">lower_limit</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">        <span class="nam">getattr</span><span class="op">(</span><span class="nam">model</span><span class="op">,</span> <span class="nam">constraint_name</span><span class="op">)</span><span class="op">[</span><span class="nam">t</span><span class="op">]</span><span class="op">.</span><span class="nam">setub</span><span class="op">(</span><span class="nam">upper_limit</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">    <span class="nam">attrname_constraint</span> <span class="op">=</span> <span class="nam">constraint_name</span> <span class="op">+</span> <span class="str">"_constraint"</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">    <span class="nam">attrname_constraint</span> <span class="op">=</span> <span class="nam">constraint_name</span> <span class="op">+</span> <span class="str">&quot;_constraint&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">    <span class="key">def</span> <span class="nam">_flow_count_rule</span><span class="op">(</span><span class="nam">m</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">        <span class="key">for</span> <span class="nam">ts</span> <span class="key">in</span> <span class="nam">m</span><span class="op">.</span><span class="nam">TIMESTEPS</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -179,7 +179,7 @@
     <p class="run run2"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">    <span class="nam">setattr</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">        <span class="nam">model</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">        <span class="nam">attrname_constraint</span> <span class="op">+</span> <span class="str">"_build"</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">        <span class="nam">attrname_constraint</span> <span class="op">+</span> <span class="str">&quot;_build&quot;</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">        <span class="nam">po</span><span class="op">.</span><span class="nam">BuildAction</span><span class="op">(</span><span class="nam">rule</span><span class="op">=</span><span class="nam">_flow_count_rule</span><span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -189,7 +189,7 @@
     <p class="run"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t"><span class="key">def</span> <span class="nam">limit_active_flow_count_by_keyword</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t">    <span class="nam">model</span><span class="op">,</span> <span class="nam">keyword</span><span class="op">,</span> <span class="nam">lower_limit</span><span class="op">=</span><span class="num">0</span><span class="op">,</span> <span class="nam">upper_limit</span><span class="op">=</span><span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t107" href="#t107">107</a></span><span class="t"><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">    <span class="str">r"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t108" href="#t108">108</a></span><span class="t">    <span class="str">r&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t109" href="#t109">109</a></span><span class="t"><span class="str">    This wrapper for limit_active_flow_count allows to set limits</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t110" href="#t110">110</a></span><span class="t"><span class="str">    to the count of concurrently active flows by using a keyword</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t111" href="#t111">111</a></span><span class="t"><span class="str">    instead of a list. The constraint will be named $(keyword)_count.</span>&nbsp;</span><span class="r"></span></p>
@@ -212,7 +212,7 @@
     <p class="pln"><span class="n"><a id="t128" href="#t128">128</a></span><span class="t"><span class="str">    See Also</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t129" href="#t129">129</a></span><span class="t"><span class="str">    --------</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t130" href="#t130">130</a></span><span class="t"><span class="str">    limit_active_flow_count</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t"><span class="str">    """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t131" href="#t131">131</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t132" href="#t132">132</a></span><span class="t">    <span class="nam">flows</span> <span class="op">=</span> <span class="op">[</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t133" href="#t133">133</a></span><span class="t">    <span class="key">for</span> <span class="nam">i</span><span class="op">,</span> <span class="nam">o</span> <span class="key">in</span> <span class="nam">model</span><span class="op">.</span><span class="nam">NonConvexFlowBlock</span><span class="op">.</span><span class="nam">FIXED_CAPACITY_NONCONVEX_FLOWS</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t134" href="#t134">134</a></span><span class="t">        <span class="key">if</span> <span class="nam">keyword</span> <span class="key">in</span> <span class="nam">model</span><span class="op">.</span><span class="nam">flows</span><span class="op">[</span><span class="nam">i</span><span class="op">,</span> <span class="nam">o</span><span class="op">]</span><span class="op">.</span><span class="nam">custom_properties</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
@@ -233,8 +233,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_f2717abd6ac10154_integral_limit_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
-            created at 2026-08-08 05:33 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.4">coverage.py v7.15.4</a>,
+            created at 2026-08-13 06:50 +0000
         </p>
     </div>
 </footer>

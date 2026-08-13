@@ -66,8 +66,8 @@
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a id="nextFileLink" class="nav" href="z_a05a191dbd626744__generic_chp_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
-            created at 2026-08-08 05:33 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.4">coverage.py v7.15.4</a>,
+            created at 2026-08-13 06:50 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -84,11 +84,11 @@
 <main id="source">
     <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="com"># -*- coding: utf-8 -</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">ExtractionTurbineCHP and associated individual constraints (blocks)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">and groupings.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Uwe Krien &lt;krien@uni-bremen.de></span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Uwe Krien &lt;krien@uni-bremen.de&gt;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Simon Hilpert</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Cord Kaldemeyer</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t"><span class="str">SPDX-FileCopyrightText: Patrik Sch&#246;nfeldt</span>&nbsp;</span><span class="r"></span></p>
@@ -101,7 +101,7 @@
     <p class="pln"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="str">SPDX-License-Identifier: MIT</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t"><span class="key">from</span> <span class="nam">pyomo</span><span class="op">.</span><span class="nam">core</span><span class="op">.</span><span class="nam">base</span><span class="op">.</span><span class="nam">block</span> <span class="key">import</span> <span class="nam">ScalarBlock</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t"><span class="key">from</span> <span class="nam">pyomo</span><span class="op">.</span><span class="nam">environ</span> <span class="key">import</span> <span class="nam">BuildAction</span>&nbsp;</span><span class="r"></span></p>
@@ -113,7 +113,7 @@
     <p class="pln"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t"><span class="key">class</span> <span class="nam">ExtractionTurbineCHP</span><span class="op">(</span><span class="nam">Converter</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="str">r"""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">    <span class="str">r&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t"><span class="str">    A CHP with an extraction turbine in a linear model. For a more</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t"><span class="str">    detailled modelling approach providing more options, also see</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t"><span class="str">    the :class:`.GenericCHP` class.</span>&nbsp;</span><span class="r"></span></p>
@@ -143,17 +143,17 @@
     <p class="pln"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t"><span class="str">    Examples</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t"><span class="str">    --------</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t"><span class="str">    >>> from oemof import solph</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t"><span class="str">    >>> bel = solph.buses.Bus(label='electricityBus')</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t"><span class="str">    >>> bth = solph.buses.Bus(label='heatBus')</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="str">    >>> bgas = solph.buses.Bus(label='commodityBus')</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t"><span class="str">    >>> et_chp = solph.components.ExtractionTurbineCHP(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t"><span class="str">    ...    label='variable_chp_gas',</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t"><span class="str">    &gt;&gt;&gt; from oemof import solph</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t"><span class="str">    &gt;&gt;&gt; bel = solph.buses.Bus(label=&#x27;electricityBus&#x27;)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t"><span class="str">    &gt;&gt;&gt; bth = solph.buses.Bus(label=&#x27;heatBus&#x27;)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t"><span class="str">    &gt;&gt;&gt; bgas = solph.buses.Bus(label=&#x27;commodityBus&#x27;)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t"><span class="str">    &gt;&gt;&gt; et_chp = solph.components.ExtractionTurbineCHP(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t"><span class="str">    ...    label=&#x27;variable_chp_gas&#x27;,</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t"><span class="str">    ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t"><span class="str">    ...    outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t"><span class="str">    ...    conversion_factors={bel: 0.3, bth: 0.5},</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t"><span class="str">    ...    conversion_factor_full_condensation={bel: 0.5})</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="str">    """</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">    <span class="nam">conversion_factor_full_condensation</span> <span class="op">=</span> <span class="nam">Apply</span><span class="op">(</span><span class="nam">SequenceDict</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -184,7 +184,7 @@
     <p class="pln"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t"><span class="key">class</span> <span class="nam">ExtractionTurbineCHPBlock</span><span class="op">(</span><span class="nam">ScalarBlock</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="str">r"""Block for all instances of</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="str">r&quot;&quot;&quot;Block for all instances of</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t"><span class="str">    :class:`~oemof.solph.components.experimental._ExtractionTurbineCHP`</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t"><span class="str">    **Variables**</span>&nbsp;</span><span class="r"></span></p>
@@ -277,7 +277,7 @@
     <p class="pln"><span class="n"><a id="t193" href="#t193">193</a></span><span class="t"><span class="str">                                                                                        maximal heat extraction</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t194" href="#t194">194</a></span><span class="t"><span class="str">    ========================= ============================================ ==== =========</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t195" href="#t195">195</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t"><span class="str">    """</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t196" href="#t196">196</a></span><span class="t"><span class="str">    &quot;&quot;&quot;</span>  <span class="com"># noqa: E501</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t197" href="#t197">197</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t198" href="#t198">198</a></span><span class="t">    <span class="nam">CONSTRAINT_GROUP</span> <span class="op">=</span> <span class="key">True</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t199" href="#t199">199</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -285,7 +285,7 @@
     <p class="run"><span class="n"><a id="t201" href="#t201">201</a></span><span class="t">        <span class="nam">super</span><span class="op">(</span><span class="op">)</span><span class="op">.</span><span class="nam">__init__</span><span class="op">(</span><span class="op">*</span><span class="nam">args</span><span class="op">,</span> <span class="op">**</span><span class="nam">kwargs</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t202" href="#t202">202</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t203" href="#t203">203</a></span><span class="t">    <span class="key">def</span> <span class="nam">_create</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">group</span><span class="op">=</span><span class="key">None</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">        <span class="str">"""Creates the constraints for</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">        <span class="str">&quot;&quot;&quot;Creates the constraints for</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t205" href="#t205">205</a></span><span class="t"><span class="str">        :class:`oemof.solph.components.experimental._extraction_turbine_chp.ExtractionTurbineCHPBlock`.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t206" href="#t206">206</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t"><span class="str">        Parameters</span>&nbsp;</span><span class="r"></span></p>
@@ -298,7 +298,7 @@
     <p class="pln"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t"><span class="str">            Note that the relation is created for all existing relations</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t215" href="#t215">215</a></span><span class="t"><span class="str">            of the inputs and all outputs of the converter-like object.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t216" href="#t216">216</a></span><span class="t"><span class="str">            The components inside the list need to hold all needed attributes.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t217" href="#t217">217</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t217" href="#t217">217</a></span><span class="t"><span class="str">        &quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="par run show_par"><span class="n"><a id="t218" href="#t218">218</a></span><span class="t">        <span class="key">if</span> <span class="nam">group</span> <span class="key">is</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"><span class="annotate short">218&#x202F;&#x219B;&#x202F;219</span><span class="annotate long">line 218 didn't jump to line 219 because the condition on line 218 was never true</span></span></p>
     <p class="mis show_mis"><span class="n"><a id="t219" href="#t219">219</a></span><span class="t">            <span class="key">return</span> <span class="key">None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t220" href="#t220">220</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
@@ -329,7 +329,7 @@
     <p class="run run2"><span class="n"><a id="t245" href="#t245">245</a></span><span class="t">            <span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t246" href="#t246">246</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t247" href="#t247">247</a></span><span class="t">        <span class="key">def</span> <span class="nam">_input_output_relation_rule</span><span class="op">(</span><span class="nam">block</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t248" href="#t248">248</a></span><span class="t">            <span class="str">"""Connection between input, main output and tapped output."""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t248" href="#t248">248</a></span><span class="t">            <span class="str">&quot;&quot;&quot;Connection between input, main output and tapped output.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t249" href="#t249">249</a></span><span class="t">            <span class="key">for</span> <span class="nam">t</span> <span class="key">in</span> <span class="nam">m</span><span class="op">.</span><span class="nam">TIMESTEPS</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t250" href="#t250">250</a></span><span class="t">                <span class="key">for</span> <span class="nam">g</span> <span class="key">in</span> <span class="nam">group</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t251" href="#t251">251</a></span><span class="t">                    <span class="nam">lhs</span> <span class="op">=</span> <span class="nam">m</span><span class="op">.</span><span class="nam">flow</span><span class="op">[</span><span class="nam">g</span><span class="op">.</span><span class="nam">inflow</span><span class="op">,</span> <span class="nam">g</span><span class="op">,</span> <span class="nam">t</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -348,7 +348,7 @@
     <p class="run run2"><span class="n"><a id="t264" href="#t264">264</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t265" href="#t265">265</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t266" href="#t266">266</a></span><span class="t">        <span class="key">def</span> <span class="nam">_out_flow_relation_rule</span><span class="op">(</span><span class="nam">block</span><span class="op">)</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t">            <span class="str">"""Relation between main and tapped output in full chp mode."""</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t267" href="#t267">267</a></span><span class="t">            <span class="str">&quot;&quot;&quot;Relation between main and tapped output in full chp mode.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t268" href="#t268">268</a></span><span class="t">            <span class="key">for</span> <span class="nam">t</span> <span class="key">in</span> <span class="nam">m</span><span class="op">.</span><span class="nam">TIMESTEPS</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t269" href="#t269">269</a></span><span class="t">                <span class="key">for</span> <span class="nam">g</span> <span class="key">in</span> <span class="nam">group</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t270" href="#t270">270</a></span><span class="t">                    <span class="nam">lhs</span> <span class="op">=</span> <span class="nam">m</span><span class="op">.</span><span class="nam">flow</span><span class="op">[</span><span class="nam">g</span><span class="op">,</span> <span class="nam">g</span><span class="op">.</span><span class="nam">main_output</span><span class="op">,</span> <span class="nam">t</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
@@ -356,7 +356,7 @@
     <p class="run run2"><span class="n"><a id="t272" href="#t272">272</a></span><span class="t">                        <span class="nam">m</span><span class="op">.</span><span class="nam">flow</span><span class="op">[</span><span class="nam">g</span><span class="op">,</span> <span class="nam">g</span><span class="op">.</span><span class="nam">tapped_output</span><span class="op">,</span> <span class="nam">t</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t273" href="#t273">273</a></span><span class="t">                        <span class="op">*</span> <span class="nam">g</span><span class="op">.</span><span class="nam">flow_relation_index</span><span class="op">[</span><span class="nam">t</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t274" href="#t274">274</a></span><span class="t">                    <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">                    <span class="nam">block</span><span class="op">.</span><span class="nam">out_flow_relation</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="op">(</span><span class="nam">g</span><span class="op">,</span> <span class="nam">t</span><span class="op">)</span><span class="op">,</span> <span class="op">(</span><span class="nam">lhs</span> <span class="op">>=</span> <span class="nam">rhs</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t275" href="#t275">275</a></span><span class="t">                    <span class="nam">block</span><span class="op">.</span><span class="nam">out_flow_relation</span><span class="op">.</span><span class="nam">add</span><span class="op">(</span><span class="op">(</span><span class="nam">g</span><span class="op">,</span> <span class="nam">t</span><span class="op">)</span><span class="op">,</span> <span class="op">(</span><span class="nam">lhs</span> <span class="op">&gt;=</span> <span class="nam">rhs</span><span class="op">)</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t276" href="#t276">276</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t277" href="#t277">277</a></span><span class="t">        <span class="nam">self</span><span class="op">.</span><span class="nam">out_flow_relation</span> <span class="op">=</span> <span class="nam">Constraint</span><span class="op">(</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t278" href="#t278">278</a></span><span class="t">            <span class="nam">group</span><span class="op">,</span> <span class="nam">m</span><span class="op">.</span><span class="nam">TIMESTEPS</span><span class="op">,</span> <span class="nam">noruleinit</span><span class="op">=</span><span class="key">True</span>&nbsp;</span><span class="r"></span></p>
@@ -372,8 +372,8 @@
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
             <a class="nav" href="z_a05a191dbd626744__generic_chp_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.2">coverage.py v7.15.2</a>,
-            created at 2026-08-08 05:33 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.15.4">coverage.py v7.15.4</a>,
+            created at 2026-08-13 06:50 +0000
         </p>
     </div>
 </footer>
