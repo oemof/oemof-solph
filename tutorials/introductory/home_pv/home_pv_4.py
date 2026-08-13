@@ -105,7 +105,7 @@ results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 
 # Potentially, there are more points in time to invest.
 # For upfront invest, we need to select the initial.
-pv_size = results["capacity"][(pv_system, el_bus)][0]
+pv_size = results["nominal_capacity"][(pv_system, el_bus)][0]
 
 battery_annuity = battery_epc * battery_size
 pv_annuity = pv_epc * results["invest"][(pv_system, el_bus)][0]

@@ -84,10 +84,10 @@ def test_invest_power_uncoupled():
 
     assert (results["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
 
-    capacity_inflow = results["capacity"][(bus, storage)]
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
     assert capacity_inflow[0] == pytest.approx(1)
 
-    capacity_outflow = results["capacity"][(storage, bus)]
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
     assert capacity_outflow[0] == pytest.approx(0)
 
 
@@ -130,10 +130,10 @@ def test_invest_power_coupled():
     storage_content = results["storage_content"][storage]
     assert (storage_content == np.arange(0, 10.5, 1)).all()
 
-    capacity_inflow = results["capacity"][(bus, storage)]
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
     assert capacity_inflow[0] == pytest.approx(1)
 
-    capacity_outflow = results["capacity"][(storage, bus)]
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
     assert capacity_outflow[0] == pytest.approx(2)
 
 
