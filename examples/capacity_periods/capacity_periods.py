@@ -23,7 +23,7 @@ def main():
         label="source",
         outputs={
             bus: solph.Flow(
-                nominal_capacity=solph.Investment(maximum=4),
+                nominal_capacity=solph.Investment(maximum=4, ep_costs=0.1),
             ),
         },
     )
@@ -43,6 +43,7 @@ def main():
     results = model.solve()
 
     print(results["flow"])
+    print(results["nominal_capacity"])
     print(results["objective"])
 
 
