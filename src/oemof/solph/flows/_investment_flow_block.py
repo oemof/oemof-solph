@@ -663,50 +663,24 @@ class InvestmentFlowBlock(ScalarBlock):
 
         m = self.parent_block()
         investment_costs = 0
-        period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
 
-        if m.es.transitional_single_period:
-            for i, o in self.CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                    )
+        for i, o in self.CONVEX_INVESTFLOWS:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p]
+                    * m.flows[i, o].investment.ep_costs[p]
+                )
 
-            for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                        + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
-                    )
-
-        else:
-            for i, o in self.CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-
-                    investment_costs_increment = (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                    )
-                    investment_costs += investment_costs_increment
-                    period_investment_costs[p] += investment_costs_increment
-
-            for i, o in self.NON_CONVEX_INVESTFLOWS:
-                for p in m.CAPACITY_PERIODS:
-
-                    investment_costs_increment = (
-                        self.invest[i, o, p]
-                        * m.flows[i, o].investment.ep_costs[p]
-                        + self.invest_status[i, o, p]
-                        * m.flows[i, o].investment.offset[p]
-                    )
-                    investment_costs += investment_costs_increment
-                    period_investment_costs[p] += investment_costs_increment
+        for i, o in self.NON_CONVEX_INVESTFLOWS:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[i, o, p]
+                    * m.flows[i, o].investment.ep_costs[p]
+                    + self.invest_status[i, o, p]
+                    * m.flows[i, o].investment.offset[p]
+                )
 
         self.investment_costs = Expression(expr=investment_costs)
-        self.period_investment_costs = period_investment_costs
         self.costs = Expression(expr=investment_costs)
 
         return self.costs
