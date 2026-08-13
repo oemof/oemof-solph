@@ -10,7 +10,6 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.sdist]
 include = [
-    "AUTHORS.rst",
     "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.rst",
