@@ -1,87 +1,40 @@
 .. _optimization_multi_period_label:
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Multi-period optimization (experimental)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Pathway planning (experimental)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Sometimes you might be interested in how energy systems could evolve in the longer-term, e.g. until 2045 or 2050 to meet some
 carbon neutrality and climate protection or RES and energy efficiency targets.
 
-While in principle, you could try to model this in oemof.solph using the standard investment mode described above (see :ref:`optimization_invest_label`),
+While in principle, you could try to model this in oemof.solph using default investments as described above (see :ref:`optimization_invest_label`),
 you would make the implicit assumption that your entire system is built at the start of your optimization and doesn't change over time.
-To address this shortcoming, the multi-period (investment) feature has been introduced. Be aware that it is still experimental.
+To address this shortcoming, the pathway planning feature has been introduced. Be aware that it is still experimental.
 So feel free to report any bugs or unexpected behaviour if you come across them.
 
-While in principle, you can define a dispatch-only multi-period system, this doesn't make much sense. The power of the multi-period feature
-only unfolds if you look at long-term investments. Let's see how.
+For pathway planning, you define the usual time axis but also a number of points in time when installed capacities can change.
+In rare cases, it might also be convenient to define a dispatch-only system using this feature. However, the power of the pathway-planning feature
+fully unfolds if you look at long-term investments. Let's see how.
 
 First, you start by defining your energy system as you might have done before, but you
 
-* choose a longer-term time horizon (spanning multiple years, i.e. multiple periods) and
-* explicitly define the `periods` attribute of your energy system which lists the time steps for each period.
+* choose a longer-term time horizon (typically spanning multiple years) and
+* explicitly define the `investment_times` attribute of your energy system which lists the time stamps at which capacitis may change.
 
 .. code-block:: python
 
     import pandas as pd
     import oemof.solph as solph
 
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
-    periods = [
-        pd.date_range('1/1/2013', periods=8760, freq='h'),
-        pd.date_range('1/1/2014', periods=8760, freq='h'),
-    ]
-    my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
+    my_index = pd.date_range('1/1/2013', periods=2*8760 + 1, freq='h')
+    my_energysystem = solph.EnergySystem(
+        timeindex=my_index,
+        investment_times=[my_index[0], my_index[8760], my_index[-1]],
+    )
 
-If you want to use a multi-period model you have define periods of your energy system explicitly. This way,
-you are forced to critically think, e.g. about handling leap years, and take some design decisions. It is possible to
-define periods with different lengths, but remember that decommissioning of components is possible only at the
-beginning of each period. This means that if the life of a component is just a little longer, it will remain for the
-entire next period. This can have a particularly large impact the longer your periods are.
-
-To assist you, here is a plain python snippet that includes leap years which you can just copy
-and adjust to your needs:
-
-.. code-block:: python
-
-    def determine_periods(datetimeindex):
-        """Explicitly define and return periods of the energy system
-
-        Leap years have 8784 hourly time steps, regular years 8760.
-
-        Parameters
-        ----------
-        datetimeindex : pd.date_range
-            DatetimeIndex of the model comprising all time steps
-
-        Returns
-        -------
-        periods : list
-            periods for the optimization run
-        """
-        years = sorted(list(set(getattr(datetimeindex, "year"))))
-        periods = []
-        filter_series = datetimeindex.to_series()
-        for number, year in enumerate(years):
-            start = filter_series.loc[filter_series.index.year == year].min()
-            end = filter_series.loc[filter_series.index.year == year].max()
-            periods.append(pd.date_range(start, end, freq=datetimeindex.freq))
-
-        return periods
-
-So if you want to use this, the above would simplify to:
-
-.. code-block:: python
-
-    import pandas as pd
-    import oemof.solph as solph
-
-    # Define your method (or import it from somewhere else)
-    def determine_periods(datetimeindex):
-        ...
-
-    my_index = pd.date_range('1/1/2013', periods=17520, freq='h')
-    periods = determine_periods(my_index)  # Make use of method
-    my_energysystem = solph.EnergySystem(timeindex=my_index, periods=periods)
+The capacity periods work very similar to the normal timeindex:
+You need to define the time step that closes the last interval,
+and it is possible to define capacity periods with different lengths.
 
 
 Then you add all the *components* and *buses* to your energy system, just as you are used to with, but with few additions.
@@ -108,30 +61,25 @@ Then you add all the *components* and *buses* to your energy system, just as you
         },
     )
 
-    electrical_sink = solph.components.Sink(
-        label="electricity_demand",
-        inputs={
-            electricity_bus: solph.flows.Flow(
-                nominal_capacity=1000, fix=[0.8] * len(my_index)
-            )
-        },
-    )
+So defining buses is the same as for standard models. Also defining components with constant capacities is the same.
+Now, if you have componants that have a changing capacity, you can define that
+using the capacitiy periods instead of changing values for fix.
+Also, components that can be invested into (see :ref:`optimization_invest_label`),
+behave slightly different as the optimal capacitiy can be chosen per period:
 
-So defining buses is the same as for standard models. Also defining components that do not have any investments associated with
-them or any lifetime limitations is the same.
-
-Now if you want to have components that can be invested into, you use the investment option, just as in :ref:`optimization_invest_label`,
-but with a few minor additions and modifications in the investment object itself which you specify by additional attributes:
-
-* You have to specify a `lifetime` attribute. This is the components assumed technical lifetime in years. If it is 20 years,
-  the model invests into it and your simulation has a 30 years horizon, the plant will be decommissioned. Now the model is
-  free to reinvest or choose another option to fill up the missing capacity.
-* You can define an initial `age` if you have `existing` capacity. If you do not specify anything, the default value 0 will be used,
-  meaning your `existing` capacity has just been newly invested.
 
 Here is an example
 
 .. code-block:: python
+
+    electrical_sink = solph.components.Sink(
+        label="electricity_demand",
+        inputs={
+            electricity_bus: solph.flows.Flow(
+                nominal_capacity=[1000, 1100], fix=0.8
+            )
+        },
+    )
 
     hydrogen_power_plant = solph.components.Converter(
         label="hydrogen_pp",
@@ -140,24 +88,13 @@ Here is an example
             electricity_bus: solph.flows.Flow(
                 nominal_capacity=solph.Investment(
                     maximum=1000,
-                    ep_costs=1e6,
-                    lifetime=30,
+                    ep_costs=30e3,
                 ),
                 variable_costs=3,
             )
         },
         conversion_factors={electricity_bus: 0.6},
     )
-
-.. warning::
-
-    The `ep_costs` attribute for investments is used in a different way in a multi-period model. Instead
-    of periodical costs, it depicts (nominal or real) investment expenses, so actual Euros you have to pay per kW or MW
-    (or whatever power or energy unit) installed. Also, you can depict a change in investment expenses over time,
-    so instead of providing a scalar value, you could define a list with investment expenses with one value for each period modelled.
-
-    Annuities are calculated within the model. You do not have to do that.
-    Also the model takes care of discounting future expenses / cashflows.
 
 Below is what it would look like if you altered `ep_costs` per period. This can be done by simply
 providing a list. Note that the length of the list must equal the number of periods of your model.
@@ -172,8 +109,7 @@ This would mean that for investments in the particular period, these values woul
             electricity_bus: solph.flows.Flow(
                 nominal_capacity=solph.Investment(
                     maximum=1000,
-                    ep_costs=[1e6, 1.1e6],
-                    lifetime=30,
+                    ep_costs=[30e3, 29e3],
                 ),
                 variable_costs=3,
             )
@@ -183,26 +119,6 @@ This would mean that for investments in the particular period, these values woul
 
 For components that is not invested into, you also can specify some additional attributes for their inflows and outflows:
 
-* You can specify a `lifetime` attribute. This can be used to depict existing plants going offline when reaching their lifetime.
-* You can define an initial `age`. Also, this can be used for existing plants.
-
-.. code-block:: python
-
-    coal_power_plant = solph.components.Converter(
-        label="existing_coal_pp",
-        inputs={coal_bus: solph.flows.Flow()},
-        outputs={
-            electricity_bus: solph.flows.Flow(
-                nominal_capacity=600,
-                maximum=1,
-                minimum=0.4,
-                lifetime=50,
-                age=46,
-                variable_costs=3,
-            )
-        },
-        conversion_factors={electricity_bus: 0.36},
-    )
 
 To solve our model and retrieve results, you basically perform the same operations as for standard models.
 So it works like this:
@@ -223,30 +139,10 @@ So it works like this:
     om = solph.Model(my_energysystem)
     results = om.solve(solver="cbc", solve_kwargs={"tee": True})
 
-    # Show investment plan for hydrogen power plants
-    print(results["invest"])
-
-The keys in the results dict in a multi-period model are "sequences" and "period_scalars".
-So for sequences, it is all the same, while for scalar values, we now have values for each period.
-
-Besides the `invest` variable, new variables are introduced as well. These are:
-
-* `total`: The total capacity installed, i.e. how much is actually there in a given period.
-* `old`: (Overall) capacity to be decommissioned in a given period.
-* `old_end`: Endogenous capacity to be decommissioned in a given period. This is capacity that has been invested into
-  in the model itself.
-* `old_exo`: Exogenous capacity to be decommissioned in a given period. This is capacity that was already existing and
-  given by the `existing` attribute.
+    # Show investment for hydrogen power plants
+    print(results["nominal_capacity"])
 
 .. note::
 
-    * For storage units, the `initial_content` is not allowed combined with multi-period investments.
-      The storage inflow and outflow are forced to zero until the storage unit is invested into.
-    * You can specify periods of different lengths, but the frequency of your timeindex needs to be consistent. Also,
-      you could use the `timeincrement` attribute of the energy system to model different weightings. Be aware that this
-      has not yet been tested.
-    * For now, both, the `timeindex` as well as the `timeincrement` of an energy system have to be defined since they
-      have to be of the same length for a multi-period model.
-    * Also please be aware, that periods correspond to years by default. You could also choose
-      monthly periods, but you would need to be very careful in parameterizing your energy system and your model and also,
-      this would mean monthly discounting (if applicable) as well as specifying your plants lifetimes in months.
+    For storage units, the `initial_content` is currently not allowed combined with multi-period investments.
+    The storage inflow and outflow are forced to zero until the storage unit is invested into.
