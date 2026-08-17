@@ -44,8 +44,7 @@ class Flow(Edge):
 
     Parameters
     ----------
-    nominal_capacity : numeric, :math:`P_{nom}` or
-            :class:`Investment <oemof.solph.options.Investment>`
+    nominal_capacity : numeric (iterable or scalar) or :class:`Investment <oemof.solph.options.Investment>`, :math:`P_{nom}`
         The nominal calacity of the flow, either fixed or as an investement
         optimisation. If this value is set, the corresponding optimization
         variable of the flow object will be bounded by this value
@@ -85,16 +84,6 @@ class Flow(Edge):
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
-    lifetime : int, :math:`l`
-        The lifetime of a flow (usually given in years);
-        once it reaches its lifetime (considering also
-        an initial age), the flow is forced to 0.
-        Note: Only applicable for a multi-period model.
-    age : int, :math:`a`
-        The initial age of a flow (usually given in years);
-        once it reaches its lifetime (considering also
-        an initial age), the flow is forced to 0.
-        Note: Only applicable for a multi-period model.
 
     Notes
     -----
