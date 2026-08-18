@@ -1414,10 +1414,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             ]
         )
 
-        self.EXISTING_INVESTSTORAGES = Set(
-            initialize=[n for n in group if n.investment.existing is not None]
-        )
-
         # ######################### Variables  ################################
         if not m.TSAM_MODE:
             self.storage_content = Var(
@@ -1479,7 +1475,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 for p in m.CAPACITY_PERIODS:
                     expr = (
                         self.storage_capacity[n, p]
-                        == self.invest[n, p] + n.investment.existing
+                        == self.invest[n, p] + n.investment.existing[p]
                     )
                     self.total_storage_rule.add((n, p), expr)
 
@@ -1497,7 +1493,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 lhs = block.storage_content[n, 0]
             else:
                 lhs = block.intra_storage_delta[n, 0, 0, 0]
-            return lhs <= n.investment.existing + block.invest[n, 0]
+            return lhs <= n.investment.existing[0] + block.invest[n, 0]
 
         self.init_content_limit = Constraint(
             self.INVESTSTORAGES_NO_INIT_CONTENT,
@@ -1511,7 +1507,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             else:
                 lhs = block.intra_storage_delta[n, 0, 0, 0]
             return lhs == n.initial_storage_level * (
-                n.investment.existing + block.invest[n, 0]
+                n.investment.existing[0] + block.invest[n, 0]
             )
 
         self.init_content_fix = Constraint(

@@ -70,6 +70,7 @@ class Investment:
     """  # noqa: E501
 
     ep_costs = Apply(sequence)
+    existing = Apply(sequence)
     maximum = Apply(sequence)
     minimum = Apply(sequence)
     offset = Apply(sequence)
