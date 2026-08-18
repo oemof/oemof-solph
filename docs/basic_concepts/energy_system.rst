@@ -12,7 +12,7 @@ An example of a simple energy system shows the usage of the nodes for
 real world representations:
 
 .. 	figure:: /_files/oemof_solph_example_darkmode.svg
-   :alt: oemof_solph_example_darkmode.svgt
+   :alt: oemof_solph_example_darkmode.svg
    :align: center
    :figclass: only-dark
 
@@ -38,12 +38,12 @@ Flows
 Flows are used to create connections between different elements of your
 `EnergySystem`. You can connect `Components` with `Buses` or `Buses` with other
 `Buses`. The :code:`Flow` class is normally used in combination with the
-definition of a component. It connects the inlets and/or outlets of a component.
+definition of a component. It connects the inlets and/or outlets of a component
 to the respective Buses.
 
 On top of creating the topological structure of your `EnergySystem`, the `Flow`
-holds variables, which optimized with the solver. This can be the per time step
-amounts of energy transferred from one part of your system to another one, or
+holds variables, which are optimized by the solver. This can be the per-time-step
+amounts of energy transferred from one part of your system to another, or
 the installed capacity of a specific component (e.g. a heat pump). Furthermore,
 you can set constraints, e.g. limiting upper and lower bounds (constant or
 time-dependent) or setting summarised limits (such as an annual emission limit).
@@ -66,17 +66,17 @@ provided in the sections on the
 Buses
 #####
 
-Buses are representing commodities such as electricity, heat or natural gas.
+Buses represent commodities such as electricity, heat or natural gas.
 The main purpose of a Bus is the balancing of its inflows and its outflows at
-any given point in time, meaning, that the sum of all incoming flows and all
+every single point in time, meaning, that the sum of all incoming flows and all
 outgoing flows must be equal to zero.
 
-To define an instance of a Bus only a unique label is necessary. If you do not
+To define an instance of a Bus, only a unique label is necessary. If you do not
 set a label, a random label is assigned, but this makes it difficult to track
 the results later on.
 
 To make it easier to connect your buses with other parts of the energy system,
-you can assign it to a variable for later use.
+you can assign them to a variable for later use.
 
 .. code-block:: python
 
@@ -99,7 +99,7 @@ Components are used to model:
   example: Heat or electricity demand of consumers.
 - energy storage (Storage), for example: batteries or heat storage tanks.
 
-You can use all oemof.solph *components* in your energy system model. However
+You can use all oemof.solph *components* in your energy system model. However,
 you should read the documentation of each *component* to learn about usage and
 restrictions. For example it is not possible to combine every *component* with
 every *flow*. Furthermore, you can add your own *components* in your
@@ -115,15 +115,15 @@ The model time is defined by the number of intervals and the length of
 intervals. The length of each interval does not have to be the same. The
 intervals are defined by giving a `pandas.DatetimeIndex` with all time steps
 that define the intervals. Be aware that you have to define n+1 time points to
-get n intervals. For non-leap year with hourly values that means 8761 time
-points to get 8760 interval e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
+get n intervals. For non-leap years with hourly values that means 8761 time
+points to get 8760 intervals e.g. 2018-01-01 00:00 to 2019-01-01 00:00.
 
 .. note::
 
     The index will also be used for the results. For a numeric index the resulting
     time series will indexed with a numeric index starting with 0.
 
-One can use the function :py:func:`create_time_index` to create an equidistant
+One can use the function :py:func:`create_time_index` to create a regular (i.e. uniformly spaced)
 datetime index:
 
 .. code-block:: python
@@ -140,7 +140,7 @@ the value can be overwritten by the user.
 
 It is also possible to define the datetime index using pandas. See
 `pandas date_range guide <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.date_range.html>`_
-for more information. The example below will created the identical index as the
+for more information. The example below will create the identical index as the
 helper function provided by oemof.solph.
 
 .. code-block:: python
@@ -163,7 +163,7 @@ To create your `EnergySystem` you have to pass the time index at initialisation:
     >>> type(my_energysystem)
     <class 'oemof.solph._energy_system.EnergySystem'>
 
-After defining an instance of the `EnergySystem` class, one need to add nodes
+After defining an instance of the `EnergySystem` class, one must add nodes
 and links between them to define the underlying network of the energy system.
 
 There are different ways to add components. The following line adds a *bus*
@@ -182,7 +182,7 @@ that case it is easy to add as many objects as you like.
     >>> my_bus2 = solph.buses.Bus()
     >>> my_energysystem.add(my_bus1, my_bus2)
 
-Therefore it is also possible to add lists or dictionaries of components.
+It is also possible to add lists or dictionaries of components.
 
 .. code-block:: python
 
