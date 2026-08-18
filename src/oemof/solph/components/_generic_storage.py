@@ -76,10 +76,6 @@ class GenericStorage(Node):
     initial_storage_level : numeric, :math:`c(-1)`
         The relative storage content in the timestep before the first
         time step of optimization (between 0 and 1).
-
-        Note: When investment mode is used in a multi-period model,
-        `initial_storage_level` is not supported.
-        Storage output is forced to zero until the storage unit is invested in.
     balanced : boolean
         Couple storage level of first and last time step.
         (Total inflow and total outflow are balanced.)
@@ -1099,16 +1095,14 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     The following constraints are created depending on the attributes of
     the :class:`.GenericStorage`:
 
-        * :attr:`initial_storage_level is None`;
-          not applicable for multi-period model
+        * :attr:`initial_storage_level is None`
 
             Constraint for a variable initial storage content:
 
         .. math::
                E(-1) \le E_{exist} + E_{invest}(0)
 
-        * :attr:`initial_storage_level is not None`;
-          not applicable for multi-period model
+        * :attr:`initial_storage_level is not None`
 
             An initial value for the storage content is given:
 
@@ -1361,24 +1355,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         """Create a storage block for investment modeling"""
         m = self.parent_block()
 
-        # ########################## CHECKS ###################################
-        if not m.es.transitional_single_period:
-            for n in group:
-                error_fixed_absolute_losses = (
-                    "For a multi-period investment model, fixed absolute"
-                    " losses are not supported. Please remove parameter."
-                )
-                if n.fixed_losses_absolute[0] != 0:
-                    raise ValueError(error_fixed_absolute_losses)
-                error_initial_storage_level = (
-                    "For a multi-period model, initial_storage_level is"
-                    " not supported.\nIt needs to be removed since it"
-                    " has no effect.\nstorage_content will be zero,"
-                    " until there is some usable storage capacity installed."
-                )
-                if n.initial_storage_level is not None:
-                    raise ValueError(error_initial_storage_level)
-
         # ########################## SETS #####################################
 
         self.INVESTSTORAGES = Set(initialize=[n for n in group])
@@ -1515,55 +1491,33 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=_total_storage_capacity_rule
         )
 
-        # multi-period storage implementation for time intervals
-        if not m.es.transitional_single_period:
-
-            def _initially_empty_rule(_):
-                """Ensure storage to be empty initially"""
-                for n in self.INVESTSTORAGES:
-                    expr = self.storage_content[n, 0] == 0
-                    self.initially_empty.add((n, 0), expr)
-
+        def _inv_storage_init_content_max_rule(block, n):
+            """Constraint for a variable initial storage capacity."""
             if not m.TSAM_MODE:
-                # inter and intra initial storage contents are handled above
-                self.initially_empty = Constraint(
-                    self.INVESTSTORAGES, m.TIMESTEPS, noruleinit=True
-                )
+                lhs = block.storage_content[n, 0]
+            else:
+                lhs = block.intra_storage_delta[n, 0, 0, 0]
+            return lhs <= n.investment.existing + block.invest[n, 0]
 
-                self.initially_empty_build = BuildAction(
-                    rule=_initially_empty_rule
-                )
+        self.init_content_limit = Constraint(
+            self.INVESTSTORAGES_NO_INIT_CONTENT,
+            rule=_inv_storage_init_content_max_rule,
+        )
 
-        # Standard storage implementation for discrete time points
-        else:
-
-            def _inv_storage_init_content_max_rule(block, n):
-                """Constraint for a variable initial storage capacity."""
-                if not m.TSAM_MODE:
-                    lhs = block.storage_content[n, 0]
-                else:
-                    lhs = block.intra_storage_delta[n, 0, 0, 0]
-                return lhs <= n.investment.existing + block.invest[n, 0]
-
-            self.init_content_limit = Constraint(
-                self.INVESTSTORAGES_NO_INIT_CONTENT,
-                rule=_inv_storage_init_content_max_rule,
+        def _inv_storage_init_content_fix_rule(block, n):
+            """Constraint for a fixed initial storage capacity."""
+            if not m.TSAM_MODE:
+                lhs = block.storage_content[n, 0]
+            else:
+                lhs = block.intra_storage_delta[n, 0, 0, 0]
+            return lhs == n.initial_storage_level * (
+                n.investment.existing + block.invest[n, 0]
             )
 
-            def _inv_storage_init_content_fix_rule(block, n):
-                """Constraint for a fixed initial storage capacity."""
-                if not m.TSAM_MODE:
-                    lhs = block.storage_content[n, 0]
-                else:
-                    lhs = block.intra_storage_delta[n, 0, 0, 0]
-                return lhs == n.initial_storage_level * (
-                    n.investment.existing + block.invest[n, 0]
-                )
-
-            self.init_content_fix = Constraint(
-                self.INVESTSTORAGES_INIT_CONTENT,
-                rule=_inv_storage_init_content_fix_rule,
-            )
+        self.init_content_fix = Constraint(
+            self.INVESTSTORAGES_INIT_CONTENT,
+            rule=_inv_storage_init_content_fix_rule,
+        )
 
         def _storage_balance_rule(block, n, p, t):
             """

@@ -141,8 +141,3 @@ So it works like this:
 
     # Show investment for hydrogen power plants
     print(results["nominal_capacity"])
-
-.. note::
-
-    For storage units, the `initial_content` is currently not allowed combined with multi-period investments.
-    The storage inflow and outflow are forced to zero until the storage unit is invested into.
