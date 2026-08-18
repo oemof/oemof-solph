@@ -1438,18 +1438,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             ]
         )
 
-        self.OVERALL_MAXIMUM_INVESTSTORAGES = Set(
-            initialize=[
-                n for n in group if n.investment.overall_maximum is not None
-            ]
-        )
-
-        self.OVERALL_MINIMUM_INVESTSTORAGES = Set(
-            initialize=[
-                n for n in group if n.investment.overall_minimum is not None
-            ]
-        )
-
         self.EXISTING_INVESTSTORAGES = Set(
             initialize=[n for n in group if n.investment.existing is not None]
         )
@@ -1788,51 +1776,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             m.CAPACITY_PERIODS,
             rule=smallest_invest,
         )
-
-        if not m.es.transitional_single_period:
-
-            def _overall_storage_maximum_investflow_rule(block):
-                """Rule definition for maximum overall investment
-                in investment case.
-                """
-                for n in self.OVERALL_MAXIMUM_INVESTSTORAGES:
-                    for p in m.CAPACITY_PERIODS:
-                        expr = (
-                            self.storage_capacity[n, p]
-                            <= n.investment.overall_maximum
-                        )
-                        self.overall_storage_maximum.add((n, p), expr)
-
-            self.overall_storage_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTSTORAGES,
-                m.CAPACITY_PERIODS,
-                noruleinit=True,
-            )
-
-            self.overall_maximum_build = BuildAction(
-                rule=_overall_storage_maximum_investflow_rule
-            )
-
-            def _overall_minimum_investflow_rule(block):
-                """Rule definition for minimum overall investment
-                in investment case.
-
-                Note: This is only applicable for the last period
-                """
-                for n in self.OVERALL_MINIMUM_INVESTSTORAGES:
-                    expr = (
-                        n.investment.overall_minimum
-                        <= self.storage_capacity[n, m.CAPACITY_PERIODS[-1]]
-                    )
-                    self.overall_minimum.add(n, expr)
-
-            self.overall_minimum = Constraint(
-                self.OVERALL_MINIMUM_INVESTSTORAGES, noruleinit=True
-            )
-
-            self.overall_minimum_build = BuildAction(
-                rule=_overall_minimum_investflow_rule
-            )
 
     def _add_storage_limit_constraints(self):
         m = self.parent_block()

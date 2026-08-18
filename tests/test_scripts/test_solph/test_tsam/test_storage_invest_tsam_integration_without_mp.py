@@ -101,7 +101,7 @@ storage = solph.components.GenericStorage(
     label="storage",
     inputs={bel: solph.Flow()},
     outputs={bel: solph.Flow()},
-    nominal_capacity=solph.Investment(ep_costs=epc, lifetime=20),
+    nominal_capacity=solph.Investment(ep_costs=epc),
     loss_rate=0.01,
     inflow_conversion_factor=0.9,
     outflow_conversion_factor=0.8,

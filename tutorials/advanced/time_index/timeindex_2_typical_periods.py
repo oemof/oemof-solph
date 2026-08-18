@@ -57,7 +57,6 @@ def create_investment_objects_multi_period(year_of_invest):
             ep_costs=epc,
             offset=fix_cost,
             maximum=maximum,
-            lifetime=20,
             nonconvex=True,
         )
     return investments

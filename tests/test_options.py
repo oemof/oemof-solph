@@ -13,13 +13,6 @@ from oemof.tools import debugging
 from oemof import solph
 
 
-def test_check_age_and_lifetime():
-    """Check error being thrown if age > lifetime"""
-    msg = "A unit's age must be smaller than its expected lifetime."
-    with pytest.raises(AttributeError, match=msg):
-        solph.Flow(nominal_capacity=solph.Investment(age=41, lifetime=40))
-
-
 def test_check_invest_attributes_nonconvex():
     """Check error being thrown if nonconvex parameter is not of type bool"""
     msg = (

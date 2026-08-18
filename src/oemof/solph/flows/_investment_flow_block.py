@@ -147,22 +147,6 @@ class InvestmentFlowBlock(ScalarBlock):
             ]
         )
 
-        self.OVERALL_MAXIMUM_INVESTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].investment.overall_maximum is not None
-            ]
-        )
-
-        self.OVERALL_MINIMUM_INVESTFLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].investment.overall_minimum is not None
-            ]
-        )
-
     def _create_variables(self, _):
         r"""Creates all variables for investment flows.
 
@@ -391,27 +375,6 @@ class InvestmentFlowBlock(ScalarBlock):
             .. math::
                 \sum_{p, t} P(t) \cdot \tau(t) \geq P_{total}
                 \cdot t_{full\_load, min}
-
-            * :attr:`overall_maximum` is not None
-              (for multi-period model only)
-
-                Overall maximum of total installed capacity / energy for flow
-
-            .. math::
-                &
-                P_{total}(p) \leq P_{overall,max} \\
-                &\\
-                &
-                \forall p \in \textrm{CAPACITY_PERIODS}
-
-            * :attr:`overall_minimum` is not None
-              (for multi-period model only)
-
-                Overall minimum of total installed capacity / energy for flow;
-                applicable only in last period
-
-            .. math::
-                P_{total}(p_{last}) \geq P_{overall,min}
         """
         m = self.parent_block()
 
@@ -524,46 +487,6 @@ class InvestmentFlowBlock(ScalarBlock):
             self.FULL_LOAD_TIME_MIN_INVESTFLOWS,
             rule=_full_load_time_min_investflow_rule,
         )
-
-        if m.es.capacity_periods is not None:
-
-            def _overall_maximum_investflow_rule(block):
-                """Rule definition for maximum overall investment
-                in investment case.
-                """
-                for i, o in self.OVERALL_MAXIMUM_INVESTFLOWS:
-                    for p in m.CAPACITY_PERIODS:
-                        expr = (
-                            self.nominal_capacity[i, o, p]
-                            <= m.flows[i, o].investment.overall_maximum
-                        )
-                        self.overall_maximum.add((i, o, p), expr)
-
-            self.overall_maximum = Constraint(
-                self.OVERALL_MAXIMUM_INVESTFLOWS,
-                m.CAPACITY_PERIODS,
-                noruleinit=True,
-            )
-            self.overall_maximum_build = BuildAction(
-                rule=_overall_maximum_investflow_rule
-            )
-
-            def _overall_minimum_investflow_rule(block, i, o):
-                """Rule definition for minimum overall investment
-                in investment case.
-
-                Note: This is only applicable for the last period
-                """
-                expr = (
-                    m.flows[i, o].investment.overall_minimum
-                    <= self.nominal_capacity[i, o, m.CAPACITY_PERIODS[-1]]
-                )
-                return expr
-
-            self.overall_minimum = Constraint(
-                self.OVERALL_MINIMUM_INVESTFLOWS,
-                rule=_overall_minimum_investflow_rule,
-            )
 
     def _objective_expression(self):
         r"""Objective expression for flows with investment attribute of type
