@@ -4,6 +4,12 @@ v0.6.5
 API changes
 ###########
 
+* Moved to clearly continuous time for pathway planning (formerly multi-period)
+  optimisation. Instead of defining periods, users now can give
+  `investment times` at which capacities (may) change. Consequently, many
+  parameters that were scalars before can now be iterable. In contrast to the
+  former multi-period implementation, it is possible to give a time series of
+  fixed capacities without any investment.
 * Removed the wrapper that still allowed initialising the `OffsetConverter`
   using a tuple named `coefficient`. (This breaks compatibility with solph
   API before v0.5.3 from June 25th, 2024.)

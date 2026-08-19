@@ -57,7 +57,6 @@ def create_investment_objects_multi_period(year_of_invest):
             ep_costs=epc,
             offset=fix_cost,
             maximum=maximum,
-            lifetime=20,
             nonconvex=True,
         )
     return investments
@@ -108,8 +107,6 @@ def run_for_typical_periods(
 
     es = solph.EnergySystem(
         timeindex=tindex_agg,
-        timeincrement=[1] * len(tindex_agg),
-        periods=[tindex_agg],
         tsa_parameters=[
             {
                 "timesteps_per_period": aggregation.n_timesteps_per_period,
@@ -117,7 +114,7 @@ def run_for_typical_periods(
                 "timeindex": aggregation.cluster_representatives.index,
             }
         ],
-        infer_last_interval=False,
+        infer_last_interval=True,
     )
     # %%[ti_index_and_energy_system_end]
     results = populate_and_solve_energy_system(

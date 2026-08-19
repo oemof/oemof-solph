@@ -39,12 +39,8 @@ class Investment:
         defined per period p for a multi-period model.
     ep_costs : float, :math:`c_{invest,var}`
         Equivalent periodical costs or investment expenses for the investment
-
-        * For a standard model: equivalent periodical costs for the investment
-          per flow capacity, i.e. annuities for investments already calculated.
-        * For a multi-period model: Investment expenses for the respective
-          period (in nominal terms). Annuities are calculated within the
-          objective term, also considering age and lifetime.
+        per flow or storage capacity, i.e. annuities for investments already
+        calculated.
     existing : float, :math:`P_{exist}` or :math:`E_{exist}`
         Existing / installed capacity. The invested capacity is added on top
         of this value. Hence, existing capacities come at no additional costs.
@@ -57,23 +53,8 @@ class Investment:
     offset : float, :math:`c_{invest,fix}`
         Additional fixed investment costs. Only applicable if `nonconvex` is
         set to `True`.
-    overall_maximum : float, :math:`P_{overall,max}` or :math:`E_{overall,max}`
-        Overall maximum capacity investment, i.e. the amount of capacity
-        that can be totally installed at maximum in any period (taking into
-        account decommissionings); only applicable for multi-period models
-    overall_minimum : float :math:`P_{overall,min}` or :math:`E_{overall,min}`
-        Overall minimum capacity investment that needs to be installed
-        in the last period of the optimization (taking into account
-        decommissionings); only applicable for multi-period models
-    lifetime : int, :math:`l`
-        Units lifetime, given in years; only applicable for multi-period
-        models
-    age : int, :math:`a`
-        Units start age, given in years at the beginning of the optimization;
-        only applicable for multi-period models
-    fixed_costs : float or list of float, :math:`c_{fixed}(p)`
-        Fixed costs in each period (given in nominal terms);
-        only applicable for multi-period models
+    lifetime : int, :math:`l` (experimental)
+        Lifetime of newly invested capacity (given capacity periods)
 
 
     For the variables, constraints and parts of the objective function, which
@@ -87,10 +68,11 @@ class Investment:
     """  # noqa: E501
 
     ep_costs = Apply(sequence)
-    fixed_costs = Apply(sequence)
+    existing = Apply(sequence)
     maximum = Apply(sequence)
     minimum = Apply(sequence)
     offset = Apply(sequence)
+    lifetime = Apply(sequence)
 
     def __init__(
         self,
@@ -100,11 +82,7 @@ class Investment:
         existing=0,
         nonconvex=False,
         offset=0,
-        overall_maximum=None,
-        overall_minimum=None,
         lifetime=None,
-        age=0,
-        fixed_costs=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
@@ -133,18 +111,24 @@ class Investment:
         self.existing = existing
         self.nonconvex = nonconvex
         self.offset = offset
-        self.overall_maximum = overall_maximum
-        self.overall_minimum = overall_minimum
         self.lifetime = lifetime
-        self.age = age
-        self.fixed_costs = fixed_costs
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
         self._check_invest_attributes_offset()
-        self._check_age_and_lifetime()
         self._check_invest_attributes_nonconvex()
         self._check_nonconvex()
+
+    def relevant_periods(
+        self,
+        period: int,
+    ) -> list[int]:
+        rv = []
+        for p in range(period):
+            if not self.lifetime or self.lifetime[p] + p > period:
+                rv.append(p)
+        rv.append(period)
+        return rv
 
     def _check_invest_attributes(self):
         """Throw an error if existing is other than 0 and nonconvex is True"""
@@ -177,18 +161,6 @@ class Investment:
                 " ignored."
             )
             raise AttributeError(e3)
-
-    def _check_age_and_lifetime(self):
-        """Throw an error if age is chosen greater or equal to lifetime;
-        only applicable for multi-period models
-        """
-        if self.lifetime is not None:
-            if self.age >= self.lifetime:
-                e4 = (
-                    "A unit's age must be smaller than its "
-                    "expected lifetime."
-                )
-                raise AttributeError(e4)
 
     def _check_invest_attributes_nonconvex(self):
         """Throw an error if nonconvex is not of type boolean."""

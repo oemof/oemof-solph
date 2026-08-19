@@ -68,9 +68,9 @@ using the investment mode (see :ref:`optimization_invest_label`).
 
 .. note::
 
-    Since v0.5.1, there is also the possibility to have multi-period (i.e. dynamic)
-    investments over longer time horizons. This is in an experimental state (see
-    :ref:`optimization_multi_period_label`).
+    Since v0.6.5, it is possible to define time-dependent capacities and
+    to optimise investments over longer time horizons
+    (see :ref:`optimization_multi_period_label`).
 
 .. code-block:: python
 

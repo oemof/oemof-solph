@@ -230,11 +230,11 @@ def investment_costs() -> pd.DataFrame:
                 1101,
                 1048,
             ],
-            ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
             ("heat pump", "maximum [kW]"): 100,
             ("heat storage", "specific_costs [Eur/m3]"): [1120] * 5,
-            ("heat storage", "fixed_costs [Eur]"): [806] * 5,
+            ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
             ("heat storage", "maximum [kWh]"): 100,
+            ("heat storage", "fixed_costs [Eur]"): [806] * 5,
             ("pv", "specific_costs [Eur/kW]"): [
                 1200,
                 1017,

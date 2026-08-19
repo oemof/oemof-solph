@@ -9,6 +9,7 @@ available from its original location oemof/tests/test_components.py
 SPDX-License-Identifier: MIT
 """
 
+import numpy as np
 import pytest
 
 from oemof.solph import NonConvex
@@ -39,6 +40,17 @@ def test_custom_properties():
     # --- END ---
 
 
+def test_flow_nominal_capacity():
+    capacity_series = [1, 2]
+    capacity_scalar = 3
+
+    flow = Flow(nominal_capacity=capacity_series)
+    np.testing.assert_equal(flow.nominal_capacity, capacity_series)
+
+    flow = Flow(nominal_capacity=capacity_scalar)
+    assert flow.nominal_capacity == capacity_scalar
+
+
 def test_source_with_full_load_time_max():
     flow = Flow(nominal_capacity=1, full_load_time_max=2)
 
@@ -46,12 +58,17 @@ def test_source_with_full_load_time_max():
     assert flow.full_load_time_max == 2
 
 
-def test_nominal_capacity_validation():
-    with pytest.raises(
-        ValueError,
-        match="Parameter nominal_capacity must be either",
-    ):
-        Flow(nominal_capacity=[1, 2])
+def test_fix_flow():
+    fix_values = [1, 2, 3]
+
+    flow = Flow(
+        nominal_capacity=12,
+        fix=fix_values,
+    )
+    np.testing.assert_equal(flow.fix, fix_values)
+
+    with pytest.raises(AttributeError, match="If fix is set in a flow"):
+        _ = Flow(fix=fix_values)
 
 
 def test_nonconvex_positive_gradient_error():

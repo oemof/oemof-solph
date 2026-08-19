@@ -79,7 +79,6 @@ def populate_and_solve_energy_system(
     time_series: dict[str, list] | dict[str, pd.DataFrame],
     investments: dict[str, solph.Investment],
     variable_costs: dict | pd.DataFrame,
-    discount_rate=0.02,
 ):
 
     parameter = get_parameter()
@@ -200,7 +199,7 @@ def populate_and_solve_energy_system(
     es.add(gas_import)
 
     logging.info("Creating Model...")
-    m = solph.Model(es, discount_rate=discount_rate)
+    m = solph.Model(es)
     logging.info("Solving Model...")
 
     results = m.solve(solver="cbc", solve_kwargs={"tee": False})
@@ -263,7 +262,6 @@ def create_investment_objects(n, r, year):
             ep_costs=epc,
             offset=fix_cost,
             maximum=maximum,
-            lifetime=20,
             nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
         )
     return investments

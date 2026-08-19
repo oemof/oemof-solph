@@ -20,8 +20,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-import math
-import numbers
 from collections.abc import Iterable
 from inspect import isbuiltin
 from warnings import warn
@@ -46,8 +44,7 @@ class Flow(Edge):
 
     Parameters
     ----------
-    nominal_capacity : numeric, :math:`P_{nom}` or
-            :class:`Investment <oemof.solph.options.Investment>`
+    nominal_capacity : numeric (iterable or scalar) or :class:`Investment <oemof.solph.options.Investment>`, :math:`P_{nom}`
         The nominal calacity of the flow, either fixed or as an investement
         optimisation. If this value is set, the corresponding optimization
         variable of the flow object will be bounded by this value
@@ -87,20 +84,6 @@ class Flow(Edge):
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
-    fixed_costs : numeric (iterable or scalar), :math:`c_{fixed}`
-        The fixed costs associated with a flow.
-        Note: These are only applicable for a multi-period model
-        and given on a yearly basis.
-    lifetime : int, :math:`l`
-        The lifetime of a flow (usually given in years);
-        once it reaches its lifetime (considering also
-        an initial age), the flow is forced to 0.
-        Note: Only applicable for a multi-period model.
-    age : int, :math:`a`
-        The initial age of a flow (usually given in years);
-        once it reaches its lifetime (considering also
-        an initial age), the flow is forced to 0.
-        Note: Only applicable for a multi-period model.
 
     Notes
     -----
@@ -128,8 +111,8 @@ class Flow(Edge):
     fix = Apply(sequence)
     maximum = Apply(sequence)
     minimum = Apply(sequence)
+    nominal_capacity = Apply(sequence)
 
-    fixed_costs = Apply(sequence)
     variable_costs = Apply(sequence)
 
     positive_gradient_limit = Apply(sequence)
@@ -156,9 +139,6 @@ class Flow(Edge):
         bidirectional=False,
         # --- END
         nonconvex=None,
-        lifetime=None,
-        age=None,
-        fixed_costs=None,
         custom_attributes=None,  # To be removed for versions >= v0.7
         custom_properties=None,
     ):
@@ -236,40 +216,12 @@ class Flow(Edge):
         self.nominal_capacity = None
         self.investment = None
 
-        infinite_error_msg = (
-            "{} must be a finite value. Passing an infinite "
-            "value is not allowed."
-        )
         if nominal_capacity is not None:
-            if isinstance(nominal_capacity, numbers.Real):
-                if not math.isfinite(nominal_capacity):
-                    raise ValueError(
-                        infinite_error_msg.format("nominal_capacity")
-                    )
-                self.nominal_capacity = nominal_capacity
-            elif isinstance(nominal_capacity, Investment):
+            if isinstance(nominal_capacity, Investment):
                 self.investment = nominal_capacity
             else:
-                raise ValueError(
-                    "Parameter nominal_capacity must be either"
-                    + " a constant value or an Investment object."
-                )
+                self.nominal_capacity = nominal_capacity
 
-        if fixed_costs is not None:
-            msg = (
-                "Be aware that the fixed costs attribute is only\n"
-                "meant to be used for multi-period models to depict "
-                "fixed costs that occur on a yearly basis.\n"
-                "If you wish to set up a multi-period model, explicitly "
-                "set the `periods` attribute of your energy system.\n"
-                "It has been decided to remove the `fixed_costs` "
-                "attribute with v0.2 for regular uses.\n"
-                "If you specify `fixed_costs` for a regular model, "
-                "this will simply be silently ignored."
-            )
-            warn(msg, debugging.SuspiciousUsageWarning)
-
-        self.fixed_costs = fixed_costs
         self.variable_costs = variable_costs
         self.positive_gradient_limit = positive_gradient_limit
         self.negative_gradient_limit = negative_gradient_limit
@@ -278,8 +230,6 @@ class Flow(Edge):
         self.full_load_time_min = full_load_time_min
         self.integer = integer
         self.nonconvex = nonconvex
-        self.lifetime = lifetime
-        self.age = age
 
         # It is not allowed to define `minimum` or `maximum` if `fix`
         # is defined.
@@ -346,11 +296,6 @@ class Flow(Edge):
                         f"If {attr} is set in a flow, "
                         "nominal_capacity must be set as well."
                     )
-
-        if self.nominal_capacity is not None and not math.isfinite(
-            self.maximum[0]
-        ):
-            raise ValueError(infinite_error_msg.format("maximum"))
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
