@@ -27,7 +27,6 @@ import numbers
 from warnings import warn
 
 from oemof.network import Node
-from oemof.tools import economics
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -1579,42 +1578,40 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_intra_storage_balance_rule,
             )
 
-        def _inter_storage_balance_rule(block, n, i):
-            """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
-            """
-            ii = 0
-            for p in m.CAPACITY_PERIODS:
-                ii += len(m.es.tsa_parameters[p]["order"])
-                if ii > i:
-                    ii -= len(m.es.tsa_parameters[p]["order"])
-                    ii = i - ii
-                    break
-
-            k = m.es.tsa_parameters[p]["order"][ii]
-            t = m.get_timestep_from_tsam_timestep(
-                p, k, m.es.tsa_parameters[p]["timesteps"] - 1
-            )
-            expr = 0
-            expr += block.inter_storage_content[n, i + 1]
-            expr += -block.inter_storage_content[n, i] * (
-                1 - n.loss_rate[t]
-            ) ** (m.timeincrement[t] * m.es.tsa_parameters[p]["timesteps"])
-            expr += -self.intra_storage_delta[
-                n, p, k, m.es.tsa_parameters[p]["timesteps"]
-            ]
-            return expr == 0
-
         if m.TSAM_MODE:
+            def _inter_storage_balance_rule(block, n, i):
+                """
+                Rule definition for the storage balance of every storage n and
+                every timestep.
+                """
+                ii = 0
+                for p in m.CAPACITY_PERIODS:
+                    ii += len(m.es.tsa_parameters[p]["order"])
+                    if ii > i:
+                        ii -= len(m.es.tsa_parameters[p]["order"])
+                        ii = i - ii
+                        break
+
+                k = m.es.tsa_parameters[p]["order"][ii]
+                t = m.get_timestep_from_tsam_timestep(
+                    p, k, m.es.tsa_parameters[p]["timesteps"] - 1
+                )
+                expr = 0
+                expr += block.inter_storage_content[n, i + 1]
+                expr += -block.inter_storage_content[n, i] * (
+                    1 - n.loss_rate[t]
+                ) ** (m.timeincrement[t] * m.es.tsa_parameters[p]["timesteps"])
+                expr += -self.intra_storage_delta[
+                    n, p, k, m.es.tsa_parameters[p]["timesteps"]
+                ]
+                return expr == 0
+
             self.inter_balance = Constraint(
                 self.INVESTSTORAGES,
                 m.CLUSTERS,
                 rule=_inter_storage_balance_rule,
             )
-
-        if m.es.transitional_single_period and not m.TSAM_MODE:
-
+        else:
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMEPOINTS.at(-1)]
@@ -1730,78 +1727,43 @@ class GenericInvestmentStorageBlock(ScalarBlock):
     def _add_storage_limit_constraints(self):
         m = self.parent_block()
         if not m.TSAM_MODE:
-            if m.es.transitional_single_period:
 
-                def _max_storage_content_invest_rule(_, n, t):
-                    """
-                    Rule definition for upper bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        <= self.storage_capacity[n, 0] * n.max_storage_level[t]
-                    )
-                    return expr
-
-                self.max_storage_content = Constraint(
-                    self.INVESTSTORAGES,
-                    m.TIMEPOINTS,
-                    rule=_max_storage_content_invest_rule,
+            def _max_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition for upper bound constraint for the
+                storage content.
+                """
+                p = m.es.capacity_period_of_timepoint(t)
+                expr = (
+                    self.storage_content[n, t]
+                    <= self.storage_capacity[n, p] * n.max_storage_level[t]
                 )
+                return expr
 
-                def _min_storage_content_invest_rule(_, n, t):
-                    """
-                    Rule definition of lower bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        >= self.storage_capacity[n, 0] * n.min_storage_level[t]
-                    )
-                    return expr
+            self.max_storage_content = Constraint(
+                self.INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_max_storage_content_invest_rule,
+            )
 
-                self.min_storage_content = Constraint(
-                    self.MIN_INVESTSTORAGES,
-                    m.TIMEPOINTS,
-                    rule=_min_storage_content_invest_rule,
+            def _min_storage_content_invest_rule(_, n, t):
+                """
+                Rule definition of lower bound constraint for the
+                storage content.
+                """
+                p = m.es.capacity_period_of_timepoint(t)
+                expr = (
+                    self.storage_content[n, t]
+                    >= self.storage_capacity[n, p] * n.min_storage_level[t]
                 )
-            else:
+                return expr
 
-                def _max_storage_content_invest_rule(_, n, p, t):
-                    """
-                    Rule definition for upper bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        <= self.storage_capacity[n, p] * n.max_storage_level[t]
-                    )
-                    return expr
-
-                self.max_storage_content = Constraint(
-                    self.INVESTSTORAGES,
-                    m.TIMEINDEX,
-                    rule=_max_storage_content_invest_rule,
-                )
-
-                def _min_storage_content_invest_rule(_, n, p, t):
-                    """
-                    Rule definition of lower bound constraint for the
-                    storage content.
-                    """
-                    expr = (
-                        self.storage_content[n, t]
-                        >= self.storage_capacity[n, p] * n.min_storage_level[t]
-                    )
-                    return expr
-
-                self.min_storage_content = Constraint(
-                    self.MIN_INVESTSTORAGES,
-                    m.TIMEINDEX,
-                    rule=_min_storage_content_invest_rule,
-                )
+            self.min_storage_content = Constraint(
+                self.MIN_INVESTSTORAGES,
+                m.TIMEPOINTS,
+                rule=_min_storage_content_invest_rule,
+            )
         else:
-
             def _storage_inter_maximum_level_rule(block):
                 for n in self.INVESTSTORAGES:
                     for p, i, g in m.TIMEINDEX_CLUSTER:
@@ -1881,66 +1843,17 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         storage_costs = 0
         period_investment_costs = {p: 0 for p in m.CAPACITY_PERIODS}
 
-        if m.es.transitional_single_period:
-            for n in self.CONVEX_INVESTSTORAGES:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[n, p] * n.investment.ep_costs[p]
-                    )
-            for n in self.NON_CONVEX_INVESTSTORAGES:
-                for p in m.CAPACITY_PERIODS:
-                    investment_costs += (
-                        self.invest[n, p] * n.investment.ep_costs[p]
-                        + self.invest_status[n, p] * n.investment.offset[p]
-                    )
-
-        else:
-            for n in self.CONVEX_INVESTSTORAGES:
-                lifetime = n.investment.lifetime
-                interest = 0.02
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization
-                        - m.es.capacity_period_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
-                    )
-                    investment_costs += investment_costs_increment
-                    period_investment_costs[p] += investment_costs_increment
-
-            for n in self.NON_CONVEX_INVESTSTORAGES:
-                lifetime = n.investment.lifetime
-                interest = 0.02
-                for p in m.CAPACITY_PERIODS:
-                    annuity = economics.annuity(
-                        capex=n.investment.ep_costs[p],
-                        n=lifetime,
-                        wacc=interest,
-                    )
-                    duration = min(
-                        m.es.end_year_of_optimization
-                        - m.es.capacity_period_years[p],
-                        lifetime,
-                    )
-                    present_value_factor = 1 / economics.annuity(
-                        capex=1, n=duration, wacc=interest
-                    )
-                    investment_costs_increment = (
-                        self.invest[n, p] * annuity * present_value_factor
-                        + self.invest_status[n, p] * n.investment.offset[p]
-                    )
-                    investment_costs += investment_costs_increment
-                    period_investment_costs[p] += investment_costs_increment
+        for n in self.CONVEX_INVESTSTORAGES:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[n, p] * n.investment.ep_costs[p]
+                )
+        for n in self.NON_CONVEX_INVESTSTORAGES:
+            for p in m.CAPACITY_PERIODS:
+                investment_costs += (
+                    self.invest[n, p] * n.investment.ep_costs[p]
+                    + self.invest_status[n, p] * n.investment.offset[p]
+                )
 
         for n in self.INVESTSTORAGES:
             if valid_sequence(n.storage_costs, len(m.TIMESTEPS)):

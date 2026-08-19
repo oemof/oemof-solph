@@ -317,6 +317,23 @@ class EnergySystem(es.EnergySystem):
             self.capacity_period_years[-1] + duration_last_period
         )
 
+    def capacity_period_of_timepoint(
+        self,
+        tp: int,
+    ) -> int:
+        # This is a very inefficient algorithm.
+        # However, I think it will be replaced soon anyway,
+        # so I will put no time into runtime optimisation here.
+        period_end = 0
+        for p, capacity_period in enumerate(self.capacity_periods):
+            period_end += len(capacity_period)
+            if tp < period_end:
+                return p
+        if tp == period_end:
+            return p
+
+        raise ValueError(f"Time point {tp} not in capacity range.")
+
     def capacity_period_of_timestep(
         self,
         ts: int,

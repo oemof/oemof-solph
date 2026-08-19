@@ -197,11 +197,11 @@ def test_invest_content_uncoupled():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = results["storage_capacity"][storage]
-    assert invest_capacity[0] == pytest.approx(19)
-
     storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
+
+    invest_capacity = results["storage_capacity"][storage]
+    assert invest_capacity[0] == pytest.approx(19)
 
 
 def test_invest_content_minimum():
