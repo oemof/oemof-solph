@@ -1514,64 +1514,65 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             rule=_inv_storage_init_content_fix_rule,
         )
 
-        def _storage_balance_rule(block, n, p, t):
-            """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
-            """
-            expr = 0
-            expr += block.storage_content[n, t + 1]
-            expr += (
-                -block.storage_content[n, t]
-                * (1 - n.loss_rate[t]) ** m.timeincrement[t]
-            )
-            expr += (
-                n.fixed_losses_relative[t]
-                * self.storage_capacity[n, p]
-                * m.timeincrement[t]
-            )
-            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
-            expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
-            expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
-            return expr == 0
-
-        def _intra_storage_balance_rule(block, n, p, k, g):
-            """
-            Rule definition for the storage balance of every storage n and
-            every timestep.
-            """
-            t = m.get_timestep_from_tsam_timestep(p, k, g)
-            expr = 0
-            expr += block.intra_storage_delta[n, p, k, g + 1]
-            expr += (
-                -block.intra_storage_delta[n, p, k, g]
-                * (1 - n.loss_rate[t]) ** m.timeincrement[t]
-            )
-            expr += (
-                n.fixed_losses_relative[t]
-                * self.storage_capacity[n, p]
-                * m.timeincrement[t]
-            )
-            expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
-            expr += (
-                -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
-            ) * m.timeincrement[t]
-            expr += (
-                m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
-            ) * m.timeincrement[t]
-            return expr == 0
-
         if not m.TSAM_MODE:
+            def _storage_balance_rule(block, n, t):
+                """
+                Rule definition for the storage balance of every storage n and
+                every timestep.
+                """
+                p = m.es.capacity_period_of_timestep(t)
+                expr = 0
+                expr += block.storage_content[n, t + 1]
+                expr += (
+                    -block.storage_content[n, t]
+                    * (1 - n.loss_rate[t]) ** m.timeincrement[t]
+                )
+                expr += (
+                    n.fixed_losses_relative[t]
+                    * self.storage_capacity[n, p]
+                    * m.timeincrement[t]
+                )
+                expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
+                expr += (
+                    -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                ) * m.timeincrement[t]
+                expr += (
+                    m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+                ) * m.timeincrement[t]
+                return expr == 0
+
             self.balance = Constraint(
                 self.INVESTSTORAGES,
-                m.TIMEINDEX,
+                m.TIMESTEPS,
                 rule=_storage_balance_rule,
             )
         else:
+            def _intra_storage_balance_rule(block, n, p, k, g):
+                """
+                Rule definition for the storage balance of every storage n and
+                every timestep.
+                """
+                t = m.get_timestep_from_tsam_timestep(p, k, g)
+                expr = 0
+                expr += block.intra_storage_delta[n, p, k, g + 1]
+                expr += (
+                    -block.intra_storage_delta[n, p, k, g]
+                    * (1 - n.loss_rate[t]) ** m.timeincrement[t]
+                )
+                expr += (
+                    n.fixed_losses_relative[t]
+                    * self.storage_capacity[n, p]
+                    * m.timeincrement[t]
+                )
+                expr += n.fixed_losses_absolute[t] * m.timeincrement[t]
+                expr += (
+                    -m.flow[i[n], n, t] * n.inflow_conversion_factor[t]
+                ) * m.timeincrement[t]
+                expr += (
+                    m.flow[n, o[n], t] / n.outflow_conversion_factor[t]
+                ) * m.timeincrement[t]
+                return expr == 0
+
             self.intra_balance = Constraint(
                 self.INVESTSTORAGES,
                 m.TIMEINDEX_TYPICAL_CLUSTER,

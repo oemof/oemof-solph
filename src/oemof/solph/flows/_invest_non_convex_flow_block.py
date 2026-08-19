@@ -230,7 +230,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_one(_, i, o, p, t):
+        def _linearization_rule_invest_non_convex_one(_, i, o, t):
+            p = m.es.capacity_period_of_timestep(t)
             expr = (
                 self.status[i, o, t] * m.flows[i, o].investment.maximum[p]
                 >= self.status_nominal[i, o, t]
@@ -239,7 +240,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMEINDEX,
+            m.TIMESTEPS,
             rule=_linearization_rule_invest_non_convex_one,
         )
 
@@ -251,13 +252,14 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_two(_, i, o, p, t):
+        def _linearization_rule_invest_non_convex_two(_, i, o, t):
+            p = m.es.capacity_period_of_timestep(t)
             expr = self.invest[i, o, p] >= self.status_nominal[i, o, t]
             return expr
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMEINDEX,
+            m.TIMESTEPS,
             rule=_linearization_rule_invest_non_convex_two,
         )
 
@@ -270,7 +272,8 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         m = self.parent_block()
 
-        def _linearization_rule_invest_non_convex_three(_, i, o, p, t):
+        def _linearization_rule_invest_non_convex_three(_, i, o, t):
+            p = m.es.capacity_period_of_timestep(t)
             expr = (
                 self.invest[i, o, p]
                 - (1 - self.status[i, o, t])
@@ -281,7 +284,7 @@ class InvestNonConvexFlowBlock(ScalarBlock):
 
         return Constraint(
             self.MIN_FLOWS,
-            m.TIMEINDEX,
+            m.TIMESTEPS,
             rule=_linearization_rule_invest_non_convex_three,
         )
 

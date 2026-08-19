@@ -407,16 +407,17 @@ class InvestmentFlowBlock(ScalarBlock):
             of investment flow to (normed) actual value
             """
             for i, o in self.FIXED_INVESTFLOWS:
-                for p, t in m.TIMEINDEX:
-                    expr = (
-                        m.flow[i, o, t]
-                        == self.nominal_capacity[i, o, p]
-                        * m.flows[i, o].fix[t]
-                    )
-                    self.fixed.add((i, o, p, t), expr)
+                for p in m.CAPACITY_PERIODS:
+                    for t in m.TIMESTEPS_IN_PERIOD[p]:
+                        expr = (
+                            m.flow[i, o, t]
+                            == self.nominal_capacity[i, o, p]
+                            * m.flows[i, o].fix[t]
+                        )
+                        self.fixed.add((i, o, t), expr)
 
         self.fixed = Constraint(
-            self.FIXED_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
+            self.FIXED_INVESTFLOWS, m.TIMESTEPS, noruleinit=True
         )
         self.fixed_build = BuildAction(rule=_investflow_fixed_rule)
 
@@ -425,16 +426,17 @@ class InvestmentFlowBlock(ScalarBlock):
             variable in investment case.
             """
             for i, o in self.NON_FIXED_INVESTFLOWS:
-                for p, t in m.TIMEINDEX:
-                    expr = (
-                        m.flow[i, o, t]
-                        <= self.nominal_capacity[i, o, p]
-                        * m.flows[i, o].maximum[t]
-                    )
-                    self.max.add((i, o, p, t), expr)
+                for p in m.CAPACITY_PERIODS:
+                    for t in m.TIMESTEPS_IN_PERIOD[p]:
+                        expr = (
+                            m.flow[i, o, t]
+                            <= self.nominal_capacity[i, o, p]
+                            * m.flows[i, o].maximum[t]
+                        )
+                        self.max.add((i, o, t), expr)
 
         self.max = Constraint(
-            self.NON_FIXED_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
+            self.NON_FIXED_INVESTFLOWS, m.TIMESTEPS, noruleinit=True
         )
         self.max_build = BuildAction(rule=_max_investflow_rule)
 
@@ -443,16 +445,17 @@ class InvestmentFlowBlock(ScalarBlock):
             variable in investment case.
             """
             for i, o in self.MIN_INVESTFLOWS:
-                for p, t in m.TIMEINDEX:
-                    expr = (
-                        m.flow[i, o, t]
-                        >= self.nominal_capacity[i, o, p]
-                        * m.flows[i, o].minimum[t]
-                    )
-                    self.min.add((i, o, p, t), expr)
+                for p in m.CAPACITY_PERIODS:
+                    for t in m.TIMESTEPS_IN_PERIOD[p]:
+                        expr = (
+                            m.flow[i, o, t]
+                            >= self.nominal_capacity[i, o, p]
+                            * m.flows[i, o].minimum[t]
+                        )
+                        self.min.add((i, o, t), expr)
 
         self.min = Constraint(
-            self.MIN_INVESTFLOWS, m.TIMEINDEX, noruleinit=True
+            self.MIN_INVESTFLOWS, m.TIMESTEPS, noruleinit=True
         )
         self.min_build = BuildAction(rule=_min_investflow_rule)
 
