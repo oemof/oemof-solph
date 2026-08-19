@@ -388,7 +388,11 @@ class InvestmentFlowBlock(ScalarBlock):
                 for p in m.CAPACITY_PERIODS:
                     expr = (
                         self.nominal_capacity[i, o, p]
-                        == self.invest[i, o, p]
+                        == sum(
+                            self.invest[i, o, rp]
+                            for rp
+                            in m.flows[i, o].investment.relevant_periods(p)
+                        )
                         + m.flows[i, o].investment.existing[p]
                     )
                     self.total_capacity_rule.add((i, o, p), expr)
