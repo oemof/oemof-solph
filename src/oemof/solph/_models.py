@@ -464,11 +464,23 @@ class Model(po.ConcreteModel):
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
+        ub = appsi_results.best_feasible_objective
+        lb = appsi_results.best_objective_bound
+        if ub not in (None, 0) and lb is not None:
+            gap = abs(ub - lb) / abs(ub)
+        else:
+            gap = None
+
         return solver_info(
             optimal=optimal,
             termination_condition=tc,
             status=tc.value,
             solver_results=solver_results,
+            wallclock_time=solver_results.get("wallclock_time"),
+            ub=ub,
+            lb=lb,
+            gap=gap,
+            message=None,
         )
 
     def solve_factory(
@@ -484,13 +496,30 @@ class Model(po.ConcreteModel):
         factory_results = opt.solve(self, **solve_kwargs)
 
         status = factory_results.Solver.Status
-        message = factory_results.Solver.Termination_condition
+        tc = factory_results.Solver.Termination_condition
+        msg = getattr(factory_results.Solver, "Message", None)
+        wt = getattr(factory_results.Solver, "Time", None)
+        ub = getattr(
+            factory_results.Problem[0], "Upper_bound", None
+        )
+        lb = getattr(
+            factory_results.Problem[0], "Lower_bound", None
+        )
+        if ub not in (None, 0) and lb is not None:
+            gap = abs(ub - lb) / abs(ub)
+        else:
+            gap = None
 
         return solver_info(
-            optimal=status == "ok" and message == "optimal",
-            termination_condition=message,
-            status=factory_results.Solver.Status,
+            optimal=status == "ok" and tc == "optimal",
+            termination_condition=tc,
+            status=status,
             solver_results=factory_results,
+            wallclock_time=wt,
+            ub=ub,
+            lb=lb,
+            gap=gap,
+            message=msg,
         )
 
     def solve(
@@ -528,9 +557,20 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
+        solver_result_keys = [
+            "optimal",
+            "status",
+            "termination_condition",
+            "solver_results",
+            "message",
+            "wallclock_time",
+            "gap",
+            "ub",
+            "lb",
+        ]
+
         solver_info = namedtuple(
-            "SolverReturn",
-            ["optimal", "solver_results", "termination_condition", "status"],
+            "SolverReturn", [key for key in solver_result_keys]
         )
         if solver == "highs":
             solver_return = self.solve_highs(
