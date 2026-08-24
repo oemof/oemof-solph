@@ -23,7 +23,7 @@ def test_flow_count_limit():
 
     b1 = solph.buses.Bus(label="b1", balanced=False)
     s0 = solph.components.Sink(
-        label="s1",
+        label="s0",
         inputs={
             b1: solph.Flow(
                 variable_costs=[-0.5, 0.5],
@@ -35,7 +35,7 @@ def test_flow_count_limit():
         },
     )
     s1 = solph.components.Sink(
-        label="s2",
+        label="s1",
         inputs={
             b1: solph.Flow(
                 variable_costs=[-0.2, 0.2],
@@ -47,7 +47,7 @@ def test_flow_count_limit():
         },
     )
     s2 = solph.components.Sink(
-        label="s3",
+        label="s2",
         inputs={
             b1: solph.Flow(
                 variable_costs=[-0.1, 0.1],
@@ -59,7 +59,7 @@ def test_flow_count_limit():
         },
     )
     s3 = solph.components.Sink(
-        label="s4",
+        label="s3",
         inputs={
             b1: solph.Flow(
                 variable_costs=[-0.1, 0.2],
@@ -81,19 +81,14 @@ def test_flow_count_limit():
         upper_limit=2,
     )
 
-    model.solve()
+    results = model.solve()
 
-    results = solph.processing.results(model)
+    flow = {s: list(results["flow"][(b1, s)]) for s in [s0, s1, s2, s3]}
 
-    flow = [
-        list(results[(b1, s)]["sequences"]["flow"][:-1])
-        for s in [s0, s1, s2, s3]
-    ]
-
-    assert flow[0] == pytest.approx([4, 0])
-    assert flow[1] == pytest.approx([2, 0])
-    assert flow[2] == pytest.approx([0, 1.5])
-    assert flow[3] == pytest.approx([3, 0])
+    assert flow[s0] == pytest.approx([4, 0])
+    assert flow[s1] == pytest.approx([2, 0])
+    assert flow[s2] == pytest.approx([0, 1.5])
+    assert flow[s3] == pytest.approx([3, 0])
 
 
 def test_flow_count_limit_investment():

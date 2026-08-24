@@ -31,7 +31,7 @@ def limit_active_flow_count(
         Model to which constraints are added
     constraint_name: string
         name for the constraint
-    flows: list of flows
+    flows: set of flows
         flows (have to be NonConvex, with or without investment) in the
         format [(in, out)]
     lower_limit: integer
@@ -80,18 +80,20 @@ def limit_active_flow_count(
 
     attrname_constraint = constraint_name + "_constraint"
 
+    fixed_capacity_flows = set(
+        model.NonConvexFlowBlock.FIXED_CAPACITY_NONCONVEX_FLOWS
+    ).intersection(flows)
+    invest_flows = set(
+        model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
+    ).intersection(flows)
+
     def _flow_count_rule(m):
-        if hasattr(m.InvestNonConvexFlowBlock, "INVEST_NON_CONVEX_FLOWS"):
-            invest_flows = m.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
-        else:
-            invest_flows = []
         for ts in m.TIMESTEPS:
             lhs = 0
-            for fi, fo in flows:
-                if (fi, fo) not in invest_flows:
-                    lhs += m.NonConvexFlowBlock.status[fi, fo, ts]
-                else:
-                    lhs += m.InvestNonConvexFlowBlock.status[fi, fo, ts]
+            for fi, fo in fixed_capacity_flows:
+                lhs += m.NonConvexFlowBlock.status[fi, fo, ts]
+            for fi, fo in invest_flows:
+                lhs += m.InvestNonConvexFlowBlock.status[fi, fo, ts]
             rhs = getattr(model, constraint_name)[ts]
             expr = lhs == rhs
             if expr is not True:
@@ -139,17 +141,11 @@ def limit_active_flow_count_by_keyword(
     --------
     limit_active_flow_count
     """
-    nonconvex_flows = []
-    if hasattr(
-        model.NonConvexFlowBlock, "FIXED_CAPACITY_NONCONVEX_FLOWS"
-    ):
-        nonconvex_flows += list(
-            model.NonConvexFlowBlock.FIXED_CAPACITY_NONCONVEX_FLOWS
-        )
-    if hasattr(model.InvestNonConvexFlowBlock, "INVEST_NON_CONVEX_FLOWS"):
-        nonconvex_flows += list(
-            model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
-        )
+    nonconvex_flows = list(
+        model.NonConvexFlowBlock.FIXED_CAPACITY_NONCONVEX_FLOWS
+    ) + list(
+        model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
+    )
 
     flows = []
     for i, o in nonconvex_flows:
