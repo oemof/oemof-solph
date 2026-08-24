@@ -29,6 +29,8 @@ Bug fixes
 * Name the TSA-disaggregated storage SOC result ``storage_content`` to match
   non-clustered ``GenericStorage`` results, so result readers (e.g. ``views``)
   find it by the same key regardless of clustering.
+* Fix ``limit_active_flow_count`` and ``limit_active_flow_count_by_keyword ``
+  constraints for flows of type ``INVEST_NON_CONVEX_FLOWS``
 
 Other changes
 #############
@@ -49,6 +51,7 @@ Contributors
 * Pierre Francois Bachibouzouk
 * Stephan Günther
 * Diana Maldonado Castro
+* Jonas Freißmann
 * Uwe Krien
 * Francesco Witte
 

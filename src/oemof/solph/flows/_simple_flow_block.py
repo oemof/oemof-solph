@@ -62,12 +62,12 @@ class SimpleFlowBlock(ScalarBlock):
             associated source (s) and target (t)
             of flow e.g. groups=[(s1, t1, f1), (s2, t2, f2),..]
         """
-        if group is None:
-            return None
-
-        self._create_sets(group)
-        self._create_variables(group)
-        self._create_constraints()
+        if group is not None:
+            self._create_sets(group)
+            self._create_variables(group)
+            self._create_constraints()
+        else:  # block is created without member flows
+            self._create_sets([])
 
     def _create_sets(self, group):
         """

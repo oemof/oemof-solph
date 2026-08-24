@@ -51,12 +51,12 @@ class NonConvexFlowBlock(ScalarBlock):
             List of oemof.solph.NonConvexFlowBlock objects for which
             the constraints are build.
         """
-        if group is None:
-            return None
-
-        self._create_sets(group)
-        self._create_variables()
-        self._create_constraints()
+        if group is not None:
+            self._create_sets(group)
+            self._create_variables()
+            self._create_constraints()
+        else:  # block is created without member flows
+            self._create_sets([])
 
     def _create_sets(self, group):
         r"""
