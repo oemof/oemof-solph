@@ -172,8 +172,7 @@ def test_optimise_storage_size(
 
 def test_results_with_recent_dump():
     test_optimise_storage_size()
-    energysystem = solph.EnergySystem()
-    energysystem.restore(filename="./es_dump.oemof", consider_dpath=False)
+    energysystem = solph.EnergySystem.from_file("./es_dump.oemof")
 
     # Results
     results = energysystem.results["main"]
@@ -223,8 +222,7 @@ def test_solph_converter_attributes_before_dump_and_after_restore():
     """dump/restore should preserve all attributes
     of `solph.components.Converter`"""
     test_optimise_storage_size()
-    energysystem = solph.EnergySystem()
-    energysystem.restore(filename="./es_dump.oemof", consider_dpath=False)
+    energysystem = solph.EnergySystem.from_file("./es_dump.oemof")
 
     trsf_attr_before_dump = sorted([x for x in dir(PP_GAS) if "__" not in x])
 
