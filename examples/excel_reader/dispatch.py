@@ -59,7 +59,6 @@ import os
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
-from oemof.network.graph import create_nx_graph
 from oemof.tools import logger
 
 from oemof import solph
@@ -407,7 +406,7 @@ def main(optimize=True, solver="cbc"):
     # create graph of esys
     # You can use argument filename='/home/somebody/my_graph.graphml'
     # to dump your graph to disc. You can open it using e.g. yEd or gephi
-    graph = create_nx_graph(esys)
+    graph = esys.to_networkx()
 
     # plot esys graph
     draw_graph(

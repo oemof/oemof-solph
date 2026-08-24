@@ -40,8 +40,6 @@ Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
-from oemof.network.graph import create_nx_graph
-
 # oemof imports
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -189,7 +187,7 @@ def main(optimize=True, solver="cbc"):
         solver=solver, solve_kwargs={"tee": True, "keepfiles": False}
     )
 
-    graph = create_nx_graph(es, m)
+    graph = es.to_networkx()
 
     if pygz is not None:
         draw_graph(
