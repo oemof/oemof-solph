@@ -59,7 +59,7 @@ import pandas as pd
 from oemof.tools import logger
 
 from oemof import solph
-
+from oemof.visio import plot as oeplot
 # import oemof plots
 try:
     from oemof.visio import plot as oeplot
@@ -125,7 +125,7 @@ def main(optimize=True, solver="cbc"):
                 "demand_th": [344],
             }
         )
-
+    data.loc[180:, "demand_th"] = 0
     logger.define_logging()
     logging.info("Initialize the energy system")
 

@@ -280,3 +280,19 @@ class ExtractionTurbineCHPBlock(ScalarBlock):
         self.out_flow_relation_build = BuildAction(
             rule=_out_flow_relation_rule
         )
+
+        eta_th_min = 0.10  # Wirkungsgrad Wärme im Minimalpunkt
+
+        def _min_heat_extraction_rule(block):
+            for t in m.TIMESTEPS:
+                for g in group:
+                    lhs = 0.1 * m.flow[g.inflow, g, t]
+                    rhs = m.flow[g, g.tapped_output, t]
+                    block.min_heat_extraction.add((g, t), (lhs <= rhs))
+
+        self.min_heat_extraction = Constraint(
+            group, m.TIMESTEPS, noruleinit=True
+        )
+        self.min_heat_extraction_build = BuildAction(
+            rule=_min_heat_extraction_rule
+        )
