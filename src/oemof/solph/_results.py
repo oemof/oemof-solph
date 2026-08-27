@@ -43,9 +43,7 @@ class Results:
 
     def __init__(self, model: ConcreteModel):
         self._solver_results = model.solver_results
-        self._meta_results = {
-            "objective": model.objective(),
-        }
+        self._meta_results = model.meta_results
         self._variables = {}
         self._model = model
 

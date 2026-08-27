@@ -20,6 +20,7 @@ import warnings
 from collections import namedtuple
 from logging import getLogger
 
+import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.contrib import appsi
@@ -178,6 +179,7 @@ class Model(po.ConcreteModel):
         self.flows = self.es.flows()
 
         self.solver_results = None
+        self.meta_results = None
         self.dual = None
         self.rc = None
 
@@ -439,7 +441,7 @@ class Model(po.ConcreteModel):
         return processing.results(self)
 
     def solve_highs(
-        self, solver_info, cmdline_options=None, solve_kwargs=None
+        self, solver_info, solver, cmdline_options=None, solve_kwargs=None
     ):
         opt = appsi.solvers.Highs()
         opt.config.load_solution = False
@@ -472,8 +474,10 @@ class Model(po.ConcreteModel):
             gap = None
 
         return solver_info(
+            objective=ub,
+            solver=solver,
             optimal=optimal,
-            termination_condition=tc,
+            termination_condition=tc.name,
             status=tc.value,
             solver_results=solver_results,
             wallclock_time=solver_results.get("wallclock_time"),
@@ -499,12 +503,8 @@ class Model(po.ConcreteModel):
         tc = factory_results.Solver.Termination_condition
         msg = getattr(factory_results.Solver, "Message", None)
         wt = getattr(factory_results.Solver, "Time", None)
-        ub = getattr(
-            factory_results.Problem[0], "Upper_bound", None
-        )
-        lb = getattr(
-            factory_results.Problem[0], "Lower_bound", None
-        )
+        ub = getattr(factory_results.Problem[0], "Upper_bound", None)
+        lb = getattr(factory_results.Problem[0], "Lower_bound", None)
         if ub not in (None, 0) and lb is not None:
             gap = abs(ub - lb) / abs(ub)
         else:
@@ -512,8 +512,10 @@ class Model(po.ConcreteModel):
 
         return solver_info(
             optimal=status == "ok" and tc == "optimal",
-            termination_condition=tc,
-            status=status,
+            solver=solver,
+            objective=po.value(self.objective),
+            termination_condition=tc.name,
+            status=status.name,
             solver_results=factory_results,
             wallclock_time=wt,
             ub=ub,
@@ -564,6 +566,8 @@ class Model(po.ConcreteModel):
             "solver_results",
             "message",
             "wallclock_time",
+            "objective",
+            "solver",
             "gap",
             "ub",
             "lb",
@@ -577,6 +581,7 @@ class Model(po.ConcreteModel):
                 solver_info=solver_info,
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
+                solver=solver,
             )
         else:
             solver_return = self.solve_factory(
@@ -589,17 +594,20 @@ class Model(po.ConcreteModel):
 
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
+        self.meta_results = pd.Series(solver_return._asdict()).drop(
+            "solver_results"
+        )
 
         if solver_return.optimal:
-            msg = "Optimization successful."
+            msg = "Optimisation successful."
             logging.info(msg)
         else:
             msg = (
                 f"The solver did not return an optimal solution. "
-                f"Instead the optimization ended with\n"
+                f"Instead the optimisation ended with\n"
                 f"       - status: {solver_return.status}\n"
                 f"       - termination condition: "
-                f"{solver_return.termination_condition.name}"
+                f"{solver_return.termination_condition}"
             )
 
             if allow_nonoptimal:
