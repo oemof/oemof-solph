@@ -60,6 +60,7 @@ from oemof.tools import logger
 
 from oemof import solph
 from oemof.visio import plot as oeplot
+
 # import oemof plots
 try:
     from oemof.visio import plot as oeplot
@@ -222,13 +223,31 @@ def main(optimize=True, solver="cbc"):
         conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
     )
 
+    # # create a fixed Converter to distribute to the heat and elec buses
+    # noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
+    #     label="variable_chp_gas",
+    #     inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+    #     outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
+    #     conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
+    #     conversion_factor_full_condensation={noded["bel"]: 0.5},
+    # )
     # create a fixed Converter to distribute to the heat and elec buses
-    noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
+    abel = [0.5] * 192
+    abth = [0.3] * 192
+
+    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
         label="variable_chp_gas",
         inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-        outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-        conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
-        conversion_factor_full_condensation={noded["bel"]: 0.5},
+        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
+        conversion_factors={
+            noded["bel"]: abel,
+            noded["bth"]: abth,
+        },
+        # allow_equal_states=True,
+        conversion_factors_secondary_state={
+            noded["bel"]: [0.3] * 192,
+            noded["bth"]: [0.5] * 192,
+        },
     )
 
     ##########################################################################
