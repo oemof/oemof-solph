@@ -332,9 +332,10 @@ class VariableSplitConverterBlock(ScalarBlock):
         def _out_a_lower_bound_rule(block):
             for t in m.TIMESTEPS:
                 for g in self.EQUAL_STATES:
-                    lhs = g.out_a_min[t] * m.flow[g.inflow, g, t]
-                    rhs = m.flow[g, g.output_a, t]
-                    block.out_a_lower_bound.add((g, t), (lhs <= rhs))
+                    if g.coef_out_b[t] == 0:
+                        lhs = g.out_a_min[t] * m.flow[g.inflow, g, t]
+                        rhs = m.flow[g, g.output_a, t]
+                        block.out_a_lower_bound.add((g, t), (lhs <= rhs))
 
         self.out_a_lower_bound = Constraint(
             self.EQUAL_STATES, m.TIMESTEPS, noruleinit=True
@@ -346,9 +347,10 @@ class VariableSplitConverterBlock(ScalarBlock):
         def _out_a_upper_bound_rule(block):
             for t in m.TIMESTEPS:
                 for g in self.EQUAL_STATES:
-                    lhs = m.flow[g, g.output_a, t]
-                    rhs = g.out_a_max[t] * m.flow[g.inflow, g, t]
-                    block.out_a_upper_bound.add((g, t), (lhs <= rhs))
+                    if g.coef_out_b[t] == 0:
+                        lhs = m.flow[g, g.output_a, t]
+                        rhs = g.out_a_max[t] * m.flow[g.inflow, g, t]
+                        block.out_a_upper_bound.add((g, t), (lhs <= rhs))
 
         self.out_a_upper_bound = Constraint(
             self.EQUAL_STATES, m.TIMESTEPS, noruleinit=True

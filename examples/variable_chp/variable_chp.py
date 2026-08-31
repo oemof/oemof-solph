@@ -110,7 +110,7 @@ def write_lp_file(model):
     model.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
-def main(optimize=True, solver="cbc"):
+def main(optimize=True, solver="cbc", new=True):
     # Read data file
     filename = os.path.join(os.getcwd(), "variable_chp.csv")
     try:
@@ -223,32 +223,41 @@ def main(optimize=True, solver="cbc"):
         conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
     )
 
-    # # create a fixed Converter to distribute to the heat and elec buses
-    # noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
-    #     label="variable_chp_gas",
-    #     inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-    #     outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-    #     conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
-    #     conversion_factor_full_condensation={noded["bel"]: 0.5},
-    # )
-    # create a fixed Converter to distribute to the heat and elec buses
-    abel = [0.5] * 192
-    abth = [0.3] * 192
+    if not new:
+        # create a fixed Converter to distribute to the heat and elec buses
+        noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
+            label="variable_chp_gas",
+            inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+            outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
+            conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
+            conversion_factor_full_condensation={noded["bel"]: 0.5},
+        )
+    else:
+        # create a fixed Converter to distribute to the heat and elec buses
+        # Try with iterable or floats and try with equal points
+        # If allow_equal_states=False equal states are not allowed and will
+        # raise an error even if the equal state is just in one time step.
+        # Otherwise, only in this time step two more constraints will be
+        # written to the lp-file to avoid mismatches.
+        abel = [0.5] * 192
+        abth = [0.3] * 192
+        bbel = [0.3] * 192
+        bbth = [0.5] * 192
 
-    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
-        label="variable_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
-        conversion_factors={
-            noded["bel"]: abel,
-            noded["bth"]: abth,
-        },
-        # allow_equal_states=True,
-        conversion_factors_secondary_state={
-            noded["bel"]: [0.3] * 192,
-            noded["bth"]: [0.5] * 192,
-        },
-    )
+        noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
+            label="variable_chp_gas",
+            inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+            outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
+            conversion_factors={
+                noded["bel"]: abel,
+                noded["bth"]: abth,
+            },
+            allow_equal_states=False,
+            conversion_factors_secondary_state={
+                noded["bel"]: bbel,
+                noded["bth"]: bbth,
+            },
+        )
 
     ##########################################################################
     # Optimise the energy system
@@ -498,4 +507,4 @@ def main(optimize=True, solver="cbc"):
 
 
 if __name__ == "__main__":
-    main()
+    main(new=True)
