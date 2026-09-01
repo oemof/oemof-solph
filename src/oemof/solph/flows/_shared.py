@@ -189,6 +189,19 @@ def variables_for_non_convex_flows(block):
         )
 
 
+def _previous_status(block, i, o, t):
+    """Status of a flow in the time step before `t`.
+
+    Before the first time step of the optimisation horizon, the flow is
+    assumed to have been in its `initial_status`. This is the same
+    convention that the startup and shutdown constraints use.
+    """
+    m = block.parent_block()
+    if t > m.TIMESTEPS.at(1):
+        return block.status[i, o, t - 1]
+    return m.flows[i, o].nonconvex.initial_status
+
+
 def _min_downtime_constraint(block):
     r"""
     .. math::
@@ -197,15 +210,11 @@ def _min_downtime_constraint(block):
         \leq t_{down,minimum} \
         - \sum_{n=0}^{t_{down,minimum}-1} Y_{status}(t+n) \\
         \forall t \in \textrm{TIMESTEPS} | \\
-        t \neq \{0..t_{down,minimum}\} \cup \
-        \{t\_max-t_{down,minimum}..t\_max\} , \\
+        t \neq t\_max , \\
         \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
-        \\ \\
-        Y_{status}(t) = Y_{status,0} \\
-        \forall t \in \textrm{TIMESTEPS} | \\
-        t = \{0..t_{down,minimum}\} \cup \
-        \{t\_max-t_{down,minimum}..t\_max\} , \\
-        \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
+
+    where :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
+    of the flow.
     """
     m = block.parent_block()
 
@@ -213,17 +222,13 @@ def _min_downtime_constraint(block):
         """
         Rule definition for min-downtime constraints of non-convex flows.
         """
-        if (
-            m.flows[i, o].nonconvex.first_flexible_timestep
-            < t
-            < m.TIMESTEPS.at(-1)
-        ):
+        if t < m.TIMESTEPS.at(-1):
             # We have a 2D matrix of constraints,
             # so testing is easier then just calling the rule for valid t.
 
             expr = 0
             expr += (
-                block.status[i, o, t - 1] - block.status[i, o, t]
+                _previous_status(block, i, o, t) - block.status[i, o, t]
             ) * m.flows[i, o].nonconvex.minimum_downtime[t]
             expr += -m.flows[i, o].nonconvex.minimum_downtime[t]
             expr += sum(
@@ -251,15 +256,11 @@ def _min_uptime_constraint(block):
         (Y_{status}(t)-Y_{status}(t-1)) \cdot t_{up,minimum} \\
         \leq \sum_{n=0}^{t_{up,minimum}-1} Y_{status}(t+n) \\
         \forall t \in \textrm{TIMESTEPS} | \\
-        t \neq \{0..t_{up,minimum}\} \cup \
-        \{t\_max-t_{up,minimum}..t\_max\} , \\
+        t \neq t\_max , \\
         \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
-        \\ \\
-        Y_{status}(t) = Y_{status,0} \\
-        \forall t \in \textrm{TIMESTEPS} | \\
-        t = \{0..t_{up,minimum}\} \cup \
-        \{t\_max-t_{up,minimum}..t\_max\} , \\
-        \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
+
+    where :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
+    of the flow.
     """
     m = block.parent_block()
 
@@ -267,16 +268,12 @@ def _min_uptime_constraint(block):
         """
         Rule definition for min-uptime constraints of non-convex flows.
         """
-        if (
-            m.flows[i, o].nonconvex.first_flexible_timestep
-            < t
-            < m.TIMESTEPS.at(-1)
-        ):
+        if t < m.TIMESTEPS.at(-1):
             # We have a 2D matrix of constraints,
             # so testing is easier then just calling the rule for valid t.
             expr = 0
             expr += (
-                block.status[i, o, t] - block.status[i, o, t - 1]
+                block.status[i, o, t] - _previous_status(block, i, o, t)
             ) * m.flows[i, o].nonconvex.minimum_uptime[t]
             expr += -sum(
                 block.status[i, o, u]
@@ -306,18 +303,8 @@ def _shutdown_constraint(block):
 
     def _shutdown_rule(_, i, o, t):
         """Rule definition for shutdown constraints of non-convex flows."""
-        if t > m.TIMESTEPS.at(1):
-            expr = (
-                block.shutdown[i, o, t]
-                >= block.status[i, o, t - 1] - block.status[i, o, t]
-            )
-        else:
-            expr = (
-                block.shutdown[i, o, t]
-                >= m.flows[i, o].nonconvex.initial_status
-                - block.status[i, o, t]
-            )
-        return expr
+        previous = _previous_status(block, i, o, t)
+        return block.shutdown[i, o, t] >= previous - block.status[i, o, t]
 
     return Constraint(block.SHUTDOWNFLOWS, m.TIMESTEPS, rule=_shutdown_rule)
 
@@ -333,18 +320,8 @@ def _startup_constraint(block):
 
     def _startup_rule(_, i, o, t):
         """Rule definition for startup constraint of nonconvex flows."""
-        if t > m.TIMESTEPS.at(1):
-            expr = (
-                block.startup[i, o, t]
-                >= block.status[i, o, t] - block.status[i, o, t - 1]
-            )
-        else:
-            expr = (
-                block.startup[i, o, t]
-                >= block.status[i, o, t]
-                - m.flows[i, o].nonconvex.initial_status
-            )
-        return expr
+        previous = _previous_status(block, i, o, t)
+        return block.startup[i, o, t] >= block.status[i, o, t] - previous
 
     return Constraint(block.STARTUPFLOWS, m.TIMESTEPS, rule=_startup_rule)
 

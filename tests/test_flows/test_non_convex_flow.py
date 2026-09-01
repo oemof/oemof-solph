@@ -132,3 +132,66 @@ def test_shutdown_costs_start_on():
     flow_result = _run_flow_model(flow)
 
     assert (flow_result["flow"][:-1] == [1, 1, 1, 10, 1, 1, 1, 10, 1, 1]).all()
+
+
+def test_minimum_uptime_after_initial_downtime():
+    # The unit is off initially, so `status` is fixed to 0 for the first
+    # `minimum_downtime` steps. Starting up in the first free time step
+    # still has to respect `minimum_uptime`.
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(
+            initial_status=0, minimum_downtime=2, minimum_uptime=4
+        ),
+        variable_costs=[1, 1, -10, 1, 1, 1, 1, 1, 1, 1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert (flow_result["flow"][:-1] == [0, 0, 10, 5, 5, 5, 0, 0, 0, 0]).all()
+
+
+def test_minimum_downtime_after_initial_uptime():
+    # The unit is on initially, so `status` is fixed to 1 for the first
+    # `minimum_uptime` steps. Shutting down in the first free time step
+    # still has to respect `minimum_downtime`.
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(
+            initial_status=1, minimum_uptime=2, minimum_downtime=4
+        ),
+        variable_costs=[1, 1, 10, -10, 1, 1, 1, 1, 1, 1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert (flow_result["flow"][:-1] == [5, 5, 5, 10, 0, 0, 0, 0, 0, 0]).all()
+
+
+def test_minimum_uptime_at_first_timestep():
+    # Starting up in the very first time step is a startup relative to
+    # `initial_status=0` and thus has to respect `minimum_uptime`.
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(initial_status=0, minimum_uptime=4),
+        variable_costs=[-10, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert (flow_result["flow"][:-1] == [10, 5, 5, 5, 0, 0, 0, 0, 0, 0]).all()
+
+
+def test_minimum_downtime_at_first_timestep():
+    # Shutting down in the very first time step is a shutdown relative to
+    # `initial_status=1` and thus has to respect `minimum_downtime`:
+    # the cheap time step 2 is out of reach, so the unit stays off.
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(initial_status=1, minimum_downtime=4),
+        variable_costs=[20, 20, -10, 1, 1, 1, 1, 1, 1, 1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert (flow_result["flow"][:-1] == 10 * [0]).all()
