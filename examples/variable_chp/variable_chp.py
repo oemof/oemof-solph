@@ -260,12 +260,13 @@ def main(optimize=True, solver="cbc", new=True):
     # Optimise the energy system
     ##########################################################################
 
+
+    energysystem.add(*noded.values())
+
     if optimize is False:
         return energysystem
 
     logging.info("Optimise the energy system")
-
-    energysystem.add(*noded.values())
 
     om = solph.Model(energysystem)
 
