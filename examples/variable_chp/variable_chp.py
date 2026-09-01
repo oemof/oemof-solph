@@ -110,22 +110,19 @@ def write_lp_file(model):
     model.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
+def get_data_from_file_path(file_path: str) -> pd.DataFrame:
+    try:
+        data = pd.read_csv(file_path)
+    except FileNotFoundError:
+        dir = os.path.dirname(os.path.abspath(__file__))
+        data = pd.read_csv(dir + "/" + file_path)
+    return data
+
+
 def main(optimize=True, solver="cbc", new=True):
     # Read data file
-    filename = os.path.join(os.getcwd(), "variable_chp.csv")
-    try:
-        data = pd.read_csv(filename)
-    except FileNotFoundError:
-        msg = "Data file not found: {0}. Only one value used!"
-        warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame(
-            {
-                "pv": [0.3],
-                "wind": [0.6],
-                "demand_el": [500],
-                "demand_th": [344],
-            }
-        )
+    data = get_data_from_file_path("variable_chp.csv")
+
     data.loc[180:, "demand_th"] = 0
     logger.define_logging()
     logging.info("Initialize the energy system")
