@@ -39,9 +39,10 @@ Bug fixes
   step it was free to, and reverse that one time step later, ignoring the
   other of the two minimum times. Both constraints now use ``initial_status``
   as the status preceding the horizon, the same convention the startup and
-  shutdown constraints already used. Note that this can change the result of
-  existing models that combine ``initial_status`` with ``minimum_uptime`` or
-  ``minimum_downtime``.
+  shutdown constraints already used. The rules are now also built for the last
+  time step, so ``minimum_uptime`` is no longer ignored for a startup there.
+  Note that this can change the result of existing models that combine
+  ``initial_status`` with ``minimum_uptime`` or ``minimum_downtime``.
 
 Other changes
 #############

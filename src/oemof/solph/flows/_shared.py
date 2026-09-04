@@ -11,6 +11,7 @@ SPDX-FileCopyrightText: Birgit Schachler
 SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems
+SPDX-FileCopyrightText: Dylan Pulver
 
 SPDX-License-Identifier: MIT
 
@@ -209,8 +210,7 @@ def _min_downtime_constraint(block):
         \cdot t_{down,minimum} \\
         \leq t_{down,minimum} \
         - \sum_{n=0}^{t_{down,minimum}-1} Y_{status}(t+n) \\
-        \forall t \in \textrm{TIMESTEPS} | \\
-        t \neq t\_max , \\
+        \forall t \in \textrm{TIMESTEPS}, \\
         \forall (i,o) \in \textrm{MINDOWNTIMEFLOWS}.
 
     where :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
@@ -222,28 +222,22 @@ def _min_downtime_constraint(block):
         """
         Rule definition for min-downtime constraints of non-convex flows.
         """
-        if t < m.TIMESTEPS.at(-1):
-            # We have a 2D matrix of constraints,
-            # so testing is easier then just calling the rule for valid t.
-
-            expr = 0
-            expr += (
-                _previous_status(block, i, o, t) - block.status[i, o, t]
-            ) * m.flows[i, o].nonconvex.minimum_downtime[t]
-            expr += -m.flows[i, o].nonconvex.minimum_downtime[t]
-            expr += sum(
-                block.status[i, o, d]
-                for d in range(
-                    t,
-                    min(
-                        t + m.flows[i, o].nonconvex.minimum_downtime[t],
-                        len(m.TIMESTEPS),
-                    ),
-                )
+        expr = 0
+        expr += (
+            _previous_status(block, i, o, t) - block.status[i, o, t]
+        ) * m.flows[i, o].nonconvex.minimum_downtime[t]
+        expr += -m.flows[i, o].nonconvex.minimum_downtime[t]
+        expr += sum(
+            block.status[i, o, d]
+            for d in range(
+                t,
+                min(
+                    t + m.flows[i, o].nonconvex.minimum_downtime[t],
+                    len(m.TIMESTEPS),
+                ),
             )
-            return expr <= 0
-        else:
-            return Constraint.Skip
+        )
+        return expr <= 0
 
     return Constraint(
         block.MINDOWNTIMEFLOWS, m.TIMESTEPS, rule=min_downtime_rule
@@ -255,8 +249,7 @@ def _min_uptime_constraint(block):
     .. math::
         (Y_{status}(t)-Y_{status}(t-1)) \cdot t_{up,minimum} \\
         \leq \sum_{n=0}^{t_{up,minimum}-1} Y_{status}(t+n) \\
-        \forall t \in \textrm{TIMESTEPS} | \\
-        t \neq t\_max , \\
+        \forall t \in \textrm{TIMESTEPS}, \\
         \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
 
     where :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
@@ -268,26 +261,21 @@ def _min_uptime_constraint(block):
         """
         Rule definition for min-uptime constraints of non-convex flows.
         """
-        if t < m.TIMESTEPS.at(-1):
-            # We have a 2D matrix of constraints,
-            # so testing is easier then just calling the rule for valid t.
-            expr = 0
-            expr += (
-                block.status[i, o, t] - _previous_status(block, i, o, t)
-            ) * m.flows[i, o].nonconvex.minimum_uptime[t]
-            expr += -sum(
-                block.status[i, o, u]
-                for u in range(
-                    t,
-                    min(
-                        t + m.flows[i, o].nonconvex.minimum_uptime[t],
-                        len(m.TIMESTEPS),
-                    ),
-                )
+        expr = 0
+        expr += (
+            block.status[i, o, t] - _previous_status(block, i, o, t)
+        ) * m.flows[i, o].nonconvex.minimum_uptime[t]
+        expr += -sum(
+            block.status[i, o, u]
+            for u in range(
+                t,
+                min(
+                    t + m.flows[i, o].nonconvex.minimum_uptime[t],
+                    len(m.TIMESTEPS),
+                ),
             )
-            return expr <= 0
-        else:
-            return Constraint.Skip
+        )
+        return expr <= 0
 
     return Constraint(block.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule)
 
