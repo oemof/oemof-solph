@@ -1,5 +1,5 @@
-v0.6.5
-------
+v0.6.5 (September 7th, 2026)
+----------------------------
 
 API changes
 ###########
@@ -13,10 +13,6 @@ New features
 
 * Added support for the solver HiGHS. If installed, you can use it by calling
   `Model.solve(solver="highs")`.
-
-Documentation
-#############
-
 
 Bug fixes
 #########
@@ -50,10 +46,10 @@ Other changes
 * Updated respective examples and tutorials to use current TSAM API (v3).
 * Internally, sequences of 'None' are now avoided and a simple 'None'
   is used instead. We expect no effect for end users.
-* _FakeSequences can no longer have a defined length. It has "every length"
-  by convention. Thus, it can now be reliably cast; not to an array but to
-  a scalar float. We expect no effect for end users.
-* _FakeSequences have operators defined. We expect no effect for end users.
+* ``_FakeSequence`` can no longer have a defined length.
+  They have "every length" by convention. Thus, it can now be reliably cast;
+  not to an array but to a scalar float. We expect no effect for end users.
+* ``_FakeSequence`` have operators defined. We expect no effect for end users.
 
 Contributors
 ############
@@ -67,6 +63,3 @@ Contributors
 * Uwe Krien
 * Francesco Witte
 * Dylan Pulver
-
-Acknowledgements
-################
