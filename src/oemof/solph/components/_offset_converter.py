@@ -20,21 +20,21 @@ SPDX-License-Identifier: MIT
 
 """
 
-from warnings import warn
-
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
-from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import Apply
+from oemof.solph._plumbing import SequenceDict
 
 
 class OffsetConverter(Node):
-    r"""An object with one input and multiple outputs and two coefficients
-    per output to model part load behaviour.
-    The output must contain a NonConvex object.
+    r"""An object with one or more inputs and one or more outputs to allow
+    modeling part-load dependend efficiency. One of all the input and output
+    flows connected must be NonConvex. All provided conversion_factors and
+    normed_offsets are relative to the flow with the NonConvex object.
 
     Parameters
     ----------
@@ -59,7 +59,8 @@ class OffsetConverter(Node):
 
     .. math::
 
-        m = \frac{(l_{max}/\eta_{max}-l_{min}/\eta_{min}}{l_{max}-l_{min}}
+        m = \frac{l_\text{max}/\eta_\text{max}-l_\text{min}/\eta_\text{min}}
+        {l_\text{max}-l_\text{min}}
 
         y_\text{0,normed} = \frac{1}{\eta_{max}} - m
 
@@ -80,7 +81,8 @@ class OffsetConverter(Node):
     >>> from oemof.solph.components import slope_offset_from_nonconvex_output
 
     The sets, variables, constraints and objective parts are created
-     * :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
+
+    - :py:class:`~oemof.solph.components._offset_converter.OffsetConverterBlock`
 
     Examples
     --------
@@ -132,6 +134,9 @@ class OffsetConverter(Node):
 
     """  # noqa: E501
 
+    conversion_factors = Apply(SequenceDict)
+    normed_offsets = Apply(SequenceDict)
+
     def __init__(
         self,
         inputs,
@@ -140,7 +145,6 @@ class OffsetConverter(Node):
         label=None,
         conversion_factors=None,
         normed_offsets=None,
-        coefficients=None,
         custom_properties=None,
     ):
         if custom_properties is None:
@@ -153,28 +157,6 @@ class OffsetConverter(Node):
             label=label,
             custom_properties=custom_properties,
         )
-
-        # --- BEGIN: To be removed for versions >= v0.7 ---
-        # this part is used for the transition phase from the old
-        # OffsetConverter API to the new one. It calcualtes the
-        # conversion_factors and normed_offsets from the coefficients and the
-        # outputs information on min and max.
-        if coefficients is not None:
-            if conversion_factors is not None or normed_offsets is not None:
-                msg = (
-                    "The deprecated argument `coefficients` cannot be used "
-                    "in combination with its replacements "
-                    "(`conversion_factors` and `normed_offsets`)."
-                )
-                raise TypeError(msg)
-
-            (
-                normed_offsets,
-                conversion_factors,
-            ) = self.normed_offset_and_conversion_factors_from_coefficients(
-                coefficients
-            )
-        # --- END ---
 
         _reference_flow = [v for v in self.inputs.values() if v.nonconvex]
         _reference_flow += [v for v in self.outputs.values() if v.nonconvex]
@@ -219,16 +201,14 @@ class OffsetConverter(Node):
                 "flow."
             )
 
-        self.conversion_factors = {
-            k: sequence(v) for k, v in conversion_factors.items()
-        }
+        self.conversion_factors = {k: v for k, v in conversion_factors.items()}
 
         missing_conversion_factor_keys = (
             set(self.outputs) | set(self.inputs)
         ) - set(self.conversion_factors)
 
         for cf in missing_conversion_factor_keys:
-            self.conversion_factors[cf] = sequence(1)
+            self.conversion_factors[cf] = 1
 
         if normed_offsets is None:
             normed_offsets = {}
@@ -238,87 +218,17 @@ class OffsetConverter(Node):
                 "Normed offsets cannot be specified for the `NonConvex` flow."
             )
 
-        self.normed_offsets = {
-            k: sequence(v) for k, v in normed_offsets.items()
-        }
+        self.normed_offsets = {k: v for k, v in normed_offsets.items()}
 
         missing_normed_offsets_keys = (
             set(self.outputs) | set(self.inputs)
         ) - set(self.normed_offsets)
 
         for cf in missing_normed_offsets_keys:
-            self.normed_offsets[cf] = sequence(0)
+            self.normed_offsets[cf] = 0
 
     def constraint_group(self):
         return OffsetConverterBlock
-
-    # --- BEGIN: To be removed for versions >= v0.7 ---
-    def normed_offset_and_conversion_factors_from_coefficients(
-        self, coefficients
-    ):
-        """
-        Calculate slope and offset for new API from the old API coefficients.
-
-        Parameters
-        ----------
-        coefficients : tuple
-            tuple holding the coefficients (offset, slope) for the old style
-            OffsetConverter.
-
-        Returns
-        -------
-        tuple
-            A tuple holding the slope and the offset for the new
-            OffsetConverter API.
-        """
-        coefficients = tuple([sequence(i) for i in coefficients])
-        if len(coefficients) != 2:
-            raise ValueError(
-                "Two coefficients or coefficient series have to be given."
-            )
-
-        input_bus = list(self.inputs.values())[0].input
-        for flow in self.outputs.values():
-            if flow.maximum.size is not None:
-                target_len = flow.maximum.size
-            else:
-                target_len = 1
-
-            slope = []
-            offset = []
-            for i in range(target_len):
-                eta_at_max = (
-                    flow.maximum[i]
-                    * coefficients[1][i]
-                    / (flow.maximum[i] - coefficients[0][i])
-                )
-                eta_at_min = (
-                    flow.minimum[i]
-                    * coefficients[1][i]
-                    / (flow.minimum[i] - coefficients[0][i])
-                )
-
-                c0, c1 = slope_offset_from_nonconvex_output(
-                    flow.maximum[i], flow.minimum[i], eta_at_max, eta_at_min
-                )
-                slope.append(c0)
-                offset.append(c1)
-
-            if target_len == 1:
-                slope = slope[0]
-                offset = offset[0]
-
-            conversion_factors = {input_bus: slope}
-            normed_offsets = {input_bus: offset}
-            msg = (
-                "The usage of coefficients is depricated, use "
-                "conversion_factors and normed_offsets instead."
-            )
-            warn(msg, DeprecationWarning)
-
-        return normed_offsets, conversion_factors
-
-    # --- END ---
 
     def plot_partload(self, bus, tstep):
         """Create a matplotlib figure of the flow to nonconvex flow relation.

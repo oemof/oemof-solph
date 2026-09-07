@@ -23,7 +23,8 @@ from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
-from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import Apply
+from oemof.solph._plumbing import SequenceDict
 from oemof.solph.components import Converter
 
 
@@ -70,6 +71,8 @@ class ExtractionTurbineCHP(Converter):
     ...    conversion_factor_full_condensation={bel: 0.5})
     """  # noqa: E501
 
+    conversion_factor_full_condensation = Apply(SequenceDict)
+
     def __init__(
         self,
         conversion_factor_full_condensation,
@@ -89,8 +92,7 @@ class ExtractionTurbineCHP(Converter):
             custom_properties=custom_properties,
         )
         self.conversion_factor_full_condensation = {
-            k: sequence(v)
-            for k, v in conversion_factor_full_condensation.items()
+            k: v for k, v in conversion_factor_full_condensation.items()
         }
 
     def constraint_group(self):

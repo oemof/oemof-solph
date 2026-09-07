@@ -20,6 +20,7 @@ from warnings import warn
 
 from oemof.tools import debugging
 
+from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -85,6 +86,12 @@ class Investment:
 
     """  # noqa: E501
 
+    ep_costs = Apply(sequence)
+    fixed_costs = Apply(sequence)
+    maximum = Apply(sequence)
+    minimum = Apply(sequence)
+    offset = Apply(sequence)
+
     def __init__(
         self,
         maximum=float("+inf"),
@@ -120,17 +127,17 @@ class Investment:
             custom_properties = custom_attributes
         # --- END ---
         self.custom_properties = custom_properties
-        self.maximum = sequence(maximum)
-        self.minimum = sequence(minimum)
-        self.ep_costs = sequence(ep_costs)
+        self.maximum = maximum
+        self.minimum = minimum
+        self.ep_costs = ep_costs
         self.existing = existing
         self.nonconvex = nonconvex
-        self.offset = sequence(offset)
+        self.offset = offset
         self.overall_maximum = overall_maximum
         self.overall_minimum = overall_minimum
         self.lifetime = lifetime
         self.age = age
-        self.fixed_costs = sequence(fixed_costs)
+        self.fixed_costs = fixed_costs
 
         self._check_invest_attributes()
         self._check_invest_attributes_maximum()
@@ -249,6 +256,15 @@ class NonConvex:
             (`flow[t-1] > flow[t]`) of two consecutive flow values.
     """
 
+    activity_costs = Apply(sequence)
+    inactivity_costs = Apply(sequence)
+    minimum_downtime = Apply(sequence)
+    minimum_uptime = Apply(sequence)
+    negative_gradient_limit = Apply(sequence)
+    positive_gradient_limit = Apply(sequence)
+    shutdown_costs = Apply(sequence)
+    startup_costs = Apply(sequence)
+
     def __init__(
         self,
         initial_status=0,
@@ -286,17 +302,17 @@ class NonConvex:
         self.custom_properties = custom_properties
 
         self.initial_status = initial_status
-        self.minimum_uptime = sequence(minimum_uptime)
-        self.minimum_downtime = sequence(minimum_downtime)
+        self.minimum_uptime = minimum_uptime
+        self.minimum_downtime = minimum_downtime
         self.maximum_startups = maximum_startups
         self.maximum_shutdowns = maximum_shutdowns
 
-        self.startup_costs = sequence(startup_costs)
-        self.shutdown_costs = sequence(shutdown_costs)
-        self.activity_costs = sequence(activity_costs)
-        self.inactivity_costs = sequence(inactivity_costs)
-        self.negative_gradient_limit = sequence(negative_gradient_limit)
-        self.positive_gradient_limit = sequence(positive_gradient_limit)
+        self.startup_costs = startup_costs
+        self.shutdown_costs = shutdown_costs
+        self.activity_costs = activity_costs
+        self.inactivity_costs = inactivity_costs
+        self.negative_gradient_limit = negative_gradient_limit
+        self.positive_gradient_limit = positive_gradient_limit
 
         if initial_status == 0:
             self.first_flexible_timestep = self.minimum_downtime[0]

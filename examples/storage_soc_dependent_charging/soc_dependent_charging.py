@@ -70,7 +70,7 @@ def plotting(results):
     plt.show()
 
 
-def optimise_storage():
+def main(optimize=True, solver="cbc"):
     """A minimal storage model, that just loads the storages."""
     logger.define_logging()
     logging.info("Initialize the energy system")
@@ -102,12 +102,15 @@ def optimise_storage():
     )
     energysystem.add(storage, storage_new)
 
+    if not optimize:
+        return energysystem
+
     logging.info("Optimise the energy system")
     om = solph.Model(energysystem)
-    om.solve(solver="cbc", solve_kwargs={"tee": False})
+    om.solve(solver=solver, solve_kwargs={"tee": False})
 
     return solph.Results(om)
 
 
 if __name__ == "__main__":
-    plotting(optimise_storage())
+    plotting(main())

@@ -22,11 +22,11 @@ jobs:
         python-version: ["3.11", "3.14"]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Install cbc
       run: sudo apt install coinor-cbc glpk-utils
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v6
+      uses: actions/setup-python@v7
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
@@ -48,7 +48,7 @@ jobs:
         COVERAGE_FILE: ".coverage.${{ matrix.python-version }}"
 
     - name: Store coverage file
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: coverage-${{ matrix.python-version }}
         path: .coverage.${{ matrix.python-version }}
@@ -67,14 +67,14 @@ jobs:
       pull-requests: write
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # This is optional since by default it's to true. The git
           # operations in python-coverage-comment-action utilize the token
           # stored by actions/checkout.
           persist-credentials: true
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         id: download
         with:
           pattern: coverage-*
@@ -88,7 +88,7 @@ jobs:
           MERGE_COVERAGE_FILES: true
 
       - name: Store Pull Request comment to be posted
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: steps.coverage_comment.outputs.COMMENT_FILE_WRITTEN == 'true'
         with:
           name: python-coverage-comment-action

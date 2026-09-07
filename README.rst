@@ -86,7 +86,7 @@ Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof-solph repository to your own
-GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
+GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/start-your-journey/hello-world>`_
 
 If you have questions regarding the use of oemof including oemof.solph you can visit the openmod forum (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and open a new thread if your questions hasn't been already answered.
 

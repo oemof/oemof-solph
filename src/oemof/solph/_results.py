@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 
 import warnings
 from collections.abc import Hashable
+from typing import Any
 
 import pandas as pd
 from oemof.tools.debugging import ExperimentalFeatureWarning
@@ -48,34 +49,34 @@ class Results:
         self._variables = {}
         self._model = model
 
-        for vardata in model.component_data_objects(Var):
-            for variable in [vardata.parent_component()]:
-                # name of the variable
-                key = str(variable).split(".")[-1]
-                # where the variable is found in the model
-                occurence = str(variable)[: -(len(key) + 1)]
-                if (
-                    key not in self._variables
-                    and key not in self._solver_results
-                ):  # variable found for the first time
-                    self._variables[key] = {occurence: variable}
-                elif (
-                    key in self._variables
-                    and occurence not in self._variables[key]
-                ):
-                    # Variable known name found somewhere new in the model.
-                    # Aligning names is particularly useful when they name
-                    # the same thing in different Blocks.
-                    self._variables[key][occurence] = variable
-                else:
-                    # Only left option should be
-                    # self._variables[key][occurence] == variable.
-                    # Iterated over the same thing twice.
-                    # Case for debugging purposes.
-                    # We should avoid useless iterations.
-                    pass
+        for variable in model.component_objects(Var):
+            var_name = variable.getname()
+            # name of the variable
+            key = var_name.split(".")[-1]
+            # where the variable is found in the model
+            occurence = variable.parent_block()
 
-        # adss additional keys for the calculation of opex and capex
+            if (
+                key not in self._variables and key not in self._solver_results
+            ):  # variable found for the first time
+                self._variables[key] = {occurence: variable}
+            elif (
+                key in self._variables
+                and occurence not in self._variables[key]
+            ):
+                # Variable known name found somewhere new in the model.
+                # Aligning names is particularly useful when they name
+                # the same thing in different Blocks.
+                self._variables[key][occurence] = variable
+            else:
+                # Only left option should be
+                # self._variables[key][occurence] == variable.
+                # Iterated over the same thing twice.
+                # Case for debugging purposes.
+                # We should avoid useless iterations.
+                pass
+
+        # adds additional keys for the calculation of opex and capex
         # if the keyword eval_economy is True
         # checks if investment optimization is happing to add capex as key
         # TODO: add keyword for multiperiod
@@ -100,8 +101,8 @@ class Results:
     def get(
         self,
         key: str,
-        default: any = None,
-    ) -> pd.DataFrame | pd.Series:
+        default: Any = None,
+    ) -> pd.DataFrame | pd.Series | None:
         # TODO:
         #   - Figure out why `Results.init_content` is a `pd.Series`.
         #   - Support `Var`s as arguments?
@@ -117,7 +118,7 @@ class Results:
         ----------
         key : string
             name of a result (e.g. pyomo variable or derived quantity)
-        default : any
+        default : Any
             value to return if key is not found
 
         Returns
@@ -126,9 +127,9 @@ class Results:
         """
 
         if key == "variable_costs":
-            rv = self._calc_variable_costs()
+            return self._calc_variable_costs()
         elif key == "investment_costs":
-            rv = self._calc_capex()
+            return self._calc_capex()
         elif key in self._variables:
             rv = []
             for occurence in self._variables[key]:
@@ -148,18 +149,19 @@ class Results:
             # if third-party code introduces a variable name collision.
             rv = pd.concat(rv, axis=1)
 
-            # overwrite known indexes
-            index_type = tuple(dataset.index_set().subsets())[-1].name
-            match index_type:
-                case "TIMEPOINTS":
-                    rv.index = self._model.es.timeindex
-                case "TIMESTEPS":
-                    rv.index = self._model.es.timeindex[:-1]
-                case _:
-                    rv.index = rv.index.get_level_values(-1)
-        else:
-            rv = default
-        return rv
+            if not rv.empty:
+                # overwrite known indexes
+                index_type = tuple(dataset.index_set().subsets())[-1].name
+                match index_type:
+                    case "TIMEPOINTS":
+                        rv.index = self._model.es.timeindex
+                    case "TIMESTEPS":
+                        rv.index = self._model.es.timeindex[:-1]
+                    case _:
+                        rv.index = rv.index.get_level_values(-1)
+                return rv
+
+        return default
 
     # --- BEGIN: The following code can be removed for versions >= v0.7 ---
     def to_df(self, variable: str) -> pd.DataFrame | pd.Series:
@@ -266,7 +268,7 @@ class Results:
         self._economy_calculation_waring()
         df_opex = pd.DataFrame()
 
-        # extract the the optimized flow values
+        # extract the optimized flow values
         flow_values = self.get("flow", pd.DataFrame())
 
         for i, o in self._model.FLOWS:

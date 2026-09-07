@@ -208,3 +208,15 @@ def test_soc():
     assert flow.iloc[5] == pytest.approx((50 * 1 / 0.8) / (1 - 0.01), abs=1e-2)
     assert flow.iloc[6] == pytest.approx(0, abs=1e-2)
     assert flow.iloc[7] == pytest.approx((init_soc + (100 * 1 / 0.8)) / 0.99)
+
+
+def test_storage_soc_uses_storage_content_name():
+    # clustered runs used to label SOC "soc", but "storage_content" is the
+    # canonical name and should stay consistent
+    all_columns = [
+        col
+        for entry in results.values()
+        for col in entry["sequences"].columns
+    ]
+    assert "storage_content" in all_columns
+    assert "soc" not in all_columns

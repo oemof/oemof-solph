@@ -27,6 +27,7 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
+from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -119,6 +120,8 @@ class GenericCHP(Node):
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
 
+    beta = Apply(sequence)
+
     def __init__(
         self,
         fuel_input,
@@ -139,7 +142,7 @@ class GenericCHP(Node):
         self.fuel_input = fuel_input
         self.electrical_output = electrical_output
         self.heat_output = heat_output
-        self.beta = sequence(beta)
+        self.beta = beta
         self.back_pressure = back_pressure
         self._alphas = None
 

@@ -40,8 +40,10 @@ def test_custom_properties():
 
 
 def test_source_with_full_load_time_max():
-    # TODO: This does not test anything?
-    Flow(nominal_capacity=1, full_load_time_max=2)
+    flow = Flow(nominal_capacity=1, full_load_time_max=2)
+
+    assert flow.nominal_capacity == 1
+    assert flow.full_load_time_max == 2
 
 
 def test_nominal_capacity_validation():

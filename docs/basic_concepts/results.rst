@@ -51,7 +51,7 @@ Working with results
 --------------------
 
 First of all, it should be mentioned that a Node is considered to be equal
-to its label. Thus, the above code is completely equivilent to:
+to its label. Thus, the above code is completely equivalent to:
 
 .. code-block:: python
 
@@ -61,8 +61,8 @@ to its label. Thus, the above code is completely equivilent to:
     storage_content = results["storage_content"]["storage_node_label"]
 
 However, there is a big advantage in having the original nodes in the
-column name. This way, you can use information not provided in the label.
-For example, to collect all Flows going to a GenericStorage,
+column name. This way, you can use information not provided within the label.
+For example, to collect all flows going to a GenericStorage,
 the following code can be used:
 
 .. code-block:: python
@@ -102,7 +102,7 @@ visualised. See how you can extract flows from the results to plot them:
     ax.legend()
     plt.show()
 
-If you want to have a DataFrame that contains all flows fromand to
+If you want to have a DataFrame that contains all flows from and to
 a specific node, you can also use masking.
 
 .. code-block:: python
@@ -115,7 +115,7 @@ a specific node, you can also use masking.
     flows_bel = flows.loc[:, mask_bel]
 
 This way, you can also migrate from ``solph.views``.
-That modeule was designed to extract node specific from
+That module was designed to extract node specific from
 the nested result dictionary that is returned by calling
 ``solph.processing.results(Model)``. With the new results object,
 this approach is no longer advised.

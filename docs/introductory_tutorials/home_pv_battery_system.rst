@@ -39,7 +39,7 @@ The full dataset (which has 10-minute resolution) is described in the paper
 `Dataset on electrical single-family house and heat pump load profiles in
 Germany <https://doi.org/10.1038/s41597-022-01156-1>`_.
 The PV time series has been created using
-`PVGIS <https://re.jrc.ec.europa.eu/pvg_tools/en/>`_.
+`PVGIS <https://doi.org/10.1016/j.solener.2012.03.006>`_.
 
 First, let us import all needed packages:
 ``os`` is handy to for file handling,

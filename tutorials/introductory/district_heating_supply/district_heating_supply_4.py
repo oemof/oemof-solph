@@ -70,7 +70,7 @@ gas_boiler = solph.components.Converter(
             variable_costs=var_cost_gas_boiler,
         )
     },
-    conversion_factors={gas_bus: 0.95},
+    conversion_factors={heat_bus: 0.95},
 )
 
 district_heating_system.add(gas_boiler)

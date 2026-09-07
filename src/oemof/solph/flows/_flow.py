@@ -31,6 +31,7 @@ from oemof.network import Edge
 from oemof.tools import debugging
 
 from oemof.solph._options import Investment
+from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -123,6 +124,16 @@ class Flow(Edge):
     >>> f1.maximum[1]
     0.99
     """  # noqa: E501
+
+    fix = Apply(sequence)
+    maximum = Apply(sequence)
+    minimum = Apply(sequence)
+
+    fixed_costs = Apply(sequence)
+    variable_costs = Apply(sequence)
+
+    positive_gradient_limit = Apply(sequence)
+    negative_gradient_limit = Apply(sequence)
 
     def __init__(
         self,
@@ -258,10 +269,10 @@ class Flow(Edge):
             )
             warn(msg, debugging.SuspiciousUsageWarning)
 
-        self.fixed_costs = sequence(fixed_costs)
-        self.variable_costs = sequence(variable_costs)
-        self.positive_gradient_limit = sequence(positive_gradient_limit)
-        self.negative_gradient_limit = sequence(negative_gradient_limit)
+        self.fixed_costs = fixed_costs
+        self.variable_costs = variable_costs
+        self.positive_gradient_limit = positive_gradient_limit
+        self.negative_gradient_limit = negative_gradient_limit
 
         self.full_load_time_max = full_load_time_max
         self.full_load_time_min = full_load_time_min
@@ -303,9 +314,9 @@ class Flow(Edge):
         else:
             self.bidirectional = False
 
-        self.fix = sequence(fix)
-        self.maximum = sequence(maximum)
-        self.minimum = sequence(minimum)
+        self.fix = fix
+        self.maximum = maximum
+        self.minimum = minimum
 
         need_nominal_capacity = [
             "fix",
@@ -343,9 +354,9 @@ class Flow(Edge):
 
         # Checking for impossible gradient combinations
         if self.nonconvex:
-            if self.nonconvex.positive_gradient_limit[0] is not None and (
-                self.positive_gradient_limit[0] is not None
-                or self.negative_gradient_limit[0] is not None
+            if self.nonconvex.positive_gradient_limit is not None and (
+                self.positive_gradient_limit is not None
+                or self.negative_gradient_limit is not None
             ):
                 raise ValueError(
                     "You specified a positive gradient in your nonconvex "
@@ -353,9 +364,9 @@ class Flow(Edge):
                     "negative gradient for a standard flow!"
                 )
 
-            if self.nonconvex.negative_gradient_limit[0] is not None and (
-                self.positive_gradient_limit[0] is not None
-                or self.negative_gradient_limit[0] is not None
+            if self.nonconvex.negative_gradient_limit is not None and (
+                self.positive_gradient_limit is not None
+                or self.negative_gradient_limit is not None
             ):
                 raise ValueError(
                     "You specified a negative gradient in your nonconvex "

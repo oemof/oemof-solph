@@ -133,7 +133,7 @@ As our system is complete for this step, its time to start the unit commitment
 optimization. For that, we first have to create a :py:class:`solph.Model` instance
 from our ``district_heating_system``. Then we can use its :py:func:`solve` method
 to run the optimization. We decide to use the open source solver
-`CBC <https://projects.coin-or.org/Cbc>`_ and add the additional :py:attr:`solve_kwargs`
+`CBC <https://coin-or.github.io/Cbc/>`_ and add the additional :py:attr:`solve_kwargs`
 parameter ``'tee'`` to ``True``, in order to get a more verbose solver logging
 output in the console.
 

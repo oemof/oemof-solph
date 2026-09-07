@@ -27,7 +27,8 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
 from oemof.solph._helpers import warn_if_missing_attribute
-from oemof.solph._plumbing import sequence
+from oemof.solph._plumbing import Apply
+from oemof.solph._plumbing import SequenceDict
 
 
 class Link(Node):
@@ -79,6 +80,8 @@ class Link(Node):
     0.8
     """
 
+    conversion_factors = Apply(SequenceDict)
+
     def __init__(
         self,
         label=None,
@@ -109,9 +112,8 @@ class Link(Node):
         if conversion_factors is None:
             warn_if_missing_attribute(self, "conversion_factors")
             conversion_factors = {}
-        self.conversion_factors = {
-            k: sequence(v) for k, v in conversion_factors.items()
-        }
+
+        self.conversion_factors = {k: v for k, v in conversion_factors.items()}
         msg = (
             "Component `Link` should have exactly "
             + "2 inputs, 2 outputs, and 2 "

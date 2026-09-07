@@ -19,7 +19,7 @@ API changes
 ####################
 
  * The demandlib is no longer part of the oemof package. It has its own
-   package now: (`demandlib <https://github.com/oemof/demandlib>`_)
+   package now: (`oemof.demand <https://github.com/oemof/oemof-demand>`_)
 
 
 New features

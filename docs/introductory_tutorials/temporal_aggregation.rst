@@ -17,6 +17,13 @@ The full tutorial consists of the following:
 * Step 3: Upfront investment using time series aggregation
 * Step 4: Pathway planning using time series aggregation
 
+To run the tutorial code on the typical periods in step 2 you will need the
+extra dependencies:
+
+- oemof.demand
+- workalendar
+- tsam
+
 
 Step 1: Sampling of high resolution input data
 ----------------------------------------------

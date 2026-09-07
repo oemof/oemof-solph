@@ -43,9 +43,9 @@ from oemof.solph.constraints import storage_level_constraint
 from oemof.solph.processing import results
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     es = EnergySystem(
-        timeindex=pd.date_range("2022-01-01", freq="1H", periods=24),
+        timeindex=pd.date_range("2022-01-01", freq="1h", periods=24),
         infer_last_interval=True,
     )
 
@@ -101,7 +101,7 @@ def main(optimize=True):
         input_levels={in_1: 1 / 3},  # in_0 is always active
         output_levels={out_0: 1 / 6, out_1: 1 / 2},
     )
-    model.solve()
+    model.solve(solver=solver)
 
     my_results = results(model)
 

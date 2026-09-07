@@ -1,0 +1,65 @@
+v0.6.5 (September 7th, 2026)
+----------------------------
+
+API changes
+###########
+
+* Removed the wrapper that still allowed initialising the `OffsetConverter`
+  using a tuple named `coefficient`. (This breaks compatibility with solph
+  API before v0.5.3 from June 25th, 2024.)
+
+New features
+############
+
+* Added support for the solver HiGHS. If installed, you can use it by calling
+  `Model.solve(solver="highs")`.
+
+Bug fixes
+#########
+
+* Fix TSAM result disaggregation for ``NonConvex`` and ``InvestNonConvex``
+  flows, which silently dropped per-timestep variables from the output.
+* Fix inconsistency in the assignment of sequences using scalar variables;
+  e.g. `flow = Flow(variable_costs=5)` worked, but `flow.variable_costs = 5`
+  failed when constructing the model.
+* Name the TSA-disaggregated storage SOC result ``storage_content`` to match
+  non-clustered ``GenericStorage`` results, so result readers (e.g. ``views``)
+  find it by the same key regardless of clustering.
+* Fix ``limit_active_flow_count`` and ``limit_active_flow_count_by_keyword ``
+  constraints for flows of type ``INVEST_NON_CONVEX_FLOWS``
+* Fix ``NonConvex`` ``minimum_uptime``/``minimum_downtime`` being skipped for
+  the first time steps of the optimisation horizon. The constraints were only
+  built for ``t > first_flexible_timestep``, which is derived from
+  ``minimum_downtime`` if ``initial_status=0`` and from ``minimum_uptime``
+  otherwise. A unit could therefore start up (or shut down) in the first time
+  step it was free to, and reverse that one time step later, ignoring the
+  other of the two minimum times. Both constraints now use ``initial_status``
+  as the status preceding the horizon, the same convention the startup and
+  shutdown constraints already used. The rules are now also built for the last
+  time step, so ``minimum_uptime`` is no longer ignored for a startup there.
+  Note that this can change the result of existing models that combine
+  ``initial_status`` with ``minimum_uptime`` or ``minimum_downtime``.
+
+Other changes
+#############
+
+* Updated respective examples and tutorials to use current TSAM API (v3).
+* Internally, sequences of 'None' are now avoided and a simple 'None'
+  is used instead. We expect no effect for end users.
+* ``_FakeSequence`` can no longer have a defined length.
+  They have "every length" by convention. Thus, it can now be reliably cast;
+  not to an array but to a scalar float. We expect no effect for end users.
+* ``_FakeSequence`` have operators defined. We expect no effect for end users.
+
+Contributors
+############
+
+* Jelmer de Wit
+* Patrik Schönfeldt
+* Pierre Francois Bachibouzouk
+* Stephan Günther
+* Diana Maldonado Castro
+* Jonas Freißmann
+* Uwe Krien
+* Francesco Witte
+* Dylan Pulver

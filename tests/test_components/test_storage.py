@@ -163,9 +163,7 @@ def test_storage_charging():
 
     assert list(results["flow"][(bus, storage)]) == 10 * [2]
 
-    storage_content = list(
-        results["storage_content"][storage]
-    )
+    storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
 
 
@@ -202,9 +200,7 @@ def test_invest_content_uncoupled():
     invest_capacity = results["invest"][storage]
     assert invest_capacity[0] == pytest.approx(19)
 
-    storage_content = list(
-        results["storage_content"][storage]
-    )
+    storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
 
 
@@ -361,9 +357,7 @@ def test_soc_dependent_charging_with_investment():
 
 
 def test_soc_dependent_charging_without_inputs():
-    with pytest.raises(
-        NotImplementedError, match="adding Flows later"
-    ):
+    with pytest.raises(NotImplementedError, match="adding Flows later"):
         bus = solph.Bus()
         _ = solph.components.GenericStorage(
             label="storage",

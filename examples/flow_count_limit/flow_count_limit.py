@@ -47,7 +47,7 @@ except ImportError:
     plt = None
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     energy_system = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=4, freq="h"),
         infer_last_interval=True,

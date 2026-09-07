@@ -10,6 +10,7 @@ SPDX-License-Identifier: MIT
 """
 
 import warnings
+from collections import abc
 
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
@@ -27,7 +28,7 @@ class TestConverterClass:
     @pytest.mark.filterwarnings("ignore::UserWarning")
     def test_empty_converter(self):
         converter = solph.components.Converter()
-        assert isinstance(converter.conversion_factors, dict)
+        assert isinstance(converter.conversion_factors, abc.MutableMapping)
         assert len(converter.conversion_factors.keys()) == 0
 
     def test_default_conversion_factor(self):

@@ -17,22 +17,24 @@ Introduction
 (LP/MILP). The oemof.solph package is part of the
 `open energy modelling framework (oemof) <https://github.com/oemof/oemof>`_.
 This is an organisational framework to bundle tools for energy (system) modelling.
-oemof-solph is a model generator for energy system modelling and optimisation.
 
 The package ``oemof.solph`` is very often called just ``oemof``.
 This is because installing the ``oemof`` meta package was once the best way to get ``oemof.solph``.
-Notice that you should prefeably install ``oemof.solph`` instead of ``oemof``
+Notice that you should preferably install ``oemof.solph`` instead of ``oemof``
 if you want to use ``solph``.
 
 Everybody is welcome to use and/or develop oemof.solph.
-Read our `contribution <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
+Read our `contributing <https://oemof.readthedocs.io/en/latest/contributing.html>`_ section.
 
 Contribution is already possible on a low level by simply fixing typos in
 oemof's documentation or rephrasing sections which are unclear.
 If you want to support us that way please fork the oemof-solph repository to your own
-GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/quickstart/hello-world>`_
+GitHub account and make changes as described in the `github guidelines <https://docs.github.com/en/get-started/start-your-journey/hello-world>`_
 
-If you have questions regarding the use of oemof including oemof.solph you can visit the openmod forum (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and open a new thread if your questions hasn't been already answered.
+If you have questions regarding the use of oemof including oemof.solph you can visit 
+the `openmod forum <https://forum.openmod-initiative.org/>`_ (`tag oemof <https://forum.openmod-initiative.org/tags/c/qa/oemof>`_ 
+or `tag oemof-solph <https://forum.openmod-initiative.org/tags/c/qa/oemof-solph>`_) and 
+open a new thread if your questions haven't been already answered.
 
 Keep in touch! - You can become a watcher at our `github site <https://github.com/oemof/oemof>`_,
 but this will bring you quite a few mails and might be more interesting for developers.
@@ -75,7 +77,7 @@ Example Applications
 ====================
 The combination of specific modules (often including other packages) is called
 an application (app). For example, it can depict a concrete energy system model.
-You can find a large variety of helpful examples in the in these sections:
+You can find a large variety of helpful examples in these sections:
 
 - :ref:`tutorials <tutorials_label>`
 - :ref:`showcase applications <showcase_examples_label>`
