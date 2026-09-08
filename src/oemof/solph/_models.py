@@ -20,6 +20,7 @@ import warnings
 from collections import namedtuple
 from logging import getLogger
 
+import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.contrib import appsi
@@ -178,6 +179,7 @@ class Model(po.ConcreteModel):
         self.flows = self.es.flows()
 
         self.solver_results = None
+        self.meta_results = None
         self.dual = None
         self.rc = None
 
@@ -439,7 +441,7 @@ class Model(po.ConcreteModel):
         return processing.results(self)
 
     def solve_highs(
-        self, solver_info, cmdline_options=None, solve_kwargs=None
+        self, solver_info, solver, cmdline_options=None, solve_kwargs=None
     ):
         opt = appsi.solvers.Highs()
         opt.config.load_solution = False
@@ -464,11 +466,25 @@ class Model(po.ConcreteModel):
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
+        ub = appsi_results.best_feasible_objective
+        lb = appsi_results.best_objective_bound
+        if ub not in (None, 0) and lb is not None:
+            gap = abs(ub - lb) / abs(ub)
+        else:
+            gap = None
+
         return solver_info(
+            objective=ub,
+            solver=solver,
             optimal=optimal,
-            termination_condition=tc,
+            termination_condition=tc.name,
             status=tc.value,
             solver_results=solver_results,
+            wallclock_time=solver_results.get("wallclock_time"),
+            ub=ub,
+            lb=lb,
+            gap=gap,
+            message=None,
         )
 
     def solve_factory(
@@ -484,13 +500,28 @@ class Model(po.ConcreteModel):
         factory_results = opt.solve(self, **solve_kwargs)
 
         status = factory_results.Solver.Status
-        message = factory_results.Solver.Termination_condition
+        tc = factory_results.Solver.Termination_condition
+        msg = getattr(factory_results.Solver, "Message", None)
+        wt = getattr(factory_results.Solver, "Time", None)
+        ub = getattr(factory_results.Problem[0], "Upper_bound", None)
+        lb = getattr(factory_results.Problem[0], "Lower_bound", None)
+        if ub not in (None, 0) and lb is not None:
+            gap = abs(ub - lb) / abs(ub)
+        else:
+            gap = None
 
         return solver_info(
-            optimal=status == "ok" and message == "optimal",
-            termination_condition=message,
-            status=factory_results.Solver.Status,
+            optimal=status == "ok" and tc == "optimal",
+            solver=solver,
+            objective=po.value(self.objective),
+            termination_condition=tc.name,
+            status=status.name,
             solver_results=factory_results,
+            wallclock_time=wt,
+            ub=ub,
+            lb=lb,
+            gap=gap,
+            message=msg,
         )
 
     def solve(
@@ -528,15 +559,29 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
+        solver_result_keys = [
+            "optimal",
+            "status",
+            "termination_condition",
+            "solver_results",
+            "message",
+            "wallclock_time",
+            "objective",
+            "solver",
+            "gap",
+            "ub",
+            "lb",
+        ]
+
         solver_info = namedtuple(
-            "SolverReturn",
-            ["optimal", "solver_results", "termination_condition", "status"],
+            "SolverReturn", [key for key in solver_result_keys]
         )
         if solver == "highs":
             solver_return = self.solve_highs(
                 solver_info=solver_info,
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
+                solver=solver,
             )
         else:
             solver_return = self.solve_factory(
@@ -549,17 +594,20 @@ class Model(po.ConcreteModel):
 
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
+        self.meta_results = pd.Series(solver_return._asdict()).drop(
+            "solver_results"
+        )
 
         if solver_return.optimal:
-            msg = "Optimization successful."
+            msg = "Optimisation successful."
             logging.info(msg)
         else:
             msg = (
                 f"The solver did not return an optimal solution. "
-                f"Instead the optimization ended with\n"
+                f"Instead the optimisation ended with\n"
                 f"       - status: {solver_return.status}\n"
                 f"       - termination condition: "
-                f"{solver_return.termination_condition.name}"
+                f"{solver_return.termination_condition}"
             )
 
             if allow_nonoptimal:
