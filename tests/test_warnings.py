@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
-import pandas as pd
 import pytest
 from oemof.tools.debugging import SuspiciousUsageWarning
 
@@ -101,11 +100,11 @@ def test_nonconvex_investment_without_maximum_raises_warning(warning_fixture):
         )
 
 
-def test_link_to_warn_about_not_matching_number_of_flows(warning_fixture):
+def test_link_to_fails_about_not_matching_number_of_flows(warning_fixture):
     """Link warns about missing parameters and not matching number of flows."""
 
     msg = (
-        "Component `Link` should have exactly "
+        "Component `Link` must have exactly "
         + "2 inputs, 2 outputs, and 2 "
         + "conversion factors connecting these. You are initializing "
         + "a `Link`without obeying this specification. "
@@ -113,46 +112,27 @@ def test_link_to_warn_about_not_matching_number_of_flows(warning_fixture):
         + "disable the SuspiciousUsageWarning globally."
     )
 
-    with warnings.catch_warnings(record=True) as w:
+    with pytest.raises(ValueError, match=msg):
         solph.components.Link(
             label="empty_link",
         )
-        assert len(w) == 4
-        # Check  number of raised warnings:
-        # 1. empty inputs, 2. empty outputs 3. empty conversion_factors
-        # 4. unmatched number of flows
-        # Check warning for unmatched number of flows
-        assert msg in str(w[-1].message)
 
 
 def test_link_raise_key_error_in_Linkblock(warning_fixture):
     """Link raises KeyError if conversion factors don't match the connected
     busses."""
 
-    date_time_index = pd.date_range("1/1/2012", periods=3, freq="h")
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index,
-        infer_last_interval=True,
-    )
     bel0 = solph.buses.Bus(label="el0")
     bel1 = solph.buses.Bus(label="el1")
     look_out = solph.buses.Bus(label="look_out")
-    link = solph.components.Link(
-        label="transshipment_link",
-        inputs={
-            bel0: solph.flows.Flow(nominal_capacity=4),
-            bel1: solph.flows.Flow(nominal_capacity=2),
-        },
-        outputs={bel0: solph.flows.Flow(), look_out: solph.flows.Flow()},
-        conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.7},
-    )
 
-    energysystem.add(bel0, bel1, link)
-
-    msg = (
-        "Error in constraint creation from: el0, to: el1, via: "
-        "transshipment_link. Check if all connected buses match the "
-        "conversion factors."
-    )
-    with pytest.raises(KeyError, match=msg):
-        solph.Model(energysystem)
+    with pytest.raises(KeyError, match="el1"):
+        _ = solph.components.Link(
+            label="transshipment_link",
+            inputs={
+                bel0: solph.flows.Flow(nominal_capacity=4),
+                bel1: solph.flows.Flow(nominal_capacity=2),
+            },
+            outputs={bel0: solph.flows.Flow(), look_out: solph.flows.Flow()},
+            conversion_factors={(bel0, bel1): 0.8, (bel1, bel0): 0.7},
+        )
