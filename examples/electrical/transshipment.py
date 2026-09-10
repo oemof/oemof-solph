@@ -14,7 +14,7 @@ Download source code: :download:`transshipment.py </../examples/electrical/trans
 
     .. literalinclude:: /../examples/electrical/transshipment.py
         :language: python
-        :lines: 39-211
+        :lines: 39-
 
 Installation requirements
 -------------------------
