@@ -6,9 +6,9 @@ Optimization Model
 
 The typical optimisation of an energy system in solph is the dispatch
 optimisation (:ref:`optimization_dispatch_vs_invest_label`), which means that
-the use of the sources is optimised to satisfy the demand at least costs. The
-capacities of component must be fixed, i.e. the attribute `nominal_capacity` of
-a flow assigned to the component should be used
+the use of the sources is optimised to satisfy the demand at lowest cost. The
+capacities of a component must be fixed, i.e. the attribute `nominal_capacity` of
+a flow assigned to the component should be used.
 
 .. code-block:: python
 
@@ -39,9 +39,9 @@ a flow assigned to the component should be used
     ...     },
     ... )
 
-Variable costs can be defined for each components. For example, the cost for
-gas could be defined in the gas source The operating costs of the gas power
-plant could be defined in gas power plant converter.
+Variable costs can be defined for each component. For example, the cost for
+gas could be defined in the gas source. The operating costs of the gas power
+plant could be defined in the gas power plant converter.
 
 .. code-block:: python
 
@@ -68,8 +68,8 @@ using the investment mode (see :ref:`optimization_invest_label`).
 
 .. note::
 
-    Since v0.5.1, there also is the possibility to have multi-period (i.e. dynamic)
-    investments over longer-time horizon which is in experimental state (see
+    Since v0.5.1, there is also the possibility to have multi-period (i.e. dynamic)
+    investments over longer time horizons. This is in an experimental state (see
     :ref:`optimization_multi_period_label`).
 
 .. code-block:: python
@@ -87,7 +87,7 @@ timesteps to 3, to increase the readability of the file.
 Solver
 ------
 
-For a list on possible solver please have a look at SOLVER_SECTION_LINK
+For a list on possible solvers please see SOLVER_SECTION_LINK.
 
 ..
    TODO Move/link the lp-file to the debugging section

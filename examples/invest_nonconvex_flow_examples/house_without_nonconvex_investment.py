@@ -50,12 +50,12 @@ except ImportError:
     plt = None
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
 
-    periods = 365
+    periods = 10  # change to 365 to calculate one year
     time = pd.date_range("1/1/2018", periods=periods, freq="D")
 
     es = solph.EnergySystem(timeindex=time)
@@ -142,7 +142,7 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # solve model
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    om.solve(solver=solver, solve_kwargs={"tee": True})
 
     ##########################################################################
     # Check and plot the results

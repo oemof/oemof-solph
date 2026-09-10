@@ -101,7 +101,7 @@ def plot_figures_for(element: dict) -> None:
     plt.show()
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
 
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
@@ -111,7 +111,6 @@ def main(optimize=True):
     file_name = "time_series.csv"
     data = get_data_from_file_path(file_name)
 
-    solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
 

@@ -1,0 +1,27 @@
+v0.6.6
+------
+
+API changes
+###########
+
+New features
+############
+
+Documentation
+#############
+
+
+Bug fixes
+#########
+
+Other changes
+#############
+
+* The component ``Link`` now uses the nested Node capability and is internally
+  represented by two ``Converter`` s.
+
+Contributors
+############
+
+Acknowledgements
+################

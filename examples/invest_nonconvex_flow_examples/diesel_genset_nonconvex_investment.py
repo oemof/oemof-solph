@@ -61,7 +61,7 @@ except ImportError:
     plt = None
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     ##########################################################################
     # Initialize the energy system and calculate necessary parameters
     ##########################################################################
@@ -73,7 +73,7 @@ def main(optimize=True):
 
     # The maximum number of days depends on the given *.csv file.
     n_days = 10
-    n_days_in_year = 365
+    n_days_in_year = 10  # change to 365 to calculate one year
 
     # Create date and time objects.
     start_date_obj = datetime.strptime(start, "%Y-%m-%d")
@@ -270,8 +270,11 @@ def main(optimize=True):
 
     # The higher the MipGap or ratioGap, the faster the solver would converge,
     # but the less accurate the results would be.
-    solver_option = {"gurobi": {"MipGap": "0.02"}, "cbc": {"ratioGap": "0.02"}}
-    solver = "cbc"
+    solver_option = {
+        "gurobi": {"MipGap": "0.02"},
+        "cbc": {"ratioGap": "0.02"},
+        "highs": {"mip_rel_gap": 0.02},
+    }
 
     if optimize is False:
         return energysystem
@@ -280,7 +283,7 @@ def main(optimize=True):
     model.solve(
         solver=solver,
         solve_kwargs={"tee": True},
-        cmdline_options=solver_option[solver],
+        cmdline_options=solver_option.get(solver, None),
     )
 
     # End of the calculation time.

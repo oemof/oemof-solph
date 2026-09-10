@@ -5,12 +5,11 @@ src = ["src", "tests"]
 target-version = "py313"
 
 [build-system]
-requires = ["flit_core >=3.2,<4"]
+requires = ["flit_core >=3.2,<5"]
 build-backend = "flit_core.buildapi"
 
 [tool.flit.sdist]
 include = [
-    "AUTHORS.rst",
     "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.rst",
@@ -31,7 +30,7 @@ include = [
     ".pep8speaks.yml",
     ".readthedocs.yaml",
 ]
-exclude = ["docs/_build"]
+exclude = ["docs/_build", "*.lp"]
 
 [project]
 name = "oemof.solph"
@@ -68,7 +67,7 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.1b2",
+    "oemof.network >= 0.5.3",
 ]
 license = "MIT"
 license-files = [
@@ -86,6 +85,7 @@ dev = [
     "cffconvert",
     "flit",
     "furo",
+    "highspy",
     "matplotlib",
     "nbformat",
     "oemof.demand",

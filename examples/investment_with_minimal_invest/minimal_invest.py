@@ -37,7 +37,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     data = [0, 15, 30, 35, 20, 25, 27, 10, 5, 2, 15, 40, 20, 0, 0]
 
     # create an energy system
@@ -117,7 +117,7 @@ def main(optimize=True):
     om.write(filename, io_options={"symbolic_solver_labels": True})
 
     # solve model
-    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver=solver, solve_kwargs={"tee": True})
 
     flows = results["flow"]
     mask_bus1 = (flows.columns.get_level_values(0) == "bus_1") | (
@@ -145,10 +145,7 @@ def main(optimize=True):
 
     c_total = c_invest + c_source_0 + c_source_1
 
-    es.results["meta"] = solph.processing.meta_results(om)
-    objective = pd.DataFrame.from_dict(es.results["meta"]).at[
-        "Lower bound", "objective"
-    ]
+    objective = results["objective"]
 
     print("  objective:", objective)
     print("  berechnet:", c_total)
@@ -170,4 +167,4 @@ def main(optimize=True):
 
 
 if __name__ == "__main__":
-    main()
+    main(solver="highs")

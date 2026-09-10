@@ -88,7 +88,7 @@ from oemof.tools import logger
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # Read data file
     filename = os.path.join(
         os.path.dirname(__file__), "storage_investment.csv"
@@ -231,7 +231,7 @@ def main(optimize=True):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc", solve_kwargs={"tee": True})
+    om.solve(solver=solver, solve_kwargs={"tee": True})
 
     ##########################################################################
     # Check and plot the results
@@ -242,9 +242,6 @@ def main(optimize=True):
 
     custom_storage = solph.views.node(results, "storage")
     electricity_bus = solph.views.node(results, "electricity")
-
-    meta_results = solph.processing.meta_results(om)
-    pp.pprint(meta_results)
 
     # returns a pandas Series with all scalar values (investment, total) of
     # components connected to the electricity bus

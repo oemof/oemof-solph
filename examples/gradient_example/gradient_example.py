@@ -42,7 +42,7 @@ from oemof.solph import components as cmp
 from oemof.solph import Flow
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # The gradient for the output of the natural gas power plant.
     # Change the gradient between 0.1 and 0.0001 and check the results. The
     # more flexible the power plant can be run the less the storage will be
@@ -171,7 +171,7 @@ def main(optimize=True):
     model = Model(energysystem)
 
     # solve
-    results = model.solve(solver="cbc")
+    results = model.solve(solver=solver)
 
     # *** Create a table with all sequences and store it into a file (csv/xlsx)
     flows = results["flow"]

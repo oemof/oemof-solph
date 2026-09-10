@@ -89,13 +89,26 @@ def test_fake_sequence_slice():
         _ = seq[1:-5]
 
 
-def test_fake_sequence_float():
+def test_fake_sequence_numeric_cast():
     seq = _FakeSequence(3.14)
-    assert float(seq) == 3.14
-    assert isinstance(float(seq), float)
 
-    seq_int = _FakeSequence(42.0)
-    assert float(seq_int) == 42.0
+    value_f = float(seq)
+    assert value_f == 3.14
+    assert isinstance(value_f, float)
+
+    value_i = int(seq)
+    assert value_i == 3
+    assert isinstance(value_i, int)
+
+    seq_int = _FakeSequence(42)
+
+    value_f = float(seq_int)
+    assert value_f == 42.0
+    assert isinstance(value_f, float)
+
+    value_i = int(seq_int)
+    assert value_i == 42
+    assert isinstance(value_i, int)
 
 
 def test_sequence_from_fake_sequence_with_length():

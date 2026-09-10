@@ -47,7 +47,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     ##########################################################################
     # Calculate parameters and initialize the energy system and
     ##########################################################################
@@ -100,7 +100,7 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # solve model
-    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver=solver, solve_kwargs={"tee": True})
 
     ##########################################################################
     # Check and plot the results

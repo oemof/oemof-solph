@@ -40,7 +40,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # create an energy system
     idx = pd.date_range("1/1/2023", periods=13, freq="h")
     es = solph.EnergySystem(timeindex=idx, infer_last_interval=False)
@@ -127,14 +127,14 @@ def main(optimize=True):
     )
     es.add(battery2)
 
-    if optimize is False:
+    if not optimize:
         return es
 
     # create an optimization problem and solve it
     model = solph.Model(es)
 
     # solve model
-    model.solve(solver="cbc")
+    model.solve(solver=solver)
 
     # create result object
     results = solph.processing.results(model)
@@ -154,4 +154,4 @@ def main(optimize=True):
 
 
 if __name__ == "__main__":
-    storage_costs_example()
+    main()

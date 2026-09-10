@@ -14,6 +14,7 @@ SPDX-License-Identifier: MIT
 import warnings
 from collections import UserDict
 from collections import abc
+from numbers import Number
 
 import numpy as np
 
@@ -180,7 +181,7 @@ class _FakeSequence:
     42
     """
 
-    def __init__(self, value):
+    def __init__(self, value: Number):
         self._value = value
 
     def __getitem__(self, i):
@@ -203,7 +204,10 @@ class _FakeSequence:
         return f"[{self._value}, {self._value}, ..., {self._value}]"
 
     def __float__(self):
-        return self._value
+        return float(self._value)
+
+    def __int__(self):
+        return int(self._value)
 
     def max(self):
         return self._value

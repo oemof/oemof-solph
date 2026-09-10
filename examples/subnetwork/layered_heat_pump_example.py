@@ -109,7 +109,7 @@ class HeatPump(Node):
             )
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
 
     date_time_index = solph.create_time_index(2025, number=2)
 
