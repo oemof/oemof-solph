@@ -30,7 +30,6 @@ include = [
     ".bumpversion.cfg",
     ".coveragerc",
     ".editorconfig",
-    ".flake8",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
 ]
