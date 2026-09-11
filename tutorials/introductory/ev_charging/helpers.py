@@ -4,8 +4,6 @@
 
 import matplotlib.pyplot as plt
 
-import oemof.solph as solph
-
 
 def plot_results(results, plot_title, dark_mode=False):
 
