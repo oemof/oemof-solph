@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
+
+SPDX-License-Identifier: MIT
+"""
+
 __version__ = "0.6.6a1"
 
 from . import buses

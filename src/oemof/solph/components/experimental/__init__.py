@@ -5,6 +5,10 @@ and associated individual constraints (blocks) and groupings.
 
 Requirements for documentation and unit tests are relaxed,
 so code referred to within this module might not have production quality.
+
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
+
+SPDX-License-Identifier: MIT
 """
 
 from ._generic_caes import GenericCAES
