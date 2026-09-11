@@ -56,7 +56,7 @@ License
 -------
 Johannes Röder <johannes.roeder@uni-bremen.de>
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 import logging

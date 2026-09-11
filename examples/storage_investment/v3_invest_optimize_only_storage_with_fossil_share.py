@@ -71,7 +71,7 @@ This example requires oemof.solph (at least v0.5.0), install by:
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 

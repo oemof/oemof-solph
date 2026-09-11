@@ -8,7 +8,7 @@ the docs
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 ###########################################################################

@@ -10,7 +10,8 @@ Dependencies:
 
 Licence
 -------
-`MIT licence <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+
+SPDX-License-Identifier: MIT
 
 """
 

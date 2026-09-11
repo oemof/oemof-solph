@@ -24,7 +24,7 @@ License
 -------
 Johannes Röder <https://www.uni-bremen.de/en/res/team/johannes-roeder-m-sc>
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 

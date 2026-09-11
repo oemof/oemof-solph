@@ -66,8 +66,8 @@ extensions = [
 # master_doc = 'contents'
 # names, years, etc
 project = "oemof.solph"
-year = "2025"
-author = "oemof developer group"
+year = "2026"
+author = "oemof developers"
 copyright = author
 
 # The short X.Y version.

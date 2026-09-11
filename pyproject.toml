@@ -13,7 +13,7 @@ include = [
     "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.rst",
-    "LICENSE",
+    "LICENSES/MIT.txt",
     "README.rst",
     "VERSION",
     "tox.ini",
@@ -38,7 +38,7 @@ dynamic = ["version"]
 description = "A model generator for energy system modelling and optimisation."
 readme = "README.rst"
 authors = [
-    {name = "oemof developer group", email = "contact@oemof.org"},
+    {name = "oemof association (oemof e.V.)", email = "contact@oemof.org"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -71,7 +71,7 @@ dependencies = [
 ]
 license = "MIT"
 license-files = [
-    "LICENSE",
+    "LICENSES/MIT.txt",
 ]
 
 [project.urls]
