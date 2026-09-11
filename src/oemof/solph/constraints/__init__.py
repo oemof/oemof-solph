@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 """
 Additional constraints to be used in an oemof energy model.
+
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
+
+SPDX-License-Identifier: MIT
 """
 
 from .equate_flows import equate_flows

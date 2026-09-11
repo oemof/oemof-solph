@@ -8,9 +8,10 @@ Dependencies:
     * matplotlib
     * oemof-tools
 
-Licence
--------
-`MIT licence <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
+
+SPDX-License-Identifier: MIT
 
 """
 

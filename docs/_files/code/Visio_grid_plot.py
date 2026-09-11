@@ -7,8 +7,11 @@ This Code generates the picture of an energysystem used for the grid icons in
 the docs
 
 License
+
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
 """
 
 ###########################################################################

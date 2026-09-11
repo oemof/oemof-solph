@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# SPDX-FileCopyrightText: oemof e.V. and contributors
 """
 Example that illustrates how to use custom component `GenericCHP` can be used.
 

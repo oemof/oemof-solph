@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description
 -------------------
@@ -49,7 +51,7 @@ License
 Uwe Krien <uvchik.git@posteo.eu>
 Jonathan Amme <jonathan.amme@rl-institut.de>
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 

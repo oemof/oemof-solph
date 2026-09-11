@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+-->
+
 *   Describe your pull request as transparent as possible
     *   What functionality does it implement?
     *   Where is it located?

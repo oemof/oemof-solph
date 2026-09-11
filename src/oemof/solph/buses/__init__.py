@@ -7,6 +7,10 @@ module holds the class definition and the block directly located by each other.
 
 Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
+
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
+
+SPDX-License-Identifier: MIT
 """
 
 from ._bus import Bus

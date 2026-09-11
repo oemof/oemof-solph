@@ -1,4 +1,8 @@
 ---
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 name: Bug report
 about: Create a report to help us improve
 title: ''

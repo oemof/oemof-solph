@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: oemof e.V. and contributors
+//
+// SPDX-License-Identifier: MIT
+
 function removeAnnouncementBanner() {
   var banner = document.getElementsByClassName("announcement")
   banner[0].remove()

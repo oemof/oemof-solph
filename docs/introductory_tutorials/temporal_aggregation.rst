@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 .. _temporal_aggregation_tutorial_label:
 
 Time indexes and temporal aggregation
