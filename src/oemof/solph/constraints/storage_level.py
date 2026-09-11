@@ -60,6 +60,9 @@ def storage_level_constraint(
             r"""
             .. math::
                 y_n \le E(t) / E_n
+
+            Output is allowed if content is sufficiently high at the
+            end of the time interval -> storage_content[s, t + 1].
             """
             for t in m.TIMESTEPS:
                 for o in output_levels:
@@ -199,6 +202,9 @@ def storage_level_constraint(
             r"""
             .. math::
                 \hat{y}_n \ge (E(t) - E_n) / E_{max}
+
+            Input is allowed if content is sufficiently low at the
+            beginning of the time interval -> storage_content[s, t].
             """
             for t in m.TIMESTEPS:
                 for i in input_levels:
