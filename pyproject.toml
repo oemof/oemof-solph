@@ -17,7 +17,7 @@ include = [
     "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.rst",
-    "LICENSES/MIT.txt",
+    "LICENSES/*.txt",
     "README.rst",
     "VERSION",
     "tox.ini",
