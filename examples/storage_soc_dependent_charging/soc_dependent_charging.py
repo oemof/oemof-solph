@@ -8,8 +8,8 @@ Dependencies:
     * matplotlib
     * oemof-tools
 
-Licence
--------
+
+SPDX-FileCopyrightText: oemof association (oemof e.V.)
 
 SPDX-License-Identifier: MIT
 

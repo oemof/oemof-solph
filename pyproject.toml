@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
 line-length = 79

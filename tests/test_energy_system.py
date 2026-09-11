@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """Tests of the _energy_system module.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted

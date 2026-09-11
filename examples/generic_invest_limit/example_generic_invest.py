@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# SPDX-FileCopyrightText: oemof e.V. and contributors
 r"""
 General description
 -------------------

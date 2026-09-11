@@ -1,3 +1,6 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
 
 |tox-pytest| |tox-checks| |packaging| |coverage|
 

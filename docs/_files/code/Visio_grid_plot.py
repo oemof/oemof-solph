@@ -7,7 +7,10 @@ This Code generates the picture of an energysystem used for the grid icons in
 the docs
 
 License
+
 -------
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
 SPDX-License-Identifier: MIT
 """
 

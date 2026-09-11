@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 .. _optimization_dispatch_vs_invest_label:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
