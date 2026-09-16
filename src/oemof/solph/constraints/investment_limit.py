@@ -15,8 +15,6 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
-from oemof.solph._plumbing import sequence
-
 
 def investment_limit(model, limit=None):
     r"""Set an absolute limit for the total investment costs of an investment
@@ -53,69 +51,6 @@ def investment_limit(model, limit=None):
         return expr <= limit
 
     model.investment_limit = po.Constraint(rule=investment_rule)
-
-    return model
-
-
-def investment_limit_per_period(model, limit=None):
-    r"""Set an absolute limit for the total investment costs of a
-    investment optimization problem for each period
-    of the multi-period problem.
-
-    .. math::
-        \sum_{investment\_costs(p)} \leq limit(p)
-        \forall p \in \textrm{CAPACITY_PERIODS}
-
-    Parameters
-    ----------
-    model : oemof.solph.Model
-        Model to which the constraint is added
-    limit : sequence of float, :math:`limit(p)`
-        Absolute limit of the investment for each period
-        (i.e. RHS of constraint)
-    """
-
-    if model.es.transitional_single_period:
-        msg = (
-            "investment_limit_per_period is only applicable "
-            "for multi-period models.\nIn order to create such a model, "
-            "explicitly set attribute `periods` of your energy system."
-        )
-        raise ValueError(msg)
-
-    if limit is not None:
-        limit = sequence(limit)
-    else:
-        msg = (
-            "You have to provide an investment limit for each period!\n"
-            "If you provide a scalar value, this will be applied as a "
-            "limit for each period."
-        )
-        raise ValueError(msg)
-
-    def investment_period_rule(m, p):
-        expr = 0
-
-        if hasattr(m, "InvestmentFlowBlock"):
-            expr += m.InvestmentFlowBlock.period_investment_costs[p]
-
-        if hasattr(m, "GenericInvestmentStorageBlock"):
-            expr += m.GenericInvestmentStorageBlock.period_investment_costs[p]
-
-        if hasattr(m, "SinkDSMOemofInvestmentBlock"):
-            expr += m.SinkDSMOemofInvestmentBlock.period_investment_costs[p]
-
-        if hasattr(m, "SinkDSMDIWInvestmentBlock"):
-            expr += m.SinkDSMDIWInvestmentBlock.period_investment_costs[p]
-
-        if hasattr(m, "SinkDSMDLRInvestmentBlock"):
-            expr += m.SinkDSMDLRInvestmentBlock.period_investment_costs[p]
-
-        return expr <= limit[p]
-
-    model.investment_limit_per_period = po.Constraint(
-        model.CAPACITY_PERIODS, rule=investment_period_rule
-    )
 
     return model
 
