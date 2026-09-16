@@ -4,6 +4,7 @@
 
 SPDX-FileCopyrightText: Deutsches Zentrum für Luft- und Raumfahrt e.V.
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Dylan Pulver
 
 SPDX-License-Identifier: MIT
 """

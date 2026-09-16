@@ -60,7 +60,7 @@ DATA = [
 PARAMETER = {"el_price": 10, "ex_price": 5, "nominal_storage_capacity": 7}
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     timeseries = pd.DataFrame(
         {"demand_el": [7, 6, 6, 7], "pv_el": [3, 5, 3, 12]}
     )
@@ -133,7 +133,7 @@ def main(optimize=True):
     om = solph.Model(es)
 
     # solve model
-    results = om.solve(solver="cbc")
+    results = om.solve(solver=solver)
 
     storage_cap = results["storage_content"]
     balance = storage_cap.iloc[0] - storage_cap.iloc[-1]

@@ -132,7 +132,7 @@ class Label(namedtuple("solph_label", ["tag1", "tag2", "tag3"])):
         return "_".join(map(str, self._asdict().values()))
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # Read data file
     home_path = os.path.dirname(__file__)
     filename = os.path.join(home_path, "tuple_as_label.csv")
@@ -143,7 +143,6 @@ def main(optimize=True):
         warnings.warn(msg.format(filename), UserWarning)
         data = pd.DataFrame({"pv": [0.3], "wind": [0.6], "demand_el": [500]})
 
-    solver = "cbc"  # 'glpk', 'gurobi',....
     debug = False  # Set number_of_timesteps to 3 to get a readable lp-file.
     number_of_time_steps = len(data)
     solver_verbose = False  # show/hide solver output
@@ -324,7 +323,7 @@ def main(optimize=True):
     )
 
     # Store the table to csv or excel file:
-    my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
+    # my_flows.to_csv(os.path.join(home_path, "my_flows.csv"))
     # my_flows.to_excel(os.path.join(home_path, "my_flows.xlsx"))
     print(my_flows.sum())
 

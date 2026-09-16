@@ -57,14 +57,12 @@ from oemof.solph.components import Sink
 from oemof.solph.components import Source
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # Read data file
     filename = os.path.join(
         os.path.dirname(os.path.abspath(__file__)), "input_data.csv"
     )
     data = pd.read_csv(filename)
-
-    solver = "cbc"
 
     # Create an energy system and optimize the dispatch at least costs.
     # ####################### initialize and provide data #####################

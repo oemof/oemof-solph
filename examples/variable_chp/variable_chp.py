@@ -109,7 +109,7 @@ def write_lp_file(model):
     model.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # Read data file
     filename = os.path.join(os.getcwd(), "variable_chp.csv")
     try:
@@ -249,7 +249,7 @@ def main(optimize=True):
     # write_lp_file(om)
 
     logging.info("Solve the optimization problem")
-    om.solve(solver="cbc", solve_kwargs={"tee": False})
+    om.solve(solver=solver, solve_kwargs={"tee": False})
 
     results = solph.processing.results(om)
 

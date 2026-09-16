@@ -48,12 +48,11 @@ from oemof.solph import Flow
 from oemof.solph import processing
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
 
-    solver = "cbc"  # 'glpk', 'gurobi',....
     number_of_time_steps = 48
     solver_verbose = False  # show/hide solver output
 
@@ -223,7 +222,7 @@ def main(optimize=True):
     cap = 400
     storage = cmp.GenericStorage(
         nominal_capacity=cap,
-        label="storage",
+        label="my_storage",
         inputs={bus_elec: Flow(nominal_capacity=cap / 6)},
         outputs={
             bus_elec: Flow(nominal_capacity=cap / 6, variable_costs=0.001)
@@ -261,7 +260,7 @@ def main(optimize=True):
         :, flows.columns.get_level_values(0) == bus_elec
     ]
 
-    storage = results["storage_content"]
+    storage = pd.concat([results["storage_content"]], keys=["storage"], axis=1)
 
     duals = pd.DataFrame(
         {
@@ -270,6 +269,7 @@ def main(optimize=True):
             if k[1] is None and isinstance(k[0], buses.Bus)
         }
     )
+    duals = pd.concat([duals], keys=["bus"], axis=1)
 
     my_flows = pd.concat(
         [flows_to_bus, flows_from_bus, storage, duals],

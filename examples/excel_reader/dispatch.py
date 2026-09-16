@@ -59,7 +59,6 @@ import os
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
-from oemof.network.graph import create_nx_graph
 from oemof.tools import logger
 
 from oemof import solph
@@ -357,7 +356,7 @@ def draw_graph(
         plt.show()
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     logger.define_logging()
     datetime_index = pd.date_range(
         "2016-01-01 00:00:00", "2016-01-01 23:00:00", freq="60min"
@@ -402,12 +401,12 @@ def main(optimize=True):
     om.receive_duals()
 
     # solving the linear problem using the given solver
-    results = om.solve(solver="cbc")
+    results = om.solve(solver=solver)
 
     # create graph of esys
     # You can use argument filename='/home/somebody/my_graph.graphml'
     # to dump your graph to disc. You can open it using e.g. yEd or gephi
-    graph = create_nx_graph(esys)
+    graph = esys.to_networkx()
 
     # plot esys graph
     draw_graph(

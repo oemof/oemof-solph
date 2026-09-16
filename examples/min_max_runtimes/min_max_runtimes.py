@@ -36,7 +36,7 @@ from matplotlib import pyplot as plt
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # Create demand data
     demand_el = [0] * 24
     for n in [10, 15, 19]:
@@ -98,7 +98,7 @@ def main(optimize=True):
     # om.write('problem.lp', io_options={'symbolic_solver_labels': True})
 
     # solve model
-    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver=solver, solve_kwargs={"tee": True})
 
     # plot data
     flows = results["flow"]

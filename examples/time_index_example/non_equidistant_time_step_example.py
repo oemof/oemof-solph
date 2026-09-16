@@ -48,7 +48,7 @@ except ModuleNotFoundError:
     plt = None
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     solver = "cbc"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 

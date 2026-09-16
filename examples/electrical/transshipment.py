@@ -40,8 +40,6 @@ Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
-from oemof.network.graph import create_nx_graph
-
 # oemof imports
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -127,7 +125,7 @@ def draw_graph(
         plt.show()
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     datetimeindex = pd.date_range("1/1/2017", periods=3, freq="h")
 
     es = EnergySystem(timeindex=datetimeindex, infer_last_interval=False)
@@ -186,10 +184,10 @@ def main(optimize=True):
     # m.write('transshipment.lp', io_options={'symbolic_solver_labels': True})
 
     results = m.solve(
-        solver="cbc", solve_kwargs={"tee": True, "keepfiles": False}
+        solver=solver, solve_kwargs={"tee": True, "keepfiles": False}
     )
 
-    graph = create_nx_graph(es, m)
+    graph = es.to_networkx()
 
     if pygz is not None:
         draw_graph(

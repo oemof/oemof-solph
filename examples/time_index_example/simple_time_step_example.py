@@ -44,10 +44,11 @@ License
 import matplotlib.pyplot as plt
 
 from oemof import solph
+from oemof.tools import logger
 
 
-def main(optimize=True):
-    solver = "cbc"  # 'glpk', 'gurobi',...
+def main(optimize=True, solver="cbc"):
+    solver = "highs"  # 'glpk', 'gurobi',...
     solver_verbose = False  # show/hide solver output
 
     date_time_index = solph.create_time_index(2000, interval=0.25, number=8)
@@ -127,4 +128,5 @@ def main(optimize=True):
 
 
 if __name__ == "__main__":
+    logger.define_logging()
     main()

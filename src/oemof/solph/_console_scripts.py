@@ -67,7 +67,7 @@ def _check_oemof_installation(solvers):
 
 
 def check_oemof_installation():
-    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex", "scip"]
+    solvers_to_test = ["cbc", "glpk", "gurobi", "cplex", "scip", "highs"]
 
     solver_status = _check_oemof_installation(solvers_to_test)
 

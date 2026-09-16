@@ -36,7 +36,7 @@ import pandas as pd
 from oemof import solph
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     demand_el = [
         0,
         0,
@@ -113,7 +113,7 @@ def main(optimize=True):
     # om.write('problem.lp', io_options={'symbolic_solver_labels': True})
 
     # solve model
-    results = om.solve(solver="cbc", solve_kwargs={"tee": True})
+    results = om.solve(solver=solver, solve_kwargs={"tee": True})
 
     # plot electrical bus
     to_bus = pd.DataFrame(

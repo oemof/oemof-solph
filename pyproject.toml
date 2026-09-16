@@ -30,7 +30,7 @@ include = [
     ".pep8speaks.yml",
     ".readthedocs.yaml",
 ]
-exclude = ["docs/_build"]
+exclude = ["docs/_build", "*.lp"]
 
 [project]
 name = "oemof.solph"
@@ -67,7 +67,7 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.1b2",
+    "oemof.network >= 0.5.3",
 ]
 license = "MIT"
 license-files = [
@@ -85,6 +85,7 @@ dev = [
     "cffconvert",
     "flit",
     "furo",
+    "highspy",
     "matplotlib",
     "nbformat",
     "oemof.demand",

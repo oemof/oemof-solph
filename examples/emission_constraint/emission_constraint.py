@@ -37,7 +37,7 @@ from oemof import solph
 from oemof.solph import constraints
 
 
-def main(optimize=True):
+def main(optimize=True, solver="cbc"):
     # create energy system
     energysystem = solph.EnergySystem(
         timeindex=pd.date_range("1/1/2012", periods=3, freq="h"),
