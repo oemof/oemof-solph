@@ -32,10 +32,6 @@ warnings.filterwarnings(
 logger.define_logging()
 
 
-def calculate_fix_cost(value):
-    return value / 20
-
-
 # %%[reshape_unevenly]
 def reshape_unevenly(data):
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
@@ -68,10 +64,6 @@ def prepare_technical_data(minutes, url, port):
     )
     df_un = reshape_unevenly(data_table)
     return data(even=data_table, uneven=df_un)
-
-
-def prepare_cost_data():
-    pass
 
 
 def populate_and_solve_energy_system(
