@@ -7,24 +7,39 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
 """
+import warnings
 
 import pandas as pd
+from oemof.tools.debugging import ExperimentalFeatureWarning
 
 from oemof import solph
 
 
-def _run_flow_model(flow):
-    date_time_index = pd.date_range("1/1/2012", periods=10, freq="h")
-    energysystem = solph.EnergySystem(
-        timeindex=date_time_index,
-        infer_last_interval=True,
-    )
+def _run_flow_model(flow, multi_period=False):
+    date_time_index = pd.date_range("1/1/2012", periods=11, freq="h")
+
+    if multi_period:
+        investment_times = (
+            date_time_index[0],
+            date_time_index[5],
+            date_time_index[-1],
+        )
+    else:
+        investment_times = None
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", ExperimentalFeatureWarning)
+        energysystem = solph.EnergySystem(
+            timeindex=date_time_index,
+            investment_times=investment_times,
+            infer_last_interval=False,
+        )
     bus = solph.buses.Bus(label="bus", balanced=False)
     energysystem.add(bus)
 
     bus.inputs[bus] = flow
 
     model = solph.Model(energysystem)
-    model.solve()
+    results = model.solve()
 
-    return solph.processing.results(model)[(bus, bus)]["sequences"]
+    return list(results["flow"][(bus, bus)])

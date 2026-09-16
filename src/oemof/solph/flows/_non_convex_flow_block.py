@@ -173,7 +173,10 @@ class NonConvexFlowBlock(ScalarBlock):
             """Rule definition for status_nominal"""
             expr = (
                 self.status_nominal[i, o, t]
-                == self.status[i, o, t] * m.flows[i, o].nominal_capacity
+                == self.status[i, o, t]
+                * m.flows[i, o].nominal_capacity[
+                    m.es.capacity_period_of_timestep(t)
+                ]
             )
             return expr
 

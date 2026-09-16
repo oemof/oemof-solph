@@ -84,11 +84,11 @@ def test_invest_power_uncoupled():
 
     assert (results["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = results["invest"][(bus, storage)]
-    assert invest_inflow[0] == pytest.approx(1)
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
+    assert capacity_inflow[0] == pytest.approx(1)
 
-    invest_outflow = results["invest"][(storage, bus)]
-    assert invest_outflow[0] == pytest.approx(0)
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
+    assert capacity_outflow[0] == pytest.approx(0)
 
 
 def test_invest_power_coupled():
@@ -130,11 +130,11 @@ def test_invest_power_coupled():
     storage_content = results["storage_content"][storage]
     assert (storage_content == np.arange(0, 10.5, 1)).all()
 
-    invest_inflow = results["invest"][(bus, storage)]
-    assert invest_inflow[0] == pytest.approx(1)
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
+    assert capacity_inflow[0] == pytest.approx(1)
 
-    invest_outflow = results["invest"][(storage, bus)]
-    assert invest_outflow[0] == pytest.approx(2)
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
+    assert capacity_outflow[0] == pytest.approx(2)
 
 
 def test_storage_charging():
@@ -197,11 +197,11 @@ def test_invest_content_uncoupled():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = results["invest"][storage]
-    assert invest_capacity[0] == pytest.approx(19)
-
     storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
+
+    invest_capacity = results["storage_capacity"][storage]
+    assert invest_capacity[0] == pytest.approx(19)
 
 
 def test_invest_content_minimum():
@@ -234,7 +234,7 @@ def test_invest_content_minimum():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = results["invest"][storage]
+    invest_capacity = results["storage_capacity"][storage]
     assert invest_capacity[0] == pytest.approx(32)
 
     storage_content = list(results["storage_content"][storage])
@@ -272,7 +272,7 @@ def test_invest_content_minimum_nonconvex():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [0]
 
-    assert results["invest"][storage][0] == pytest.approx(0)
+    assert results["storage_capacity"][storage][0] == pytest.approx(0)
 
     storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx(11 * [0])
@@ -310,7 +310,7 @@ def test_invest_content_maximum():
     model = solph.Model(es)
     results = model.solve()
 
-    invest_capacity = results["invest"][storage]
+    invest_capacity = results["storage_capacity"][storage]
     assert invest_capacity[0] == pytest.approx(10)
 
     storage_content = list(results["storage_content"][storage])

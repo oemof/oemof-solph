@@ -186,9 +186,9 @@ class _FakeSequence:
 
     def __getitem__(self, i):
         if isinstance(i, slice):
-            start = (i.start if i.start is not None else 0)
-            step = (i.step if i.step is not None else 1)
-            stop = (i.stop if i.stop is not None else -1)
+            start = i.start if i.start is not None else 0
+            step = i.step if i.step is not None else 1
+            stop = i.stop if i.stop is not None else -1
             if start < stop:
                 length = (stop - start) // step
                 return np.full(length, self._value)

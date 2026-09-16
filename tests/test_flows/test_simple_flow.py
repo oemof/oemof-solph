@@ -15,6 +15,18 @@ from oemof import solph
 from . import _run_flow_model
 
 
+def test_nominal_capacity():
+    flow = solph.flows.Flow(
+        nominal_capacity=[1, 2],
+        maximum=[0.25] + 8 * [1] + [0.5],
+        variable_costs=-1,
+    )
+    flow_result = _run_flow_model(flow, multi_period=True)
+    assert flow_result == pytest.approx(
+        [0.25, 1, 1, 1, 1, 2, 2, 2, 2, 1]
+    )
+
+
 def test_gradient_limit():
     price_pattern = [8] + 8 * [-1] + [8]
 
@@ -24,7 +36,7 @@ def test_gradient_limit():
         positive_gradient_limit=0.4,
         negative_gradient_limit=0.25,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx(
         [0, 0.8, 1.6, 2.0, 2.0, 2.0, 1.5, 1.0, 0.5, 0]
@@ -39,7 +51,7 @@ def test_full_load_time_max():
         variable_costs=price_pattern,
         full_load_time_max=4.5,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx(5 * [0] + [1] + 4 * [2])
 
@@ -52,7 +64,7 @@ def test_full_load_time_min():
         variable_costs=price_pattern,
         full_load_time_min=4.5,
     )
-    flow_result = list(_run_flow_model(flow)["flow"][:-1])
+    flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx(4 * [2] + [1] + 5 * [0])
 
