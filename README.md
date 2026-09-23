@@ -31,7 +31,7 @@
 | src/oemof/solph/constraints/integral\_limit.py              |       48 |       21 |       24 |        5 |     58.33% |49, 148-154, 157, 175-\>181, 182, 229-267, 301 |
 | src/oemof/solph/constraints/investment\_limit.py            |       50 |       37 |       28 |        0 |     21.79% |35-57, 78-120 |
 | src/oemof/solph/constraints/shared\_limit.py                |       15 |        0 |        4 |        0 |    100.00% |           |
-| src/oemof/solph/constraints/storage\_level.py               |       76 |       38 |       20 |        2 |     50.00% |109-172, 185, 251-315, 328 |
+| src/oemof/solph/constraints/storage\_level.py               |       76 |       38 |       20 |        2 |     50.00% |112-175, 188, 257-321, 334 |
 | src/oemof/solph/flows/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/flows/\_flow.py                             |      113 |        0 |       60 |        1 |     99.42% | 311-\>317 |
 | src/oemof/solph/flows/\_invest\_non\_convex\_flow\_block.py |      101 |        1 |       24 |        2 |     97.60% |140-\>exit, 305 |
