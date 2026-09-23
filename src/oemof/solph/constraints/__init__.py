@@ -2,7 +2,7 @@
 """
 Additional constraints to be used in an oemof energy model.
 
-SPDX-FileCopyrightText: oemof association (oemof e.V.)
+SPDX-FileCopyrightText: oemof e.V. and contributors
 
 SPDX-License-Identifier: MIT
 """

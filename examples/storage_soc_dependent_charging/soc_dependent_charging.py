@@ -9,7 +9,7 @@ Dependencies:
     * oemof-tools
 
 
-SPDX-FileCopyrightText: oemof association (oemof e.V.)
+SPDX-FileCopyrightText: oemof e.V. and contributors
 
 SPDX-License-Identifier: MIT
 

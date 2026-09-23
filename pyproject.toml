@@ -41,7 +41,7 @@ dynamic = ["version"]
 description = "A model generator for energy system modelling and optimisation."
 readme = "README.rst"
 authors = [
-    {name = "oemof association (oemof e.V.)", email = "contact@oemof.org"},
+    {name = "oemof e.V. and contributors", email = "contact@oemof.org"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
