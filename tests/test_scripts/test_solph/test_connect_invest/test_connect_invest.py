@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """Connecting different investment variables.
 
 This file is part of project oemof (github.com/oemof/oemof). It's copyrighted

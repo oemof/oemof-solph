@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 # -*- coding: utf-8 -
 
 """Test the created constraints against approved constraints.

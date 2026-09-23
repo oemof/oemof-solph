@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 # Additional copyright: Joachim Jablon, kieferro (MIT license)
 
 name: tox pytests

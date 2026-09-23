@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+-->
+
 # Contributor Covenant Code of Conduct
 
 ## Our Pledge

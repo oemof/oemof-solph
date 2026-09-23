@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description:
 ---------------------
@@ -34,7 +36,7 @@ License
 -------
 Simon Hilpert - 12.12.2017 - simon.hilpert@uni-flensburg.de
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 import networkx as nx
