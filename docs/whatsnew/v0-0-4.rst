@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 v0.0.4 (March 03, 2016)
 -----------------------
 

@@ -1,4 +1,12 @@
-__version__ = "0.6.5a5"
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+"""
+
+__version__ = "0.6.6a1"
 
 from . import buses
 from . import components

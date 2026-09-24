@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 This script shows how to a an individual constraint to the oemof solph
 Model.

@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+"""
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+"""
+
 import os
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt

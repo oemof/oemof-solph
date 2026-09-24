@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 [tool.ruff]
 extend-exclude = ["static", "ci/templates"]
 line-length = 79
@@ -10,11 +14,10 @@ build-backend = "flit_core.buildapi"
 
 [tool.flit.sdist]
 include = [
-    "AUTHORS.rst",
     "CITATION.cff",
     "CODE_OF_CONDUCT.md",
     "CONTRIBUTING.rst",
-    "LICENSE",
+    "LICENSES/*.txt",
     "README.rst",
     "VERSION",
     "tox.ini",
@@ -27,7 +30,6 @@ include = [
     ".bumpversion.cfg",
     ".coveragerc",
     ".editorconfig",
-    ".flake8",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
 ]
@@ -39,7 +41,7 @@ dynamic = ["version"]
 description = "A model generator for energy system modelling and optimisation."
 readme = "README.rst"
 authors = [
-    {name = "oemof developer group", email = "contact@oemof.org"},
+    {name = "oemof e.V. and contributors", email = "contact@oemof.org"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -68,11 +70,11 @@ dependencies = [
     "pyomo >= 6.8.0",
     "networkx",
     "oemof.tools >= 0.4.3",
-    "oemof.network >= 0.5.1b2",
+    "oemof.network >= 0.5.3",
 ]
 license = "MIT"
 license-files = [
-    "LICENSE",
+    "LICENSES/MIT.txt",
 ]
 
 [project.urls]

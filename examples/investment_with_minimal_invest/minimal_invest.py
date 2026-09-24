@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# SPDX-FileCopyrightText: oemof e.V. and contributors
 """
 Example that shows how to use "Offset-Invest".
 
@@ -24,7 +26,7 @@ License
 -------
 Johannes Röder <https://www.uni-bremen.de/en/res/team/johannes-roeder-m-sc>
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 

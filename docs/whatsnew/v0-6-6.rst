@@ -1,0 +1,31 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
+v0.6.6
+------
+
+API changes
+###########
+
+New features
+############
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+Other changes
+#############
+
+* Comply with REUSE.software.
+
+Contributors
+############
+
+* Patrik Schönfeldt (DLR)
+
+Acknowledgements
+################

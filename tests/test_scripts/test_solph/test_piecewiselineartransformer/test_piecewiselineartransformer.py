@@ -3,12 +3,11 @@
 Example that illustrates how to use custom component
 `PiecewiseLinearConverter` can be used.
 
-This file is part of project oemof (github.com/oemof/oemof). It's copyrighted
-by the contributors recorded in the version control history of the file,
-available from its original location
-oemof/tests/test_scripts/test_solph/test_generic_chp/test_generic_chp.py
+SPDX-FileCopyrightText: Jann Launer
+SPDX-FileCopyrightText: Uwe Krien
+SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 """
 
 import numpy as np

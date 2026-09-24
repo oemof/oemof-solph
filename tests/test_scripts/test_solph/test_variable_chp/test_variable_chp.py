@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 This test contains a ExtractionTurbineCHP class.
 
