@@ -42,15 +42,16 @@ to learn about which solvers are supported.
             conda activate oemof-solph-env
 
       4. There are two options available for installing oemof.solph:
-      
-      4a Install oemof.solph with open source solvers already included, in this
-         HiGHS and CBC.
+
+         1. Install oemof.solph with open source solvers already included, in
+            this HiGHS and CBC.
 
          .. code-block:: console
 
             pip install oemof.solph[solver]
 
-      4b Install default version of oemof.solph without a preinstalled solver.
+         2. Install default version of oemof.solph without a preinstalled
+            solver.
 
          .. code-block:: console
 
@@ -74,13 +75,14 @@ to learn about which solvers are supported.
       2. Depending on your setup, you can install oemof.solph in one of two
          ways:
       
-      2a For installing oemof.solph and open source solver HiGHS and CBC type:
+         1. For installing oemof.solph and open source solver HiGHS and CBC
+            type:
 
          .. code-block:: console
 
             pip install oemof.solph[solver]
 
-      2b For installing oemof.solph without type in terminal:
+         2. For installing oemof.solph without type in terminal:
 
          .. code-block:: console
 
