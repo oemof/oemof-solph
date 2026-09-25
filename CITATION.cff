@@ -101,6 +101,10 @@ authors:
     alias: "@nesnoj"
     orcid: "https://orcid.org/0000-0002-8563-5261"
   -
+    given-names: Julius
+    familiy-names: Ellermann
+    alias: "@3LL3RM4NN"
+  -
     given-names: Lena
     family-names: Rosin
     alias: "@leroum"
