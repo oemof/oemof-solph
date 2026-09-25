@@ -124,6 +124,12 @@ class Results:
         pd.DataFrame or pd.Series: Result including corresponding time axis
         """
 
+        if key in ("Problem", "Solution", "Solver"):
+            warnings.warn(
+                f"The key '{key}' is deprecated,"
+                + " please access via meta_results key.",
+                FutureWarning,
+            )
         if key == "variable_costs":
             return self._calc_variable_costs()
         elif key == "investment_costs":
