@@ -14,7 +14,7 @@ have Python 3 installed. On top of that, you need a solver to use `oemof.solph`.
 
 There are several solvers that can work with `oemof.solph`, both open source and
 commercial. Two open source solvers are widely used (`HiGHS` and `CBC`),
-`oemof.solph`` defaults to `CBC` (Coin-or branch and cut). It may be useful to compare
+`oemof.solph` defaults to `CBC` (Coin-or branch and cut). It may be useful to compare
 results of different solvers to see which performs best. Commercial
 solvers, like Gurobi or Cplex, are also options. Have a look at the
 `pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`__
