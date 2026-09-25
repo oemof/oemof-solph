@@ -8,21 +8,24 @@
 Installation and setup
 ######################
 
-Following you find guidelines for the installation process for various
-operating systems. oemof.solph is a Python package, thus it requires you to
-have Python 3 installed. On top of that, you need a solver to use oemof.solph.
+Here you find guidelines for the installation process for various
+operating systems. `oemof.solph` is a Python package, thus it requires you to
+have Python 3 installed. On top of that, you need a solver to use `oemof.solph`.
 
-There are several solvers that can work with oemof.solph, both open source and
-commercial. Two open source solvers are widely used (HiGHS, CBC and GLPK), but
-oemof.solph suggests CBC (Coin-or branch and cut). It may be useful to compare
-results of different solvers to see which performs best. Other commercial
+There are several solvers that can work with `oemof.solph`, both open source and
+commercial. Two open source solvers are widely used (`HiGHS` and `CBC`),
+`oemof.solph` defaults to `CBC` (Coin-or branch and cut). It may be useful to compare
+results of different solvers to see which performs best. Commercial
 solvers, like Gurobi or Cplex, are also options. Have a look at the
 `pyomo docs <https://pyomo.readthedocs.io/en/stable/api/pyomo.solvers.plugins.solvers.html>`__
 to learn about which solvers are supported.
 
+We recommend installing `oemof.solph` within a virtual Python environment and not into the base,
+system-wide Python installation.
+
 .. tab-set::
 
-   .. tab-item:: Using conda (all OS)
+   .. tab-item:: Using conda
 
       You can download a lightweight and open source variant of conda:
       "miniforge3".
@@ -41,60 +44,30 @@ to learn about which solvers are supported.
 
             conda activate oemof-solph-env
 
-      4. There are two options available for installing oemof.solph:
 
-         1. Install oemof.solph with open source solvers already included, in
-            this HiGHS and CBC.
+   .. tab-item:: Using Python venv
 
-         .. code-block:: console
+      With `Python <http://python.org/>`__ installed, you can use virtualenv
+      to manage virtual environments. Open terminal to create and activate
+      a virtual environment by typing:
 
-            pip install oemof.solph[solver]
+      .. code-block:: console
 
-         2. Install default version of oemof.solph without a preinstalled
-            solver.
+         python -m venv /path/to/desired/oemof-solph-env
+         source /path/to/desired/oemof-solph-env/bin/activate
 
-         .. code-block:: console
 
-            pip install oemof.solph
 
-   .. tab-item:: Linux
+When you are have a virtual environment activated, you can install
+`oemof.solph` and the open source solver HiGHS and CBC using:
 
-      **Install oemof.solph**
+.. code-block:: console
 
-      With python3 installed, we recommend installing oemof.solph within a
-      virtual Python environment and not into the base, system-wide Python
-      installation. On Linux you can use virtualenv to do so.
+   pip install oemof.solph[solver]
 
-      1. Open terminal to create and activate a virtual environment by typing:
+If you want to use a solver you installed in a different way,
+just omit the :code:`[solver]`.
 
-         .. code-block:: console
-
-            python -m venv /path/to/desired/oemof-solph-env
-            source /path/to/desired/oemof-solph-env/bin/activate
-
-      2. Depending on your setup, you can install oemof.solph in one of two
-         ways:
-      
-         1. For installing oemof.solph and open source solver HiGHS and CBC
-            type:
-
-         .. code-block:: console
-
-            pip install oemof.solph[solver]
-
-         2. For installing oemof.solph without type in terminal:
-
-         .. code-block:: console
-
-            pip install oemof.solph
-
-   .. tab-item:: Developer version
-
-      If you would like to get access to not yet released features or features
-      under development you can install the developer version. The steps are
-      similar to the steps here, but INSTEAD of installing oemof.solph using
-      the standard way,
-      follow the instructions on :ref:`this page <contribute_label>`.
 
 Installation test
 -----------------
@@ -109,13 +82,17 @@ If the installation was successful, you will receive something like this:
 
 .. code:: console
 
-   *********
-   Solver installed with oemof:
-   glpk: working
-   cplex: not working
-   cbc: working
-   gurobi: not working
-   *********
-   oemof.solph successfully installed.
+   ***********************************
+   Solver installed with oemof.solph:
 
-as an output.
+   cbc: installed and working
+   glpk: not installed/ not working
+   gurobi: not installed/ not working
+   cplex: not installed/ not working
+   scip: not installed/ not working
+   highs: installed and working
+
+   ***********************************
+   oemof.solph successfully installed.
+   ***********************************
+
