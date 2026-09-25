@@ -182,7 +182,6 @@ investments = {
         nonconvex=True,
         offset=investment_costs[("pv", "fixed_costs [Eur]")] / 5,
         maximum=10,
-        overall_maximum=10,
     ),
     "battery": solph.Investment(
         ep_costs=investment_costs[("battery", "specific_costs [Eur/kWh]")] / 5,
@@ -195,13 +194,12 @@ investments = {
         nonconvex=True,
         offset=investment_costs[("heat pump", "fixed_costs [Eur]")] / 5,
         maximum=10,
-        overall_maximum=10,
     ),
     "gas boiler": solph.Investment(
         ep_costs=investment_costs[("gas boiler", "specific_costs [Eur/kW]")]
         / 5,
         lifetime=4,
-        fixed_costs=investment_costs[("gas boiler", "fixed_costs [Eur]")] / 5,
+        offset=investment_costs[("gas boiler", "fixed_costs [Eur]")] / 5,
         existing=3.5,  # existing cannot be combined with nonconvex
         age=2,
     ),
@@ -215,7 +213,6 @@ es = solph.EnergySystem(
     periods=investment_periods,
     tsa_parameters=tsa_parameters,
     infer_last_interval=False,
-    use_remaining_value=True,
 )
 
 # %% [solve]

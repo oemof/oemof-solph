@@ -64,7 +64,9 @@ def prepare_input_data(proxy_url=None, proxy_port=None):
         file_path = Path(file_path, filename)
         if not file_path.exists():
             with open(file_path, "w") as data_file:
-                data_file.write(requests.get(url[filename], timeout=10).text)
+                r = requests.get(url[filename], timeout=10)
+                r.encoding = r.apparent_encoding
+                data_file.write(r.text)
         df = pd.read_csv(
             file_path,
             index_col=0,
@@ -230,11 +232,11 @@ def investment_costs() -> pd.DataFrame:
                 1101,
                 1048,
             ],
-            ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
             ("heat pump", "maximum [kW]"): 100,
             ("heat storage", "specific_costs [Eur/m3]"): [1120] * 5,
-            ("heat storage", "fixed_costs [Eur]"): [806] * 5,
+            ("heat pump", "fixed_costs [Eur]"): [3860, 3030, 2716, 2530, 2410],
             ("heat storage", "maximum [kWh]"): 100,
+            ("heat storage", "fixed_costs [Eur]"): [806] * 5,
             ("pv", "specific_costs [Eur/kW]"): [
                 1200,
                 1017,

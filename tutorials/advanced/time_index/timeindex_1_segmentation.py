@@ -32,10 +32,6 @@ warnings.filterwarnings(
 logger.define_logging()
 
 
-def calculate_fix_cost(value):
-    return value / 20
-
-
 # %%[reshape_unevenly]
 def reshape_unevenly(data):
     def to_bucket(ts: pd.Timestamp) -> pd.Timestamp:
@@ -70,16 +66,11 @@ def prepare_technical_data(minutes, url, port):
     return data(even=data_table, uneven=df_un)
 
 
-def prepare_cost_data():
-    pass
-
-
 def populate_and_solve_energy_system(
     es: solph.EnergySystem,
     time_series: dict[str, list] | dict[str, pd.DataFrame],
     investments: dict[str, solph.Investment],
     variable_costs: dict | pd.DataFrame,
-    discount_rate=0.02,
 ):
 
     parameter = get_parameter()
@@ -200,7 +191,7 @@ def populate_and_solve_energy_system(
     es.add(gas_import)
 
     logging.info("Creating Model...")
-    m = solph.Model(es, discount_rate=discount_rate)
+    m = solph.Model(es)
     logging.info("Solving Model...")
 
     results = m.solve(solver="cbc", solve_kwargs={"tee": False})
@@ -263,7 +254,6 @@ def create_investment_objects(n, r, year):
             ep_costs=epc,
             offset=fix_cost,
             maximum=maximum,
-            lifetime=20,
             nonconvex=bool(fix_cost > 0),  # need to cast to avoid np.bool
         )
     return investments
@@ -281,15 +271,10 @@ def process_results(results):
     return key_results
 
 
-def optimise_investment(year, interval, result_path):
-    result_file = f"time_series_even_uneven_{year}_{interval}min.csv"
-    result_fn = Path(result_path, result_file)
+def optimise_investment(year, interval):
 
-    if not result_fn.is_file():
         logging.info(f"Start with {year} - {interval}")
-        # Create empty file
-        with open(result_fn, "w")  as file:
-            file.write(f"Start with {year} - {interval}")
+
         my_data = prepare_technical_data(interval, None, None)
 
         logging.info("Start with even....")
@@ -310,17 +295,6 @@ def optimise_investment(year, interval, result_path):
         time_uneven = datetime.now() - start
         key_results_uneven["time"] = time_uneven.seconds
 
-        logging.info("Create joined results.")
-        results = (
-            pd.concat(
-                [key_results_uneven, key_results_even],
-                keys=["uneven", "even"],
-            )
-            .droplevel(1)
-            .T
-        )
-        results.to_csv(result_fn)
-
         # compare_results(results_even, results_uneven)
         print()
         print("*** Investment ***")
@@ -340,21 +314,4 @@ def read_result_files(year, interval, result_path):
 
 
 if __name__ == "__main__":
-    my_result_path = Path(Path.home(), ".oemof", "tutorial", "time_series")
-    my_result_path.mkdir(parents=True, exist_ok=True)
-    intervals = [60, 30, 15, 10, 5, 1]
-    years = [2025, 2035, 2045]
-
-    for my_year in years:
-        for my_interval in intervals:
-            optimise_investment(my_year, my_interval, my_result_path)
-
-    df = pd.DataFrame()
-    for my_year in years:
-        for my_interval in intervals:
-            df = pd.concat(
-                [df, read_result_files(my_year, my_interval, my_result_path)],
-                axis=1,
-            )
-
-    df.sort_index(axis=1).to_csv(Path(my_result_path, "results_all.csv"))
+    optimise_investment(2025, interval=60)
