@@ -15,6 +15,7 @@ SPDX-License-Identifier: MIT
 
 from . import experimental
 from ._converter import Converter
+from ._variable_split_converter import VariableSplitConverter
 from ._extraction_turbine_chp import ExtractionTurbineCHP
 from ._generic_chp import GenericCHP
 from ._generic_storage import GenericStorage
@@ -37,4 +38,5 @@ __all__ = [
     "Source",
     "slope_offset_from_nonconvex_input",
     "slope_offset_from_nonconvex_output",
+    "VariableSplitConverter"
 ]
