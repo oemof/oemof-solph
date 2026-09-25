@@ -41,14 +41,17 @@ to learn about which solvers are supported.
 
             conda activate oemof-solph-env
 
-      4. Install a solver, e.g. CBC
+      4. There are two options available for installing oemof.solph:
+
+         1. Install oemof.solph with open source solvers already included, in
+            this HiGHS and CBC.
 
          .. code-block:: console
 
-            conda install -c conda-forge coincbc
+            pip install oemof.solph[solver]
 
-      5. Only AFTER you have installed the solver via conda, use pip to install
-         oemof.solph:
+         2. Install default version of oemof.solph without a preinstalled
+            solver.
 
          .. code-block:: console
 
@@ -69,42 +72,21 @@ to learn about which solvers are supported.
             python -m venv /path/to/desired/oemof-solph-env
             source /path/to/desired/oemof-solph-env/bin/activate
 
-      2. In terminal type:
+      2. Depending on your setup, you can install oemof.solph in one of two
+         ways:
+      
+         1. For installing oemof.solph and open source solver HiGHS and CBC
+            type:
+
+         .. code-block:: console
+
+            pip install oemof.solph[solver]
+
+         2. For installing oemof.solph without type in terminal:
 
          .. code-block:: console
 
             pip install oemof.solph
-
-      **Install a solver**
-
-      To install the solvers have a look at the package repository of your
-      Linux distribution or search for precompiled packages. GLPK and CBC ares
-      available at Debian, Feodora, Ubuntu and others.
-
-   .. tab-item:: Windows (solver only)
-
-      We recommend using conda for the python installation, with which you can
-      also install a solver. If you want to install the solver externally (not
-      via conda), you can follow these steps:
-
-      1. Download `CBC <https://github.com/coin-or/Cbc/releases>`_ or
-         `GLPK (64/32 bit) <https://sourceforge.net/projects/winglpk/>`_
-      2. Unpack CBC/GLPK to any folder (e.g. C:/Users/Somebody/my_programs)
-      3. Add the path of the executable files of both solvers to the PATH
-         variable (can be done per user without administrator privileges).
-      4. Restart Windows
-
-   .. tab-item:: OSX (solver only)
-
-      We recommend using conda for the python installation, with which you can
-      also install a solver. If you want to install the solver externally (not
-      via conda), you can follow these steps:
-
-      - CBC-solver: https://github.com/coin-or/Cbc
-      - GLPK-solver: http://arnab-deka.com/posts/2010/02/installing-glpk-on-a-mac/
-
-      If you install the CBC solver via brew (highly recommended), it should
-      work without additional configuration.
 
    .. tab-item:: Developer version
 

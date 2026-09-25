@@ -21,11 +21,13 @@ Other changes
 #############
 
 * Comply with REUSE.software.
+* Add optional solver dependency
 
 Contributors
 ############
 
 * Patrik Schönfeldt (DLR)
+* Malte Fritz
 
 Acknowledgements
 ################
