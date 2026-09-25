@@ -26,6 +26,7 @@ Contributors
 ############
 
 * Patrik Schönfeldt (DLR)
+* Julius Ellermann (DLR)
 
 Acknowledgements
 ################
