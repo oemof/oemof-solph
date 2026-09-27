@@ -12,6 +12,7 @@ SPDX-License-Identifier: MIT
 
 import warnings
 from collections.abc import Hashable
+from itertools import groupby
 from typing import Any
 
 import pandas as pd
@@ -36,16 +37,15 @@ class Results:
     >>> from oemof import solph
     >>> energysystem = solph.EnergySystem(timeindex=[1,2,3])
     >>> energysystem_model = solph.Model(energysystem)
-    >>> _ = energysystem_model.solve()
-    >>> results = solph.Results(energysystem_model)
+    >>> results = energysystem_model.solve()
     >>> results.get("flow")  # with the equivalent `results["flow"]`
     """
 
-    def __init__(self, model: ConcreteModel):
-        self._solver_results = model.solver_results
-        self._meta_results = model.meta_results
+    def __init__(self, model: ConcreteModel, solver_info):
+        self._meta_results = model.solver_results
         self._variables = {}
         self._model = model
+        self.solver = solver_info
 
         for variable in model.component_objects(Var):
             var_name = variable.getname()
@@ -55,7 +55,7 @@ class Results:
             occurence = variable.parent_block()
 
             if (
-                key not in self._variables and key not in self._solver_results
+                key not in self._variables and key not in self._meta_results
             ):  # variable found for the first time
                 self._variables[key] = {occurence: variable}
             elif (
@@ -80,6 +80,11 @@ class Results:
         # TODO: add keyword for multiperiod
 
         self._economy = {"variable_costs": None}
+        self._duals = self._extract_duals() if model.dual is not None else None
+        self._rc = (
+            self._extract_reduced_costs() if model.rc is not None else None
+        )
+
         if "invest" in self._variables.keys():
             self._economy["investment_costs"] = None
 
@@ -89,9 +94,8 @@ class Results:
         Returns:
             set: keys that can be used to access results
         """
-        return (
-            self._solver_results.keys()
-            | self._meta_results.keys()
+        keys = (
+            self._meta_results.keys()
             | self._variables.keys()
             | self._economy.keys()
         )
@@ -124,14 +128,18 @@ class Results:
         pd.DataFrame or pd.Series: Result including corresponding time axis
         """
 
-        if key in ("Problem", "Solution", "Solver"):
-            warnings.warn(
-                f"The key '{key}' is deprecated,"
-                + " please access via meta_results key.",
-                FutureWarning,
-            )
         if key == "variable_costs":
             return self._calc_variable_costs()
+        # This can be removed in v0.7 - start
+        elif key in ("Problem", "Solution", "Solver"):
+            warnings.warn(
+                f"The key '{key}' is deprecated,"
+                " please use the solver attribute instead "
+                "e.g. results.solver.",
+                FutureWarning,
+            )
+            return self._meta_results.get(key)
+        # This can be removed in v0.7 - end
         elif key == "investment_costs":
             return self._calc_capex()
         elif key in self._variables:
@@ -216,10 +224,8 @@ class Results:
         # TODO: is it really necessary to loop over all flows again or is it
         # possible to use the flows of 'invest_values'?
         for i, o in self._model.FLOWS:
-
             # access the costs of each investment flow
             if hasattr(self._model.flows[i, o], "investment"):
-
                 # map investment and costs and multiply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):
@@ -247,7 +253,6 @@ class Results:
                 node,
                 oemof.solph.components._generic_storage.GenericStorage,
             ):
-
                 # map investment and costs and mulitply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):
@@ -318,16 +323,14 @@ class Results:
         pd.DataFrame, pd.Series, or ListContainer: Result
         """
         # backward-compatibility with returned results object from Pyomo
-        if key in self._solver_results:
-            self._direct_pyomo_result_waring()
-            return self._solver_results[key]
-        elif key in self._meta_results:
-            return self._meta_results[key]
-        else:
-            rv = self.get(key)
-            if rv is None:
-                raise KeyError(f"Key '{key}' not in Results.")
-            return rv
+        rv = self.get(key)
+        if rv is None:
+            raise KeyError(f"Key '{key}' not in Results.")
+        return rv
 
     def __contains__(self, key: Hashable) -> bool:
-        return key in self._solver_results or key in self._variables
+        return (
+            key in self._meta_results
+            or key in self._variables
+            or key in self.keys()
+        )

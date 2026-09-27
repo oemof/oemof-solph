@@ -124,8 +124,6 @@ class Model(po.ConcreteModel):
         Name of the model
     es : solph.EnergySystem
         Energy system of the model
-    meta : `pyomo.opt.results.results_.SolverResults` or None
-        Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
@@ -223,7 +221,6 @@ class Model(po.ConcreteModel):
         self.flows = self.es.flows()
 
         self.solver_results = None
-        self.meta_results = None
         self.dual = None
         self.rc = None
 
@@ -499,10 +496,9 @@ class Model(po.ConcreteModel):
         tc = appsi_results.termination_condition
 
         solver_results = {
-            "termination_condition": tc.name,
-            "best_feasible_objective": appsi_results.best_feasible_objective,
-            "best_objective_bound": appsi_results.best_objective_bound,
-            "wallclock_time": appsi_results.wallclock_time,
+            "Problem": tc.name,
+            "Solution": appsi_results.best_feasible_objective,
+            "Solver": solver,
         }
 
         optimal = tc == appsi.base.TerminationCondition.optimal
@@ -510,30 +506,29 @@ class Model(po.ConcreteModel):
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
-        ub = appsi_results.best_feasible_objective
-        lb = appsi_results.best_objective_bound
-        if ub not in (None, 0) and lb is not None:
-            gap = abs(ub - lb) / abs(ub)
+
+        bfo = appsi_results.best_feasible_objective
+        bob = appsi_results.best_objective_bound
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
         else:
             gap = None
 
-        return solver_info(
-            objective=ub,
+        return SolverResults(
+            objective=bfo,
             solver=solver,
             optimal=optimal,
             termination_condition=tc.name,
             status=tc.value,
             solver_results=solver_results,
-            wallclock_time=solver_results.get("wallclock_time"),
-            ub=ub,
-            lb=lb,
+            wallclock_time=appsi_results.wallclock_time,
+            best_objective_bound=bob,
+            best_feasible_objective=bfo,
             gap=gap,
-            message=None,
+            message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
-    def solve_factory(
-        self, solver_info, solver, solver_io, solve_kwargs, cmdline_options
-    ):
+    def _solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -541,29 +536,34 @@ class Model(po.ConcreteModel):
         for k in cmdline_options:
             options[k] = cmdline_options[k]
 
+        solve_kwargs = dict(solve_kwargs)
         factory_results = opt.solve(self, **solve_kwargs)
 
         status = factory_results.Solver.Status
         tc = factory_results.Solver.Termination_condition
         msg = getattr(factory_results.Solver, "Message", None)
         wt = getattr(factory_results.Solver, "Time", None)
-        ub = getattr(factory_results.Problem[0], "Upper_bound", None)
-        lb = getattr(factory_results.Problem[0], "Lower_bound", None)
-        if ub not in (None, 0) and lb is not None:
-            gap = abs(ub - lb) / abs(ub)
+        bfo = getattr(factory_results.Problem[0], "Upper_bound", None)
+        bob = getattr(factory_results.Problem[0], "Lower_bound", None)
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
         else:
             gap = None
+        try:
+            objective = po.value(self.objective)
+        except ValueError:
+            objective = None
 
-        return solver_info(
+        return SolverResults(
             optimal=status == "ok" and tc == "optimal",
             solver=solver,
-            objective=po.value(self.objective),
+            objective=objective,
             termination_condition=tc.name,
             status=status.name,
             solver_results=factory_results,
             wallclock_time=wt,
-            ub=ub,
-            lb=lb,
+            best_feasible_objective=bfo,
+            best_objective_bound=bob,
             gap=gap,
             message=msg,
         )
@@ -622,9 +622,7 @@ class Model(po.ConcreteModel):
 
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
-        self.meta_results = pd.Series(solver_return._asdict()).drop(
-            "solver_results"
-        )
+        solver_info = pd.Series(solver_return.__dict__).drop("solver_results")
 
         if solver_return.optimal:
             msg = "Optimisation successful."
@@ -643,8 +641,7 @@ class Model(po.ConcreteModel):
                 return solver_return.solver_results
             else:
                 raise RuntimeError(msg)
-
-        return Results(self)
+        return Results(self, solver_info=solver_info)
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
