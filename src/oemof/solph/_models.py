@@ -17,7 +17,7 @@ SPDX-License-Identifier: MIT
 
 import logging
 import warnings
-from collections import namedtuple
+from dataclasses import dataclass
 from logging import getLogger
 
 import pandas as pd
@@ -44,6 +44,50 @@ class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
 
     pass
+
+
+@dataclass
+class SolverResults:
+    """SolverResults holds the summary results of the solver run.
+
+    Parameters
+    ----------
+    optimal : bool
+        Whether the optimisation terminated with an optimal solution.
+    status : str | int | None
+        Solver status (e.g. ``ok`` or ``5``) returned by the solver.
+    termination_condition : str | None
+        Termination condition reported by the solver (e.g. ``"optimal"``).
+    solver_results : object
+        The full, solver-specific results object (e.g. a Pyomo results
+        object) that the summary is derived from.
+    message : str | None
+        Optional solver message.
+    wallclock_time : float | None
+        Wall-clock time the solver took to solve the problem in seconds.
+    objective : float | None
+        Objective function value of the solution.
+    solver : str
+        Name of the solver used (e.g. ``"cbc"``, ``"highs"``).
+    gap : float | None
+        Relative optimality gap of the solution, if available.
+    best_feasible_objective : float | None
+        Best feasible objective value found by the solver.
+    best_objective_bound : float | None
+        Best objective bound reported by the solver.
+    """
+
+    optimal: bool
+    status: str | int | None
+    termination_condition: str | None
+    solver_results: object
+    message: str | None
+    wallclock_time: float | None
+    objective: float | None
+    solver: str
+    gap: float | None
+    best_feasible_objective: float | None
+    best_objective_bound: float | None
 
 
 class Model(po.ConcreteModel):
@@ -559,33 +603,17 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
-        solver_result_keys = [
-            "optimal",
-            "status",
-            "termination_condition",
-            "solver_results",
-            "message",
-            "wallclock_time",
-            "objective",
-            "solver",
-            "gap",
-            "ub",
-            "lb",
-        ]
+        if duals:
+            self._receive_duals()
 
-        solver_info = namedtuple(
-            "SolverReturn", [key for key in solver_result_keys]
-        )
         if solver == "highs":
-            solver_return = self.solve_highs(
-                solver_info=solver_info,
+            solver_return = self._solve_highs(
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
                 solver=solver,
             )
         else:
-            solver_return = self.solve_factory(
-                solver_info=solver_info,
+            solver_return = self._solve_factory(
                 solver=solver,
                 solver_io=solver_io,
                 solve_kwargs=solve_kwargs,
