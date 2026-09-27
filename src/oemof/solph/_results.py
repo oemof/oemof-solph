@@ -99,6 +99,11 @@ class Results:
             | self._variables.keys()
             | self._economy.keys()
         )
+        if self._duals is not None:
+            keys = keys | {"duals"}
+        if self._rc is not None:
+            keys = keys | {"reduced_costs"}
+        return keys
 
     def get(
         self,
@@ -172,6 +177,10 @@ class Results:
                     case _:
                         rv.index = rv.index.get_level_values(-1)
                 return rv
+        elif key == "duals":
+            return self._duals if self._duals is not None else default
+        elif key == "reduced_costs":
+            return self._rc if self._rc is not None else default
 
         return default
 
@@ -307,7 +316,63 @@ class Results:
         )
         return self._model.es.timeindex
 
-    # --- END ---
+    def _extract_suffix_dataframe(
+        self, suffix, grouped_components: dict
+    ) -> pd.DataFrame | None:
+        """Build a `DataFrame` from a pyomo `Suffix` (dual or rc values).
+
+        Parameters
+        ----------
+        suffix : pyomo.core.base.suffix.Suffix
+            The suffix holding the values (`model.dual` or `model.rc`).
+        grouped_components : dict
+            Mapping of a column key (e.g. bus, or (source, target) tuple)
+            to an ordered list of pyomo components (constraints or
+            variables), one per timestep, whose suffix value is extracted.
+
+        Returns
+        -------
+        pd.DataFrame or None
+        """
+        data = {
+            key: [
+                suffix.get(component, float("nan")) for component in components
+            ]
+            for key, components in grouped_components.items()
+        }
+        df = pd.DataFrame(data)
+        if self._model.es.timeindex is not None:
+            df.index = self._model.es.timeindex[: len(df)]
+        return df
+
+    def _extract_duals(self) -> pd.DataFrame | None:
+        """Extract dual variables (shadow prices) of the bus balance
+        constraints. Only called if `Model.receive_duals()` was invoked.
+        """
+        grouped = groupby(
+            sorted(self._model.BusBlock.balance.keys()), lambda t: t[0]
+        )
+        grouped_components = {
+            bus: [self._model.BusBlock.balance[bus, t] for _, t in ts]
+            for bus, ts in grouped
+        }
+        return self._extract_suffix_dataframe(
+            self._model.dual, grouped_components
+        )
+
+    def _extract_reduced_costs(self) -> pd.DataFrame | None:
+        """Extract reduced costs of the flow variables. Only called if
+        `Model.receive_duals()` was invoked (both `cbc` and `highs`).
+        """
+        grouped_components = {
+            (src, dst): [
+                self._model.flow[src, dst, t] for t in self._model.TIMESTEPS
+            ]
+            for src, dst in self._model.FLOWS
+        }
+        return self._extract_suffix_dataframe(
+            self._model.rc, grouped_components
+        )
 
     def __getitem__(self, key: str) -> pd.DataFrame | ListContainer:
         """

@@ -24,7 +24,6 @@ import pandas as pd
 from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.contrib import appsi
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import processing
@@ -461,13 +460,24 @@ class Model(po.ConcreteModel):
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
+        warnings.warn(
+            "Model.receive_duals() is deprecated. Use "
+            "Model.solve(duals=True) instead.",
+            FutureWarning,
+        )
+        self._receive_duals()
+
+    def _receive_duals(self):
         """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
         """
-        # shadow prices
+        if self.dual is None:
+            del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
-        # reduced costs
+
+        if self.rc is None:
+            del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
@@ -481,9 +491,7 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    def solve_highs(
-        self, solver_info, solver, cmdline_options=None, solve_kwargs=None
-    ):
+    def _solve_highs(self, solver, cmdline_options=None, solve_kwargs=None):
         opt = appsi.solvers.Highs()
         opt.config.load_solution = False
 
@@ -505,7 +513,31 @@ class Model(po.ConcreteModel):
 
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
+        if self.dual is not None:
+            try:
+                duals = opt.get_duals()
+                for c, v in duals.items():
+                    self.dual[c] = v
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract dual variables from HiGHS. This "
+                    "typically happens for MIP models, where duals are not "
+                    "well-defined.",
+                    UserWarning,
+                )
 
+        if self.rc is not None:
+            try:
+                reduced_costs = opt.get_reduced_costs()
+                for v_, val in reduced_costs.items():
+                    self.rc[v_] = val
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract reduced costs from HiGHS. This "
+                    "typically happens for MIP models, where reduced costs "
+                    "are not well-defined.",
+                    UserWarning,
+                )
 
         bfo = appsi_results.best_feasible_objective
         bob = appsi_results.best_objective_bound
@@ -537,6 +569,8 @@ class Model(po.ConcreteModel):
             options[k] = cmdline_options[k]
 
         solve_kwargs = dict(solve_kwargs)
+        solve_kwargs["suffixes"] = ["dual", "rc"]
+
         factory_results = opt.solve(self, **solve_kwargs)
 
         status = factory_results.Solver.Status
@@ -573,6 +607,7 @@ class Model(po.ConcreteModel):
         solver="cbc",
         solver_io="lp",
         allow_nonoptimal=False,
+        duals=False,
         solve_kwargs=None,
         cmdline_options=None,
     ):
@@ -589,6 +624,8 @@ class Model(po.ConcreteModel):
             True: If no optimal solution is found, there will be a warning.
             This is an option for experts. There will be no results in case
             no optimum is found.
+        duals : bool
+            Receive dual variables and reduced cost.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {"tee":True}
@@ -619,7 +656,7 @@ class Model(po.ConcreteModel):
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
             )
-
+        # ToDo DepricatedWarning for es.results and meta
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
         solver_info = pd.Series(solver_return.__dict__).drop("solver_results")
@@ -645,9 +682,7 @@ class Model(po.ConcreteModel):
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
-        relaxer = RelaxIntegrality()
-        relaxer._apply_to(self)
-
+        po.TransformationFactory("core.relax_integer_vars").apply_to(self)
         return self
 
     def get_timestep_from_tsam_timestep(self, p, ik, g):
