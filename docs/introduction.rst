@@ -51,12 +51,13 @@ Quick Installation
 For oemof.solph you need a solver on top of the software itself. Complete
 installation instructions can be found
 :ref:`here <installation_and_setup_label>`. For example, you can install
-oemof.solph together with the CBC solver in a conda environment:
+oemof.solph together with the HiGHS and CBC solvers:
 
 .. code:: console
 
-    (venv) conda install -c conda-forge coincbc
-    (venv) pip install oemof.solph
+    pip install oemof.solph[solver]
+
+Omit "[solver]" if you would like to install solvers on your own.
 
 Contributing
 ============
