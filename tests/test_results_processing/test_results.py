@@ -7,15 +7,13 @@ import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.opt.results.container import ListContainer
 
-from oemof.solph import Results
-
-from . import optimization_model
+from . import optimisation_results
 
 
 class TestResultsClass:
     @classmethod
     def setup_class(cls):
-        cls.results = Results(optimization_model)
+        cls.results = optimisation_results
 
     def test_hasattr(self):
         assert hasattr(self.results, "_variables"), (
@@ -46,7 +44,7 @@ class TestResultsClass:
         )
 
     def test_objective(self):
-        assert self.results["objective"] == pytest.approx(8495, abs=1)
+        assert self.results.solver.objective == pytest.approx(8495, abs=1)
 
     def test_get(self):
         flows = self.results.get("flow")
@@ -85,7 +83,7 @@ class TestResultsClass:
     def test_solver_result_access(self):
         with pytest.warns(
             FutureWarning,
-            match="Direct access to Pyomo results",
+            match="The key 'Problem' is deprecated,",
         ):
             assert isinstance(self.results["Problem"], ListContainer)
 

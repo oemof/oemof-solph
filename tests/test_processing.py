@@ -88,7 +88,7 @@ class TestParameterResult:
         )
         cls.es.add(dg, batt, demand)
         cls.model_duals = Model(cls.es)
-        cls.model_duals.receive_duals()
+        cls.model_duals._receive_duals()
         cls.model_duals.solve()
         cls.model_cbc = Model(cls.es)
         cls.model_cbc.solve(solver="cbc")

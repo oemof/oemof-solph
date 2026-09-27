@@ -26,7 +26,7 @@ from oemof.solph._results import Results
 
 
 def _make_infeasible_es():
-    """Source capacity (4) < sink demand (5) → infeasible."""
+    """Source capacity (4) < sink demand (5) -> infeasible."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -46,7 +46,7 @@ def _make_infeasible_es():
 
 
 def _make_unbounded_es():
-    """Negative variable cost with no upper bound → unbounded."""
+    """Negative variable cost with no upper bound -> unbounded."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -77,7 +77,7 @@ def _make_feasible_es():
             label="sink",
             inputs={
                 bus: solph.flows.Flow(
-                    fix=[0.5, 0.8, 0.3], nominal_capacity=100
+                    minimum=[0.5, 0.8, 0.3], nominal_capacity=100
                 )
             },
         )
@@ -86,7 +86,7 @@ def _make_feasible_es():
 
 
 def _make_mip_es():
-    """Same as feasible LP but with a NonConvex flow → MIP."""
+    """Same as feasible LP but with a NonConvex flow -> MIP."""
     es = solph.EnergySystem(timeindex=[0, 1, 2], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -107,7 +107,7 @@ def _make_mip_es():
             label="sink",
             inputs={
                 bus: solph.flows.Flow(
-                    fix=[0.5, 0.8, 0.3], nominal_capacity=100
+                    minimum=[0.5, 0.8, 0.3], nominal_capacity=100
                 )
             },
         )
@@ -176,7 +176,7 @@ def test_highs_objective_matches_cbc():
     es = _make_feasible_es()
     r_highs = solph.Model(es).solve(solver="highs")
     r_cbc = solph.Model(es).solve(solver="cbc")
-    assert r_highs["objective"] == pytest.approx(r_cbc["objective"])
+    assert r_highs.solver.objective == pytest.approx(r_cbc.solver.objective)
 
 
 def test_highs_flow_values_match_cbc():
@@ -189,32 +189,24 @@ def test_highs_flow_values_match_cbc():
     )
 
 
-@pytest.mark.skip(
-    reason="Handling of duals in new Results object is not yet implemented"
-)
 def test_highs_duals_match_cbc():
+    """Dual values (shadow prices) must match between CBC and HiGHS."""
     es = _make_feasible_es()
 
-    m_highs = solph.Model(es)
-    m_highs.receive_duals()
-    m_highs.solve(solver="highs")
+    r_highs = solph.Model(es).solve(solver="highs", duals=True)
+    r_cbc = solph.Model(es).solve(solver="cbc", duals=True)
 
-    m_cbc = solph.Model(es)
-    m_cbc.receive_duals()
-    m_cbc.solve(solver="cbc")
+    highs_duals = r_highs.get("duals")
+    cbc_duals = r_cbc.get("duals")
 
-    highs_duals = {str(c): v for c, v in m_highs.dual.items()}
-    cbc_duals = {str(c): v for c, v in m_cbc.dual.items()}
-
-    assert highs_duals.keys() == cbc_duals.keys()
-    for key in highs_duals:
-        assert highs_duals[key] == pytest.approx(cbc_duals[key], abs=1e-6)
+    assert highs_duals is not None
+    assert cbc_duals is not None
+    pd.testing.assert_frame_equal(
+        highs_duals.sort_index(axis=1),
+        cbc_duals.sort_index(axis=1),
+    )
 
 
-@pytest.mark.skip(
-    reason="Handling of reduced cost in new Results object is not yet "
-           "implemented"
-)
 def test_highs_reduced_costs_match_cbc():
     """Reduced costs match CBC for variables both solvers report.
 
@@ -223,29 +215,33 @@ def test_highs_reduced_costs_match_cbc():
     """
     es = _make_feasible_es()
 
-    m_highs = solph.Model(es)
-    m_highs.receive_duals()
-    m_highs.solve(solver="highs")
+    r_highs = solph.Model(es).solve(solver="highs", duals=True)
+    r_cbc = solph.Model(es).solve(solver="cbc", duals=True)
 
-    m_cbc = solph.Model(es)
-    m_cbc.receive_duals()
-    m_cbc.solve(solver="cbc")
+    highs_rc = r_highs.get("reduced_costs")
+    cbc_rc = r_cbc.get("reduced_costs")
 
-    highs_rc = {str(v): val for v, val in m_highs.rc.items()}
-    cbc_rc = {str(v): val for v, val in m_cbc.rc.items()}
+    assert highs_rc is not None
+    assert cbc_rc is not None
 
-    common_keys = highs_rc.keys() & cbc_rc.keys()
-    assert len(common_keys) > 0, "No common RC variables to compare"
-    for key in common_keys:
-        assert highs_rc[key] == pytest.approx(cbc_rc[key], abs=1e-6)
+    common_cols = highs_rc.columns.intersection(cbc_rc.columns)
+    assert len(common_cols) > 0, "No common RC variables to compare"
+
+    pd.testing.assert_frame_equal(
+        highs_rc[common_cols].sort_index(axis=1),
+        cbc_rc[common_cols].sort_index(axis=1),
+        check_exact=False,
+        atol=1e-6,
+    )
 
 
+@pytest.mark.filterwarnings("ignore:Could not extract")
 @pytest.mark.parametrize("solver", ["cbc", "highs"])
 def test_receive_duals_on_mip_does_not_crash(solver):
-    """receive_duals() followed by solve must not crash for MIP models."""
+    """duals=True on a MIP model must not crash (no duals for MIP,
+    but reduced_costs may still be requested without error)."""
     m = solph.Model(_make_mip_es())
-    m.receive_duals()
-    m.solve(solver=solver)
+    m.solve(solver=solver, duals=True)
 
 
 # ---------------------------------------------------------------------------
@@ -344,3 +340,80 @@ def test_multi_period_default_discount_rate():
     with warnings.catch_warnings(record=True) as w:
         solph.Model(es)
         assert msg in str(w[0].message)
+
+
+# ---------------------------------------------------------------------------
+# Duals / reduced costs are optional (only populated if requested)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.parametrize("solver", ["cbc", "highs"])
+def test_duals_none_when_not_requested(solver):
+    """Without duals=True, both 'duals' and 'reduced_costs' must be None."""
+    result = solph.Model(_make_feasible_es()).solve(solver=solver)
+    assert result.get("duals") is None
+    assert result.get("reduced_costs") is None
+
+
+@pytest.mark.parametrize("solver", ["cbc", "highs"])
+def test_duals_keys_absent_when_not_requested(solver):
+    """'duals'/'reduced_costs' must not appear in keys() if not requested."""
+    result = solph.Model(_make_feasible_es()).solve(solver=solver)
+    assert "duals" not in result.keys()
+    assert "reduced_costs" not in result.keys()
+
+
+@pytest.mark.parametrize("solver", ["cbc", "highs"])
+def test_duals_keys_present_when_requested(solver):
+    """'duals'/'reduced_costs' must appear in keys() once requested."""
+    result = solph.Model(_make_feasible_es()).solve(solver=solver, duals=True)
+    assert "duals" in result.keys()
+    assert "reduced_costs" in result.keys()
+
+
+def test_results_get_custom_default_for_missing_duals():
+    """Results.get() must honor a custom default, not just None."""
+    result = solph.Model(_make_feasible_es()).solve(solver="cbc")
+    sentinel = object()
+    assert result.get("duals", sentinel) is sentinel
+    assert result.get("reduced_costs", sentinel) is sentinel
+
+
+def test_extract_suffix_dataframe_nan_for_missing_entry():
+    """_extract_suffix_dataframe must return NaN (not raise KeyError)
+    for components missing from the suffix dict -- this happens when
+    a solver's presolve eliminates a variable/constraint before
+    reporting duals/reduced costs."""
+    result = solph.Model(_make_feasible_es()).solve(solver="cbc", duals=True)
+
+    class _EmptySuffix(dict):
+        def get(self, key, default=None):
+            return default  # simulate: nothing reported by the solver
+
+    df = result._extract_suffix_dataframe(
+        _EmptySuffix(),
+        grouped_components={"some_key": [object(), object()]},
+    )
+    assert df["some_key"].isna().all()
+
+
+# ---------------------------------------------------------------------------
+# Deprecated receive_duals() must still work (no infinite recursion)
+# ---------------------------------------------------------------------------
+
+def test_receive_duals_deprecated_still_populates_duals():
+    """receive_duals() is deprecated but must still enable dual extraction."""
+    m = solph.Model(_make_feasible_es())
+    with pytest.warns(FutureWarning, match="deprecated"):
+        m.receive_duals()
+
+    result = m.solve(solver="cbc")
+    assert result.get("duals") is not None
+    assert result.get("reduced_costs") is not None
+
+
+def test_receive_duals_on_mip_highs_warns():
+    """duals=True on a MIP model must not crash, but should warn."""
+    m = solph.Model(_make_mip_es())
+    with pytest.warns(UserWarning, match="MIP"):
+        m.solve(solver="highs", duals=True)

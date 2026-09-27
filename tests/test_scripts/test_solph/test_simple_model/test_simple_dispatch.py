@@ -159,7 +159,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)
 
-    optimization_model.receive_duals()
+    optimization_model._receive_duals()
 
     # solve problem
     optimization_model.solve(solver=solver)
