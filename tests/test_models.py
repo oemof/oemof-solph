@@ -401,6 +401,7 @@ def test_extract_suffix_dataframe_nan_for_missing_entry():
 # Deprecated receive_duals() must still work (no infinite recursion)
 # ---------------------------------------------------------------------------
 
+
 def test_receive_duals_deprecated_still_populates_duals():
     """receive_duals() is deprecated but must still enable dual extraction."""
     m = solph.Model(_make_feasible_es())
@@ -417,3 +418,167 @@ def test_receive_duals_on_mip_highs_warns():
     m = solph.Model(_make_mip_es())
     with pytest.warns(UserWarning, match="MIP"):
         m.solve(solver="highs", duals=True)
+
+
+# ---------------------------------------------------------------------------
+# Discount rate: explicit value must NOT trigger default-warning (228->233)
+# ---------------------------------------------------------------------------
+
+
+@pytest.mark.filterwarnings(
+    "ignore:Ensure that your timeindex and timeincrement are"
+    " consistent.:UserWarning"
+)
+@pytest.mark.filterwarnings(
+    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
+)
+def test_multi_period_explicit_discount_rate_no_warning():
+    """Passing an explicit discount_rate must skip the default-value
+    warning branch (covers _models.py 228->233)."""
+    timeindex = pd.date_range(start="2017-01-01", periods=3, freq="D")
+    es = solph.EnergySystem(
+        timeindex=timeindex,
+        timeincrement=[1] * len(timeindex),
+        periods=[timeindex],
+        infer_last_interval=False,
+    )
+    bel = solph.buses.Bus(label="bus")
+    es.add(bel)
+    es.add(
+        solph.components.Sink(
+            inputs={
+                bel: solph.flows.Flow(
+                    nominal_capacity=5, fix=[1] * len(timeindex)
+                )
+            }
+        )
+    )
+    es.add(
+        solph.components.Source(
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
+            }
+        )
+    )
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        solph.Model(es, discount_rate=0.03)
+
+    messages = [str(warning.message) for warning in w]
+    assert not any("By default, a discount_rate" in m for m in messages)
+
+
+# ---------------------------------------------------------------------------
+# auto_construct=False must skip construction (233->exit)
+# ---------------------------------------------------------------------------
+
+
+def test_auto_construct_false_skips_construction():
+    """auto_construct=False must skip automatic model building
+    (covers _models.py 233->exit)."""
+    m = solph.Model(_make_feasible_es(), auto_construct=False)
+    assert not hasattr(m, "flow")
+
+
+# ---------------------------------------------------------------------------
+# Bidirectional flows: no explicit lower bound set (423->402, 427->402)
+# ---------------------------------------------------------------------------
+
+
+def test_parent_block_variables_bidirectional_edge_cases():
+    """Bidirectional flows must not get an explicit lower bound:
+    - with nominal_capacity + nonconvex (423->402)
+    - without nominal_capacity at all (427->402)
+    """
+    es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
+    bus = solph.buses.Bus(label="bus")
+    es.add(bus)
+    es.add(
+        solph.components.Sink(
+            label="sink",
+            inputs={bus: solph.flows.Flow(nominal_capacity=10, fix=[1, 1])},
+        )
+    )
+    es.add(
+        solph.components.Source(
+            label="source_capacity",
+            outputs={bus: solph.flows.Flow(nominal_capacity=10)},
+        )
+    )
+    es.add(
+        solph.components.Source(
+            label="source_no_capacity",
+            outputs={bus: solph.flows.Flow()},
+        )
+    )
+
+    m = solph.Model(es, auto_construct=False)
+
+    capacity_key = no_capacity_key = None
+    for (src, dst), flow in m.flows.items():
+        if getattr(src, "label", None) == "source_capacity":
+            flow.bidirectional = True
+            flow.nonconvex = True
+            capacity_key = (src, dst)
+        elif getattr(src, "label", None) == "source_no_capacity":
+            flow.bidirectional = True
+            no_capacity_key = (src, dst)
+
+    assert capacity_key is not None
+    assert no_capacity_key is not None
+
+    m._add_parent_block_sets()
+    m._add_parent_block_variables()
+
+    assert capacity_key in m.BIDIRECTIONAL_FLOWS
+    assert m.flow[(*capacity_key, 0)].lb is None
+
+    assert no_capacity_key in m.BIDIRECTIONAL_FLOWS
+    assert m.flow[(*no_capacity_key, 0)].lb is None
+
+
+# ---------------------------------------------------------------------------
+# _add_objective(update=True) must delete existing objective first (452)
+# ---------------------------------------------------------------------------
+
+
+def test_add_objective_update_replaces_existing_objective():
+    """update=True must delete the existing 'objective' before rebuilding
+    it -- needed for sequential model building (covers _models.py 452)."""
+    m = solph.Model(_make_feasible_es())
+    assert hasattr(m, "objective")
+
+    m._add_objective(update=True)
+    assert hasattr(m, "objective")
+
+
+# ---------------------------------------------------------------------------
+# _receive_duals called twice: dual/rc already set (475->477, 479->481)
+# ---------------------------------------------------------------------------
+
+
+def test_receive_duals_called_twice_does_not_error():
+    """Calling _receive_duals repeatedly (dual/rc already set) must not
+    raise (covers _models.py 475->477 and 479->481)."""
+    m = solph.Model(_make_feasible_es())
+    m._receive_duals()
+    assert m.dual is not None
+    assert m.rc is not None
+
+    m._receive_duals()
+    assert m.dual is not None
+    assert m.rc is not None
+
+
+# ---------------------------------------------------------------------------
+# relax_problem() (685-686)
+# ---------------------------------------------------------------------------
+
+
+def test_relax_problem_returns_self():
+    """relax_problem() must relax integer variables and return self
+    for chaining (covers _models.py 685-686)."""
+    m = solph.Model(_make_mip_es())
+    returned = m.relax_problem()
+    assert returned is m
