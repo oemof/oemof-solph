@@ -156,4 +156,4 @@ energysystem.add(
 optimization_model = Model(energysystem=energysystem)
 
 # solve problem
-optimization_model.solve()
+optimisation_results = optimization_model.solve()

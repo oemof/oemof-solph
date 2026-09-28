@@ -163,7 +163,7 @@ def test_optimise_storage_size(
 
     # Solve model
     om = solph.Model(es)
-    om.receive_duals()
+    om._receive_duals()
     om.solve(solver=solver)
     es.results["main"] = processing.results(om)
     es.results["meta"] = processing.meta_results(om)

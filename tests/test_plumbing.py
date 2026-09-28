@@ -2,9 +2,9 @@
 
 """Testing the class NonConvex.
 
-SPDX-FileCopyrightText: Patrik Schönfeldt
-
-SPDX-License-Identifier: MIT
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
 """
 
 import numpy as np
@@ -16,6 +16,19 @@ from oemof.solph._plumbing import SequenceDict
 from oemof.solph._plumbing import _FakeSequence
 from oemof.solph._plumbing import sequence
 from oemof.solph._plumbing import valid_sequence
+
+
+def test_apply_descriptor_raises_without_default():
+    """Accessing an Apply-descriptor attribute before it was ever set,
+    and without a default value, must raise AttributeError
+    (covers _plumbing.py line 152)."""
+
+    class Foo:
+        value = Apply(lambda x: x)
+
+    foo = Foo()
+    with pytest.raises(AttributeError, match="accessed before being"):
+        foo.value
 
 
 def test_fake_sequence_access():

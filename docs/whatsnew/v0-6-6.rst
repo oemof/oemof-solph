@@ -28,6 +28,8 @@ Contributors
 
 * Patrik Schönfeldt (DLR)
 * Malte Fritz
+* Julius Ellermann (DLR)
+* Uwe Krien
 
 Acknowledgements
 ################

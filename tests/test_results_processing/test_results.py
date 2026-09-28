@@ -7,15 +7,16 @@ import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.opt.results.container import ListContainer
 
-from oemof.solph import Results
+from oemof import solph
+from oemof.solph._results import Results
 
-from . import optimization_model
+from . import optimisation_results
 
 
 class TestResultsClass:
     @classmethod
     def setup_class(cls):
-        cls.results = Results(optimization_model)
+        cls.results = optimisation_results
 
     def test_hasattr(self):
         assert hasattr(self.results, "_variables"), (
@@ -46,7 +47,7 @@ class TestResultsClass:
         )
 
     def test_objective(self):
-        assert self.results["objective"] == pytest.approx(8495, abs=1)
+        assert self.results.solver.objective == pytest.approx(8495, abs=1)
 
     def test_get(self):
         flows = self.results.get("flow")
@@ -85,7 +86,7 @@ class TestResultsClass:
     def test_solver_result_access(self):
         with pytest.warns(
             FutureWarning,
-            match="Direct access to Pyomo results",
+            match="The key 'Problem' is deprecated,",
         ):
             assert isinstance(self.results["Problem"], ListContainer)
 
@@ -106,3 +107,101 @@ class TestResultsClass:
             timeindex = self.results.timeindex
         assert len(timeindex) == 25
         assert timeindex[3].strftime("%m/%d/%Y, %H") == "01/01/2012, 03"
+
+
+def test_direct_pyomo_result_warning_static_method():
+    """_direct_pyomo_result_waring() is not called anywhere internally
+    but must still raise its FutureWarning when invoked directly
+    (covers _results.py line 213)."""
+    with pytest.warns(FutureWarning, match="Direct access to Pyomo results"):
+        Results._direct_pyomo_result_waring()
+
+
+def test_results_init_ignores_duplicate_variable_occurrence():
+    """If the same (key, occurrence) pair is encountered twice while
+    scanning the model's Var components, Results must simply ignore
+    the duplicate (covers _results.py line 75)."""
+
+    class _FakeVar:
+        def __init__(self, name, block):
+            self._name = name
+            self._block = block
+
+        def getname(self):
+            return self._name
+
+        def parent_block(self):
+            return self._block
+
+    class _FakeModel:
+        def __init__(self, variables):
+            self.solver_results = {}
+            self.dual = None
+            self.rc = None
+            self._variables = variables
+
+        def component_objects(self, _cls):
+            return self._variables
+
+    block = object()
+    var = _FakeVar("flow", block)
+    model = _FakeModel([var, var])  # same variable object seen twice
+
+    result = Results(model, solver_info=pd.Series(dtype=object))
+    assert result._variables["flow"][block] is var
+
+
+def test_investment_costs_dataframe(recwarn):
+    """_calc_capex must compute investment costs for InvestmentFlows and
+    GenericStorage investments (covers _results.py 228-283).
+
+    NOTE: Adjust the ``Investment``/``GenericStorage`` keyword names below
+    if they differ from your installed oemof.solph version.
+    """
+    es = solph.EnergySystem(timeindex=[0, 1, 2], infer_last_interval=False)
+    bus = solph.buses.Bus(label="bus")
+    es.add(bus)
+    es.add(
+        solph.components.Source(
+            label="source",
+            outputs={
+                bus: solph.flows.Flow(
+                    nominal_capacity=solph.Investment(
+                        ep_costs=10,
+                        offset=5,
+                        nonconvex=True,
+                        maximum=50,
+                    )
+                )
+            },
+        )
+    )
+    es.add(
+        solph.components.GenericStorage(
+            label="storage",
+            inputs={bus: solph.flows.Flow()},
+            outputs={bus: solph.flows.Flow()},
+            nominal_storage_capacity=solph.Investment(
+                ep_costs=20,
+                offset=3,
+                nonconvex=True,
+                maximum=50,
+            ),
+        )
+    )
+    es.add(
+        solph.components.Sink(
+            label="sink",
+            inputs={
+                bus: solph.flows.Flow(nominal_capacity=10, fix=[0.5, 0.8, 0.3])
+            },
+        )
+    )
+
+    result = solph.Model(es).solve(solver="cbc")
+
+    with pytest.warns(ExperimentalFeatureWarning):
+        capex = result.get("investment_costs")
+
+    assert isinstance(capex, pd.DataFrame)
+    assert not capex.empty

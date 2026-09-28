@@ -404,8 +404,7 @@ def test_soc_dependent_charging():
     es.add(storage, storage_new)
 
     model = solph.Model(es)
-    model.solve("cbc")
-    results = solph.Results(model)
+    results = model.solve("cbc")
     cols = sorted([c for c in results["flow"].columns if bus == c[0]])
     assert results["flow"][cols].iloc[0].to_list() == [10.0, 10.0]
     assert results["flow"][cols].iloc[-1].round(2).to_list() == [10.0, 5.11]

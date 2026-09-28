@@ -70,7 +70,7 @@ class TestParameterResult:
         )
         es.add(dg, batt, demand)
         model = Model(es)
-        model.receive_duals()
+        model._receive_duals()
         model.solve()
         results = processing.results(model, remove_last_time_point=False)
         cls.flows = {k: v for k, v in results.items() if k[1] is not None}
@@ -189,7 +189,7 @@ class TestParameterResult:
     def test_numeric_index(self):
         self.es.timeindex = None
         model = Model(self.es)
-        model.receive_duals()
+        model._receive_duals()
         model.solve()
         results = processing.results(self.model)
         flow = {k: v for k, v in results.items() if k[1] is not None}

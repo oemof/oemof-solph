@@ -21,13 +21,13 @@ Download source code: :download:`dual_variable_example.py </../examples/dual_var
 Installation requirements
 -------------------------
 
-This example requires oemof.solph (at least v0.6.4), install by:
+This example requires oemof.solph (at least v0.6.6), install by:
 
 .. code:: bash
 
-    pip install oemof.solph>=0.6.4
+    pip install oemof.solph>=0.6.6
 
-SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
+SPDX-FileCopyrightText: oemof e.V. and contributors
 
 SPDX-License-Identifier: MIT
 """
@@ -45,7 +45,6 @@ from oemof.solph import Model
 from oemof.solph import buses
 from oemof.solph import components as cmp
 from oemof.solph import Flow
-from oemof.solph import processing
 
 
 def main(optimize=True, solver="cbc"):
@@ -245,39 +244,13 @@ def main(optimize=True, solver="cbc"):
     # initialise the operational model
     model = Model(energysystem)
 
-    model.receive_duals()
-
     # if tee_switch is true solver messages will be displayed
-    results = model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
-
-    result_dict = processing.results(model)
+    results = model.solve(solver=solver, duals=True)
 
     # add results to the energy system to make it possible to store them.
-    flows = results["flow"]
+    duals = results["duals"]
 
-    flows_to_bus = flows.loc[:, flows.columns.get_level_values(1) == bus_elec]
-    flows_from_bus = flows.loc[
-        :, flows.columns.get_level_values(0) == bus_elec
-    ]
-
-    storage = pd.concat([results["storage_content"]], keys=["storage"], axis=1)
-
-    duals = pd.DataFrame(
-        {
-            str(k[0].label): v["sequences"]["duals"]
-            for k, v in result_dict.items()
-            if k[1] is None and isinstance(k[0], buses.Bus)
-        }
-    )
-    duals = pd.concat([duals], keys=["bus"], axis=1)
-
-    my_flows = pd.concat(
-        [flows_to_bus, flows_from_bus, storage, duals],
-        keys=["to_bus", "from_bus", "content", "duals"],
-        axis=1,
-    )
-
-    my_flows.plot()
+    duals.plot()
     plt.show()
 
 
