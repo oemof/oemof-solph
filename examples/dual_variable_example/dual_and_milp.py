@@ -68,7 +68,7 @@ def milp_es():
 def main(solver="cbc"):
     # Solve MILP
     m = solph.Model(milp_es())
-    mip_results = m.solve(solver=solver)
+    m.solve(solver=solver)
 
     # Fix all integer and binary variables.
     for var in m.component_objects(po.Var, active=True):

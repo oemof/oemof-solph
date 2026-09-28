@@ -216,16 +216,12 @@ def main(optimize=True, solver="cbc"):
     logging.info("Solve the optimization problem")
     results = om.solve(solver=solver, solve_kwargs={"tee": True}, duals=True)
     print(results.keys())
-    # print(results["duals"])
-    # results["duals"].plot()
-    # plt.show()
-    duals = results.get("duals")              # None if receive_duals() not called
-    reduced_costs = results.get("reduced_costs")  # None if receive_duals() not called
+
+    duals = results.get("duals")
+    reduced_costs = results.get("reduced_costs")
     duals.plot()
     reduced_costs.plot()
     plt.show()
-    exit(0)
-
 
     ##########################################################################
     # Check and plot the results
