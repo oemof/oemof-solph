@@ -51,6 +51,23 @@ Note that data is processed on demand, meaning that accessing data can trigger
 calculations. So if you are not interested in every detail of you results,
 some time can be saved here.
 
+Solver results
+--------------
+
+The Solver Results contain direct return values from the solver used. These
+may vary depending on the selected solver; the keys remain the same but may
+also be “None” if no return value is provided. A complete list can be found
+here: :class:`~oemof.solph._models.SolverResults`
+
+.. code-block:: python
+
+    [...]
+    results = model.solve(solver=solver)
+    objective = results.solver.objective
+    wallclock_time = results.solver.wallclock_time
+    solver_results = results.solver  # pandas.Series
+
+
 Working with results
 --------------------
 
