@@ -1,5 +1,10 @@
-# -*- coding: utf-8 -*-
-"""Unit tests for VariableSplitConverter and VariableSplitConverterBlock."""
+"""
+Unit tests for VariableSplitConverter and VariableSplitConverterBlock.
+
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+"""
 
 import pytest
 

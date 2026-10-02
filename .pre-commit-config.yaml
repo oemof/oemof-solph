@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 # To install the git pre-commit hooks run:
 #   pre-commit install --install-hooks
 # To update the versions:
