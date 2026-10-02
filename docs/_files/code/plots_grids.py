@@ -15,10 +15,12 @@ import pandas as pd
 # creates the icons in the grid view of the documentation
 
 
-def hex_from_rgb(rgb):
+def hex_from_rgb(rgb_color):
     """makes rgb to hex"""
     return "#{:02X}{:02X}{:02X}".format(
-        int(rgb[0] * 255), int(rgb[1] * 255), int(rgb[2] * 255)
+        int(rgb_color[0] * 255),
+        int(rgb_color[1] * 255),
+        int(rgb_color[2] * 255),
     )
 
 
@@ -105,14 +107,12 @@ def draw_lin_vs_mixed_int(mode="dark"):
 
     # save the plot
     if mode == "dark":
-
         plt.savefig("lin_vs_mixed_int_plot_dark.png")
     if mode == "light":
-
         plt.savefig("lin_vs_mixed_int_plot_light.png")
 
 
-def draw_timeline(mode="dark", savefig_filename=None):
+def draw_timeline(mode="dark"):
     """
     draws timeline for the multiperiod icon
     """
@@ -157,7 +157,7 @@ def draw_timeline(mode="dark", savefig_filename=None):
         ax.text(
             year,
             0.3,
-            f"Period {i+1}",
+            f"Period {i + 1}",
             ha="center",
             va="bottom",
             color=text_color,
@@ -183,16 +183,15 @@ def draw_timeline(mode="dark", savefig_filename=None):
 
     # save png
     if mode == "dark":
-
         plt.savefig("timeline_dark.png")
     if mode == "light":
-
         plt.savefig("timeline_light.png")
 
 
 def plot_dispatch_invest(csv_path, mode="dark"):
     """
-    draws a demand timeseries next to an bar plot symbolizing the investment decisions
+    draws a demand timeseries next to an bar plot symbolizing the investment
+    decisions
     """
 
     df = pd.read_csv(csv_path)
@@ -255,7 +254,7 @@ def plot_dispatch_invest(csv_path, mode="dark"):
         spine.set_color(text_color)
     ax2.tick_params(colors=text_color, labelleft=False)
 
-    bars = ax2.bar(
+    ax2.bar(
         labels, values, color=bar_colors, edgecolor=text_color, linewidth=1.5
     )
 
@@ -270,10 +269,8 @@ def plot_dispatch_invest(csv_path, mode="dark"):
 
     # save plots
     if mode == "dark":
-
         plt.savefig("plot_dispatch_invest_dark.png")
     if mode == "light":
-
         plt.savefig("plot_dispatch_invest_light.png")
 
 

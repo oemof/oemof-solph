@@ -22,9 +22,7 @@ def test_nominal_capacity():
         variable_costs=-1,
     )
     flow_result = _run_flow_model(flow, multi_period=True)
-    assert flow_result == pytest.approx(
-        [0.25, 1, 1, 1, 1, 2, 2, 2, 2, 1]
-    )
+    assert flow_result == pytest.approx([0.25, 1, 1, 1, 1, 2, 2, 2, 2, 1])
 
 
 def test_gradient_limit():

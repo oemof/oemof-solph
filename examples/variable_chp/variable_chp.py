@@ -119,15 +119,7 @@ def main(optimize=True, solver="cbc"):
     except FileNotFoundError:
         msg = "Data file not found: {0}. Only one value used!"
         warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame(
-            {
-                "pv": [0.3],
-                "wind": [0.6],
-                "demand_el": [500],
-                "demand_th": [344],
-            }
-        )
-
+        data = pd.DataFrame({"demand_el": [500], "demand_th": [344]})
     logger.define_logging()
     logging.info("Initialize the energy system")
 
@@ -225,19 +217,36 @@ def main(optimize=True, solver="cbc"):
     )
 
     # create a fixed Converter to distribute to the heat and elec buses
-    noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
+    # Try with iterable or floats and try with equal points
+    # If allow_equal_states=False equal states are not allowed and will
+    # raise an error even if the equal state is just in one time step.
+    # Otherwise, only in this time step two more constraints will be
+    # written to the lp-file to avoid mismatches.
+    abel = [0.5] * 192
+    abth = [0.3] * 192
+    bbel = [0.3] * 192
+    bbth = [0.5] * 192
+
+    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
         label="variable_chp_gas",
         inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-        outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-        conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
-        conversion_factor_full_condensation={noded["bel"]: 0.5},
+        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
+        conversion_factors={
+            noded["bel"]: abel,
+            noded["bth"]: abth,
+        },
+        allow_equal_states=False,
+        conversion_factors_secondary_state={
+            noded["bel"]: bbel,
+            noded["bth"]: bbth,
+        },
     )
 
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
 
-    if optimize is False:
+    if not optimize:
         return energysystem
 
     logging.info("Optimise the energy system")
@@ -478,6 +487,8 @@ def main(optimize=True, solver="cbc"):
         logging.warning(
             "Use: pip install git+https://github.com/oemof/oemof_visio.git"
         )
+
+    return None
 
 
 if __name__ == "__main__":

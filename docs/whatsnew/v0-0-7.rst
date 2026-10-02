@@ -9,4 +9,3 @@ Bug fixes
 ####################
 
  * Exclude non working pyomo version
-

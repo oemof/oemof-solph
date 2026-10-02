@@ -17,4 +17,3 @@ Contributors
 * Simon Hilpert
 * Stephan Günther
 * Uwe Krien
-

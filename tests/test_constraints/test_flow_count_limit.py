@@ -134,9 +134,7 @@ def test_flow_count_limit_investment():
     model.solve()
     results = solph.processing.results(model)
 
-    flow = [
-        list(results[(b1, s)]["sequences"]["flow"][:-1]) for s in sinks
-    ]
+    flow = [list(results[(b1, s)]["sequences"]["flow"][:-1]) for s in sinks]
 
     # Only two of the three investment nonconvex flows may be active at once.
     assert flow[0] == pytest.approx([4, 4])
@@ -203,9 +201,7 @@ def test_flow_count_limit_mixed():
     model.solve()
     results = solph.processing.results(model)
 
-    flow = [
-        list(results[(b1, s)]["sequences"]["flow"][:-1]) for s in sinks
-    ]
+    flow = [list(results[(b1, s)]["sequences"]["flow"][:-1]) for s in sinks]
 
     # The limit is shared across both blocks: the cheapest plain sink and the
     # cheapest investment sink run, the two more expensive ones are blocked.

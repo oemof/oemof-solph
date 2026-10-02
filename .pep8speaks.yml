@@ -13,4 +13,3 @@ pycodestyle:  # Same as scanner.linter value.
     ignore:  # Errors and warnings to ignore
         - W503  # line break before binary operator
         - E203
-
