@@ -14,6 +14,7 @@ API changes
   parameters that were scalars before can now be iterable. In contrast to the
   former multi-period implementation, it is possible to give a time series of
   fixed capacities without any investment.
+* Avoid creation of empty variables (i.e. variable vectors of zero length).
 
 New features
 ############

@@ -69,6 +69,18 @@ def test_full_load_time_min():
     assert flow_result == pytest.approx(4 * [2] + [1] + 5 * [0])
 
 
+def test_integer_flow():
+    flow = solph.flows.Flow(
+        nominal_capacity=5.5,
+        variable_costs=-1,
+        integer=True,
+    )
+    flow_result = _run_flow_model(flow)
+
+    # full capacity is not an interger, thus flow is lower
+    assert flow_result == pytest.approx(10 * [5])
+
+
 # --- BEGIN: The following code can be removed for versions >= v0.7 ---
 def test_nominal_capacity_warning():
     with pytest.warns(FutureWarning, match="nominal_value"):
