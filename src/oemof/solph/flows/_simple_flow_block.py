@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
-from pyomo.core import NonNegativeIntegers
+from pyomo.core import Integers
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
@@ -164,7 +164,7 @@ class SimpleFlowBlock(ScalarBlock):
             self.integer_flow = Var(
                 self.INTEGER_FLOWS,
                 m.TIMESTEPS,
-                within=NonNegativeIntegers,
+                within=Integers,
             )
 
         # set upper bound of gradient variable
