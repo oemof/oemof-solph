@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """This example shows how to create an energysystem with oemof objects and
 solve it with the solph module.
 

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 import pandas as pd
 import pytest
 from oemof.tools.debugging import ExperimentalFeatureWarning

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 # %%[func_lcoh_start]
 def LCOH(invest_cost, operation_cost, heat_produced, revenue=0, i=0.05, n=20):
     pvf = ((1 + i) ** n - 1) / ((1 + i) ** n * i)
