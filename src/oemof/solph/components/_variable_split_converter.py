@@ -158,6 +158,8 @@ class VariableSplitConverterBlock(ScalarBlock):
     r"""Block for all instances of
     :class:`~oemof.solph.components.experimental._VariableSplitConverter`
 
+    .. _VSC-equations:
+
     **Variables**
 
     * :math:`\dot H_{in}`
@@ -215,17 +217,17 @@ class VariableSplitConverterBlock(ScalarBlock):
     spanned by the two points -- the converter can never move beyond
     either of them.
 
-    ============ ======================================================== ==== =========
-    symbol       attribute                                                type explanation
-    ============ ======================================================== ==== =========
-    :math:`\dot H_{in}` `flow[i, n, t]`                                   V    input flow
-    :math:`A`    `flow[n, output_1, t]`                                   V    first output flow
-    :math:`B`    `flow[n, output_2, t]`                                   V    second output flow
-    :math:`a_1`  `conversion_factors[output_1][n, t]`                     P    efficiency of output_1 at point 1
-    :math:`b_1`  `conversion_factors[output_2][n, t]`                     P    efficiency of output_2 at point 1
-    :math:`a_2`  `conversion_factors_at_second_point[output_1][n, t]`     P    efficiency of output_1 at point 2
-    :math:`b_2`  `conversion_factors_at_second_point[output_2][n, t]`     P    efficiency of output_2 at point 2
-    ============ ======================================================== ==== =========
+    =================== ======================================================== ==== =================================
+    symbol               attribute                                               type explanation
+    =================== ======================================================== ==== =================================
+    :math:`\dot H_{in}` `flow[i, n, t]`                                          V    input flow
+    :math:`A`           `flow[n, output_1, t]`                                   V    first output flow
+    :math:`B`           `flow[n, output_2, t]`                                   V    second output flow
+    :math:`a_1`         `conversion_factors[output_1][n, t]`                     P    efficiency of output_1 at point 1
+    :math:`b_1`         `conversion_factors[output_2][n, t]`                     P    efficiency of output_2 at point 1
+    :math:`a_2`         `conversion_factors_at_second_point[output_1][n, t]`     P    efficiency of output_1 at point 2
+    :math:`b_2`         `conversion_factors_at_second_point[output_2][n, t]`     P    efficiency of output_2 at point 2
+    =================== ======================================================== ==== =================================
 
     """  # noqa: E501
 

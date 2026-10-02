@@ -59,7 +59,6 @@ import pandas as pd
 from oemof.tools import logger
 
 from oemof import solph
-from oemof.visio import plot as oeplot
 
 # import oemof plots
 try:
@@ -110,7 +109,7 @@ def write_lp_file(model):
     model.write(lp_filename, io_options={"symbolic_solver_labels": True})
 
 
-def main(optimize=True, solver="cbc", new=True):
+def main(optimize=True, solver="cbc"):
     # Read data file
     filename = os.path.join(os.getcwd(), "variable_chp.csv")
     try:
@@ -126,7 +125,6 @@ def main(optimize=True, solver="cbc", new=True):
                 "demand_th": [344],
             }
         )
-    data.loc[180:, "demand_th"] = 0
     logger.define_logging()
     logging.info("Initialize the energy system")
 
@@ -223,47 +221,37 @@ def main(optimize=True, solver="cbc", new=True):
         conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
     )
 
-    if not new:
-        # create a fixed Converter to distribute to the heat and elec buses
-        noded["variable_chp_gas"] = solph.components.ExtractionTurbineCHP(
-            label="variable_chp_gas",
-            inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-            outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-            conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
-            conversion_factor_full_condensation={noded["bel"]: 0.5},
-        )
-    else:
-        # create a fixed Converter to distribute to the heat and elec buses
-        # Try with iterable or floats and try with equal points
-        # If allow_equal_states=False equal states are not allowed and will
-        # raise an error even if the equal state is just in one time step.
-        # Otherwise, only in this time step two more constraints will be
-        # written to the lp-file to avoid mismatches.
-        abel = [0.5] * 192
-        abth = [0.3] * 192
-        bbel = [0.3] * 192
-        bbth = [0.5] * 192
+    # create a fixed Converter to distribute to the heat and elec buses
+    # Try with iterable or floats and try with equal points
+    # If allow_equal_states=False equal states are not allowed and will
+    # raise an error even if the equal state is just in one time step.
+    # Otherwise, only in this time step two more constraints will be
+    # written to the lp-file to avoid mismatches.
+    abel = [0.5] * 192
+    abth = [0.3] * 192
+    bbel = [0.3] * 192
+    bbth = [0.5] * 192
 
-        noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
-            label="variable_chp_gas",
-            inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-            outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
-            conversion_factors={
-                noded["bel"]: abel,
-                noded["bth"]: abth,
-            },
-            allow_equal_states=False,
-            conversion_factors_secondary_state={
-                noded["bel"]: bbel,
-                noded["bth"]: bbth,
-            },
-        )
+    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
+        label="variable_chp_gas",
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
+        conversion_factors={
+            noded["bel"]: abel,
+            noded["bth"]: abth,
+        },
+        allow_equal_states=False,
+        conversion_factors_secondary_state={
+            noded["bel"]: bbel,
+            noded["bth"]: bbth,
+        },
+    )
 
     ##########################################################################
     # Optimise the energy system
     ##########################################################################
 
-    if optimize is False:
+    if not optimize:
         return energysystem
 
     logging.info("Optimise the energy system")
@@ -505,6 +493,8 @@ def main(optimize=True, solver="cbc", new=True):
             "Use: pip install git+https://github.com/oemof/oemof_visio.git"
         )
 
+    return None
+
 
 if __name__ == "__main__":
-    main(new=True)
+    main()

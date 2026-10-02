@@ -7,10 +7,13 @@ from helpers import LCOH
 
 import oemof.solph as solph
 
+
+# %%[sec_1_start]
 file_path = os.path.dirname(__file__)
 filename = os.path.join(file_path, "input_data.csv")
 
 data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
+# %%[sec_1_end]
 
 # %%[sec_2_start]
 

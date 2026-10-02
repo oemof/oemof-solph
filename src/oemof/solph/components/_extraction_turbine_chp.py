@@ -19,6 +19,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+import warnings
+
 from oemof.solph.components import VariableSplitConverter
 
 
@@ -75,14 +77,29 @@ class ExtractionTurbineCHP(VariableSplitConverter):
         conversion_factors=None,
         custom_properties=None,
     ):
-        # super().__init__(
-        #     label=label,
-        #     inputs=inputs,
-        #     outputs=outputs,
-        #     parent_node=parent_node,
-        #     conversion_factors=conversion_factors,
-        #     custom_properties=custom_properties,
-        # )
+        msg = """
+            Class 'ExtractionTurbineCHP' will be removed in
+            oemof.solph>=v0.8.0. Use VariableSplitConverter instead.
+            The VariableSplitConverter is more flexible. But can be used for
+            the same cases. See example below.
+
+            >>> et_chp = solph.components.ExtractionTurbineCHP(
+                ...    label='variable_chp_gas',
+                ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
+                ...    outputs={bel: solph.flows.Flow(),
+                ...             bth: solph.flows.Flow()},
+                ...    conversion_factors={bel: 0.3, bth: 0.5},
+                ...    conversion_factor_full_condensation={bel: 0.5})
+
+            >>> et_chp = solph.components.VariableSplitConverter(
+                ...    label='variable_chp_gas',
+                ...    inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
+                ...    outputs={bel: solph.flows.Flow(),
+                ...             bth: solph.flows.Flow()},
+                ...    conversion_factors={bel: 0.3, bth: 0.5},
+                ...    conversion_factors_secondary_state={bel: 0.5, bth: 0.0})
+            """
+        warnings.warn(msg, FutureWarning)
         bus2 = (
             set(conversion_factors)
             .difference(set(conversion_factor_full_condensation))
@@ -98,5 +115,7 @@ class ExtractionTurbineCHP(VariableSplitConverter):
             conversion_factors=conversion_factors,
             custom_properties=custom_properties,
             allow_equal_states=False,
-            conversion_factors_secondary_state=conversion_factor_full_condensation,
+            conversion_factors_secondary_state=(
+                conversion_factor_full_condensation
+            ),
         )

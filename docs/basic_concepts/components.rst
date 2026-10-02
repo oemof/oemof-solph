@@ -487,8 +487,8 @@ the application example for the component is a flexible combined heat and power
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
 
-.. include:: /../src/oemof/solph/components/_extraction_turbine_chp.py
-  :start-after: _ETCHP-equations:
+.. include:: /../src/oemof/solph/components/_variable_split_converter.py
+  :start-after: _VSC-equations:
   :end-before: """
 
 These constraints are applied in addition to those of a standard
