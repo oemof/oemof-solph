@@ -481,12 +481,12 @@ timestep. It is also possible to define multiple outputs.
 
 .. _oemof_solph_components_extraction_turbine_chp_label:
 
-ExtractionTurbineCHP
-^^^^^^^^^^^^^^^^^^^^
+VariableSplitConverter
+^^^^^^^^^^^^^^^^^^^^^^
 
-The :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP`
-inherits from the :ref:`oemof_solph_components_converter_label` class. Like the name indicates,
-the application example for the component is a flexible combined heat and power
+The :py:class:`~oemof.solph.components._variable_split_converter.VariableSplitConverter`
+inherits from the :ref:`oemof_solph_components_converter_label` class. An
+application example for the component is a flexible combined heat and power
 (chp) plant. Of course, an instance of this class can represent also another
 component with one input and two output flows and a flexible ratio between
 these flows, with the following constraints:
@@ -513,26 +513,24 @@ incorporates the backpressure coefficient :math:`C_b`.
    :align: center
    :figclass: only-dark
 
-For now, :py:class:`~oemof.solph.components._extraction_turbine_chp.ExtractionTurbineCHP` instances must
-have one input and two output flows. The class allows the definition
-of a different efficiency for every time step that can be passed as a series
-of parameters that are fixed before the optimisation. In contrast to the
-:py:class:`~oemof.solph.components.Converter`, a main flow and a tapped flow is
-defined. For the main flow you can define a separate conversion factor that
-applies when the second flow is zero (*`conversion_factor_full_condensation`*).
+For now, :py:class:`~oemof.solph.components._variable_split_converter.VariableSplitConverter`
+instances must have one input and two output flows. The class allows the
+definition of a different efficiency for every time step that can be passed
+as a series of parameters that are fixed before the optimisation. In
+contrast to the :py:class:`~oemof.solph.components.Converter`, the efficiency
+of both flows at two states can be defined.
 
 .. code-block:: python
 
-    solph.components._extractionTurbineCHP(
-        label='variable_chp_gas',
-        inputs={b_gas: solph.flows.Flow(nominal_capacity=10e10)},
-        outputs={b_el: solph.flows.Flow(), b_th: solph.flows.Flow()},
-        conversion_factors={b_el: 0.3, b_th: 0.5},
-        conversion_factor_full_condensation={b_el: 0.5})
+    solph.components.VariableSplitConverter(
+       label='variable_chp_gas',
+       inputs={bgas: solph.flows.Flow(nominal_capacity=10e10)},
+       outputs={bel: solph.flows.Flow(), bth: solph.flows.Flow()},
+       conversion_factors={bel: 0.30, bth: 0.50},
+       conversion_factors_secondary_state={bel: 0.5, bth: 0.0}
+    )
 
-The key of the parameter *'conversion_factor_full_condensation'* defines which
-of the two flows is the main flow. In the example above, the flow to the Bus
-*'b_el'* is the main flow and the flow to the Bus *'b_th'* is the tapped flow.
+
 The following plot shows how the variable chp (right) schedules it's electrical
 and thermal power production in contrast to a fixed chp (left). The plot is the
 output of an example in the `example directory
