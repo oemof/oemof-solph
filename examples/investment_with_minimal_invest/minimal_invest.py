@@ -31,7 +31,6 @@ Johannes Röder <https://www.uni-bremen.de/en/res/team/johannes-roeder-m-sc>
 import logging
 import os
 
-import pandas as pd
 from matplotlib import pyplot as plt
 
 from oemof import solph

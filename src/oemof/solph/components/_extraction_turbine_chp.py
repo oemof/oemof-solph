@@ -83,9 +83,11 @@ class ExtractionTurbineCHP(VariableSplitConverter):
         #     conversion_factors=conversion_factors,
         #     custom_properties=custom_properties,
         # )
-        bus2 = set(conversion_factors).difference(
-            set(conversion_factor_full_condensation)
-        ).pop()
+        bus2 = (
+            set(conversion_factors)
+            .difference(set(conversion_factor_full_condensation))
+            .pop()
+        )
         conversion_factor_full_condensation[bus2] = 0
 
         super().__init__(

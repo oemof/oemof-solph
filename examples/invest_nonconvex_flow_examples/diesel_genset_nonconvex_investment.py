@@ -46,7 +46,6 @@ __license__ = "MIT"
 
 import os
 import time
-import warnings
 from datetime import datetime
 from datetime import timedelta
 

@@ -212,10 +212,8 @@ class Results:
         # TODO: is it really necessary to loop over all flows again or is it
         # possible to use the flows of 'invest_values'?
         for i, o in self._model.FLOWS:
-
             # access the costs of each investment flow
             if hasattr(self._model.flows[i, o], "investment"):
-
                 # map investment and costs and multiply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):
@@ -243,7 +241,6 @@ class Results:
                 node,
                 oemof.solph.components._generic_storage.GenericStorage,
             ):
-
                 # map investment and costs and mulitply
                 for col in invest_values.columns:
                     if isinstance(col, oemof.solph.components.GenericStorage):

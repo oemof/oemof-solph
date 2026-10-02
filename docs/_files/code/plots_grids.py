@@ -97,10 +97,8 @@ def draw_lin_vs_mixed_int(mode="dark"):
 
     # save the plot
     if mode == "dark":
-
         plt.savefig("lin_vs_mixed_int_plot_dark.png")
     if mode == "light":
-
         plt.savefig("lin_vs_mixed_int_plot_light.png")
 
 
@@ -149,7 +147,7 @@ def draw_timeline(mode="dark", savefig_filename=None):
         ax.text(
             year,
             0.3,
-            f"Period {i+1}",
+            f"Period {i + 1}",
             ha="center",
             va="bottom",
             color=text_color,
@@ -175,10 +173,8 @@ def draw_timeline(mode="dark", savefig_filename=None):
 
     # save png
     if mode == "dark":
-
         plt.savefig("timeline_dark.png")
     if mode == "light":
-
         plt.savefig("timeline_light.png")
 
 
@@ -262,10 +258,8 @@ def plot_dispatch_invest(csv_path, mode="dark"):
 
     # save plots
     if mode == "dark":
-
         plt.savefig("plot_dispatch_invest_dark.png")
     if mode == "light":
-
         plt.savefig("plot_dispatch_invest_light.png")
 
 

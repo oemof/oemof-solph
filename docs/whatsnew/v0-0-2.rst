@@ -57,4 +57,3 @@ Contributors
  * Cord Kaldemeyer
  * Guido Pleßmann
  * Stephan Günther
-
