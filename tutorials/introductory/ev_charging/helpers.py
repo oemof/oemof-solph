@@ -1,6 +1,8 @@
-import matplotlib.pyplot as plt
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
 
-import oemof.solph as solph
+import matplotlib.pyplot as plt
 
 
 def plot_results(results, plot_title, dark_mode=False):

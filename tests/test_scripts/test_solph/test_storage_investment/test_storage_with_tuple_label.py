@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description:
 ---------------------
@@ -169,8 +171,7 @@ def test_tuples_as_labels_example(
 
     # Check dump and restore
     energysystem.dump(filename="./es_dump.oemof", consider_dpath=False)
-    es = solph.EnergySystem()
-    es.restore(filename="./es_dump.oemof", consider_dpath=False)
+    es = solph.EnergySystem.from_file("./es_dump.oemof")
 
     # Results
     results = es.results["main"]

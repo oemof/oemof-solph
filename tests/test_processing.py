@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 # -*- coding: utf-8 -
 
 """Tests the processing module of solph.
@@ -136,8 +138,6 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         default_attributes = {
-            "age": None,
-            "lifetime": None,
             "integer": False,
             "investment": None,
             "nominal_capacity": 1,
@@ -150,7 +150,6 @@ class TestParameterResult:
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
-            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),
@@ -180,14 +179,12 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_age": 0,
                     "investment_ep_costs": 0.4,
                     "investment_existing": 0,
                     "investment_maximum": float("inf"),
@@ -219,14 +216,12 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_age": 0,
                     "investment_ep_costs": 0.4,
                     "investment_existing": 0,
                     "investment_maximum": float("inf"),

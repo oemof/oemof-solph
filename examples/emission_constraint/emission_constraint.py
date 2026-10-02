@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description
 -------------------
@@ -24,9 +26,7 @@ This example requires oemof.solph (at least v0.6.4), install by:
 
     pip install oemof.solph>=0.6.4
 
-License
--------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 
