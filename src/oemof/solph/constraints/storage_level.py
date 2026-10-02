@@ -94,7 +94,9 @@ def storage_level_constraint(
         def _constraint_output_rule(m, o, t):
             return (
                 m.flow[multiplexer_bus, o, t]
-                / m.flows[multiplexer_bus, o].nominal_capacity
+                / m.flows[multiplexer_bus, o].nominal_capacity[
+                    m.es.capacity_period_of_timestep(t)
+                ]
                 <= active_output[o, t]
             )
 
@@ -168,7 +170,9 @@ def storage_level_constraint(
             t = m.get_timestep_from_tsam_timestep(p, k, g)
             return (
                 m.flow[multiplexer_bus, o, p, t]
-                / m.flows[multiplexer_bus, o].nominal_capacity
+                / m.flows[multiplexer_bus, o].nominal_capacity[
+                    m.es.capacity_period_of_timestep(t)
+                ]
                 <= active_output[o, p, k, g]
             )
 
@@ -239,7 +243,9 @@ def storage_level_constraint(
         def _constraint_input_rule(m, i, t):
             return (
                 m.flow[i, multiplexer_bus, t]
-                / m.flows[i, multiplexer_bus].nominal_capacity
+                / m.flows[i, multiplexer_bus].nominal_capacity[
+                    m.es.capacity_period_of_timestep(t)
+                ]
                 <= 1 - inactive_input[i, t]
             )
 
@@ -314,7 +320,9 @@ def storage_level_constraint(
             t = m.get_timestep_from_tsam_timestep(p, k, g)
             return (
                 m.flow[i, multiplexer_bus, p, t]
-                / m.flows[i, multiplexer_bus].nominal_capacity
+                / m.flows[i, multiplexer_bus].nominal_capacity[
+                    m.es.capacity_period_of_timestep(t)
+                ]
                 <= 1 - inactive_input[i, p, k, g]
             )
 
