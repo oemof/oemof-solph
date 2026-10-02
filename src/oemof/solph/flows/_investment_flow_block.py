@@ -915,7 +915,8 @@ class InvestmentFlowBlock(ScalarBlock):
         else:
             interest = 0.05
             msg = (
-                "You did not specify an interest rate.\nIt will be set to {}."
+                "You did not specify an interest rate.\n"
+                "It will be set to {}."
             )
             for i, o in self.CONVEX_INVESTFLOWS:
                 lifetime = m.flows[i, o].investment.lifetime
@@ -924,6 +925,7 @@ class InvestmentFlowBlock(ScalarBlock):
                     debugging.SuspiciousUsageWarning,
                 )
                 for p in m.PERIODS:
+
                     annuity = economics.annuity(
                         capex=m.flows[i, o].investment.ep_costs[p],
                         n=lifetime,

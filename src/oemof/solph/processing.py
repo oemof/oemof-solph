@@ -725,9 +725,9 @@ def _get_multiplexer_flows_and_keys(flow_dict):
         if "multiplexer_active" in data["variable_name"].values[0]:
             multiplexer.setdefault(oemof_tuple[0], {})
             multiplexer_keys.append(oemof_tuple)
-            multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = (
-                data
-            )
+            multiplexer[oemof_tuple[0]][
+                (oemof_tuple[1], oemof_tuple[2])
+            ] = data
     return multiplexer, multiplexer_keys
 
 
@@ -754,9 +754,7 @@ def convert_keys_to_strings(result, keep_none_type=False):
             (
                 tuple([str(e) if e is not None else None for e in k])
                 if isinstance(k, tuple)
-                else str(k)
-                if k is not None
-                else None
+                else str(k) if k is not None else None
             ): v
             for k, v in result.items()
         }

@@ -34,5 +34,5 @@ __all__ = [
     "Source",
     "slope_offset_from_nonconvex_input",
     "slope_offset_from_nonconvex_output",
-    "VariableSplitConverter",
+    "VariableSplitConverter"
 ]

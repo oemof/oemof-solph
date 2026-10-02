@@ -87,6 +87,7 @@ def get_data_from_file_path(file_path: str) -> pd.DataFrame:
 
 
 def main(optimize=True, solver="cbc"):
+
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************

@@ -29,3 +29,4 @@ Icon
 
 .. figure:: logo_oemof_solph_ICON.svg
    :alt: Icon
+

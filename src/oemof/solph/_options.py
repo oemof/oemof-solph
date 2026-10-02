@@ -184,7 +184,10 @@ class Investment:
         """
         if self.lifetime is not None:
             if self.age >= self.lifetime:
-                e4 = "A unit's age must be smaller than its expected lifetime."
+                e4 = (
+                    "A unit's age must be smaller than its "
+                    "expected lifetime."
+                )
                 raise AttributeError(e4)
 
     def _check_invest_attributes_nonconvex(self):

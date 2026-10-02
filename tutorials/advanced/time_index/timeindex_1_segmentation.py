@@ -58,7 +58,6 @@ def reshape_unevenly(data):
 
     return data_mean
 
-
 # %%[prepare_technical_data]
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
@@ -82,6 +81,7 @@ def populate_and_solve_energy_system(
     variable_costs: dict | pd.DataFrame,
     discount_rate=0.02,
 ):
+
     parameter = get_parameter()
 
     bus_el = solph.Bus(label="electricity")
@@ -288,7 +288,7 @@ def optimise_investment(year, interval, result_path):
     if not result_fn.is_file():
         logging.info(f"Start with {year} - {interval}")
         # Create empty file
-        with open(result_fn, "w") as file:
+        with open(result_fn, "w")  as file:
             file.write(f"Start with {year} - {interval}")
         my_data = prepare_technical_data(interval, None, None)
 
