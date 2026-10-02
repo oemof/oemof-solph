@@ -119,14 +119,7 @@ def main(optimize=True, solver="cbc"):
     except FileNotFoundError:
         msg = "Data file not found: {0}. Only one value used!"
         warnings.warn(msg.format(filename), UserWarning)
-        data = pd.DataFrame(
-            {
-                "pv": [0.3],
-                "wind": [0.6],
-                "demand_el": [500],
-                "demand_th": [344],
-            }
-        )
+        data = pd.DataFrame({"demand_el": [500], "demand_th": [344]})
     logger.define_logging()
     logging.info("Initialize the energy system")
 

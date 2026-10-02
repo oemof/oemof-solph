@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: oemof e.V. and contributors
 SPDX-License-Identifier: MIT
 """
 
+import pandas as pd
 import pytest
 
 from oemof import solph
@@ -17,6 +18,145 @@ from oemof.solph.components._variable_split_converter import (
 from oemof.solph.components._variable_split_converter import (
     _conversion_points_are_equal,
 )
+
+
+def test_variable_split_converter_function():
+    data = pd.DataFrame(
+        {
+            "demand_el": [500, 500, 300, 500, 500, 300],
+            "demand_th": [60, 200, 700, 60, 200, 700],
+        }
+    )
+    abel = [0.5, 0.5, 0.5, 0.3, 0.3, 0.3]
+    abth = [0.1, 0.1, 0.1, 0.5, 0.5, 0.5]
+    bbel = [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
+    bbth = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+
+    energysystem = solph.EnergySystem(timeincrement=[1, 1, 1, 1, 1, 1])
+
+    noded = dict()
+
+    # create natural gas bus
+    noded["bgas"] = solph.Bus(label="natural_gas")
+
+    # create commodity object for gas resource
+    noded["rgas"] = solph.components.Source(
+        label="rgas", outputs={noded["bgas"]: solph.Flow(variable_costs=50)}
+    )
+
+    # create two electricity buses and two heat buses
+    noded["bel"] = solph.Bus(label="electricity")
+    noded["bel2"] = solph.Bus(label="electricity_2")
+    noded["bth"] = solph.Bus(label="heat")
+    noded["bth2"] = solph.Bus(label="heat_2")
+
+    # create excess components for the elec/heat bus to allow overproduction
+    noded["excess_bth_2"] = solph.components.Sink(
+        label="excess_bth_2", inputs={noded["bth2"]: solph.Flow()}
+    )
+    noded["excess_therm"] = solph.components.Sink(
+        label="excess_therm", inputs={noded["bth"]: solph.Flow()}
+    )
+    noded["excess_bel_2"] = solph.components.Sink(
+        label="excess_bel_2", inputs={noded["bel2"]: solph.Flow()}
+    )
+    noded["excess_elec"] = solph.components.Sink(
+        label="excess_elec", inputs={noded["bel"]: solph.Flow()}
+    )
+
+    # create simple sink object for electrical demand for each electrical bus
+    noded["demand_elec"] = solph.components.Sink(
+        label="demand_elec",
+        inputs={
+            noded["bel"]: solph.Flow(fix=data["demand_el"], nominal_capacity=1)
+        },
+    )
+    noded["demand_el_2"] = solph.components.Sink(
+        label="demand_el_2",
+        inputs={
+            noded["bel2"]: solph.Flow(
+                fix=data["demand_el"], nominal_capacity=1
+            )
+        },
+    )
+
+    # create simple sink object for heat demand for each thermal bus
+    noded["demand_therm"] = solph.components.Sink(
+        label="demand_therm",
+        inputs={
+            noded["bth"]: solph.Flow(fix=data["demand_th"], nominal_capacity=1)
+        },
+    )
+    noded["demand_therm_2"] = solph.components.Sink(
+        label="demand_th_2",
+        inputs={
+            noded["bth2"]: solph.Flow(
+                fix=data["demand_th"], nominal_capacity=1
+            )
+        },
+    )
+
+    # This is just a dummy Converter with a nominal input of zero
+    noded["fixed_chp_gas"] = solph.components.Converter(
+        label="fixed_chp_gas",
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=0)},
+        outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
+        conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
+    )
+
+    # create a fixed Converter to distribute to the heat_2 and elec_2 buses
+    noded["fixed_chp_gas_2"] = solph.components.Converter(
+        label="fixed_chp_gas_2",
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+        outputs={noded["bel2"]: solph.Flow(), noded["bth2"]: solph.Flow()},
+        conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
+    )
+
+    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
+        label="variable_chp_gas",
+        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
+        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
+        conversion_factors={
+            noded["bel"]: abel,
+            noded["bth"]: abth,
+        },
+        allow_equal_states=True,
+        conversion_factors_secondary_state={
+            noded["bel"]: bbel,
+            noded["bth"]: bbth,
+        },
+    )
+
+    energysystem.add(*noded.values())
+
+    om = solph.Model(energysystem)
+
+    new_results = om.solve(solver="cbc", solve_kwargs={"tee": False})
+    ex_cols = [
+        c for c in new_results["flow"].columns if "excess" in c[1].label
+    ]
+    dfr = new_results["flow"][ex_cols]
+
+    columns = pd.MultiIndex.from_tuples(
+        [
+            ("electricity", "excess_elec"),
+            ("electricity_2", "excess_bel_2"),
+            ("heat", "excess_therm"),
+            ("heat_2", "excess_bth_2"),
+        ]
+    )
+
+    data = [
+        [0.0, 0.0, 40.00000, 773.33333],
+        [0.0, 0.0, 0.00000, 633.33333],
+        [120.0, 120.0, 0.00000, 0.00000],
+        [0.0, 0.0, 773.33333, 773.33333],
+        [0.0, 0.0, 633.33333, 633.33333],
+        [120.0, 120.0, 0.00000, 0.00000],
+    ]
+
+    df = pd.DataFrame(data, columns=columns)
+    assert df.equals(dfr)
 
 
 # ---------------------------------------------------------------------------
