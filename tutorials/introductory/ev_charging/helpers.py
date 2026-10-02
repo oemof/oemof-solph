@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 
 
 def plot_results(results, plot_title, dark_mode=False):
-
     plt.figure()
     if dark_mode:
         plt.style.use("dark_background")

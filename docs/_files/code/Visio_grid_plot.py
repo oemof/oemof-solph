@@ -51,7 +51,6 @@ def plot_figures_for(element: dict) -> None:
 
 # uses data from the basic example
 def main():
-
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************

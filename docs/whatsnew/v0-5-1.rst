@@ -74,4 +74,3 @@ Contributors
 * Julian Endres
 * Jann Launer
 * Lennart Schürmann
-

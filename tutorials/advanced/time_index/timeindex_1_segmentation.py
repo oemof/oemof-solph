@@ -54,6 +54,7 @@ def reshape_unevenly(data):
 
     return data_mean
 
+
 # %%[prepare_technical_data]
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
@@ -72,7 +73,6 @@ def populate_and_solve_energy_system(
     investments: dict[str, solph.Investment],
     variable_costs: dict | pd.DataFrame,
 ):
-
     parameter = get_parameter()
 
     bus_el = solph.Bus(label="electricity")
@@ -272,38 +272,35 @@ def process_results(results):
 
 
 def optimise_investment(year, interval):
+    logging.info(f"Start with {year} - {interval}")
 
-        logging.info(f"Start with {year} - {interval}")
+    my_data = prepare_technical_data(interval, None, None)
 
-        my_data = prepare_technical_data(interval, None, None)
+    logging.info("Start with even....")
+    start = datetime.now()
+    results_even = solve_model(my_data.even, get_parameter(), year=year)
+    key_results_even = process_results(results_even)
+    key_results_even["short_interval"] = interval
+    key_results_even["year_of_investment"] = year
+    time_even = datetime.now() - start
+    key_results_even["time"] = time_even.seconds
 
-        logging.info("Start with even....")
-        start = datetime.now()
-        results_even = solve_model(my_data.even, get_parameter(), year=year)
-        key_results_even = process_results(results_even)
-        key_results_even["short_interval"] = interval
-        key_results_even["year_of_investment"] = year
-        time_even = datetime.now() - start
-        key_results_even["time"] = time_even.seconds
+    logging.info("Start with uneven....")
+    start = datetime.now()
+    results_uneven = solve_model(my_data.uneven, get_parameter(), year=year)
+    key_results_uneven = process_results(results_uneven)
+    time_uneven = datetime.now() - start
+    key_results_uneven["time"] = time_uneven.seconds
 
-        logging.info("Start with uneven....")
-        start = datetime.now()
-        results_uneven = solve_model(
-            my_data.uneven, get_parameter(), year=year
-        )
-        key_results_uneven = process_results(results_uneven)
-        time_uneven = datetime.now() - start
-        key_results_uneven["time"] = time_uneven.seconds
-
-        # compare_results(results_even, results_uneven)
-        print()
-        print("*** Investment ***")
-        print("even\n", key_results_even.iloc[0])
-        print("uneven\n", key_results_uneven.iloc[0])
-        print()
-        print("*** Times ****")
-        print("even", time_even)
-        print("uneven", time_uneven)
+    # compare_results(results_even, results_uneven)
+    print()
+    print("*** Investment ***")
+    print("even\n", key_results_even.iloc[0])
+    print("uneven\n", key_results_uneven.iloc[0])
+    print()
+    print("*** Times ****")
+    print("even", time_even)
+    print("uneven", time_uneven)
 
 
 def read_result_files(year, interval, result_path):

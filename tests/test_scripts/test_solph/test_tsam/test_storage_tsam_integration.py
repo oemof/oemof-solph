@@ -216,9 +216,7 @@ def test_storage_soc_uses_storage_content_name():
     # clustered runs used to label SOC "soc", but "storage_content" is the
     # canonical name and should stay consistent
     all_columns = [
-        col
-        for entry in results.values()
-        for col in entry["sequences"].columns
+        col for entry in results.values() for col in entry["sequences"].columns
     ]
     assert "storage_content" in all_columns
     assert "soc" not in all_columns

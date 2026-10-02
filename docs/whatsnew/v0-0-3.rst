@@ -52,4 +52,3 @@ Contributors
  * Clemens Wingenbach
  * Simon Hilpert
  * Stephan Günther
-

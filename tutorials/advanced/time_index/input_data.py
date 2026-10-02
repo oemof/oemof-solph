@@ -263,6 +263,7 @@ def investment_costs() -> pd.DataFrame:
         [pd.DataFrame(index=range(2025, 2065)), df], axis=1
     ).interpolate()
 
+
 # %%[main]
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

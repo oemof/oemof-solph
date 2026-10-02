@@ -22,7 +22,8 @@ data = pd.read_csv(filename, sep=";", index_col=0, parse_dates=True)
 # %%[sec_2_start]
 
 district_heating_system = solph.EnergySystem(
-    timeindex=data.index, infer_last_interval=True,
+    timeindex=data.index,
+    infer_last_interval=True,
 )
 # %%[sec_2_end]
 
@@ -105,9 +106,7 @@ var_cost_gas_boiler = 1.10
 invest_cost = spec_inv_gas_boiler * cap_gas_boiler
 operation_cost = (
     var_cost_gas_boiler * flows[("gas boiler", "heat network")].sum()
-    + (
-        data["gas price"] * flows[("gas network", "gas boiler")]
-    ).sum()
+    + (data["gas price"] * flows[("gas network", "gas boiler")]).sum()
 )
 heat_produced = flows[("heat network", "heat sink")].sum()
 
