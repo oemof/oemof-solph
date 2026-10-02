@@ -148,17 +148,23 @@ class SimpleFlowBlock(ScalarBlock):
 
         if len(self.POSITIVE_GRADIENT_FLOWS) > 0:
             self.positive_gradient = Var(
-                self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+                self.POSITIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
             )
 
         if len(self.NEGATIVE_GRADIENT_FLOWS) > 0:
             self.negative_gradient = Var(
-                self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
+                self.NEGATIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
             )
 
         if len(self.INTEGER_FLOWS) > 0:
             self.integer_flow = Var(
-                self.INTEGER_FLOWS, m.TIMESTEPS, within=NonNegativeIntegers
+                self.INTEGER_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeIntegers,
             )
 
         # set upper bound of gradient variable
