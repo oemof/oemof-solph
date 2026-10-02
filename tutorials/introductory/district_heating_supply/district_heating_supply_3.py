@@ -1,5 +1,6 @@
 import os
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from helpers import LCOH
 from helpers import epc
@@ -172,8 +173,6 @@ heat_produced = flows[("heat network", "heat sink")].sum()
 
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f"LCOH: {lcoh:.2f} €/MWh")
-
-import matplotlib.pyplot as plt
 
 # plt.style.use('dark_background')
 

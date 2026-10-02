@@ -240,7 +240,7 @@ def main(optimize=True, solver="cbc"):
     # check if the new result object is working for custom components
     results = solph.processing.results(om)
 
-    custom_storage = solph.views.node(results, "storage")
+    solph.views.node(results, "storage")
     electricity_bus = solph.views.node(results, "electricity")
 
     # returns a pandas Series with all scalar values (investment, total) of

@@ -337,8 +337,6 @@ def draw_graph(
 
     # try to use pygraphviz for graph layout
     try:
-        import pygraphviz
-
         pos = nx.drawing.nx_agraph.graphviz_layout(grph, prog=layout)
     except ImportError:
         logging.error("Module pygraphviz not found, I won't plot the graph.")
