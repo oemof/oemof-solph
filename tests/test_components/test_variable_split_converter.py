@@ -172,6 +172,58 @@ class TestVariableSplitConverterInit:
         )
         assert converter.constraint_group() is VariableSplitConverterBlock
 
+    def test_equal_states_mixed_degenerate_timesteps(self):
+        idx = solph.create_time_index(2020, number=1)
+        es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
+
+        bgas = solph.buses.Bus(label="gasBus")
+        bel = solph.buses.Bus(label="elBus")
+        bth = solph.buses.Bus(label="thBus")
+
+        converter = VariableSplitConverter(
+            label="chp",
+            inputs={bgas: solph.flows.Flow()},
+            outputs={
+                bel: solph.flows.Flow(nominal_capacity=10),
+                bth: solph.flows.Flow(nominal_capacity=10),
+            },
+            conversion_factors={bel: [0.30, 0.40], bth: [0.50, 0.45]},
+            conversion_factors_secondary_state={
+                bel: [0.35, 0.45],
+                bth: [0.50, 0.40],
+            },
+            allow_equal_states=True,
+        )
+
+        source = solph.components.Source(
+            label="gas_source",
+            outputs={bgas: solph.flows.Flow(nominal_capacity=1000)},
+        )
+        sink_el = solph.components.Sink(
+            label="el_sink",
+            inputs={bel: solph.flows.Flow(nominal_capacity=10, fix=0.5)},
+        )
+        sink_th = solph.components.Sink(
+            label="th_sink",
+            inputs={bth: solph.flows.Flow(nominal_capacity=10, fix=0.3)},
+        )
+
+        es.add(bgas, bel, bth, converter, source, sink_el, sink_th)
+
+        m = solph.Model(es)
+        block = m.VariableSplitConverterBlock
+
+        assert converter in block.EQUAL_STATES
+
+        # Only t=0 is degenerate (coef_out_b == 0) -> only one constraint
+        # per bound is built; t=1 is skipped (coef_out_b != 0).
+        assert len(block.out_a_lower_bound) == 1
+        assert len(block.out_a_upper_bound) == 1
+        assert (converter, 0) in block.out_a_lower_bound
+        assert (converter, 1) not in block.out_a_lower_bound
+        assert (converter, 0) in block.out_a_upper_bound
+        assert (converter, 1) not in block.out_a_upper_bound
+
 
 # ---------------------------------------------------------------------------
 # VariableSplitConverterBlock
