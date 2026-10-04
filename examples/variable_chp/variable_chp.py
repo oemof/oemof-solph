@@ -116,10 +116,16 @@ def main(optimize=True, solver="cbc"):
     filename = os.path.join(os.getcwd(), "variable_chp.csv")
     try:
         data = pd.read_csv(filename)
+        data["demand_th"] *= 741000
+        y_lim_elec = 350000
+        y_lim_heat = 600000
+
     except FileNotFoundError:
         msg = "Data file not found: {0}. Only one value used!"
         warnings.warn(msg.format(filename), UserWarning)
         data = pd.DataFrame({"demand_el": [500], "demand_th": [344]})
+        y_lim_elec = 5
+        y_lim_heat = 10
     logger.define_logging()
     logging.info("Initialize the energy system")
 
@@ -187,7 +193,7 @@ def main(optimize=True, solver="cbc"):
         label="demand_therm",
         inputs={
             noded["bth"]: solph.Flow(
-                fix=data["demand_th"], nominal_capacity=741000
+                fix=data["demand_th"], nominal_capacity=1
             )
         },
     )
@@ -195,7 +201,7 @@ def main(optimize=True, solver="cbc"):
         label="demand_th_2",
         inputs={
             noded["bth2"]: solph.Flow(
-                fix=data["demand_th"], nominal_capacity=741000
+                fix=data["demand_th"], nominal_capacity=1
             )
         },
     )
@@ -223,7 +229,7 @@ def main(optimize=True, solver="cbc"):
     # Otherwise, only in this time step two more constraints will be
     # written to the lp-file to avoid mismatches.
     abel = [0.5] * 192
-    abth = [0.3] * 192
+    abth = [0.2] * 192
     bbel = [0.3] * 192
     bbth = [0.5] * 192
 
@@ -328,6 +334,7 @@ def main(optimize=True, solver="cbc"):
             ],
         )
         myplot["ax"].set_ylabel("Power in MW")
+        myplot["ax"].set_ylim([0, y_lim_elec])
         myplot["ax"].set_xlabel("")
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_xlim(0, x_length)
@@ -353,6 +360,7 @@ def main(optimize=True, solver="cbc"):
             ],
         )
         myplot["ax"].get_yaxis().set_visible(False)
+        myplot["ax"].set_ylim([0, y_lim_elec])
         myplot["ax"].set_xlabel("")
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_title("Electricity output (variable chp)")
@@ -375,7 +383,7 @@ def main(optimize=True, solver="cbc"):
             ],
         )
         myplot["ax"].set_ylabel("Power in MW")
-        myplot["ax"].set_ylim([0, 600000])
+        myplot["ax"].set_ylim([0, y_lim_heat])
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_title("Heat output (fixed chp)")
         myplot["ax"].set_xlim(0, x_length)
@@ -399,7 +407,7 @@ def main(optimize=True, solver="cbc"):
                 (("heat", "excess_therm"), "flow"),
             ],
         )
-        myplot["ax"].set_ylim([0, 600000])
+        myplot["ax"].set_ylim([0, y_lim_heat])
         myplot["ax"].get_yaxis().set_visible(False)
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_title("Heat output (variable chp)")
@@ -424,8 +432,10 @@ def main(optimize=True, solver="cbc"):
         ]
         e_ef = elec.div(ngas)
         h_ef = heat.div(ngas)
-        df = pd.DataFrame(pd.concat([h_ef, e_ef], axis=1))
-        my_ax = df.reset_index(drop=True).plot(
+        df_eff_fix = pd.DataFrame(
+            pd.concat([h_ef, e_ef], axis=1, keys=["heat", "electricity"])
+        )
+        my_ax = df_eff_fix.reset_index(drop=True).plot(
             drawstyle=style, ax=fig.add_subplot(3, 2, 5), linewidth=2
         )
         my_ax.set_ylabel("efficiency")
@@ -433,7 +443,7 @@ def main(optimize=True, solver="cbc"):
         my_ax.set_xlabel("May 2012")
         my_ax = oeplot.set_datetime_ticks(
             my_ax,
-            df.index,
+            df_eff_fix.index,
             tick_distance=24,
             date_format="%d",
             offset=12,
@@ -455,14 +465,16 @@ def main(optimize=True, solver="cbc"):
         h_ef = heat.div(ngas)
         e_ef.name = "electricity           "
         h_ef.name = "heat"
-        df = pd.DataFrame(pd.concat([h_ef, e_ef], axis=1))
-        my_ax = df.reset_index(drop=True).plot(
+        df_eff_var = pd.DataFrame(pd.concat([h_ef, e_ef], axis=1))
+        # df_eff_var.sort_values("heat").reset_index(drop=True).T.sum().T
+        # plt.show()
+        my_ax = df_eff_var.reset_index(drop=True).plot(
             drawstyle=style, ax=fig.add_subplot(3, 2, 6), linewidth=2
         )
         my_ax.set_ylim([0, 0.55])
         my_ax = oeplot.set_datetime_ticks(
             my_ax,
-            df.index,
+            df_eff_var.index,
             tick_distance=24,
             date_format="%d",
             offset=12,
@@ -478,6 +490,13 @@ def main(optimize=True, solver="cbc"):
         )
         my_ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), ncol=1)
 
+        # plt.show()
+        df_eff_var.set_index("heat", drop=True).plot(
+            title="Variable CHP", marker="o"
+        )
+        df_eff_fix.round(2).set_index("heat", drop=True).plot(
+            title="Fixed CHP", marker="o"
+        )
         plt.show()
 
     else:
