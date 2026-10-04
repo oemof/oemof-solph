@@ -23,16 +23,16 @@ from oemof.solph.components._variable_split_converter import (
 def test_variable_split_converter_function():
     data = pd.DataFrame(
         {
-            "demand_el": [500, 500, 300, 500, 500, 300],
-            "demand_th": [60, 200, 700, 60, 200, 700],
+            "demand_el": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+            "demand_th": [0.5, 2, 5, 7, 9, 0.5, 2, 5, 7, 9],
         }
     )
-    abel = [0.5, 0.5, 0.5, 0.3, 0.3, 0.3]
-    abth = [0.1, 0.1, 0.1, 0.5, 0.5, 0.5]
-    bbel = [0.3, 0.3, 0.3, 0.3, 0.3, 0.3]
-    bbth = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5]
+    abel = [0.5, 0.5, 0.5, 0.5, 0.5, 0.3, 0.3, 0.3, 0.3, 0.3]
+    abth = [0.1, 0.1, 0.1, 0.1, 0.1, 0.5, 0.5, 0.5, 0.5, 0.5]
+    bbel = [0.2, 0.2, 0.2, 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 0.3]
+    bbth = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.3]
 
-    energysystem = solph.EnergySystem(timeincrement=[1, 1, 1, 1, 1, 1])
+    energysystem = solph.EnergySystem(timeincrement=[1] * 10)
 
     noded = dict()
 
@@ -96,14 +96,6 @@ def test_variable_split_converter_function():
         },
     )
 
-    # This is just a dummy Converter with a nominal input of zero
-    noded["fixed_chp_gas"] = solph.components.Converter(
-        label="fixed_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_capacity=0)},
-        outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-        conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
-    )
-
     # create a fixed Converter to distribute to the heat_2 and elec_2 buses
     noded["fixed_chp_gas_2"] = solph.components.Converter(
         label="fixed_chp_gas_2",
@@ -131,12 +123,40 @@ def test_variable_split_converter_function():
 
     om = solph.Model(energysystem)
 
-    new_results = om.solve(solver="cbc", solve_kwargs={"tee": False})
+    results = om.solve(solver="cbc", solve_kwargs={"tee": False})
+    flows = results["flow"]
     ex_cols = [
-        c for c in new_results["flow"].columns if "excess" in c[1].label
+        c for c in flows.columns if "excess" in c[1].label
     ]
-    dfr = new_results["flow"][ex_cols]
 
+    eff_fix_elec = (
+        flows[("fixed_chp_gas_2", "electricity_2")]
+        / flows[("natural_gas", "fixed_chp_gas_2")]
+    )
+    eff_fix_heat = (
+        flows[("fixed_chp_gas_2", "heat_2")]
+        / flows[("natural_gas", "fixed_chp_gas_2")]
+    )
+    eff_var_elec = (
+        flows[("variable_chp_gas", "electricity")]
+        / flows[("natural_gas", "variable_chp_gas")]
+    )
+    eff_var_heat = (
+        flows[("variable_chp_gas", "heat")]
+        / flows[("natural_gas", "variable_chp_gas")]
+    )
+
+    # Efficiencies of Convert must be fixed
+    assert all(eff_fix_elec.round(9) == 0.3)
+    assert all(eff_fix_heat.round(9) == 0.5)
+    # Efficiencies of VariableSplitConverter must be within the linear function
+    assert all(
+        (
+            round(-4 / 3 * eff_var_elec + 23 / 30, 6) == round(eff_var_heat, 6)
+        ).iloc[0:5]
+    )
+
+    # Expected results
     columns = pd.MultiIndex.from_tuples(
         [
             ("electricity", "excess_elec"),
@@ -145,18 +165,20 @@ def test_variable_split_converter_function():
             ("heat_2", "excess_bth_2"),
         ]
     )
-
     data = [
-        [0.0, 0.0, 40.00000, 773.33333],
-        [0.0, 0.0, 0.00000, 633.33333],
-        [120.0, 120.0, 0.00000, 0.00000],
-        [0.0, 0.0, 773.33333, 773.33333],
-        [0.0, 0.0, 633.33333, 633.33333],
-        [120.0, 120.0, 0.00000, 0.00000],
+        [0.0, 0.0, 0.1, 4.5],
+        [0.0, 0.0, 0.0, 3.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [0.0, 1.2, 0.0, 0.0],
+        [0.6, 2.4, 0.0, 0.0],
+        [0.0, 0.0, 4.5, 4.5],
+        [0.0, 0.0, 3.0, 3.0],
+        [0.0, 0.0, 0.0, 0.0],
+        [1.2, 1.2, 0.0, 0.0],
+        [2.4, 2.4, 0.0, 0.0],
     ]
-
     df = pd.DataFrame(data, columns=columns)
-    assert df.equals(dfr)
+    assert df.equals(flows[ex_cols])
 
 
 # ---------------------------------------------------------------------------
