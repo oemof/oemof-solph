@@ -125,9 +125,7 @@ def test_variable_split_converter_function():
 
     results = om.solve(solver="cbc", solve_kwargs={"tee": False})
     flows = results["flow"]
-    ex_cols = [
-        c for c in flows.columns if "excess" in c[1].label
-    ]
+    ex_cols = [c for c in flows.columns if "excess" in c[1].label]
 
     eff_fix_elec = (
         flows[("fixed_chp_gas_2", "electricity_2")]

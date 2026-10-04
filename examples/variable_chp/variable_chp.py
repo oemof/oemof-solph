@@ -192,9 +192,7 @@ def main(optimize=True, solver="cbc"):
     noded["demand_therm"] = solph.components.Sink(
         label="demand_therm",
         inputs={
-            noded["bth"]: solph.Flow(
-                fix=data["demand_th"], nominal_capacity=1
-            )
+            noded["bth"]: solph.Flow(fix=data["demand_th"], nominal_capacity=1)
         },
     )
     noded["demand_therm_2"] = solph.components.Sink(
