@@ -11,8 +11,6 @@ available from its original location oemof/tests/basic_tests.py
 SPDX-License-Identifier: MIT
 """
 
-import warnings
-
 import pandas as pd
 import pytest
 from pyomo.opt.results import SolverResults
@@ -291,3 +289,174 @@ def test_highs_cmdline_options(capsys):
 
     captured = capsys.readouterr()
     assert "without presolve" in captured.out
+
+
+# ---------------------------------------------------------------------------
+# Coverage additions: Model.__init__ branches
+# ---------------------------------------------------------------------------
+
+
+def test_constraint_groups_explicitly_passed_skips_default_init():
+    """Passing a non-None `constraint_groups` must skip the
+    `constraint_groups = []` fallback assignment (branch 195->198)."""
+    es = _make_feasible_es()
+    model = solph.Model(es, constraint_groups=[])
+
+    # default CONSTRAINT_GROUPS must still be the prefix of the combined list
+    assert (
+        model._constraint_groups[: len(solph.Model.CONSTRAINT_GROUPS)]
+        == solph.Model.CONSTRAINT_GROUPS
+    )
+
+
+def test_auto_construct_false_skips_construction():
+    """auto_construct=False must skip the automatic `_construct()` call
+    (branch 214->216)."""
+    es = _make_feasible_es()
+    model = solph.Model(es, auto_construct=False)
+
+    assert not hasattr(model, "objective")
+
+    # Manual, sequential construction (as documented) still works.
+    model._add_parent_block_sets()
+    model._add_parent_block_variables()
+    model._add_child_blocks()
+    model._add_objective()
+
+    assert hasattr(model, "objective")
+
+
+# ---------------------------------------------------------------------------
+# Coverage additions: bidirectional + (non)convex flow variable bounds
+# ---------------------------------------------------------------------------
+
+
+def test_bidirectional_nonconvex_flow_with_capacity_skips_lower_bound():
+    """A flow with nominal_capacity, no fix, nonconvex=True and
+    bidirectional=True must *not* get an explicit lower bound set
+    (branch 412->388)."""
+    es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
+    bus = solph.buses.Bus(label="bus")
+    es.add(bus)
+    es.add(
+        solph.components.Sink(
+            label="sink",
+            inputs={
+                bus: solph.flows.Flow(
+                    nominal_capacity=10,
+                    bidirectional=True,
+                    nonconvex=solph.NonConvex(),
+                )
+            },
+        )
+    )
+
+    model = solph.Model(es, auto_construct=False)
+    model._add_parent_block_sets()
+    model._add_parent_block_variables()
+
+    key = next(iter(model.FLOWS))
+    assert key in model.BIDIRECTIONAL_FLOWS
+
+    flow_var = model.flow[key[0], key[1], 0]
+    assert flow_var.lb is None
+
+
+def test_bidirectional_flow_without_capacity_skips_lower_bound():
+    """A bidirectional flow without nominal_capacity must *not* get an
+    explicit lower bound of 0 set (branch 417->388)."""
+    es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
+    bus = solph.buses.Bus(label="bus")
+    es.add(bus)
+    es.add(
+        solph.components.Sink(
+            label="sink",
+            inputs={bus: solph.flows.Flow(bidirectional=True)},
+        )
+    )
+
+    model = solph.Model(es, auto_construct=False)
+    model._add_parent_block_sets()
+    model._add_parent_block_variables()
+
+    key = next(iter(model.FLOWS))
+    assert key in model.BIDIRECTIONAL_FLOWS
+
+    flow_var = model.flow[key[0], key[1], 0]
+    assert flow_var.lb is None
+
+
+# ---------------------------------------------------------------------------
+# Coverage additions: _add_objective(update=True)
+# ---------------------------------------------------------------------------
+
+
+def test_add_objective_update_replaces_existing_objective():
+    """Calling `_add_objective(update=True)` must delete the existing
+    'objective' component before re-adding it (line 443)."""
+    es = _make_feasible_es()
+    model = solph.Model(es, auto_construct=False)
+    model._add_parent_block_sets()
+    model._add_parent_block_variables()
+    model._add_objective()
+
+    first_objective_id = id(model.objective)
+
+    model._add_objective(update=True)
+
+    assert hasattr(model, "objective")
+    assert id(model.objective) != first_objective_id
+
+
+# ---------------------------------------------------------------------------
+# Coverage additions: receive_duals() deprecated wrapper
+# ---------------------------------------------------------------------------
+
+
+def test_receive_duals_deprecated_method_sets_suffixes():
+    """The deprecated `receive_duals()` method must warn and delegate to
+    `_receive_duals()` (lines 454-459)."""
+    es = _make_feasible_es()
+    model = solph.Model(es)
+
+    with pytest.warns(FutureWarning, match="receive_duals"):
+        model.receive_duals()
+
+    assert model.dual is not None
+    assert model.rc is not None
+
+
+def test_receive_duals_can_be_called_multiple_times():
+    """Calling `_receive_duals()` a second time must not try to `del` an
+    unset suffix, i.e. the `is None` checks must evaluate to False on the
+    second call (branches 466->468 and 470->472)."""
+    es = _make_feasible_es()
+    model = solph.Model(es)
+
+    model._receive_duals()
+    first_dual = model.dual
+    first_rc = model.rc
+
+    # Second call: self.dual / self.rc are already set (not None).
+    model._receive_duals()
+
+    assert model.dual is not None
+    assert model.rc is not None
+    assert model.dual is not first_dual
+    assert model.rc is not first_rc
+
+
+# ---------------------------------------------------------------------------
+# Coverage additions: relax_problem()
+# ---------------------------------------------------------------------------
+
+
+def test_relax_problem_returns_self():
+    """`relax_problem()` must apply the relaxation transformation and
+    return the model instance itself (lines 681-682)."""
+    es = _make_mip_es()
+    model = solph.Model(es)
+
+    relaxed = model.relax_problem()
+
+    assert relaxed is model
