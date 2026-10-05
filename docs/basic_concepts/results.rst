@@ -58,7 +58,8 @@ Each solver return generell information about the solving process a little bit
 different. Therefore, Results.solver provides a defined structure (pandas
 .Series) of the general solver feed-back like bounds, objective or wallclock
 time. If a value is not returned it will be "None". A complete list can be
-found here: :class:`~oemof.solph._models.SolverResults`
+found here: :class:`~oemof.solph._models.SolverResults`. If you need the
+original return object of the solver use `Model.solver_return`.
 
 .. code-block:: python
 
