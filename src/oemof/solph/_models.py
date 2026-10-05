@@ -21,10 +21,8 @@ from dataclasses import dataclass
 from logging import getLogger
 
 import pandas as pd
-from oemof.tools import debugging
 from pyomo import environ as po
 from pyomo.contrib import appsi
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import EnergySystem
@@ -113,12 +111,8 @@ class Model(po.ConcreteModel):
         Time increments
     flows : dict
         Flows of the model
-    name : str
-        Name of the model
     es : solph.EnergySystem
         Energy system of the model
-    meta : `pyomo.opt.results.results_.SolverResults` or None
-        Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
