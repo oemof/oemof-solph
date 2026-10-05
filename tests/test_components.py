@@ -364,3 +364,15 @@ def test_generic_chp_without_warning():
         back_pressure=False,
     )
     warnings.filterwarnings("always", category=SuspiciousUsageWarning)
+
+
+# ********* Sink *********
+def test_sink_without_input():
+    sink = components.Sink(inputs=None)
+    assert len(sink.inputs) == 0
+
+
+# ********* Source *********
+def test_source_without_output():
+    sink = components.Source(outputs=None)
+    assert len(sink.outputs) == 0
