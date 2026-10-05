@@ -1,0 +1,25 @@
+# To install the git pre-commit hooks run:
+#   pre-commit install --install-hooks
+# To update the versions:
+#   pre-commit autoupdate
+exclude: '^(\.tox|ci/templates|\.bumpversion\.cfg)(/|$)'
+# Note the order is intentional to avoid multiple passes of the hooks
+repos:
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.10.0
+    hooks:
+      - id: black
+        language_version: python3.14
+  - repo: https://github.com/tombi-toml/tombi-pre-commit
+    rev: v0.11.1
+    hooks:
+      - id: tombi-format
+      - id: tombi-lint
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+        args: [--fix=lf]
+      - id: debug-statements
