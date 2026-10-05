@@ -177,10 +177,10 @@ class Results:
                     case _:
                         rv.index = rv.index.get_level_values(-1)
                 return rv
-        elif key == "duals":
-            return self._duals if self._duals is not None else default
-        elif key == "reduced_costs":
-            return self._rc if self._rc is not None else default
+        elif key == "duals" and self._duals is not None:
+            return self._duals
+        elif key == "reduced_costs" and self._rc is not None:
+            return self._rc
 
         return default
 
