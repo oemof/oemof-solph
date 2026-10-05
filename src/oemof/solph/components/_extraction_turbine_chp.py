@@ -21,7 +21,9 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
-from oemof.solph.components import VariableSplitConverter
+from oemof.solph.components._variable_split_converter import (
+    VariableSplitConverter,
+)
 
 
 class ExtractionTurbineCHP(VariableSplitConverter):
