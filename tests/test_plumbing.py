@@ -2,9 +2,10 @@
 
 """Testing the class NonConvex.
 
-# SPDX-FileCopyrightText: oemof e.V. and contributors
-#
-# SPDX-License-Identifier: MIT
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Uwe Krien
+
+SPDX-License-Identifier: MIT
 """
 
 import numpy as np
