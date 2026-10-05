@@ -58,7 +58,6 @@ def reshape_unevenly(data):
 
     return data_mean
 
-
 # %%[prepare_technical_data]
 def prepare_technical_data(minutes, url, port):
     data = namedtuple("data", "even uneven")
@@ -289,7 +288,7 @@ def optimise_investment(year, interval, result_path):
     if not result_fn.is_file():
         logging.info(f"Start with {year} - {interval}")
         # Create empty file
-        with open(result_fn, "w") as file:
+        with open(result_fn, "w")  as file:
             file.write(f"Start with {year} - {interval}")
         my_data = prepare_technical_data(interval, None, None)
 

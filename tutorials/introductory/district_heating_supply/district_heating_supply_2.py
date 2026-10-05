@@ -161,13 +161,18 @@ invest_cost = (
 )
 operation_cost = (
     var_cost_gas_boiler * flows[("gas boiler", "heat network")].sum()
-    + (data["gas price"] * flows[("gas network", "gas boiler")]).sum()
+    + (
+        data["gas price"] * flows[("gas network", "gas boiler")]
+    ).sum()
     + var_cost_heat_pump * flows[("heat pump", "heat network")].sum()
     + (
-        data["el_spot_price"] * flows[("electricity network", "heat pump")]
+        data["el_spot_price"]
+        * flows[("electricity network", "heat pump")]
     ).sum()
-    + var_cost_storage * flows[("heat storage", "heat network")].sum()
-    + var_cost_storage * flows[("heat network", "heat storage")].sum()
+    + var_cost_storage
+    * flows[("heat storage", "heat network")].sum()
+    + var_cost_storage
+    * flows[("heat network", "heat storage")].sum()
 )
 heat_produced = flows[("heat network", "heat sink")].sum()
 
