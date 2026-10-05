@@ -80,8 +80,8 @@ class ExtractionTurbineCHP(VariableSplitConverter):
         custom_properties=None,
     ):
         msg = """
-            Class 'ExtractionTurbineCHP' will be removed in
-            oemof.solph>=v0.8.0. Use VariableSplitConverter instead.
+            Class 'ExtractionTurbineCHP' will be removed in a future
+            version of oemof.solph. Use VariableSplitConverter instead.
             The VariableSplitConverter is more flexible. But can be used for
             the same cases. See example below.
 
