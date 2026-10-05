@@ -51,13 +51,14 @@ Note that data is processed on demand, meaning that accessing data can trigger
 calculations. So if you are not interested in every detail of you results,
 some time can be saved here.
 
-Solver results
---------------
+Solver return information
+-------------------------
 
-The Solver Results contain direct return values from the solver used. These
-may vary depending on the selected solver; the keys remain the same but may
-also be “None” if no return value is provided. A complete list can be found
-here: :class:`~oemof.solph._models.SolverResults`
+Each solver return generell information about the solving process a little bit
+different. Therefore, Results.solver provides a defined structure (pandas
+.Series) of the general solver feed-back like bounds, objective or wallclock
+time. If a value is not returned it will be "None". A complete list can be
+found here: :class:`~oemof.solph._models.SolverResults`
 
 .. code-block:: python
 
