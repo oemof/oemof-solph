@@ -57,9 +57,6 @@ class SolverResults:
         Solver status (e.g. ``ok`` or ``5``) returned by the solver.
     termination_condition : str | None
         Termination condition reported by the solver (e.g. ``"optimal"``).
-    solver_results : object
-        The full, solver-specific results object (e.g. a Pyomo results
-        object) that the summary is derived from.
     message : str | None
         Optional solver message.
     wallclock_time : float | None
@@ -79,7 +76,6 @@ class SolverResults:
     optimal: bool
     status: str | int | None
     termination_condition: str | None
-    solver_results: object
     message: str | None
     wallclock_time: float | None
     objective: float | None
@@ -87,6 +83,7 @@ class SolverResults:
     gap: float | None
     best_feasible_objective: float | None
     best_objective_bound: float | None
+    _solver_return: object
 
 
 class Model(po.ConcreteModel):
@@ -219,7 +216,6 @@ class Model(po.ConcreteModel):
 
         self.flows = self.es.flows()
 
-        self.solver_results = None
         self.dual = None
         self.rc = None
 
@@ -232,6 +228,20 @@ class Model(po.ConcreteModel):
 
         if kwargs.get("auto_construct", True):
             self._construct()
+        self._solver_results = None
+        self.solver_return = None
+
+    @property
+    def solver_results(self):
+        warnings.warn(
+            "'solver_results' attribute is deprecated and will be removed in "
+            "a future version. Use the 'solver' attribute of the Results "
+            "object or 'solver_return' if you need the original return "
+            "object.",
+            FutureWarning,
+            stacklevel=2
+        )
+        return self._solver_results
 
     def _construct(self):
         """Construct a Model by adding parent block sets and variables
@@ -500,19 +510,13 @@ class Model(po.ConcreteModel):
 
         opt.highs_options = cmdline_options
 
-        appsi_results = opt.solve(self)
-        tc = appsi_results.termination_condition
-
-        solver_results = {
-            "Problem": tc.name,
-            "Solution": appsi_results.best_feasible_objective,
-            "Solver": solver,
-        }
+        appsi_return = opt.solve(self)
+        tc = appsi_return.termination_condition
 
         optimal = tc == appsi.base.TerminationCondition.optimal
 
-        if optimal or appsi_results.best_feasible_objective is not None:
-            appsi_results.solution_loader.load_vars()
+        if optimal or appsi_return.best_feasible_objective is not None:
+            appsi_return.solution_loader.load_vars()
         if self.dual is not None:
             try:
                 duals = opt.get_duals()
@@ -539,8 +543,8 @@ class Model(po.ConcreteModel):
                     UserWarning,
                 )
 
-        bfo = appsi_results.best_feasible_objective
-        bob = appsi_results.best_objective_bound
+        bfo = appsi_return.best_feasible_objective
+        bob = appsi_return.best_objective_bound
         if bfo not in (None, 0) and bob is not None:
             gap = abs(bfo - bob) / abs(bfo)
         else:
@@ -552,8 +556,8 @@ class Model(po.ConcreteModel):
             optimal=optimal,
             termination_condition=tc.name,
             status=tc.value,
-            solver_results=solver_results,
-            wallclock_time=appsi_results.wallclock_time,
+            _solver_return=appsi_return,
+            wallclock_time=appsi_return.wallclock_time,
             best_objective_bound=bob,
             best_feasible_objective=bfo,
             gap=gap,
@@ -571,14 +575,14 @@ class Model(po.ConcreteModel):
         solve_kwargs = dict(solve_kwargs)
         solve_kwargs["suffixes"] = ["dual", "rc"]
 
-        factory_results = opt.solve(self, **solve_kwargs)
+        factory_return = opt.solve(self, **solve_kwargs)
 
-        status = factory_results.Solver.Status
-        tc = factory_results.Solver.Termination_condition
-        msg = getattr(factory_results.Solver, "Message", None)
-        wt = getattr(factory_results.Solver, "Time", None)
-        bfo = getattr(factory_results.Problem[0], "Upper_bound", None)
-        bob = getattr(factory_results.Problem[0], "Lower_bound", None)
+        status = factory_return.Solver.Status
+        tc = factory_return.Solver.Termination_condition
+        msg = getattr(factory_return.Solver, "Message", None)
+        wt = getattr(factory_return.Solver, "Time", None)
+        bfo = getattr(factory_return.Problem[0], "Upper_bound", None)
+        bob = getattr(factory_return.Problem[0], "Lower_bound", None)
         if bfo not in (None, 0) and bob is not None:
             gap = abs(bfo - bob) / abs(bfo)
         else:
@@ -594,7 +598,7 @@ class Model(po.ConcreteModel):
             objective=objective,
             termination_condition=tc.name,
             status=status.name,
-            solver_results=factory_results,
+            _solver_return=factory_return,
             wallclock_time=wt,
             best_feasible_objective=bfo,
             best_objective_bound=bob,
@@ -656,10 +660,21 @@ class Model(po.ConcreteModel):
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
             )
-        # ToDo DepricatedWarning for es.results and meta
-        self.es.results = solver_return.solver_results
-        self.solver_results = solver_return.solver_results
-        solver_info = pd.Series(solver_return.__dict__).drop("solver_results")
+        # ToDo DepricatedWarning for es.results
+        self.es.results = solver_return._solver_return
+
+        # This is deprecated and will be removed in future versions
+        if solver_return.solver == "highs":
+            return_value = solver_return._solver_return.__dict__
+        else:
+            return_value = solver_return._solver_return
+        self._solver_results = return_value
+
+        # The new API:
+        # To access the original solver return use Model.solver_return
+        # To access readable solver information use Results.solver
+        self.solver_return = solver_return._solver_return
+        solver_info = pd.Series(solver_return.__dict__).drop("_solver_return")
 
         if solver_return.optimal:
             msg = "Optimisation successful."
@@ -675,7 +690,7 @@ class Model(po.ConcreteModel):
 
             if allow_nonoptimal:
                 warnings.warn(msg, UserWarning)
-                return solver_return.solver_results
+                return solver_return._solver_return
             else:
                 raise RuntimeError(msg)
         return Results(self, solver_info=solver_info)
