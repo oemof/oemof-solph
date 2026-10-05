@@ -27,7 +27,7 @@ This example requires oemof.solph (at least v0.6.6), install by:
 
     pip install oemof.solph>=0.6.6
 
-SPDX-FileCopyrightText: oemof e.V. and contributors
+SPDX-FileCopyrightText: Uwe Krien
 
 SPDX-License-Identifier: MIT
 """
