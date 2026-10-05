@@ -1,7 +1,0 @@
-# SPDX-FileCopyrightText: oemof e.V. and contributors
-#
-# SPDX-License-Identifier: MIT
-
-[formatting]
-array_auto_collapse = false
-indent_string = "    "
