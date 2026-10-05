@@ -15,12 +15,20 @@ API changes
   former multi-period implementation, it is possible to give a time series of
   fixed capacities without any investment.
 * Avoid creation of empty variables (i.e. variable vectors of zero length).
+* ExtractionTurbineCHP is deprecated and will be replaced by
+  VariableSplitConverter. The new class is more flexible but will cover all
+  use cases of the ExtractionTurbineCHP
 * Remove `solver-results` attribute from Model class. It will be replaced by
   the new `solver_return` attribute.
 
 New features
 ############
 
+* VariableSplitConverter: A converter with one input and two competing
+  outputs, where the split between the outputs can vary linearly between two
+  given, real operating points (e.g. an extraction/backpressure turbine, where
+  the split between electricity and heat varies with the amount of heat
+  extracted).
 * Added a solver attribute to the Results class to get the return values of
   the solver in a structured way
 * Added dual-variables and reduced cost to the Results class
