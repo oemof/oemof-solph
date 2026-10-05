@@ -7,12 +7,12 @@ v0.6.1 (November 17th, 2025)
 
 API changes
 ###########
-* GenericStorage requires explicitly set `Investment` objects if the `invest_relation`
+* GenericStorage requires explicitly set `Investment` objects if the `invest_relation` 
   keywords are used. Automatic creation of the `Investment` objects is removed.
 
 New features
 ############
-* Two new keys added to `Results` class (experimental) to calculate variable costs and
+* Two new keys added to `Results` class (experimental) to calculate variable costs and 
   investment costs via `results["variable_costs"]` and `results["investment_costs"]`.
 * Nodes (buses and components) can now have a `parent_node` and create `subnode` s.
   This allows constructing nested structures in the energy system graph.
@@ -23,7 +23,7 @@ Documentation
 
 Bug fixes
 #########
-* Setting `invest_relation_input_output` now actually creates the relational
+* Setting `invest_relation_input_output` now actually creates the relational 
   constraint.
 
 Other changes

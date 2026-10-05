@@ -26,7 +26,7 @@ New features
 Documentation
 #############
 
-* The `Flow` parameters `min` and `max` are now listed with their default
+* The `Flow` parameters `min` and `max` are now listed with their default 
   values of 0 and 1, respectively, in the `Flow` API documentation.
 
 Bug fixes

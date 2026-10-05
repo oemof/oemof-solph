@@ -850,9 +850,9 @@ class GenericStorageBlock(ScalarBlock):
             for n in self.STORAGES_WITH_INVEST_FLOW_REL:
                 for p in m.CAPACITY_PERIODS:
                     expr = (
-                        (m.InvestmentFlowBlock.nominal_capacity[n, o[n], p])
-                        * n.invest_relation_input_output[p]
-                        == (m.InvestmentFlowBlock.nominal_capacity[i[n], n, p])
+                        m.InvestmentFlowBlock.nominal_capacity[n, o[n], p]
+                    ) * n.invest_relation_input_output[p] == (
+                        m.InvestmentFlowBlock.nominal_capacity[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -1515,7 +1515,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         if not m.TSAM_MODE:
-
             def _storage_balance_rule(block, n, t):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1548,7 +1547,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_storage_balance_rule,
             )
         else:
-
             def _intra_storage_balance_rule(block, n, p, k, g):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1582,7 +1580,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
         if m.TSAM_MODE:
-
             def _inter_storage_balance_rule(block, n, i):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1616,7 +1613,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
         else:
-
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMEPOINTS.at(-1)]
@@ -1635,9 +1631,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.CAPACITY_PERIODS:
                     expr = (
-                        (m.InvestmentFlowBlock.nominal_capacity[n, o[n], p])
-                        * n.invest_relation_input_output[p]
-                        == (m.InvestmentFlowBlock.nominal_capacity[i[n], n, p])
+                        m.InvestmentFlowBlock.nominal_capacity[n, o[n], p]
+                    ) * n.invest_relation_input_output[p] == (
+                        m.InvestmentFlowBlock.nominal_capacity[i[n], n, p]
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -1769,7 +1765,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_min_storage_content_invest_rule,
             )
         else:
-
             def _storage_inter_maximum_level_rule(block):
                 for n in self.INVESTSTORAGES:
                     for p, i, g in m.TIMEINDEX_CLUSTER:

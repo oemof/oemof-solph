@@ -11,7 +11,6 @@ import numpy as np
 
 from oemof import solph
 
-
 def main():
     es = solph.EnergySystem(
         timeindex=np.linspace(start=0, stop=12, num=13),

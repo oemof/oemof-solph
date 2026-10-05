@@ -63,6 +63,7 @@ SPDX-License-Identifier: MIT
 
 import logging
 import os
+import pprint as pp
 from datetime import datetime
 
 import matplotlib.pyplot as plt
@@ -103,6 +104,7 @@ def plot_figures_for(element: dict) -> None:
 
 
 def main(optimize=True, solver="cbc"):
+
     # *************************************************************************
     # ********** PART 1 - Define and optimise the energy system ***************
     # *************************************************************************
@@ -277,9 +279,9 @@ def main(optimize=True, solver="cbc"):
 
     print("\n********* State of Charge (slice) *********")
     print(
-        f"{result_dict[(storage, None)]['sequences'][start_time:end_time]}\n"
+        f"{result_dict[(storage, None)]['sequences'][start_time : end_time]}\n"
     )
-    print(f"{results['storage_content'][storage][start_time:end_time]}\n")
+    print(f"{results['storage_content'][storage][start_time : end_time]}\n")
 
     # get all variables of a specific component/bus
     custom_storage = views.node(result_dict, "battery_storage")

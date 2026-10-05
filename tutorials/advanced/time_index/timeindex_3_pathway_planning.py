@@ -168,7 +168,8 @@ time_series = {
         ignore_index=True,
     ),
     "Electricity for Car Charging_HH1": pd.concat(
-        [representatives["Electricity for Car Charging_HH1"]] * len(years),
+        [representatives["Electricity for Car Charging_HH1"]]
+        * len(years),
         ignore_index=True,
     ),
 }

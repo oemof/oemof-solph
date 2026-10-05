@@ -18,12 +18,11 @@ from oemof import solph
 
 BATTERY_CAPACITY = 50
 
-
 def create_model():
     es = solph.EnergySystem(timeindex=solph.create_time_index(2026, 1, 24))
 
     driving_pattern = np.array(
-        6 * [0] + 2 * [1.0] + 8 * [0] + 2 * [1.0] + 6 * [0]
+        6 * [0] + 2 * [1.] + 8 * [0] + 2 * [1.] + 6 * [0]
     )
     presence_pattern = np.ones(24) - driving_pattern
 
@@ -74,12 +73,10 @@ def create_model():
 
     sink_plan = solph.components.Sink(
         "sink plan",
-        inputs={
-            b_plan: solph.Flow(
-                nominal_capacity=18,
-                fix=driving_pattern,
-            )
-        },
+        inputs={b_plan: solph.Flow(
+            nominal_capacity=18,
+            fix=driving_pattern,
+        )},
     )
     sink_flex = solph.components.Sink(
         "sink flex",
@@ -90,9 +87,7 @@ def create_model():
     model = solph.Model(es)
 
     solph.constraints.limit_active_flow_count_by_keyword(
-        model,
-        "charger",
-        upper_limit=1,
+        model, "charger", upper_limit=1,
     )
 
     solph.constraints.shared_limit(
@@ -108,7 +103,7 @@ def create_model():
         for ts in m.TIMESTEPS:
             getattr(m, "discharge_limit").add(
                 ts,
-                m.flow[b_flex, sink_flex, ts] <= m.flow[b_plan, sink_plan, ts],
+                m.flow[b_flex, sink_flex, ts] <= m.flow[b_plan, sink_plan, ts]
             )
 
     setattr(
@@ -123,7 +118,6 @@ def create_model():
     )
 
     return model
-
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt

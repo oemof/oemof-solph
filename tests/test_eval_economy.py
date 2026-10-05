@@ -6,6 +6,7 @@ from oemof import solph
 
 
 def results_opex():
+
     date_time_index = solph.create_time_index(2025, number=4)
 
     # create the energysystem and assign the time index
@@ -60,6 +61,7 @@ def results_opex():
 
 
 def results_capex():
+
     date_time_index = solph.create_time_index(2025, number=4)
 
     # create the energysystem and assign the time index

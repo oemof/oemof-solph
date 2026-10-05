@@ -7,7 +7,6 @@ SPDX-FileCopyrightText: Patrik Schönfeldt
 
 SPDX-License-Identifier: MIT
 """
-
 import warnings
 
 import pandas as pd

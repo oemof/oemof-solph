@@ -42,7 +42,6 @@ SPDX-License-Identifier: MIT
 import networkx as nx
 import pandas as pd
 from matplotlib import pyplot as plt
-
 # oemof imports
 from oemof.solph import Bus
 from oemof.solph import EnergySystem

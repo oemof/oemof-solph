@@ -95,3 +95,4 @@ If the installation was successful, you will receive something like this:
    ***********************************
    oemof.solph successfully installed.
    ***********************************
+

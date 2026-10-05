@@ -33,6 +33,7 @@ SPDX-License-Identifier: MIT
 import logging
 import os
 
+import pandas as pd
 from matplotlib import pyplot as plt
 
 from oemof import solph

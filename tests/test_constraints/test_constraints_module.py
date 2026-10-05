@@ -109,4 +109,6 @@ def test_integral_limit():
         results["flow"][(src3, bel)]
     ) + emission_factor_high * sum(
         results["flow"][(src4, bel)]
-    ) == pytest.approx(emission_limit)
+    ) == pytest.approx(
+        emission_limit
+    )
