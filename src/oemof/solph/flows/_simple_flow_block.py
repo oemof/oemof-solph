@@ -21,7 +21,7 @@ SPDX-License-Identifier: MIT
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
-from pyomo.core import NonNegativeIntegers
+from pyomo.core import Integers
 from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
@@ -111,22 +111,6 @@ class SimpleFlowBlock(ScalarBlock):
             initialize=[(g[0], g[1]) for g in group if g[2].integer]
         )
 
-        self.LIFETIME_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].lifetime is not None and g[2].age is None
-            ]
-        )
-
-        self.LIFETIME_AGE_FLOWS = Set(
-            initialize=[
-                (g[0], g[1])
-                for g in group
-                if g[2].lifetime is not None and g[2].age is not None
-            ]
-        )
-
     def _create_variables(self, group):
         r"""Creates all variables for standard flows.
 
@@ -162,17 +146,27 @@ class SimpleFlowBlock(ScalarBlock):
         """
         m = self.parent_block()
 
-        self.positive_gradient = Var(
-            self.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
-        )
+        if len(self.POSITIVE_GRADIENT_FLOWS) > 0:
+            self.positive_gradient = Var(
+                self.POSITIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
+            )
 
-        self.negative_gradient = Var(
-            self.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, within=NonNegativeReals
-        )
+        if len(self.NEGATIVE_GRADIENT_FLOWS) > 0:
+            self.negative_gradient = Var(
+                self.NEGATIVE_GRADIENT_FLOWS,
+                m.TIMESTEPS,
+                within=NonNegativeReals,
+            )
 
-        self.integer_flow = Var(
-            self.INTEGER_FLOWS, m.TIMESTEPS, within=NonNegativeIntegers
-        )
+        if len(self.INTEGER_FLOWS) > 0:
+            self.integer_flow = Var(
+                self.INTEGER_FLOWS,
+                m.TIMESTEPS,
+                within=Integers,
+            )
+
         # set upper bound of gradient variable
         for i, o, f in group:
             if valid_sequence(
@@ -180,14 +174,20 @@ class SimpleFlowBlock(ScalarBlock):
             ):
                 for t in m.TIMESTEPS:
                     self.positive_gradient[i, o, t].setub(
-                        f.positive_gradient_limit[t] * f.nominal_capacity
+                        f.positive_gradient_limit[t]
+                        * f.nominal_capacity[
+                            m.es.capacity_period_of_timestep(t)
+                        ]
                     )
             if valid_sequence(
                 m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
             ):
                 for t in m.TIMESTEPS:
                     self.negative_gradient[i, o, t].setub(
-                        f.negative_gradient_limit[t] * f.nominal_capacity
+                        f.negative_gradient_limit[t]
+                        * f.nominal_capacity[
+                            m.es.capacity_period_of_timestep(t)
+                        ]
                     )
 
     def _create_constraints(self):
@@ -227,9 +227,10 @@ class SimpleFlowBlock(ScalarBlock):
                     * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
+                # FIXME: hardcoded single period
                 rhs = (
                     m.flows[inp, out].full_load_time_max
-                    * m.flows[inp, out].nominal_capacity
+                    * m.flows[inp, out].nominal_capacity[0]
                 )
                 self.full_load_time_max_constr.add((inp, out), lhs <= rhs)
 
@@ -249,9 +250,10 @@ class SimpleFlowBlock(ScalarBlock):
                     * m.tsam_weighting[ts]
                     for ts in m.TIMESTEPS
                 )
+                # FIXME: hardcoded single period
                 rhs = (
                     m.flows[inp, out].full_load_time_min
-                    * m.flows[inp, out].nominal_capacity
+                    * m.flows[inp, out].nominal_capacity[0]
                 )
                 self.full_load_time_min_constr.add((inp, out), lhs >= rhs)
 
@@ -340,49 +342,6 @@ class SimpleFlowBlock(ScalarBlock):
             self.INTEGER_FLOWS, m.TIMESTEPS, rule=_integer_flow_rule
         )
 
-        if m.es.periods is not None:
-
-            def _lifetime_output_rule(_):
-                """Force flow value to zero when lifetime is reached"""
-                for inp, out in self.LIFETIME_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if m.flows[inp, out].lifetime <= m.es.periods_years[p]:
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_output = Constraint(
-                self.LIFETIME_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_output_build = BuildAction(
-                rule=_lifetime_output_rule
-            )
-
-            def _lifetime_age_output_rule(block):
-                """Force flow value to zero when lifetime is reached
-                considering initial age
-                """
-                for inp, out in self.LIFETIME_AGE_FLOWS:
-                    for p, ts in m.TIMEINDEX:
-                        if (
-                            m.flows[inp, out].lifetime - m.flows[inp, out].age
-                            <= m.es.periods_years[p]
-                        ):
-                            lhs = m.flow[inp, out, ts]
-                            rhs = 0
-                            self.lifetime_age_output.add(
-                                (inp, out, p, ts), (lhs == rhs)
-                            )
-
-            self.lifetime_age_output = Constraint(
-                self.LIFETIME_AGE_FLOWS, m.TIMEINDEX, noruleinit=True
-            )
-            self.lifetime_age_output_build = BuildAction(
-                rule=_lifetime_age_output_rule
-            )
-
     def _objective_expression(self):
         r"""Objective expression for all standard flows with fixed costs
         and variable costs.
@@ -404,23 +363,6 @@ class SimpleFlowBlock(ScalarBlock):
               \sum_{(i,o)} \sum_{p, t} P(p, t) \cdot w(t)
               \cdot c_{var}(i, o, t)
 
-        * `Flow.fixed_costs` is not `None` and flow has no lifetime limit
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{year_{max}}
-              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
-        * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
-           but not an initial age
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}}
-              P_{nominal} \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
-        * `Flow.fixed_costs` is not `None` and flow has a lifetime limit,
-           and an initial age
-            .. math::
-              \sum_{(i,o)} \displaystyle \sum_{pp=0}^{limit_{exo}} P_{nominal}
-              \cdot c_{fixed}(i, o, pp) \cdot DF^{-pp}
-
         Hereby
 
         * :math:`DF(p) = (1 + dr)` is the discount factor for period :math:`p`
@@ -436,75 +378,18 @@ class SimpleFlowBlock(ScalarBlock):
         m = self.parent_block()
 
         variable_costs = 0
-        fixed_costs = 0
 
-        if m.es.periods is None:
-            for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for t in m.TIMESTEPS:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.objective_weighting[t]
-                            * m.tsam_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                        )
-
-        else:
-            for i, o in m.FLOWS:
-                if valid_sequence(
-                    m.flows[i, o].variable_costs, len(m.TIMESTEPS)
-                ):
-                    for p, t in m.TIMEINDEX:
-                        variable_costs += (
-                            m.flow[i, o, t]
-                            * m.objective_weighting[t]
-                            * m.tsam_weighting[t]
-                            * m.flows[i, o].variable_costs[t]
-                            * ((1 + m.discount_rate) ** -m.es.periods_years[p])
-                        )
-
-                # Fixed costs for units with no lifetime limit
-                if (
-                    m.flows[i, o].fixed_costs is not None
-                    and m.flows[i, o].nominal_capacity is not None
-                    and (i, o) not in self.LIFETIME_FLOWS
-                    and (i, o) not in self.LIFETIME_AGE_FLOWS
-                ):
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(m.es.end_year_of_optimization)
-                    )
-
-            # Fixed costs for units with limited lifetime
-            for i, o in self.LIFETIME_FLOWS:
-                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
-                    range_limit = min(
-                        m.es.end_year_of_optimization,
-                        m.flows[i, o].lifetime,
-                    )
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(range_limit)
-                    )
-
-            for i, o in self.LIFETIME_AGE_FLOWS:
-                if valid_sequence(m.flows[i, o].fixed_costs, len(m.TIMESTEPS)):
-                    range_limit = min(
-                        m.es.end_year_of_optimization,
-                        m.flows[i, o].lifetime - m.flows[i, o].age,
-                    )
-                    fixed_costs += sum(
-                        m.flows[i, o].nominal_capacity
-                        * m.flows[i, o].fixed_costs[pp]
-                        for pp in range(range_limit)
+        for i, o in m.FLOWS:
+            if valid_sequence(m.flows[i, o].variable_costs, len(m.TIMESTEPS)):
+                for t in m.TIMESTEPS:
+                    variable_costs += (
+                        m.flow[i, o, t]
+                        * m.timeincrement[t]
+                        * m.tsam_weighting[t]
+                        * m.flows[i, o].variable_costs[t]
                     )
 
         self.variable_costs = Expression(expr=variable_costs)
-        self.fixed_costs = Expression(expr=fixed_costs)
-        self.costs = Expression(expr=variable_costs + fixed_costs)
+        self.costs = Expression(expr=variable_costs)
 
         return self.costs

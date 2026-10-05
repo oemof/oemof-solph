@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+
+# SPDX-FileCopyrightText: oemof e.V. and contributors
 r"""
 General description
 -------------------
@@ -56,7 +58,7 @@ License
 -------
 Johannes Röder <johannes.roeder@uni-bremen.de>
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 import logging

@@ -9,6 +9,10 @@ This is subject to change in the future.
 
 Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
+
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
 """
 
 from ._flow import Flow

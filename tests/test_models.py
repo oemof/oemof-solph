@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 # -*- coding: utf-8 -
 
 """Basic tests.
@@ -8,8 +10,6 @@ available from its original location oemof/tests/basic_tests.py
 
 SPDX-License-Identifier: MIT
 """
-
-import warnings
 
 import pandas as pd
 import pytest
@@ -24,7 +24,7 @@ from oemof.solph._results import Results
 
 
 def _make_infeasible_es():
-    """Source capacity (4) < sink demand (5) → infeasible."""
+    """Source capacity (4) < sink demand (5) -> infeasible."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -44,7 +44,7 @@ def _make_infeasible_es():
 
 
 def _make_unbounded_es():
-    """Negative variable cost with no upper bound → unbounded."""
+    """Negative variable cost with no upper bound -> unbounded."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -84,7 +84,7 @@ def _make_feasible_es():
 
 
 def _make_mip_es():
-    """Same as feasible LP but with a NonConvex flow → MIP."""
+    """Same as feasible LP but with a NonConvex flow -> MIP."""
     es = solph.EnergySystem(timeindex=[0, 1, 2], infer_last_interval=False)
     bus = solph.buses.Bus(label="bus")
     es.add(bus)
@@ -293,52 +293,3 @@ def test_highs_cmdline_options(capsys):
 
     captured = capsys.readouterr()
     assert "without presolve" in captured.out
-
-
-# ---------------------------------------------------------------------------
-# Multi-period
-# ---------------------------------------------------------------------------
-
-
-@pytest.mark.filterwarnings(
-    "ignore:Ensure that your timeindex and timeincrement are"
-    " consistent.:UserWarning"
-)
-@pytest.mark.filterwarnings(
-    "ignore:CAUTION! You specified the 'periods' attribute:UserWarning"
-)
-def test_multi_period_default_discount_rate():
-    """Test error being thrown for default multi-period discount rate"""
-    timeindex = pd.date_range(start="2017-01-01", periods=100, freq="D")
-    es = solph.EnergySystem(
-        timeindex=timeindex,
-        timeincrement=[1] * len(timeindex),
-        periods=[timeindex],
-        infer_last_interval=False,
-    )
-    bel = solph.buses.Bus(label="bus")
-    es.add(bel)
-    es.add(
-        solph.components.Sink(
-            label="sink",
-            inputs={
-                bel: solph.flows.Flow(
-                    nominal_capacity=5, fix=[1] * len(timeindex)
-                )
-            },
-        )
-    )
-    es.add(
-        solph.components.Source(
-            label="source",
-            outputs={
-                bel: solph.flows.Flow(nominal_capacity=4, variable_costs=5)
-            },
-        )
-    )
-    msg = (
-        "By default, a discount_rate of 0.02 is used for a multi-period model."
-    )
-    with warnings.catch_warnings(record=True) as w:
-        solph.Model(es)
-        assert msg in str(w[0].message)

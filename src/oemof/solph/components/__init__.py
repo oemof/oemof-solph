@@ -7,6 +7,10 @@ module holds the class definition and the block directly located by each other.
 
 Note that only mature code is imported,
 experimental code should be included in oemof.experimental.
+
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
 """
 
 from . import experimental
@@ -20,6 +24,7 @@ from ._offset_converter import slope_offset_from_nonconvex_input
 from ._offset_converter import slope_offset_from_nonconvex_output
 from ._sink import Sink
 from ._source import Source
+from ._variable_split_converter import VariableSplitConverter
 
 __all__ = [
     "Converter",
@@ -33,4 +38,5 @@ __all__ = [
     "Source",
     "slope_offset_from_nonconvex_input",
     "slope_offset_from_nonconvex_output",
+    "VariableSplitConverter",
 ]

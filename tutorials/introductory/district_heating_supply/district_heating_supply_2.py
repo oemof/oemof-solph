@@ -1,5 +1,10 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 import os
 
+import matplotlib.pyplot as plt
 import pandas as pd
 from helpers import LCOH
 from helpers import epc
@@ -142,10 +147,12 @@ results = model.solve(solver="cbc", solve_kwargs={"tee": True})
 # %%[sec_6_start]
 
 flows = results["flow"]
-cap_gas_boiler = results["invest"][("gas boiler", "heat network")][0]
-cap_heat_pump = results["invest"][("heat pump", "heat network")][0]
-cap_storage = results["invest"]["heat storage"][0]
-cap_storage_out = results["invest"][("heat storage", "heat network")][0]
+cap_gas_boiler = results["nominal_capacity"][("gas boiler", "heat network")][0]
+cap_heat_pump = results["nominal_capacity"][("heat pump", "heat network")][0]
+cap_storage = results["nominal_capacity"]["heat storage"][0]
+cap_storage_out = results["nominal_capacity"][
+    ("heat storage", "heat network")
+][0]
 
 print(f"capacity gas boiler: {cap_gas_boiler:.1f} MW")
 print(f"capacity heat pump: {cap_heat_pump:.1f} MW")
@@ -179,8 +186,6 @@ heat_produced = flows[("heat network", "heat sink")].sum()
 lcoh = LCOH(invest_cost, operation_cost, heat_produced)
 print(f"LCOH: {lcoh:.2f} €/MWh")
 # %%[sec_7_end]
-
-import matplotlib.pyplot as plt
 
 # plt.style.use('dark_background')
 

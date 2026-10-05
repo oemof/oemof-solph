@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description
 -------------------
@@ -36,7 +38,7 @@ License
 -------
 Simon Hilpert - 31.10.2016 - simon.hilpert@uni-flensburg.de
 
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 import logging
