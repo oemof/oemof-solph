@@ -211,7 +211,7 @@ def test_highs_duals_match_cbc():
 
 @pytest.mark.skip(
     reason="Handling of reduced cost in new Results object is not yet "
-           "implemented"
+    "implemented"
 )
 def test_highs_reduced_costs_match_cbc():
     """Reduced costs match CBC for variables both solvers report.

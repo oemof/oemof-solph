@@ -37,7 +37,7 @@ supply systems, which in our simple example only contains a single gas boiler.
     Structure of the heating supplier's portfolio
 
 But before we start modeling the energy system, we should give some thought about
-what kind of input data we need for the simulation.Maybe the first that comes to 
+what kind of input data we need for the simulation.Maybe the first that comes to
 mind is the heat demand our system should supply.
 As the demand varies throughout the seasons, it makes sense to simulate a full
 year. Typically, this is done with an hourly time resolution. Furthermore, we have
@@ -406,7 +406,7 @@ units. The latter are also displayed in :numref:`tab-caps-1`.
     :widths: 1 1 1 1
     :header-rows: 1
 
-    * - 
+    * -
       - gas boiler
       - heat pump
       - heat storage
@@ -572,7 +572,7 @@ before.
     :widths: 1 1 1 1
     :header-rows: 1
 
-    * - 
+    * -
       - gas boiler
       - heat pump
       - heat storage
@@ -666,7 +666,7 @@ the heat storage is much larger and can work as more than just a daily buffer.
     :widths: 1 1 1 1
     :header-rows: 1
 
-    * - 
+    * -
       - gas boiler
       - heat pump
       - heat storage

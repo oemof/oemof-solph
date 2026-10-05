@@ -42,4 +42,3 @@ Contributors
 * Elisa Papdis
 * Martin Soethe
 * Guido Plessmann
-

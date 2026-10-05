@@ -30,4 +30,3 @@ Contributors
 * Patrik Schönfeldt
 * Maximilian Hillen
 * Eva Schischke
-

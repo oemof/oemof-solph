@@ -88,12 +88,8 @@ def run_for_typical_periods(
     # %%[tsam_aggregation_end]
     time_series = {
         "cop": representatives["cop"],
-        "electricity demand (kW)": representatives[
-            "electricity demand (kW)"
-        ],
-        "heat demand (kW)": representatives[
-            "heat demand (kW)"
-        ],
+        "electricity demand (kW)": representatives["electricity demand (kW)"],
+        "heat demand (kW)": representatives["heat demand (kW)"],
         "PV (kW/kWp)": representatives["PV (kW/kWp)"],
         "Electricity for Car Charging_HH1": representatives[
             "Electricity for Car Charging_HH1"

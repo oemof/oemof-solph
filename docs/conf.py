@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), "..", "examples"))
 
 
 def update_author_list():
-    with open('../CITATION.cff', 'r') as file:
+    with open("../CITATION.cff", "r") as file:
         data = yaml.safe_load(file)
 
     authors = data["authors"]
@@ -30,9 +30,13 @@ def update_author_list():
         for author in authors[:-1]:
             f.write(
                 "* "
-                + author["given-names"] + " "
-                + author["family-names"] + "\n"
+                + author["given-names"]
+                + " "
+                + author["family-names"]
+                + "\n"
             )
+
+
 update_author_list()
 
 
