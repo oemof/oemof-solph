@@ -25,8 +25,7 @@ from pyomo.contrib import appsi
 from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
-from oemof.solph import EnergySystem
-from oemof.solph import processing
+from oemof.solph import EnergySystem, processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
 from oemof.solph.flows._invest_non_convex_flow_block import (
@@ -419,6 +418,7 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
+    # TODO remove
     def solve_highs(
         self, solver_info, cmdline_options=None, solve_kwargs=None
     ):
@@ -452,6 +452,7 @@ class Model(po.ConcreteModel):
             solver_results=solver_results,
         )
 
+    # TOOD remove? or used for glpk and scip?
     def solve_factory(
         self, solver_info, solver, solver_io, solve_kwargs, cmdline_options
     ):
@@ -477,7 +478,6 @@ class Model(po.ConcreteModel):
     def solve(
         self,
         solver="cbc",
-        solver_io="lp",
         allow_nonoptimal=False,
         solve_kwargs=None,
         cmdline_options=None,
@@ -513,20 +513,50 @@ class Model(po.ConcreteModel):
             "SolverReturn",
             ["optimal", "solver_results", "termination_condition", "status"],
         )
-        if solver == "highs":
-            solver_return = self.solve_highs(
-                solver_info=solver_info,
-                solve_kwargs=solve_kwargs,
-                cmdline_options=cmdline_options,
+
+        solver_classes = {
+            "highs": (appsi.solvers.Highs, "highs_options"),
+            "cbc": (appsi.solvers.Cbc, "cbc_options"),
+            "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
+        }
+
+        if solver not in solver_classes:
+            msg = (
+                f"Solver {solver} is not supported. "
+                f"Please use one of the following: {list(solver_classes)}"
             )
-        else:
-            solver_return = self.solve_factory(
-                solver_info=solver_info,
-                solver=solver,
-                solver_io=solver_io,
-                solve_kwargs=solve_kwargs,
-                cmdline_options=cmdline_options,
-            )
+            raise ValueError(msg)
+
+        solver_class, solver_options = solver_classes.get(solver, None)
+
+        opt = solver_class()
+
+        if solve_kwargs.get("tee"):
+            opt.config.stream_solver = True
+
+        setattr(opt, solver_options, cmdline_options)
+
+        appsi_results = opt.solve(self)
+        tc = appsi_results.termination_condition
+
+        solver_results = {
+            "termination_condition": tc.name,
+            "best_feasible_objective": appsi_results.best_feasible_objective,
+            "best_objective_bound": appsi_results.best_objective_bound,
+            "wallclock_time": getattr(appsi_results, "wallclock_time", None),
+        }
+
+        optimal = tc == appsi.base.TerminationCondition.optimal
+
+        if optimal or appsi_results.best_feasible_objective is not None:
+            appsi_results.solution_loader.load_vars()
+
+        solver_return = solver_info(
+            optimal=optimal,
+            termination_condition=tc,
+            status=tc.value,
+            solver_results=solver_results,
+        )
 
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
