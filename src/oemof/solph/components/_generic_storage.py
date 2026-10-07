@@ -539,8 +539,6 @@ class GenericStorageBlock(ScalarBlock):
 
     """  # noqa: E501
 
-    CONSTRAINT_GROUP = True
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -1344,8 +1342,6 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         :math:`\gamma(t)`, :math:`\delta(t)` and timeincrement :math:`\tau(t)`"
 
     """
-
-    CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

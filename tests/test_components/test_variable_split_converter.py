@@ -390,9 +390,6 @@ class TestVariableSplitConverterInit:
 # VariableSplitConverterBlock
 # ---------------------------------------------------------------------------
 class TestVariableSplitConverterBlock:
-    def test_constraint_group_flag_is_true(self):
-        assert VariableSplitConverterBlock.CONSTRAINT_GROUP is True
-
     def test_create_with_none_group_returns_none(self):
         block = VariableSplitConverterBlock()
         assert block._create(group=None) is None

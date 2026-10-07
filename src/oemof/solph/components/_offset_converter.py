@@ -328,8 +328,6 @@ class OffsetConverterBlock(ScalarBlock):
 
     """  # noqa: E501
 
-    CONSTRAINT_GROUP = True
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
