@@ -330,7 +330,8 @@ class TestVariableSplitConverterInit:
             conversion_factors={bel: 0.30, bth: 0.50},
             conversion_factors_secondary_state={bel: 0.48, bth: 0.10},
         )
-        assert converter.constraint_group() is VariableSplitConverterBlock
+        [required_block] = converter.required_blocks()
+        assert required_block is VariableSplitConverterBlock
 
     def test_equal_states_mixed_degenerate_timesteps(self):
         idx = solph.create_time_index(2020, number=1)

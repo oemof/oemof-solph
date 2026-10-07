@@ -26,7 +26,6 @@ import math
 import numbers
 from warnings import warn
 
-from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import BuildAction
@@ -37,6 +36,7 @@ from pyomo.environ import Set
 from pyomo.environ import Var
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
+from oemof.solph._node import Node
 from oemof.solph._options import Investment
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
@@ -420,11 +420,11 @@ class GenericStorage(Node):
             raise NotImplementedError(msg)
         return attributes_not_none
 
-    def constraint_group(self):
+    def required_blocks(self):
         if self._invest_group is True:
-            return GenericInvestmentStorageBlock
+            return [GenericInvestmentStorageBlock]
         else:
-            return GenericStorageBlock
+            return [GenericStorageBlock]
 
 
 class GenericStorageBlock(ScalarBlock):
@@ -1515,6 +1515,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         if not m.TSAM_MODE:
+
             def _storage_balance_rule(block, n, t):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1547,6 +1548,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_storage_balance_rule,
             )
         else:
+
             def _intra_storage_balance_rule(block, n, p, k, g):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1580,6 +1582,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
         if m.TSAM_MODE:
+
             def _inter_storage_balance_rule(block, n, i):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1613,6 +1616,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
         else:
+
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMEPOINTS.at(-1)]
@@ -1765,6 +1769,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_min_storage_content_invest_rule,
             )
         else:
+
             def _storage_inter_maximum_level_rule(block):
                 for n in self.INVESTSTORAGES:
                     for p, i, g in m.TIMEINDEX_CLUSTER:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.Sink
+A Node that is not meant to have any outflows
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -14,7 +14,7 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
+from oemof.solph._node import Node
 
 
 class Sink(Node):
@@ -56,6 +56,3 @@ class Sink(Node):
             parent_node=parent_node,
             custom_properties=custom_properties,
         )
-
-    def constraint_group(self):
-        pass

@@ -17,13 +17,14 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
+
+from oemof.solph._node import Node
 
 
 class PiecewiseLinearConverter(Node):
@@ -105,8 +106,8 @@ PiecewiseLinearConverter'>
                 + "nominal value"
             )
 
-    def constraint_group(self):
-        return PiecewiseLinearConverterBlock
+    def required_blocks(self):
+        return [PiecewiseLinearConverterBlock]
 
 
 class PiecewiseLinearConverterBlock(ScalarBlock):

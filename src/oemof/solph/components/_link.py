@@ -19,7 +19,6 @@ SPDX-License-Identifier: MIT
 
 from warnings import warn
 
-from oemof.network import Node
 from oemof.tools import debugging
 from pyomo.core import Set
 from pyomo.core.base.block import ScalarBlock
@@ -27,6 +26,7 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
 from oemof.solph._helpers import warn_if_missing_attribute
+from oemof.solph._node import Node
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 
@@ -130,8 +130,8 @@ class Link(Node):
         ):
             warn(msg, debugging.SuspiciousUsageWarning)
 
-    def constraint_group(self):
-        return LinkBlock
+    def required_blocks(self):
+        return [LinkBlock]
 
 
 class LinkBlock(ScalarBlock):

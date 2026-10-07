@@ -34,7 +34,7 @@ SPDX-License-Identifier: MIT
 
 import numpy as np
 
-from oemof.network import Node
+from oemof.solph._node import Node
 from oemof.network.network.nodes import QualifiedLabel
 
 from oemof import solph

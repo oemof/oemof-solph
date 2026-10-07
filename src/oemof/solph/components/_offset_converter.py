@@ -20,12 +20,12 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
+from oemof.solph._node import Node
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 
@@ -227,8 +227,8 @@ class OffsetConverter(Node):
         for cf in missing_normed_offsets_keys:
             self.normed_offsets[cf] = 0
 
-    def constraint_group(self):
-        return OffsetConverterBlock
+    def required_blocks(self):
+        return [OffsetConverterBlock]
 
     def plot_partload(self, bus, tstep):
         """Create a matplotlib figure of the flow to nonconvex flow relation.

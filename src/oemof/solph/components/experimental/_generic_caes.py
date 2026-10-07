@@ -17,13 +17,14 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
 from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
+
+from oemof.solph._node import Node
 
 
 class GenericCAES(Node):
@@ -126,8 +127,8 @@ class GenericCAES(Node):
         self.inputs.update(fuel_input)
         self.outputs.update(electrical_output)
 
-    def constraint_group(self):
-        return GenericCAESBlock
+    def required_blocks(self):
+        return [GenericCAESBlock]
 
 
 class GenericCAESBlock(ScalarBlock):

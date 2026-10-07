@@ -150,8 +150,8 @@ class VariableSplitConverter(Converter):
             ):
                 raise ValueError("That is not okay.")
 
-    def constraint_group(self):
-        return VariableSplitConverterBlock
+    def required_blocks(self):
+        return [VariableSplitConverterBlock]
 
 
 class VariableSplitConverterBlock(ScalarBlock):
