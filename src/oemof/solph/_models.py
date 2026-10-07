@@ -530,6 +530,7 @@ class Model(po.ConcreteModel):
         solver_class, solver_options = solver_classes.get(solver, None)
 
         opt = solver_class()
+        opt.config.load_solution = False
 
         if solve_kwargs.get("tee"):
             opt.config.stream_solver = True
