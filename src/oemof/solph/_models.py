@@ -461,6 +461,8 @@ class Model(po.ConcreteModel):
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
         """
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
         if self.dual is None:
             del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
