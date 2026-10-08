@@ -6,7 +6,7 @@ SPDX-FileCopyrightText: oemof e.V. and contributors
 SPDX-License-Identifier: MIT
 """
 
-__version__ = "0.6.6a2"
+__version__ = "0.6.6a3"
 
 from . import buses
 from . import components
