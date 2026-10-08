@@ -467,6 +467,8 @@ class Model(po.ConcreteModel):
             del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
 
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
         if self.rc is None:
             del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
