@@ -221,7 +221,7 @@ class Model(po.ConcreteModel):
             "object or 'solver_return' if you need the original return "
             "object.",
             FutureWarning,
-            stacklevel=2
+            stacklevel=2,
         )
         return self._solver_results
 
@@ -562,7 +562,7 @@ class Model(po.ConcreteModel):
         tc = self.solver_return.Solver.Termination_condition
         msg = getattr(self.solver_return.Solver, "Message", None)
         wt = getattr(self.solver_return.Solver, "Time", None)
-        bfo = getattr(self.solver_returnn.Problem[0], "Upper_bound", None)
+        bfo = getattr(self.solver_return.Problem[0], "Upper_bound", None)
         bob = getattr(self.solver_return.Problem[0], "Lower_bound", None)
         if bfo not in (None, 0) and bob is not None:
             gap = abs(bfo - bob) / abs(bfo)
@@ -644,8 +644,9 @@ class Model(po.ConcreteModel):
         # ToDo DepricatedWarning for es.results -> oemof.network
         self.es.results = self.solver_return
 
-        # The solver_results attribute is deprecated and will be removed in future versions
-        # To access the original solver return use Model.solver_return
+        # The solver_results attribute is deprecated and will be removed in
+        # future versions To access the original solver return use
+        # Model.solver_return
         if solver_info.solver == "highs":
             self._solver_results = self.solver_return.__dict__
         else:
@@ -669,8 +670,9 @@ class Model(po.ConcreteModel):
             else:
                 raise RuntimeError(msg)
 
-        # The solver_info is a pandas Series. It is accessible using Results.solver
-        return Results(self, solver_info=pd.Series(solver_info.__dict__).drop("_solver_return"))
+        # The solver_info is a pandas Series. It is accessible using
+        # Results.solver
+        return Results(self, solver_info=pd.Series(solver_info.__dict__))
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
