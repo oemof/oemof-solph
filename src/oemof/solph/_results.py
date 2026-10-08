@@ -42,7 +42,7 @@ class Results:
     """
 
     def __init__(self, model: ConcreteModel, solver_info):
-        self._meta_results = model.solver_return
+        self._meta_results = model._solver_results
         self._variables = {}
         self._model = model
         self.solver = solver_info
