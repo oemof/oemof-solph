@@ -54,7 +54,7 @@ some time can be saved here.
 Solver return information
 -------------------------
 
-Each solver return generell information about the solving process a little bit
+Each solver return general information about the solving process a little bit
 different. Therefore, Results.solver provides a defined structure (pandas
 .Series) of the general solver feed-back like bounds, objective or wallclock
 time. If a value is not returned it will be "None". A complete list can be
