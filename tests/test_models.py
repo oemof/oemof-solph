@@ -13,7 +13,6 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import pytest
-from pyomo.opt.results import SolverResults
 
 from oemof import solph
 from oemof.solph._results import Results
@@ -135,12 +134,13 @@ def test_infeasible_warns_when_nonoptimal_allowed(solver):
         m.solve(solver=solver, allow_nonoptimal=True)
 
 
-def test_infeasible_cbc_returns_solver_results():
-    """CBC specifically returns a SolverResults object when non-optimal."""
+def test_infeasible_cbc_returns_solver_metadata():
+    """CBC returns solver metadata when non-optimal results are allowed."""
     m = solph.Model(_make_infeasible_es())
     with pytest.warns(UserWarning):
         result = m.solve(solver="cbc", allow_nonoptimal=True)
-    assert isinstance(result, SolverResults)
+    assert isinstance(result, dict)
+    assert result["termination_condition"] == "infeasible"
 
 
 @pytest.mark.parametrize("solver", ["cbc", "highs"])
@@ -211,7 +211,7 @@ def test_highs_duals_match_cbc():
 
 @pytest.mark.skip(
     reason="Handling of reduced cost in new Results object is not yet "
-           "implemented"
+    "implemented"
 )
 def test_highs_reduced_costs_match_cbc():
     """Reduced costs match CBC for variables both solvers report.
