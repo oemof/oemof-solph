@@ -418,21 +418,47 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    # TODO remove
-    def solve_highs(
-        self, solver_info, cmdline_options=None, solve_kwargs=None
+    def solve_appsi(
+        self,
+        solver_info,
+        solver_class="cbc",
+        solver_options="cbc_options",
+        cmdline_options=None,
+        solve_kwargs=None,
     ):
-        opt = appsi.solvers.Highs()
+        """Solve the model with a Pyomo APPSI solver.
+
+        Parameters
+        ----------
+        solver_info : callable
+            Factory used to create the common solver return object.
+        solver_class : type ["gurobi]
+            APPSI solver class to instantiate.
+        solver_options : str
+            Name of the solver attribute that receives ``cmdline_options``.
+        cmdline_options : dict
+            Solver-specific options passed to the APPSI solver.
+        solve_kwargs : dict
+            Solve options. Currently, ``tee=True`` enables solver output.
+
+        Returns
+        -------
+        solver_info
+            Solver status and APPSI result metadata. Variable values are
+            loaded when an optimal solution or a feasible incumbent exists.
+        """
+        opt = solver_class()
         opt.config.load_solution = False
 
         if solve_kwargs.get("tee"):
             opt.config.stream_solver = True
 
-        opt.highs_options = cmdline_options
+        setattr(opt, solver_options, cmdline_options)
 
         appsi_results = opt.solve(self)
         tc = appsi_results.termination_condition
 
+        # TODO: Handle solver results depending on solver class
         solver_results = {
             "termination_condition": tc.name,
             "best_feasible_objective": appsi_results.best_feasible_objective,
@@ -442,6 +468,7 @@ class Model(po.ConcreteModel):
 
         optimal = tc == appsi.base.TerminationCondition.optimal
 
+        # TODO: check if valid for all solver
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
@@ -452,10 +479,29 @@ class Model(po.ConcreteModel):
             solver_results=solver_results,
         )
 
-    # TOOD remove? or used for glpk and scip?
     def solve_factory(
         self, solver_info, solver, solver_io, solve_kwargs, cmdline_options
     ):
+        """Solve the model with Pyomo's ``SolverFactory`` interface.
+
+        Parameters
+        ----------
+        solver_info : callable
+            Factory used to create the common solver return object.
+        solver : str
+            Name of the solver registered with ``SolverFactory``.
+        solver_io : str
+            Solver interface or file format passed to ``SolverFactory``.
+        solve_kwargs : dict
+            Keyword arguments forwarded to the solver's ``solve`` method.
+        cmdline_options : dict
+            Solver options added to the solver object's ``options`` mapping.
+
+        Returns
+        -------
+        solver_info
+            Solver status and the Pyomo ``SolverResults`` object.
+        """
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -475,9 +521,11 @@ class Model(po.ConcreteModel):
             solver_results=factory_results,
         )
 
+    # TODO add parameter/flagg for appsi solvers
     def solve(
         self,
         solver="cbc",
+        solver_io="lp",
         allow_nonoptimal=False,
         solve_kwargs=None,
         cmdline_options=None,
@@ -492,18 +540,35 @@ class Model(po.ConcreteModel):
             pyomo solver interface file format: "lp", "python", "nl", etc.
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
-            True: If no optimal solution is found, there will be a warning.
-            This is an option for experts. There will be no results in case
-            no optimum is found.
+            True: If no optimal solution is found, a warning is issued and
+            the solver metadata is returned instead of a ``Results`` object.
+            A feasible incumbent may be loaded for APPSI solvers.
         solve_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory.solve() method
-            Example : {"tee":True}
+            Additional arguments for the solver's ``solve`` method, e.g.
+            ``{"tee": True}``. APPSI solvers currently use ``tee`` to enable
+            solver output; other arguments are forwarded by the
+            ``SolverFactory`` path.
         cmdline_options : dict
-            Dictionary with command line options for solver e.g.
-            {"mipgap":"0.01"} results in "--mipgap 0.01"
-            \{"interior":" "} results in "--interior"
-            \Gurobi solver takes numeric parameter values such as
-            {"method": 2}
+            Solver-specific options. APPSI solvers receive these through
+            their options attribute; ``SolverFactory`` solvers receive them
+            through their ``options`` mapping. For example,
+            ``{"mipgap": 0.01}`` sets a MIP gap, while Gurobi accepts numeric
+            parameters such as ``{"method": 2}``.
+
+        Returns
+        -------
+        Results or dict
+            An optimal solve returns a ``Results`` object. If
+            ``allow_nonoptimal=True`` and the solver is non-optimal, a warning
+            is issued and its solver metadata is returned instead.
+
+        Raises
+        ------
+        ValueError
+            If ``solver`` is not supported by this method.
+        RuntimeError
+            If the solver does not return an optimal solution and
+            ``allow_nonoptimal`` is false.
         """
         if solve_kwargs is None:
             solve_kwargs = {}
@@ -514,50 +579,40 @@ class Model(po.ConcreteModel):
             ["optimal", "solver_results", "termination_condition", "status"],
         )
 
-        solver_classes = {
+        # TODO: any solver missing? ipopt, mosek, cplex -> appsi or solver_factory
+        appsi_solver = {
             "highs": (appsi.solvers.Highs, "highs_options"),
             "cbc": (appsi.solvers.Cbc, "cbc_options"),
             "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
         }
 
-        if solver not in solver_classes:
+        factory_solver = ["glpk", "scip"]
+
+        if solver not in appsi_solver.keys() | set(factory_solver):
             msg = (
                 f"Solver {solver} is not supported. "
-                f"Please use one of the following: {list(solver_classes)}"
+                f"Please use one of the following: {list(appsi_solver) + factory_solver}"
             )
             raise ValueError(msg)
 
-        solver_class, solver_options = solver_classes.get(solver, None)
+        if solver in appsi_solver:
+            solver_class, solver_options = appsi_solver.get(solver, None)
 
-        opt = solver_class()
-        opt.config.load_solution = False
-
-        if solve_kwargs.get("tee"):
-            opt.config.stream_solver = True
-
-        setattr(opt, solver_options, cmdline_options)
-
-        appsi_results = opt.solve(self)
-        tc = appsi_results.termination_condition
-
-        solver_results = {
-            "termination_condition": tc.name,
-            "best_feasible_objective": appsi_results.best_feasible_objective,
-            "best_objective_bound": appsi_results.best_objective_bound,
-            "wallclock_time": getattr(appsi_results, "wallclock_time", None),
-        }
-
-        optimal = tc == appsi.base.TerminationCondition.optimal
-
-        if optimal or appsi_results.best_feasible_objective is not None:
-            appsi_results.solution_loader.load_vars()
-
-        solver_return = solver_info(
-            optimal=optimal,
-            termination_condition=tc,
-            status=tc.value,
-            solver_results=solver_results,
-        )
+            solver_return = self.solve_appsi(
+                solver_info=solver_info,
+                solver_class=solver_class,
+                solver_options=solver_options,
+                solve_kwargs=solve_kwargs,
+                cmdline_options=cmdline_options,
+            )
+        else:
+            solver_return = self.solve_factory(
+                solver_info=solver_info,
+                solver=solver,
+                solver_io=solver_io,
+                solve_kwargs=solve_kwargs,
+                cmdline_options=cmdline_options,
+            )
 
         self.es.results = solver_return.solver_results
         self.solver_results = solver_return.solver_results
