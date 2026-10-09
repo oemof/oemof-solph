@@ -135,7 +135,7 @@ def test_results_init_ignores_duplicate_variable_occurrence():
 
     class _FakeModel:
         def __init__(self, variables):
-            self.solver_results = {}
+            self._solver_results = {}
             self.dual = None
             self.rc = None
             self._variables = variables

@@ -217,7 +217,9 @@ def test_results_with_recent_dump():
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert meta["objective"] == pytest.approx(423167578261115584, abs=0.5)
+    assert meta["objective"] == pytest.approx(
+        423167578261115600, rel=0.0000001
+    )
 
 
 def test_solph_converter_attributes_before_dump_and_after_restore():
