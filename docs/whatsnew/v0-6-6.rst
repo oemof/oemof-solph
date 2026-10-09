@@ -18,6 +18,8 @@ API changes
 * ExtractionTurbineCHP is deprecated and will be replaced by
   VariableSplitConverter. The new class is more flexible but will cover all
   use cases of the ExtractionTurbineCHP
+* Remove `solver-results` attribute from Model class. It will be replaced by
+  the new `solver_return` attribute.
 
 New features
 ############
@@ -27,6 +29,9 @@ New features
   given, real operating points (e.g. an extraction/backpressure turbine, where
   the split between electricity and heat varies with the amount of heat
   extracted).
+* Added a solver attribute to the Results class to get the return values of
+  the solver in a structured way
+* Added dual-variables and reduced cost to the Results class
 
 Documentation
 #############
@@ -44,8 +49,9 @@ Contributors
 ############
 
 * Patrik Schönfeldt (DLR)
-* Uwe Krien
 * Malte Fritz
+* Julius Ellermann (DLR)
+* Uwe Krien
 
 Acknowledgements
 ################

@@ -33,9 +33,9 @@ def test_maximum_shutdowns():
         nonconvex=solph.NonConvex(maximum_shutdowns=1),
         variable_costs=[1, -2, 1, 1, 1, -5, 1, 1, 1, -2],
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert flow_result == [0, 10, 5, 5, 5, 10, 0, 0, 0, 10]
+    assert flow_result == [0.0, 10.0, 5.0, 5.0, 5.0, 10.0, 0.0, 0.0, 0.0, 10.0]
 
 
 def test_maximum_startups():
@@ -45,7 +45,7 @@ def test_maximum_startups():
         nonconvex=solph.NonConvex(maximum_startups=1),
         variable_costs=[1, -4, 1, 1, 1, -5, 1, 1, 5, -3],
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
     assert flow_result == [0, 10, 5, 5, 5, 10, 0, 0, 0, 0]
 
@@ -58,7 +58,7 @@ def test_initial_status_on():
         nonconvex=solph.NonConvex(initial_status=1, minimum_uptime=3),
         variable_costs=1,
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
     assert flow_result == 3 * [5] + 7 * [0]
 
@@ -72,7 +72,7 @@ def test_activity_costs():
         nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
         variable_costs=-0.45,
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
     assert flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]
 

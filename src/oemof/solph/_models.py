@@ -17,12 +17,12 @@ SPDX-License-Identifier: MIT
 
 import logging
 import warnings
-from collections import namedtuple
+from dataclasses import dataclass
 from logging import getLogger
 
+import pandas as pd
 from pyomo import environ as po
 from pyomo.contrib import appsi
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
 from oemof.solph import EnergySystem, processing
@@ -42,6 +42,46 @@ class LoggingError(BaseException):
     """Raised when the wrong logging level is used."""
 
     pass
+
+
+@dataclass
+class SolverResults:
+    """SolverResults holds the summary results of the solver run.
+
+    Parameters
+    ----------
+    optimal : bool
+        Whether the optimisation terminated with an optimal solution.
+    status : str | int | None
+        Solver status (e.g. ``ok`` or ``5``) returned by the solver.
+    termination_condition : str | None
+        Termination condition reported by the solver (e.g. ``"optimal"``).
+    message : str | None
+        Optional solver message.
+    wallclock_time : float | None
+        Wall-clock time the solver took to solve the problem in seconds.
+    objective : float | None
+        Objective function value of the solution.
+    solver : str
+        Name of the solver used (e.g. ``"cbc"``, ``"highs"``).
+    gap : float | None
+        Relative optimality gap of the solution, if available.
+    best_feasible_objective : float | None
+        Best feasible objective value found by the solver.
+    best_objective_bound : float | None
+        Best objective bound reported by the solver.
+    """
+
+    optimal: bool
+    status: str | int | None
+    termination_condition: str | None
+    message: str | None
+    wallclock_time: float | None
+    objective: float | None
+    solver: str
+    gap: float | None
+    best_feasible_objective: float | None
+    best_objective_bound: float | None
 
 
 class Model(po.ConcreteModel):
@@ -69,12 +109,8 @@ class Model(po.ConcreteModel):
         Time increments
     flows : dict
         Flows of the model
-    name : str
-        Name of the model
     es : solph.EnergySystem
         Energy system of the model
-    meta : `pyomo.opt.results.results_.SolverResults` or None
-        Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
@@ -175,12 +211,25 @@ class Model(po.ConcreteModel):
 
         self.flows = self.es.flows()
 
-        self.solver_results = None
         self.dual = None
         self.rc = None
 
         if auto_construct is True:
             self._construct()
+        self._solver_results = None
+        self.solver_return = None
+
+    @property
+    def solver_results(self):
+        warnings.warn(
+            "'solver_results' attribute is deprecated and will be removed in "
+            "a future version. Use the 'solver' attribute of the Results "
+            "object or 'solver_return' if you need the original return "
+            "object.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self._solver_results
 
     def _construct(self):
         """Construct a Model by adding parent block sets and variables
@@ -405,13 +454,28 @@ class Model(po.ConcreteModel):
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
+        warnings.warn(
+            "Model.receive_duals() is deprecated. Use "
+            "Model.solve(duals=True) instead.",
+            FutureWarning,
+        )
+        self._receive_duals()
+
+    def _receive_duals(self):
         """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
         """
-        # shadow prices
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
+        if self.dual is None:
+            del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
-        # reduced costs
+
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
+        if self.rc is None:
+            del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
@@ -427,7 +491,6 @@ class Model(po.ConcreteModel):
 
     def solve_appsi(
         self,
-        solver_info,
         solver=appsi.solvers.Cbc,
         solver_options="cbc_options",
         cmdline_options=None,
@@ -437,8 +500,6 @@ class Model(po.ConcreteModel):
 
         Parameters
         ----------
-        solver_info : callable
-            Factory used to create the common solver return object.
         solver : type
             APPSI solver class (a subclass of
             ``pyomo.contrib.appsi.base.Solver``) to instantiate.
@@ -481,22 +542,57 @@ class Model(po.ConcreteModel):
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
-        return solver_info(
+        if self.dual is not None:
+            try:
+                duals = opt.get_duals()
+                for c, v in duals.items():
+                    self.dual[c] = v
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract dual variables from HiGHS. This "
+                    "typically happens for MIP models, where duals are not "
+                    "well-defined.",
+                    UserWarning,
+                )
+
+        if self.rc is not None:
+            try:
+                reduced_costs = opt.get_reduced_costs()
+                for v_, val in reduced_costs.items():
+                    self.rc[v_] = val
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract reduced costs from HiGHS. This "
+                    "typically happens for MIP models, where reduced costs "
+                    "are not well-defined.",
+                    UserWarning,
+                )
+
+        bfo = appsi_results.best_feasible_objective
+        bob = appsi_results.best_objective_bound
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
+        else:
+            gap = None
+
+        return SolverResults(
+            objective=bfo,
+            solver=solver,
             optimal=optimal,
-            termination_condition=tc,
+            termination_condition=tc.name,
             status=tc.value,
-            solver_results=solver_results,
+            wallclock_time=appsi_results.wallclock_time,
+            best_objective_bound=bob,
+            best_feasible_objective=bfo,
+            gap=gap,
+            message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
-    def solve_factory(
-        self, solver_info, solver, solver_io, solve_kwargs, cmdline_options
-    ):
+    def solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
         """Solve the model with Pyomo's ``SolverFactory`` interface.
 
         Parameters
         ----------
-        solver_info : callable
-            Factory used to create the common solver return object.
         solver : str
             Name of the solver registered with ``SolverFactory``.
         solver_io : str
@@ -518,16 +614,37 @@ class Model(po.ConcreteModel):
         for k in cmdline_options:
             options[k] = cmdline_options[k]
 
-        factory_results = opt.solve(self, **solve_kwargs)
+        solve_kwargs = dict(solve_kwargs)
+        solve_kwargs["suffixes"] = ["dual", "rc"]
 
-        status = factory_results.Solver.Status
-        message = factory_results.Solver.Termination_condition
+        self.solver_return = opt.solve(self, **solve_kwargs)
 
-        return solver_info(
-            optimal=status == "ok" and message == "optimal",
-            termination_condition=message,
-            status=factory_results.Solver.Status,
-            solver_results=factory_results,
+        status = self.solver_return.Solver.Status
+        tc = self.solver_return.Solver.Termination_condition
+        msg = getattr(self.solver_return.Solver, "Message", None)
+        wt = getattr(self.solver_return.Solver, "Time", None)
+        bfo = getattr(self.solver_return.Problem[0], "Upper_bound", None)
+        bob = getattr(self.solver_return.Problem[0], "Lower_bound", None)
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
+        else:
+            gap = None
+        try:
+            objective = po.value(self.objective)
+        except ValueError:
+            objective = None
+
+        return SolverResults(
+            optimal=status == "ok" and tc == "optimal",
+            solver=solver,
+            objective=objective,
+            termination_condition=tc.name,
+            status=status.name,
+            wallclock_time=wt,
+            best_feasible_objective=bfo,
+            best_objective_bound=bob,
+            gap=gap,
+            message=msg,
         )
 
     def _get_solve_function(self, solver: str, interface: str):
@@ -576,6 +693,7 @@ class Model(po.ConcreteModel):
         solver_io: str = "lp",  # TODO: only relevant for SolverFactory
         interface: str = "auto",
         allow_nonoptimal: bool = False,
+        duals: bool = False,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
     ) -> Results | dict:
@@ -591,9 +709,11 @@ class Model(po.ConcreteModel):
             interface to use: "auto", "solverfactory", "appsi".
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
-            True: If no optimal solution is found, a warning is issued and
-            the solver metadata is returned instead of a ``Results`` object.
-            A feasible incumbent may be loaded for APPSI solvers.
+            True: If no optimal solution is found, there will be a warning.
+            This is an option for experts. There will be no results in case
+            no optimum is found.
+        duals : bool
+            Receive dual variables and reduced cost.
         solve_kwargs : dict
             Additional arguments for the solver's ``solve`` method, e.g.
             ``{"tee": True}``. APPSI solvers currently use ``tee`` to enable
@@ -640,6 +760,9 @@ class Model(po.ConcreteModel):
             cmdline_options=cmdline_options,
         )
 
+        if duals:
+            self._receive_duals()
+
         if solver in self._APPSI_SOLVER:
             solver_class, solver_options = self._APPSI_SOLVER.get(solver, None)
 
@@ -647,46 +770,53 @@ class Model(po.ConcreteModel):
                 solver_info=solver_info,
                 solver_class=solver_class,
                 solver_options=solver_options,
-                solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
+                solver=solver,
             )
         else:
-            solver_return = self.solve_factory(
-                solver_info=solver_info,
+            solver_info = self._solve_factory(
                 solver=solver,
                 solver_io=solver_io,
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
             )
 
-        self.es.results = solver_return.solver_results
-        self.solver_results = solver_return.solver_results
+        # ToDo DepricatedWarning for es.results -> oemof.network
+        self.es.results = self.solver_return
 
-        if solver_return.optimal:
-            msg = "Optimization successful."
+        # The solver_results attribute is deprecated and will be removed in
+        # future versions To access the original solver return use
+        # Model.solver_return
+        if solver_info.solver == "highs":
+            self._solver_results = self.solver_return.__dict__
+        else:
+            self._solver_results = self.solver_return
+
+        if solver_info.optimal:
+            msg = "Optimisation successful."
             logging.info(msg)
         else:
             msg = (
                 f"The solver did not return an optimal solution. "
-                f"Instead the optimization ended with\n"
-                f"       - status: {solver_return.status}\n"
+                f"Instead the optimisation ended with\n"
+                f"       - status: {solver_info.status}\n"
                 f"       - termination condition: "
-                f"{solver_return.termination_condition.name}"
+                f"{solver_info.termination_condition}"
             )
 
             if allow_nonoptimal:
                 warnings.warn(msg, UserWarning)
-                return solver_return.solver_results
+                return self.solver_return
             else:
                 raise RuntimeError(msg)
 
-        return Results(self)
+        # The solver_info is a pandas Series. It is accessible using
+        # Results.solver
+        return Results(self, solver_info=pd.Series(solver_info.__dict__))
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
-        relaxer = RelaxIntegrality()
-        relaxer._apply_to(self)
-
+        po.TransformationFactory("core.relax_integer_vars").apply_to(self)
         return self
 
     def get_timestep_from_tsam_timestep(self, p, ik, g):

@@ -76,9 +76,7 @@ def test_non_convex_status_variables():
     model = solph.Model(energy_system)
 
     # Optimization
-    model.solve(solver="cbc", solve_kwargs={"tee": False})
-
-    results = solph.Results(model)
+    results = model.solve(solver="cbc", solve_kwargs={"tee": False})
 
     assert (results["status"][(boiler, bus_heat)] == [1, 0]).all()
     assert (results["status"][(heat_pump, bus_heat)] == [0, 1]).all()

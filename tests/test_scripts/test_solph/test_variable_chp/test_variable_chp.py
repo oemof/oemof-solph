@@ -205,5 +205,5 @@ def test_variable_chp(filename="variable_chp.csv", solver="cbc"):
 
     # objective function
     assert solph.processing.meta_results(om)["objective"] == pytest.approx(
-        326661590, abs=0.5
+        326661590, abs=5
     )

@@ -51,6 +51,25 @@ Note that data is processed on demand, meaning that accessing data can trigger
 calculations. So if you are not interested in every detail of you results,
 some time can be saved here.
 
+Solver return information
+-------------------------
+
+Each solver return general information about the solving process a little bit
+different. Therefore, Results.solver provides a defined structure (pandas
+.Series) of the general solver feed-back like bounds, objective or wallclock
+time. If a value is not returned it will be "None". A complete list can be
+found here: :class:`~oemof.solph._models.SolverResults`. If you need the
+original return object of the solver use `Model.solver_return`.
+
+.. code-block:: python
+
+    [...]
+    results = model.solve(solver=solver)
+    objective = results.solver.objective
+    wallclock_time = results.solver.wallclock_time
+    solver_results = results.solver  # pandas.Series
+
+
 Working with results
 --------------------
 
