@@ -95,6 +95,13 @@ class TestParameterResult:
         cls.model_cbc = Model(cls.es)
         cls.model_cbc.solve(solver="cbc")
 
+    def test_energy_system_results(self):
+        with pytest.warns(
+            FutureWarning,
+            match="EnergySystem.results is deprecated",
+        ):
+            self.es.results == self.es._results
+
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
         meta_cbc = processing.meta_results(self.model_cbc)

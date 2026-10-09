@@ -20,6 +20,8 @@ API changes
   use cases of the ExtractionTurbineCHP
 * Remove `solver-results` attribute from Model class. It will be replaced by
   the new `solver_return` attribute.
+* Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
+  the new `solver_return` attribute.
 
 New features
 ############
