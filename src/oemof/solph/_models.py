@@ -428,7 +428,7 @@ class Model(po.ConcreteModel):
     def solve_appsi(
         self,
         solver_info,
-        solver_class="cbc",
+        solver=appsi.solvers.Cbc,
         solver_options="cbc_options",
         cmdline_options=None,
         solve_kwargs=None,
@@ -439,8 +439,9 @@ class Model(po.ConcreteModel):
         ----------
         solver_info : callable
             Factory used to create the common solver return object.
-        solver_class : type ["gurobi]
-            APPSI solver class to instantiate.
+        solver : type
+            APPSI solver class (a subclass of
+            ``pyomo.contrib.appsi.base.Solver``) to instantiate.
         solver_options : str
             Name of the solver attribute that receives ``cmdline_options``.
         cmdline_options : dict
@@ -454,7 +455,8 @@ class Model(po.ConcreteModel):
             Solver status and APPSI result metadata. Variable values are
             loaded when an optimal solution or a feasible incumbent exists.
         """
-        opt = solver_class()
+        # TODO: Implement option to handle unknown solver names defined by user
+        opt = solver()
         opt.config.load_solution = False
 
         if solve_kwargs.get("tee"):
@@ -567,22 +569,26 @@ class Model(po.ConcreteModel):
                 f"'appsi'."
             )
             raise ValueError(msg)
+
     def solve(
         self,
-        solver="cbc",
-        solver_io="lp",
-        allow_nonoptimal=False,
-        solve_kwargs=None,
-        cmdline_options=None,
-    ):
+        solver: str = "cbc",
+        solver_io: str = "lp",  # TODO: only relevant for SolverFactory
+        interface: str = "auto",
+        allow_nonoptimal: bool = False,
+        solve_kwargs: None | dict = None,
+        cmdline_options: None | dict = None,
+    ) -> Results | dict:
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
         ----------
         solver : string
-            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
+            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex".
         solver_io : string
             pyomo solver interface file format: "lp", "python", "nl", etc.
+        interface : str
+            interface to use: "auto", "solverfactory", "appsi".
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
             True: If no optimal solution is found, a warning is issued and
@@ -609,8 +615,6 @@ class Model(po.ConcreteModel):
 
         Raises
         ------
-        ValueError
-            If ``solver`` is not supported by this method.
         RuntimeError
             If the solver does not return an optimal solution and
             ``allow_nonoptimal`` is false.
@@ -619,7 +623,7 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
-        solver_info = namedtuple(
+        solver_info = namedtuple(  # defines return object for solve functions
             "SolverReturn",
             ["optimal", "solver_results", "termination_condition", "status"],
         )
