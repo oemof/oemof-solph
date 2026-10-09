@@ -8,17 +8,12 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.14"
-  # overriding create_environment and install replaces the default
-  # virtualenv + pip steps with uv
-  jobs:
-    pre_create_environment:
-      - asdf plugin add uv
-      - asdf install uv latest
-      - asdf global uv latest
-    create_environment:
-      - uv venv "$READTHEDOCS_VIRTUALENV_PATH"
-    install:
-      - UV_PROJECT_ENVIRONMENT="$READTHEDOCS_VIRTUALENV_PATH" UV_LINK_MODE=copy uv sync --extra dev
 sphinx:
   configuration: docs/conf.py
 formats: []
+python:
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - dev
