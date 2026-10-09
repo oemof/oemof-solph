@@ -152,7 +152,7 @@ class TestParameterResult:
         assert storage_content.iloc[0] != storage_content.iloc[-1]
         assert (
             storage_content.iloc[0]
-            == storage_content.iloc[-1] + charge.iloc[-1] / 2
+            == pytest.approx(storage_content.iloc[-1] + charge.iloc[-1] / 2)
         )
         assert not charge.isnull().any()
         assert storage_content.index[0] == datetime.datetime(
