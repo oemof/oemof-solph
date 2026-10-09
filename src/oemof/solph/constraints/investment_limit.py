@@ -130,7 +130,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     >>> model = solph.Model(es)
     >>> model = solph.constraints.additional_investment_flow_limit(
     ...     model, "space", limit=1500)
-    >>> a = model.solve(solver="cbc")
+    >>> a = model.solve(solver="highs")
     >>> int(round(model.invest_limit_space()))
     1500
     """  # noqa: E501

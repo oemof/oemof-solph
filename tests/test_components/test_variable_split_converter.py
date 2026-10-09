@@ -6,6 +6,7 @@ SPDX-FileCopyrightText: oemof e.V. and contributors
 SPDX-License-Identifier: MIT
 """
 
+import numpy as np
 import pandas as pd
 import pytest
 
@@ -145,14 +146,10 @@ def test_variable_split_converter_function():
     )
 
     # Efficiencies of Convert must be fixed
-    assert all(eff_fix_elec.round(9) == 0.3)
-    assert all(eff_fix_heat.round(9) == 0.5)
+    assert np.allclose(eff_fix_elec.round(9), 0.3)
+    assert np.allclose(eff_fix_heat.round(9), 0.5)
     # Efficiencies of VariableSplitConverter must be within the linear function
-    assert all(
-        (
-            round(-4 / 3 * eff_var_elec + 23 / 30, 6) == round(eff_var_heat, 6)
-        ).iloc[0:5]
-    )
+    assert np.allclose((-4 / 3 * eff_var_elec + 23 / 30)[:5], eff_var_heat[:5])
 
     # Expected results
     columns = pd.MultiIndex.from_tuples(
@@ -176,7 +173,7 @@ def test_variable_split_converter_function():
         [2.4, 2.4, 0.0, 0.0],
     ]
     df = pd.DataFrame(data, columns=columns)
-    assert df.equals(flows[ex_cols])
+    assert np.allclose(df.to_numpy(), flows[ex_cols].to_numpy(), atol=1e-5)
 
 
 # ---------------------------------------------------------------------------

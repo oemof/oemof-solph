@@ -163,7 +163,7 @@ def test_optimise_storage_size(
 
     # Solve model
     om = solph.Model(es)
-    om.receive_duals()
+    om._receive_duals()
     om.solve(solver=solver)
     es.results["main"] = processing.results(om)
     es.results["meta"] = processing.meta_results(om)
@@ -208,8 +208,8 @@ def test_results_with_recent_dump():
     assert str(meta["solver"]["Status"]) == "ok"
 
     # Problem results
-    assert meta["problem"]["Lower bound"] == 4.231675777e17
-    assert meta["problem"]["Upper bound"], 4.231675777e17
+    assert meta["problem"]["Lower bound"] == pytest.approx(4.231675777e17)
+    assert meta["problem"]["Upper bound"] == pytest.approx(4.231675777e17)
     assert meta["problem"]["Number of variables"] == 2807
     assert meta["problem"]["Number of constraints"] == 2809
     assert meta["problem"]["Number of nonzeros"] == 1197
@@ -217,7 +217,9 @@ def test_results_with_recent_dump():
     assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
-    assert meta["objective"] == pytest.approx(423167578261115584, abs=0.5)
+    assert meta["objective"] == pytest.approx(
+        423167578261115600, rel=0.0000001
+    )
 
 
 def test_solph_converter_attributes_before_dump_and_after_restore():

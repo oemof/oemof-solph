@@ -92,6 +92,8 @@ from oemof.tools import logger
 
 from oemof import solph
 
+from matplotlib import pyplot as plt
+
 
 def main(optimize=True, solver="cbc"):
     # Read data file
@@ -209,17 +211,23 @@ def main(optimize=True, solver="cbc"):
 
     # initialise the operational model
     om = solph.Model(energysystem)
-
+    # om.receive_duals()
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    om.solve(solver=solver, solve_kwargs={"tee": True})
+    results = om.solve(solver=solver, solve_kwargs={"tee": True}, duals=True)
+    print(results.keys())
+
+    duals = results.get("duals")
+    reduced_costs = results.get("reduced_costs")
+    duals.plot()
+    reduced_costs.plot()
+    plt.show()
 
     ##########################################################################
     # Check and plot the results
     ##########################################################################
 
     # check if the new result object is working for custom components
-    results = solph.processing.results(om)
 
     electricity_bus = solph.views.node(results, "electricity")
 

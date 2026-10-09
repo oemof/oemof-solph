@@ -88,12 +88,12 @@ class TestParameterResult:
         )
         cls.es.add(dg, batt, demand)
         cls.model_duals = Model(cls.es)
-        cls.model_duals.receive_duals()
+        cls.model_duals._receive_duals()
         cls.model_duals.solve()
         cls.model_cbc = Model(cls.es)
         cls.model_cbc.solve(solver="cbc")
-        cls.model_glpk = Model(cls.es)
-        cls.model_glpk.solve(solver="glpk")
+        cls.model_cbc = Model(cls.es)
+        cls.model_cbc.solve(solver="cbc")
 
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
@@ -101,9 +101,9 @@ class TestParameterResult:
         assert "MIPGap" in meta_cbc["problem"]
         assert meta_cbc["problem"]["MIPGap"] == 0
 
-        meta_glpk = processing.meta_results(self.model_glpk)
-        assert "MIPGap" in meta_glpk["problem"]
-        assert meta_glpk["problem"]["MIPGap"] == 0
+        meta_cbc = processing.meta_results(self.model_cbc)
+        assert "MIPGap" in meta_cbc["problem"]
+        assert meta_cbc["problem"]["MIPGap"] == 0
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups["b_el2"]

@@ -398,10 +398,9 @@ def main(optimize=True, solver="cbc"):
 
     # creation of a least cost model from the energy system
     om = solph.Model(esys)
-    om.receive_duals()
 
     # solving the linear problem using the given solver
-    results = om.solve(solver=solver)
+    results = om.solve(solver=solver, duals=True)
 
     # create graph of esys
     # You can use argument filename='/home/somebody/my_graph.graphml'
@@ -419,6 +418,8 @@ def main(optimize=True, solver="cbc"):
 
     # print and plot some results
     flows = results["flow"]
+    duals = results["duals"]
+    print(duals.mean())
 
     mask_r2 = (flows.columns.get_level_values(0) == "R2_bus_el") | (
         flows.columns.get_level_values(1) == "R2_bus_el"
@@ -441,6 +442,7 @@ def main(optimize=True, solver="cbc"):
     fig.subplots_adjust(top=0.7)
     plt.show()
     logging.info("Done!")
+    return None
 
 
 if __name__ == "__main__":

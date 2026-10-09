@@ -16,7 +16,7 @@ In small energy system you normally address the node, you want your results
 from, directly. In large systems you may want to group your results and collect
 all power plants of a specific region or pv feed-in of all regions.
 
-Therefore you can use named tuples as label. In a named tuple you need to
+Therefore, you can use named tuples as label. In a named tuple you need to
 specify the fields:
 
 >>> label = namedtuple('solph_label', ['region', 'tag1', 'tag2'])
@@ -25,8 +25,8 @@ specify the fields:
 >>> pp_gas_label = label('region_2', 'power_plant', 'natural_gas')
 >>> demand_label = label('region_3', 'electricity', 'demand')
 
-You always have to address all fields but you can use empty strings or None as
-place holders.
+You always have to address all fields, but you can use empty strings or None as
+placeholders.
 
 >>> elec_bus = label('region_4', 'electricity', '')
 >>> print(elec_bus)
@@ -37,40 +37,6 @@ solph_label(region='region_4', tag1='electricity', tag2='')
 solph_label(region='region_4', tag1='electricity', tag2=None)
 
 Now you can filter the results using the label or the instance:
-
->>> for key, value in results.items():  # Loop results (keys are tuples!)
-...     if isinstance(key[0], comp.Sink) & (key[0].label.tag2 == 'demand'):
-...         print("elec demand {0}: {1}".format(key[0].label.region,
-...                                             value['sequences'].sum()))
-
-elec demand region_1: 3456
-elec demand region_2: 2467
-...
-
-In the example below a subclass is created to define ones own string output.
-By default the output of a namedtuple is `field1=value1, field2=value2,...`:
-
->>> print(str(pv_label))
-solph_label(region='region_1', tag1='renewable_source', tag2='pv')
-
-With the subclass we created below the output is different, because we defined
-our own string representation:
-
->>> new_pv_label = Label('region_1', 'renewable_source', 'pv')
->>> print(str(new_pv_label))
-region_1_renewable_source_pv
-
-You still will be able to get the original string using `repr`:
-
->>> print(repr(new_pv_label))
-Label(tag1='region_1', tag2='renewable_source', tag3='pv')
-
-This a helpful adaption for automatic plots etc..
-
-Afterwards you can use `format` to define your own custom string.:
-
->>> print('{0}+{1}-{2}'.format(pv_label.region, pv_label.tag2, pv_label.tag1))
-region_1+pv-renewable_source
 
 Code
 ----
@@ -95,7 +61,7 @@ This example requires oemof.solph (at least v0.5.0), install by:
     pip install oemof.solph>=0.5
 
 
-License
+Licence
 -------
 SPDX-License-Identifier: MIT
 
@@ -276,7 +242,7 @@ def main(optimize=True, solver="cbc"):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    model.receive_duals()
+
     model.solve(solver=solver, solve_kwargs={"tee": solver_verbose})
 
     logging.info("Store the energy system with the results.")
