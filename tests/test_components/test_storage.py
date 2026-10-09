@@ -86,7 +86,7 @@ def test_invest_power_uncoupled():
     model = solph.Model(es)
     results = model.solve()
 
-    assert (results["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
+    assert np.allclose(results["storage_content"][storage], np.arange(0, 10.5, 1))
 
     capacity_inflow = results["nominal_capacity"][(bus, storage)]
     assert capacity_inflow[0] == pytest.approx(1)
@@ -132,7 +132,7 @@ def test_invest_power_coupled():
     results = model.solve()
 
     storage_content = results["storage_content"][storage]
-    assert (storage_content == np.arange(0, 10.5, 1)).all()
+    assert np.allclose(storage_content, np.arange(0, 10.5, 1))
 
     capacity_inflow = results["nominal_capacity"][(bus, storage)]
     assert capacity_inflow[0] == pytest.approx(1)
