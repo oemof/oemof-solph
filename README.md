@@ -9,10 +9,10 @@
 | src/oemof/solph/\_energy\_system.py                         |      146 |        7 |       70 |        7 |     92.59% |91-\>93, 189-190, 264-\>267, 270-\>273, 335, 381-385, 391-395 |
 | src/oemof/solph/\_groupings.py                              |       28 |        0 |       12 |        3 |     92.50% |69-\>72, 83-\>86, 95-\>98 |
 | src/oemof/solph/\_helpers.py                                |       26 |        2 |       10 |        0 |     94.44% |   118-120 |
-| src/oemof/solph/\_models.py                                 |      173 |        4 |       70 |        5 |     96.30% |156-\>159, 176-\>exit, 360-\>336, 365-\>336, 391, 556-559 |
+| src/oemof/solph/\_models.py                                 |      220 |        0 |       90 |        0 |    100.00% |           |
 | src/oemof/solph/\_options.py                                |       96 |        2 |       30 |        1 |     96.03% |   128-129 |
-| src/oemof/solph/\_plumbing.py                               |      113 |        1 |       26 |        1 |     98.56% |       152 |
-| src/oemof/solph/\_results.py                                |      118 |       24 |       56 |        1 |     74.14% |77, 94, 207-265 |
+| src/oemof/solph/\_plumbing.py                               |      113 |        0 |       26 |        0 |    100.00% |           |
+| src/oemof/solph/\_results.py                                |      141 |        3 |       64 |        4 |     96.59% |103, 105, 256, 268-\>266 |
 | src/oemof/solph/buses/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/buses/\_bus.py                              |       38 |        0 |       16 |        2 |     96.30% |53-\>55, 55-\>57 |
 | src/oemof/solph/components/\_\_init\_\_.py                  |       13 |        0 |        0 |        0 |    100.00% |           |
@@ -36,14 +36,14 @@
 | src/oemof/solph/flows/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/flows/\_flow.py                             |       98 |        0 |       52 |        1 |     99.33% | 261-\>267 |
 | src/oemof/solph/flows/\_invest\_non\_convex\_flow\_block.py |      104 |        1 |       24 |        2 |     97.66% |140-\>exit, 308 |
-| src/oemof/solph/flows/\_investment\_flow\_block.py          |      114 |       19 |       46 |        6 |     76.88% |209-210, 448-455, 466-474, 485-491, 592, 605-606, 625-631, 647-652 |
+| src/oemof/solph/flows/\_investment\_flow\_block.py          |      114 |        9 |       46 |        3 |     90.00% |209-\>exit, 448-455, 466-474, 485-491, 592 |
 | src/oemof/solph/flows/\_non\_convex\_flow\_block.py         |       54 |        1 |       10 |        2 |     95.31% |93-\>92, 141 |
 | src/oemof/solph/flows/\_shared.py                           |      156 |       18 |       46 |        6 |     84.16% |179, 186, 389-413, 432-460, 585-\>584, 613-\>612 |
 | src/oemof/solph/flows/\_simple\_flow\_block.py              |       92 |        0 |       40 |        1 |     99.24% | 383-\>382 |
 | src/oemof/solph/helpers.py                                  |       20 |        1 |        8 |        2 |     89.29% |28, 37-\>39 |
-| src/oemof/solph/processing.py                               |      352 |       63 |      154 |       13 |     82.21% |59, 62-\>exit, 74, 108-110, 158-164, 196-203, 267, 272, 299-309, 324, 331, 421-457, 499, 546, 672-686, 725-728, 795, 798-801, 935 |
+| src/oemof/solph/processing.py                               |      355 |       65 |      154 |       13 |     81.93% |59, 62-\>exit, 74, 108-110, 158-164, 196-203, 267, 272, 299-309, 324, 331, 421-457, 499, 546, 672-686, 725-728, 795, 798-801, 815-816, 939 |
 | src/oemof/solph/views.py                                    |      132 |        3 |       50 |        5 |     95.60% |68, 91, 96, 296-\>299, 340-\>342 |
-| **TOTAL**                                                   | **3110** |  **269** | **1132** |   **96** | **89.37%** |           |
+| **TOTAL**                                                   | **3183** |  **235** | **1160** |   **90** | **91.18%** |           |
 
 
 ## Setup coverage badge
