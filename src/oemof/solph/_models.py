@@ -489,6 +489,7 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
+    # TODO: make solve_appsi an internal function
     def solve_appsi(
         self,
         solver=appsi.solvers.Cbc,
@@ -528,17 +529,9 @@ class Model(po.ConcreteModel):
         appsi_results = opt.solve(self)
         tc = appsi_results.termination_condition
 
-        # TODO: Handle solver results depending on solver class
-        solver_results = {
-            "termination_condition": tc.name,
-            "best_feasible_objective": appsi_results.best_feasible_objective,
-            "best_objective_bound": appsi_results.best_objective_bound,
-            "wallclock_time": appsi_results.wallclock_time,
-        }
-
+        # TODO: Handle solver results processing depending on solver class
         optimal = tc == appsi.base.TerminationCondition.optimal
 
-        # TODO: check if valid for all solver
         if optimal or appsi_results.best_feasible_objective is not None:
             appsi_results.solution_loader.load_vars()
 
@@ -588,6 +581,7 @@ class Model(po.ConcreteModel):
             message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
+    # TODO: make solve_factory an internal function
     def solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
         """Solve the model with Pyomo's ``SolverFactory`` interface.
 
@@ -743,19 +737,18 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
-        solver_info = namedtuple(  # defines return object for solve functions
-            "SolverReturn",
-            ["optimal", "solver_results", "termination_condition", "status"],
-        )
 
+        # TODO: _get_solve_function should return the fitting solver_io
         solve_function = self._get_solve_function(
             solver=solver, interface=interface
         )
 
-        solve_function(
-            solver_info=solver_info,
+        # TODO: Unify solve_factory and solve_appsi API
+        solver_info = solve_function(
             solver=solver,
-            solver_io=None if solve_function == self.solve_appsi else "lp",
+            solver_io=None
+            if solve_function == self.solve_appsi
+            else solver_io,
             solve_kwargs=solve_kwargs,
             cmdline_options=cmdline_options,
         )
@@ -763,25 +756,7 @@ class Model(po.ConcreteModel):
         if duals:
             self._receive_duals()
 
-        if solver in self._APPSI_SOLVER:
-            solver_class, solver_options = self._APPSI_SOLVER.get(solver, None)
-
-            solver_return = self.solve_appsi(
-                solver_info=solver_info,
-                solver_class=solver_class,
-                solver_options=solver_options,
-                cmdline_options=cmdline_options,
-                solver=solver,
-            )
-        else:
-            solver_info = self._solve_factory(
-                solver=solver,
-                solver_io=solver_io,
-                solve_kwargs=solve_kwargs,
-                cmdline_options=cmdline_options,
-            )
-
-        # ToDo DepricatedWarning for es.results -> oemof.network
+        # TODO DepricatedWarning for es.results -> oemof.network
         self.es.results = self.solver_return
 
         # The solver_results attribute is deprecated and will be removed in
