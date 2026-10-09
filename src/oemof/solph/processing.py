@@ -803,7 +803,8 @@ def meta_results(om, undefined=False):
                     )
     try:
         meta_res["problem"]["MIPGap"] = abs(
-            meta_res["problem"]["Upper bound"] - meta_res["problem"]["Lower bound"]
+            meta_res["problem"]["Upper bound"]
+            - meta_res["problem"]["Lower bound"]
         ) / (
             abs(
                 meta_res["problem"]["Upper bound"]
