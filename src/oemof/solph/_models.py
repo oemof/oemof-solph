@@ -164,7 +164,7 @@ class Model(po.ConcreteModel):
             for i in self.es.groups
             if hasattr(i, "CONSTRAINT_GROUP")
             and i not in self._constraint_groups
-        ]
+        ][::-1]  # invert to add constraints of subnodes first
 
         self.flows = self.es.flows()
 
