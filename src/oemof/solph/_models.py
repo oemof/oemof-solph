@@ -119,6 +119,13 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
+    # TODO: add missing solvers
+    _APPSI_SOLVER = {
+        "highs": (appsi.solvers.Highs, "highs_options"),
+        "cbc": (appsi.solvers.Cbc, "cbc_options"),
+        "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
+    }
+
     def __init__(
         self,
         energysystem: EnergySystem,
@@ -521,7 +528,45 @@ class Model(po.ConcreteModel):
             solver_results=factory_results,
         )
 
-    # TODO add parameter/flagg for appsi solvers
+    def _get_solve_function(self, solver: str, interface: str):
+        """Function to return the correct solve function (`solve_factory`,
+        `solve_appsi`) based on solver and interface selection of the user in
+        the `solve` function.
+        """
+        if interface == "auto":
+            if solver in self._APPSI_SOLVER:
+                msg = f"'appsi' interface selected by default for '{solver}'."
+                logging.info(msg)
+                return self.solve_appsi
+            else:
+                msg = (
+                    f"Solver '{solver}' is not supported by 'appsi' interface."
+                    f" Using pyomos 'SolverFactory' as fallback (slower for"
+                    f" repeated solves)."
+                )
+                logging.info(msg)
+                return self.solve_factory
+        elif interface == "solverfactory":
+            return self.solve_factory
+        elif interface == "appsi":
+            if solver in self._APPSI_SOLVER:
+                return self.solve_appsi
+            else:
+                msg = (
+                    f"Solver '{solver}' is not supported by 'appsi' interface,"
+                    f" which is set explicitly. A generic implementation is"
+                    f" tested. If this fails, set the interface to 'auto' or"
+                    f" 'solverfactory', or use a different solver."
+                )
+                raise UserWarning(msg)
+                # TODO: Implement forced appsi usage
+        else:
+            msg = (
+                f"The selected interface '{interface}' is not supported. "
+                f"Please use one of the following: 'auto', 'solverfactory', "
+                f"'appsi'."
+            )
+            raise ValueError(msg)
     def solve(
         self,
         solver="cbc",
@@ -579,24 +624,20 @@ class Model(po.ConcreteModel):
             ["optimal", "solver_results", "termination_condition", "status"],
         )
 
-        # TODO: any solver missing? ipopt, mosek, cplex -> appsi or solver_factory
-        appsi_solver = {
-            "highs": (appsi.solvers.Highs, "highs_options"),
-            "cbc": (appsi.solvers.Cbc, "cbc_options"),
-            "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
-        }
+        solve_function = self._get_solve_function(
+            solver=solver, interface=interface
+        )
 
-        factory_solver = ["glpk", "scip"]
+        solve_function(
+            solver_info=solver_info,
+            solver=solver,
+            solver_io=None if solve_function == self.solve_appsi else "lp",
+            solve_kwargs=solve_kwargs,
+            cmdline_options=cmdline_options,
+        )
 
-        if solver not in appsi_solver.keys() | set(factory_solver):
-            msg = (
-                f"Solver {solver} is not supported. "
-                f"Please use one of the following: {list(appsi_solver) + factory_solver}"
-            )
-            raise ValueError(msg)
-
-        if solver in appsi_solver:
-            solver_class, solver_options = appsi_solver.get(solver, None)
+        if solver in self._APPSI_SOLVER:
+            solver_class, solver_options = self._APPSI_SOLVER.get(solver, None)
 
             solver_return = self.solve_appsi(
                 solver_info=solver_info,
