@@ -19,7 +19,6 @@ SPDX-License-Identifier: MIT
 """
 
 import numpy as np
-from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import Binary
 from pyomo.environ import Constraint
@@ -27,6 +26,7 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
+from oemof.solph._node import Node
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
@@ -230,8 +230,8 @@ class GenericCHP(Node):
             self._calculate_alphas()
         return self._alphas
 
-    def constraint_group(self):
-        return GenericCHPBlock
+    def required_blocks(self):
+        return [GenericCHPBlock]
 
 
 class GenericCHPBlock(ScalarBlock):
@@ -323,8 +323,6 @@ class GenericCHPBlock(ScalarBlock):
     =============================== ======================= ==== =============================================
 
     """  # noqa: E501
-
-    CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -856,7 +856,7 @@ def __separate_attrs(
             "Label",
             "input",
             "output",
-            "constraint_group",
+            "required_blocks",
         ]
         # Must be tuple in order to work with `str.startswith()`:
         exclusions = tuple(default_exclusions + exclude_attrs)
