@@ -221,11 +221,15 @@ class NonConvex:
         zero and the first timesteps are fixed for the number of minimum
         downtime steps.
     negative_gradient_limit : numeric (iterable, scalar or None)
-        the normed *upper bound* on the positive difference
-        (`flow[t-1] < flow[t]`) of two consecutive flow values.
+        the normed *upper bound* on the decrease
+        (`flow[t-1] > flow[t]`) of two consecutive flow values while the
+        flow stays on. A shut-down is possible from the larger of this
+        limit and the minimum load.
     positive_gradient_limit : numeric (iterable, scalar or None)
-            the normed *upper bound* on the negative difference
-            (`flow[t-1] > flow[t]`) of two consecutive flow values.
+        the normed *upper bound* on the increase
+        (`flow[t-1] < flow[t]`) of two consecutive flow values while the
+        flow stays on. A start-up can reach the larger of this limit and
+        the minimum load.
     """
 
     activity_costs = Apply(sequence)

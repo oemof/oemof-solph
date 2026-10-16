@@ -12,16 +12,15 @@ SPDX-FileCopyrightText: jnnr
 SPDX-FileCopyrightText: jmloenneberga
 SPDX-FileCopyrightText: Johannes Kochems
 SPDX-FileCopyrightText: Dylan Pulver
+SPDX-FileCopyrightText: Syed Inayatullah
 
 SPDX-License-Identifier: MIT
 
 """
 
 from pyomo.core import Binary
-from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core import Expression
-from pyomo.core import NonNegativeReals
 from pyomo.core import Set
 from pyomo.core import Var
 
@@ -62,10 +61,10 @@ def sets_for_non_convex_flows(block, group):
         `minimum_downtime` being > 0.
     POSITIVE_GRADIENT_FLOWS
         A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
-        `positive_gradient` being not None.
+        `positive_gradient_limit` being not None.
     NEGATIVE_GRADIENT_FLOWS
         A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
-        `negative_gradient` being not None.
+        `negative_gradient_limit` being not None.
     """
     block.MIN_FLOWS = Set(
         initialize=[(g[0], g[1]) for g in group if g[2].minimum is not None]
@@ -155,17 +154,9 @@ def variables_for_non_convex_flows(block):
         Variable indicating shutdown of flow (component) indexed by
         SHUTDOWNFLOWS
 
-    :math:`\dot{P}_{up}` (continuous)
-        `NonConvexFlowBlock.positive_gradient`:
-        Variable indicating the positive gradient, i.e. the load increase
-        between two consecutive timesteps, indexed by
-        POSITIVE_GRADIENT_FLOWS
-
-    :math:`\dot{P}_{down}` (continuous)
-        `NonConvexFlowBlock.negative_gradient`:
-        Variable indicating the negative gradient, i.e. the load decrease
-        between two consecutive timesteps, indexed by
-        NEGATIVE_GRADIENT_FLOWS
+    Gradient limits need no extra variables. They are written directly in
+    terms of the flow and the status variables, see
+    :py:func:`shared_constraints_for_non_convex_flows`.
     """
     m = block.parent_block()
 
@@ -174,20 +165,6 @@ def variables_for_non_convex_flows(block):
 
     if block.SHUTDOWNFLOWS:
         block.shutdown = Var(block.SHUTDOWNFLOWS, m.TIMESTEPS, within=Binary)
-
-    if block.POSITIVE_GRADIENT_FLOWS:
-        block.positive_gradient = Var(
-            block.POSITIVE_GRADIENT_FLOWS,
-            m.TIMESTEPS,
-            within=NonNegativeReals,
-        )
-
-    if block.NEGATIVE_GRADIENT_FLOWS:
-        block.negative_gradient = Var(
-            block.NEGATIVE_GRADIENT_FLOWS,
-            m.TIMESTEPS,
-            within=NonNegativeReals,
-        )
 
 
 def _previous_status(block, i, o, t):
@@ -348,22 +325,95 @@ def _max_shutdown_constraint(block):
     return Constraint(block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule)
 
 
+def _gradient_terms(block, i, o, t):
+    r"""Capacity terms for a gradient limit between `t-1` and `t`.
+
+    Returns a tuple `(capacity, previous_on, on, ratio)`: the capacity
+    at `t`, the status at `t-1` and at `t` multiplied by that capacity,
+    and the capacity at `t-1` divided by the capacity at `t`.
+
+    Returns `None` if no gradient limit is set up for `t`. This is the
+    case if the capacity at `t` is zero, and for investment flows if the
+    capacity can change between `t-1` and `t`.
+    """
+    m = block.parent_block()
+    period = m.es.capacity_period_of_timestep(t)
+    previous_period = m.es.capacity_period_of_timestep(t - 1)
+
+    if m.flows[i, o].investment is not None:
+        if period != previous_period:
+            return None
+        return (
+            block.invest[i, o, period],
+            block.status_nominal[i, o, t - 1],
+            block.status_nominal[i, o, t],
+            1,
+        )
+
+    capacity = m.flows[i, o].nominal_capacity[period]
+    if capacity == 0:
+        return None
+    return (
+        capacity,
+        block.status[i, o, t - 1] * capacity,
+        block.status[i, o, t] * capacity,
+        m.flows[i, o].nominal_capacity[previous_period] / capacity,
+    )
+
+
 def shared_constraints_for_non_convex_flows(block):
     r"""
-    positive_gradient_constraint
+    positive_gradient_constr
         .. math::
+            P(t) - P(t-1) \leq
+            (G_{up}(t) - S_{up}(t)) \cdot P_{nom} \cdot Y_{status}(t-1)
+            + E_{up}(t) \cdot P_{nom} \cdot Y_{status}(t)
+            + (S_{up}(t) - E_{up}(t)) \cdot P_{nom}, \\
+            \forall t \in \textrm{TIMESTEPS} \setminus \{0\}, \\
+            \forall (i, o) \in \textrm{POSITIVE\_GRADIENT\_FLOWS}
 
-            P(t) \cdot Y_{status}(t)
-            - P(t-1) \cdot Y_{status}(t-1)  \leq \
-            \dot{P}_{up}(t), \\
-            \forall t \in \textrm{TIMESTEPS}.
+        with :math:`S_{up}(t) = \max(G_{up}(t), f_{min}(t))` and
+        :math:`E_{up}(t) = \min(S_{up}(t), G_{up}(t) + f_{min}(t-1))`.
 
-    negative_gradient_constraint
+        While the flow stays on, it can rise by at most
+        :math:`G_{up}(t) \cdot P_{nom}` from one time step to the next.
+        A start-up can reach :math:`S_{up}(t) \cdot P_{nom}`, so a
+        start-up to the minimum load is always possible. Shut-downs are
+        not restricted by this constraint.
+
+    negative_gradient_constr
         .. math::
-            P(t-1) \cdot Y_{status}(t-1)
-            - P(t) \cdot Y_{status}(t) \leq \
-            \dot{P}_{down}(t), \\
-            \forall t \in \textrm{TIMESTEPS}.
+            P(t-1) - P(t) \leq
+            (G_{down}(t) - S_{down}(t)) \cdot P_{nom} \cdot Y_{status}(t)
+            + E_{down}(t) \cdot P_{nom} \cdot Y_{status}(t-1)
+            + (S_{down}(t) - E_{down}(t)) \cdot P_{nom}, \\
+            \forall t \in \textrm{TIMESTEPS} \setminus \{0\}, \\
+            \forall (i, o) \in \textrm{NEGATIVE\_GRADIENT\_FLOWS}
+
+        with :math:`S_{down}(t) = \max(G_{down}(t), f_{min}(t-1))` and
+        :math:`E_{down}(t) = \min(S_{down}(t), G_{down}(t) + f_{min}(t))`.
+
+        While the flow stays on, it can fall by at most
+        :math:`G_{down}(t) \cdot P_{nom}` from one time step to the next.
+        A shut-down is possible from :math:`S_{down}(t) \cdot P_{nom}` or
+        less, so a shut-down from the minimum load is always possible.
+        Start-ups are not restricted by this constraint.
+
+    Here, :math:`G_{up}` and :math:`G_{down}` are the
+    `positive_gradient_limit` and the `negative_gradient_limit` of the
+    `NonConvex` attribute, and :math:`f_{min}` is the `minimum` of the
+    flow. Both constraints are linear. For each combination of the status
+    in `t-1` and `t`, they allow exactly the changes described above. The
+    terms with :math:`E_{up}` and :math:`E_{down}` give a tighter LP
+    relaxation than the form
+    :math:`G_{up} \cdot Y_{status}(t-1) + S_{up} \cdot (1 - Y_{status}(t-1))`
+    without changing the set of feasible integer solutions.
+
+    For investment flows, :math:`P_{nom} \cdot Y_{status}` is the
+    variable `status_nominal`. If the nominal capacity changes between
+    `t-1` and `t`, :math:`f_{min}(t-1)` is multiplied by the ratio of the
+    capacities at `t-1` and `t`. For investment flows, no gradient limit
+    is set up for the first time step after an investment time.
 
     Also creates:
 
@@ -383,94 +433,60 @@ def shared_constraints_for_non_convex_flows(block):
     block.min_uptime_constr = _min_uptime_constraint(block)
     block.min_downtime_constr = _min_downtime_constraint(block)
 
-    def _positive_gradient_flow_constraint(_):
-        r"""Rule definition for positive gradient constraint."""
-        for i, o in block.POSITIVE_GRADIENT_FLOWS:
-            for index in range(1, len(m.TIMEINDEX) + 1):
-                if m.TIMEINDEX[index][1] > 0:
-                    lhs = (
-                        m.flow[
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ]
-                        * block.status[i, o, m.TIMESTEPS[index]]
-                        - m.flow[i, o, m.TIMESTEPS[index - 1]]
-                        * block.status[i, o, m.TIMESTEPS[index - 1]]
-                    )
-                    rhs = block.positive_gradient[i, o, m.TIMEINDEX[index][1]]
-                    block.positive_gradient_constr.add(
-                        (
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ),
-                        lhs <= rhs,
-                    )
-                else:
-                    lhs = block.positive_gradient[i, o, 0]
-                    rhs = 0
-                    block.positive_gradient_constr.add(
-                        (
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ),
-                        lhs == rhs,
-                    )
+    def _positive_gradient_rule(_, i, o, t):
+        """Rule definition for positive gradient constraint."""
+        if t == m.TIMESTEPS.first():
+            return Constraint.Skip
+        terms = _gradient_terms(block, i, o, t)
+        if terms is None:
+            return Constraint.Skip
+        capacity, previous_on, on, ratio = terms
+
+        flow = m.flows[i, o]
+        limit = flow.nonconvex.positive_gradient_limit[t]
+        startup_limit = max(limit, flow.minimum[t])
+        off_reduction = min(startup_limit, limit + flow.minimum[t - 1] * ratio)
+
+        lhs = m.flow[i, o, t] - m.flow[i, o, t - 1]
+        rhs = (
+            (limit - startup_limit) * previous_on
+            + off_reduction * on
+            + (startup_limit - off_reduction) * capacity
+        )
+        return lhs <= rhs
 
     block.positive_gradient_constr = Constraint(
-        block.POSITIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
-    )
-    block.positive_gradient_build = BuildAction(
-        rule=_positive_gradient_flow_constraint
+        block.POSITIVE_GRADIENT_FLOWS,
+        m.TIMESTEPS,
+        rule=_positive_gradient_rule,
     )
 
-    def _negative_gradient_flow_constraint(_):
-        r"""Rule definition for negative gradient constraint."""
-        for i, o in block.NEGATIVE_GRADIENT_FLOWS:
-            for index in range(1, len(m.TIMESTEPS) + 1):
-                if m.TIMESTEPS[index] > 0:
-                    lhs = (
-                        m.flow[
-                            i,
-                            o,
-                            m.TIMESTEPS[index - 1],
-                        ]
-                        * block.status[i, o, m.TIMESTEPS[index - 1]]
-                        - m.flow[
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ]
-                        * block.status[i, o, m.TIMESTEPS[index]]
-                    )
-                    rhs = block.negative_gradient[i, o, m.TIMESTEPS[index]]
-                    block.negative_gradient_constr.add(
-                        (
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ),
-                        lhs <= rhs,
-                    )
-                else:
-                    lhs = block.negative_gradient[i, o, 0]
-                    rhs = 0
-                    block.negative_gradient_constr.add(
-                        (
-                            i,
-                            o,
-                            m.TIMESTEPS[index],
-                        ),
-                        lhs == rhs,
-                    )
+    def _negative_gradient_rule(_, i, o, t):
+        """Rule definition for negative gradient constraint."""
+        if t == m.TIMESTEPS.first():
+            return Constraint.Skip
+        terms = _gradient_terms(block, i, o, t)
+        if terms is None:
+            return Constraint.Skip
+        capacity, previous_on, on, ratio = terms
+
+        flow = m.flows[i, o]
+        limit = flow.nonconvex.negative_gradient_limit[t]
+        shutdown_limit = max(limit, flow.minimum[t - 1] * ratio)
+        off_reduction = min(shutdown_limit, limit + flow.minimum[t])
+
+        lhs = m.flow[i, o, t - 1] - m.flow[i, o, t]
+        rhs = (
+            (limit - shutdown_limit) * on
+            + off_reduction * previous_on
+            + (shutdown_limit - off_reduction) * capacity
+        )
+        return lhs <= rhs
 
     block.negative_gradient_constr = Constraint(
-        block.NEGATIVE_GRADIENT_FLOWS, m.TIMESTEPS, noruleinit=True
-    )
-    block.negative_gradient_build = BuildAction(
-        rule=_negative_gradient_flow_constraint
+        block.NEGATIVE_GRADIENT_FLOWS,
+        m.TIMESTEPS,
+        rule=_negative_gradient_rule,
     )
 
 
