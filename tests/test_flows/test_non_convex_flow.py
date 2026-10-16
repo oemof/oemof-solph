@@ -201,3 +201,19 @@ def test_positive_gradient_limit_invest_non_convex():
     flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
+
+
+def test_flow_gradient_limit_on_non_convex_flow():
+    # A gradient limit given on the flow of a non-convex flow behaves like
+    # the one given in NonConvex: a start-up to the minimum load is
+    # possible although the limit (1 per step) is below it (5).
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        positive_gradient_limit=0.1,
+        nonconvex=solph.NonConvex(),
+        variable_costs=[4] + 9 * [-1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])

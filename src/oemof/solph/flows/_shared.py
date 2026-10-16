@@ -27,6 +27,21 @@ from pyomo.core import Var
 from oemof.solph._plumbing import valid_sequence
 
 
+def _gradient_limit(flow, direction):
+    """Gradient limit of a non-convex flow.
+
+    The limit can be given in the `NonConvex` attribute or on the flow
+    itself. Both cannot be given at the same time (see
+    :class:`~oemof.solph.flows.Flow`). `direction` is "positive" or
+    "negative".
+    """
+    attribute = f"{direction}_gradient_limit"
+    limit = getattr(flow.nonconvex, attribute)
+    if limit is None:
+        limit = getattr(flow, attribute)
+    return limit
+
+
 def sets_for_non_convex_flows(block, group):
     r"""Creates all sets for non-convex flows.
 
@@ -61,10 +76,12 @@ def sets_for_non_convex_flows(block, group):
         `minimum_downtime` being > 0.
     POSITIVE_GRADIENT_FLOWS
         A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
-        `positive_gradient_limit` being not None.
+        `positive_gradient_limit` being not None, given in `NonConvex` or
+        on the flow.
     NEGATIVE_GRADIENT_FLOWS
         A subset of set FIXED_CAPACITY_NONCONVEX_FLOWS with the attribute
-        `negative_gradient_limit` being not None.
+        `negative_gradient_limit` being not None, given in `NonConvex` or
+        on the flow.
     """
     block.MIN_FLOWS = Set(
         initialize=[(g[0], g[1]) for g in group if g[2].minimum is not None]
@@ -117,14 +134,14 @@ def sets_for_non_convex_flows(block, group):
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.negative_gradient_limit is not None
+            if _gradient_limit(g[2], "negative") is not None
         ]
     )
     block.POSITIVE_GRADIENT_FLOWS = Set(
         initialize=[
             (g[0], g[1])
             for g in group
-            if g[2].nonconvex.positive_gradient_limit is not None
+            if _gradient_limit(g[2], "positive") is not None
         ]
     )
     block.ACTIVITYCOSTFLOWS = Set(
@@ -401,10 +418,11 @@ def shared_constraints_for_non_convex_flows(block):
         Start-ups are not restricted by this constraint.
 
     Here, :math:`G_{up}` and :math:`G_{down}` are the
-    `positive_gradient_limit` and the `negative_gradient_limit` of the
-    `NonConvex` attribute, and :math:`f_{min}` is the `minimum` of the
-    flow. Both constraints are linear. For each combination of the status
-    in `t-1` and `t`, they allow exactly the changes described above. The
+    `positive_gradient_limit` and the `negative_gradient_limit`, given in
+    the `NonConvex` attribute or on the flow, and :math:`f_{min}` is the
+    `minimum` of the flow. Both constraints are linear. For each
+    combination of the status in `t-1` and `t`, they allow exactly the
+    changes described above. The
     terms with :math:`E_{up}` and :math:`E_{down}` give a tighter LP
     relaxation than the form
     :math:`G_{up} \cdot Y_{status}(t-1) + S_{up} \cdot (1 - Y_{status}(t-1))`
@@ -444,7 +462,7 @@ def shared_constraints_for_non_convex_flows(block):
         capacity, previous_on, on, ratio = factors
 
         flow = m.flows[i, o]
-        limit = flow.nonconvex.positive_gradient_limit[t]
+        limit = _gradient_limit(flow, "positive")[t]
         startup_limit = max(limit, flow.minimum[t])
         off_reduction = min(startup_limit, limit + flow.minimum[t - 1] * ratio)
 
@@ -472,7 +490,7 @@ def shared_constraints_for_non_convex_flows(block):
         capacity, previous_on, on, ratio = factors
 
         flow = m.flows[i, o]
-        limit = flow.nonconvex.negative_gradient_limit[t]
+        limit = _gradient_limit(flow, "negative")[t]
         shutdown_limit = max(limit, flow.minimum[t - 1] * ratio)
         off_reduction = min(shutdown_limit, limit + flow.minimum[t])
 

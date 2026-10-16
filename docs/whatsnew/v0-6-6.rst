@@ -51,6 +51,9 @@ Bug fixes
   CBC or HiGHS). The constraints are now linear, apply the limits, and allow
   a start-up to and a shut-down from the minimum load (#773, see also
   #1103).
+* A gradient limit given on the flow of a `NonConvex` flow now uses the same
+  constraints as a limit given in `NonConvex`. Before, it blocked every
+  start-up when the limit was below the minimum load (#1103).
 
 Other changes
 #############
