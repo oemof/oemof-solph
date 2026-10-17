@@ -19,6 +19,7 @@ import logging
 import warnings
 from dataclasses import dataclass
 from logging import getLogger
+from typing import ClassVar
 
 import pandas as pd
 from pyomo import environ as po
@@ -156,7 +157,7 @@ class Model(po.ConcreteModel):
     ]
 
     # TODO: add missing solvers
-    _APPSI_SOLVER = {
+    _APPSI_SOLVERS: ClassVar[dict] = {
         "highs": (appsi.solvers.Highs, "highs_options"),
         "cbc": (appsi.solvers.Cbc, "cbc_options"),
         "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
@@ -489,8 +490,7 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    # TODO: make solve_appsi an internal function
-    def solve_appsi(
+    def _solve_appsi(
         self,
         solver=appsi.solvers.Cbc,
         solver_options="cbc_options",
@@ -581,8 +581,7 @@ class Model(po.ConcreteModel):
             message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
-    # TODO: make solve_factory an internal function
-    def solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
+    def _solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
         """Solve the model with Pyomo's ``SolverFactory`` interface.
 
         Parameters
@@ -642,15 +641,15 @@ class Model(po.ConcreteModel):
         )
 
     def _get_solve_function(self, solver: str, interface: str):
-        """Function to return the correct solve function (`solve_factory`,
-        `solve_appsi`) based on solver and interface selection of the user in
+        """Function to return the correct solve function (`_solve_factory`,
+        `_solve_appsi`) based on solver and interface selection of the user in
         the `solve` function.
         """
         if interface == "auto":
-            if solver in self._APPSI_SOLVER:
+            if solver in self._APPSI_SOLVERS:
                 msg = f"'appsi' interface selected by default for '{solver}'."
                 logging.info(msg)
-                return self.solve_appsi
+                return self._solve_appsi
             else:
                 msg = (
                     f"Solver '{solver}' is not supported by 'appsi' interface."
@@ -658,12 +657,12 @@ class Model(po.ConcreteModel):
                     f" repeated solves)."
                 )
                 logging.info(msg)
-                return self.solve_factory
+                return self._solve_factory
         elif interface == "solverfactory":
-            return self.solve_factory
+            return self._solve_factory
         elif interface == "appsi":
-            if solver in self._APPSI_SOLVER:
-                return self.solve_appsi
+            if solver in self._APPSI_SOLVERS:
+                return self._solve_appsi
             else:
                 msg = (
                     f"Solver '{solver}' is not supported by 'appsi' interface,"
@@ -684,7 +683,7 @@ class Model(po.ConcreteModel):
     def solve(
         self,
         solver: str = "cbc",
-        solver_io: str = "lp",  # TODO: only relevant for SolverFactory
+        solver_io: str | None = None,  # TODO: must be None for appsi
         interface: str = "auto",
         allow_nonoptimal: bool = False,
         duals: bool = False,
@@ -743,11 +742,11 @@ class Model(po.ConcreteModel):
             solver=solver, interface=interface
         )
 
-        # TODO: Unify solve_factory and solve_appsi API
+        # TODO: Unify _solve_factory and _solve_appsi API
         solver_info = solve_function(
             solver=solver,
             solver_io=None
-            if solve_function == self.solve_appsi
+            if solve_function == self._solve_appsi
             else solver_io,
             solve_kwargs=solve_kwargs,
             cmdline_options=cmdline_options,
