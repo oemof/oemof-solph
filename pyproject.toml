@@ -32,6 +32,8 @@ include = [
     ".editorconfig",
     ".pep8speaks.yml",
     ".readthedocs.yaml",
+    ".taplo.toml",
+    ".pre-commit-config.yaml"
 ]
 exclude = ["docs/_build", "*.lp"]
 
