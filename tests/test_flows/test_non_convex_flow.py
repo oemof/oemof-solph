@@ -217,3 +217,31 @@ def test_flow_gradient_limit_on_non_convex_flow():
     flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
+def test_minimum_uptime_near_horizon_end():
+    # Running costs 5 per step before step 8 and earns 3 per step in the
+    # last two steps. A start-up in step 8 pays off only if the flow may
+    # run until the end of the horizon, which is shorter than the
+    # minimum uptime.
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(minimum_uptime=4),
+        variable_costs=8 * [1] + 2 * [-0.3],
+    )
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
+
+    assert flow_result == 8 * [0] + 2 * [10]
+
+
+def test_minimum_uptime_still_enforced():
+    # A start-up for the single paid step 4 would need three more steps
+    # at the minimum load, which costs more (15) than the step earns (10).
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(minimum_uptime=4),
+        variable_costs=4 * [1] + [-1] + 5 * [1],
+    )
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
+
+    assert flow_result == 10 * [0]
