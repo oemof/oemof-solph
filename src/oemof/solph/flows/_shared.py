@@ -224,12 +224,17 @@ def _min_downtime_constraint(block):
 def _min_uptime_constraint(block):
     r"""
     .. math::
-        (Y_{status}(t)-Y_{status}(t-1)) \cdot t_{up,minimum} \\
-        \leq \sum_{n=0}^{t_{up,minimum}-1} Y_{status}(t+n) \\
+        (Y_{status}(t)-Y_{status}(t-1)) \cdot L(t) \\
+        \leq \sum_{n=0}^{L(t)-1} Y_{status}(t+n) \\
         \forall t \in \textrm{TIMESTEPS}, \\
-        \forall (i,o) \in \textrm{MINUPTIMEFLOWS}.
+        \forall (i,o) \in \textrm{MINUPTIMEFLOWS},
 
-    where :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
+    with :math:`L(t) = \min(t_{up,minimum}, |\textrm{TIMESTEPS}| - t)`,
+    the number of time steps of the uptime window that lie within the
+    optimisation horizon. Near the end of the horizon, a start-up
+    requires the flow to stay on until the last time step.
+
+    :math:`Y_{status}(-1) := Y_{status,0}`, the `initial_status`
     of the flow.
     """
     m = block.parent_block()
@@ -238,20 +243,18 @@ def _min_uptime_constraint(block):
         """
         Rule definition for min-uptime constraints of non-convex flows.
         """
+        window = range(
+            t,
+            min(
+                t + m.flows[i, o].nonconvex.minimum_uptime[t],
+                len(m.TIMESTEPS),
+            ),
+        )
         expr = 0
         expr += (
             block.status[i, o, t] - _previous_status(block, i, o, t)
-        ) * m.flows[i, o].nonconvex.minimum_uptime[t]
-        expr += -sum(
-            block.status[i, o, u]
-            for u in range(
-                t,
-                min(
-                    t + m.flows[i, o].nonconvex.minimum_uptime[t],
-                    len(m.TIMESTEPS),
-                ),
-            )
-        )
+        ) * len(window)
+        expr += -sum(block.status[i, o, u] for u in window)
         return expr <= 0
 
     return Constraint(block.MINUPTIMEFLOWS, m.TIMESTEPS, rule=_min_uptime_rule)

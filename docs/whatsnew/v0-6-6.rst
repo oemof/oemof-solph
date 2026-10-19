@@ -49,8 +49,11 @@ Bug fixes
   not applied. The constraints also multiplied the flow by the binary status,
   so models with these limits could not be written to LP format (e.g. for
   CBC or HiGHS). The constraints are now linear, apply the limits, and allow
-  a start-up to and a shut-down from the minimum load (#773, see also
-  #1103).
+  a start-up to and a shut-down from the minimum load.
+* With `minimum_uptime`, a start-up in the last `minimum_uptime - 1` time
+  steps was impossible, even if the flow stayed on until the end of the
+  horizon. Near the end, a start-up now requires the flow to stay on until
+  the last time step, as `minimum_downtime` already does for shut-downs.
 
 Other changes
 #############
