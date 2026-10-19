@@ -325,12 +325,13 @@ def _max_shutdown_constraint(block):
     return Constraint(block.MAXSHUTDOWNFLOWS, rule=_max_shutdown_rule)
 
 
-def _gradient_terms(block, i, o, t):
-    r"""Capacity terms for a gradient limit between `t-1` and `t`.
+def _factors_for_gradient_terms(block, i, o, t):
+    r"""Factors used in the gradient terms between `t-1` and `t`.
 
     Returns a tuple `(capacity, previous_on, on, ratio)`: the capacity
     at `t`, the status at `t-1` and at `t` multiplied by that capacity,
-    and the capacity at `t-1` divided by the capacity at `t`.
+    and the capacity at `t-1` divided by the capacity at `t`. The
+    gradient limits are multiplied by these factors.
 
     Returns `None` if no gradient limit is set up for `t`. This is the
     case if the capacity at `t` is zero, and for investment flows if the
@@ -437,10 +438,10 @@ def shared_constraints_for_non_convex_flows(block):
         """Rule definition for positive gradient constraint."""
         if t == m.TIMESTEPS.first():
             return Constraint.Skip
-        terms = _gradient_terms(block, i, o, t)
-        if terms is None:
+        factors = _factors_for_gradient_terms(block, i, o, t)
+        if factors is None:
             return Constraint.Skip
-        capacity, previous_on, on, ratio = terms
+        capacity, previous_on, on, ratio = factors
 
         flow = m.flows[i, o]
         limit = flow.nonconvex.positive_gradient_limit[t]
@@ -465,10 +466,10 @@ def shared_constraints_for_non_convex_flows(block):
         """Rule definition for negative gradient constraint."""
         if t == m.TIMESTEPS.first():
             return Constraint.Skip
-        terms = _gradient_terms(block, i, o, t)
-        if terms is None:
+        factors = _factors_for_gradient_terms(block, i, o, t)
+        if factors is None:
             return Constraint.Skip
-        capacity, previous_on, on, ratio = terms
+        capacity, previous_on, on, ratio = factors
 
         flow = m.flows[i, o]
         limit = flow.nonconvex.negative_gradient_limit[t]
