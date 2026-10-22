@@ -743,13 +743,15 @@ class Model(po.ConcreteModel):
         solve_function = self._get_solve_function(
             solver=solver, interface=interface
         )
-
+        solver_parameters = {
+            "solver": solver,
+            "solve_kwargs": solve_kwargs,
+            "cmdline_options": cmdline_options,
+        }
+        if solve_function != self._solve_appsi:
+            solver_parameters["solver_io"] = solver_io
         # TODO: Unify _solve_factory and _solve_appsi API
-        solver_info = solve_function(
-            solver=solver,
-            solve_kwargs=solve_kwargs,
-            cmdline_options=cmdline_options,
-        )
+        solver_info = solve_function(**solver_parameters)
 
         if duals:
             self._receive_duals()
