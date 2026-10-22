@@ -50,6 +50,9 @@ Bug fixes
   so models with these limits could not be written to LP format (e.g. for
   CBC or HiGHS). The constraints are now linear, apply the limits, and allow
   a start-up to and a shut-down from the minimum load.
+* A gradient limit given on the flow of a `NonConvex` flow now uses the same
+  constraints as a limit given in `NonConvex`. Before, it blocked every
+  start-up when the limit was below the minimum load.
 * With `minimum_uptime`, a start-up in the last `minimum_uptime - 1` time
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
