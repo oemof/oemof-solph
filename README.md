@@ -38,12 +38,12 @@
 | src/oemof/solph/flows/\_invest\_non\_convex\_flow\_block.py |      104 |        1 |       24 |        2 |     97.66% |140-\>exit, 308 |
 | src/oemof/solph/flows/\_investment\_flow\_block.py          |      114 |        9 |       46 |        3 |     90.00% |209-\>exit, 448-455, 466-474, 485-491, 592 |
 | src/oemof/solph/flows/\_non\_convex\_flow\_block.py         |       54 |        1 |       10 |        2 |     95.31% |93-\>92, 141 |
-| src/oemof/solph/flows/\_shared.py                           |      157 |       18 |       46 |        6 |     84.24% |179, 186, 392-416, 435-463, 588-\>587, 616-\>615 |
+| src/oemof/solph/flows/\_shared.py                           |      169 |        4 |       44 |        6 |     95.31% |349, 359, 446, 474, 605-\>604, 633-\>632 |
 | src/oemof/solph/flows/\_simple\_flow\_block.py              |       92 |        0 |       40 |        1 |     99.24% | 383-\>382 |
 | src/oemof/solph/helpers.py                                  |       20 |        1 |        8 |        2 |     89.29% |28, 37-\>39 |
 | src/oemof/solph/processing.py                               |      355 |       65 |      154 |       13 |     81.93% |59, 62-\>exit, 74, 108-110, 158-164, 196-203, 267, 272, 299-309, 324, 331, 421-457, 499, 546, 672-686, 725-728, 795, 798-801, 815-816, 939 |
 | src/oemof/solph/views.py                                    |      132 |        3 |       50 |        5 |     95.60% |68, 91, 96, 296-\>299, 340-\>342 |
-| **TOTAL**                                                   | **3188** |  **235** | **1160** |   **90** | **91.19%** |           |
+| **TOTAL**                                                   | **3200** |  **221** | **1158** |   **90** | **91.72%** |           |
 
 
 ## Setup coverage badge
