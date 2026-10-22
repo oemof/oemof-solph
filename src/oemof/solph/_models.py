@@ -518,7 +518,9 @@ class Model(po.ConcreteModel):
             loaded when an optimal solution or a feasible incumbent exists.
         """
         # TODO: Implement option to handle unknown solver names defined by user
-        opt = solver()
+        # get solver class
+        solver_class = self._APPSI_SOLVERS[solver][0]
+        opt = solver_class()
         opt.config.load_solution = False
 
         if solve_kwargs.get("tee"):
@@ -745,9 +747,6 @@ class Model(po.ConcreteModel):
         # TODO: Unify _solve_factory and _solve_appsi API
         solver_info = solve_function(
             solver=solver,
-            solver_io=None
-            if solve_function == self._solve_appsi
-            else solver_io,
             solve_kwargs=solve_kwargs,
             cmdline_options=cmdline_options,
         )
