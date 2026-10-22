@@ -766,6 +766,22 @@ class Model(po.ConcreteModel):
         else:
             self._solver_results = self.solver_return
 
+        # --- BEGIN: To be removed for versions >= v0.7 ---
+        # EnergySystem.results is not defined in oemof.network but only added
+        # at runtime. Thus, we also implement depreciation here.
+        self.es._results = self._solver_results
+
+        def results(self):
+            warnings.warn(
+                "EnergySystem.results is deprecated and will be removed in a"
+                " future version. Use solph.Results instead.",
+                FutureWarning,
+            )
+            return self._results
+
+        EnergySystem.results = property(results)
+        # --- END ---
+
         if solver_info.optimal:
             msg = "Optimisation successful."
             logging.info(msg)

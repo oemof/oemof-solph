@@ -20,6 +20,8 @@ API changes
   use cases of the ExtractionTurbineCHP
 * Remove `solver-results` attribute from Model class. It will be replaced by
   the new `solver_return` attribute.
+* Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
+  the new `solver_return` attribute.
 
 New features
 ############
@@ -38,6 +40,11 @@ Documentation
 
 Bug fixes
 #########
+
+* With `minimum_uptime`, a start-up in the last `minimum_uptime - 1` time
+  steps was impossible, even if the flow stayed on until the end of the
+  horizon. Near the end, a start-up now requires the flow to stay on until
+  the last time step, as `minimum_downtime` already does for shut-downs.
 
 Other changes
 #############
