@@ -28,7 +28,7 @@ import numpy as np
 from oemof.network import Edge
 from oemof.tools import debugging
 
-from oemof.solph._options import Investment
+from oemof.solph._options import Investment, NonConvex
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
@@ -120,27 +120,27 @@ class Flow(Edge):
 
     def __init__(
         self,
-        nominal_capacity=None,
+        nominal_capacity: float | Investment | None = None,
         # --- BEGIN: To be removed for versions >= v0.7 ---
         nominal_value=None,
         min=None,
         max=None,
         # --- END ---
-        variable_costs=0,
-        minimum=None,
-        maximum=None,
-        fix=None,
-        positive_gradient_limit=None,
-        negative_gradient_limit=None,
-        full_load_time_max=None,
-        full_load_time_min=None,
-        integer=False,
+        variable_costs: float | Iterable[int | float] = 0,
+        minimum: float | Iterable[int | float] | None = None,
+        maximum: float | Iterable[int | float] | None = None,
+        fix: float | Iterable[int | float] | None = None,
+        positive_gradient_limit: float | Iterable[int | float] | None = None,
+        negative_gradient_limit: float | Iterable[int | float] | None = None,
+        full_load_time_max: float | None = None,
+        full_load_time_min: float | None = None,
+        integer: bool = False,
         # --- BEGIN: To be removed for versions >= v0.7 ---
         bidirectional=False,
         # --- END
-        nonconvex=None,
+        nonconvex: NonConvex | None = None,
         custom_attributes=None,  # To be removed for versions >= v0.7
-        custom_properties=None,
+        custom_properties: dict | None = None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
         # then we need to create the var object with
