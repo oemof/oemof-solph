@@ -576,7 +576,9 @@ class Model(po.ConcreteModel):
             optimal=optimal,
             termination_condition=tc.name,
             status=tc.value,
-            wallclock_time=appsi_results.wallclock_time,
+            wallclock_time=appsi_results.wallclock_time
+            if hasattr(appsi_results, "wallclock_time")
+            else None,
             best_objective_bound=bob,
             best_feasible_objective=bfo,
             gap=gap,
