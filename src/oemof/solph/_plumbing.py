@@ -11,7 +11,6 @@ SPDX-License-Identifier: MIT
 
 """
 
-import warnings
 from collections import UserDict
 from collections import abc
 from numbers import Number
@@ -95,16 +94,6 @@ def valid_sequence(sequence, length: int) -> bool:
     else:
         if len(sequence) == length:
             return True
-        # --- BEGIN: To be removed for versions >= v0.6 ---
-        elif len(sequence) > length:
-            warnings.warn(
-                "Sequence longer than needed"
-                f" ({sequence.size} items instead of {length})."
-                " This will be treated as an error in the future.",
-                FutureWarning,
-            )
-            return True
-        # --- END ---
         else:
             raise ValueError(f"Lentgh of {sequence} should be {length}.")
 

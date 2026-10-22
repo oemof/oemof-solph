@@ -20,12 +20,15 @@ API changes
   use cases of the ExtractionTurbineCHP
 * Remove `solver-results` attribute from Model class. It will be replaced by
   the new `solver_return` attribute.
-* Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
-  the new `solver_return` attribute.
+* Depreciate `solver_results` attribute from EnergySystem class. It will be
+  replaced by the new `solver_return` attribute.
 * The variables `positive_gradient` and `negative_gradient` of
   `NonConvexFlowBlock` and `InvestNonConvexFlowBlock` are removed. The
   gradient limits of `NonConvex` flows are now written directly in terms of
   the flow and the status variables.
+* Disallow giving too long sequences to the model. Instead of warning and
+  trunkating, model building will now fail. (Too long sequencies indicate
+  modelling errors.)
 
 New features
 ############
