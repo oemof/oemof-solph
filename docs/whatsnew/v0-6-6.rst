@@ -22,6 +22,10 @@ API changes
   the new `solver_return` attribute.
 * Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
   the new `solver_return` attribute.
+* The variables `positive_gradient` and `negative_gradient` of
+  `NonConvexFlowBlock` and `InvestNonConvexFlowBlock` are removed. The
+  gradient limits of `NonConvex` flows are now written directly in terms of
+  the flow and the status variables.
 
 New features
 ############
@@ -41,6 +45,11 @@ Documentation
 Bug fixes
 #########
 
+* Gradient limits of `NonConvex` flows had no effect: the limit values were
+  not applied. The constraints also multiplied the flow by the binary status,
+  so models with these limits could not be written to LP format (e.g. for
+  CBC or HiGHS). The constraints are now linear, apply the limits, and allow
+  a start-up to and a shut-down from the minimum load.
 * With `minimum_uptime`, a start-up in the last `minimum_uptime - 1` time
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
@@ -59,6 +68,7 @@ Contributors
 * Malte Fritz
 * Julius Ellermann (DLR)
 * Uwe Krien
+* Syed Inayatullah
 
 Acknowledgements
 ################
