@@ -528,7 +528,9 @@ class Model(po.ConcreteModel):
 
         setattr(opt, solver_options, cmdline_options)
 
+        # TODO appsi_results needed? or using self.solver_return instead?
         appsi_results = opt.solve(self)
+        self.solver_return = appsi_results
         tc = appsi_results.termination_condition
 
         # TODO: Handle solver results processing depending on solver class
@@ -764,7 +766,7 @@ class Model(po.ConcreteModel):
         # The solver_results attribute is deprecated and will be removed in
         # future versions To access the original solver return use
         # Model.solver_return
-        if solver_info.solver == "highs":
+        if solve_function != self._solve_appsi:
             self._solver_results = self.solver_return.__dict__
         else:
             self._solver_results = self.solver_return
