@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """
-solph version of oemof.network.Converter including
-sets, variables, constraints and parts of the objective function
-for ConverterBlock objects.
+A N-to-N graph component with fixed relations
 
 SPDX-FileCopyrightText: Uwe Krien <krien@uni-bremen.de>
 SPDX-FileCopyrightText: Simon Hilpert
@@ -21,12 +19,12 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
 
 from oemof.solph._helpers import warn_if_missing_attribute
+from oemof.solph._node import Node
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 
@@ -134,8 +132,8 @@ class Converter(Node):
         for cf in missing_conversion_factor_keys:
             self.conversion_factors[cf] = 1
 
-    def constraint_group(self):
-        return ConverterBlock
+    def required_blocks(self):
+        return [ConverterBlock]
 
 
 class ConverterBlock(ScalarBlock):

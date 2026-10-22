@@ -58,7 +58,7 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
     # This even gives other users/us the ability to customize/extend how
     # constraints are grouped by overriding the method in future subclasses.
 
-    cg = getattr(node, "constraint_group", fallback)
+    cg = getattr(node, "required_blocks", fallback)
     return cg()
 
 

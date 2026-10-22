@@ -19,6 +19,7 @@ from ._energy_system import EnergySystem
 from ._groupings import GROUPINGS
 from ._helpers import create_time_index
 from ._models import Model
+from ._node import Node
 from ._options import Investment
 from ._options import NonConvex
 from ._plumbing import sequence
@@ -41,6 +42,7 @@ __all__ = [
     "create_time_index",
     "GROUPINGS",
     "Model",
+    "Node",
     "Investment",
     "NonConvex",
     "sequence",

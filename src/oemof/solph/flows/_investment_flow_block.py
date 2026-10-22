@@ -390,8 +390,9 @@ class InvestmentFlowBlock(ScalarBlock):
                         self.nominal_capacity[i, o, p]
                         == sum(
                             self.invest[i, o, rp]
-                            for rp
-                            in m.flows[i, o].investment.relevant_periods(p)
+                            for rp in m.flows[
+                                i, o
+                            ].investment.relevant_periods(p)
                         )
                         + m.flows[i, o].investment.existing[p]
                     )
@@ -597,15 +598,13 @@ class InvestmentFlowBlock(ScalarBlock):
         for i, o in self.CONVEX_INVESTFLOWS:
             for p in m.CAPACITY_PERIODS:
                 investment_costs += (
-                    self.invest[i, o, p]
-                    * m.flows[i, o].investment.ep_costs[p]
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                 )
 
         for i, o in self.NON_CONVEX_INVESTFLOWS:
             for p in m.CAPACITY_PERIODS:
                 investment_costs += (
-                    self.invest[i, o, p]
-                    * m.flows[i, o].investment.ep_costs[p]
+                    self.invest[i, o, p] * m.flows[i, o].investment.ep_costs[p]
                     + self.invest_status[i, o, p]
                     * m.flows[i, o].investment.offset[p]
                 )
