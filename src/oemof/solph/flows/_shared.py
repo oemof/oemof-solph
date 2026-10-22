@@ -358,27 +358,27 @@ def _factors_for_gradient_terms(block, i, o, t):
     capacity can change between `t-1` and `t`.
     """
     m = block.parent_block()
-    period = m.es.capacity_period_of_timestep(t)
-    previous_period = m.es.capacity_period_of_timestep(t - 1)
+    period_of_step = m.es.capacity_period_of_timestep(t)
+    period_of_previous_step = m.es.capacity_period_of_timestep(t - 1)
 
     if m.flows[i, o].investment is not None:
-        if period != previous_period:
+        if period_of_step != period_of_previous_step:
             return None
         return (
-            block.invest[i, o, period],
+            block.invest[i, o, period_of_step],
             block.status_nominal[i, o, t - 1],
             block.status_nominal[i, o, t],
             1,
         )
 
-    capacity = m.flows[i, o].nominal_capacity[period]
+    capacity = m.flows[i, o].nominal_capacity[period_of_step]
     if capacity == 0:
         return None
     return (
         capacity,
         block.status[i, o, t - 1] * capacity,
         block.status[i, o, t] * capacity,
-        m.flows[i, o].nominal_capacity[previous_period] / capacity,
+        m.flows[i, o].nominal_capacity[period_of_previous_step] / capacity,
     )
 
 

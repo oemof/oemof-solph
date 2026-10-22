@@ -217,6 +217,8 @@ def test_flow_gradient_limit_on_non_convex_flow():
     flow_result = _run_flow_model(flow)
 
     assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
+
+
 def test_minimum_uptime_near_horizon_end():
     # Running costs 5 per step before step 8 and earns 3 per step in the
     # last two steps. A start-up in step 8 pays off only if the flow may
