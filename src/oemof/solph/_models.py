@@ -766,7 +766,7 @@ class Model(po.ConcreteModel):
         # The solver_results attribute is deprecated and will be removed in
         # future versions To access the original solver return use
         # Model.solver_return
-        if solve_function != self._solve_appsi:
+        if solve_function == self._solve_appsi:
             self._solver_results = self.solver_return.__dict__
         else:
             self._solver_results = self.solver_return
