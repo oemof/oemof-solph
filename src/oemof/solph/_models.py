@@ -19,14 +19,14 @@ import logging
 import warnings
 from dataclasses import dataclass
 from logging import getLogger
+from typing import ClassVar
 
 import pandas as pd
 from pyomo import environ as po
 from pyomo.contrib import appsi
 from pyomo.opt import SolverFactory
 
-from oemof.solph import EnergySystem
-from oemof.solph import processing
+from oemof.solph import EnergySystem, processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
 from oemof.solph.flows._invest_non_convex_flow_block import (
@@ -155,6 +155,13 @@ class Model(po.ConcreteModel):
         NonConvexFlowBlock,
         InvestNonConvexFlowBlock,
     ]
+
+    # TODO: add missing solvers
+    _APPSI_SOLVERS: ClassVar[dict] = {
+        "highs": (appsi.solvers.Highs, "highs_options"),
+        "cbc": (appsi.solvers.Cbc, "cbc_options"),
+        "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
+    }
 
     def __init__(
         self,
@@ -483,22 +490,55 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    def _solve_highs(self, solver, cmdline_options=None, solve_kwargs=None):
-        opt = appsi.solvers.Highs()
+    def _solve_appsi(
+        self,
+        solver=appsi.solvers.Cbc,
+        solver_options="cbc_options",
+        cmdline_options=None,
+        solve_kwargs=None,
+    ):
+        """Solve the model with a Pyomo APPSI solver.
+
+        Parameters
+        ----------
+        solver : type
+            APPSI solver class (a subclass of
+            ``pyomo.contrib.appsi.base.Solver``) to instantiate.
+        solver_options : str
+            Name of the solver attribute that receives ``cmdline_options``.
+        cmdline_options : dict
+            Solver-specific options passed to the APPSI solver.
+        solve_kwargs : dict
+            Solve options. Currently, ``tee=True`` enables solver output.
+
+        Returns
+        -------
+        solver_info
+            Solver status and APPSI result metadata. Variable values are
+            loaded when an optimal solution or a feasible incumbent exists.
+        """
+        # TODO: Implement option to handle unknown solver names defined by user
+        # get solver class
+        solver_class = self._APPSI_SOLVERS[solver][0]
+        opt = solver_class()
         opt.config.load_solution = False
 
         if solve_kwargs.get("tee"):
             opt.config.stream_solver = True
 
-        opt.highs_options = cmdline_options
+        setattr(opt, solver_options, cmdline_options)
 
-        self.solver_return = opt.solve(self)
-        tc = self.solver_return.termination_condition
+        # TODO appsi_results needed? or using self.solver_return instead?
+        appsi_results = opt.solve(self)
+        self.solver_return = appsi_results
+        tc = appsi_results.termination_condition
 
+        # TODO: Handle solver results processing depending on solver class
         optimal = tc == appsi.base.TerminationCondition.optimal
 
-        if optimal or self.solver_return.best_feasible_objective is not None:
-            self.solver_return.solution_loader.load_vars()
+        if optimal or appsi_results.best_feasible_objective is not None:
+            appsi_results.solution_loader.load_vars()
+
         if self.dual is not None:
             try:
                 duals = opt.get_duals()
@@ -525,8 +565,8 @@ class Model(po.ConcreteModel):
                     UserWarning,
                 )
 
-        bfo = self.solver_return.best_feasible_objective
-        bob = self.solver_return.best_objective_bound
+        bfo = appsi_results.best_feasible_objective
+        bob = appsi_results.best_objective_bound
         if bfo not in (None, 0) and bob is not None:
             gap = abs(bfo - bob) / abs(bfo)
         else:
@@ -538,7 +578,9 @@ class Model(po.ConcreteModel):
             optimal=optimal,
             termination_condition=tc.name,
             status=tc.value,
-            wallclock_time=self.solver_return.wallclock_time,
+            wallclock_time=appsi_results.wallclock_time
+            if hasattr(appsi_results, "wallclock_time")
+            else None,
             best_objective_bound=bob,
             best_feasible_objective=bfo,
             gap=gap,
@@ -546,6 +588,24 @@ class Model(po.ConcreteModel):
         )
 
     def _solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
+        """Solve the model with Pyomo's ``SolverFactory`` interface.
+
+        Parameters
+        ----------
+        solver : str
+            Name of the solver registered with ``SolverFactory``.
+        solver_io : str
+            Solver interface or file format passed to ``SolverFactory``.
+        solve_kwargs : dict
+            Keyword arguments forwarded to the solver's ``solve`` method.
+        cmdline_options : dict
+            Solver options added to the solver object's ``options`` mapping.
+
+        Returns
+        -------
+        solver_info
+            Solver status and the Pyomo ``SolverResults`` object.
+        """
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -586,23 +646,66 @@ class Model(po.ConcreteModel):
             message=msg,
         )
 
+    def _get_solve_function(self, solver: str, interface: str):
+        """Function to return the correct solve function (`_solve_factory`,
+        `_solve_appsi`) based on solver and interface selection of the user in
+        the `solve` function.
+        """
+        if interface == "auto":
+            if solver in self._APPSI_SOLVERS:
+                msg = f"'appsi' interface selected by default for '{solver}'."
+                logging.info(msg)
+                return self._solve_appsi
+            else:
+                msg = (
+                    f"Solver '{solver}' is not supported by 'appsi' interface."
+                    f" Using pyomos 'SolverFactory' as fallback (slower for"
+                    f" repeated solves)."
+                )
+                logging.info(msg)
+                return self._solve_factory
+        elif interface == "solverfactory":
+            return self._solve_factory
+        elif interface == "appsi":
+            if solver in self._APPSI_SOLVERS:
+                return self._solve_appsi
+            else:
+                msg = (
+                    f"Solver '{solver}' is not supported by 'appsi' interface,"
+                    f" which is set explicitly. A generic implementation is"
+                    f" tested. If this fails, set the interface to 'auto' or"
+                    f" 'solverfactory', or use a different solver."
+                )
+                raise UserWarning(msg)
+                # TODO: Implement forced appsi usage
+        else:
+            msg = (
+                f"The selected interface '{interface}' is not supported. "
+                f"Please use one of the following: 'auto', 'solverfactory', "
+                f"'appsi'."
+            )
+            raise ValueError(msg)
+
     def solve(
         self,
-        solver="cbc",
-        solver_io="lp",
-        allow_nonoptimal=False,
-        duals=False,
-        solve_kwargs=None,
-        cmdline_options=None,
-    ):
+        solver: str = "cbc",
+        solver_io: str | None = None,  # TODO: must be None for appsi
+        interface: str = "auto",
+        allow_nonoptimal: bool = False,
+        duals: bool = False,
+        solve_kwargs: None | dict = None,
+        cmdline_options: None | dict = None,
+    ) -> Results | dict:
         r"""Takes care of communication with solver to solve the model.
 
         Parameters
         ----------
         solver : string
-            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex"
+            solver to be used e.g. "cbc", "glpk", "gurobi", "cplex".
         solver_io : string
             pyomo solver interface file format: "lp", "python", "nl", etc.
+        interface : str
+            interface to use: "auto", "solverfactory", "appsi".
         allow_nonoptimal : bool
             False: If no optimal solution is found, an error will be risen.
             True: If no optimal solution is found, there will be a warning.
@@ -611,40 +714,59 @@ class Model(po.ConcreteModel):
         duals : bool
             Receive dual variables and reduced cost.
         solve_kwargs : dict
-            Other arguments for the pyomo.opt.SolverFactory.solve() method
-            Example : {"tee":True}
+            Additional arguments for the solver's ``solve`` method, e.g.
+            ``{"tee": True}``. APPSI solvers currently use ``tee`` to enable
+            solver output; other arguments are forwarded by the
+            ``SolverFactory`` path.
         cmdline_options : dict
-            Dictionary with command line options for solver e.g.
-            {"mipgap":"0.01"} results in "--mipgap 0.01"
-            \{"interior":" "} results in "--interior"
-            \Gurobi solver takes numeric parameter values such as
-            {"method": 2}
+            Solver-specific options. APPSI solvers receive these through
+            their options attribute; ``SolverFactory`` solvers receive them
+            through their ``options`` mapping. For example,
+            ``{"mipgap": 0.01}`` sets a MIP gap, while Gurobi accepts numeric
+            parameters such as ``{"method": 2}``.
+
+        Returns
+        -------
+        Results or dict
+            An optimal solve returns a ``Results`` object. If
+            ``allow_nonoptimal=True`` and the solver is non-optimal, a warning
+            is issued and its solver metadata is returned instead.
+
+        Raises
+        ------
+        RuntimeError
+            If the solver does not return an optimal solution and
+            ``allow_nonoptimal`` is false.
         """
         if solve_kwargs is None:
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
+
+        # TODO: _get_solve_function should return the fitting solver_io
+        solve_function = self._get_solve_function(
+            solver=solver, interface=interface
+        )
+        solver_parameters = {
+            "solver": solver,
+            "solve_kwargs": solve_kwargs,
+            "cmdline_options": cmdline_options,
+        }
+        if solve_function != self._solve_appsi:
+            solver_parameters["solver_io"] = solver_io
+        # TODO: Unify _solve_factory and _solve_appsi API
+        solver_info = solve_function(**solver_parameters)
+
         if duals:
             self._receive_duals()
 
-        if solver == "highs":
-            solver_info = self._solve_highs(
-                solve_kwargs=solve_kwargs,
-                cmdline_options=cmdline_options,
-                solver=solver,
-            )
-        else:
-            solver_info = self._solve_factory(
-                solver=solver,
-                solver_io=solver_io,
-                solve_kwargs=solve_kwargs,
-                cmdline_options=cmdline_options,
-            )
+        # TODO DepricatedWarning for es.results -> oemof.network
+        self.es.results = self.solver_return
 
         # The solver_results attribute is deprecated and will be removed in
         # future versions To access the original solver return use
         # Model.solver_return
-        if solver_info.solver == "highs":
+        if solve_function == self._solve_appsi:
             self._solver_results = self.solver_return.__dict__
         else:
             self._solver_results = self.solver_return
