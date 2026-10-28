@@ -104,11 +104,13 @@ class TestParameterResult:
 
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
-        meta_cbc = processing.meta_results(self.model_cbc)
+        with pytest.warns(FutureWarning, match="meta_results"):
+            meta_cbc = processing.meta_results(self.model_cbc)
         assert "MIPGap" in meta_cbc["problem"]
         assert meta_cbc["problem"]["MIPGap"] == 0
 
-        meta_cbc = processing.meta_results(self.model_cbc)
+        with pytest.warns(FutureWarning, match="meta_results"):
+            meta_cbc = processing.meta_results(self.model_cbc)
         assert "MIPGap" in meta_cbc["problem"]
         assert meta_cbc["problem"]["MIPGap"] == 0
 

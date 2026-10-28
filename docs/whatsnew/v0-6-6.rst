@@ -20,6 +20,9 @@ API changes
   use cases of the ExtractionTurbineCHP
 * Remove `solver-results` attribute from Model class. It will be replaced by
   the new `solver_return` attribute.
+* Deprecate `processing.meta_results`. It now issues a `FutureWarning`
+  pointing to the `Results` class (e.g. `results.solver`) and no longer
+  fails for appsi solvers such as HiGHS (#1343).
 * Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
   the new `solver_return` attribute.
 * The variables `positive_gradient` and `negative_gradient` of
