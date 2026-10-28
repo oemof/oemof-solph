@@ -816,10 +816,13 @@ def meta_results(om, undefined=False):
         }
     else:
         for k1 in ["Problem", "Solver"]:
-            container = getattr(solver_return, k1)[0]
             k1 = k1.lower()
+            # item access returns plain values, attribute access and
+            # items() would return pyomo ScalarData containers.
+            container = solver_return[k1][0]
             meta_res[k1] = {}
-            for k2, v2 in container.items():
+            for k2 in container.keys():
+                v2 = container[k2]
                 try:
                     if str(v2) == "<undefined>":
                         if undefined:
