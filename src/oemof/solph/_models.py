@@ -527,6 +527,13 @@ class Model(po.ConcreteModel):
             found and the ``pyomo.contrib.solver.results.Results`` object
             otherwise.
         """
+        # map legacy SolverFactory kwargs to APPSI config attributes
+        KWARG_TO_CONFIG = {
+            "tee": "stream_solver",
+            "timelimit": "time_limit",
+            "load_solutions": "load_soliution",
+        }
+
         if solver in self._APPSI_SOLVERS:
             solver_class = self._APPSI_SOLVERS[solver][0]
             if solver_options == None:
@@ -537,12 +544,19 @@ class Model(po.ConcreteModel):
             if solver_options == None:
                 solver_options = f"{solver.lower()}_options"
         opt = solver_class()
-        opt.config.load_solution = False
 
-        # TODO: Add keywords from `pyomo.contrib.appsi.base.SolverConfig`
-        # with backwards compatibility
-        if solve_kwargs.get("tee"):
-            opt.config.stream_solver = True
+        # Set APPSI config attribute if legacy kwargs is defined
+        for kwarg, attr in KWARG_TO_CONFIG.items():
+            if kwarg in solve_kwargs:
+                msg = (
+                    f"Keyword argument '{kwarg}' was set in ``Model.solve``s "
+                    f"``solve_kwargs`` but is deprecated for the APPSI "
+                    f"interface. The APPSI interface uses '{attr}' instead."
+                )
+                warnings.warn(msg, DeprecationWarning)
+                setattr(opt.config, attr, solve_kwargs.pop(kwarg))
+        # set remaining solve_kwargs
+        opt.config.set_value(solve_kwargs)
 
         setattr(opt, solver_options, cmdline_options)
 
