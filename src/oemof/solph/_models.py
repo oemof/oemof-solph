@@ -577,10 +577,11 @@ class Model(po.ConcreteModel):
                         self.dual[c] = v
                 except RuntimeError:
                     warnings.warn(
-                        f"Could not extract dual variables from {solver}. This "
-                        "typically happens for MIP models, where duals are not "
-                        "well-defined, or if the specified solver does not "
-                        "support the extraction of dual variable values.",
+                        f"Could not extract dual variables from {solver}. "
+                        "This typically happens for MIP models, where duals "
+                        "are not well-defined, or if the specified solver "
+                        "does not support the extraction of dual variable "
+                        "values.",
                         UserWarning,
                     )
 
@@ -594,9 +595,10 @@ class Model(po.ConcreteModel):
                 except RuntimeError:
                     warnings.warn(
                         f"Could not extract reduced costs from {solver}. This "
-                        "typically happens for MIP models, where reduced costs "
-                        "are not well-defined or if the specified solver does not "
-                        "support the extraction of reduced costs values.",
+                        "typically happens for MIP models, where reduced "
+                        "costs are not well-defined or if the specified "
+                        "solver does not support the extraction of reduced "
+                        "costs values.",
                         UserWarning,
                     )
             bfo = self.solver_return.best_feasible_objective
@@ -611,11 +613,13 @@ class Model(po.ConcreteModel):
             else:
                 wt = None
 
+            # TODO: Get message from solver
+            msg = f"Problem solved using '{solver}' with APPSI"
             return SolverResults(
                 optimal=optimal,
                 status=tc.value,
                 termination_condition=tc.name,
-                message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
+                message=msg,
                 wallclock_time=wt,
                 objective=bfo,
                 solver=solver,
