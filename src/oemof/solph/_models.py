@@ -499,6 +499,7 @@ class Model(po.ConcreteModel):
     def _solve_appsi(
         self,
         solver: str = "cbc",
+        solver_io: str | None = None,
         solver_options: None | str = None,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
@@ -636,7 +637,7 @@ class Model(po.ConcreteModel):
     def _solve_factory(
         self,
         solver: str = "cbc",
-        solver_io: str = "lp",
+        solver_io: None | str = "lp",
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
     ) -> SolverResults | dict:
