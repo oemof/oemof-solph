@@ -492,10 +492,10 @@ class Model(po.ConcreteModel):
 
     def _solve_appsi(
         self,
-        solver=appsi.solvers.Cbc,
-        solver_options="cbc_options",
-        cmdline_options=None,
-        solve_kwargs=None,
+        solver: str = "cbc",
+        solver_options: str = "cbc_options",
+        solve_kwargs: None | dict = None,
+        cmdline_options: None | dict = None,
     ):
         """Solve the model with a Pyomo APPSI solver.
 
@@ -506,10 +506,16 @@ class Model(po.ConcreteModel):
             ``pyomo.contrib.appsi.base.Solver``) to instantiate.
         solver_options : str
             Name of the solver attribute that receives ``cmdline_options``.
-        cmdline_options : dict
-            Solver-specific options passed to the APPSI solver.
         solve_kwargs : dict
-            Solve options. Currently, ``tee=True`` enables solver output.
+            Keyword arguments forwarded to the ``appsi`` interface. Controls
+            the behavior of pyomos solver interface. See
+            ``pyomo.contrib.appsi.base.SolverConfig`` for a list of accepted
+            key-value pairs. Additional keywords are supported for backward
+            compatibility.
+        cmdline_options : dict
+            Keyword arguments forwarded to the solvers command-line interface
+            (solver specific). Controls the behavior of the selected solver.
+            E.g. {"mipgap":0.01} results in "--mipgap 0.01".
 
         Returns
         -------
@@ -523,6 +529,8 @@ class Model(po.ConcreteModel):
         opt = solver_class()
         opt.config.load_solution = False
 
+        # TODO: Add keywords from `pyomo.contrib.appsi.base.SolverConfig`
+        # with backwards compatibility
         if solve_kwargs.get("tee"):
             opt.config.stream_solver = True
 
@@ -587,7 +595,13 @@ class Model(po.ConcreteModel):
             message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
-    def _solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
+    def _solve_factory(
+        self,
+        solver: str = "cbc",
+        solver_io: str = "lp",
+        solve_kwargs: None | dict = None,
+        cmdline_options: None | dict = None,
+    ):
         """Solve the model with Pyomo's ``SolverFactory`` interface.
 
         Parameters
@@ -597,9 +611,14 @@ class Model(po.ConcreteModel):
         solver_io : str
             Solver interface or file format passed to ``SolverFactory``.
         solve_kwargs : dict
-            Keyword arguments forwarded to the solver's ``solve`` method.
+            Keyword arguments forwarded to the ``solve`` method of
+            ``SolverFactory``. Controls the behavior of pyomos
+            ``SolverFactory``. See ``pyomo.opt.base.solvers.OptSolver._presolve
+            for a list of supported key-value pairs.
         cmdline_options : dict
-            Solver options added to the solver object's ``options`` mapping.
+            Keyword arguments forwarded to the solvers command-line interface
+            (solver specific).Controls the behavior of the selected solver.
+            E.g. {"mipgap":0.01} results in "--mipgap 0.01".
 
         Returns
         -------
@@ -689,7 +708,7 @@ class Model(po.ConcreteModel):
     def solve(
         self,
         solver: str = "cbc",
-        solver_io: str | None = None,  # TODO: must be None for appsi
+        solver_io: str | None = None,
         interface: str = "auto",
         allow_nonoptimal: bool = False,
         duals: bool = False,
@@ -738,24 +757,25 @@ class Model(po.ConcreteModel):
             If the solver does not return an optimal solution and
             ``allow_nonoptimal`` is false.
         """
+        # TODO: Move to _solve_factory
         if solve_kwargs is None:
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
 
-        # TODO: _get_solve_function should return the fitting solver_io
         solve_function = self._get_solve_function(
             solver=solver, interface=interface
         )
-        solver_parameters = {
-            "solver": solver,
-            "solve_kwargs": solve_kwargs,
-            "cmdline_options": cmdline_options,
-        }
-        if solve_function != self._solve_appsi:
-            solver_parameters["solver_io"] = solver_io
-        # TODO: Unify _solve_factory and _solve_appsi API
-        solver_info = solve_function(**solver_parameters)
+
+        if solve_function == self._solve_factory and solver_io == None:
+            solver_io = "lp"
+
+        solver_info = solve_function(
+            solver=solver,
+            solver_io=solver_io,
+            solve_kwargs=solve_kwargs,
+            cmdline_options=cmdline_options,
+        )
 
         if duals:
             self._receive_duals()
