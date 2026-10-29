@@ -156,11 +156,14 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    # TODO: add missing solvers
     _APPSI_SOLVERS: ClassVar[dict] = {
-        "highs": (appsi.solvers.Highs, "highs_options"),
         "cbc": (appsi.solvers.Cbc, "cbc_options"),
+        "cplex": (appsi.solvers.Cplex, "cplex_options"),
         "gurobi": (appsi.solvers.Gurobi, "gurobi_options"),
+        "highs": (appsi.solvers.Highs, "highs_options"),
+        "ipopt": (appsi.solvers.Ipopt, "ipopt_options"),
+        "maingo": (appsi.solvers.MAiNGO, "maingo_options"),
+        "wntr": (appsi.solvers.Wntr, "wntr_options"),
     }
 
     def __init__(
