@@ -580,19 +580,22 @@ class Model(po.ConcreteModel):
         else:
             gap = None
 
+        if hasattr(appsi_results, "wallclock_time"):
+            wt = appsi_results.wallclock_time
+        else:
+            wt = None
+
         return SolverResults(
+            optimal=optimal,
+            status=tc.value,
+            termination_condition=tc.name,
+            message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
+            wallclock_time=wt,
             objective=bfo,
             solver=solver,
-            optimal=optimal,
-            termination_condition=tc.name,
-            status=tc.value,
-            wallclock_time=appsi_results.wallclock_time
-            if hasattr(appsi_results, "wallclock_time")
-            else None,
-            best_objective_bound=bob,
-            best_feasible_objective=bfo,
             gap=gap,
-            message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
+            best_feasible_objective=bfo,
+            best_objective_bound=bob,
         )
 
     def _solve_factory(
@@ -654,15 +657,15 @@ class Model(po.ConcreteModel):
 
         return SolverResults(
             optimal=status == "ok" and tc == "optimal",
-            solver=solver,
-            objective=objective,
-            termination_condition=tc.name,
             status=status.name,
+            termination_condition=tc.name,
+            message=msg,
             wallclock_time=wt,
+            objective=objective,
+            solver=solver,
             best_feasible_objective=bfo,
             best_objective_bound=bob,
             gap=gap,
-            message=msg,
         )
 
     def _get_solve_function(self, solver: str, interface: str):
@@ -757,7 +760,6 @@ class Model(po.ConcreteModel):
             If the solver does not return an optimal solution and
             ``allow_nonoptimal`` is false.
         """
-        # TODO: Move to _solve_factory
         if solve_kwargs is None:
             solve_kwargs = {}
         if cmdline_options is None:
