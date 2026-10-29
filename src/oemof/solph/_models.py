@@ -536,12 +536,12 @@ class Model(po.ConcreteModel):
 
         if solver in self._APPSI_SOLVERS:
             solver_class = self._APPSI_SOLVERS[solver][0]
-            if solver_options == None:
+            if solver_options is None:
                 solver_options = self._APPSI_SOLVERS[solver][1]
         else:
             # handle unknown solvers specified by user
             solver_class = getattr(appsi.solvers, solver)
-            if solver_options == None:
+            if solver_options is None:
                 solver_options = f"{solver.lower()}_options"
         opt = solver_class()
 
@@ -810,7 +810,7 @@ class Model(po.ConcreteModel):
             solver=solver, interface=interface
         )
 
-        if solve_function == self._solve_factory and solver_io == None:
+        if solve_function == self._solve_factory and solver_io is None:
             solver_io = "lp"
 
         solver_info = solve_function(
