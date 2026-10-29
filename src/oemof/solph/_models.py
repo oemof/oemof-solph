@@ -496,7 +496,7 @@ class Model(po.ConcreteModel):
     def _solve_appsi(
         self,
         solver: str = "cbc",
-        solver_options: str = "cbc_options",
+        solver_options: None | str = None,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
     ) -> SolverResults | dict:
@@ -527,8 +527,15 @@ class Model(po.ConcreteModel):
             found and the ``pyomo.contrib.solver.results.Results`` object
             otherwise.
         """
-        # TODO: Implement option to handle unknown solver names defined by user
-        solver_class = self._APPSI_SOLVERS[solver][0]
+        if solver in self._APPSI_SOLVERS:
+            solver_class = self._APPSI_SOLVERS[solver][0]
+            if solver_options == None:
+                solver_options = self._APPSI_SOLVERS[solver][1]
+        else:
+            # handle unknown solvers specified by user
+            solver_class = getattr(appsi.solvers, solver)
+            if solver_options == None:
+                solver_options = f"{solver.lower()}_options"
         opt = solver_class()
         opt.config.load_solution = False
 
@@ -716,8 +723,8 @@ class Model(po.ConcreteModel):
                     f" tested. If this fails, set the interface to 'auto' or"
                     f" 'solverfactory', or use a different solver."
                 )
-                raise UserWarning(msg)
-                # TODO: Implement forced appsi usage
+                warnings.warn(msg, UserWarning)
+                return self._solve_appsi
         else:
             msg = (
                 f"The selected interface '{interface}' is not supported. "
