@@ -24,9 +24,12 @@ from typing import ClassVar
 import pandas as pd
 from pyomo import environ as po
 from pyomo.contrib import appsi
-from pyomo.opt import SolverFactory, SolverStatus, TerminationCondition
+from pyomo.opt import SolverFactory
+from pyomo.opt import SolverStatus
+from pyomo.opt import TerminationCondition
 
-from oemof.solph import EnergySystem, processing
+from oemof.solph import EnergySystem
+from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
 from oemof.solph.flows._invest_non_convex_flow_block import (
