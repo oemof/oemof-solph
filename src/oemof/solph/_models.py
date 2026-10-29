@@ -537,12 +537,10 @@ class Model(po.ConcreteModel):
         setattr(opt, solver_options, cmdline_options)
 
         self.solver_return = opt.solve(self)
-        status = self.solver_return.solution_status
         tc = self.solver_return.termination_condition
 
-        optimal = status == appsi.base.TerminationCondition.optimal
+        optimal = tc == appsi.base.TerminationCondition.optimal
 
-        # TODO: Handle solver results processing depending on solver class
         if optimal:
             self.solver_return.solution_loader.load_vars()
 
@@ -577,7 +575,6 @@ class Model(po.ConcreteModel):
                         "support the extraction of reduced costs values.",
                         UserWarning,
                     )
-
             bfo = self.solver_return.best_feasible_objective
             bob = self.solver_return.best_objective_bound
             if bfo not in (None, 0) and bob is not None:
@@ -732,7 +729,7 @@ class Model(po.ConcreteModel):
         solver_io: str | None = None,
         interface: str = "auto",
         allow_nonoptimal: bool = False,
-        duals: bool = False,  # TODO: add to appsi and factory func
+        duals: bool = False,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
     ) -> Results | dict:
@@ -831,22 +828,19 @@ class Model(po.ConcreteModel):
             logging.info(msg)
         else:
             if solve_function == self._solve_appsi:
-                solver_status = solver_info.solution_status
-                solver_termination_condition = (
-                    solver_info.termination_condition
+                msg = (
+                    f"The solver did not return an optimal solution. "
+                    f"Instead the optimisation ended with termination "
+                    f"condition: {solver_info.termination_condition}"
                 )
             else:
-                solver_status = solver_info.Solver.status
-                solver_termination_condition = (
-                    solver_info.Solver.Termination_condition
+                msg = (
+                    f"The solver did not return an optimal solution. "
+                    f"Instead the optimisation ended with\n"
+                    f"       - status: {solver_info.Solver.status}\n"
+                    f"       - termination condition: "
+                    f"{solver_info.Solver.Termination_condition}"
                 )
-            msg = (
-                f"The solver did not return an optimal solution. "
-                f"Instead the optimisation ended with\n"
-                f"       - status: {solver_status}\n"
-                f"       - termination condition: "
-                f"{solver_termination_condition}"
-            )
 
             if allow_nonoptimal:
                 warnings.warn(msg, UserWarning)
