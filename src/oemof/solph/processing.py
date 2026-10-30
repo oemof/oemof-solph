@@ -20,6 +20,7 @@ import itertools
 import numbers
 import operator
 import sys
+import warnings
 from collections import abc
 from itertools import groupby
 from typing import Dict
@@ -768,7 +769,13 @@ def convert_keys_to_strings(result, keep_none_type=False):
 
 def meta_results(om, undefined=False):
     """
-    Fetch some metadata from the Solver. Feel free to add more keys.
+    Fetch some metadata from the Solver.
+
+    .. deprecated:: 0.6.6
+        ``meta_results`` will be removed in v0.7. Use the
+        :class:`~oemof.solph.Results` object returned by
+        :meth:`Model.solve` instead, e.g. ``results.solver`` (objective,
+        termination condition, gap, ...).
 
     Valid keys of the resulting dictionary are: 'objective', 'problem',
     'solver'.
@@ -783,24 +790,49 @@ def meta_results(om, undefined=False):
     -------
     dict
     """
+    warnings.warn(
+        "processing.meta_results() is deprecated and will be removed in"
+        " v0.7. Use the Results object returned by Model.solve() instead,"
+        " e.g. results.solver.",
+        FutureWarning,
+        stacklevel=2,
+    )
     meta_res = {"objective": om.objective()}
+    solver_return = om.solver_return
 
-    for k1 in ["Problem", "Solver"]:
-        k1 = k1.lower()
-        meta_res[k1] = {}
-        for k2, v2 in om.es.results[k1][0].items():
-            try:
-                if str(om.es.results[k1][0][k2]) == "<undefined>":
+    if not hasattr(solver_return, "Problem"):
+        # appsi solvers (e.g. HiGHS) do not return the classic Pyomo
+        # "Problem"/"Solver" containers (#1343).
+        bfo = getattr(solver_return, "best_feasible_objective", None)
+        bob = getattr(solver_return, "best_objective_bound", None)
+        tc = getattr(solver_return, "termination_condition", None)
+        meta_res["problem"] = {
+            "Upper bound": bfo,
+            "Lower bound": bob,
+        }
+        meta_res["solver"] = {
+            "Termination condition": getattr(tc, "name", tc),
+            "Wallclock time": getattr(solver_return, "wallclock_time", None),
+        }
+    else:
+        for k1 in ["Problem", "Solver"]:
+            k1 = k1.lower()
+            # item access returns plain values, attribute access and
+            # items() would return pyomo ScalarData containers.
+            container = solver_return[k1][0]
+            meta_res[k1] = {}
+            for k2 in container.keys():
+                v2 = container[k2]
+                try:
+                    if str(v2) == "<undefined>":
+                        if undefined:
+                            meta_res[k1][k2] = str(v2)
+                    else:
+                        meta_res[k1][k2] = v2
+                except TypeError:
                     if undefined:
-                        meta_res[k1][k2] = str(om.es.results[k1][0][k2])
-                else:
-                    meta_res[k1][k2] = om.es.results[k1][0][k2]
-            except TypeError:
-                if undefined:
-                    msg = "Cannot fetch meta results of type {0}"
-                    meta_res[k1][k2] = msg.format(
-                        type(om.es.results[k1][0][k2])
-                    )
+                        msg = "Cannot fetch meta results of type {0}"
+                        meta_res[k1][k2] = msg.format(type(v2))
     try:
         meta_res["problem"]["MIPGap"] = abs(
             meta_res["problem"]["Upper bound"]
@@ -812,7 +844,7 @@ def meta_results(om, undefined=False):
             )
             / 2
         )
-    except TypeError:
+    except (TypeError, ZeroDivisionError):
         meta_res["problem"]["MIPGap"] = None
     return meta_res
 
