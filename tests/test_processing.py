@@ -407,8 +407,6 @@ class TestParameterResult:
 
 
 def test_meta_results_warns_and_works_with_highs():
-
-
     def _solved_meta_results_model(solver):
         es = EnergySystem(
             timeindex=pandas.date_range("2020-01-01", periods=3, freq="h"),
@@ -424,7 +422,6 @@ def test_meta_results_warns_and_works_with_highs():
         model = Model(es)
         results = model.solve(solver=solver)
         return model, results
-
 
     model, results = _solved_meta_results_model("highs")
     with pytest.warns(FutureWarning, match="meta_results"):
