@@ -406,24 +406,26 @@ class TestParameterResult:
         assert view is None
 
 
-def _solved_meta_results_model(solver):
-    es = EnergySystem(
-        timeindex=pandas.date_range("2020-01-01", periods=3, freq="h"),
-        infer_last_interval=True,
-    )
-    bus = Bus(label="bus")
-    source = Source(label="source", outputs={bus: Flow(variable_costs=2)})
-    sink = Sink(
-        label="sink",
-        inputs={bus: Flow(fix=[1, 2, 3], nominal_capacity=1)},
-    )
-    es.add(bus, source, sink)
-    model = Model(es)
-    results = model.solve(solver=solver)
-    return model, results
-
-
 def test_meta_results_warns_and_works_with_highs():
+
+
+    def _solved_meta_results_model(solver):
+        es = EnergySystem(
+            timeindex=pandas.date_range("2020-01-01", periods=3, freq="h"),
+            infer_last_interval=True,
+        )
+        bus = Bus(label="bus")
+        source = Source(label="source", outputs={bus: Flow(variable_costs=2)})
+        sink = Sink(
+            label="sink",
+            inputs={bus: Flow(fix=[1, 2, 3], nominal_capacity=1)},
+        )
+        es.add(bus, source, sink)
+        model = Model(es)
+        results = model.solve(solver=solver)
+        return model, results
+
+
     model, results = _solved_meta_results_model("highs")
     with pytest.warns(FutureWarning, match="meta_results"):
         meta = processing.meta_results(model)
