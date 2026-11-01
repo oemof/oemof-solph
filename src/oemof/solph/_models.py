@@ -828,9 +828,6 @@ class Model(po.ConcreteModel):
             cmdline_options=cmdline_options,
         )
 
-        # TODO DepricatedWarning for es.results -> oemof.network
-        self.es.results = self.solver_return
-
         # The solver_results attribute is deprecated and will be removed in
         # future versions. To access the original solver return use
         # Model.solver_return.
@@ -852,7 +849,10 @@ class Model(po.ConcreteModel):
             )
             return self._results
 
-        EnergySystem.results = property(results)
+        # Only add the property if it hasn't been added already
+        # (to avoid issues with multiple solve() calls)
+        if not isinstance(getattr(EnergySystem, "results", None), property):
+            EnergySystem.results = property(results)
         # --- END ---
 
         if hasattr(solver_info, "optimal") and solver_info.optimal:
