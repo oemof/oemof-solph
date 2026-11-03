@@ -580,7 +580,6 @@ class Model(po.ConcreteModel):
 
         if optimal:
             self.solver_return.solution_loader.load_vars()
-
             # appsi does not auto-populate self.dual and self.rc
             # TODO: Write test for dual handling for different solvers
             if self.dual is not None:
@@ -597,7 +596,6 @@ class Model(po.ConcreteModel):
                         "values.",
                         UserWarning,
                     )
-
             # TODO: Write test for rc handling for different solvers
             if self.rc is not None:
                 try:
@@ -613,20 +611,15 @@ class Model(po.ConcreteModel):
                         "costs values.",
                         UserWarning,
                     )
-            bfo = self.solver_return.best_feasible_objective
-            bob = self.solver_return.best_objective_bound
+            msg = getattr(opt._solver_model, "Message", None)
+            wt = getattr(self.solver_return, "wallclock_time", None)
+            bfo = getattr(self.solver_return, "best_feasible_objective", None)
+            bob = getattr(self.solver_return, "best_objective_bound", None)
             if bfo not in (None, 0) and bob is not None:
                 gap = abs(bfo - bob) / abs(bfo)
             else:
                 gap = None
 
-            if hasattr(self.solver_return, "wallclock_time"):
-                wt = self.solver_return.wallclock_time
-            else:
-                wt = None
-
-            # TODO: Get message from solver
-            msg = f"Problem solved using '{solver}' with APPSI"
             return SolverResults(
                 optimal=optimal,
                 status=tc.value,
@@ -731,8 +724,8 @@ class Model(po.ConcreteModel):
 
             return SolverResults(
                 optimal=status == "ok" and tc == "optimal",
-                status=status.name,
-                termination_condition=tc.name,
+                status=str(status),
+                termination_condition=str(tc),
                 message=msg,
                 wallclock_time=wt,
                 objective=objective,
