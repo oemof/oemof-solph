@@ -744,9 +744,7 @@ class Model(po.ConcreteModel):
         else:
             return self.solver_return
 
-    def _get_solve_function(
-        self, solver: str, interface: str
-    ) -> Callable | None:
+    def _get_solve_function(self, solver: str, interface: str) -> Callable:
         """Function to return the correct solve function (`_solve_factory`,
         `_solve_appsi`) based on solver and interface selection of the user in
         the `solve` function.
@@ -783,8 +781,7 @@ class Model(po.ConcreteModel):
                     f" 'solverfactory', or use a different solver."
                 )
                 warnings.warn(msg, UserWarning)
-            else:
-                return self._solve_appsi
+            return self._solve_appsi
         else:
             return self._solve_factory
 
