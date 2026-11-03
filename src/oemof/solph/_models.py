@@ -499,10 +499,9 @@ class Model(po.ConcreteModel):
     def _solve_appsi(
         self,
         solver: str = "cbc",
-        solver_io: str | None = None,
-        solver_options: None | str = None,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
+        **kwargs,
     ) -> SolverResults | dict:
         """Solve the model with a Pyomo APPSI solver.
 
@@ -511,8 +510,6 @@ class Model(po.ConcreteModel):
         solver : type
             APPSI solver class (a subclass of
             ``pyomo.contrib.appsi.base.Solver``) to instantiate.
-        solver_options : str
-            Name of the solver attribute that receives ``cmdline_options``.
         solve_kwargs : dict
             Keyword arguments forwarded to the ``appsi`` interface. Controls
             the behavior of pyomos solver interface. See
@@ -523,6 +520,8 @@ class Model(po.ConcreteModel):
             Keyword arguments forwarded to the solvers command-line interface
             (solver specific). Controls the behavior of the selected solver.
             E.g. {"mipgap":0.01} results in "--mipgap 0.01".
+        solver_options : str
+            Name of the solver attribute that receives ``cmdline_options``.
 
         Returns
         -------
@@ -540,13 +539,15 @@ class Model(po.ConcreteModel):
 
         if solver in self._APPSI_SOLVERS:
             solver_class = self._APPSI_SOLVERS[solver][0]
-            if solver_options is None:
-                solver_options = self._APPSI_SOLVERS[solver][1]
+            solver_options = kwargs.get(
+                "solver_options", self._APPSI_SOLVERS[solver][1]
+            )
         else:
             # handle unknown solvers specified by user
             solver_class = getattr(appsi.solvers, solver)
-            if solver_options is None:
-                solver_options = f"{solver.lower()}_options"
+            solver_options = kwargs.get(
+                "solver_options", f"{solver.lower()}_options"
+            )
         opt = solver_class()
 
         # Set APPSI config attribute if legacy kwargs is defined
@@ -637,9 +638,9 @@ class Model(po.ConcreteModel):
     def _solve_factory(
         self,
         solver: str = "cbc",
-        solver_io: None | str = "lp",
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
+        **kwargs,
     ) -> SolverResults | dict:
         """Solve the model with Pyomo's ``SolverFactory`` interface.
 
@@ -647,8 +648,6 @@ class Model(po.ConcreteModel):
         ----------
         solver : str
             Name of the solver registered with ``SolverFactory``.
-        solver_io : str
-            Solver interface or file format passed to ``SolverFactory``.
         solve_kwargs : dict
             Keyword arguments forwarded to the ``solve`` method of
             ``SolverFactory``. Controls the behavior of pyomos
@@ -658,6 +657,9 @@ class Model(po.ConcreteModel):
             Keyword arguments forwarded to the solvers command-line interface
             (solver specific).Controls the behavior of the selected solver.
             E.g. {"mipgap":0.01} results in "--mipgap 0.01".
+        solver_io : str
+            Solver interface or file format passed to ``SolverFactory``.
+            Defaults to "lp".
 
         Returns
         -------
@@ -666,6 +668,7 @@ class Model(po.ConcreteModel):
             found and the ``pyomo.contrib.solver.results.Results`` object
             otherwise.
         """
+        solver_io = kwargs.get("solver_io", "lp")
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -758,12 +761,13 @@ class Model(po.ConcreteModel):
     def solve(
         self,
         solver: str = "cbc",
-        solver_io: str | None = None,
         interface: str = "auto",
         allow_nonoptimal: bool = False,
         duals: bool = False,
         solve_kwargs: None | dict = None,
         cmdline_options: None | dict = None,
+        solver_io: str | None = None,
+        solver_options: str | None = None,
     ) -> Results | dict:
         r"""Takes care of communication with solver to solve the model.
 
@@ -771,10 +775,10 @@ class Model(po.ConcreteModel):
         ----------
         solver : string
             solver to be used e.g. "cbc", "glpk", "gurobi", "cplex".
-        solver_io : string
-            pyomo solver interface file format: "lp", "python", "nl", etc.
+            Defaults to "cbc" (not a recommendation).
         interface : str
-            interface to use: "auto", "solverfactory", "appsi".
+            interface to use between pyomo and the solver ("auto",
+            "solverfactory", "appsi").
         allow_nonoptimal : bool
             False: Raises error if no optimal solution is found.
             True: Raises warning if no optimal solution is found.
@@ -793,6 +797,14 @@ class Model(po.ConcreteModel):
             through their ``options`` mapping. For example,
             ``{"mipgap": 0.01}`` sets a MIP gap, while Gurobi accepts numeric
             parameters such as ``{"method": 2}``.
+        solver_io : string
+            File format for communication between pyomo and selected solver (
+            "lp", "python", "nl", etc.). Only relevant if pyomos
+            `SolverFactory` is used. Defaults to "lp".
+        solver_options : str
+            Name of the solver attribute that receives ``cmdline_options`` (
+            e.g. "cbc_options" for solver `cbc`).
+            Only relevant if pyomos `appsi` interface is used.
 
         Returns
         -------
@@ -818,14 +830,12 @@ class Model(po.ConcreteModel):
             solver=solver, interface=interface
         )
 
-        if solve_function == self._solve_factory and solver_io is None:
-            solver_io = "lp"
-
         solver_info = solve_function(
             solver=solver,
-            solver_io=solver_io,
             solve_kwargs=solve_kwargs,
             cmdline_options=cmdline_options,
+            solver_io=solver_io,
+            solver_options=solver_options,
         )
 
         # The solver_results attribute is deprecated and will be removed in
