@@ -33,8 +33,9 @@ from oemof.solph import EnergySystem
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
-from oemof.solph.flows._invest_non_convex_flow_block import \
-    InvestNonConvexFlowBlock
+from oemof.solph.flows._invest_non_convex_flow_block import (
+    InvestNonConvexFlowBlock,
+)
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
@@ -556,20 +557,26 @@ class Model(po.ConcreteModel):
         opt = solver_class()
 
         # Set APPSI config attribute if legacy kwargs is defined
-        for kwarg in solve_kwargs:
-            if kwarg in KWARG_TO_CONFIG:
-                attr = KWARG_TO_CONFIG[kwarg]
-                msg = (
-                    f"Keyword argument '{kwarg}' was set in ``Model.solve``s "
-                    f"``solve_kwargs`` but is deprecated for the APPSI "
-                    f"interface. The APPSI interface uses '{attr}' instead."
-                )
-                warnings.warn(msg, DeprecationWarning)
-                setattr(opt.config, attr, solve_kwargs.pop(kwarg))
+        legacy_kwargs = list(solve_kwargs.keys() & KWARG_TO_CONFIG.keys())
+        for lkwarg in legacy_kwargs:
+            nkwarg = KWARG_TO_CONFIG[lkwarg]
+            msg = (
+                f"Keyword argument '{lkwarg}' was set in ``Model.solve``s "
+                f"``solve_kwargs`` but is deprecated for the APPSI "
+                f"interface. The APPSI interface uses '{nkwarg}' instead."
+            )
+            warnings.warn(msg, DeprecationWarning)
+            setattr(opt.config, nkwarg, solve_kwargs[lkwarg])
+        # remove legacy kwargs from solve_kwargs
+        for lkwarg in legacy_kwargs:
+            del solve_kwargs[lkwarg]
+
         # set remaining solve_kwargs
         opt.config.set_value(solve_kwargs)
 
-        setattr(opt, solver_options, cmdline_options)
+        # set cmdline_options if dict is non-empty
+        if cmdline_options:
+            setattr(opt, solver_options, cmdline_options)
 
         # appsi interface auto-loads duals and rc (no suffixes necessary)
 
