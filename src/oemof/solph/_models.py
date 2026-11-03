@@ -537,6 +537,9 @@ class Model(po.ConcreteModel):
             "load_solutions": "load_soliution",
         }
 
+        if solve_kwargs is None:
+            solve_kwargs = {}
+
         if solver in self._APPSI_SOLVERS:
             solver_class = self._APPSI_SOLVERS[solver][0]
             solver_options = kwargs.get(
@@ -551,8 +554,9 @@ class Model(po.ConcreteModel):
         opt = solver_class()
 
         # Set APPSI config attribute if legacy kwargs is defined
-        for kwarg, attr in KWARG_TO_CONFIG.items():
-            if kwarg in solve_kwargs:
+        for kwarg in solve_kwargs:
+            if kwarg in KWARG_TO_CONFIG:
+                attr = KWARG_TO_CONFIG[kwarg]
                 msg = (
                     f"Keyword argument '{kwarg}' was set in ``Model.solve``s "
                     f"``solve_kwargs`` but is deprecated for the APPSI "
@@ -668,6 +672,8 @@ class Model(po.ConcreteModel):
             found and the ``pyomo.contrib.solver.results.Results`` object
             otherwise.
         """
+        if solve_kwargs is None:
+            solve_kwargs = {}
         solver_io = kwargs.get("solver_io", "lp")
         opt = SolverFactory(solver, solver_io=solver_io)
 
@@ -676,7 +682,7 @@ class Model(po.ConcreteModel):
         for k in cmdline_options:
             options[k] = cmdline_options[k]
 
-        solve_kwargs = dict(solve_kwargs)
+        # TODO: shouldn't this be dependent on `duals` attribute?
         solve_kwargs["suffixes"] = ["dual", "rc"]
 
         self.solver_return = opt.solve(self, **solve_kwargs)
