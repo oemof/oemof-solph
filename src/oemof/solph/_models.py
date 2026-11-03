@@ -571,6 +571,8 @@ class Model(po.ConcreteModel):
 
         setattr(opt, solver_options, cmdline_options)
 
+        # appsi interface auto-loads duals and rc (no suffixes necessary)
+
         self.solver_return = opt.solve(self)
         tc = self.solver_return.termination_condition
 
@@ -579,8 +581,8 @@ class Model(po.ConcreteModel):
         if optimal:
             self.solver_return.solution_loader.load_vars()
 
+            # appsi does not auto-populate self.dual and self.rc
             # TODO: Write test for dual handling for different solvers
-            # TODO: Unify dual storage between _solve_appsi and _solve_factory
             if self.dual is not None:
                 try:
                     duals = opt.get_duals()
@@ -597,7 +599,6 @@ class Model(po.ConcreteModel):
                     )
 
             # TODO: Write test for rc handling for different solvers
-            # TODO: Unify rc storage between _solve_appsi and _solve_factory
             if self.rc is not None:
                 try:
                     reduced_costs = opt.get_reduced_costs()
@@ -687,8 +688,21 @@ class Model(po.ConcreteModel):
         for k in cmdline_options:
             options[k] = cmdline_options[k]
 
-        # TODO: shouldn't this be dependent on `duals` attribute?
-        solve_kwargs["suffixes"] = ["dual", "rc"]
+        # pyomo suffixes must be set for duals or rc extraction from solver
+        # TODO: write test for suffix setting and self.dual / self.rc bhvr
+        if "suffixes" in solve_kwargs and not isinstance(
+            solve_kwargs["suffixes"], list
+        ):
+            msg = "'solve_kwargs['suffixes']' must be of type 'list'."
+            raise ValueError(msg)
+        elif "suffixes" not in solve_kwargs:
+            solve_kwargs["suffixes"] = []
+
+        if self.dual is not None:
+            solve_kwargs["suffixes"].append("dual")
+
+        if self.rc is not None:
+            solve_kwargs["suffixes"].append("rc")
 
         self.solver_return = opt.solve(self, **solve_kwargs)
 
@@ -701,6 +715,7 @@ class Model(po.ConcreteModel):
         )
 
         if optimal:
+            # using the pyomo suffixes auto-populates self.dual and self.rc
             msg = getattr(self.solver_return.Solver, "Message", None)
             wt = getattr(self.solver_return.Solver, "Time", None)
             bfo = getattr(self.solver_return.Problem[0], "Upper_bound", None)
