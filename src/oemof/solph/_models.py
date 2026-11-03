@@ -539,6 +539,8 @@ class Model(po.ConcreteModel):
 
         if solve_kwargs is None:
             solve_kwargs = {}
+        if cmdline_options is None:
+            cmdline_options = {}
 
         if solver in self._APPSI_SOLVERS:
             solver_class = self._APPSI_SOLVERS[solver][0]
@@ -674,7 +676,10 @@ class Model(po.ConcreteModel):
         """
         if solve_kwargs is None:
             solve_kwargs = {}
+        if cmdline_options is None:
+            cmdline_options = {}
         solver_io = kwargs.get("solver_io", "lp")
+
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -690,7 +695,7 @@ class Model(po.ConcreteModel):
         status = self.solver_return.Solver.Status
         tc = self.solver_return.Solver.Termination_condition
         optimal = (
-            self.solver_return.solver.status == SolverStatus.ok
+            status == SolverStatus.ok
             and self.solver_return.solver.termination_condition
             == TerminationCondition.optimal
         )
