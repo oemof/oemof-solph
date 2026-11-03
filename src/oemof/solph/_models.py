@@ -19,7 +19,7 @@ import logging
 import warnings
 from dataclasses import dataclass
 from logging import getLogger
-from typing import ClassVar
+from typing import ClassVar, Callable
 
 import pandas as pd
 from pyomo import environ as po
@@ -729,30 +729,38 @@ class Model(po.ConcreteModel):
         else:
             return self.solver_return
 
-    def _get_solve_function(self, solver: str, interface: str):
+    def _get_solve_function(
+        self, solver: str, interface: str
+    ) -> Callable | None:
         """Function to return the correct solve function (`_solve_factory`,
         `_solve_appsi`) based on solver and interface selection of the user in
         the `solve` function.
         """
+        if interface not in ["auto", "appsi", "solverfactory"]:
+            msg = (
+                f"Solver interface '{interface}' is not supported. "
+                f"Please use 'auto', 'appsi' or 'solverfactory'."
+            )
+            raise ValueError(msg)
+
         if interface == "auto":
             if solver in self._APPSI_SOLVERS:
-                msg = f"'appsi' interface selected by default for '{solver}'."
-                logging.info(msg)
-                return self._solve_appsi
-            else:
+                interface = "appsi"
                 msg = (
-                    f"Solver '{solver}' is not supported by 'appsi' interface."
-                    f" Using pyomos 'SolverFactory' as fallback (slower for"
-                    f" repeated solves)."
+                    "Solver interface 'appsi' selected by default for ",
+                    f"solver '{solver}'.",
                 )
-                logging.info(msg)
-                return self._solve_factory
-        elif interface == "solverfactory":
-            return self._solve_factory
-        elif interface == "appsi":
-            if solver in self._APPSI_SOLVERS:
-                return self._solve_appsi
             else:
+                interface = "solverfactory"
+                msg = (
+                    "Solver interface 'appsi' is not supported for solver "
+                    f"'{solver}'. Using pyomos 'SolverFactory' as fallback "
+                    "(slower for repeated solves)."
+                )
+            logging.info(msg)
+
+        if interface == "appsi":
+            if solver not in self._APPSI_SOLVERS:
                 msg = (
                     f"Solver '{solver}' is not supported by 'appsi' interface,"
                     f" which is set explicitly. A generic implementation is"
@@ -760,14 +768,10 @@ class Model(po.ConcreteModel):
                     f" 'solverfactory', or use a different solver."
                 )
                 warnings.warn(msg, UserWarning)
+            else:
                 return self._solve_appsi
         else:
-            msg = (
-                f"The selected interface '{interface}' is not supported. "
-                f"Please use one of the following: 'auto', 'solverfactory', "
-                f"'appsi'."
-            )
-            raise ValueError(msg)
+            return self._solve_factory
 
     def solve(
         self,
