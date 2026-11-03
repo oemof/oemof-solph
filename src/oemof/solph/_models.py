@@ -19,7 +19,8 @@ import logging
 import warnings
 from dataclasses import dataclass
 from logging import getLogger
-from typing import ClassVar, Callable
+from typing import Callable
+from typing import ClassVar
 
 import pandas as pd
 from pyomo import environ as po
@@ -32,9 +33,8 @@ from oemof.solph import EnergySystem
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
-from oemof.solph.flows._invest_non_convex_flow_block import (
-    InvestNonConvexFlowBlock,
-)
+from oemof.solph.flows._invest_non_convex_flow_block import \
+    InvestNonConvexFlowBlock
 from oemof.solph.flows._investment_flow_block import InvestmentFlowBlock
 from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
