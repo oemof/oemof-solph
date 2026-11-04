@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 """
 
 import collections
+from collections.abc import Iterable
 import itertools
 import warnings
 
@@ -76,12 +77,12 @@ class EnergySystem(es.EnergySystem):
 
     def __init__(
         self,
-        timeindex=None,
-        timeincrement=None,
-        infer_last_interval=False,
-        investment_times=None,
-        tsa_parameters=None,
-        groupings=None,
+        timeindex: Iterable | None = None,
+        timeincrement: Iterable | None = None,
+        infer_last_interval: bool = False,
+        investment_times: list | None = None,
+        tsa_parameters: dict | list[dict] | None = None,
+        groupings: list | None = None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
         # for now. See the TODO in :func:`constraint_grouping
