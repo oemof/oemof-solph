@@ -67,23 +67,24 @@ class Flow(Edge):
     negative_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the negative difference
         (`flow[t-1] > flow[t]`) of two consecutive flow values.
-    full_load_time_max : numeric, :math:`t_{full\_load,maximum}`
+    full_load_time_max : numeric (iterable, scalar or None), :math:`t_{full\_load,maximum}`
         Maximum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
         (`nominal_capacity`).
-    full_load_time_min : numeric, :math:`t_{full\_load,minimum}`
+    full_load_time_min : numeric (iterable, scalar or None), :math:`t_{full\_load,minimum}`
         Minimum energy transported by the flow expressed as the time (in
         hours) that the flow would have to run at nominal capacity
         (`nominal_capacity`).
     integer : boolean
         Set True to bound the flow values to integers.
     nonconvex : :class:`NonConvex <oemof.solph.options.NonConvex>`
-        If a nonconvex flow object is added here, the flow constraints will
+        If a `NonConvex` object is passed, the flow constraints will
         be altered significantly as the mathematical model for the flow
         will be different, i.e. constraint etc. from
         :class:`~oemof.solph.flows._non_convex_flow_block.NonConvexFlowBlock`
         will be used instead of
         :class:`~oemof.solph.flows._simple_flow_block.SimpleFlowBlock`.
+        The resulting model will be a MIP model, not LP.
 
     Notes
     -----
@@ -95,11 +96,11 @@ class Flow(Edge):
     --------
     Creating a fixed flow object:
 
-    >>> f = Flow(nominal_capacity=2, fix=[10, 4, 4], variable_costs=5)
+    >>> f = Flow(nominal_capacity=2, fix=[10.0, 4.0, 4.0], variable_costs=5)
     >>> f.variable_costs[2]
     5
     >>> f.fix[2]
-    np.int64(4)
+    np.float64(4.0)
 
     Creating a flow object with time-depended lower and upper bounds:
 
@@ -122,24 +123,24 @@ class Flow(Edge):
         self,
         nominal_capacity: float | Investment | None = None,
         # --- BEGIN: To be removed for versions >= v0.7 ---
-        nominal_value=None,
-        min=None,
-        max=None,
+        nominal_value: float | Investment | None = None,
+        min: float | Iterable[float] | None = None,
+        max: float | Iterable[float] | None = None,
         # --- END ---
-        variable_costs: float | Iterable[int | float] = 0,
-        minimum: float | Iterable[int | float] | None = None,
-        maximum: float | Iterable[int | float] | None = None,
-        fix: float | Iterable[int | float] | None = None,
-        positive_gradient_limit: float | Iterable[int | float] | None = None,
-        negative_gradient_limit: float | Iterable[int | float] | None = None,
+        variable_costs: float | Iterable[float] = 0,
+        minimum: float | Iterable[float] | None = None,
+        maximum: float | Iterable[float] | None = None,
+        fix: float | Iterable[float] | None = None,
+        positive_gradient_limit: float | Iterable[float] | None = None,
+        negative_gradient_limit: float | Iterable[float] | None = None,
         full_load_time_max: float | None = None,
         full_load_time_min: float | None = None,
         integer: bool = False,
         # --- BEGIN: To be removed for versions >= v0.7 ---
-        bidirectional=False,
+        bidirectional: bool =False,
         # --- END
         nonconvex: NonConvex | None = None,
-        custom_attributes=None,  # To be removed for versions >= v0.7
+        custom_attributes: dict | None = None,  # To be removed for versions >= v0.7
         custom_properties: dict | None = None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData
