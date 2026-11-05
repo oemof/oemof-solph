@@ -296,7 +296,7 @@ class Results:
             # map flows and variable costs and mulitply
             for col in flow_values.columns:
                 if col[0] == i and col[1] == o:
-                    opex = flow_values[col] * variable_costs
+                    opex = variable_costs * flow_values[col]
                     df_opex[col] = opex
 
         return df_opex
