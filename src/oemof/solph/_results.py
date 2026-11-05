@@ -16,6 +16,7 @@ from itertools import groupby
 from typing import Any
 
 import pandas as pd
+from oemof.tools import logger
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
@@ -294,10 +295,11 @@ class Results:
             variable_costs = self._model.flows[i, o].variable_costs
 
             # map flows and variable costs and mulitply
-            for col in flow_values.columns:
-                if col[0] == i and col[1] == o:
-                    opex = variable_costs * flow_values[col]
-                    df_opex[col] = opex
+            if (i, o) in flow_values:
+                opex = variable_costs * flow_values[(i, o)]
+                df_opex[(i, o)] = opex
+            else:
+                logger.error(f"{(i, o)} column wasn't present in flow values")
 
         return df_opex
 
