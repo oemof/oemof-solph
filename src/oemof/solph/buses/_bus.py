@@ -15,10 +15,11 @@ SPDX-License-Identifier: MIT
 
 """
 
-from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core import Constraint
 from pyomo.core.base.block import ScalarBlock
+
+from oemof.solph._node import Node
 
 
 class Bus(Node):
@@ -63,11 +64,11 @@ class Bus(Node):
         )
         self.balanced = balanced
 
-    def constraint_group(self):
+    def required_blocks(self):
         if self.balanced:
-            return BusBlock
+            return [BusBlock]
         else:
-            return None
+            return []
 
 
 class BusBlock(ScalarBlock):
