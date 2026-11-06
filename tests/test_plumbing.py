@@ -303,6 +303,15 @@ def test_fake_sequence_multiplication_and_division():
     seq3 = np.array([1, 2]) * seq1
     assert (seq3 == np.array([42, 84])).all()
 
+    seq4 = seq1 * pd.Series([1, 2])
+
+    seq5 = pd.Series([1, 2]) * seq1
+
+    assert isinstance(seq4, pd.Series)
+    assert isinstance(seq5, pd.Series)
+    assert seq4.dtype == seq5.dtype
+    assert (seq4 == seq5).all()
+
 
 def test_sequence_dict():
     d0 = SequenceDict()
