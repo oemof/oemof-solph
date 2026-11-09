@@ -290,16 +290,11 @@ class Results:
         # extract the optimized flow values
         flow_values = self.get("flow", pd.DataFrame())
 
-        for i, o in self._model.FLOWS:
+        for i, o in flow_values.columns:
             # access the variable costs of each flow
             variable_costs = self._model.flows[i, o].variable_costs
-
-            # map flows and variable costs and mulitply
-            if (i, o) in flow_values:
-                opex = variable_costs * flow_values[(i, o)]
-                df_opex[(i, o)] = opex
-            else:
-                logger.error(f"{(i, o)} column wasn't present in flow values")
+            # map flows and variable costs and multiply
+            df_opex[(i, o)] = variable_costs * flow_values[(i, o)]
 
         return df_opex
 
