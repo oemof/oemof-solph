@@ -288,7 +288,10 @@ class Results:
         df_opex = pd.DataFrame()
 
         # extract the optimized flow values
-        flow_values = self.get("flow", pd.DataFrame())
+        try:
+            flow_values = self["flow"]
+        except KeyError:  # no flows
+            return pd.DataFrame()
 
         for i, o in flow_values.columns:
             # access the variable costs of each flow
