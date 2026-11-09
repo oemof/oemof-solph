@@ -16,7 +16,6 @@ from itertools import groupby
 from typing import Any
 
 import pandas as pd
-from oemof.tools import logger
 from oemof.tools.debugging import ExperimentalFeatureWarning
 from pyomo.core.base.var import Var
 from pyomo.environ import ConcreteModel
