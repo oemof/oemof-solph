@@ -1,0 +1,6 @@
+SPDX-FileCopyrightText: oemof e.V. and contributors
+SPDX-FileCopyrightText: Deutscher Wetterdienst
+
+SPDX-License-Identifier: CC-BY-4.0
+
+Weather data retrieved from DWD open data plattform.
