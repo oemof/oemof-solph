@@ -48,6 +48,7 @@ Documentation
 Bug fixes
 #########
 
+
 * Gradient limits of `NonConvex` flows had no effect: the limit values were
   not applied. The constraints also multiplied the flow by the binary status,
   so models with these limits could not be written to LP format (e.g. for
@@ -57,6 +58,9 @@ Bug fixes
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
   the last time step, as `minimum_downtime` already does for shut-downs.
+
+* Variable costs returned wrong values if the variable cost of the flow was a constant
+
 
 Other changes
 #############
@@ -73,6 +77,7 @@ Contributors
 * Uwe Krien
 * Syed Inayatullah
 * Mohammad Hamarsheh
+* Pierre-Francois Duc (RLI)
 
 Acknowledgements
 ################
