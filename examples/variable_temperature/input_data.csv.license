@@ -1,0 +1,8 @@
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+
+Dataset was created using LoadProfileGenerator.
+As this is just example data, Berlin 1996 weather data as provided
+by the tool was used to calculate heating demand. Accordingly,
+weather data colums were added from Berlin 1996 ERA5.
