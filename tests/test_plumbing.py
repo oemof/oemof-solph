@@ -75,7 +75,7 @@ def test_sequence():
     npa13 = sequence(np.array([1, 3]))
     assert isinstance(npa13, np.ndarray)
 
-    pds13 = sequence(pd.Series([1,3]))
+    pds13 = sequence(pd.Series([1, 3]))
     assert isinstance(pds13, pd.Series)
 
 
