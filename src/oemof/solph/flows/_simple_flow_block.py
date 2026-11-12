@@ -91,19 +91,25 @@ class SimpleFlowBlock(ScalarBlock):
             ]
         )
 
+        # Gradient limits of non-convex flows are set up in the
+        # (Invest)NonConvexFlowBlock, which allows start-ups and shut-downs.
         self.NEGATIVE_GRADIENT_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
                 if g[2].negative_gradient_limit is not None
+                and g[2].nonconvex is None
             ]
         )
 
+        # Gradient limits of non-convex flows are set up in the
+        # (Invest)NonConvexFlowBlock, which allows start-ups and shut-downs.
         self.POSITIVE_GRADIENT_FLOWS = Set(
             initialize=[
                 (g[0], g[1])
                 for g in group
                 if g[2].positive_gradient_limit is not None
+                and g[2].nonconvex is None
             ]
         )
 
@@ -169,7 +175,7 @@ class SimpleFlowBlock(ScalarBlock):
 
         # set upper bound of gradient variable
         for i, o, f in group:
-            if valid_sequence(
+            if (i, o) in self.POSITIVE_GRADIENT_FLOWS and valid_sequence(
                 m.flows[i, o].positive_gradient_limit, len(m.TIMESTEPS)
             ):
                 for t in m.TIMESTEPS:
@@ -179,7 +185,7 @@ class SimpleFlowBlock(ScalarBlock):
                             m.es.capacity_period_of_timestep(t)
                         ]
                     )
-            if valid_sequence(
+            if (i, o) in self.NEGATIVE_GRADIENT_FLOWS and valid_sequence(
                 m.flows[i, o].negative_gradient_limit, len(m.TIMESTEPS)
             ):
                 for t in m.TIMESTEPS:
