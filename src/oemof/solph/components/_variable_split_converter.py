@@ -150,8 +150,8 @@ class VariableSplitConverter(Converter):
             ):
                 raise ValueError("That is not okay.")
 
-    def constraint_group(self):
-        return VariableSplitConverterBlock
+    def required_blocks(self):
+        return [VariableSplitConverterBlock]
 
 
 class VariableSplitConverterBlock(ScalarBlock):
@@ -230,8 +230,6 @@ class VariableSplitConverterBlock(ScalarBlock):
     =================== ======================================================== ==== =================================
 
     """  # noqa: E501
-
-    CONSTRAINT_GROUP = True
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
