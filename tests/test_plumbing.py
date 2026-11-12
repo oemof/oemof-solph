@@ -2,6 +2,7 @@
 
 """Testing the class NonConvex.
 
+SPDX-FileCopyrightText: Pierre Francois Bachibouzouk
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Uwe Krien
 
@@ -62,14 +63,20 @@ def test_sequence():
     with pytest.raises(ValueError, match="Length mismatch"):
         _ = sequence([1, 3], length=3)
     seq13 = sequence([1, 3])
-    assert isinstance(seq13, np.ndarray)
-    assert (seq13 == np.array([1, 3])).all()
+    assert isinstance(seq13, list)
+    assert seq13 == [1, 3]
 
     with pytest.raises(ValueError, match="Length mismatch"):
         _ = sequence("ab", length=3)
     seq_ab = sequence("this_is_a_string")
-    assert isinstance(seq_ab, np.ndarray)
+    assert isinstance(seq_ab, str)
     assert seq_ab == "this_is_a_string"
+
+    npa13 = sequence(np.array([1, 3]))
+    assert isinstance(npa13, np.ndarray)
+
+    pds13 = sequence(pd.Series([1,3]))
+    assert isinstance(pds13, pd.Series)
 
 
 def test_fake_sequence_slice():
@@ -304,13 +311,12 @@ def test_fake_sequence_multiplication_and_division():
     assert (seq3 == np.array([42, 84])).all()
 
     seq4 = seq1 * pd.Series([1, 2])
+    assert isinstance(seq4, pd.Series)
+    assert (seq4 == [42, 84]).all()
 
     seq5 = pd.Series([1, 2]) * seq1
-
-    assert isinstance(seq4, pd.Series)
     assert isinstance(seq5, pd.Series)
-    assert seq4.dtype == seq5.dtype
-    assert (seq4 == seq5).all()
+    assert (seq5 == [42, 84]).all()
 
 
 def test_sequence_dict():
