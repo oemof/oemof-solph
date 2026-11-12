@@ -287,17 +287,16 @@ class Results:
         df_opex = pd.DataFrame()
 
         # extract the optimized flow values
-        flow_values = self.get("flow", pd.DataFrame())
+        try:
+            flow_values = self["flow"]
+        except KeyError:  # no flows
+            return pd.DataFrame()
 
-        for i, o in self._model.FLOWS:
+        for i, o in flow_values.columns:
             # access the variable costs of each flow
             variable_costs = self._model.flows[i, o].variable_costs
-
-            # map flows and variable costs and mulitply
-            for col in flow_values.columns:
-                if col[0] == i and col[1] == o:
-                    opex = flow_values[col] * variable_costs
-                    df_opex[col] = opex
+            # map flows and variable costs and multiply
+            df_opex[(i, o)] = variable_costs * flow_values[(i, o)]
 
         return df_opex
 
