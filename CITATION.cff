@@ -127,6 +127,10 @@ authors:
     alias: "@Maxhi77"
     orcid: "https://orcid.org/0000-0002-8171-2661"
   -
+    given-names: Mohammad
+    family-names: Hamarsheh
+    alias: "@hamarshehmhmd"
+  -
     given-names: Patrik
     family-names: "Schönfeldt"
     alias: "@p-snft"
@@ -164,6 +168,11 @@ authors:
     given-names: Stephan
     family-names: "Günther"
     alias: "@gnn"
+  -
+    given-names: Syed
+    family-names: Inayatullah
+    alias: "@inayatku"
+    orcid: "https://orcid.org/0000-0002-8576-4653"
   -
     given-names: Tjark
     family-names: Smalla
