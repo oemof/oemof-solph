@@ -63,8 +63,8 @@ def test_sequence():
     with pytest.raises(ValueError, match="Length mismatch"):
         _ = sequence([1, 3], length=3)
     seq13 = sequence([1, 3])
-    assert isinstance(seq13, list)
-    assert seq13 == [1, 3]
+    assert isinstance(seq13, np.ndarray)
+    assert (seq13 == [1, 3]).all()
 
     with pytest.raises(ValueError, match="Length mismatch"):
         _ = sequence("ab", length=3)

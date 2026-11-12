@@ -22,11 +22,12 @@ import numpy as np
 def sequence(iterable_or_scalar, length=None):
     """Casts iterable_or_scalar to an object that allows element access.
 
-    Technically, it checks if an object is iterable or scalar and returns the
-    unchanged object if it is an iterable of the given length,
-    a numpy.array if it is a scalar that needs a length, or a
-    _FakeSequence if the length cannot be infered.
-    This way, we can (possibly) define a sequence of unknown length if needed.
+    Technically, it checks if an object is iterable or scalar. For scalars
+    * it creates a numpy array of the given length (if proveded), or
+    * a _FakeSequence (has every length, see below).
+    For iterables, it checks the length and an success
+    * casts lists to numpy array, or
+    * just lets the iterable pass.
 
     Parameters
     ----------
@@ -76,6 +77,8 @@ def sequence(iterable_or_scalar, length=None):
                 f"Length mismatch: Cannot create sequence of length {length}"
                 + " from input {iterable_or_scalar}."
             )
+        elif isinstance(iterable_or_scalar, list):
+            return np.array(iterable_or_scalar)
         else:
             return iterable_or_scalar
     else:
