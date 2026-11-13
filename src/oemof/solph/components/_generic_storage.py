@@ -25,6 +25,7 @@ SPDX-License-Identifier: MIT
 import math
 import numbers
 from warnings import warn
+from collections.abc import Iterable
 
 from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
@@ -179,30 +180,30 @@ class GenericStorage(Node):
 
     def __init__(
         self,
-        label=None,
-        inputs=None,
-        outputs=None,
-        parent_node=None,
-        nominal_capacity=None,
+        label: str | tuple | None = None,
+        inputs: dict | None = None,
+        outputs: dict | None = None,
+        parent_node: Node | None = None,
+        nominal_capacity: float | Investment | None = None,
         nominal_storage_capacity=None,  # Can be removed for versions >= v0.7
-        initial_storage_level=None,
-        invest_relation_input_output=None,
-        invest_relation_input_capacity=None,
-        invest_relation_output_capacity=None,
-        min_storage_level=0,
-        max_storage_level=1,
-        balanced=True,
-        loss_rate=0,
-        fixed_losses_relative=0,
-        fixed_losses_absolute=0,
-        inflow_conversion_factor=1,
-        outflow_conversion_factor=1,
-        constant_soc_until=None,
-        fraction_saturation_charging=None,
-        storage_costs=None,
-        lifetime_inflow=None,
-        lifetime_outflow=None,
-        custom_properties=None,
+        initial_storage_level: float | None = None,
+        invest_relation_input_output: float | Iterable[float] | None = None,
+        invest_relation_input_capacity: float | Iterable[float] | None = None,
+        invest_relation_output_capacity: float | Iterable[float] | None = None,
+        min_storage_level: float | Iterable[float] = 0,
+        max_storage_level: float | Iterable[float] = 1,
+        balanced: bool = True,
+        loss_rate: float | Iterable[float] = 0,
+        fixed_losses_relative: float | Iterable[float] = 0,
+        fixed_losses_absolute: float | Iterable[float] = 0,
+        inflow_conversion_factor: float | Iterable[float] = 1,
+        outflow_conversion_factor: float | Iterable[float] = 1,
+        constant_soc_until: float | None = None,
+        fraction_saturation_charging: float | None = None,
+        storage_costs: float | Iterable[float] | None = None,
+        lifetime_inflow: int | None = None,
+        lifetime_outflow: int | None = None,
+        custom_properties: dict | None = None,
     ):
         if inputs is None:
             inputs = {}
@@ -850,9 +851,9 @@ class GenericStorageBlock(ScalarBlock):
             for n in self.STORAGES_WITH_INVEST_FLOW_REL:
                 for p in m.CAPACITY_PERIODS:
                     expr = (
-                        m.InvestmentFlowBlock.nominal_capacity[n, o[n], p]
-                    ) * n.invest_relation_input_output[p] == (
-                        m.InvestmentFlowBlock.nominal_capacity[i[n], n, p]
+                        (m.InvestmentFlowBlock.nominal_capacity[n, o[n], p])
+                        * n.invest_relation_input_output[p]
+                        == (m.InvestmentFlowBlock.nominal_capacity[i[n], n, p])
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -1515,6 +1516,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         if not m.TSAM_MODE:
+
             def _storage_balance_rule(block, n, t):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1547,6 +1549,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_storage_balance_rule,
             )
         else:
+
             def _intra_storage_balance_rule(block, n, p, k, g):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1580,6 +1583,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
         if m.TSAM_MODE:
+
             def _inter_storage_balance_rule(block, n, i):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1613,6 +1617,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
         else:
+
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMEPOINTS.at(-1)]
@@ -1631,9 +1636,9 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             for n in self.INVEST_REL_IN_OUT:
                 for p in m.CAPACITY_PERIODS:
                     expr = (
-                        m.InvestmentFlowBlock.nominal_capacity[n, o[n], p]
-                    ) * n.invest_relation_input_output[p] == (
-                        m.InvestmentFlowBlock.nominal_capacity[i[n], n, p]
+                        (m.InvestmentFlowBlock.nominal_capacity[n, o[n], p])
+                        * n.invest_relation_input_output[p]
+                        == (m.InvestmentFlowBlock.nominal_capacity[i[n], n, p])
                     )
                     self.power_coupled.add((n, p), expr)
 
@@ -1765,6 +1770,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_min_storage_content_invest_rule,
             )
         else:
+
             def _storage_inter_maximum_level_rule(block):
                 for n in self.INVESTSTORAGES:
                     for p, i, g in m.TIMEINDEX_CLUSTER:
