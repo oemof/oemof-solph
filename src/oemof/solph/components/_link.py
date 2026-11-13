@@ -84,12 +84,12 @@ class Link(Node):
 
     def __init__(
         self,
-        label=None,
-        inputs=None,
-        outputs=None,
-        parent_node=None,
-        conversion_factors=None,
-        custom_properties=None,
+        label: str | tuple | None = None,
+        inputs: dict | None = None,
+        outputs: dict | None = None,
+        parent_node: Node | None = None,
+        conversion_factors: dict | None = None,
+        custom_properties: dict | None = None,
     ):
         # compatibility with omeof.network w/o explicit named arguments
         if inputs is None:
