@@ -331,6 +331,7 @@ def test_auto_construct_false_skips_construction():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.pyomo_only
 def test_bidirectional_nonconvex_flow_with_capacity_skips_lower_bound():
     """A flow with nominal_capacity, no fix, nonconvex=True and
     bidirectional=True must *not* get an explicit lower bound set
@@ -362,6 +363,7 @@ def test_bidirectional_nonconvex_flow_with_capacity_skips_lower_bound():
     assert flow_var.lb is None
 
 
+@pytest.mark.pyomo_only
 def test_bidirectional_flow_without_capacity_skips_lower_bound():
     """A bidirectional flow without nominal_capacity must *not* get an
     explicit lower bound of 0 set (branch 417->388)."""
@@ -391,6 +393,7 @@ def test_bidirectional_flow_without_capacity_skips_lower_bound():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.pyomo_only
 def test_add_objective_update_replaces_existing_objective():
     """Calling `_add_objective(update=True)` must delete the existing
     'objective' component before re-adding it (line 443)."""

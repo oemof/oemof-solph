@@ -18,6 +18,7 @@ from oemof.solph._linopy import get_builder  # noqa: E402
 from oemof.solph._linopy import register_builder  # noqa: E402
 from oemof.solph._linopy import unregister_builder  # noqa: E402
 from oemof.solph._linopy._indexing import ragged_sum  # noqa: E402
+from oemof.solph._models import Model as PyomoModel  # noqa: E402
 from oemof.solph.buses._bus import BusBlock  # noqa: E402
 from oemof.solph.flows._non_convex_flow_block import (  # noqa: E402
     NonConvexFlowBlock,
@@ -108,7 +109,7 @@ def test_flow_bounds_match_pyomo(no_op_flow_builders):
             inputs={el: solph.Flow(minimum=-1, nominal_capacity=3)},
         ),
     )
-    pyomo_model = solph.Model(es)
+    pyomo_model = PyomoModel(es)
     model = LinopyModel(es)
 
     lower = model.flow.lower.values
