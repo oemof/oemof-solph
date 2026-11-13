@@ -1,0 +1,130 @@
+# -*- coding: utf-8 -*-
+
+"""
+General description
+-------------------
+The flexibility market example (see `flexibility_market.py`) with the
+(experimental) linopy backend: the method to consider offering storage
+capacity at a flexibility market that is described in
+https://elib.dlr.de/212741/.
+
+The custom constraint (discharge at the flexibility market is limited by
+the planned discharge) is written for all timesteps at once with
+``model.flow_var()`` and added with ``model.add_custom_constraints()``.
+
+SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-License-Identifier: MIT
+"""
+
+import numpy as np
+
+from oemof import solph
+
+BATTERY_CAPACITY = 50
+
+
+def create_model():
+    es = solph.EnergySystem(timeindex=solph.create_time_index(2026, 1, 24))
+
+    driving_pattern = np.array(
+        6 * [0] + 2 * [1.0] + 8 * [0] + 2 * [1.0] + 6 * [0]
+    )
+    presence_pattern = np.ones(24) - driving_pattern
+
+    b_plan = solph.Bus("electricity")
+    b_flex = solph.Bus("flexibility")
+    es.add(b_plan, b_flex)
+
+    s_plan = solph.components.Source(
+        "source plan",
+        outputs={
+            b_plan: solph.Flow(
+                nominal_capacity=11,
+                nonconvex=solph.NonConvex(),
+                variable_costs=0.3,
+                maximum=presence_pattern,
+                custom_properties={"charger": True},
+            ),
+        },
+    )
+
+    s_flex = solph.components.Source(
+        "source flex",
+        outputs={
+            b_flex: solph.Flow(
+                nominal_capacity=11,
+                nonconvex=solph.NonConvex(),
+                variable_costs=-0.01,
+                maximum=presence_pattern,
+                custom_properties={"charger": True},
+            ),
+        },
+    )
+    es.add(s_plan, s_flex)
+
+    storage_plan = solph.components.GenericStorage(
+        "storage plan",
+        nominal_capacity=BATTERY_CAPACITY,
+        inputs={b_plan: solph.Flow()},
+        outputs={b_plan: solph.Flow()},
+    )
+    storage_flex = solph.components.GenericStorage(
+        "storage flex",
+        nominal_capacity=BATTERY_CAPACITY,
+        inputs={b_flex: solph.Flow()},
+        outputs={b_flex: solph.Flow()},
+    )
+    es.add(storage_plan, storage_flex)
+
+    sink_plan = solph.components.Sink(
+        "sink plan",
+        inputs={
+            b_plan: solph.Flow(
+                nominal_capacity=18,
+                fix=driving_pattern,
+            )
+        },
+    )
+    sink_flex = solph.components.Sink(
+        "sink flex",
+        inputs={b_flex: solph.Flow()},
+    )
+    es.add(sink_plan, sink_flex)
+
+    model = solph.LinopyModel(es)
+
+    solph.constraints.limit_active_flow_count_by_keyword(
+        model,
+        "charger",
+        upper_limit=1,
+    )
+    solph.constraints.shared_limit(
+        model,
+        model.GenericStorageBlock.storage_content,
+        "limit_storage",
+        [storage_plan, storage_flex],
+        [1, 1],
+        upper_limit=BATTERY_CAPACITY,
+    )
+
+    def discharge_limit(m):
+        m.linopy.add_constraints(
+            m.flow_var(b_flex, sink_flex) - m.flow_var(b_plan, sink_plan) <= 0,
+            name="discharge_limit",
+        )
+
+    model.add_custom_constraints(discharge_limit)
+
+    return model
+
+
+if __name__ == "__main__":
+    import matplotlib.pyplot as plt
+
+    model = create_model()
+    results = model.solve()
+
+    results["flow"].plot(drawstyle="steps-post")
+    results["storage_content"].plot.area()
+
+    plt.show()

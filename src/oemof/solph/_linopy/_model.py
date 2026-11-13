@@ -481,6 +481,18 @@ class LinopyModel:
         """The objective contributions by block, as a dict."""
         return dict(self._objective_terms)
 
+    def __setattr__(self, name, value):
+        # a Pyomo component assigned to the model (as custom constraints for
+        # the Pyomo backend do) would be ignored silently
+        if type(value).__module__.startswith("pyomo."):
+            msg = (
+                f"Cannot add the Pyomo component {name!r} to a LinopyModel. "
+                "Add constraints with model.linopy.add_constraints() or "
+                "model.add_custom_constraints() instead."
+            )
+            raise TypeError(msg)
+        super().__setattr__(name, value)
+
     def __getattr__(self, name):
         # model.<Block>.<variable>[keys]: read access to block variables by
         # the same keys as in the Pyomo model, e.g.

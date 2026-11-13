@@ -364,3 +364,10 @@ def test_equate_flows_equivalence():
 
 def test_assert_backends_agree_is_importable():
     assert callable(assert_backends_agree)
+
+
+def test_pyomo_components_are_refused():
+    """A Pyomo constraint assigned to a LinopyModel must not be ignored."""
+    model = LinopyModel(_two_party_storage_system())
+    with pytest.raises(TypeError, match="Pyomo component"):
+        model.my_limit = po.Constraint(rule=lambda m: po.Constraint.Skip)
