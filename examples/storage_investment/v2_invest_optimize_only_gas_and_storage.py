@@ -229,7 +229,9 @@ def main(optimize=True, solver="cbc"):
 
     # check if the new result object is working for custom components
 
-    electricity_bus = solph.views.node(results, "electricity")
+    electricity_bus = solph.views.node(
+        solph.processing.results(om), "electricity"
+    )
 
     # returns a pandas Series with all scalar values (investment, total) of
     # components connected to the electricity bus
