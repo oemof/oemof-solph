@@ -191,14 +191,14 @@ class NonConvex:
 
     Parameters
     ----------
-    startup_costs : numeric (iterable or scalar)
+    startup_costs : numeric (iterable, scalar or None)
         Costs associated with a start of the flow (representing a unit).
-    shutdown_costs : numeric (iterable or scalar)
+    shutdown_costs : numeric (iterable, scalar or None)
         Costs associated with the shutdown of the flow (representing a unit).
-    activity_costs : numeric (iterable or scalar)
+    activity_costs : numeric (iterable, scalar or None)
         Costs associated with the active operation of the flow, independently
         from the actual output.
-    inactivity_costs : numeric (iterable or scalar)
+    inactivity_costs : numeric (iterable, scalar or None)
         Costs associated with not operating the flow.
     minimum_uptime : numeric or list of numeric (1 or positive integer)
         Minimum number of time steps that a flow must be greater then its
@@ -244,19 +244,19 @@ class NonConvex:
 
     def __init__(
         self,
-        initial_status=0,
-        minimum_uptime=0,
-        minimum_downtime=0,
-        maximum_startups=None,
-        maximum_shutdowns=None,
-        startup_costs=None,
-        shutdown_costs=None,
-        activity_costs=None,
-        inactivity_costs=None,
-        negative_gradient_limit=None,
-        positive_gradient_limit=None,
+        initial_status: int = 0,
+        minimum_uptime: float | list[float] = 0,
+        minimum_downtime: float | list[float] = 0,
+        maximum_startups: float | None = None,
+        maximum_shutdowns: float | None = None,
+        startup_costs: float | Iterable[float] | None = None,
+        shutdown_costs: float | Iterable[float] | None = None,
+        activity_costs: float | Iterable[float] | None = None,
+        inactivity_costs: float | Iterable[float] | None = None,
+        negative_gradient_limit: float | Iterable[float] | None = None,
+        positive_gradient_limit: float | Iterable[float] | None = None,
         custom_attributes=None,  # To be removed for versions >= v0.7
-        custom_properties=None,
+        custom_properties: dict | None = None,
     ):
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
