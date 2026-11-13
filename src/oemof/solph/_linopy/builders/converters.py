@@ -12,6 +12,7 @@ from oemof.solph._linopy._indexing import expression
 from oemof.solph._linopy._indexing import take
 from oemof.solph._linopy._registry import register_builder
 from oemof.solph.components._converter import ConverterBlock
+from oemof.solph.components._offset_converter import OffsetConverterBlock
 
 
 @register_builder(ConverterBlock)
@@ -45,3 +46,41 @@ def build_converters(model, group):
         ("relation", "timestep"),
     )
     model.add_constraints("ConverterBlock.relation", lhs, "=", 0)
+
+
+@register_builder(OffsetConverterBlock)
+def build_offset_converters(model, group):
+    """``P(t) = P_ref(t) * m(t) + status_nominal_ref(t) * y0(t)`` for every
+    flow of an OffsetConverter that is not the (nonconvex) reference."""
+    n_steps = len(model.TIMESTEPS)
+    labels = model.flow.labels.values
+    status_nominal = getattr(model, "nonconvex_status_nominal", {})
+    ref_labels, sn_labels, flow_labels, slope, offset = [], [], [], [], []
+    for n in group:
+        ref = n._reference_node
+        ref_key = (ref, n) if n._reference_node_at_input else (n, ref)
+        others = [(i, n) for i in n.inputs if i != ref]
+        others += [(n, o) for o in n.outputs if o != ref]
+        for key in others:
+            other = key[0] if key[1] is n else key[1]
+            ref_labels.append(labels[model.flow_position(*ref_key)])
+            sn_labels.append(status_nominal[ref_key])
+            flow_labels.append(labels[model.flow_position(*key)])
+            slope.append(
+                to_array(n.conversion_factors[other], n_steps, "conversion")
+            )
+            offset.append(
+                to_array(n.normed_offsets[other], n_steps, "normed_offsets")
+            )
+    if not ref_labels:
+        return
+    lhs = expression(
+        model.linopy,
+        [
+            (np.array(ref_labels), np.array(slope)),
+            (np.array(sn_labels), np.array(offset)),
+            (np.array(flow_labels), -1.0),
+        ],
+        ("offset_relation", "timestep"),
+    )
+    model.add_constraints("OffsetConverterBlock.relation", lhs, "=", 0)

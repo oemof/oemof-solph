@@ -78,6 +78,7 @@ class LinopyModel:
 
         self.linopy = linopy.Model()
         self._objective_added = False
+        self._objective_constant = 0.0
         self._objective_terms = {}
         self._var_meta = {}
         self._result_vars = {}
@@ -293,7 +294,11 @@ class LinopyModel:
         if index is not None:
             coords.append(self.coords_for(index))
         kwargs = {}
-        if not binary:
+        if not binary or np.ndim(lower) > 0 or np.ndim(upper) > 0:
+            # binaries take bounds only to fix them (0 or 1)
+            if binary:
+                lower = 0 if np.ndim(lower) == 0 else lower
+                upper = 1 if np.ndim(upper) == 0 else upper
             kwargs["lower"] = self._bound(lower, coords)
             kwargs["upper"] = self._bound(upper, coords)
         var = self.linopy.add_variables(
@@ -335,6 +340,19 @@ class LinopyModel:
             return self.linopy.add_constraints(lhs, name=name)
         return self.linopy.add_constraints(lhs, sign, rhs, name=name)
 
+    def add_masked_constraints(self, name, lhs, sign, rhs, mask):
+        """Add constraints only where `mask` (an array over the dims of
+        `lhs`) is True, like rules returning Constraint.Skip in Pyomo."""
+        dims = [d for d in lhs.dims if d != "_term"]
+        mask = xr.DataArray(
+            np.asarray(mask, dtype=bool),
+            dims=dims,
+            coords={d: lhs.coords[d] for d in dims if d in lhs.coords},
+        )
+        return self.linopy.add_constraints(
+            lhs, sign, rhs, name=name, mask=mask
+        )
+
     def add_objective_term(self, name, expression):
         """Contribute a (scalar) expression to the objective.
 
@@ -345,6 +363,12 @@ class LinopyModel:
             return
         if hasattr(expression, "ndim") and expression.ndim > 0:
             expression = expression.sum()
+        # linopy objectives take no constant: keep it apart and add it to
+        # the reported objective value, as the Pyomo objective includes it
+        const = float(np.asarray(expression.const).sum())
+        if const != 0:
+            expression = expression - const
+            self._objective_constant += const
         self._objective_terms[name] = expression
 
     @property
@@ -413,6 +437,13 @@ class LinopyModel:
             cmdline_options=cmdline_options,
         )
 
+    def relax_problem(self):
+        """Relax integer and binary variables to continuous ones, as
+        :meth:`oemof.solph.Model.relax_problem`."""
+        for name in list(self.linopy.integers) + list(self.linopy.binaries):
+            self.linopy.variables[name].relax()
+        return self
+
     def results(self):
         """Deprecated, as :meth:`oemof.solph.Model.results`."""
         import warnings
@@ -432,7 +463,7 @@ class LinopyModel:
         Pyomo objective. Only exists once the model is constructed."""
         if not self._objective_added:
             raise AttributeError("The objective has not been added yet.")
-        return _Objective(self.linopy)
+        return _Objective(self.linopy, self._objective_constant)
 
     @property
     def solver_results(self):
@@ -631,11 +662,12 @@ class _Objective:
     """Callable stand-in for a Pyomo objective: ``objective()`` is its
     value."""
 
-    def __init__(self, linopy_model):
+    def __init__(self, linopy_model, constant=0.0):
         self._model = linopy_model
+        self._constant = constant
 
     def __call__(self):
-        return self._model.objective.value
+        return self._model.objective.value + self._constant
 
     @property
     def expression(self):

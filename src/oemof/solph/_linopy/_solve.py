@@ -86,7 +86,11 @@ def solve(
     wallclock = time.perf_counter() - start
 
     optimal = status == "ok" and str(condition) == "optimal"
-    objective = model.linopy.objective.value if optimal else None
+    objective = (
+        model.linopy.objective.value + model._objective_constant
+        if optimal
+        else None
+    )
     is_mip = bool(len(model.linopy.integers) or len(model.linopy.binaries))
     model.solver_return = LinopySolverReturn(
         status=str(status),
