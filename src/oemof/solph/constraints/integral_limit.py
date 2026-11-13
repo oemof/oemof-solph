@@ -18,8 +18,10 @@ import warnings
 from pyomo import environ as po
 
 from oemof.solph._plumbing import sequence
+from oemof.solph.constraints._backend import backend_dispatch
 
 
+@backend_dispatch
 def emission_limit(om, flows=None, limit=None):
     r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
@@ -35,6 +37,7 @@ def emission_limit(om, flows=None, limit=None):
     )
 
 
+@backend_dispatch
 def generic_integral_limit(
     om,
     keyword,

@@ -46,6 +46,11 @@ class Results:
         self._variables = {}
         self._model = model
         self.solver = solver_info
+        self._backend = getattr(model, "BACKEND", "pyomo")
+
+        if self._backend == "linopy":
+            self._init_linopy(model)
+            return
 
         for variable in model.component_objects(Var):
             var_name = variable.getname()
@@ -87,6 +92,18 @@ class Results:
 
         if "invest" in self._variables.keys():
             self._economy["investment_costs"] = None
+
+    def _init_linopy(self, model):
+        """Results of a :class:`~oemof.solph.LinopyModel`: the model keeps
+        the layout of its variables and builds the tables on request."""
+        self._variables = {key: None for key in model._result_keys()}
+        self._economy = {"variable_costs": None}
+        if "invest" in self._variables:
+            self._economy["investment_costs"] = None
+        self._duals = model._result_duals() if model.dual is not None else None
+        self._rc = (
+            model._result_reduced_costs() if model.rc is not None else None
+        )
 
     def keys(self):
         """Method returning keys of the result object
@@ -147,6 +164,8 @@ class Results:
         # This can be removed in v0.7 - end
         elif key == "investment_costs":
             return self._calc_capex()
+        elif key in self._variables and self._backend == "linopy":
+            return self._model._result_frame(key)
         elif key in self._variables:
             rv = []
             for occurence in self._variables[key]:

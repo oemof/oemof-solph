@@ -77,6 +77,7 @@ class LinopyModel:
         self.rc = None
 
         self.linopy = linopy.Model()
+        self._objective_added = False
         self._objective_terms = {}
         self._result_vars = {}
         self._solver_results = None
@@ -156,6 +157,8 @@ class LinopyModel:
         n_flows, n_steps = len(self.FLOWS), len(self.TIMESTEPS)
         lower = np.full((n_flows, n_steps), -INF)
         upper = np.full((n_flows, n_steps), INF)
+        # flows with `fix`: Pyomo fixes them, which makes them constants
+        self._fixed_flows = np.zeros(n_flows, dtype=bool)
         p_of_t = self.period_of_timestep
         n_periods = len(self.CAPACITY_PERIODS)
 
@@ -169,6 +172,7 @@ class LinopyModel:
                     fixed = to_array(flow.fix, n_steps, name="fix") * nominal
                     lower[k] = fixed
                     upper[k] = fixed
+                    self._fixed_flows[k] = True
                 else:
                     upper[k] = (
                         to_array(flow.maximum, n_steps, name="maximum")
@@ -223,6 +227,7 @@ class LinopyModel:
                 total = total + term
         if total is not None:
             self.linopy.add_objective(total, sense="min", overwrite=True)
+        self._objective_added = True
 
     # ------------------------------------------------------------------
     # API for builders
@@ -342,8 +347,181 @@ class LinopyModel:
         return dict(self._objective_terms)
 
     # ------------------------------------------------------------------
+    # solving
+    # ------------------------------------------------------------------
+
+    def solve(
+        self,
+        solver="cbc",
+        solver_io=None,
+        allow_nonoptimal=False,
+        duals=False,
+        solve_kwargs=None,
+        cmdline_options=None,
+    ):
+        """Solve the model; same arguments as :meth:`oemof.solph.Model.solve`.
+
+        Parameters
+        ----------
+        solver : str
+            Any solver linopy supports ("highs", "cbc", "gurobi", ...).
+        solver_io : str, optional
+            linopy's ``io_api`` ("direct", "lp", "mps"). Defaults to
+            "direct" for solvers with an in-memory interface, else "lp".
+        allow_nonoptimal : bool
+            Warn instead of raising if no optimal solution is found.
+        duals : bool
+            Receive duals of the bus balances and reduced costs.
+        solve_kwargs : dict
+            ``{"tee": True}`` shows the solver log; other keys are passed
+            to linopy's ``Model.solve``.
+        cmdline_options : dict
+            Solver options, passed to the solver by name.
+
+        Returns
+        -------
+        Results
+        """
+        from oemof.solph._linopy._solve import solve
+
+        return solve(
+            self,
+            solver=solver,
+            solver_io=solver_io,
+            allow_nonoptimal=allow_nonoptimal,
+            duals=duals,
+            solve_kwargs=solve_kwargs,
+            cmdline_options=cmdline_options,
+        )
+
+    def results(self):
+        """Deprecated, as :meth:`oemof.solph.Model.results`."""
+        import warnings
+
+        from oemof.solph import processing
+
+        warnings.warn(
+            "Model.results() is deprecated."
+            + " Please use results returned by Model.solve().",
+            FutureWarning,
+        )
+        return processing.results(self)
+
+    @property
+    def objective(self):
+        """The objective; ``model.objective()`` returns its value, as for a
+        Pyomo objective. Only exists once the model is constructed."""
+        if not self._objective_added:
+            raise AttributeError("The objective has not been added yet.")
+        return _Objective(self.linopy)
+
+    @property
+    def solver_results(self):
+        """Deprecated, as :attr:`oemof.solph.Model.solver_results`."""
+        import warnings
+
+        warnings.warn(
+            "'solver_results' attribute is deprecated and will be removed in "
+            "a future version. Use the 'solver' attribute of the Results "
+            "object or 'solver_return' if you need the original return "
+            "object.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self._solver_results
+
+    def receive_duals(self):
+        """Deprecated, as :meth:`oemof.solph.Model.receive_duals`."""
+        import warnings
+
+        warnings.warn(
+            "Model.receive_duals() is deprecated. Use "
+            "Model.solve(duals=True) instead.",
+            FutureWarning,
+        )
+        self._receive_duals()
+
+    def _receive_duals(self):
+        """Receive bus duals and reduced costs with the next solve."""
+        self.dual = True
+        self.rc = True
+
+    # ------------------------------------------------------------------
     # results
     # ------------------------------------------------------------------
+
+    def _result_duals(self):
+        """Bus balance duals as a DataFrame (columns: buses)."""
+        if "BusBlock.balance" not in self.linopy.constraints:
+            return pd.DataFrame()
+        values = np.asarray(
+            self.linopy.constraints["BusBlock.balance"].dual.values
+        )
+        return pd.DataFrame(
+            values.T,
+            index=self._row_index("timestep", values.shape[1]),
+            columns=pd.Index(self.balance_buses),
+        )
+
+    def _bus_duals(self):
+        """Bus balance duals as {bus: array over timesteps}."""
+        frame = self._result_duals()
+        return {bus: frame[bus].to_numpy() for bus in frame.columns}
+
+    def _result_reduced_costs(self):
+        """Reduced costs of the flow variable, columns (source, target)."""
+        from oemof.solph._linopy._solve import reduced_costs
+
+        rc = reduced_costs(self)
+        labels = self.flow.labels.values
+        values = np.vectorize(lambda lab: rc.get(lab, np.nan))(labels)
+        # as in the Pyomo backend, where fixed flows are constants
+        values[self._fixed_flows] = 0.0
+        return pd.DataFrame(
+            values.T,
+            index=self._row_index("timestep", values.shape[1]),
+            columns=self._columns(self.FLOWS),
+        )
+
+    def _results_dataframe(self):
+        """All variable values as the long table that
+        :func:`oemof.solph.processing.create_dataframe` builds for Pyomo
+        models, so that :func:`~oemof.solph.processing.results` and
+        :mod:`~oemof.solph.views` work unchanged."""
+        frames = []
+        for key, containers in self._result_vars.items():
+            for name, entities, index in containers:
+                if entities is None:
+                    continue
+                values = np.asarray(
+                    self.linopy.variables[name].solution.values
+                ).reshape(len(entities), -1)
+                n_rows = values.shape[1]
+                tuples = [
+                    e if isinstance(e, tuple) else (e,) for e in entities
+                ]
+                timesteps = np.arange(n_rows) if index is not None else [0]
+                frame = pd.DataFrame(
+                    {
+                        "oemof_tuple": [
+                            t for t in tuples for _ in range(len(timesteps))
+                        ],
+                        "timestep": np.tile(timesteps, len(entities)),
+                        "variable_name": key,
+                        "value": values.ravel(),
+                    }
+                )
+                frames.append(frame)
+        if not frames:
+            return pd.DataFrame(
+                columns=["oemof_tuple", "timestep", "variable_name", "value"]
+            )
+        df = pd.concat(frames, ignore_index=True)
+        df["pyomo_tuple"] = None
+        df = df.sort_values(
+            ["oemof_tuple", "timestep"], ascending=[True, True]
+        )
+        return df.dropna(subset=["value"])
 
     def _row_index(self, index, n_rows):
         timeindex = self.es.timeindex
@@ -388,6 +566,21 @@ class LinopyModel:
                 )
             frames.append(frame)
         return pd.concat(frames, axis=1)
+
+
+class _Objective:
+    """Callable stand-in for a Pyomo objective: ``objective()`` is its
+    value."""
+
+    def __init__(self, linopy_model):
+        self._model = linopy_model
+
+    def __call__(self):
+        return self._model.objective.value
+
+    @property
+    def expression(self):
+        return self._model.objective.expression
 
 
 def _member_key(member):

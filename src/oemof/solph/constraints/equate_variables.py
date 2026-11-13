@@ -11,7 +11,10 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph.constraints._backend import backend_dispatch
 
+
+@backend_dispatch
 def equate_variables(model, var1, var2, factor1=1, name=None):
     r"""
     Adds a constraint to the given model that sets two variables to equal adaptable by a factor.

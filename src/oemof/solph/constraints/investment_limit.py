@@ -15,7 +15,10 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph.constraints._backend import backend_dispatch
 
+
+@backend_dispatch
 def investment_limit(model, limit=None):
     r"""Set an absolute limit for the total investment costs of an investment
     optimization problem (over all periods in case of a multi-period model):
@@ -55,6 +58,7 @@ def investment_limit(model, limit=None):
     return model
 
 
+@backend_dispatch
 def additional_investment_flow_limit(model, keyword, limit=None):
     r"""
     Global limit for investment flows weighted by an attribute keyword.

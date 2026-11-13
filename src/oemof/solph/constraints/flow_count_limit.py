@@ -14,7 +14,10 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph.constraints._backend import backend_dispatch
 
+
+@backend_dispatch
 def limit_active_flow_count(
     model, constraint_name, flows, lower_limit=0, upper_limit=None
 ):
@@ -113,6 +116,7 @@ def limit_active_flow_count(
     return model
 
 
+@backend_dispatch
 def limit_active_flow_count_by_keyword(
     model, keyword, lower_limit=0, upper_limit=None
 ):
@@ -143,9 +147,7 @@ def limit_active_flow_count_by_keyword(
     """
     nonconvex_flows = list(
         model.NonConvexFlowBlock.FIXED_CAPACITY_NONCONVEX_FLOWS
-    ) + list(
-        model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
-    )
+    ) + list(model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS)
 
     flows = []
     for i, o in nonconvex_flows:

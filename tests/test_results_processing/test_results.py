@@ -83,6 +83,7 @@ class TestResultsClass:
         with pytest.raises(TypeError):
             self.results["objective"] = 5
 
+    @pytest.mark.pyomo_only
     def test_solver_result_access(self):
         with pytest.warns(
             FutureWarning,
