@@ -61,7 +61,12 @@ class Source(Node):
     """
 
     def __init__(
-        self, label=None, *, outputs, parent_node=None, custom_properties=None
+        self,
+        label: str | tuple | None = None,
+        *,
+        outputs: dict,
+        parent_node: Node | None = None,
+        custom_properties: dict | None = None,
     ):
         if outputs is None:
             outputs = {}
