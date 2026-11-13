@@ -618,6 +618,18 @@ class LinopyModel:
         self._build_callbacks.append(callback)
         return self
 
+    def write(self, filename, io_options=None, **kwargs):
+        """Write the problem to an LP or MPS file (format by suffix), as
+        Pyomo's ``Model.write``. `io_options` are accepted for
+        compatibility; ``{"symbolic_solver_labels": True}`` writes the
+        variable and constraint names instead of their labels."""
+        io_options = dict(io_options or {})
+        names = bool(io_options.pop("symbolic_solver_labels", False))
+        self.linopy.to_file(
+            filename, explicit_coordinate_names=names, **kwargs
+        )
+        return str(filename)
+
     def relax_problem(self):
         """Relax integer and binary variables to continuous ones, as
         :meth:`oemof.solph.Model.relax_problem`."""

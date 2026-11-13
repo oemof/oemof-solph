@@ -231,3 +231,86 @@ def test_solve_without_constraints_with_cbc():
     bus.inputs[bus] = solph.Flow(nominal_capacity=2, variable_costs=-1)
     results = LinopyModel(es).solve(solver="cbc")
     assert results.solver["objective"] == pytest.approx(-2 * N_STEPS)
+
+
+@pytest.mark.parametrize("suffix", [".lp", ".mps"])
+def test_write_problem_file(tmp_path, suffix):
+    """write() exports the problem; HiGHS solves the file to the same
+    objective."""
+    import highspy
+
+    from oemof.solph._linopy import LinopyModel
+
+    model = LinopyModel(dispatch_system())
+    path = tmp_path / f"model{suffix}"
+    model.write(path, io_options={"symbolic_solver_labels": True})
+    results = LinopyModel(dispatch_system()).solve(solver="highs")
+    h = highspy.Highs()
+    h.setOptionValue("output_flag", False)
+    h.readModel(str(path))
+    h.run()
+    assert h.getInfo().objective_function_value == pytest.approx(
+        results.solver["objective"], rel=1e-7
+    )
+
+
+def link_system():
+    """Two regions connected by a lossy bidirectional link."""
+    es = _es()
+    a, b = solph.Bus("a"), solph.Bus("b")
+    es.add(a, b)
+    es.add(
+        solph.components.Source(
+            "gen a", outputs={a: solph.Flow(variable_costs=PRICE)}
+        ),
+        solph.components.Source(
+            "gen b", outputs={b: solph.Flow(variable_costs=PRICE[::-1])}
+        ),
+        solph.components.Sink(
+            "demand a",
+            inputs={a: solph.Flow(fix=HEAT / 8, nominal_capacity=8)},
+        ),
+        solph.components.Sink(
+            "demand b",
+            inputs={b: solph.Flow(fix=POWER / 4, nominal_capacity=4)},
+        ),
+        solph.components.Link(
+            "line",
+            inputs={
+                a: solph.Flow(nominal_capacity=3),
+                b: solph.Flow(nominal_capacity=3),
+            },
+            outputs={a: solph.Flow(), b: solph.Flow()},
+            conversion_factors={(a, b): 0.95, (b, a): 0.9},
+        ),
+    )
+    return es
+
+
+def test_link():
+    assert_backends_agree(link_system)
+
+
+def test_shared_limit_on_flows():
+    from oemof.solph._linopy import LinopyModel
+    from oemof.solph._models import Model as PyomoModel
+
+    def run(model_class):
+        es = dispatch_system()
+        g = es.groups
+        model = model_class(es)
+        solph.constraints.shared_limit(
+            model,
+            model.flow,
+            "gas_limit",
+            [(g["gas supply"], g["gas"])],
+            [1.0],
+            upper_limit=6,
+        )
+        return model.solve(solver="highs")
+
+    pyomo, linopy_ = run(PyomoModel), run(LinopyModel)
+    assert linopy_.solver["objective"] == pytest.approx(
+        pyomo.solver["objective"], rel=1e-6
+    )
+    assert linopy_.get("gas_limit").to_numpy().max() <= 6 + 1e-6
