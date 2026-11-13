@@ -217,17 +217,20 @@ def test_tuples_as_labels_example(
 
     # Solver results
     assert str(meta["solver"]["Termination condition"]) == "optimal"
-    assert meta["solver"]["Error rc"] == 0
-    assert str(meta["solver"]["Status"]) == "ok"
+    # Pyomo's CBC interface reports the return code and problem
+    # statistics; the linopy backend builds a different matrix
+    if getattr(solph.Model, "BACKEND", "pyomo") == "pyomo":
+        assert meta["solver"]["Error rc"] == 0
+        assert str(meta["solver"]["Status"]) == "ok"
 
-    # Problem results
-    assert int(meta["problem"]["Lower bound"]) == 37819254
-    assert int(meta["problem"]["Upper bound"]) == 37819254
-    assert meta["problem"]["Number of variables"] == 320
-    assert meta["problem"]["Number of constraints"] == 202
-    assert meta["problem"]["Number of nonzeros"] == 116
-    assert meta["problem"]["Number of objectives"] == 1
-    assert str(meta["problem"]["Sense"]) == "minimize"
+        # Problem results
+        assert int(meta["problem"]["Lower bound"]) == 37819254
+        assert int(meta["problem"]["Upper bound"]) == 37819254
+        assert meta["problem"]["Number of variables"] == 320
+        assert meta["problem"]["Number of constraints"] == 202
+        assert meta["problem"]["Number of nonzeros"] == 116
+        assert meta["problem"]["Number of objectives"] == 1
+        assert str(meta["problem"]["Sense"]) == "minimize"
 
     # Objective function
     assert meta["objective"] == pytest.approx(37819254, abs=0.5)

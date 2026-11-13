@@ -95,6 +95,9 @@ def create_dataframe(om):
     separate columns are created for the variable index e.g. for tuples
     of the flows and components or the timesteps.
     """
+    if getattr(om, "BACKEND", None) == "linopy":
+        return om._results_dataframe()
+
     # get all pyomo variables including their block
     block_vars = list(
         set([bv.parent_component() for bv in om.component_data_objects(Var)])
@@ -311,13 +314,24 @@ def results(model, remove_last_time_point=False):
 
     # add dual variables for bus constraints
     if model.dual is not None:
-        grouped = groupby(
-            sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
-        )
-        for bus, timestep in grouped:
-            duals = [
-                model.dual[model.BusBlock.balance[bus, t]] for _, t in timestep
+        if getattr(model, "BACKEND", None) == "linopy":
+            bus_duals = model._bus_duals().items()
+        else:
+            grouped = groupby(
+                sorted(model.BusBlock.balance.iterkeys()), lambda t: t[0]
+            )
+            bus_duals = [
+                (
+                    bus,
+                    [
+                        model.dual[model.BusBlock.balance[bus, t]]
+                        for _, t in timestep
+                    ],
+                )
+                for bus, timestep in grouped
             ]
+        for bus, duals in bus_duals:
+            duals = list(duals)
             if model.es.transitional_single_period:
                 df = pd.DataFrame({"duals": duals}, index=result_index[:-1])
             # TODO: Align with standard model

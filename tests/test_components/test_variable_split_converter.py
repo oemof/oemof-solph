@@ -329,6 +329,7 @@ class TestVariableSplitConverterInit:
         )
         assert converter.constraint_group() is VariableSplitConverterBlock
 
+    @pytest.mark.pyomo_only
     def test_equal_states_mixed_degenerate_timesteps(self):
         idx = solph.create_time_index(2020, number=1)
         es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
@@ -393,6 +394,7 @@ class TestVariableSplitConverterBlock:
         block = VariableSplitConverterBlock()
         assert block._create(group=None) is None
 
+    @pytest.mark.pyomo_only
     def test_model_build_creates_expected_constraints(self):
         idx = solph.create_time_index(2020, number=3)
         es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)
@@ -445,6 +447,7 @@ class TestVariableSplitConverterBlock:
         # converter.
         assert converter not in block.EQUAL_STATES
 
+    @pytest.mark.pyomo_only
     def test_model_build_with_equal_states_populates_equal_states_set(self):
         idx = solph.create_time_index(2020, number=2)
         es = solph.EnergySystem(timeindex=idx, infer_last_interval=True)

@@ -135,6 +135,7 @@ def test_infeasible_warns_when_nonoptimal_allowed(solver):
         m.solve(solver=solver, allow_nonoptimal=True)
 
 
+@pytest.mark.pyomo_only
 def test_infeasible_cbc_returns_solver_results():
     """CBC specifically returns a SolverResults object when non-optimal."""
     m = solph.Model(_make_infeasible_es())
@@ -247,6 +248,7 @@ def test_receive_duals_on_mip_does_not_crash(solver):
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.pyomo_only
 def test_cbc_cmdline_options(capsys):
     """CBC echoes command-line options in its solver output."""
     es = solph.EnergySystem(timeindex=[0, 1], infer_last_interval=False)
@@ -277,6 +279,7 @@ def test_cbc_cmdline_options(capsys):
     assert "-ratio 0.01" in captured.out
 
 
+@pytest.mark.pyomo_only
 def test_highs_cmdline_options(capsys):
     """HiGHS options passed via cmdline_options are applied to the solver."""
     m = solph.Model(_make_feasible_es())
@@ -331,6 +334,7 @@ def test_auto_construct_false_skips_construction():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.pyomo_only
 def test_bidirectional_nonconvex_flow_with_capacity_skips_lower_bound():
     """A flow with nominal_capacity, no fix, nonconvex=True and
     bidirectional=True must *not* get an explicit lower bound set
@@ -362,6 +366,7 @@ def test_bidirectional_nonconvex_flow_with_capacity_skips_lower_bound():
     assert flow_var.lb is None
 
 
+@pytest.mark.pyomo_only
 def test_bidirectional_flow_without_capacity_skips_lower_bound():
     """A bidirectional flow without nominal_capacity must *not* get an
     explicit lower bound of 0 set (branch 417->388)."""
@@ -391,6 +396,7 @@ def test_bidirectional_flow_without_capacity_skips_lower_bound():
 # ---------------------------------------------------------------------------
 
 
+@pytest.mark.pyomo_only
 def test_add_objective_update_replaces_existing_objective():
     """Calling `_add_objective(update=True)` must delete the existing
     'objective' component before re-adding it (line 443)."""
@@ -426,6 +432,7 @@ def test_receive_duals_deprecated_method_sets_suffixes():
     assert model.rc is not None
 
 
+@pytest.mark.pyomo_only
 def test_receive_duals_can_be_called_multiple_times():
     """Calling `_receive_duals()` a second time must not try to `del` an
     unset suffix, i.e. the `is None` checks must evaluate to False on the

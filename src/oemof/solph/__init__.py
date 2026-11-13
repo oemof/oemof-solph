@@ -26,6 +26,16 @@ from ._results import Results
 from .buses import Bus  # default Bus (for convenience)
 from .flows import Flow  # default Flow (for convenience)
 
+
+def __getattr__(name):
+    # linopy is optional: import the backend only when it is asked for
+    if name == "LinopyModel":
+        from ._linopy import LinopyModel
+
+        return LinopyModel
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
 __all__ = [
     "buses",
     "Bus",

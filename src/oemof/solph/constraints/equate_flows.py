@@ -10,7 +10,10 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph.constraints._backend import backend_dispatch
 
+
+@backend_dispatch
 def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
     r"""
     Adds a constraint to the given model that sets the sum of two groups of
@@ -64,6 +67,7 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
     return model
 
 
+@backend_dispatch
 def equate_flows_by_keyword(
     model, keyword1, keyword2, factor1=1, name="equate_flows"
 ):

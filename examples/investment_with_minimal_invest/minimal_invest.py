@@ -147,7 +147,7 @@ def main(optimize=True, solver="cbc"):
 
     c_total = c_invest + c_source_0 + c_source_1
 
-    objective = results["objective"]
+    objective = results.solver["objective"]
 
     print("  objective:", objective)
     print("  berechnet:", c_total)

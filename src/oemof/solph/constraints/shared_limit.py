@@ -10,7 +10,10 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph.constraints._backend import backend_dispatch
 
+
+@backend_dispatch
 def shared_limit(
     model,
     quantity,

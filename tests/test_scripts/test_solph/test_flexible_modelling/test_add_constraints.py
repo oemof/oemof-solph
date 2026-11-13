@@ -19,6 +19,7 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
+import pytest
 from pyomo import environ as po
 
 from oemof.solph import EnergySystem
@@ -28,6 +29,7 @@ from oemof.solph.buses import Bus
 from oemof.solph.flows import Flow
 
 
+@pytest.mark.pyomo_only
 def test_add_constraints_example(solver="cbc", nologg=False):
     if not nologg:
         logging.basicConfig(level=logging.INFO)

@@ -229,7 +229,9 @@ def main(optimize=True, solver="cbc"):
 
     # check if the new result object is working for custom components
 
-    electricity_bus = solph.views.node(results, "electricity")
+    # views and the (node, node) access below need the result dictionary
+    result_dict = solph.processing.results(om)
+    electricity_bus = solph.views.node(result_dict, "electricity")
 
     # returns a pandas Series with all scalar values (investment, total) of
     # components connected to the electricity bus
@@ -237,14 +239,14 @@ def main(optimize=True, solver="cbc"):
 
     # installed capacity of storage in GWh
     my_results["storage_invest_GWh"] = (
-        results[(storage, None)]["scalars"]["invest"] / 1e6
+        result_dict[(storage, None)]["scalars"]["invest"] / 1e6
     )
 
     # resulting renewable energy share
     my_results["res_share"] = (
         1
-        - results[(pp_gas, bel)]["sequences"].sum().iloc[0]
-        / results[(bel, demand)]["sequences"].sum().iloc[0]
+        - result_dict[(pp_gas, bel)]["sequences"].sum().iloc[0]
+        / result_dict[(bel, demand)]["sequences"].sum().iloc[0]
     )
 
     pp.pprint(my_results)
