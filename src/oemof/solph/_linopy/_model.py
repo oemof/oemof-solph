@@ -79,6 +79,7 @@ class LinopyModel:
         self.linopy = linopy.Model()
         self._objective_added = False
         self._objective_terms = {}
+        self._var_meta = {}
         self._result_vars = {}
         self._solver_results = None
         self.solver_return = None
@@ -306,6 +307,11 @@ class LinopyModel:
         self._result_vars.setdefault(key, []).append(
             (name, list(entities) if entities is not None else None, index)
         )
+        self._var_meta[name] = (
+            list(entities) if entities is not None else None,
+            entity_dim,
+            index,
+        )
         return var
 
     @staticmethod
@@ -345,6 +351,19 @@ class LinopyModel:
     def objective_terms(self):
         """The objective contributions by block, as a dict."""
         return dict(self._objective_terms)
+
+    def __getattr__(self, name):
+        # model.<Block>.<variable>[keys]: read access to block variables by
+        # the same keys as in the Pyomo model, e.g.
+        # model.InvestmentFlowBlock.invest[source, target, period]
+        if name.startswith("_") or "_var_meta" not in self.__dict__:
+            raise AttributeError(name)
+        prefix = name + "."
+        if any(v.startswith(prefix) for v in self.__dict__["_var_meta"]):
+            return _BlockView(self, name)
+        raise AttributeError(
+            f"{type(self).__name__!r} object has no attribute {name!r}"
+        )
 
     # ------------------------------------------------------------------
     # solving
@@ -566,6 +585,46 @@ class LinopyModel:
                 )
             frames.append(frame)
         return pd.concat(frames, axis=1)
+
+
+class _BlockView:
+    """The variables of one block, addressed as in the Pyomo model."""
+
+    def __init__(self, model, block):
+        self._model = model
+        self._block = block
+
+    def __getattr__(self, name):
+        full = f"{self._block}.{name}"
+        if full not in self._model._var_meta:
+            raise AttributeError(f"{self._block} has no variable {name!r}")
+        return _VariableView(self._model, full)
+
+
+class _VariableView:
+    """Index a linopy variable by node keys and time, as a Pyomo Var."""
+
+    def __init__(self, model, name):
+        self._model = model
+        self._name = name
+        self._entities, self._entity_dim, self._index = model._var_meta[name]
+        self._position = {e: k for k, e in enumerate(self._entities or [])}
+
+    @property
+    def variable(self):
+        """The linopy variable."""
+        return self._model.linopy.variables[self._name]
+
+    def __getitem__(self, key):
+        key = key if isinstance(key, tuple) else (key,)
+        selection = {}
+        if self._index is not None:
+            *key, step = key
+            selection[self._model.coords_for(self._index).name] = step
+        if self._entities is not None:
+            entity = tuple(key) if len(key) > 1 else key[0]
+            selection[self._entity_dim] = self._position[entity]
+        return self.variable.isel(selection)
 
 
 class _Objective:

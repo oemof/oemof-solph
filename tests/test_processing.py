@@ -322,6 +322,7 @@ class TestParameterResult:
             int(bel1["sequences"][("diesel", "b_el1", "flow")].sum()) == 2875
         )
 
+    @pytest.mark.pyomo_only
     def test_error_from_nan_values(self):
         trsf = self.es.groups["diesel"]
         bus = self.es.groups["b_el1"]

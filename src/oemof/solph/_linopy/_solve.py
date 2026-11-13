@@ -120,6 +120,10 @@ def solve(
         ]
     }
 
+    # --- BEGIN: To be removed together with Model's version (v0.7) ---
+    _set_deprecated_energy_system_results(model)
+    # --- END ---
+
     if optimal:
         logging.info("Optimisation successful.")
     else:
@@ -150,3 +154,20 @@ def reduced_costs(model):
     duals = np.nan_to_num(np.asarray(matrices.dual, dtype=float))
     rc = np.asarray(matrices.c, dtype=float) - matrices.A.T @ duals
     return dict(zip(np.asarray(matrices.vlabels), rc))
+
+
+def _set_deprecated_energy_system_results(model):
+    """EnergySystem.results, deprecated, as set by Model.solve()."""
+    from oemof.solph import EnergySystem
+
+    model.es._results = model._solver_results
+
+    def results(self):
+        warnings.warn(
+            "EnergySystem.results is deprecated and will be removed in a"
+            " future version. Use solph.Results instead.",
+            FutureWarning,
+        )
+        return self._results
+
+    EnergySystem.results = property(results)

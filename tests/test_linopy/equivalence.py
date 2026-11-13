@@ -39,9 +39,11 @@ def _by_label(frame):
             return tuple(str(getattr(c, "label", c)) for c in column)
         return str(getattr(column, "label", column))
 
-    frame = frame.copy()
+    # Pyomo's Results add an all-NaN column for empty variables (e.g. the
+    # invest_status of InvestmentFlowBlock without nonconvex flows)
+    frame = frame.dropna(axis=1, how="all").copy()
     frame.columns = [key(c) for c in frame.columns]
-    return frame.reindex(sorted(frame.columns), axis=1)
+    return frame.reindex(sorted(frame.columns, key=str), axis=1)
 
 
 def assert_frames_agree(pyomo_frame, linopy_frame, rtol=1e-6, atol=1e-6):
