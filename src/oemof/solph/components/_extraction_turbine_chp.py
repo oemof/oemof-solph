@@ -21,6 +21,7 @@ SPDX-License-Identifier: MIT
 
 import warnings
 
+from oemof.network import Node
 from oemof.solph.components._variable_split_converter import (
     VariableSplitConverter,
 )
@@ -71,12 +72,12 @@ class ExtractionTurbineCHP(VariableSplitConverter):
 
     def __init__(
         self,
-        conversion_factor_full_condensation,
-        label=None,
-        inputs=None,
-        outputs=None,
-        parent_node=None,
-        conversion_factors=None,
+        conversion_factor_full_condensation: dict,
+        label: str | tuple | None = None,
+        inputs: dict | None = None,
+        outputs: dict | None = None,
+        parent_node: Node | None = None,
+        conversion_factors: dict | None = None,
         custom_properties=None,
     ):
         msg = """
