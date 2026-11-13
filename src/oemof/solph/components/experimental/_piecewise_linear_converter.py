@@ -25,6 +25,8 @@ from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
 
+from collections.abc import Callable
+
 
 class PiecewiseLinearConverter(Node):
     """Component to model an energy converter with one input and one output
@@ -68,15 +70,15 @@ PiecewiseLinearConverter'>
 
     def __init__(
         self,
-        label,
+        label: str | tuple,
         *,
-        inputs,
-        outputs,
-        conversion_function,
-        in_breakpoints,
-        pw_repn,
-        parent_node=None,
-        custom_properties=None,
+        inputs: dict,
+        outputs: dict,
+        conversion_function: Callable,
+        in_breakpoints: list,
+        pw_repn: str,
+        parent_node: Node | None = None,
+        custom_properties: dict | None = None,
     ):
         super().__init__(
             label,
