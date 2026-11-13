@@ -42,13 +42,13 @@ class Bus(Node):
 
     def __init__(
         self,
-        label=None,
+        label: str | tuple | None = None,
         *,
-        inputs=None,
-        outputs=None,
-        parent_node=None,
-        balanced=True,
-        custom_properties=None,
+        inputs: dict | None = None,
+        outputs: dict | None = None,
+        parent_node: Node | None = None,
+        balanced: bool = True,
+        custom_properties: dict | None = None,
     ):
         if inputs is None:
             inputs = {}
