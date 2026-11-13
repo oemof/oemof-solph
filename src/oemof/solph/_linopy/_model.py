@@ -143,16 +143,76 @@ class LinopyModel:
 
         self.TSAM_MODE = es.tsa_parameters is not None
         if self.TSAM_MODE:
-            msg = (
-                "Energy systems with tsa_parameters (solph's tsam mode) are "
-                "not supported by the linopy backend yet."
-            )
-            raise NotImplementedError(msg)
-        self.tsam_weighting = np.ones(n_steps)
+            self._add_tsam_sets()
+        else:
+            self.tsam_weighting = np.ones(n_steps)
 
         self.FLOWS = list(self.flows.keys())
         self._flow_position = {k: i for i, k in enumerate(self.FLOWS)}
         self.flow_entity_index = pd.RangeIndex(len(self.FLOWS), name="flow")
+
+    def _add_tsam_sets(self):
+        """Sets of solph's tsam mode, as in Model._add_parent_block_sets:
+        timesteps are those of the typical periods; storages couple
+        original periods (clusters) through inter-period contents."""
+        tsa = self.es.tsa_parameters
+        periods = self.CAPACITY_PERIODS
+        self.tsam_weighting = np.array(
+            [
+                tsa[p]["occurrences"][k]
+                for p in periods
+                for k in range(len(tsa[p]["occurrences"]))
+                for _ in range(tsa[p]["timesteps"])
+            ],
+            dtype=float,
+        )
+        n_clusters = sum(len(tsa[p]["order"]) for p in periods)
+        self.CLUSTERS = range(n_clusters)
+        self.CLUSTERS_OFFSET = range(n_clusters + 1)
+        self.TYPICAL_CLUSTERS = [
+            (p, i) for p in periods for i in range(len(tsa[p]["occurrences"]))
+        ]
+        self.TIMEINDEX_CLUSTER = self.get_cluster_index("order", 0)
+        self.TIMEINDEX_TYPICAL_CLUSTER = self.get_cluster_index(
+            "occurrences", 0
+        )
+        self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET = self.get_cluster_index(
+            "occurrences", 1
+        )
+        self.cluster_offset_index = pd.RangeIndex(
+            n_clusters + 1, name="cluster_offset"
+        )
+        self.typical_timepoint_index = pd.RangeIndex(
+            len(self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET),
+            name="typical_timepoint",
+        )
+        self._typical_timepoint_position = {
+            key: n
+            for n, key in enumerate(self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET)
+        }
+
+    def get_timestep_from_tsam_timestep(self, p, ik, g):
+        """Return original timestep from cluster-based timestep"""
+        return (
+            p * len(self.TIMESTEPS_IN_PERIOD[p])
+            + ik * self.es.tsa_parameters[p]["timesteps"]
+            + g
+        )
+
+    def get_cluster_index(self, cluster_type, offset):
+        """Return cluster index for original or typical periods with or
+        without offset"""
+        return [
+            (p, k, t)
+            for p in range(len(self.es.tsa_parameters))
+            for k in range(len(self.es.tsa_parameters[p][cluster_type]))
+            for t in range(self.es.tsa_parameters[p]["timesteps"] + offset)
+        ]
+
+    def typical_timepoint_position(self, p, k, g):
+        """Position of (period, typical period, step) along
+        "typical_timepoint"."""
+        return self._typical_timepoint_position[p, k, g]
 
     def _add_parent_block_variables(self):
         """The flow variable with its bounds, as in
@@ -256,6 +316,10 @@ class LinopyModel:
             "timestep": self.timestep_index,
             "timepoint": self.timepoint_index,
             "capacity_period": self.capacity_period_index,
+            "cluster_offset": getattr(self, "cluster_offset_index", None),
+            "typical_timepoint": getattr(
+                self, "typical_timepoint_index", None
+            ),
         }[index]
 
     def add_variables(
@@ -580,13 +644,23 @@ class LinopyModel:
                 tuples = [
                     e if isinstance(e, tuple) else (e,) for e in entities
                 ]
-                timesteps = np.arange(n_rows) if index is not None else [0]
+                if index == "typical_timepoint":
+                    # as Pyomo's (node, period, typical period, step)
+                    keys = self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
+                    oemof_tuples = [
+                        t + (p, k) for t in tuples for p, k, _ in keys
+                    ]
+                    steps = [g for _ in tuples for _, _, g in keys]
+                else:
+                    timesteps = np.arange(n_rows) if index is not None else [0]
+                    oemof_tuples = [
+                        t for t in tuples for _ in range(len(timesteps))
+                    ]
+                    steps = np.tile(timesteps, len(entities))
                 frame = pd.DataFrame(
                     {
-                        "oemof_tuple": [
-                            t for t in tuples for _ in range(len(timesteps))
-                        ],
-                        "timestep": np.tile(timesteps, len(entities)),
+                        "oemof_tuple": oemof_tuples,
+                        "timestep": steps,
                         "variable_name": key,
                         "value": values.ravel(),
                     }
@@ -633,7 +707,17 @@ class LinopyModel:
             if entities is None:
                 values = values.reshape((1,) + values.shape)
                 entities = [None]
-            if index is None:
+            if index == "typical_timepoint":
+                # columns (node, period, typical period), rows: step
+                keys = self.TIMEINDEX_TYPICAL_CLUSTER_OFFSET
+                values = values.reshape(len(entities), -1)
+                series = {(e, p, k): {} for e in entities for p, k, _ in keys}
+                for row, e in enumerate(entities):
+                    for col, (p, k, g) in enumerate(keys):
+                        series[e, p, k][g] = values[row, col]
+                frame = pd.DataFrame(series)
+                frame.columns = pd.MultiIndex.from_tuples(frame.columns)
+            elif index is None:
                 frame = pd.DataFrame(
                     values.reshape(1, -1), columns=self._columns(entities)
                 )

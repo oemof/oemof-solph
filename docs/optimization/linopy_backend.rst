@@ -40,9 +40,10 @@ work with both backends.
 Not supported yet
 =================
 
-Energy systems with ``tsa_parameters`` (solph's own time series
-aggregation mode) raise :class:`NotImplementedError` when the model is
-built.
+:func:`~oemof.solph.constraints.storage_level_constraint` in solph's
+time series aggregation mode (energy systems with ``tsa_parameters``)
+raises :class:`NotImplementedError`. Everything else, including
+multi-period investment and the tsam mode itself, is supported.
 
 Custom constraints
 ==================

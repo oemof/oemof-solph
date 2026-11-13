@@ -147,14 +147,7 @@ def invest_nonconvex(**investment):
     ids=["linear", "offset"],
 )
 def test_invest_nonconvex_flow(investment):
-    pyomo, linopy_ = assert_backends_agree(
-        invest_nonconvex(**investment), compare=()
-    )
-    np.testing.assert_allclose(
-        pyomo.get("invest").dropna(axis=1, how="all").to_numpy(),
-        linopy_.get("invest").to_numpy(),
-        atol=1e-6,
-    )
+    assert_backends_agree(invest_nonconvex(**investment), compare=("invest",))
 
 
 def offset_converter_system():
