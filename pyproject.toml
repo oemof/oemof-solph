@@ -107,6 +107,10 @@ solver = [
     "cbcbox<=2.929",
     "highspy",
 ]
+# experimental linopy backend (oemof.solph.LinopyModel)
+linopy = [
+    "linopy >= 0.10.1",
+]
 
 [project.scripts]
 oemof_installation_test = "oemof.solph._console_scripts:check_oemof_installation"
