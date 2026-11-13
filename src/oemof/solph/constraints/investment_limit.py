@@ -15,8 +15,12 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph import Model
 
-def investment_limit(model, limit=None):
+
+def investment_limit(
+    model: Model | po.ConcreteModel, limit: float
+) -> Model | po.ConcreteModel:
     r"""Set an absolute limit for the total investment costs of an investment
     optimization problem (over all periods in case of a multi-period model):
 
@@ -24,7 +28,7 @@ def investment_limit(model, limit=None):
 
     Parameters
     ----------
-    model : oemof.solph._models.Model
+    model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which the constraint is added
     limit : float
         Absolute limit of the investment (i.e. RHS of constraint)
@@ -55,7 +59,9 @@ def investment_limit(model, limit=None):
     return model
 
 
-def additional_investment_flow_limit(model, keyword, limit=None):
+def additional_investment_flow_limit(
+    model: Model | po.ConcreteModel, keyword: str, limit: float
+) -> Model | po.ConcreteModel:
     r"""
     Global limit for investment flows weighted by an attribute keyword.
 
@@ -91,7 +97,7 @@ def additional_investment_flow_limit(model, keyword, limit=None):
     ----------
     model : oemof.solph.Model
         Model to which constraints are added.
-    keyword : attribute to consider
+    keyword : str
         All flows with Investment attribute containing the keyword will be
         used.
     limit : numeric
@@ -99,8 +105,8 @@ def additional_investment_flow_limit(model, keyword, limit=None):
 
     Note
     ----
-    The Investment attribute of the considered (Investment-)flows requires an
-    attribute named like keyword!
+    The Investment attribute of the considered (Investment-)flows requires a
+    `custom_properties` dictionary with `keyword` as a key (see example)!
 
     Examples
     --------

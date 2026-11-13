@@ -22,7 +22,7 @@ def equate_flows(
     flows2: Iterable[tuple[Node, Node]],
     factor1: float = 1,
     name: str = "equate_flows",
-):
+) -> Model | po.ConcreteModel:
     r"""
     Adds a constraint to the given model that sets the sum of two groups of
     flows equal or proportional by a factor for each timestep.

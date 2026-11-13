@@ -17,10 +17,16 @@ import warnings
 
 from pyomo import environ as po
 
+from oemof.network import Node
 from oemof.solph._plumbing import sequence
+from oemof.solph import Model, Flow
 
 
-def emission_limit(om, flows=None, limit=None):
+def emission_limit(
+    om: Model | po.ConcreteModel,
+    flows: dict[tuple[Node, Node], Flow] | None = None,
+    limit: float | None = None,
+):
     r"""
     Short handle for generic_integral_limit() with keyword="emission_factor".
     Can be used to impose an emissions budget limit in a multi-period model.
@@ -36,14 +42,14 @@ def emission_limit(om, flows=None, limit=None):
 
 
 def generic_integral_limit(
-    om,
-    keyword,
-    flows=None,
-    upper_limit=None,
-    lower_limit=None,
-    limit=None,
-    limit_name=None,
-):
+    om: Model | po.ConcreteModel,
+    keyword: str,
+    flows: dict[tuple[Node, Node], Flow] | None = None,
+    upper_limit: float | None = None,
+    lower_limit: float | None = None,
+    limit: float | None = None,
+    limit_name: str | None = None,
+) -> Model | po.ConcreteModel:
     r"""Set a global limit for flows weighted by attribute named keyword.
     The attribute named keyword has to be added
     to every flow you want to take into account.
@@ -54,9 +60,9 @@ def generic_integral_limit(
 
     Parameters
     ----------
-    om : oemof.solph.Model
+    om : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which constraints are added.
-    flows : dict
+    flows : dict (optional)
         Dictionary holding the flows that should be considered in constraint.
         Keys are (source, target) objects of the Flow. If no dictionary is
         given all flows containing the keyword attribute will be
@@ -172,20 +178,22 @@ def generic_integral_limit(
     return om
 
 
-def _check_and_set_flows(om, flows, keyword):
+def _check_and_set_flows(
+    om: Model | po.ConcreteModel,
+    flows: dict[tuple[Node, Node], Flow] | None,
+    keyword: str,
+) -> dict[tuple[Node, Node], Flow]:
     """Checks and sets flows if needed
 
     Parameters
     ----------
-    om : oemof.solph.Model
+    om : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which constraints are added.
-
     flows : dict
         Dictionary holding the flows that should be considered in constraint.
         Keys are (source, target) objects of the Flow. If no dictionary is
         given all flows containing the keyword attribute will be
         used.
-
     keyword : string
         attribute to consider
 

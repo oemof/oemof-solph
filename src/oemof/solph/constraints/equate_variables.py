@@ -10,13 +10,14 @@ SPDX-License-Identifier: MIT
 """
 
 from pyomo import environ as po
+
 from oemof.solph import Model
 
 
 def equate_variables(
     model: Model | po.ConcreteModel,
-    var1: po.Var,
-    var2: po.Var,
+    var1: po.expr.NumericValue,
+    var2: po.expr.NumericValue,
     factor1: float = 1,
     name: str | None = None,
 ):
@@ -25,15 +26,17 @@ def equate_variables(
 
     Parameters
     ----------
-    var1 : pyomo.environ.Var
+    var1 : pyomo.expr.NumericValue
         First variable, to be set to equal with Var2 and multiplied with
-        factor1.
-    var2 : pyomo.environ.Var
-        Second variable, to be set equal to (Var1 * factor1).
-    factor1 : float
+        factor1. Usually this is a numeric value stored in a `pyomo.Var`
+        (see example).
+    var2 : pyomo.expr.NumericValue
+        Second variable, to be set equal to (Var1 * factor1). Usually this is
+        a numeric value stored in a `pyomo.Var` (see example).
+    factor1 : float, default=1
         Factor to define the proportion between the variables.
-    name : str
-        Optional name for the equation e.g. in the LP file. By default the
+    name : str (optional)
+        Name for the equation e.g. in the LP file. By default the
         name is: equate + string representation of var1 and var2.
     model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which the constraint is added.
@@ -41,16 +44,16 @@ def equate_variables(
 
     **The following constraints are build:**
 
-    .. math:: var_1 \cdot factor_1 = var_1
+    .. math:: var_1 \cdot factor_1 = var_2
 
     The symbols used are defined as follows (with Variables (V) and Parameters (P)):
 
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | symbol           | attribute           | type | explanation                                                                                                                                    |
     +==================+=====================+======+================================================================================================================================================+
-    | :math:`var_1`    | pyomo.environ.Var`  | V    | First variable, to be set to equal with :math:`var_2` and :math:`var_1` multiplied with :math:`factor_1`                                       |
+    | :math:`var_1`    | pyomo.environ.Var   | V    | First variable, to be set to equal with :math:`var_2` and :math:`var_1` multiplied with :math:`factor_1`                                       |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
-    | :math:`var_2`    | pyomo.environ.Var`  | V    | Second variable, to be set equal to :math:`var_1 \cdot factor_1`                                                                               |
+    | :math:`var_2`    | pyomo.environ.Var   | V    | Second variable, to be set equal to :math:`var_1 \cdot factor_1`                                                                               |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
     | :math:`factor_1` | `float`             | P    | Factor to define the proportion between the variables. The default value is 1.                                                                 |
     +------------------+---------------------+------+------------------------------------------------------------------------------------------------------------------------------------------------+
