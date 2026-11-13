@@ -81,6 +81,7 @@ class LinopyModel:
         self._objective_constant = 0.0
         self._objective_terms = {}
         self._var_meta = {}
+        self._expressions = {}
         self._result_vars = {}
         self._solver_results = None
         self.solver_return = None
@@ -371,6 +372,33 @@ class LinopyModel:
             self._objective_constant += const
         self._objective_terms[name] = expression
 
+    def add_expression(self, name, expression):
+        """Keep a named (scalar) expression, e.g. the investment costs of a
+        block or the total of an integral limit. ``model.<name>()`` returns
+        its value after solving, as for a Pyomo Expression."""
+        self._expressions[name] = expression
+        return expression
+
+    def expression(self, name):
+        """The named expression added with :meth:`add_expression`."""
+        return self._expressions[name]
+
+    def entity_labels(self, quantity, entity):
+        """Labels of one entity of a variable, along its index.
+
+        `quantity` is ``model.flow`` (entity = (source, target)) or a block
+        variable as ``model.<Block>.<variable>`` (entity = node or flow).
+        """
+        if isinstance(quantity, _VariableView):
+            return quantity.variable.labels.values[quantity._position[entity]]
+        if quantity is self.flow or getattr(quantity, "name", None) == "flow":
+            return self.flow.labels.values[self.flow_position(*entity)]
+        msg = (
+            "Expected model.flow or a block variable such as "
+            "model.GenericStorageBlock.storage_content."
+        )
+        raise TypeError(msg)
+
     @property
     def objective_terms(self):
         """The objective contributions by block, as a dict."""
@@ -382,6 +410,8 @@ class LinopyModel:
         # model.InvestmentFlowBlock.invest[source, target, period]
         if name.startswith("_") or "_var_meta" not in self.__dict__:
             raise AttributeError(name)
+        if name in self.__dict__.get("_expressions", {}):
+            return _ExpressionView(self.__dict__["_expressions"][name])
         prefix = name + "."
         if any(v.startswith(prefix) for v in self.__dict__["_var_meta"]):
             return _BlockView(self, name)
@@ -656,6 +686,16 @@ class _VariableView:
             entity = tuple(key) if len(key) > 1 else key[0]
             selection[self._entity_dim] = self._position[entity]
         return self.variable.isel(selection)
+
+
+class _ExpressionView:
+    """A named expression; calling it gives its value after solving."""
+
+    def __init__(self, expression):
+        self.expression = expression
+
+    def __call__(self):
+        return float(self.expression.solution)
 
 
 class _Objective:

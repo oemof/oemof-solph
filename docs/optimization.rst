@@ -20,6 +20,7 @@ you have by using oemof.solph.
     optimization/dispatch_vs_invest.rst
     optimization/linear_vs_mixed_integer.rst
     optimization/multi_period_invest.rst
+    optimization/linopy_backend.rst
 
 
 .. grid:: 2

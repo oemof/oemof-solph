@@ -205,6 +205,7 @@ def build_investment_flows(model, group):
             ).sum()
         )
 
+    model.add_expression(f"{BLOCK}.investment_costs", costs)
     model.add_objective_term(f"{BLOCK}.investment_costs", costs)
 
 

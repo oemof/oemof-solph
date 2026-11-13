@@ -512,6 +512,8 @@ def build_investment_storages(model, group):
             ).sum()
         )
 
+    # investment_limit sums the investment costs without storage costs
+    model.add_expression(f"{INVEST_BLOCK}.investment_costs", costs)
     costs_k, storage_costs = [], []
     for k, n in enumerate(group):
         if valid_sequence(n.storage_costs, n_steps):
