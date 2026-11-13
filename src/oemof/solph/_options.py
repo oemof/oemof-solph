@@ -16,6 +16,7 @@ SPDX-License-Identifier: MIT
 
 """
 
+from collections.abc import Iterable
 from warnings import warn
 
 from oemof.tools import debugging
@@ -76,15 +77,15 @@ class Investment:
 
     def __init__(
         self,
-        maximum=float("+inf"),
-        minimum=0,
-        ep_costs=0,
-        existing=0,
-        nonconvex=False,
-        offset=0,
-        lifetime=None,
+        maximum: float = float("+inf"),
+        minimum: float = 0,
+        ep_costs: float = 0,
+        existing: float = 0,
+        nonconvex: bool = False,
+        offset: float = 0,
+        lifetime: float | None = None,
         custom_attributes=None,  # To be removed for versions >= v0.7
-        custom_properties=None,
+        custom_properties: dict | None = None,
     ):
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
