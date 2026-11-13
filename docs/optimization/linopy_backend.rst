@@ -109,3 +109,30 @@ a linopy builder as well, registered for that block class:
 
 Without one, building a :class:`~oemof.solph.LinopyModel` raises
 :class:`NotImplementedError` naming the block.
+
+Changing parameters and solving again
+=====================================
+
+With ``persistent=True`` the solver keeps its model. After changing
+parameters, the linopy model is rebuilt from the energy system (fast) and
+the solver applies the difference in place, keeping its warm start:
+
+.. code-block:: python
+
+    model = solph.LinopyModel(energysystem)
+    model.solve(solver="highs", persistent=True)
+
+    model.update(
+        flows={(grid, el): {"variable_costs": new_prices}},
+        nodes={heat_pump: {"conversion_factors": {heat: new_cop}}},
+    )
+    results = model.resolve()
+
+Attributes of a flow's ``Investment`` or ``NonConvex`` are addressed with a
+dot, e.g. ``"investment.ep_costs"``. Changing the energy system directly
+and calling ``model.rebuild()`` does the same as ``update()``. Costs,
+bounds, right-hand sides and coefficients are changed in place; a change
+of the model's structure (other variables or constraints) makes the solver
+rebuild its model, or raises with ``resolve(require_in_place=True)``.
+Constraints that should survive a rebuild are added with
+``model.add_custom_constraints(callback)``.

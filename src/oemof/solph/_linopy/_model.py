@@ -72,10 +72,18 @@ class LinopyModel:
             and i not in self._constraint_groups
         ][::-1]
 
-        self.flows = self.es.flows()
         self.dual = None
         self.rc = None
+        self._persistent = None
+        self._build_callbacks = []
+        self._reset()
 
+        if auto_construct:
+            self._construct()
+
+    def _reset(self):
+        """Fresh linopy model and builder state (on init and rebuild)."""
+        self.flows = self.es.flows()
         self.linopy = linopy.Model()
         self._objective_added = False
         self._objective_constant = 0.0
@@ -86,9 +94,14 @@ class LinopyModel:
         self._solver_results = None
         self.solver_return = None
         self.solver = None
-
-        if auto_construct:
-            self._construct()
+        for attr in (
+            "invest_flow_capacity",
+            "nonconvex_status",
+            "nonconvex_status_nominal",
+            "balance_buses",
+            "_equate_count",
+        ):
+            self.__dict__.pop(attr, None)
 
     # ------------------------------------------------------------------
     # construction
@@ -495,6 +508,7 @@ class LinopyModel:
         duals=False,
         solve_kwargs=None,
         cmdline_options=None,
+        persistent=False,
     ):
         """Solve the model; same arguments as :meth:`oemof.solph.Model.solve`.
 
@@ -514,6 +528,10 @@ class LinopyModel:
             to linopy's ``Model.solve``.
         cmdline_options : dict
             Solver options, passed to the solver by name.
+        persistent : bool
+            Keep the solver's model for :meth:`resolve`, which applies
+            changes made with :meth:`update` in place. Needs a solver with
+            an in-memory interface (e.g. "highs", "gurobi").
 
         Returns
         -------
@@ -529,7 +547,76 @@ class LinopyModel:
             duals=duals,
             solve_kwargs=solve_kwargs,
             cmdline_options=cmdline_options,
+            persistent=persistent,
         )
+
+    def resolve(self, require_in_place=False):
+        """Solve again after :meth:`update` or :meth:`rebuild`.
+
+        The persistent solver of the last ``solve(..., persistent=True)``
+        compares the rebuilt model with the one it solved and changes
+        coefficients, bounds, right-hand sides and costs in place, keeping
+        its warm start. A structural change (other variables or
+        constraints) makes it rebuild its model, unless `require_in_place`
+        is True, which raises an error instead.
+
+        Returns
+        -------
+        Results
+        """
+        from oemof.solph._linopy._solve import resolve
+
+        return resolve(self, require_in_place=require_in_place)
+
+    def update(self, flows=None, nodes=None):
+        """Change parameters of the energy system and rebuild the model.
+
+        Parameters
+        ----------
+        flows : dict
+            ``{(source, target): {attribute: value}}``, e.g.
+            ``{(grid, el): {"variable_costs": prices}}``. Attributes of the
+            flow's Investment or NonConvex options are addressed with a dot:
+            ``"investment.ep_costs"``.
+        nodes : dict
+            ``{node: {attribute: value}}``, e.g.
+            ``{heat_pump: {"conversion_factors": {heat: cop}}}``.
+
+        Changing the energy system directly and calling :meth:`rebuild`
+        does the same. Follow with :meth:`resolve` (or :meth:`solve`).
+        """
+        for key, changes in (flows or {}).items():
+            _set_attributes(self.flows[key], changes)
+        for node, changes in (nodes or {}).items():
+            _set_attributes(node, changes)
+        self.rebuild()
+        return self
+
+    def rebuild(self):
+        """Build the model again from the (changed) energy system.
+
+        Constraints added with :meth:`add_custom_constraints` are added
+        again; constraints added directly to :attr:`linopy` are not.
+        """
+        self._reset()
+        self._construct()
+        for callback in self._build_callbacks:
+            callback(self)
+        return self
+
+    def add_custom_constraints(self, callback):
+        """Add constraints with ``callback(model)`` now and after every
+        :meth:`rebuild`, e.g.::
+
+            model.add_custom_constraints(
+                lambda m: m.linopy.add_constraints(
+                    m.flow_var(a, b).sum() <= 60, name="limit"
+                )
+            )
+        """
+        callback(self)
+        self._build_callbacks.append(callback)
+        return self
 
     def relax_problem(self):
         """Relax integer and binary variables to continuous ones, as
@@ -730,6 +817,21 @@ class LinopyModel:
                 )
             frames.append(frame)
         return pd.concat(frames, axis=1)
+
+
+def _set_attributes(obj, changes):
+    for name, value in changes.items():
+        *path, attribute = name.split(".")
+        target = obj
+        for part in path:
+            target = getattr(target, part)
+        current = getattr(target, attribute, None)
+        if isinstance(value, dict) and hasattr(current, "keys"):
+            # e.g. conversion_factors: change the given keys, keep the rest
+            merged = dict(current)
+            merged.update(value)
+            value = merged
+        setattr(target, attribute, value)
 
 
 class _BlockView:

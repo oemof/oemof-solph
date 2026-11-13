@@ -12,6 +12,7 @@ from dataclasses import dataclass
 
 import numpy as np
 import pandas as pd
+from linopy.solvers import Solver
 
 from oemof.solph._models import SolverResults
 
@@ -41,6 +42,34 @@ _QUIET_OPTIONS = {
 }
 
 
+# solve_kwargs of the Pyomo backend: their linopy keyword or solver option
+_SOLVE_KWARGS = {
+    "keepfiles": ("linopy", "keep_files"),
+    "timelimit": ("option", {"highs": "time_limit", "gurobi": "TimeLimit"}),
+    "symbolic_solver_labels": ("ignore", None),
+}
+
+
+def _translate(solver, solve_kwargs, options):
+    linopy_kwargs = {}
+    for key, value in solve_kwargs.items():
+        kind, target = _SOLVE_KWARGS.get(key, ("unknown", None))
+        if kind == "linopy":
+            linopy_kwargs[target] = value
+        elif kind == "option" and solver in target:
+            options.setdefault(target[solver], value)
+        elif kind == "ignore":
+            continue
+        else:
+            warnings.warn(
+                f"solve_kwargs '{key}' has no equivalent for '{solver}' in "
+                "the linopy backend and is passed to linopy unchanged.",
+                UserWarning,
+            )
+            linopy_kwargs[key] = value
+    return linopy_kwargs
+
+
 def solve(
     model,
     solver="cbc",
@@ -49,27 +78,70 @@ def solve(
     duals=False,
     solve_kwargs=None,
     cmdline_options=None,
+    persistent=False,
 ):
     """Solve `model` with linopy; see :meth:`LinopyModel.solve`."""
     solve_kwargs = dict(solve_kwargs or {})
     options = dict(cmdline_options or {})
     tee = bool(solve_kwargs.pop("tee", False))
-    for unknown in list(solve_kwargs):
-        warnings.warn(
-            f"solve_kwargs '{unknown}' is passed to linopy's solve() "
-            "unchanged.",
-            UserWarning,
-        )
+    linopy_kwargs = _translate(solver, solve_kwargs, options)
     if not tee:
         for key, value in _QUIET_OPTIONS.get(solver, {}).items():
             options.setdefault(key, value)
     if duals:
         model.dual = True
         model.rc = True
+    model._solve_settings = {
+        "solver": solver,
+        "allow_nonoptimal": allow_nonoptimal,
+    }
 
-    io_api = solver_io
-    if io_api is None or io_api == "python":
-        io_api = "direct" if solver in DIRECT_SOLVERS else "lp"
+    start = time.perf_counter()
+    if persistent:
+        solver_object = Solver.from_name(
+            solver,
+            model.linopy,
+            io_api="direct",
+            options=options,
+            track_updates=True,
+        )
+        solver_object.solve(model.linopy, assign=True, **linopy_kwargs)
+        status, condition = (
+            model.linopy.status,
+            model.linopy.termination_condition,
+        )
+        model._persistent = solver_object
+    else:
+        io_api = solver_io
+        if io_api is None or io_api == "python":
+            io_api = "direct" if solver in DIRECT_SOLVERS else "lp"
+        _add_dummy_constraint_for_files(model, io_api)
+        status, condition = model.linopy.solve(
+            solver_name=solver, io_api=io_api, **linopy_kwargs, **options
+        )
+        model._persistent = None
+    return _finish(model, status, condition, time.perf_counter() - start)
+
+
+def resolve(model, require_in_place=False):
+    """Solve again with the persistent solver of the last solve; the
+    solver applies the changes since then in place where it can."""
+    if getattr(model, "_persistent", None) is None:
+        msg = "resolve() needs a previous solve(..., persistent=True)."
+        raise RuntimeError(msg)
+    start = time.perf_counter()
+    model._persistent.solve(
+        model.linopy, assign=True, disallow_rebuild=require_in_place
+    )
+    return _finish(
+        model,
+        model.linopy.status,
+        model.linopy.termination_condition,
+        time.perf_counter() - start,
+    )
+
+
+def _add_dummy_constraint_for_files(model, io_api):
     if io_api != "direct" and model.linopy.ncons == 0:
         # an LP file without constraints is rejected by e.g. CBC; Pyomo
         # writes the same dummy constraint (ONE_VAR_CONSTANT = 1)
@@ -79,13 +151,14 @@ def solve(
             )
             model.linopy.add_constraints(one == 1, name="ONE_VAR_CONSTANT")
 
-    start = time.perf_counter()
-    status, condition = model.linopy.solve(
-        solver_name=solver, io_api=io_api, **solve_kwargs, **options
-    )
-    wallclock = time.perf_counter() - start
 
-    optimal = status == "ok" and str(condition) == "optimal"
+def _finish(model, status, condition, wallclock):
+    """SolverResults, deprecated attributes and the Results object."""
+    settings = model._solve_settings
+    solver = settings["solver"]
+    status = str(getattr(status, "value", status))
+    condition = str(getattr(condition, "value", condition))
+    optimal = status == "ok" and condition == "optimal"
     objective = (
         model.linopy.objective.value + model._objective_constant
         if optimal
@@ -93,8 +166,8 @@ def solve(
     )
     is_mip = bool(len(model.linopy.integers) or len(model.linopy.binaries))
     model.solver_return = LinopySolverReturn(
-        status=str(status),
-        termination_condition=str(condition),
+        status=status,
+        termination_condition=condition,
         best_feasible_objective=objective,
         # an optimal LP has no gap; linopy reports no bound for MIPs
         best_objective_bound=None if is_mip else objective,
@@ -104,8 +177,8 @@ def solve(
         optimal=optimal,
         solver=solver,
         objective=objective,
-        termination_condition=str(condition),
-        status=str(status),
+        termination_condition=condition,
+        status=status,
         wallclock_time=wallclock,
         best_feasible_objective=objective,
         best_objective_bound=None,
@@ -117,13 +190,12 @@ def solve(
     model._solver_results = {
         "Solver": [
             {
-                "Status": str(status),
-                "Termination condition": str(condition),
+                "Status": status,
+                "Termination condition": condition,
                 "Time": wallclock,
             }
         ]
     }
-
     # --- BEGIN: To be removed together with Model's version (v0.7) ---
     _set_deprecated_energy_system_results(model)
     # --- END ---
@@ -137,7 +209,7 @@ def solve(
             f"       - status: {status}\n"
             f"       - termination condition: {condition}"
         )
-        if allow_nonoptimal:
+        if settings["allow_nonoptimal"]:
             warnings.warn(msg, UserWarning)
             return model.solver_return
         raise RuntimeError(msg)
