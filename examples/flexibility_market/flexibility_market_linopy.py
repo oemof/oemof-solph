@@ -125,6 +125,8 @@ if __name__ == "__main__":
     results = model.solve()
 
     results["flow"].plot(drawstyle="steps-post")
-    results["storage_content"].plot.area()
+    # solvers return contents like -1e-16 for an empty storage, which an
+    # area plot refuses
+    results["storage_content"].clip(lower=0).plot.area()
 
     plt.show()
