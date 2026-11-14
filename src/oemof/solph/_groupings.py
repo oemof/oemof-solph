@@ -22,8 +22,13 @@ SPDX-FileCopyrightText: Johannes Kochems
 SPDX-License-Identifier: MIT
 """
 
-from oemof.network import groupings as groupings
+from collections.abc import Callable
+from pyomo.environ import ScalarBlock
 
+from oemof.network import groupings as groupings
+from oemof.network import Node
+
+from oemof.solph.flows._flow import Flow
 from oemof.solph.flows._invest_non_convex_flow_block import (
     InvestNonConvexFlowBlock,
 )
@@ -32,7 +37,9 @@ from oemof.solph.flows._non_convex_flow_block import NonConvexFlowBlock
 from oemof.solph.flows._simple_flow_block import SimpleFlowBlock
 
 
-def constraint_grouping(node, fallback=lambda *xs, **ks: None):
+def constraint_grouping(
+    node: Node, fallback: Callable | None = lambda *xs, **ks: None
+) -> type[ScalarBlock] | None:
     """Grouping function for constraints.
 
     This function can be passed in a list to :attr:`groupings` of
@@ -65,7 +72,7 @@ def constraint_grouping(node, fallback=lambda *xs, **ks: None):
 standard_flow_grouping = groupings.FlowsWithNodes(constant_key=SimpleFlowBlock)
 
 
-def _investment_grouping(stf):
+def _investment_grouping(stf: tuple[Node, Node, Flow]):
     if hasattr(stf[2], "investment"):
         if stf[2].investment is not None and stf[2].nonconvex is None:
             return True
@@ -79,7 +86,7 @@ investment_flow_grouping = groupings.FlowsWithNodes(
 )
 
 
-def _nonconvex_grouping(stf):
+def _nonconvex_grouping(stf: tuple[Node, Node, Flow]):
     if hasattr(stf[2], "nonconvex"):
         if stf[2].nonconvex is not None and stf[2].investment is None:
             return True
@@ -91,7 +98,7 @@ nonconvex_flow_grouping = groupings.FlowsWithNodes(
 )
 
 
-def _invest_non_convex_grouping(stf):
+def _invest_non_convex_grouping(stf: tuple[Node, Node, Flow]):
     if hasattr(stf[2], "nonconvex"):
         if stf[2].investment is not None and stf[2].nonconvex is not None:
             return True

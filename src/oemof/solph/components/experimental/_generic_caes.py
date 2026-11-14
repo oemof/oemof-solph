@@ -99,14 +99,14 @@ class GenericCAES(Node):
 
     def __init__(
         self,
-        label,
+        label: str | tuple | None,
         *,
-        electrical_input,
-        fuel_input,
-        electrical_output,
-        params,
-        parent_node=None,
-        custom_properties=None,
+        electrical_input: dict,
+        fuel_input: dict,
+        electrical_output: dict,
+        params: dict,
+        parent_node: Node | None = None,
+        custom_properties: dict | None = None,
     ):
         super().__init__(
             label=label,

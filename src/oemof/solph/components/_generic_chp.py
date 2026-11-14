@@ -124,14 +124,14 @@ class GenericCHP(Node):
 
     def __init__(
         self,
-        fuel_input,
-        electrical_output,
-        heat_output,
-        beta,
-        back_pressure,
-        parent_node=None,
-        label=None,
-        custom_properties=None,
+        fuel_input: dict,
+        electrical_output: dict,
+        heat_output: dict,
+        beta: list[float],
+        back_pressure: bool,
+        parent_node: Node | None = None,
+        label: str | tuple | None = None,
+        custom_properties: dict | None = None,
     ):
         if custom_properties is None:
             custom_properties = {}

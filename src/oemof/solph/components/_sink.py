@@ -43,7 +43,12 @@ class Sink(Node):
     """
 
     def __init__(
-        self, label=None, *, inputs, parent_node=None, custom_properties=None
+        self,
+        label: str | tuple | None = None,
+        *,
+        inputs: dict,
+        parent_node: Node | None = None,
+        custom_properties: dict | None = None,
     ):
         if inputs is None:
             inputs = {}

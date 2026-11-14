@@ -14,11 +14,12 @@ SPDX-License-Identifier: MIT
 import logging
 
 import pandas as pd
+from collections.abc import Iterable
 
 from oemof import solph
 
 
-def _check_oemof_installation(solvers):
+def _check_oemof_installation(solvers: Iterable[str]) -> dict:
     logging.disable(logging.CRITICAL)
 
     date_time_index = pd.date_range("1/1/2012", periods=6, freq="h")
@@ -66,7 +67,7 @@ def _check_oemof_installation(solvers):
     return solver_status
 
 
-def check_oemof_installation():
+def check_oemof_installation() -> None:
     solvers_to_test = ["cbc", "glpk", "gurobi", "cplex", "scip", "highs"]
 
     solver_status = _check_oemof_installation(solvers_to_test)
