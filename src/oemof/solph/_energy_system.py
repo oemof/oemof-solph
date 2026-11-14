@@ -16,7 +16,8 @@ SPDX-License-Identifier: MIT
 """
 
 import collections
-from collections.abc import Iterable
+from collections.abc import Iterable, Callable
+from typing import Any
 import itertools
 import warnings
 
@@ -78,10 +79,10 @@ class EnergySystem(es.EnergySystem):
     def __init__(
         self,
         timeindex: Iterable | None = None,
-        timeincrement: Iterable | None = None,
+        timeincrement: Iterable[float] | None = None,
         infer_last_interval: bool = False,
         investment_times: list | None = None,
-        tsa_parameters: dict | list[dict] | None = None,
+        tsa_parameters: dict[str, Any] | list[dict[str, Any]] | None = None,
         groupings: list | None = None,
     ):
         # Doing imports at runtime is generally frowned upon, but should work
@@ -277,7 +278,7 @@ class EnergySystem(es.EnergySystem):
         self._extract_periods_matrix()
         self._extract_end_year_of_optimization()
 
-    def _extract_periods_years(self):
+    def _extract_periods_years(self) -> None:
         """Map years in optimization to respective period based on time indices
 
         Attribute `capacity_period_years` of type list is set. It contains
@@ -292,7 +293,7 @@ class EnergySystem(es.EnergySystem):
 
         self.capacity_period_years = periods_years
 
-    def _extract_periods_matrix(self):
+    def _extract_periods_matrix(self) -> None:
         """Determines a matrix describing the temporal distance to each period.
 
         Attribute `periods_matrix` of type list np.array is set.
@@ -308,7 +309,7 @@ class EnergySystem(es.EnergySystem):
             capacity_periods_matrix.append(row)
         self.capacity_periods_matrix = np.array(capacity_periods_matrix)
 
-    def _extract_end_year_of_optimization(self):
+    def _extract_end_year_of_optimization(self) -> None:
         """Extract the end of the optimization in years
 
         Attribute `end_year_of_optimization` of int is set.
@@ -350,7 +351,7 @@ class EnergySystem(es.EnergySystem):
 
         raise ValueError(f"Time step {ts} not in capacity range.")
 
-    def get_period_duration(self, period):
+    def get_period_duration(self, period: int) -> int:
         """Get duration of a period in full years
 
         Parameters
@@ -370,7 +371,11 @@ class EnergySystem(es.EnergySystem):
         )
 
     @staticmethod
-    def _init_timeincrement(timeincrement, timeindex, tsa_parameters):
+    def _init_timeincrement(
+        timeincrement: Iterable[float] | None,
+        timeindex: Iterable | None,
+        tsa_parameters: dict[str, Any] | list[dict[str, Any]] | None,
+    ) -> Iterable | None:
         """Check and initialize timeincrement"""
 
         # Timeincrement in TSAM mode
