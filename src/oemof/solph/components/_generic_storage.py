@@ -1405,11 +1405,12 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         # The storage content is a non-negative variable, therefore it makes no
         # sense to create an additional constraint if the lower bound is zero
         # for all time steps.
+        level_points = m.TIMESTEPS if m.TSAM_MODE else m.TIMEPOINTS
         self.MIN_INVESTSTORAGES = Set(
             initialize=[
                 n
                 for n in group
-                if sum([n.min_storage_level[t] for t in m.TIMESTEPS]) > 0
+                if sum([n.min_storage_level[t] for t in level_points]) > 0
             ]
         )
 
