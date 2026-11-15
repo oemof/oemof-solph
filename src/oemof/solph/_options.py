@@ -17,6 +17,7 @@ SPDX-License-Identifier: MIT
 """
 
 from collections.abc import Iterable
+from typing import Any
 from warnings import warn
 
 from oemof.tools import debugging
@@ -32,30 +33,30 @@ class Investment:
     Parameters
     ----------
     maximum : float, :math:`P_{invest,max}(p)` or :math:`E_{invest,max}(p)`
-        Maximum of the additional invested capacity;
+        Maximum of the additional invested capacity (default: `+inf`);
         defined per period p for a multi-period model.
     minimum : float, :math:`P_{invest,min}(p)` or :math:`E_{invest,min}(p)`
-        Minimum of the additional invested capacity. If `nonconvex` is `True`,
-        `minimum` defines the threshold for the invested capacity;
-        defined per period p for a multi-period model.
+        Minimum of the additional invested capacity (default: 0). If
+        `nonconvex` is `True`, `minimum` defines the threshold for the
+        invested capacity; defined per period p for a multi-period model.
     ep_costs : float, :math:`c_{invest,var}`
         Equivalent periodical costs or investment expenses for the investment
         per flow or storage capacity, i.e. annuities for investments already
-        calculated.
+        calculated (default: 0).
     existing : float, :math:`P_{exist}` or :math:`E_{exist}`
-        Existing / installed capacity. The invested capacity is added on top
-        of this value. Hence, existing capacities come at no additional costs.
-        Not applicable if `nonconvex` is set to `True`.
+        Existing / installed capacity (default: 0). The invested capacity is
+        added on top of this value. Hence, existing capacities come at no
+        additional costs. Not applicable if `nonconvex` is set to `True`.
     nonconvex : bool
         If `True`, a binary variable for the status of the investment is
-        created. This enables additional fix investment costs (*offset*)
-        independent of the invested flow capacity. Therefore, use the `offset`
-        parameter.
+        created (default: `False`). This enables additional fix investment
+        costs (*offset*) independent of the invested flow capacity. Therefore,
+        use the `offset` parameter.
     offset : float, :math:`c_{invest,fix}`
-        Additional fixed investment costs. Only applicable if `nonconvex` is
-        set to `True`.
-    lifetime : int, :math:`l` (experimental)
-        Lifetime of newly invested capacity (given capacity periods)
+        Additional fixed investment costs (default: 0). Only applicable if
+        `nonconvex` is set to `True`.
+    lifetime : int, :math:`l` (experimental, optional)
+        Lifetime of newly invested capacity (given capacity periods).
 
 
     For the variables, constraints and parts of the objective function, which
@@ -77,15 +78,15 @@ class Investment:
 
     def __init__(
         self,
-        maximum: float = float("+inf"),
-        minimum: float = 0,
-        ep_costs: float = 0,
-        existing: float = 0,
+        maximum: float | Iterable[float] = float("+inf"),
+        minimum: float | Iterable[float] = 0,
+        ep_costs: float | Iterable[float] = 0,
+        existing: float | Iterable[float] = 0,
         nonconvex: bool = False,
-        offset: float = 0,
-        lifetime: float | None = None,
+        offset: float | Iterable[float] = 0,
+        lifetime: int | Iterable[int] | None = None,
         custom_attributes=None,  # To be removed for versions >= v0.7
-        custom_properties: dict | None = None,
+        custom_properties: dict[str, Any] | None = None,
     ):
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
@@ -202,11 +203,12 @@ class NonConvex:
         Costs associated with not operating the flow.
     minimum_uptime : numeric or list of numeric (1 or positive integer)
         Minimum number of time steps that a flow must be greater then its
-        minimum flow after startup. Be aware that minimum up and downtimes
-        can contradict each other and may lead to infeasible problems.
+        minimum flow after startup (default: 0). Be aware that minimum up and
+        downtimes can contradict each other and may lead to infeasible
+        problems.
     minimum_downtime : numeric or list of numeric (1 or positive integer)
         Minimum number of time steps a flow is forced to zero after
-        shutting down. Be aware that minimum up and downtimes can
+        shutting down (default: 0). Be aware that minimum up and downtimes can
         contradict each other and may to infeasible problems.
     maximum_startups : numeric (0 or positive integer)
         Maximum number of start-ups in the optimization timeframe.
@@ -214,13 +216,13 @@ class NonConvex:
         Maximum number of shutdowns in the optimization timeframe.
     initial_status : numeric (0 or 1)
         Integer value indicating the status of the flow in the first time step
-        (0 = off, 1 = on). For minimum up and downtimes, the initial status
-        is set for the respective values in the beginning e.g. if a
-        minimum uptime of four timesteps is defined and the initial status is
-        set to one, the initial status is fixed for the four first timesteps
-        of the optimization period. Otherwise if the initial status is set to
-        zero and the first timesteps are fixed for the number of minimum
-        downtime steps.
+        (0 = off, 1 = on; default: 0). For minimum up and downtimes, the
+        initial status is set for the respective values in the beginning e.g.
+        if a minimum uptime of four timesteps is defined and the initial
+        status is set to one, the initial status is fixed for the four first
+        timesteps of the optimization period. Otherwise if the initial status
+        is set to zero and the first timesteps are fixed for the number of
+        minimum downtime steps.
     negative_gradient_limit : numeric (iterable, scalar or None)
         the normed *upper bound* on the decrease
         (`flow[t-1] > flow[t]`) of two consecutive flow values while the
@@ -256,7 +258,7 @@ class NonConvex:
         negative_gradient_limit: float | Iterable[float] | None = None,
         positive_gradient_limit: float | Iterable[float] | None = None,
         custom_attributes=None,  # To be removed for versions >= v0.7
-        custom_properties: dict | None = None,
+        custom_properties: dict[str, Any] | None = None,
     ):
         # --- BEGIN: The following code can be removed for versions >= v0.7 ---
         if custom_attributes is not None:
