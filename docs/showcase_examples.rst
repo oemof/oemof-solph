@@ -19,8 +19,9 @@ accessible freely, so other users can explore and learn from your project.
 
 .. card::
 
-    **OpenPlan Tool**
-    ^^^
+    .. card-header::
+
+        OpenPlan Tool
 
     .. image:: /_files/open-plan-tool-screenshot.png
       :align: center
@@ -35,8 +36,9 @@ accessible freely, so other users can explore and learn from your project.
 
 .. card::
 
-    **Dashboard for optimization of heating supply systems**
-    ^^^
+    .. card-header::
+
+        Dashboard for optimization of heating supply systems
 
     .. image:: /_files/showcase_owp.png
       :align: center
@@ -55,22 +57,24 @@ accessible freely, so other users can explore and learn from your project.
     project at the Flensburg University of Applied Sciences with the aim of
     lowering the entry barrier to energy system analysis for non-experts.
 
-    +++
-    Title: Dashboard for optimization of heating supply systems
+    .. card-footer::
+    
+        Title: Dashboard for optimization of heating supply systems
 
-    Authors: Malte Fritz, Jonas Freißmann
+        Authors: Malte Fritz, Jonas Freißmann
 
-    URL: https://owp-inno-nord.streamlit.app
+        URL: https://owp-inno-nord.streamlit.app
 
-    GitHub: https://github.com/maltefritz/owp_milp_optimization
+        GitHub: https://github.com/maltefritz/owp_milp_optimization
 
-    Language: German
+        Language: German
 
 
 .. card::
 
-    **Spreadsheet Energy System Model Generator**
-    ^^^
+    .. card-header::
+
+        Spreadsheet Energy System Model Generator
 
     .. image:: /_files/sesmg-screenshot.png
       :align: center
