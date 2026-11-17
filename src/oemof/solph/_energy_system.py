@@ -16,10 +16,10 @@ SPDX-License-Identifier: MIT
 """
 
 import collections
-from collections.abc import Iterable, Callable
-from typing import Any
 import itertools
 import warnings
+from collections.abc import Iterable
+from typing import Any
 
 import numpy as np
 import pandas as pd
