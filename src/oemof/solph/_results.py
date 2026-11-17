@@ -10,6 +10,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 import warnings
 from collections.abc import Hashable
 from itertools import groupby
@@ -41,7 +43,9 @@ class Results:
     >>> results.get("flow")  # with the equivalent `results["flow"]`
     """
 
-    def __init__(self, model: ConcreteModel, solver_info):
+    def __init__(
+        self, model: oemof.solph.Model, solver_info: pd.Series
+    ) -> None:
         self._meta_results = model._solver_results
         self._variables = {}
         self._model = model
@@ -88,11 +92,14 @@ class Results:
         if "invest" in self._variables.keys():
             self._economy["investment_costs"] = None
 
-    def keys(self):
+    def keys(self) -> set[str]:
         """Method returning keys of the result object
 
-        Returns:
-            set: keys that can be used to access results
+        Returns
+        -------
+        keys : set
+            A set containing the keys that can be used
+            to access the results
         """
         keys = (
             self._meta_results.keys()
@@ -115,11 +122,12 @@ class Results:
         #   - Support `Var`s as arguments?
         #   - Add column (level) and index names like:
         #       source, target, timestep etc.
-        """Return a `DataFrame` view of the model's `variable`.
+        """
+        Return a `DataFrame` view of the model's `variable`.
 
-            The function signature mimics the function `get` of a `dict`,
-            similarly, you can also replace e.g. `results.get("flow")`
-            with the equivalent `results["flow"]`.
+        The function signature mimics the function `get` of a `dict`.
+        Similarly, you can also replace e.g. `results.get("flow")`
+        with the equivalent `results["flow"]`.
 
         Parameters
         ----------
@@ -135,7 +143,7 @@ class Results:
 
         if key == "variable_costs":
             return self._calc_variable_costs()
-        # This can be removed in v0.7 - start
+        # --- BEGIN: To be removed for versions >= v0.7 ---
         elif key in ("Problem", "Solution", "Solver"):
             warnings.warn(
                 f"The key '{key}' is deprecated,"
@@ -144,7 +152,7 @@ class Results:
                 FutureWarning,
             )
             return self._meta_results.get(key)
-        # This can be removed in v0.7 - end
+        # --- END ---
         elif key == "investment_costs":
             return self._calc_capex()
         elif key in self._variables:
@@ -216,7 +224,7 @@ class Results:
             category=FutureWarning,
         )
 
-    def _calc_capex(self):
+    def _calc_capex(self) -> pd.DataFrame:
         self._economy_calculation_waring()
         # extract the the optimized investment sizes
         try:
@@ -282,7 +290,7 @@ class Results:
 
         return df_capex
 
-    def _calc_variable_costs(self):
+    def _calc_variable_costs(self) -> pd.DataFrame:
         self._economy_calculation_waring()
         df_opex = pd.DataFrame()
 
