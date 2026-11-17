@@ -11,15 +11,21 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 import warnings
 from collections import UserDict
-from collections import abc
+from collections.abc import Hashable
+from collections.abc import Iterable
 from numbers import Number
 
 import numpy as np
 
 
-def sequence(iterable_or_scalar, length=None):
+def sequence(
+    iterable_or_scalar: float | Iterable[float] | None,
+    length: int | None = None,
+) -> np.ndarray | _FakeSequence | None:
     """Casts iterable_or_scalar to an object that allows element access.
 
     Technically, it checks if an object is iterable or scalar and returns a
@@ -29,7 +35,17 @@ def sequence(iterable_or_scalar, length=None):
 
     Parameters
     ----------
-    iterable_or_scalar : iterable or None or int or float
+    iterable_or_scalar : numeric (iterable or scalar)
+        The value to be converted into a sequence.
+    length : int (optional)
+        The length the sequence should have.
+
+    Returns
+    -------
+    sequence: np.ndarray, _FakeSequence or None
+        The sequence, which behaves like a `np.ndarray` but can be of type
+        `_FakeSequence` (for internal reasons) or `None` if `None` is passed
+        to this function for `iterable_or_scalar`.
 
     Examples
     --------
@@ -69,11 +85,11 @@ def sequence(iterable_or_scalar, length=None):
             "on.\nPlease notice that a table with one column is still a table "
             "with 2 dimensions and not a Series."
         )
-    if isinstance(iterable_or_scalar, abc.Iterable):
+    if isinstance(iterable_or_scalar, Iterable):
         if length and length is not len(iterable_or_scalar):
             raise ValueError(
                 f"Length mismatch: Cannot create sequence of length {length}"
-                + " from input {iterable_or_scalar}."
+                + f" from input {iterable_or_scalar}."
             )
         else:
             return np.array(iterable_or_scalar)
@@ -81,12 +97,21 @@ def sequence(iterable_or_scalar, length=None):
         return _FakeSequence(value=iterable_or_scalar)
 
 
-def valid_sequence(sequence, length: int) -> bool:
+def valid_sequence(
+    sequence: np.ndarray | _FakeSequence | None, length: int
+) -> bool:
     """
-    Checks if an object has the given length
+    Checks if an object has the given length.
 
     This is needed as we have `_FakeSequence` which is assumed to have every
     possible length, thus `__len__` is not defined for it.
+
+    Parameters
+    ----------
+    sequence: np.ndarray, _FakeSequence or None
+        The sequence to be checked.
+    length: int
+        The length to check the `sequence` for.
     """
     if sequence is None:
         return False
@@ -106,60 +131,7 @@ def valid_sequence(sequence, length: int) -> bool:
             return True
         # --- END ---
         else:
-            raise ValueError(f"Lentgh of {sequence} should be {length}.")
-
-
-class SequenceDict(UserDict):
-    """Convert each value to a `sequence` upon insertion.
-
-    A drop-in replacement class for `dict`s, that calls `sequence` on
-    values before they are inserted and stores the result.
-
-    """
-
-    def __setitem__(self, key, value):
-        self.data[key] = sequence(value)
-
-
-class Apply:
-    """Apply `converter` to values assigned to this attribute.
-
-    Whenever a `value` is assigned to an attribute that uses this
-    descriptor, what's actually stored is the result of
-    `converter(value)`, e.g.:
-
-    >>> class Inverter:
-    ...     inverted = Apply(lambda x: -x)
-    ...
-    >>> one = Inverter()
-    >>> one.inverted = 1
-    >>> one.inverted
-    -1
-
-    """
-
-    unset = object()
-
-    def __init__(self, converter, default=unset):
-        self.converter = converter
-        self.default = default
-
-        self.data = {}
-        self.name = None
-
-    def __get__(self, obj, objtype=None):
-        if (id(obj) not in self.data) and (self.default is self.unset):
-            raise AttributeError(
-                f"attribute '{self.name}' of '{objtype.__name__}'"
-                " object accessed before being assigned a value"
-            )
-        return self.data.get(id(obj), self.default)
-
-    def __set__(self, obj, value):
-        self.data[id(obj)] = self.converter(value)
-
-    def __set_name__(self, owner, name):
-        self.name = name
+            raise ValueError(f"Length of {sequence} should be {length}.")
 
 
 class _FakeSequence:
@@ -168,7 +140,6 @@ class _FakeSequence:
     Parameters
     ----------
     value : scalar
-    length : integer
 
 
     Examples
@@ -176,12 +147,12 @@ class _FakeSequence:
     >>> s = _FakeSequence(value=42)
     >>> s
     [42, 42, ..., 42]
-    >>> # undefined lenght, access always works
+    >>> # undefined length, access always works
     >>> s[1337]
     42
     """
 
-    def __init__(self, value: Number):
+    def __init__(self, value: Number) -> None:
         self._value = value
 
     def __getitem__(self, i):
@@ -277,3 +248,56 @@ class _FakeSequence:
     @property
     def value(self):
         return self._value
+
+
+class SequenceDict(UserDict[Hashable, np.ndarray | _FakeSequence | None]):
+    """Convert each value to a `sequence` upon insertion.
+
+    A drop-in replacement class for `dict`s, that calls `sequence` on
+    values before they are inserted and stores the result.
+
+    """
+
+    def __setitem__(self, key, value):
+        self.data[key] = sequence(value)
+
+
+class Apply:
+    """Apply `converter` to values assigned to this attribute.
+
+    Whenever a `value` is assigned to an attribute that uses this
+    descriptor, what's actually stored is the result of
+    `converter(value)`, e.g.:
+
+    >>> class Inverter:
+    ...     inverted = Apply(lambda x: -x)
+    ...
+    >>> one = Inverter()
+    >>> one.inverted = 1
+    >>> one.inverted
+    -1
+
+    """
+
+    unset = object()
+
+    def __init__(self, converter, default=unset):
+        self.converter = converter
+        self.default = default
+
+        self.data = {}
+        self.name = None
+
+    def __get__(self, obj, objtype=None):
+        if (id(obj) not in self.data) and (self.default is self.unset):
+            raise AttributeError(
+                f"attribute '{self.name}' of '{objtype.__name__}'"
+                " object accessed before being assigned a value"
+            )
+        return self.data.get(id(obj), self.default)
+
+    def __set__(self, obj, value):
+        self.data[id(obj)] = self.converter(value)
+
+    def __set_name__(self, owner, name):
+        self.name = name
