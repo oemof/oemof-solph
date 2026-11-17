@@ -104,7 +104,7 @@ dev = [
     "pyyaml",
 ]
 solver = [
-    "cbcbox<=2.929",
+    "cbcbox<=2.937",
     "highspy",
 ]
 
