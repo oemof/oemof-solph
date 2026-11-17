@@ -24,6 +24,8 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
+from oemof.network import Node
+
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 from oemof.solph._plumbing import sequence
@@ -98,14 +100,14 @@ class VariableSplitConverter(Converter):
 
     def __init__(
         self,
-        label=None,
-        inputs=None,
-        outputs=None,
-        parent_node=None,
-        conversion_factors=None,
-        conversion_factors_secondary_state=None,
-        custom_properties=None,
-        allow_equal_states=False,
+        label: str | tuple | None = None,
+        inputs: dict | None = None,
+        outputs: dict | None = None,
+        parent_node: Node | None = None,
+        conversion_factors: dict | None = None,
+        conversion_factors_secondary_state: dict | None = None,
+        custom_properties: dict | None = None,
+        allow_equal_states: bool = False,
     ):
         super().__init__(
             label=label,

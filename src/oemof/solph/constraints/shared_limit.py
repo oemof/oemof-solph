@@ -10,15 +10,19 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.network import Node
+
+from oemof.solph import Model
+
 
 def shared_limit(
-    model,
-    quantity,
-    limit_name,
-    components,
-    weights,
-    lower_limit=0,
-    upper_limit=None,
+    model: Model | po.ConcreteModel,
+    quantity: po.Var,
+    limit_name: str,
+    components: list[Node],
+    weights: list[float],
+    lower_limit: float = 0,
+    upper_limit: float | None = None,
 ):
     r"""
     Adds a constraint to the given model that restricts
@@ -32,21 +36,21 @@ def shared_limit(
 
     Parameters
     ----------
-    model : oemof.solph.Model
+    model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which the constraint is added.
-    limit_name : string
+    limit_name : str
         Name of the constraint to create
-    quantity : pyomo.core.base.var.IndexedVar
+    quantity : pyomo.Var
         Shared Pyomo variable for all components of a type.
         (:math:`v_i(t)`)
-    components : list of components
-        list of components of the same type
+    components : list of oemof.network.Nodes
+        List of Nodes from `oemof.solph.components` of the same type
     weights : list of numeric values
         has to have the same length as the list of components
         (:math:`w_i(t)`)
-    lower_limit : numeric
+    lower_limit : numeric, default=0
         the lower limit (:math:`l_\mathrm{low}`)
-    upper_limit : numeric
+    upper_limit : numeric (optional)
         the upper limit (:math:`l_\mathrm{up}`)
 
     Examples

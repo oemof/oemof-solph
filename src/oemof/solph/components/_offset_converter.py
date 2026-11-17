@@ -28,6 +28,7 @@ from pyomo.environ import Set
 
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
+from oemof.solph.components import Bus
 
 
 class OffsetConverter(Node):
@@ -139,13 +140,13 @@ class OffsetConverter(Node):
 
     def __init__(
         self,
-        inputs,
-        outputs,
-        parent_node=None,
-        label=None,
-        conversion_factors=None,
-        normed_offsets=None,
-        custom_properties=None,
+        inputs: dict | None,
+        outputs: dict | None,
+        parent_node: Node | None = None,
+        label: str | tuple | None = None,
+        conversion_factors: dict | None = None,
+        normed_offsets: dict | None = None,
+        custom_properties: dict | None = None,
     ):
         if custom_properties is None:
             custom_properties = {}
@@ -230,7 +231,7 @@ class OffsetConverter(Node):
     def constraint_group(self):
         return OffsetConverterBlock
 
-    def plot_partload(self, bus, tstep):
+    def plot_partload(self, bus: Bus, tstep: int):
         """Create a matplotlib figure of the flow to nonconvex flow relation.
 
         Parameters
@@ -417,7 +418,7 @@ class OffsetConverterBlock(ScalarBlock):
 
 
 def slope_offset_from_nonconvex_input(
-    max_load, min_load, eta_at_max, eta_at_min
+    max_load: float, min_load: float, eta_at_max: float, eta_at_min: float
 ):
     r"""Calculate the slope and the offset with max and min given for input
 
@@ -494,7 +495,7 @@ def slope_offset_from_nonconvex_input(
 
 
 def slope_offset_from_nonconvex_output(
-    max_load, min_load, eta_at_max, eta_at_min
+    max_load: float, min_load: float, eta_at_max: float, eta_at_min: float
 ):
     r"""Calculate the slope and the offset with max and min given for output.
 

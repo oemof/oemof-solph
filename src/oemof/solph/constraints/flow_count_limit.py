@@ -13,11 +13,18 @@ SPDX-License-Identifier: MIT
 """
 
 from pyomo import environ as po
+from collections.abc import Iterable
+from oemof.network import Node
+from oemof.solph import Model
 
 
 def limit_active_flow_count(
-    model, constraint_name, flows, lower_limit=0, upper_limit=None
-):
+    model: Model | po.ConcreteModel,
+    constraint_name: str,
+    flows: Iterable[tuple[Node, Node]],
+    lower_limit: int = 0,
+    upper_limit: int | None = None,
+) -> Model | po.ConcreteModel:
     r"""
     Set limits (lower and/or upper) for the number of concurrently
     active NonConvex flows. The flows are given as a list.
@@ -27,16 +34,19 @@ def limit_active_flow_count(
 
     Parameters
     ----------
-    model: oemof.solph.Model
+    model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which constraints are added
-    constraint_name: string
+    constraint_name : str
         name for the constraint
-    flows: set of flows
-        flows (have to be NonConvex, with or without investment) in the
-        format [(in, out)]
-    lower_limit: integer
+    flows : Iterable of flows
+        Iterable of flows (have to be NonConvex, with or without investment).
+        The iterable must contain tuples of Nodes. The Nodes within the tuples
+        are expected to represent `(source, target)`, like a key of
+        `model.flows`. The iterable must be re-iterable (like a `list` or
+        `dict`).
+    lower_limit : integer, default=0
         minimum number of active flows in the list
-    upper_limit: integer
+    upper_limit : integer (optional)
         maximum number of active flows in the list
 
     Returns
@@ -114,23 +124,26 @@ def limit_active_flow_count(
 
 
 def limit_active_flow_count_by_keyword(
-    model, keyword, lower_limit=0, upper_limit=None
-):
+    model: Model | po.ConcreteModel,
+    keyword: str,
+    lower_limit: int = 0,
+    upper_limit: int | None = None,
+) -> Model | po.ConcreteModel:
     r"""
     This wrapper for limit_active_flow_count allows to set limits
     to the count of concurrently active flows by using a keyword
-    instead of a list. The constraint will be named $(keyword)_count.
+    instead of a list. The constraint will be named like the keyword.
 
     Parameters
     ----------
-    model: oemof.solph.Model
+    model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which constraints are added
-    keyword: string
+    keyword : str
         keyword to consider (searches all NonConvexFlows and
         InvestNonConvexFlows)
-    lower_limit: integer
+    lower_limit : integer, default=0
         minimum number of active flows having the keyword
-    upper_limit: integer
+    upper_limit : integer (optional)
         maximum number of active flows having the keyword
 
     Returns
@@ -143,9 +156,7 @@ def limit_active_flow_count_by_keyword(
     """
     nonconvex_flows = list(
         model.NonConvexFlowBlock.FIXED_CAPACITY_NONCONVEX_FLOWS
-    ) + list(
-        model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS
-    )
+    ) + list(model.InvestNonConvexFlowBlock.INVEST_NON_CONVEX_FLOWS)
 
     flows = []
     for i, o in nonconvex_flows:

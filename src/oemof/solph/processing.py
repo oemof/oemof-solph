@@ -16,6 +16,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 import itertools
 import numbers
 import operator
@@ -23,11 +25,12 @@ import sys
 import warnings
 from collections import abc
 from itertools import groupby
-from typing import Dict
-from typing import Tuple
+from typing import TYPE_CHECKING
+from typing import Any
 
 import numpy as np
 import pandas as pd
+from oemof.network import Node
 from oemof.network.network import Entity
 from pyomo.core.base.piecewise import IndexedPiecewise
 from pyomo.core.base.var import Var
@@ -36,6 +39,11 @@ from oemof.solph.components._generic_storage import GenericStorage
 
 from ._plumbing import _FakeSequence
 from .helpers import flatten
+
+if TYPE_CHECKING:
+    # import only for type checkers, ImportError otherwise
+    from oemof.solph._energy_system import EnergySystem
+    from oemof.solph._models import Model
 
 PERIOD_INDEXES = (
     "invest",
@@ -47,7 +55,7 @@ PERIOD_INDEXES = (
 )
 
 
-def get_tuple(x):
+def get_tuple(x: tuple) -> tuple | None:
     """Get oemof tuple within iterable or create it
 
     Tuples from Pyomo are of type `(n, n, int)`, `(n, n)` and `(n, int)`.
@@ -64,7 +72,7 @@ def get_tuple(x):
         return x
 
 
-def get_timestep(x):
+def get_timestep(x: tuple) -> int:
     """Get the timestep from oemof tuples
 
     The timestep from tuples `(n, n, int)`, `(n, n)`, `(n, int)` and (n,)
@@ -77,7 +85,7 @@ def get_timestep(x):
         return x[-1]
 
 
-def remove_timestep(x):
+def remove_timestep(x: tuple) -> tuple:
     """Remove the timestep from oemof tuples
 
     The timestep is removed from tuples of type `(n, n, int)` and `(n, int)`.
@@ -88,7 +96,7 @@ def remove_timestep(x):
         return x[:-1]
 
 
-def create_dataframe(om):
+def create_dataframe(om: Model) -> pd.DataFrame:
     """Create a result DataFrame with all optimization data
 
     Results from Pyomo are written into one common pandas.DataFrame where
@@ -141,7 +149,9 @@ def create_dataframe(om):
     return df
 
 
-def divide_scalars_sequences(df_dict, k):
+def divide_scalars_sequences(
+    df_dict: dict[tuple, pd.DataFrame], k: tuple
+) -> dict[str, pd.Series | pd.DataFrame]:
     """Split results into scalars and sequences results
 
     Parameters
@@ -165,7 +175,9 @@ def divide_scalars_sequences(df_dict, k):
         raise IndexError(error_message)
 
 
-def set_result_index(df_dict, k, result_index):
+def set_result_index(
+    df_dict: dict[tuple, pd.DataFrame], k: tuple, result_index: pd.Index
+) -> None:
     """Define index for results
 
     Parameters
@@ -193,7 +205,7 @@ def set_result_index(df_dict, k, result_index):
             ).with_traceback(sys.exc_info()[2])
 
 
-def set_sequences_index(df, result_index):
+def set_sequences_index(df: pd.DataFrame, result_index: pd.Index) -> None:
     try:
         df.index = result_index
     except ValueError:
@@ -204,7 +216,9 @@ def set_sequences_index(df, result_index):
             raise ValueError("Results extraction failed!")
 
 
-def results(model, remove_last_time_point=False):
+def results(
+    model: Model, remove_last_time_point: bool = False
+) -> dict[tuple[Node, Node | None], dict[str, pd.DataFrame | pd.Series]]:
     """Create a nested result dictionary from the result DataFrame
 
     The already rearranged results from Pyomo from the result DataFrame are
@@ -556,7 +570,7 @@ def _disaggregate_tsa_result(df_dict, tsa_parameters):
 
 def _disaggregate_segmentation(
     df: pd.DataFrame,
-    segments: Dict[Tuple[int, int], int],
+    segments: dict[tuple[int, int], int],
     current_period: int,
 ) -> pd.DataFrame:
     """Disaggregate segmentation
@@ -569,7 +583,7 @@ def _disaggregate_segmentation(
     ----------
     df : pd.Dataframe
         holding values for each segment
-    segments : Dict[Tuple[int, int], int]
+    segments : dict[tuple[int, int], int]
         Segmentation dict from TSAM, holding segmentation length for each
         timestep in each typical period
     current_period: int
@@ -726,9 +740,9 @@ def _get_multiplexer_flows_and_keys(flow_dict):
         if "multiplexer_active" in data["variable_name"].values[0]:
             multiplexer.setdefault(oemof_tuple[0], {})
             multiplexer_keys.append(oemof_tuple)
-            multiplexer[oemof_tuple[0]][
-                (oemof_tuple[1], oemof_tuple[2])
-            ] = data
+            multiplexer[oemof_tuple[0]][(oemof_tuple[1], oemof_tuple[2])] = (
+                data
+            )
     return multiplexer, multiplexer_keys
 
 
@@ -742,7 +756,9 @@ def _disaggregate_tsa_timeindex(period_index, tsa_parameters):
     )
 
 
-def convert_keys_to_strings(result, keep_none_type=False):
+def convert_keys_to_strings(
+    result: dict, keep_none_type: bool = False
+) -> dict:
     """
     Convert the dictionary keys to strings.
 
@@ -755,7 +771,9 @@ def convert_keys_to_strings(result, keep_none_type=False):
             (
                 tuple([str(e) if e is not None else None for e in k])
                 if isinstance(k, tuple)
-                else str(k) if k is not None else None
+                else str(k)
+                if k is not None
+                else None
             ): v
             for k, v in result.items()
         }
@@ -767,7 +785,7 @@ def convert_keys_to_strings(result, keep_none_type=False):
     return converted
 
 
-def meta_results(om, undefined=False):
+def meta_results(om: Model, undefined: bool = False) -> dict[str, Any]:
     """
     Fetch some metadata from the Solver.
 
@@ -985,7 +1003,11 @@ def __separate_attrs(
     return data
 
 
-def parameter_as_dict(system, exclude_none=True, exclude_attrs=None):
+def parameter_as_dict(
+    system: EnergySystem | Model,
+    exclude_none: bool = True,
+    exclude_attrs: list[str] | None = None,
+) -> dict[tuple[Node, Node | None], dict[str, pd.Series | pd.DataFrame]]:
     """
     Create a result dictionary containing node parameters.
 

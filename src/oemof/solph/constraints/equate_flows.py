@@ -9,9 +9,20 @@ SPDX-License-Identifier: MIT
 """
 
 from pyomo import environ as po
+from collections.abc import Iterable
+
+from oemof.network import Node
+
+from oemof.solph import Model
 
 
-def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
+def equate_flows(
+    model: Model | po.ConcreteModel,
+    flows1: Iterable[tuple[Node, Node]],
+    flows2: Iterable[tuple[Node, Node]],
+    factor1: float = 1,
+    name: str = "equate_flows",
+) -> Model | po.ConcreteModel:
     r"""
     Adds a constraint to the given model that sets the sum of two groups of
     flows equal or proportional by a factor for each timestep.
@@ -25,13 +36,15 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
 
     Parameters
     ----------
-    model : oemof.solph.Model
+    model : oemof.solph.Model or pyomo.environ.ConcreteModel
         Model to which the constraint is added.
-    flows1 : iterable
-        First group of flows, to be set to equal with Var2 and multiplied with
-        factor1.
-    flows2 : iterable
-        Second group of flows, to be set equal to (Var1 * factor1).
+    flows1 : Iterable of tuples
+        First group of flows. The iterable must contain tuples of Nodes. The
+        Nodes within the tuples are expected to represent `(source, target)`,
+        like a key of `model.flows`. The iterable must be re-iterable (like a
+        `list` or `dict`).
+    flows2 : Iterable of tuples
+        Second group of flows. See `flows1` for a description.
     factor1 : numeric, default=1
         Factor to define the proportion between the two groups.
     name : str, default='equate_flows'
@@ -65,7 +78,11 @@ def equate_flows(model, flows1, flows2, factor1=1, name="equate_flows"):
 
 
 def equate_flows_by_keyword(
-    model, keyword1, keyword2, factor1=1, name="equate_flows"
+    model: Model | po.ConcreteModel,
+    keyword1: str,
+    keyword2: str,
+    factor1: float = 1,
+    name: str = "equate_flows",
 ):
     r"""
     This wrapper for equate_flows allows to equate groups of flows by using a
@@ -73,7 +90,7 @@ def equate_flows_by_keyword(
 
     Parameters
     ----------
-    model: oemof.solph.Model
+    model: oemof.solph.Model or po.environ.ConcreteModel
         Model to which constraints are added.
     keyword1: string
         keyword to consider (searches all Flows).

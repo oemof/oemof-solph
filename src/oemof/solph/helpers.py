@@ -17,9 +17,10 @@ SPDX-License-Identifier: MIT
 
 import os
 from collections.abc import MutableMapping
+from typing import Any
 
 
-def get_basic_path():
+def get_basic_path() -> str:
     """Returns the basic oemof path and creates it if necessary.
     The basic path is the '.oemof' folder in the $HOME directory.
     """
@@ -29,7 +30,7 @@ def get_basic_path():
     return basicpath
 
 
-def extend_basic_path(subfolder):
+def extend_basic_path(subfolder: str) -> str:
     """Returns a path based on the basic oemof path and creates it if
     necessary. The subfolder is the name of the path extension.
     """
@@ -39,16 +40,23 @@ def extend_basic_path(subfolder):
     return extended_path
 
 
-def flatten(d, parent_key="", sep="_"):
+def flatten(
+    d: MutableMapping[Any, Any], parent_key: str = "", sep: str = "_"
+) -> dict[str, Any]:
     """
     Flatten dictionary by compressing keys.
 
     See: https://stackoverflow.com/questions/6027558/
          flatten-nested-python-dictionaries-compressing-keys
 
-    d : (dictionary)
-    parent_key : (do not use this, used internally for recursion)
-    sep : separator for flattening keys
+    Parameters
+    ----------
+    d : dict
+        The dictionary to flatten.
+    parent_key : str
+        Do not use this. It is used internally for recursion.
+    sep : str
+        Separator used for flattening the keys of `d`.
 
     Returns
     -------

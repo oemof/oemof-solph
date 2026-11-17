@@ -173,3 +173,12 @@ known_first_party = "oemof-solph"
 default_section = "THIRDPARTY"
 forced_separate = "test_oemof-solph"
 skip = "migrations"
+
+[tool.ruff.lint]
+extend-select = ["I"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+known-first-party = ["oemof-solph"]
+default-section = "third-party"
+forced-separate = ["test_oemof-solph"]

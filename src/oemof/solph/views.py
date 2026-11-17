@@ -20,13 +20,19 @@ from collections import OrderedDict
 from enum import Enum
 
 import pandas as pd
+from oemof.network import Node
 
 from oemof.solph.processing import convert_keys_to_strings
 
 NONE_REPLACEMENT_STR = "_NONE_"
 
 
-def node(results, node, multiindex=False, keep_none_type=False):
+def node(
+    results: dict,
+    node: Node | tuple | str,
+    multiindex: bool = False,
+    keep_none_type: bool = False,
+) -> dict[str, pd.Series | pd.DataFrame]:
     """
     Obtain results for a single node e.g. a Bus or Component.
 
@@ -151,7 +157,11 @@ class NodeOption(str, Enum):
     HasOnlyInputs = "has_only_inputs"
 
 
-def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
+def filter_nodes(
+    results: dict,
+    option: NodeOption = NodeOption.All,
+    exclude_busses: bool = False,
+) -> set[Node]:
     """Get set of nodes from results-dict for given node option.
 
     This function filters nodes from results for special needs. At the moment,
@@ -202,7 +212,9 @@ def filter_nodes(results, option=NodeOption.All, exclude_busses=False):
         return nodes
 
 
-def get_node_by_name(results, *names):
+def get_node_by_name(
+    results: dict, *names: str
+) -> Node | list[Node | None] | None:
     """
     Searches results for nodes
 
@@ -218,7 +230,9 @@ def get_node_by_name(results, *names):
         return [node_names.get(n, None) for n in names]
 
 
-def node_weight_by_type(results, node_type):
+def node_weight_by_type(
+    results: dict, node_type: type[Node]
+) -> pd.DataFrame | None:
     """
     Extracts node weights (if exist) of all components of the specified
     `node_type`.
@@ -266,7 +280,9 @@ def node_weight_by_type(results, node_type):
         return df
 
 
-def node_input_by_type(results, node_type, droplevel=None):
+def node_input_by_type(
+    results: dict, node_type: type[Node], droplevel: list[int] | None = None
+) -> pd.DataFrame | None:
     """Gets all inputs for all nodes of the type `node_type` and returns
     a dataframe.
 
@@ -310,7 +326,9 @@ def node_input_by_type(results, node_type, droplevel=None):
         return df
 
 
-def node_output_by_type(results, node_type, droplevel=None):
+def node_output_by_type(
+    results: dict, node_type: type[Node], droplevel: list[int] | None = None
+) -> pd.DataFrame | None:
     """Gets all outputs for all nodes of the type `node_type` and returns
     a dataframe.
 
@@ -353,7 +371,9 @@ def node_output_by_type(results, node_type, droplevel=None):
         return df
 
 
-def net_storage_flow(results, node_type):
+def net_storage_flow(
+    results: dict, node_type: type[Node]
+) -> pd.DataFrame | None:
     """Calculates the net storage flow for storage models that have one
     input edge and one output edge both with flows within the domain of
     non-negative reals.
@@ -442,7 +462,11 @@ def net_storage_flow(results, node_type):
     return pd.concat(dataframes, axis=1)
 
 
-def convert_to_multiindex(group, index_names=None, droplevel=None):
+def convert_to_multiindex(
+    group: dict,
+    index_names: list[str] | None = None,
+    droplevel: list[int] | None = None,
+) -> pd.DataFrame:
     """Convert dict to pandas DataFrame with multiindex
 
     Parameters

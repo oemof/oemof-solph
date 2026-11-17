@@ -9,14 +9,17 @@ SPDX-License-Identifier: MIT
 
 from pyomo import environ as po
 
+from oemof.solph import Model, Bus
+from oemof.solph.components import GenericStorage
+
 
 def storage_level_constraint(
-    model,
-    name,
-    storage_component,
-    multiplexer_bus,
-    input_levels,
-    output_levels,
+    model: Model | po.ConcreteModel,
+    name: str,
+    storage_component: GenericStorage,
+    multiplexer_bus: Bus,
+    input_levels: dict[Bus, float],
+    output_levels: dict[Bus, float],
 ):
     r"""
     Add constraints to implement storage content based access.
@@ -30,7 +33,7 @@ def storage_level_constraint(
     ----------
     model : oemof.solph.Model
         Model to which the constraint is added.
-    name : string
+    name : str
         Name of the multiplexer.
     storage_component : oemof.solph.components.GenericStorage
         Storage component whose content should mandate

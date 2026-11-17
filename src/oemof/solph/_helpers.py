@@ -21,9 +21,10 @@ from warnings import warn
 
 import pandas as pd
 from oemof.tools import debugging
+from oemof.network import Node
 
 
-def check_node_object_for_missing_attribute(obj, attribute):
+def check_node_object_for_missing_attribute(obj: Node, attribute: str):
     """Raises a predefined warning if object does not have attribute.
 
     Arguments
@@ -37,7 +38,7 @@ def check_node_object_for_missing_attribute(obj, attribute):
         warn_if_missing_attribute(obj, attribute)
 
 
-def warn_if_missing_attribute(obj, attribute):
+def warn_if_missing_attribute(obj: Node, attribute: str):
     """Raises warning if attribute is missing for given object"""
     msg = (
         "Attribute <{0}> is missing in Node <{1}> of {2}.\n"
@@ -51,11 +52,11 @@ def warn_if_missing_attribute(obj, attribute):
 
 
 def create_time_index(
-    year: int = None,
+    year: int | None = None,
     interval: float = 1,
-    number: int = None,
-    start: datetime.date = None,
-):
+    number: int | None = None,
+    start: datetime.date | None = None,
+) -> pd.DatetimeIndex:
     """
     Create a datetime index for one year.
 
@@ -67,7 +68,7 @@ def create_time_index(
 
     Parameters
     ----------
-    year : int, datetime
+    year : int, datetime.date
         The year of the index.
         Used to automatically set start and number for the specific year.
     interval : float
