@@ -313,12 +313,12 @@ def test_fake_sequence_multiplication_and_division():
     seq4 = seq1 * pd.Series([1, 2])
     assert isinstance(seq4, pd.Series)
     assert (seq4 == [42, 84]).all()
+    assert isinstance(seq4[0], float)
 
     seq5 = pd.Series([1, 2]) * seq1
     assert isinstance(seq5, pd.Series)
     assert (seq5 == [42, 84]).all()
-
-    assert seq5.values.dtype == seq4.values.dtype
+    assert isinstance(seq5[0], float)
 
 
 def test_sequence_dict():
