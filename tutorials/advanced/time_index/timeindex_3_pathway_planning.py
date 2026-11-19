@@ -221,7 +221,6 @@ m = populate_and_solve_energy_system(
     time_series=time_series,
     investments=investments,
     variable_costs=expand_energy_prices(tindex_agg_full, prices),
-    discount_rate=discount_rate_adjusted(0.05, 5),
 )
 
 # ----------------- Post Processing -------------------------------------------
