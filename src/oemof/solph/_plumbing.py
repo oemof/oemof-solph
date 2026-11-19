@@ -185,6 +185,8 @@ class _FakeSequence:
     42
     """
 
+    __array_priority__ = 2.0
+
     def __init__(self, value: Number):
         self._value = value
 
