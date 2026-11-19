@@ -2,8 +2,8 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-v0.6.6
-------
+v0.6.6 (November 19th, 2026)
+----------------------------
 
 API changes
 ###########
@@ -43,9 +43,6 @@ New features
 * Added dual-variables and reduced cost to the Results class
 * `Model.solve(allow_nonoptimal=True)` will now return a `Results` object.
   (It of course will not contain real results but solver infos.)
-
-Documentation
-#############
 
 Bug fixes
 #########
@@ -90,6 +87,3 @@ Contributors
 * Syed Inayatullah
 * Mohammad Hamarsheh
 * Pierre-Francois Duc (RLI)
-
-Acknowledgements
-################
