@@ -61,11 +61,16 @@ Bug fixes
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
   the last time step, as `minimum_downtime` already does for shut-downs.
-* Variable costs returned wrong values if the variable cost of the flow was a constant
+* Fixed a memory leak that occured when one script instanciated multiple
+  energy EnergySystem instances.
+* Variable costs returned wrong values if the variable cost of the flow
+  was a constant.
 * An investment `GenericStorage` ignored `min_storage_level` if it was
   non-zero only at the last time point. The lower bound on the storage
   content is now applied in this case as well (#1354).
-* _FakeSequence multiplication was not commutative with pd.Series, this was fixed by providing a value higher than 1 to the __array_priority__ attribute of the _FakeSequence class
+* _FakeSequence multiplication was not commutative with pd.Series,
+  this was fixed by providing a value higher than 1 to the __array_priority__
+  attribute of the _FakeSequence class
 
 
 Other changes

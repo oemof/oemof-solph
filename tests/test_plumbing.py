@@ -412,3 +412,43 @@ def test_valid_sequence():
 
     # _FakeSequence has every length
     assert valid_sequence(fake_sequence, 1337)
+
+
+def test_multi_apply():
+    class Inverter:
+        value = Apply(lambda x: -x, default=42)
+
+    inverter = Inverter()
+    assert inverter.value == 42
+
+    inverter.value = 1
+    assert inverter.value == -1
+
+    inverter.value = 2
+    assert inverter.value == -2
+
+
+def test_apply_values_are_released_with_their_instance():
+    """A value set through Apply must not outlive its instance, and a new
+    instance must not see a dead instance's value when its id is reused."""
+    import gc
+    import weakref
+
+    class Value:
+        pass
+
+    class Foo:
+        x = Apply(lambda v: v, default="unset")
+
+    foo = Foo()
+    foo.x = Value()
+    value_ref = weakref.ref(foo.x)
+    del foo
+    gc.collect()
+    assert value_ref() is None
+
+    for i in range(100):
+        foo = Foo()
+        foo.x = i
+        del foo
+        assert Foo().x == "unset"

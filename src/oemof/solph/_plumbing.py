@@ -140,6 +140,8 @@ class Apply:
     >>> one.inverted
     -1
 
+    Note that the default is the default value,
+    i.e. the `converter` is not applied to the default.
     """
 
     unset = object()
@@ -147,20 +149,22 @@ class Apply:
     def __init__(self, converter, default=unset):
         self.converter = converter
         self.default = default
-
-        self.data = {}
         self.name = None
 
+    # The converted value lives in the instance's own __dict__ (a data
+    # descriptor takes precedence over it on lookup), so it is released
+    # together with the instance.
     def __get__(self, obj, objtype=None):
-        if (id(obj) not in self.data) and (self.default is self.unset):
+        data = obj.__dict__
+        if (self.name not in data) and (self.default is self.unset):
             raise AttributeError(
                 f"attribute '{self.name}' of '{objtype.__name__}'"
                 " object accessed before being assigned a value"
             )
-        return self.data.get(id(obj), self.default)
+        return data.get(self.name, self.default)
 
     def __set__(self, obj, value):
-        self.data[id(obj)] = self.converter(value)
+        obj.__dict__[self.name] = self.converter(value)
 
     def __set_name__(self, owner, name):
         self.name = name
@@ -172,7 +176,6 @@ class _FakeSequence:
     Parameters
     ----------
     value : scalar
-    length : integer
 
 
     Examples
