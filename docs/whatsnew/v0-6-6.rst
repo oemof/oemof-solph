@@ -61,8 +61,8 @@ Bug fixes
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
   the last time step, as `minimum_downtime` already does for shut-downs.
-
 * Variable costs returned wrong values if the variable cost of the flow was a constant
+* _FakeSequence multiplication was not commutative with pd.Series, this was fixed by providing a value higher than 1 to the __array_priority__ attribute of the _FakeSequence class
 
 
 Other changes
