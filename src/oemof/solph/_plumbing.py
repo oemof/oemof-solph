@@ -145,33 +145,21 @@ class Apply:
         self.default = default
         self.name = None
 
-    # The converted value lives in the instance's own __dict__ (a data
-    # descriptor takes precedence over it on lookup), so it is released
-    # together with the instance. Storing values in the descriptor, keyed
-    # by id(obj), kept every value of every instance alive forever (and
-    # with them whatever they reference, e.g. a solved model via the
-    # energy system), and let a new object inherit a dead one's value
-    # when CPython reused its id.
-
+    # As Apply is meant to reduce boilerplate with properties
+    # and property setters in the classes it is used with, it
+    # makes sense to store the values in obj.
     def __get__(self, obj, objtype=None):
-        if obj is None:
-            data = {}
-            objtype = objtype if objtype is not None else type(None)
-        else:
-            data = obj.__dict__
-            objtype = type(obj)
-        if (self.name not in data) and (self.default is self.unset):
+        if (not hasattr(obj, f"_{self.name}")) and (
+            self.default is self.unset
+        ):
             raise AttributeError(
                 f"attribute '{self.name}' of '{objtype.__name__}'"
                 " object accessed before being assigned a value"
             )
-        return data.get(self.name, self.default)
+        return getattr(obj, f"_{self.name}", self.default)
 
     def __set__(self, obj, value):
-        obj.__dict__[self.name] = self.converter(value)
-
-    def __set_name__(self, owner, name):
-        self.name = name
+        setattr(obj, f"_{self.name}", self.converter(value))
 
 
 class _FakeSequence:
