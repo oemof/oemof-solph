@@ -136,6 +136,8 @@ class Apply:
     >>> one.inverted
     -1
 
+    Note that the default is the default value,
+    i.e. the `converter` is not applied to the default.
     """
 
     unset = object()
@@ -170,7 +172,6 @@ class _FakeSequence:
     Parameters
     ----------
     value : scalar
-    length : integer
 
 
     Examples
