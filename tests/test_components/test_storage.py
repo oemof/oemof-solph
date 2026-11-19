@@ -414,3 +414,31 @@ def test_soc_dependent_charging():
     storage_content = results["storage_content"].sort_index(axis=1)
     assert storage_content.iloc[0].to_list() == [0.0, 0.0]
     assert storage_content.iloc[-1].round(2).to_list() == [100.0, 75.87]
+
+
+def test_invest_min_storage_level_only_at_last_timepoint():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(year=2023, number=4),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        "storage",
+        inputs={bus: solph.Flow(nominal_capacity=50)},
+        outputs={bus: solph.Flow(nominal_capacity=50)},
+        nominal_capacity=solph.Investment(
+            ep_costs=10, existing=100, maximum=0
+        ),
+        min_storage_level=[0, 0, 0, 0, 0.5],
+        balanced=False,
+    )
+    es.add(storage)
+
+    model = solph.Model(es)
+    block = model.GenericInvestmentStorageBlock
+
+    assert storage in block.MIN_INVESTSTORAGES
+    assert (storage, 4) in block.min_storage_content
