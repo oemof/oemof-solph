@@ -399,7 +399,7 @@ def test_valid_sequence():
 
 def test_multi_apply():
     class Inverter:
-         value = Apply(lambda x: -x, default=42)
+        value = Apply(lambda x: -x, default=42)
 
     inverter = Inverter()
     assert inverter.value == 42
