@@ -68,6 +68,9 @@ Bug fixes
 * An investment `GenericStorage` ignored `min_storage_level` if it was
   non-zero only at the last time point. The lower bound on the storage
   content is now applied in this case as well (#1354).
+* _FakeSequence multiplication was not commutative with pd.Series,
+  this was fixed by providing a value higher than 1 to the __array_priority__
+  attribute of the _FakeSequence class
 
 
 Other changes
