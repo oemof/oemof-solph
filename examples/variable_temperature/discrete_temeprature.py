@@ -67,7 +67,7 @@ def main():
 
     SOLAR_COLLECTOR_EFFICIENCY = 0.988
     HEAT_LOSS_COEFFIANT = 0.0035  # kW/m2/K
-    COLLECTOR_AREA = 100  #  m2
+    COLLECTOR_AREA = 500  #  m2
     FLOW_PER_HOUR = 2 * 3600  # 2 l/s * 3600 s/h
 
     # derrived parameters
@@ -110,17 +110,7 @@ def main():
         label="grid_el",
         outputs={bus_el: Flow(variable_costs=0.30)},
     )
-    input_pv_el = Source(
-        label="PV",
-        outputs={
-            bus_el: Flow(
-                nominal_capacity=100,
-                variable_costs=0.05,  # feed-in would give 5 ct/kWh
-                maximum=input_data["radiation (kW/m2)"],
-            )
-        },
-    )
-    es.add(bus_el, input_grid_el, input_pv_el)
+    es.add(bus_el, input_grid_el)
 
     # Cold solar collector heat (15 °C, before heat pump)
     # We use freezing point (0 °C) as reference point.
@@ -400,7 +390,7 @@ def main():
 
     # Optimisation and plotting
     ###########################
-    results = model.solve(
+    model.solve(
         solver="cbc",
         solve_kwargs={"tee": True},
         cmdline_options={"seconds": SOLVER_TIME_LIMIT},
