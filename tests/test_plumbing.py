@@ -397,6 +397,20 @@ def test_valid_sequence():
     assert valid_sequence(fake_sequence, 1337)
 
 
+def test_multi_apply():
+    class Inverter:
+         value = Apply(lambda x: -x, default=42)
+
+    inverter = Inverter()
+    assert inverter.value == 42
+
+    inverter.value = 1
+    assert inverter.value == -1
+
+    inverter.value = 2
+    assert inverter.value == -2
+
+
 def test_apply_values_are_released_with_their_instance():
     """A value set through Apply must not outlive its instance, and a new
     instance must not see a dead instance's value when its id is reused."""
