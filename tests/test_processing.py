@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 # -*- coding: utf-8 -
 
 """Tests the processing module of solph.
@@ -23,6 +25,7 @@ from oemof.solph.buses import Bus
 from oemof.solph.components import Converter
 from oemof.solph.components import GenericStorage
 from oemof.solph.components import Sink
+from oemof.solph.components import Source
 from oemof.solph.flows import Flow
 
 
@@ -86,22 +89,31 @@ class TestParameterResult:
         )
         cls.es.add(dg, batt, demand)
         cls.model_duals = Model(cls.es)
-        cls.model_duals.receive_duals()
+        cls.model_duals._receive_duals()
         cls.model_duals.solve()
         cls.model_cbc = Model(cls.es)
         cls.model_cbc.solve(solver="cbc")
-        cls.model_glpk = Model(cls.es)
-        cls.model_glpk.solve(solver="glpk")
+        cls.model_cbc = Model(cls.es)
+        cls.model_cbc.solve(solver="cbc")
+
+    def test_energy_system_results(self):
+        with pytest.warns(
+            FutureWarning,
+            match="EnergySystem.results is deprecated",
+        ):
+            self.es.results == self.es._results
 
     def test_mipgap(self):
         """Test that one can access the MIPGap."""
-        meta_cbc = processing.meta_results(self.model_cbc)
+        with pytest.warns(FutureWarning, match="meta_results"):
+            meta_cbc = processing.meta_results(self.model_cbc)
         assert "MIPGap" in meta_cbc["problem"]
         assert meta_cbc["problem"]["MIPGap"] == 0
 
-        meta_glpk = processing.meta_results(self.model_glpk)
-        assert "MIPGap" in meta_glpk["problem"]
-        assert meta_glpk["problem"]["MIPGap"] == 0
+        with pytest.warns(FutureWarning, match="meta_results"):
+            meta_cbc = processing.meta_results(self.model_cbc)
+        assert "MIPGap" in meta_cbc["problem"]
+        assert meta_cbc["problem"]["MIPGap"] == 0
 
     def test_flows_with_none_exclusion(self):
         b_el2 = self.es.groups["b_el2"]
@@ -136,8 +148,6 @@ class TestParameterResult:
             self.es, exclude_none=False
         )
         default_attributes = {
-            "age": None,
-            "lifetime": None,
             "integer": False,
             "investment": None,
             "nominal_capacity": 1,
@@ -150,7 +160,6 @@ class TestParameterResult:
             "negative_gradient_limit": None,
             "positive_gradient_limit": None,
             "variable_costs": 0,
-            "fixed_costs": None,
             "flow": None,
             "values": None,
             "label": str(b_el2.outputs[demand].label),
@@ -180,14 +189,12 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_age": 0,
                     "investment_ep_costs": 0.4,
                     "investment_existing": 0,
                     "investment_maximum": float("inf"),
@@ -219,14 +226,12 @@ class TestParameterResult:
                 {
                     "balanced": True,
                     "depth": 0,
-                    "fixed_costs": 0,
                     "fixed_losses_absolute": 0,
                     "fixed_losses_relative": 0,
                     "inflow_conversion_factor": 1,
                     "initial_storage_level": 0,
                     "invest_relation_input_capacity": 1 / 6,
                     "invest_relation_output_capacity": 1 / 6,
-                    "investment_age": 0,
                     "investment_ep_costs": 0.4,
                     "investment_existing": 0,
                     "investment_maximum": float("inf"),
@@ -399,3 +404,30 @@ class TestParameterResult:
         results = processing.results(self.model_duals)
         view = views.node_weight_by_type(results, node_type=Flow)
         assert view is None
+
+
+def test_meta_results_warns_and_works_with_highs():
+    def _solved_meta_results_model(solver):
+        es = EnergySystem(
+            timeindex=pandas.date_range("2020-01-01", periods=3, freq="h"),
+            infer_last_interval=True,
+        )
+        bus = Bus(label="bus")
+        source = Source(label="source", outputs={bus: Flow(variable_costs=2)})
+        sink = Sink(
+            label="sink",
+            inputs={bus: Flow(fix=[1, 2, 3], nominal_capacity=1)},
+        )
+        es.add(bus, source, sink)
+        model = Model(es)
+        results = model.solve(solver=solver)
+        return model, results
+
+    model, results = _solved_meta_results_model("highs")
+    with pytest.warns(FutureWarning, match="meta_results"):
+        meta = processing.meta_results(model)
+    assert meta["objective"] == pytest.approx(12)
+    assert meta["objective"] == pytest.approx(results.solver["objective"])
+    assert set(meta) == {"objective", "problem", "solver"}
+    assert meta["problem"]["MIPGap"] == pytest.approx(0)
+    assert meta["solver"]["Termination condition"] == "optimal"

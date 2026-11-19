@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """This example shows how to create an energysystem with oemof objects and
 solve it with the solph module.
 
@@ -157,7 +159,7 @@ def test_dispatch_example(solver="cbc", periods=24 * 5):
     # create optimization model based on energy_system
     optimization_model = Model(energysystem=energysystem)
 
-    optimization_model.receive_duals()
+    optimization_model._receive_duals()
 
     # solve problem
     optimization_model.solve(solver=solver)

@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 ===========
 oemof.solph
 ===========
@@ -47,12 +51,13 @@ Quick Installation
 For oemof.solph you need a solver on top of the software itself. Complete
 installation instructions can be found
 :ref:`here <installation_and_setup_label>`. For example, you can install
-oemof.solph together with the CBC solver in a conda environment:
+oemof.solph together with the HiGHS and CBC solvers:
 
 .. code:: console
 
-    (venv) conda install -c conda-forge coincbc
-    (venv) pip install oemof.solph
+    pip install oemof.solph[solver]
+
+Omit "[solver]" if you would like to install solvers on your own.
 
 Contributing
 ============
@@ -86,26 +91,3 @@ You are welcome to contribute your own examples via a
 `pull request <https://github.com/oemof/oemof-solph/pulls>`_
 or by e-mailing us (see `here <https://oemof.org/contact/>`_ for contact
 information).
-
-License
-=======
-
-Copyright (c) oemof developer group
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.

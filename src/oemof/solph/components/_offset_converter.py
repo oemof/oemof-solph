@@ -292,6 +292,7 @@ class OffsetConverter(Node):
 
 class OffsetConverterBlock(ScalarBlock):
     r"""Block for the relation of nodes with type
+
     :class:`~oemof.solph.components._offset_converter.OffsetConverter`
 
     **The following constraints are created:**
@@ -324,6 +325,7 @@ class OffsetConverterBlock(ScalarBlock):
 
     Note that :math:`P_{nom}(t) \cdot Y(t)` is merged into one variable,
     called `status_nominal[n, o, p, t]`.
+
     """  # noqa: E501
 
     CONSTRAINT_GROUP = True

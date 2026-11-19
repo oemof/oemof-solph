@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 .. _optimization_linear_vs_mixed_integer_label:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

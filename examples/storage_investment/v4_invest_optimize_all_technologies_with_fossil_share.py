@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description
 -------------------
@@ -68,7 +70,7 @@ This example requires oemof.solph (at least v0.5.0), install by:
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 """
 
@@ -240,7 +242,7 @@ def main(optimize=True, solver="cbc"):
     # check if the new result object is working for custom components
     results = solph.processing.results(om)
 
-    custom_storage = solph.views.node(results, "storage")
+    solph.views.node(results, "storage")
     electricity_bus = solph.views.node(results, "electricity")
 
     # returns a pandas Series with all scalar values (investment, total) of

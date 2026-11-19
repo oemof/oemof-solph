@@ -22,10 +22,12 @@ import numpy as np
 def sequence(iterable_or_scalar, length=None):
     """Casts iterable_or_scalar to an object that allows element access.
 
-    Technically, it checks if an object is iterable or scalar and returns a
-    numpy array if the object is an iterable or the length is given, or a
-    _FakeSequence if the length cannot be infered.
-    This way, we can (possibly) define a sequence of unknown length if needed.
+    Technically, it checks if an object is iterable or scalar. For scalars
+    * it creates a numpy array of the given length (if proveded), or
+    * a _FakeSequence (has every length, see below).
+    For iterables, it checks the length and an success
+    * casts lists to numpy array, or
+    * just lets the iterable pass.
 
     Parameters
     ----------
@@ -75,8 +77,10 @@ def sequence(iterable_or_scalar, length=None):
                 f"Length mismatch: Cannot create sequence of length {length}"
                 + " from input {iterable_or_scalar}."
             )
-        else:
+        elif isinstance(iterable_or_scalar, list):
             return np.array(iterable_or_scalar)
+        else:
+            return iterable_or_scalar
     else:
         return _FakeSequence(value=iterable_or_scalar)
 
@@ -136,6 +140,8 @@ class Apply:
     >>> one.inverted
     -1
 
+    Note that the default is the default value,
+    i.e. the `converter` is not applied to the default.
     """
 
     unset = object()
@@ -143,20 +149,22 @@ class Apply:
     def __init__(self, converter, default=unset):
         self.converter = converter
         self.default = default
-
-        self.data = {}
         self.name = None
 
+    # The converted value lives in the instance's own __dict__ (a data
+    # descriptor takes precedence over it on lookup), so it is released
+    # together with the instance.
     def __get__(self, obj, objtype=None):
-        if (id(obj) not in self.data) and (self.default is self.unset):
+        data = obj.__dict__
+        if (self.name not in data) and (self.default is self.unset):
             raise AttributeError(
                 f"attribute '{self.name}' of '{objtype.__name__}'"
                 " object accessed before being assigned a value"
             )
-        return self.data.get(id(obj), self.default)
+        return data.get(self.name, self.default)
 
     def __set__(self, obj, value):
-        self.data[id(obj)] = self.converter(value)
+        obj.__dict__[self.name] = self.converter(value)
 
     def __set_name__(self, owner, name):
         self.name = name
@@ -168,7 +176,6 @@ class _FakeSequence:
     Parameters
     ----------
     value : scalar
-    length : integer
 
 
     Examples
@@ -181,14 +188,16 @@ class _FakeSequence:
     42
     """
 
+    __array_priority__ = 2.0
+
     def __init__(self, value: Number):
         self._value = value
 
     def __getitem__(self, i):
         if isinstance(i, slice):
-            start = (i.start if i.start is not None else 0)
-            step = (i.step if i.step is not None else 1)
-            stop = (i.stop if i.stop is not None else -1)
+            start = i.start if i.start is not None else 0
+            step = i.step if i.step is not None else 1
+            stop = i.stop if i.stop is not None else -1
             if start < stop:
                 length = (stop - start) // step
                 return np.full(length, self._value)

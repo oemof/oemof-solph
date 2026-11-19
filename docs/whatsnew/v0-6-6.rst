@@ -1,0 +1,89 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
+v0.6.6 (November 19th, 2026)
+----------------------------
+
+API changes
+###########
+
+* Moved to clearly continuous time for pathway planning (formerly multi-period)
+  optimisation. Instead of defining periods, users now can give
+  `investment times` at which capacities (may) change. Consequently, many
+  parameters that were scalars before can now be iterable. In contrast to the
+  former multi-period implementation, it is possible to give a time series of
+  fixed capacities without any investment.
+* Avoid creation of empty variables (i.e. variable vectors of zero length).
+* ExtractionTurbineCHP is deprecated and will be replaced by
+  VariableSplitConverter. The new class is more flexible but will cover all
+  use cases of the ExtractionTurbineCHP
+* Remove `solver-results` attribute from Model class. It will be replaced by
+  the new `solver_return` attribute.
+* Deprecate `processing.meta_results`. It now issues a `FutureWarning`
+  pointing to the `Results` class (e.g. `results.solver`) and no longer
+  fails for appsi solvers such as HiGHS (#1343).
+* Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
+  the new `solver_return` attribute.
+* The variables `positive_gradient` and `negative_gradient` of
+  `NonConvexFlowBlock` and `InvestNonConvexFlowBlock` are removed. The
+  gradient limits of `NonConvex` flows are now written directly in terms of
+  the flow and the status variables.
+
+New features
+############
+
+* VariableSplitConverter: A converter with one input and two competing
+  outputs, where the split between the outputs can vary linearly between two
+  given, real operating points (e.g. an extraction/backpressure turbine, where
+  the split between electricity and heat varies with the amount of heat
+  extracted).
+* Added a solver attribute to the Results class to get the return values of
+  the solver in a structured way
+* Added dual-variables and reduced cost to the Results class
+* `Model.solve(allow_nonoptimal=True)` will now return a `Results` object.
+  (It of course will not contain real results but solver infos.)
+
+Bug fixes
+#########
+
+* Gradient limits of `NonConvex` flows had no effect: the limit values were
+  not applied. The constraints also multiplied the flow by the binary status,
+  so models with these limits could not be written to LP format (e.g. for
+  CBC or HiGHS). The constraints are now linear, apply the limits, and allow
+  a start-up to and a shut-down from the minimum load.
+* A gradient limit given on the flow of a `NonConvex` flow now uses the same
+  constraints as a limit given in `NonConvex`. Before, it blocked every
+  start-up when the limit was below the minimum load.
+* With `minimum_uptime`, a start-up in the last `minimum_uptime - 1` time
+  steps was impossible, even if the flow stayed on until the end of the
+  horizon. Near the end, a start-up now requires the flow to stay on until
+  the last time step, as `minimum_downtime` already does for shut-downs.
+* Fixed a memory leak that occured when one script instanciated multiple
+  energy EnergySystem instances.
+* Variable costs returned wrong values if the variable cost of the flow
+  was a constant.
+* An investment `GenericStorage` ignored `min_storage_level` if it was
+  non-zero only at the last time point. The lower bound on the storage
+  content is now applied in this case as well (#1354).
+* _FakeSequence multiplication was not commutative with pd.Series,
+  this was fixed by providing a value higher than 1 to the __array_priority__
+  attribute of the _FakeSequence class
+
+
+Other changes
+#############
+
+* Comply with REUSE.software.
+* Add optional solver dependency
+
+Contributors
+############
+
+* Patrik Schönfeldt (DLR)
+* Malte Fritz
+* Julius Ellermann (DLR)
+* Uwe Krien
+* Syed Inayatullah
+* Mohammad Hamarsheh
+* Pierre-Francois Duc (RLI)

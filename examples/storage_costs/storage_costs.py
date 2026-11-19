@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 """
 General description
 -------------------
@@ -30,7 +32,7 @@ This example requires oemof.solph (at least v0.5.0) and matplotlib, install by:
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 """
 
 import numpy as np

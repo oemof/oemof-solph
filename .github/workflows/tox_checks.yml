@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 # NB: this name is used in the status badge
 name: tox checks
 
@@ -26,10 +30,6 @@ jobs:
           - docs
 
     steps:
-      - name: Update package list
-        run: sudo apt update
-      - name: Install LaTeX
-        run: sudo apt install dvipng rubber texlive-latex-extra
       - name: Git clone
         uses: actions/checkout@v7
 

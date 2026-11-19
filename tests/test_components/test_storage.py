@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: MIT
+
 # -*- coding: utf-8 -*-
 
 import numpy as np
@@ -82,13 +86,15 @@ def test_invest_power_uncoupled():
     model = solph.Model(es)
     results = model.solve()
 
-    assert (results["storage_content"][storage] == np.arange(0, 10.5, 1)).all()
+    assert np.allclose(
+        results["storage_content"][storage], np.arange(0, 10.5, 1)
+    )
 
-    invest_inflow = results["invest"][(bus, storage)]
-    assert invest_inflow[0] == pytest.approx(1)
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
+    assert capacity_inflow[0] == pytest.approx(1)
 
-    invest_outflow = results["invest"][(storage, bus)]
-    assert invest_outflow[0] == pytest.approx(0)
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
+    assert capacity_outflow[0] == pytest.approx(0)
 
 
 def test_invest_power_coupled():
@@ -128,13 +134,13 @@ def test_invest_power_coupled():
     results = model.solve()
 
     storage_content = results["storage_content"][storage]
-    assert (storage_content == np.arange(0, 10.5, 1)).all()
+    assert np.allclose(storage_content, np.arange(0, 10.5, 1))
 
-    invest_inflow = results["invest"][(bus, storage)]
-    assert invest_inflow[0] == pytest.approx(1)
+    capacity_inflow = results["nominal_capacity"][(bus, storage)]
+    assert capacity_inflow[0] == pytest.approx(1)
 
-    invest_outflow = results["invest"][(storage, bus)]
-    assert invest_outflow[0] == pytest.approx(2)
+    capacity_outflow = results["nominal_capacity"][(storage, bus)]
+    assert capacity_outflow[0] == pytest.approx(2)
 
 
 def test_storage_charging():
@@ -197,11 +203,11 @@ def test_invest_content_uncoupled():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = results["invest"][storage]
-    assert invest_capacity[0] == pytest.approx(19)
-
     storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx([i * 1.9 for i in range(0, 11)])
+
+    invest_capacity = results["storage_capacity"][storage]
+    assert invest_capacity[0] == pytest.approx(19)
 
 
 def test_invest_content_minimum():
@@ -234,7 +240,7 @@ def test_invest_content_minimum():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [2]
 
-    invest_capacity = results["invest"][storage]
+    invest_capacity = results["storage_capacity"][storage]
     assert invest_capacity[0] == pytest.approx(32)
 
     storage_content = list(results["storage_content"][storage])
@@ -272,7 +278,7 @@ def test_invest_content_minimum_nonconvex():
     storage_inflow = results["flow"][(bus, storage)]
     assert list(storage_inflow) == 10 * [0]
 
-    assert results["invest"][storage][0] == pytest.approx(0)
+    assert results["storage_capacity"][storage][0] == pytest.approx(0)
 
     storage_content = list(results["storage_content"][storage])
     assert storage_content == pytest.approx(11 * [0])
@@ -310,7 +316,7 @@ def test_invest_content_maximum():
     model = solph.Model(es)
     results = model.solve()
 
-    invest_capacity = results["invest"][storage]
+    invest_capacity = results["storage_capacity"][storage]
     assert invest_capacity[0] == pytest.approx(10)
 
     storage_content = list(results["storage_content"][storage])
@@ -400,8 +406,7 @@ def test_soc_dependent_charging():
     es.add(storage, storage_new)
 
     model = solph.Model(es)
-    model.solve("cbc")
-    results = solph.Results(model)
+    results = model.solve("cbc")
     cols = sorted([c for c in results["flow"].columns if bus == c[0]])
     assert results["flow"][cols].iloc[0].to_list() == [10.0, 10.0]
     assert results["flow"][cols].iloc[-1].round(2).to_list() == [10.0, 5.11]
@@ -409,3 +414,31 @@ def test_soc_dependent_charging():
     storage_content = results["storage_content"].sort_index(axis=1)
     assert storage_content.iloc[0].to_list() == [0.0, 0.0]
     assert storage_content.iloc[-1].round(2).to_list() == [100.0, 75.87]
+
+
+def test_invest_min_storage_level_only_at_last_timepoint():
+    es = solph.EnergySystem(
+        timeindex=solph.create_time_index(year=2023, number=4),
+        infer_last_interval=False,
+    )
+
+    bus = solph.Bus("slack_bus", balanced=False)
+    es.add(bus)
+
+    storage = solph.components.GenericStorage(
+        "storage",
+        inputs={bus: solph.Flow(nominal_capacity=50)},
+        outputs={bus: solph.Flow(nominal_capacity=50)},
+        nominal_capacity=solph.Investment(
+            ep_costs=10, existing=100, maximum=0
+        ),
+        min_storage_level=[0, 0, 0, 0, 0.5],
+        balanced=False,
+    )
+    es.add(storage)
+
+    model = solph.Model(es)
+    block = model.GenericInvestmentStorageBlock
+
+    assert storage in block.MIN_INVESTSTORAGES
+    assert (storage, 4) in block.min_storage_content

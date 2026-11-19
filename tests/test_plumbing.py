@@ -2,7 +2,9 @@
 
 """Testing the class NonConvex.
 
+SPDX-FileCopyrightText: Pierre-François Duc
 SPDX-FileCopyrightText: Patrik Schönfeldt
+SPDX-FileCopyrightText: Uwe Krien
 
 SPDX-License-Identifier: MIT
 """
@@ -16,6 +18,19 @@ from oemof.solph._plumbing import SequenceDict
 from oemof.solph._plumbing import _FakeSequence
 from oemof.solph._plumbing import sequence
 from oemof.solph._plumbing import valid_sequence
+
+
+def test_apply_descriptor_raises_without_default():
+    """Accessing an Apply-descriptor attribute before it was ever set,
+    and without a default value, must raise AttributeError
+    (covers _plumbing.py line 152)."""
+
+    class Foo:
+        value = Apply(lambda x: x)
+
+    foo = Foo()
+    with pytest.raises(AttributeError, match="accessed before being"):
+        foo.value
 
 
 def test_fake_sequence_access():
@@ -49,13 +64,19 @@ def test_sequence():
         _ = sequence([1, 3], length=3)
     seq13 = sequence([1, 3])
     assert isinstance(seq13, np.ndarray)
-    assert (seq13 == np.array([1, 3])).all()
+    assert (seq13 == [1, 3]).all()
 
     with pytest.raises(ValueError, match="Length mismatch"):
         _ = sequence("ab", length=3)
     seq_ab = sequence("this_is_a_string")
-    assert isinstance(seq_ab, np.ndarray)
+    assert isinstance(seq_ab, str)
     assert seq_ab == "this_is_a_string"
+
+    npa13 = sequence(np.array([1, 3]))
+    assert isinstance(npa13, np.ndarray)
+
+    pds13 = sequence(pd.Series([1, 3]))
+    assert isinstance(pds13, pd.Series)
 
 
 def test_fake_sequence_slice():
@@ -289,6 +310,16 @@ def test_fake_sequence_multiplication_and_division():
     seq3 = np.array([1, 2]) * seq1
     assert (seq3 == np.array([42, 84])).all()
 
+    seq4 = seq1 * pd.Series([1, 2])
+    assert isinstance(seq4, pd.Series)
+    assert (seq4 == [42, 84]).all()
+    assert isinstance(seq4[0], float)
+
+    seq5 = pd.Series([1, 2]) * seq1
+    assert isinstance(seq5, pd.Series)
+    assert (seq5 == [42, 84]).all()
+    assert isinstance(seq5[0], float)
+
 
 def test_sequence_dict():
     d0 = SequenceDict()
@@ -381,3 +412,43 @@ def test_valid_sequence():
 
     # _FakeSequence has every length
     assert valid_sequence(fake_sequence, 1337)
+
+
+def test_multi_apply():
+    class Inverter:
+        value = Apply(lambda x: -x, default=42)
+
+    inverter = Inverter()
+    assert inverter.value == 42
+
+    inverter.value = 1
+    assert inverter.value == -1
+
+    inverter.value = 2
+    assert inverter.value == -2
+
+
+def test_apply_values_are_released_with_their_instance():
+    """A value set through Apply must not outlive its instance, and a new
+    instance must not see a dead instance's value when its id is reused."""
+    import gc
+    import weakref
+
+    class Value:
+        pass
+
+    class Foo:
+        x = Apply(lambda v: v, default="unset")
+
+    foo = Foo()
+    foo.x = Value()
+    value_ref = weakref.ref(foo.x)
+    del foo
+    gc.collect()
+    assert value_ref() is None
+
+    for i in range(100):
+        foo = Foo()
+        foo.x = i
+        del foo
+        assert Foo().x == "unset"

@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 Simple heat and power dispatch
 ------------------------------
 

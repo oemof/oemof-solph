@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 Combination of investment and binary status variable
 ----------------------------------------------------
 

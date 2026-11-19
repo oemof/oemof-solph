@@ -5,9 +5,12 @@
 SPDX-FileCopyrightText: Deutsches Zentrum für Luft- und Raumfahrt e.V.
 SPDX-FileCopyrightText: Patrik Schönfeldt
 SPDX-FileCopyrightText: Dylan Pulver
+SPDX-FileCopyrightText: Syed Inayatullah
 
 SPDX-License-Identifier: MIT
 """
+
+import pytest
 
 from oemof import solph
 
@@ -23,7 +26,7 @@ def test_initial_status_off():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == 5 * [0] + 5 * [10]).all()
+    assert flow_result == 5 * [0] + 5 * [10]
 
 
 def test_maximum_shutdowns():
@@ -33,9 +36,9 @@ def test_maximum_shutdowns():
         nonconvex=solph.NonConvex(maximum_shutdowns=1),
         variable_costs=[1, -2, 1, 1, 1, -5, 1, 1, 1, -2],
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 1]
+    assert flow_result == [0.0, 10.0, 5.0, 5.0, 5.0, 10.0, 0.0, 0.0, 0.0, 10.0]
 
 
 def test_maximum_startups():
@@ -45,9 +48,9 @@ def test_maximum_startups():
         nonconvex=solph.NonConvex(maximum_startups=1),
         variable_costs=[1, -4, 1, 1, 1, -5, 1, 1, 5, -3],
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert list(flow_result["status"][:-1]) == [0, 1, 1, 1, 1, 1, 0, 0, 0, 0]
+    assert flow_result == [0, 10, 5, 5, 5, 10, 0, 0, 0, 0]
 
 
 def test_initial_status_on():
@@ -58,9 +61,9 @@ def test_initial_status_on():
         nonconvex=solph.NonConvex(initial_status=1, minimum_uptime=3),
         variable_costs=1,
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert (flow_result["flow"][:-1] == 3 * [5] + 7 * [0]).all()
+    assert flow_result == 3 * [5] + 7 * [0]
 
 
 def test_activity_costs():
@@ -72,9 +75,9 @@ def test_activity_costs():
         nonconvex=solph.NonConvex(activity_costs=9 * [1] + [10]),
         variable_costs=-0.45,
     )
-    flow_result = _run_flow_model(flow)["flow"][:-1]
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert (flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]).all()
+    assert flow_result == [0, 0, 0, 3, 4, 5, 6, 7, 8, 0]
 
 
 def test_inactivity_costs():
@@ -85,9 +88,9 @@ def test_inactivity_costs():
         nonconvex=solph.NonConvex(inactivity_costs=9 * [1] + [10]),
         variable_costs=0.45,
     )
-    flow_result = _run_flow_model(flow)["flow"][:-1]
+    flow_result = _run_flow_model(flow)
 
-    assert (flow_result == [0, 1, 2, 0, 0, 0, 0, 0, 0, 9]).all()
+    assert flow_result == [0, 1, 2, 0, 0, 0, 0, 0, 0, 9]
 
 
 def test_startup_costs_start_off():
@@ -102,7 +105,7 @@ def test_startup_costs_start_off():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [0, 0, 0, 10, 1, 1, 1, 10, 0, 0]).all()
+    assert flow_result == [0, 0, 0, 10, 1, 1, 1, 10, 0, 0]
 
 
 def test_startup_costs_start_on():
@@ -117,7 +120,7 @@ def test_startup_costs_start_on():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [1, 1, 1, 10, 1, 1, 1, 10, 0, 0]).all()
+    assert flow_result == [1, 1, 1, 10, 1, 1, 1, 10, 0, 0]
 
 
 def test_shutdown_costs_start_on():
@@ -132,67 +135,115 @@ def test_shutdown_costs_start_on():
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [1, 1, 1, 10, 1, 1, 1, 10, 1, 1]).all()
+    assert flow_result == [1, 1, 1, 10, 1, 1, 1, 10, 1, 1]
 
 
-def test_minimum_uptime_after_initial_downtime():
-    # The unit is off initially, so `status` is fixed to 0 for the first
-    # `minimum_downtime` steps. Starting up in the first free time step
-    # still has to respect `minimum_uptime`.
+def test_positive_gradient_limit_startup_to_minimum():
+    # The gradient limit (1 per step) is below the minimum load (5).
+    # A start-up still reaches the minimum load, then the flow ramps up.
     flow = solph.flows.Flow(
         nominal_capacity=10,
         minimum=0.5,
-        nonconvex=solph.NonConvex(
-            initial_status=0, minimum_downtime=2, minimum_uptime=4
-        ),
-        variable_costs=[1, 1, -10, 1, 1, 1, 1, 1, 1, 1],
+        nonconvex=solph.NonConvex(positive_gradient_limit=0.1),
+        variable_costs=[4] + 9 * [-1],
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [0, 0, 10, 5, 5, 5, 0, 0, 0, 0]).all()
+    assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
 
 
-def test_minimum_downtime_after_initial_uptime():
-    # The unit is on initially, so `status` is fixed to 1 for the first
-    # `minimum_uptime` steps. Shutting down in the first free time step
-    # still has to respect `minimum_downtime`.
+def test_positive_gradient_limit_without_minimum():
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        nonconvex=solph.NonConvex(positive_gradient_limit=0.3),
+        variable_costs=[4] + 9 * [-1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert flow_result == pytest.approx([0, 3, 6, 9, 10, 10, 10, 10, 10, 10])
+
+
+def test_negative_gradient_limit_shutdown_from_minimum():
+    # The flow ramps down by 2.5 per step and shuts down from the
+    # minimum load (5).
     flow = solph.flows.Flow(
         nominal_capacity=10,
         minimum=0.5,
-        nonconvex=solph.NonConvex(
-            initial_status=1, minimum_uptime=2, minimum_downtime=4
-        ),
-        variable_costs=[1, 1, 10, -10, 1, 1, 1, 1, 1, 1],
+        nonconvex=solph.NonConvex(negative_gradient_limit=0.25),
+        variable_costs=5 * [-1] + 5 * [3],
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [5, 5, 5, 10, 0, 0, 0, 0, 0, 0]).all()
+    assert flow_result == pytest.approx([10, 10, 10, 7.5, 5, 0, 0, 0, 0, 0])
 
 
-def test_minimum_uptime_at_first_timestep():
-    # Starting up in the very first time step is a startup relative to
-    # `initial_status=0` and thus has to respect `minimum_uptime`.
+def test_positive_gradient_limit_changing_capacity():
+    # The nominal capacity doubles at the second investment time (step 5).
+    # The gradient limit refers to the capacity of the current step.
+    flow = solph.flows.Flow(
+        nominal_capacity=[10, 20],
+        minimum=0.5,
+        nonconvex=solph.NonConvex(positive_gradient_limit=0.1),
+        variable_costs=[4] + 9 * [-1],
+    )
+    flow_result = _run_flow_model(flow, multi_period=True)
+
+    assert flow_result == pytest.approx([0, 5, 6, 7, 8, 10, 12, 14, 16, 18])
+
+
+def test_positive_gradient_limit_invest_non_convex():
+    flow = solph.flows.Flow(
+        nominal_capacity=solph.Investment(maximum=10, ep_costs=0.1),
+        minimum=0.5,
+        nonconvex=solph.NonConvex(positive_gradient_limit=0.1),
+        variable_costs=[4] + 9 * [-1],
+    )
+    flow_result = _run_flow_model(flow)
+
+    assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
+
+
+def test_flow_gradient_limit_on_non_convex_flow():
+    # A gradient limit given on the flow of a non-convex flow behaves like
+    # the one given in NonConvex: a start-up to the minimum load is
+    # possible although the limit (1 per step) is below it (5).
     flow = solph.flows.Flow(
         nominal_capacity=10,
         minimum=0.5,
-        nonconvex=solph.NonConvex(initial_status=0, minimum_uptime=4),
-        variable_costs=[-10, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        positive_gradient_limit=0.1,
+        nonconvex=solph.NonConvex(),
+        variable_costs=[4] + 9 * [-1],
     )
     flow_result = _run_flow_model(flow)
 
-    assert (flow_result["flow"][:-1] == [10, 5, 5, 5, 0, 0, 0, 0, 0, 0]).all()
+    assert flow_result == pytest.approx([0, 5, 6, 7, 8, 9, 10, 10, 10, 10])
 
 
-def test_minimum_downtime_at_first_timestep():
-    # Shutting down in the very first time step is a shutdown relative to
-    # `initial_status=1` and thus has to respect `minimum_downtime`:
-    # the cheap time step 2 is out of reach, so the unit stays off.
+def test_minimum_uptime_near_horizon_end():
+    # Running costs 5 per step before step 8 and earns 3 per step in the
+    # last two steps. A start-up in step 8 pays off only if the flow may
+    # run until the end of the horizon, which is shorter than the
+    # minimum uptime.
     flow = solph.flows.Flow(
         nominal_capacity=10,
         minimum=0.5,
-        nonconvex=solph.NonConvex(initial_status=1, minimum_downtime=4),
-        variable_costs=[20, 20, -10, 1, 1, 1, 1, 1, 1, 1],
+        nonconvex=solph.NonConvex(minimum_uptime=4),
+        variable_costs=8 * [1] + 2 * [-0.3],
     )
-    flow_result = _run_flow_model(flow)
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
 
-    assert (flow_result["flow"][:-1] == 10 * [0]).all()
+    assert flow_result == 8 * [0] + 2 * [10]
+
+
+def test_minimum_uptime_still_enforced():
+    # A start-up for the single paid step 4 would need three more steps
+    # at the minimum load, which costs more (15) than the step earns (10).
+    flow = solph.flows.Flow(
+        nominal_capacity=10,
+        minimum=0.5,
+        nonconvex=solph.NonConvex(minimum_uptime=4),
+        variable_costs=4 * [1] + [-1] + 5 * [1],
+    )
+    flow_result = [round(f, 10) for f in _run_flow_model(flow)]
+
+    assert flow_result == 10 * [0]

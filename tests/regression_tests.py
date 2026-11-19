@@ -1,3 +1,5 @@
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+
 # -*- coding: utf-8 -
 
 """Regression tests.

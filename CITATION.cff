@@ -1,4 +1,8 @@
 # YAML 1.2
+# SPDX-FileCopyrightText: oemof e.V. and contributors
+#
+# SPDX-License-Identifier: CC0-1.0
+
 ---
 cff-version: "1.2.0"
 doi: "10.5281/zenodo.596235"
@@ -97,6 +101,10 @@ authors:
     alias: "@nesnoj"
     orcid: "https://orcid.org/0000-0002-8563-5261"
   -
+    given-names: Julius
+    family-names: Ellermann
+    alias: "@3LL3RM4NN"
+  -
     given-names: Lena
     family-names: Rosin
     alias: "@leroum"
@@ -118,6 +126,10 @@ authors:
     family-names: Hillen
     alias: "@Maxhi77"
     orcid: "https://orcid.org/0000-0002-8171-2661"
+  -
+    given-names: Mohammad
+    family-names: Hamarsheh
+    alias: "@hamarshehmhmd"
   -
     given-names: Patrik
     family-names: "Schönfeldt"
@@ -156,6 +168,11 @@ authors:
     given-names: Stephan
     family-names: "Günther"
     alias: "@gnn"
+  -
+    given-names: Syed
+    family-names: Inayatullah
+    alias: "@inayatku"
+    orcid: "https://orcid.org/0000-0002-8576-4653"
   -
     given-names: Tjark
     family-names: Smalla

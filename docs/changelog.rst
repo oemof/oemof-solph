@@ -1,8 +1,13 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
 Changelog
 =========
 
 These are new features and improvements of note in each release
 
+.. include::  whatsnew/v0-6-6.rst
 .. include::  whatsnew/v0-6-5.rst
 .. include::  whatsnew/v0-6-4.rst
 .. include::  whatsnew/v0-6-3.rst

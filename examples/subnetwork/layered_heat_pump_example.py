@@ -24,7 +24,7 @@ This example requires oemof.solph (at least v0.6.1), install by:
 
 License
 -------
-`MIT license <https://github.com/oemof/oemof-solph/blob/dev/LICENSE>`_
+SPDX-License-Identifier: MIT
 
 SPDX-FileCopyrightText: Patrik Schönfeldt <patrik.schoenfeldt@dlr.de>
 SPDX-FileCopyrightText: Deutsches Zentrum für Luft- und Raumfahrt (DLR)

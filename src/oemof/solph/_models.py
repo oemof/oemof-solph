@@ -17,15 +17,15 @@ SPDX-License-Identifier: MIT
 
 import logging
 import warnings
-from collections import namedtuple
+from dataclasses import dataclass
 from logging import getLogger
 
-from oemof.tools import debugging
+import pandas as pd
 from pyomo import environ as po
 from pyomo.contrib import appsi
-from pyomo.core.plugins.transform.relax_integrality import RelaxIntegrality
 from pyomo.opt import SolverFactory
 
+from oemof.solph import EnergySystem
 from oemof.solph import processing
 from oemof.solph.buses._bus import BusBlock
 from oemof.solph.components._converter import ConverterBlock
@@ -45,6 +45,46 @@ class LoggingError(BaseException):
     pass
 
 
+@dataclass
+class SolverResults:
+    """SolverResults holds the summary results of the solver run.
+
+    Parameters
+    ----------
+    optimal : bool
+        Whether the optimisation terminated with an optimal solution.
+    status : str | int | None
+        Solver status (e.g. ``ok`` or ``5``) returned by the solver.
+    termination_condition : str | None
+        Termination condition reported by the solver (e.g. ``"optimal"``).
+    message : str | None
+        Optional solver message.
+    wallclock_time : float | None
+        Wall-clock time the solver took to solve the problem in seconds.
+    objective : float | None
+        Objective function value of the solution.
+    solver : str
+        Name of the solver used (e.g. ``"cbc"``, ``"highs"``).
+    gap : float | None
+        Relative optimality gap of the solution, if available.
+    best_feasible_objective : float | None
+        Best feasible objective value found by the solver.
+    best_objective_bound : float | None
+        Best objective bound reported by the solver.
+    """
+
+    optimal: bool
+    status: str | int | None
+    termination_condition: str | None
+    message: str | None
+    wallclock_time: float | None
+    objective: float | None
+    solver: str
+    gap: float | None
+    best_feasible_objective: float | None
+    best_objective_bound: float | None
+
+
 class Model(po.ConcreteModel):
     """An energy system model for operational and/or investment
     optimization.
@@ -57,11 +97,6 @@ class Model(po.ConcreteModel):
         Solph looks for these groups in the given energy system and uses them
         to create the constraints of the optimization problem.
         Defaults to `Model.CONSTRAINT_GROUPS`
-    objective_weighting : array like (optional)
-        Weights used for temporal objective function
-        expressions. If nothing is passed, `timeincrement` will be used which
-        is calculated from the freq length of the energy system timeindex or
-        can be directly passed as a sequence.
     auto_construct : boolean
         If this value is true, the set, variables, constraints, etc. are added,
         automatically when instantiating the model. For sequential model
@@ -75,12 +110,8 @@ class Model(po.ConcreteModel):
         Time increments
     flows : dict
         Flows of the model
-    name : str
-        Name of the model
     es : solph.EnergySystem
         Energy system of the model
-    meta : `pyomo.opt.results.results_.SolverResults` or None
-        Solver results
     dual : `pyomo.core.base.suffix.Suffix` or None
         Store the dual variables of the model if pyomo suffix is set to IMPORT
     rc : `pyomo.core.base.suffix.Suffix` or None
@@ -95,7 +126,7 @@ class Model(po.ConcreteModel):
     TIMESTEPS
         A set with all timesteps of the given time horizon.
 
-    PERIODS
+    CAPACITY_PERIODS
         A set with all investment periods of the given time horizon.
 
     TIMEINDEX
@@ -125,14 +156,21 @@ class Model(po.ConcreteModel):
         InvestNonConvexFlowBlock,
     ]
 
-    def __init__(self, energysystem, **kwargs):
+    def __init__(
+        self,
+        energysystem: EnergySystem,
+        *,
+        constraint_groups: list[po.ScalarBlock] = None,
+        auto_construct: bool = True,
+        debug: bool = False,
+    ):
         super().__init__()
 
         # Check root logger. Due to a problem with pyomo the building of the
         # model will take up to a 100 times longer if the root logger is set
         # to DEBUG
 
-        if getLogger().level <= 10 and kwargs.get("debug", False) is False:
+        if getLogger().level <= 10 and debug is False:
             msg = (
                 "The root logger level is 'DEBUG'.\nDue to a communication "
                 "problem between solph and the pyomo package,\nusing the "
@@ -148,24 +186,14 @@ class Model(po.ConcreteModel):
 
         # ########################  Arguments #################################
 
-        self.name = kwargs.get("name", type(self).__name__)
-
         self.es = energysystem
+        self.timeincrement = self.es.timeincrement
 
-        if kwargs.get("timeincrement"):
-            msg = "Resetting timeincrement from EnergySystem in Model."
-            warnings.warn(msg, debugging.SuspiciousUsageWarning)
+        if constraint_groups is None:
+            constraint_groups = []
 
-            self.timeincrement = kwargs.get("timeincrement")
-        else:
-            self.timeincrement = self.es.timeincrement
-
-        self.objective_weighting = kwargs.get(
-            "objective_weighting", self.timeincrement
-        )
-
-        self._constraint_groups = type(self).CONSTRAINT_GROUPS + kwargs.get(
-            "constraint_groups", []
+        self._constraint_groups = (
+            type(self).CONSTRAINT_GROUPS + constraint_groups
         )
 
         self._constraint_groups += [
@@ -173,23 +201,29 @@ class Model(po.ConcreteModel):
             for i in self.es.groups
             if hasattr(i, "CONSTRAINT_GROUP")
             and i not in self._constraint_groups
-        ]
+        ][::-1]  # invert to add constraints of subnodes first
 
         self.flows = self.es.flows()
 
-        self.solver_results = None
         self.dual = None
         self.rc = None
 
-        if energysystem.periods is not None:
-            self.discount_rate = kwargs.get("discount_rate")
-            if self.discount_rate is None:
-                self._set_discount_rate_with_warning()
-        else:
-            pass
-
-        if kwargs.get("auto_construct", True):
+        if auto_construct is True:
             self._construct()
+        self._solver_results = None
+        self.solver_return = None
+
+    @property
+    def solver_results(self):
+        warnings.warn(
+            "'solver_results' attribute is deprecated and will be removed in "
+            "a future version. Use the 'solver' attribute of the Results "
+            "object or 'solver_return' if you need the original return "
+            "object.",
+            FutureWarning,
+            stacklevel=2,
+        )
+        return self._solver_results
 
     def _construct(self):
         """Construct a Model by adding parent block sets and variables
@@ -200,22 +234,10 @@ class Model(po.ConcreteModel):
         self._add_child_blocks()
         self._add_objective()
 
-    def _set_discount_rate_with_warning(self):
-        """
-        Sets the discount rate to the standard value and raises a warning.
-        """
-        self.discount_rate = 0.02
-        msg = (
-            f"By default, a discount_rate of {self.discount_rate} "
-            f"is used for a multi-period model. "
-            f"If you want to use another value, "
-            f"you have to specify the `discount_rate` attribute."
-        )
-        warnings.warn(msg, debugging.SuspiciousUsageWarning)
-
     def _add_parent_block_sets(self):
         """Add all basic sets to the model, i.e. NODES, TIMESTEPS and FLOWS.
-        Also create sets PERIODS and TIMEINDEX used for multi-period models.
+        Also create sets CAPACITY_PERIODS and TIMEINDEX used for
+        formulti-period models.
         """
         self.nodes = list(self.es.nodes)
 
@@ -237,7 +259,7 @@ class Model(po.ConcreteModel):
             initialize=range(len(self.es.timeincrement) + 1), ordered=True
         )
 
-        if self.es.periods is None:
+        if self.es.transitional_single_period:
             self.TIMEINDEX = po.Set(
                 initialize=list(
                     zip(
@@ -247,11 +269,11 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(initialize=[0])
+            self.CAPACITY_PERIODS = po.Set(initialize=[0], ordered=True)
         else:
             nested_list = [
-                [k] * len(self.es.periods[k])
-                for k in range(len(self.es.periods))
+                [k] * len(self.es.capacity_periods[k])
+                for k in range(len(self.es.capacity_periods))
             ]
             flattened_list = [
                 item for sublist in nested_list for item in sublist
@@ -262,12 +284,15 @@ class Model(po.ConcreteModel):
                 ),
                 ordered=True,
             )
-            self.PERIODS = po.Set(
-                initialize=sorted(list(set(range(len(self.es.periods)))))
+            self.CAPACITY_PERIODS = po.Set(
+                initialize=sorted(
+                    list(set(range(len(self.es.capacity_periods))))
+                ),
+                ordered=True,
             )
 
         # (Re-)Map timesteps to periods
-        timesteps_in_period = {p: [] for p in self.PERIODS}
+        timesteps_in_period = {p: [] for p in self.CAPACITY_PERIODS}
         for p, t in self.TIMEINDEX:
             timesteps_in_period[p].append(t)
         self.TIMESTEPS_IN_PERIOD = timesteps_in_period
@@ -282,7 +307,7 @@ class Model(po.ConcreteModel):
             # Construct weighting from occurrences and order
             self.tsam_weighting = list(
                 self.es.tsa_parameters[p]["occurrences"][k]
-                for p in self.PERIODS
+                for p in self.CAPACITY_PERIODS
                 for k in range(len(self.es.tsa_parameters[p]["occurrences"]))
                 for _ in range(self.es.tsa_parameters[p]["timesteps"])
             )
@@ -291,7 +316,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                     )
                 )
@@ -301,7 +326,7 @@ class Model(po.ConcreteModel):
                     range(
                         sum(
                             len(self.es.tsa_parameters[p]["order"])
-                            for p in self.PERIODS
+                            for p in self.CAPACITY_PERIODS
                         )
                         + 1
                     )
@@ -310,7 +335,7 @@ class Model(po.ConcreteModel):
             self.TYPICAL_CLUSTERS = po.Set(
                 initialize=[
                     (p, i)
-                    for p in self.PERIODS
+                    for p in self.CAPACITY_PERIODS
                     for i in range(
                         len(self.es.tsa_parameters[p]["occurrences"])
                     )
@@ -360,31 +385,36 @@ class Model(po.ConcreteModel):
         for o, i in self.FLOWS:
             if self.flows[o, i].nominal_capacity is not None:
                 if self.flows[o, i].fix is not None:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].value = (
-                            self.flows[o, i].fix[t]
-                            * self.flows[o, i].nominal_capacity
-                        )
-                        self.flow[o, i, t].fix()
-                else:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setub(
-                            self.flows[o, i].maximum[t]
-                            * self.flows[o, i].nominal_capacity
-                        )
-                    if not self.flows[o, i].nonconvex:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(
-                                self.flows[o, i].minimum[t]
-                                * self.flows[o, i].nominal_capacity
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].value = (
+                                self.flows[o, i].fix[t]
+                                * self.flows[o, i].nominal_capacity[p]
                             )
+                            self.flow[o, i, t].fix()
+                else:
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].setub(
+                                self.flows[o, i].maximum[t]
+                                * self.flows[o, i].nominal_capacity[p]
+                            )
+                    if not self.flows[o, i].nonconvex:
+                        for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                            for t in timesteps:
+                                self.flow[o, i, t].setlb(
+                                    self.flows[o, i].minimum[t]
+                                    * self.flows[o, i].nominal_capacity[p]
+                                )
                     elif (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                        for t in self.TIMESTEPS:
-                            self.flow[o, i, t].setlb(0)
+                        for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                            for t in timesteps:
+                                self.flow[o, i, t].setlb(0)
             else:
                 if (o, i) in self.UNIDIRECTIONAL_FLOWS:
-                    for t in self.TIMESTEPS:
-                        self.flow[o, i, t].setlb(0)
+                    for p, timesteps in self.TIMESTEPS_IN_PERIOD.items():
+                        for t in timesteps:
+                            self.flow[o, i, t].setlb(0)
 
     def _add_child_blocks(self):
         """Method to add the defined child blocks for components that have
@@ -418,13 +448,28 @@ class Model(po.ConcreteModel):
         self.objective = po.Objective(sense=sense, expr=expr)
 
     def receive_duals(self):
+        warnings.warn(
+            "Model.receive_duals() is deprecated. Use "
+            "Model.solve(duals=True) instead.",
+            FutureWarning,
+        )
+        self._receive_duals()
+
+    def _receive_duals(self):
         """Method sets solver suffix to extract information about dual
         variables from solver. Shadow prices (duals) and reduced costs (rc) are
         set as attributes of the model.
         """
-        # shadow prices
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
+        if self.dual is None:
+            del self.dual
         self.dual = po.Suffix(direction=po.Suffix.IMPORT)
-        # reduced costs
+
+        # Pyomo warns when setting attributes that already exist,
+        # so we need to delete them first.
+        if self.rc is None:
+            del self.rc
         self.rc = po.Suffix(direction=po.Suffix.IMPORT)
 
     def results(self):
@@ -438,9 +483,7 @@ class Model(po.ConcreteModel):
         )
         return processing.results(self)
 
-    def solve_highs(
-        self, solver_info, cmdline_options=None, solve_kwargs=None
-    ):
+    def _solve_highs(self, solver, cmdline_options=None, solve_kwargs=None):
         opt = appsi.solvers.Highs()
         opt.config.load_solution = False
 
@@ -449,31 +492,60 @@ class Model(po.ConcreteModel):
 
         opt.highs_options = cmdline_options
 
-        appsi_results = opt.solve(self)
-        tc = appsi_results.termination_condition
-
-        solver_results = {
-            "termination_condition": tc.name,
-            "best_feasible_objective": appsi_results.best_feasible_objective,
-            "best_objective_bound": appsi_results.best_objective_bound,
-            "wallclock_time": appsi_results.wallclock_time,
-        }
+        self.solver_return = opt.solve(self)
+        tc = self.solver_return.termination_condition
 
         optimal = tc == appsi.base.TerminationCondition.optimal
 
-        if optimal or appsi_results.best_feasible_objective is not None:
-            appsi_results.solution_loader.load_vars()
+        if optimal or self.solver_return.best_feasible_objective is not None:
+            self.solver_return.solution_loader.load_vars()
+        if self.dual is not None:
+            try:
+                duals = opt.get_duals()
+                for c, v in duals.items():
+                    self.dual[c] = v
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract dual variables from HiGHS. This "
+                    "typically happens for MIP models, where duals are not "
+                    "well-defined.",
+                    UserWarning,
+                )
 
-        return solver_info(
+        if self.rc is not None:
+            try:
+                reduced_costs = opt.get_reduced_costs()
+                for v_, val in reduced_costs.items():
+                    self.rc[v_] = val
+            except RuntimeError:
+                warnings.warn(
+                    "Could not extract reduced costs from HiGHS. This "
+                    "typically happens for MIP models, where reduced costs "
+                    "are not well-defined.",
+                    UserWarning,
+                )
+
+        bfo = self.solver_return.best_feasible_objective
+        bob = self.solver_return.best_objective_bound
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
+        else:
+            gap = None
+
+        return SolverResults(
+            objective=bfo,
+            solver=solver,
             optimal=optimal,
-            termination_condition=tc,
+            termination_condition=tc.name,
             status=tc.value,
-            solver_results=solver_results,
+            wallclock_time=self.solver_return.wallclock_time,
+            best_objective_bound=bob,
+            best_feasible_objective=bfo,
+            gap=gap,
+            message=f"Problem solved using '{solver}' with appsi-API of Pyomo",
         )
 
-    def solve_factory(
-        self, solver_info, solver, solver_io, solve_kwargs, cmdline_options
-    ):
+    def _solve_factory(self, solver, solver_io, solve_kwargs, cmdline_options):
         opt = SolverFactory(solver, solver_io=solver_io)
 
         # set command line options
@@ -481,16 +553,37 @@ class Model(po.ConcreteModel):
         for k in cmdline_options:
             options[k] = cmdline_options[k]
 
-        factory_results = opt.solve(self, **solve_kwargs)
+        solve_kwargs = dict(solve_kwargs)
+        solve_kwargs["suffixes"] = ["dual", "rc"]
 
-        status = factory_results.Solver.Status
-        message = factory_results.Solver.Termination_condition
+        self.solver_return = opt.solve(self, **solve_kwargs)
 
-        return solver_info(
-            optimal=status == "ok" and message == "optimal",
-            termination_condition=message,
-            status=factory_results.Solver.Status,
-            solver_results=factory_results,
+        status = self.solver_return.Solver.Status
+        tc = self.solver_return.Solver.Termination_condition
+        msg = getattr(self.solver_return.Solver, "Message", None)
+        wt = getattr(self.solver_return.Solver, "Time", None)
+        bfo = getattr(self.solver_return.Problem[0], "Upper_bound", None)
+        bob = getattr(self.solver_return.Problem[0], "Lower_bound", None)
+        if bfo not in (None, 0) and bob is not None:
+            gap = abs(bfo - bob) / abs(bfo)
+        else:
+            gap = None
+        try:
+            objective = po.value(self.objective)
+        except ValueError:
+            objective = None
+
+        return SolverResults(
+            optimal=status == "ok" and tc == "optimal",
+            solver=solver,
+            objective=objective,
+            termination_condition=tc.name,
+            status=status.name,
+            wallclock_time=wt,
+            best_feasible_objective=bfo,
+            best_objective_bound=bob,
+            gap=gap,
+            message=msg,
         )
 
     def solve(
@@ -498,6 +591,7 @@ class Model(po.ConcreteModel):
         solver="cbc",
         solver_io="lp",
         allow_nonoptimal=False,
+        duals=False,
         solve_kwargs=None,
         cmdline_options=None,
     ):
@@ -514,6 +608,8 @@ class Model(po.ConcreteModel):
             True: If no optimal solution is found, there will be a warning.
             This is an option for experts. There will be no results in case
             no optimum is found.
+        duals : bool
+            Receive dual variables and reduced cost.
         solve_kwargs : dict
             Other arguments for the pyomo.opt.SolverFactory.solve() method
             Example : {"tee":True}
@@ -528,53 +624,71 @@ class Model(po.ConcreteModel):
             solve_kwargs = {}
         if cmdline_options is None:
             cmdline_options = {}
-        solver_info = namedtuple(
-            "SolverReturn",
-            ["optimal", "solver_results", "termination_condition", "status"],
-        )
+        if duals:
+            self._receive_duals()
+
         if solver == "highs":
-            solver_return = self.solve_highs(
-                solver_info=solver_info,
+            solver_info = self._solve_highs(
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
+                solver=solver,
             )
         else:
-            solver_return = self.solve_factory(
-                solver_info=solver_info,
+            solver_info = self._solve_factory(
                 solver=solver,
                 solver_io=solver_io,
                 solve_kwargs=solve_kwargs,
                 cmdline_options=cmdline_options,
             )
 
-        self.es.results = solver_return.solver_results
-        self.solver_results = solver_return.solver_results
+        # The solver_results attribute is deprecated and will be removed in
+        # future versions To access the original solver return use
+        # Model.solver_return
+        if solver_info.solver == "highs":
+            self._solver_results = self.solver_return.__dict__
+        else:
+            self._solver_results = self.solver_return
 
-        if solver_return.optimal:
-            msg = "Optimization successful."
+        # --- BEGIN: To be removed for versions >= v0.7 ---
+        # EnergySystem.results is not defined in oemof.network but only added
+        # at runtime. Thus, we also implement depreciation here.
+        self.es._results = self._solver_results
+
+        def results(self):
+            warnings.warn(
+                "EnergySystem.results is deprecated and will be removed in a"
+                " future version. Use solph.Results instead.",
+                FutureWarning,
+            )
+            return self._results
+
+        EnergySystem.results = property(results)
+        # --- END ---
+
+        if solver_info.optimal:
+            msg = "Optimisation successful."
             logging.info(msg)
         else:
             msg = (
                 f"The solver did not return an optimal solution. "
-                f"Instead the optimization ended with\n"
-                f"       - status: {solver_return.status}\n"
+                f"Instead the optimisation ended with\n"
+                f"       - status: {solver_info.status}\n"
                 f"       - termination condition: "
-                f"{solver_return.termination_condition.name}"
+                f"{solver_info.termination_condition}"
             )
 
             if allow_nonoptimal:
                 warnings.warn(msg, UserWarning)
-                return solver_return.solver_results
             else:
                 raise RuntimeError(msg)
 
-        return Results(self)
+        # The solver_info is a pandas Series. It is accessible using
+        # Results.solver
+        return Results(self, solver_info=pd.Series(solver_info.__dict__))
 
     def relax_problem(self):
         """Relaxes integer variables to reals of optimization model self."""
-        relaxer = RelaxIntegrality()
-        relaxer._apply_to(self)
-
+        po.TransformationFactory("core.relax_integer_vars").apply_to(self)
         return self
 
     def get_timestep_from_tsam_timestep(self, p, ik, g):

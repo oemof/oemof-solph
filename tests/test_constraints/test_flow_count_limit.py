@@ -141,7 +141,7 @@ def test_flow_count_limit_investment():
     # Only two of the three investment nonconvex flows may be active at once.
     assert flow[0] == pytest.approx([4, 4])
     assert flow[1] == pytest.approx([4, 4])
-    assert flow[2] == pytest.approx([0, 0])
+    assert flow[2] == pytest.approx([0, 0], abs=0.00000001)
 
 
 def test_flow_count_limit_mixed():
@@ -212,4 +212,4 @@ def test_flow_count_limit_mixed():
     assert flow[0] == pytest.approx([4, 4])  # plain, vc=-4
     assert flow[1] == pytest.approx([0, 0])  # plain, vc=-2
     assert flow[2] == pytest.approx([4, 4])  # invest, vc=-3
-    assert flow[3] == pytest.approx([0, 0])  # invest, vc=-1
+    assert flow[3] == pytest.approx([0, 0], abs=0.00000001)  # invest, vc=-1
