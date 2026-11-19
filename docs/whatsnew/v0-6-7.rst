@@ -1,0 +1,27 @@
+.. SPDX-FileCopyrightText: oemof e.V. and contributors
+..
+.. SPDX-License-Identifier: MIT
+
+v0.6.7
+------
+
+API changes
+###########
+
+New features
+############
+
+Documentation
+#############
+
+Bug fixes
+#########
+
+Other changes
+#############
+
+Contributors
+############
+
+Acknowledgements
+################
