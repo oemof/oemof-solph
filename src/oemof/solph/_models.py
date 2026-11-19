@@ -679,7 +679,6 @@ class Model(po.ConcreteModel):
 
             if allow_nonoptimal:
                 warnings.warn(msg, UserWarning)
-                return self.solver_return
             else:
                 raise RuntimeError(msg)
 

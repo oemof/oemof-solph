@@ -41,13 +41,14 @@ New features
 * Added a solver attribute to the Results class to get the return values of
   the solver in a structured way
 * Added dual-variables and reduced cost to the Results class
+* `Model.solve(allow_nonoptimal=True)` will now return a `Results` object.
+  (It of course will not contain real results but solver infos.)
 
 Documentation
 #############
 
 Bug fixes
 #########
-
 
 * Gradient limits of `NonConvex` flows had no effect: the limit values were
   not applied. The constraints also multiplied the flow by the binary status,
