@@ -44,7 +44,6 @@ def main():
 
     print(results["flow"])
     print(results["nominal_capacity"])
-    print(results["objective"])
 
 
 if __name__ == "__main__":
