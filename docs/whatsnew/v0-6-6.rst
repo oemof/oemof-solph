@@ -2,8 +2,8 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-v0.6.6
-------
+v0.6.6 (November 19th, 2026)
+----------------------------
 
 API changes
 ###########
@@ -41,13 +41,11 @@ New features
 * Added a solver attribute to the Results class to get the return values of
   the solver in a structured way
 * Added dual-variables and reduced cost to the Results class
-
-Documentation
-#############
+* `Model.solve(allow_nonoptimal=True)` will now return a `Results` object.
+  (It of course will not contain real results but solver infos.)
 
 Bug fixes
 #########
-
 
 * Gradient limits of `NonConvex` flows had no effect: the limit values were
   not applied. The constraints also multiplied the flow by the binary status,
@@ -61,11 +59,16 @@ Bug fixes
   steps was impossible, even if the flow stayed on until the end of the
   horizon. Near the end, a start-up now requires the flow to stay on until
   the last time step, as `minimum_downtime` already does for shut-downs.
-
-* Variable costs returned wrong values if the variable cost of the flow was a constant
+* Fixed a memory leak that occured when one script instanciated multiple
+  energy EnergySystem instances.
+* Variable costs returned wrong values if the variable cost of the flow
+  was a constant.
 * An investment `GenericStorage` ignored `min_storage_level` if it was
   non-zero only at the last time point. The lower bound on the storage
   content is now applied in this case as well (#1354).
+* _FakeSequence multiplication was not commutative with pd.Series,
+  this was fixed by providing a value higher than 1 to the __array_priority__
+  attribute of the _FakeSequence class
 
 
 Other changes
@@ -84,6 +87,3 @@ Contributors
 * Syed Inayatullah
 * Mohammad Hamarsheh
 * Pierre-Francois Duc (RLI)
-
-Acknowledgements
-################

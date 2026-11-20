@@ -249,9 +249,9 @@ def main(optimize=True, solver="cbc"):
     # ********** PART 2 - Processing the results ******************************
     # *************************************************************************
 
-    # These are the keys to access information from the Results()
+    # These are the keys to access information from the Results
     keys = results.keys()
-    print("\n********* Keys to access information from Results() *********")
+    print("\n********* Keys to access information from Results *********")
     for key in keys:
         print("Key: {}".format(key))
 

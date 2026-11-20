@@ -24,7 +24,6 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 from pyomo.environ import Set
 
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 from oemof.solph._plumbing import sequence
 from oemof.solph.components import Converter
@@ -93,9 +92,6 @@ class VariableSplitConverter(Converter):
     ...    conversion_factors_secondary_state={bel: 0.48, bth: 0.10})
     """  # noqa: E501
 
-    conversion_factors_secondary_state = Apply(SequenceDict)
-    conversion_factors = Apply(SequenceDict)
-
     def __init__(
         self,
         label=None,
@@ -149,6 +145,22 @@ class VariableSplitConverter(Converter):
                 ]
             ):
                 raise ValueError("That is not okay.")
+
+    @property
+    def conversion_factors(self):
+        return self._conversion_factors
+
+    @conversion_factors.setter
+    def conversion_factors(self, value):
+        self._conversion_factors = SequenceDict(value)
+
+    @property
+    def conversion_factors_secondary_state(self):
+        return self._conversion_factors_secondary_state
+
+    @conversion_factors_secondary_state.setter
+    def conversion_factors_secondary_state(self, value):
+        self._conversion_factors_secondary_state = SequenceDict(value)
 
     def constraint_group(self):
         return VariableSplitConverterBlock

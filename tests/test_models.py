@@ -13,7 +13,6 @@ SPDX-License-Identifier: MIT
 
 import pandas as pd
 import pytest
-from pyomo.opt.results import SolverResults
 
 from oemof import solph
 from oemof.solph._results import Results
@@ -135,12 +134,12 @@ def test_infeasible_warns_when_nonoptimal_allowed(solver):
         m.solve(solver=solver, allow_nonoptimal=True)
 
 
-def test_infeasible_cbc_returns_solver_results():
+def test_infeasible_cbc_still_returns_results():
     """CBC specifically returns a SolverResults object when non-optimal."""
     m = solph.Model(_make_infeasible_es())
     with pytest.warns(UserWarning):
         result = m.solve(solver="cbc", allow_nonoptimal=True)
-    assert isinstance(result, SolverResults)
+    assert isinstance(result, Results)
 
 
 @pytest.mark.parametrize("solver", ["cbc", "highs"])

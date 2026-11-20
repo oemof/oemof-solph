@@ -75,6 +75,8 @@ def sequence(iterable_or_scalar, length=None):
                 f"Length mismatch: Cannot create sequence of length {length}"
                 + " from input {iterable_or_scalar}."
             )
+        elif isinstance(iterable_or_scalar, str):
+            return iterable_or_scalar
         else:
             return np.array(iterable_or_scalar)
     else:
@@ -121,54 +123,12 @@ class SequenceDict(UserDict):
         self.data[key] = sequence(value)
 
 
-class Apply:
-    """Apply `converter` to values assigned to this attribute.
-
-    Whenever a `value` is assigned to an attribute that uses this
-    descriptor, what's actually stored is the result of
-    `converter(value)`, e.g.:
-
-    >>> class Inverter:
-    ...     inverted = Apply(lambda x: -x)
-    ...
-    >>> one = Inverter()
-    >>> one.inverted = 1
-    >>> one.inverted
-    -1
-
-    """
-
-    unset = object()
-
-    def __init__(self, converter, default=unset):
-        self.converter = converter
-        self.default = default
-
-        self.data = {}
-        self.name = None
-
-    def __get__(self, obj, objtype=None):
-        if (id(obj) not in self.data) and (self.default is self.unset):
-            raise AttributeError(
-                f"attribute '{self.name}' of '{objtype.__name__}'"
-                " object accessed before being assigned a value"
-            )
-        return self.data.get(id(obj), self.default)
-
-    def __set__(self, obj, value):
-        self.data[id(obj)] = self.converter(value)
-
-    def __set_name__(self, owner, name):
-        self.name = name
-
-
 class _FakeSequence:
     """Emulates a numpy.array which length is not known in advance.
 
     Parameters
     ----------
     value : scalar
-    length : integer
 
 
     Examples
@@ -180,6 +140,8 @@ class _FakeSequence:
     >>> s[1337]
     42
     """
+
+    __array_priority__ = 2.0
 
     def __init__(self, value: Number):
         self._value = value
