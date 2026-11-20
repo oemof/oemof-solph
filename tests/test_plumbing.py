@@ -62,7 +62,7 @@ def test_sequence():
     assert isinstance(npa13, np.ndarray)
 
     pds13 = sequence(pd.Series([1, 3]))
-    assert isinstance(pds13, pd.Series)
+    assert isinstance(pds13, np.ndarray)
 
 
 def test_fake_sequence_slice():
@@ -297,7 +297,7 @@ def test_fake_sequence_multiplication_and_division():
     assert (seq3 == np.array([42, 84])).all()
 
     seq4 = seq1 * pd.Series([1, 2])
-    assert isinstance(seq4, pd.Series)
+    assert isinstance(seq4, np.ndarray)
     assert (seq4 == [42, 84]).all()
     assert isinstance(seq4[0], float)
 
