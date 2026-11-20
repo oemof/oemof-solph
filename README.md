@@ -10,21 +10,21 @@
 | src/oemof/solph/\_groupings.py                              |       28 |        0 |       12 |        3 |     92.50% |69-\>72, 83-\>86, 95-\>98 |
 | src/oemof/solph/\_helpers.py                                |       26 |        2 |       10 |        0 |     94.44% |   118-120 |
 | src/oemof/solph/\_models.py                                 |      223 |        0 |       90 |        0 |    100.00% |           |
-| src/oemof/solph/\_options.py                                |       96 |        2 |       30 |        1 |     96.03% |   128-129 |
-| src/oemof/solph/\_plumbing.py                               |      116 |        0 |       28 |        0 |    100.00% |           |
+| src/oemof/solph/\_options.py                                |      165 |        2 |       30 |        1 |     97.44% |   168-169 |
+| src/oemof/solph/\_plumbing.py                               |      101 |        0 |       26 |        0 |    100.00% |           |
 | src/oemof/solph/\_results.py                                |      141 |        5 |       60 |        4 |     95.52% |103, 105, 256, 268-\>266, 292-293 |
 | src/oemof/solph/buses/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/buses/\_bus.py                              |       38 |        0 |       16 |        2 |     96.30% |53-\>55, 55-\>57 |
 | src/oemof/solph/components/\_\_init\_\_.py                  |       13 |        0 |        0 |        0 |    100.00% |           |
-| src/oemof/solph/components/\_converter.py                   |       51 |        2 |       24 |        1 |     96.00% |110-\>113, 241-242 |
+| src/oemof/solph/components/\_converter.py                   |       55 |        2 |       24 |        1 |     96.20% |107-\>110, 246-247 |
 | src/oemof/solph/components/\_extraction\_turbine\_chp.py    |        9 |        0 |        0 |        0 |    100.00% |           |
-| src/oemof/solph/components/\_generic\_chp.py                |      148 |       15 |       20 |        8 |     86.31% |136-\>138, 180, 218-222, 345, 487, 501-509, 523-529, 544 |
-| src/oemof/solph/components/\_generic\_storage.py            |      468 |       14 |      174 |       11 |     94.55% |211-\>213, 558, 631-634, 780-\>787, 782-\>780, 926-927, 1508, 1590-\>1597, 1592-\>1590, 1633-1639, 1865-1872 |
-| src/oemof/solph/components/\_link.py                        |       56 |        2 |       24 |        5 |     91.25% |99-\>101, 172, 185-\>exit, 186-\>185, 187-\>186, 200 |
-| src/oemof/solph/components/\_offset\_converter.py           |      117 |       28 |       34 |        3 |     79.47% |196, 214, 248-290, 349 |
+| src/oemof/solph/components/\_generic\_chp.py                |      152 |       15 |       20 |        8 |     86.63% |133-\>135, 177, 215-219, 350, 492, 506-514, 528-534, 549 |
+| src/oemof/solph/components/\_generic\_storage.py            |      522 |       14 |      174 |       11 |     94.97% |198-\>200, 633, 706-709, 855-\>862, 857-\>855, 1001-1002, 1583, 1668-\>1675, 1670-\>1668, 1712-1718, 1945-1952 |
+| src/oemof/solph/components/\_link.py                        |       60 |        2 |       24 |        5 |     91.67% |96-\>98, 177, 190-\>exit, 191-\>190, 192-\>191, 205 |
+| src/oemof/solph/components/\_offset\_converter.py           |      126 |       28 |       34 |        3 |     80.62% |192, 210, 260-302, 361 |
 | src/oemof/solph/components/\_sink.py                        |       10 |        0 |        4 |        0 |    100.00% |           |
 | src/oemof/solph/components/\_source.py                      |       10 |        0 |        4 |        0 |    100.00% |           |
-| src/oemof/solph/components/\_variable\_split\_converter.py  |       96 |        0 |       38 |        0 |    100.00% |           |
+| src/oemof/solph/components/\_variable\_split\_converter.py  |      105 |        0 |       38 |        0 |    100.00% |           |
 | src/oemof/solph/constraints/\_\_init\_\_.py                 |       12 |        0 |        0 |        0 |    100.00% |           |
 | src/oemof/solph/constraints/equate\_flows.py                |       20 |        0 |       10 |        1 |     96.67% |   50-\>46 |
 | src/oemof/solph/constraints/equate\_variables.py            |        7 |        0 |        2 |        1 |     88.89% |   91-\>94 |
@@ -34,16 +34,16 @@
 | src/oemof/solph/constraints/shared\_limit.py                |       15 |        0 |        4 |        0 |    100.00% |           |
 | src/oemof/solph/constraints/storage\_level.py               |       76 |       38 |       20 |        2 |     50.00% |114-179, 192, 263-329, 342 |
 | src/oemof/solph/flows/\_\_init\_\_.py                       |        2 |        0 |        0 |        0 |    100.00% |           |
-| src/oemof/solph/flows/\_flow.py                             |       98 |        0 |       52 |        1 |     99.33% | 261-\>267 |
+| src/oemof/solph/flows/\_flow.py                             |      132 |        0 |       52 |        1 |     99.46% | 250-\>256 |
 | src/oemof/solph/flows/\_invest\_non\_convex\_flow\_block.py |      104 |        1 |       24 |        2 |     97.66% |140-\>exit, 308 |
-| src/oemof/solph/flows/\_investment\_flow\_block.py          |      114 |        9 |       46 |        3 |     90.00% |209-\>exit, 448-455, 466-474, 485-491, 592 |
+| src/oemof/solph/flows/\_investment\_flow\_block.py          |      114 |        9 |       46 |        3 |     90.00% |209-\>exit, 449-456, 467-475, 486-492, 593 |
 | src/oemof/solph/flows/\_non\_convex\_flow\_block.py         |       54 |        1 |       10 |        2 |     95.31% |93-\>92, 141 |
 | src/oemof/solph/flows/\_shared.py                           |      175 |        4 |       46 |        6 |     95.48% |366, 376, 464, 492, 623-\>622, 651-\>650 |
 | src/oemof/solph/flows/\_simple\_flow\_block.py              |       92 |        0 |       40 |        1 |     99.24% | 389-\>388 |
 | src/oemof/solph/helpers.py                                  |       20 |        1 |        8 |        2 |     89.29% |28, 37-\>39 |
 | src/oemof/solph/processing.py                               |      366 |       65 |      156 |       13 |     82.38% |60, 63-\>exit, 75, 109-111, 159-165, 197-204, 268, 273, 300-310, 325, 332, 422-458, 500, 547, 673-687, 726-729, 829, 832-835, 847-848, 971 |
 | src/oemof/solph/views.py                                    |      132 |        3 |       50 |        5 |     95.60% |68, 91, 96, 296-\>299, 340-\>342 |
-| **TOTAL**                                                   | **3220** |  **220** | **1160** |   **90** | **91.78%** |           |
+| **TOTAL**                                                   | **3392** |  **220** | **1158** |   **90** | **92.09%** |           |
 
 
 ## Setup coverage badge
