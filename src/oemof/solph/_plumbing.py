@@ -22,12 +22,10 @@ import numpy as np
 def sequence(iterable_or_scalar, length=None):
     """Casts iterable_or_scalar to an object that allows element access.
 
-    Technically, it checks if an object is iterable or scalar. For scalars
-    * it creates a numpy array of the given length (if proveded), or
-    * a _FakeSequence (has every length, see below).
-    For iterables, it checks the length and an success
-    * casts lists to numpy array, or
-    * just lets the iterable pass.
+    Technically, it checks if an object is iterable or scalar and returns a
+    numpy array if the object is an iterable or the length is given, or a
+    _FakeSequence if the length cannot be infered.
+    This way, we can (possibly) define a sequence of unknown length if needed.
 
     Parameters
     ----------
@@ -77,10 +75,10 @@ def sequence(iterable_or_scalar, length=None):
                 f"Length mismatch: Cannot create sequence of length {length}"
                 + " from input {iterable_or_scalar}."
             )
-        elif isinstance(iterable_or_scalar, list):
-            return np.array(iterable_or_scalar)
-        else:
+        elif isinstance(iterable_or_scalar, str):
             return iterable_or_scalar
+        else:
+            return np.array(iterable_or_scalar)
     else:
         return _FakeSequence(value=iterable_or_scalar)
 
@@ -123,51 +121,6 @@ class SequenceDict(UserDict):
 
     def __setitem__(self, key, value):
         self.data[key] = sequence(value)
-
-
-class Apply:
-    """Apply `converter` to values assigned to this attribute.
-
-    Whenever a `value` is assigned to an attribute that uses this
-    descriptor, what's actually stored is the result of
-    `converter(value)`, e.g.:
-
-    >>> class Inverter:
-    ...     inverted = Apply(lambda x: -x)
-    ...
-    >>> one = Inverter()
-    >>> one.inverted = 1
-    >>> one.inverted
-    -1
-
-    Note that the default is the default value,
-    i.e. the `converter` is not applied to the default.
-    """
-
-    unset = object()
-
-    def __init__(self, converter, default=unset):
-        self.converter = converter
-        self.default = default
-        self.name = None
-
-    # The converted value lives in the instance's own __dict__ (a data
-    # descriptor takes precedence over it on lookup), so it is released
-    # together with the instance.
-    def __get__(self, obj, objtype=None):
-        data = obj.__dict__
-        if (self.name not in data) and (self.default is self.unset):
-            raise AttributeError(
-                f"attribute '{self.name}' of '{objtype.__name__}'"
-                " object accessed before being assigned a value"
-            )
-        return data.get(self.name, self.default)
-
-    def __set__(self, obj, value):
-        obj.__dict__[self.name] = self.converter(value)
-
-    def __set_name__(self, owner, name):
-        self.name = name
 
 
 class _FakeSequence:

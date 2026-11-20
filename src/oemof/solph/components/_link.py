@@ -27,7 +27,6 @@ from pyomo.environ import BuildAction
 from pyomo.environ import Constraint
 
 from oemof.solph._helpers import warn_if_missing_attribute
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 
 
@@ -80,8 +79,6 @@ class Link(Node):
     0.8
     """
 
-    conversion_factors = Apply(SequenceDict)
-
     def __init__(
         self,
         label=None,
@@ -129,6 +126,14 @@ class Link(Node):
             or len(self.conversion_factors) != 2
         ):
             warn(msg, debugging.SuspiciousUsageWarning)
+
+    @property
+    def conversion_factors(self):
+        return self._conversion_factors
+
+    @conversion_factors.setter
+    def conversion_factors(self, value):
+        self._conversion_factors = SequenceDict(value)
 
     def constraint_group(self):
         return LinkBlock

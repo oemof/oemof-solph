@@ -2,7 +2,7 @@
 ..
 .. SPDX-License-Identifier: MIT
 
-v0.6.6 (November 19th, 2026)
+v0.6.7 (November 20th, 2026)
 ----------------------------
 
 API changes
@@ -23,8 +23,8 @@ API changes
 * Deprecate `processing.meta_results`. It now issues a `FutureWarning`
   pointing to the `Results` class (e.g. `results.solver`) and no longer
   fails for appsi solvers such as HiGHS (#1343).
-* Depreciate `solver_results` attribute from EnergySystem class. It will be replaced by
-  the new `solver_return` attribute.
+* Depreciate `solver_results` attribute from EnergySystem class.
+  It will be replaced by the new `solver_return` attribute.
 * The variables `positive_gradient` and `negative_gradient` of
   `NonConvexFlowBlock` and `InvestNonConvexFlowBlock` are removed. The
   gradient limits of `NonConvex` flows are now written directly in terms of
@@ -60,15 +60,18 @@ Bug fixes
   horizon. Near the end, a start-up now requires the flow to stay on until
   the last time step, as `minimum_downtime` already does for shut-downs.
 * Fixed a memory leak that occured when one script instanciated multiple
-  energy EnergySystem instances.
+  energy EnergySystem instances. (To avoid such problems in the future,
+  we refactored a lot of code after fixing the problem, as this problem
+  was hard to spot/ trace.)
 * Variable costs returned wrong values if the variable cost of the flow
   was a constant.
 * An investment `GenericStorage` ignored `min_storage_level` if it was
   non-zero only at the last time point. The lower bound on the storage
   content is now applied in this case as well (#1354).
-* _FakeSequence multiplication was not commutative with pd.Series,
-  this was fixed by providing a value higher than 1 to the __array_priority__
-  attribute of the _FakeSequence class
+* `_FakeSequence` multiplication was not commutative with pd.Series,
+  this was fixed by providing a value higher than 1 to the `__array_priority__`
+  attribute of the `_FakeSequence` class. (Return type still depends on the
+  order.)
 
 
 Other changes

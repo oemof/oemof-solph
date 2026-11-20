@@ -29,7 +29,6 @@ from oemof.network import Edge
 from oemof.tools import debugging
 
 from oemof.solph._options import Investment
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -107,16 +106,6 @@ class Flow(Edge):
     >>> f1.maximum[1]
     0.99
     """  # noqa: E501
-
-    fix = Apply(sequence)
-    maximum = Apply(sequence)
-    minimum = Apply(sequence)
-    nominal_capacity = Apply(sequence)
-
-    variable_costs = Apply(sequence)
-
-    positive_gradient_limit = Apply(sequence)
-    negative_gradient_limit = Apply(sequence)
 
     def __init__(
         self,
@@ -328,3 +317,59 @@ class Flow(Edge):
                 "Investment into a non-convex flows needs a maximum "
                 + "investment to be set."
             )
+
+    @property
+    def fix(self):
+        return self._fix
+
+    @fix.setter
+    def fix(self, value):
+        self._fix = sequence(value)
+
+    @property
+    def maximum(self):
+        return self._maximum
+
+    @maximum.setter
+    def maximum(self, value):
+        self._maximum = sequence(value)
+
+    @property
+    def minimum(self):
+        return self._minimum
+
+    @minimum.setter
+    def minimum(self, value):
+        self._minimum = sequence(value)
+
+    @property
+    def nominal_capacity(self):
+        return self._nominal_capacity
+
+    @nominal_capacity.setter
+    def nominal_capacity(self, value):
+        self._nominal_capacity = sequence(value)
+
+    @property
+    def variable_costs(self):
+        return self._variable_costs
+
+    @variable_costs.setter
+    def variable_costs(self, value):
+        self._variable_costs = sequence(value)
+
+    @property
+    def positive_gradient_limit(self):
+        return self._positive_gradient_limit
+
+    @positive_gradient_limit.setter
+    def positive_gradient_limit(self, value):
+        self._positive_gradient_limit = sequence(value)
+
+    @property
+    def negative_gradient_limit(self):
+        return self._negative_gradient_limit
+
+    @negative_gradient_limit.setter
+    def negative_gradient_limit(self, value):
+        self._negative_gradient_limit = sequence(value)
