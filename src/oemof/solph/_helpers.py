@@ -20,8 +20,8 @@ import datetime
 from warnings import warn
 
 import pandas as pd
-from oemof.tools import debugging
 from oemof.network import Node
+from oemof.tools import debugging
 
 
 def check_node_object_for_missing_attribute(obj: Node, attribute: str):

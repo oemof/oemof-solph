@@ -17,6 +17,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from collections.abc import Callable
+
 from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock
 from pyomo.environ import BuildAction
@@ -24,8 +26,6 @@ from pyomo.environ import Constraint
 from pyomo.environ import Piecewise
 from pyomo.environ import Set
 from pyomo.environ import Var
-
-from collections.abc import Callable
 
 
 class PiecewiseLinearConverter(Node):

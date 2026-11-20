@@ -24,8 +24,8 @@ SPDX-License-Identifier: MIT
 
 import math
 import numbers
-from warnings import warn
 from collections.abc import Iterable
+from warnings import warn
 
 from oemof.network import Node
 from pyomo.core.base.block import ScalarBlock

@@ -12,9 +12,9 @@ SPDX-License-Identifier: MIT
 """
 
 import logging
+from collections.abc import Iterable
 
 import pandas as pd
-from collections.abc import Iterable
 
 from oemof import solph
 

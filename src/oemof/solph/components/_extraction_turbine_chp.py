@@ -22,6 +22,7 @@ SPDX-License-Identifier: MIT
 import warnings
 
 from oemof.network import Node
+
 from oemof.solph.components._variable_split_converter import (
     VariableSplitConverter,
 )

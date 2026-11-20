@@ -23,10 +23,10 @@ SPDX-License-Identifier: MIT
 """
 
 from collections.abc import Callable
-from pyomo.environ import ScalarBlock
 
-from oemof.network import groupings as groupings
 from oemof.network import Node
+from oemof.network import groupings as groupings
+from pyomo.environ import ScalarBlock
 
 from oemof.solph.flows._flow import Flow
 from oemof.solph.flows._invest_non_convex_flow_block import (
