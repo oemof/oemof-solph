@@ -162,9 +162,7 @@ def main(optimize=True, solver="cbc"):
         return es
 
     model = solph.Model(es)
-    model.solve()
-
-    results = solph.Results(model)
+    results = model.solve()
 
     print(results["flow"].columns)
 

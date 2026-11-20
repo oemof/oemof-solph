@@ -27,7 +27,6 @@ from pyomo.environ import NonNegativeReals
 from pyomo.environ import Set
 from pyomo.environ import Var
 
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -119,8 +118,6 @@ class GenericCHP(Node):
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """
-
-    beta = Apply(sequence)
 
     def __init__(
         self,
@@ -232,6 +229,14 @@ class GenericCHP(Node):
 
     def constraint_group(self):
         return GenericCHPBlock
+
+    @property
+    def beta(self):
+        return self._beta
+
+    @beta.setter
+    def beta(self, value):
+        self._beta = sequence(value)
 
 
 class GenericCHPBlock(ScalarBlock):

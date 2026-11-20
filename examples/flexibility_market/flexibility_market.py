@@ -18,7 +18,7 @@ from oemof import solph
 
 BATTERY_CAPACITY = 50
 
-def create_model():
+def main():
     es = solph.EnergySystem(timeindex=solph.create_time_index(2026, 1, 24))
 
     driving_pattern = np.array(
@@ -116,16 +116,14 @@ def create_model():
         "discharge_limit_build",
         po.BuildAction(rule=_limit_flow_rule),
     )
+    results = model.solve()
 
-    return model
+    return results
 
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
-    model = create_model()
-    model.solve()
-
-    results = solph.Results(model)
+    results = main()
 
     results["flow"].plot(drawstyle="steps-post")
     results["storage_content"].plot.area()
