@@ -13,24 +13,10 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
 from oemof.solph._plumbing import _FakeSequence
 from oemof.solph._plumbing import sequence
 from oemof.solph._plumbing import valid_sequence
-
-
-def test_apply_descriptor_raises_without_default():
-    """Accessing an Apply-descriptor attribute before it was ever set,
-    and without a default value, must raise AttributeError
-    (covers _plumbing.py line 152)."""
-
-    class Foo:
-        value = Apply(lambda x: x)
-
-    foo = Foo()
-    with pytest.raises(AttributeError, match="accessed before being"):
-        foo.value
 
 
 def test_fake_sequence_access():
@@ -342,51 +328,6 @@ def test_sequence_dict():
     assert d1[3][0] == 20
 
 
-def test_Apply_descriptor():
-    class TestClass:
-        x = Apply(sequence)
-        y = Apply(converter=sequence, default="y")
-
-        def __init__(self, x):
-            self.x = x
-            if x is not None:
-                self.y = x
-
-    i0 = TestClass(None)
-    assert i0.x is None
-    assert i0.y == "y"
-
-    i1 = TestClass(1)
-    assert i1.x[0] == 1
-    assert i1.y[42] == 1
-
-    i2 = TestClass([1, 2])
-    assert (i2.x == [1, 2]).all()
-    assert (i2.y == [1, 2]).all()
-
-
-def test_using_Apply_to_convert_to_numeric():
-    class TestClass:
-        i = Apply(converter=int)
-        f = Apply(converter=float)
-
-        def __init__(self, x):
-            self.i = x
-            self.f = x
-
-    i1 = TestClass(1)
-    assert isinstance(i1.i, int)
-    assert isinstance(i1.f, float)
-    assert i1.i == 1
-    assert i1.f == 1
-
-    i2 = TestClass(2.0)
-    assert isinstance(i2.i, int)
-    assert isinstance(i2.f, float)
-    assert i2.i == 2
-    assert i2.f == 2
-
-
 def test_dimension_is_too_high_to_create_a_sequence():
     df = pd.DataFrame({"epc": 5}, index=["a"])
     with pytest.raises(ValueError, match="Dimension too high"):
@@ -412,43 +353,3 @@ def test_valid_sequence():
 
     # _FakeSequence has every length
     assert valid_sequence(fake_sequence, 1337)
-
-
-def test_multi_apply():
-    class Inverter:
-        value = Apply(lambda x: -x, default=42)
-
-    inverter = Inverter()
-    assert inverter.value == 42
-
-    inverter.value = 1
-    assert inverter.value == -1
-
-    inverter.value = 2
-    assert inverter.value == -2
-
-
-def test_apply_values_are_released_with_their_instance():
-    """A value set through Apply must not outlive its instance, and a new
-    instance must not see a dead instance's value when its id is reused."""
-    import gc
-    import weakref
-
-    class Value:
-        pass
-
-    class Foo:
-        x = Apply(lambda v: v, default="unset")
-
-    foo = Foo()
-    foo.x = Value()
-    value_ref = weakref.ref(foo.x)
-    del foo
-    gc.collect()
-    assert value_ref() is None
-
-    for i in range(100):
-        foo = Foo()
-        foo.x = i
-        del foo
-        assert Foo().x == "unset"

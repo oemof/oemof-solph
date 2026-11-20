@@ -20,7 +20,6 @@ from warnings import warn
 
 from oemof.tools import debugging
 
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
 
@@ -67,13 +66,6 @@ class Investment:
 
     """  # noqa: E501
 
-    ep_costs = Apply(sequence)
-    existing = Apply(sequence)
-    maximum = Apply(sequence)
-    minimum = Apply(sequence)
-    offset = Apply(sequence)
-    lifetime = Apply(sequence)
-
     def __init__(
         self,
         maximum=float("+inf"),
@@ -118,6 +110,54 @@ class Investment:
         self._check_invest_attributes_offset()
         self._check_invest_attributes_nonconvex()
         self._check_nonconvex()
+
+    @property
+    def ep_costs(self):
+        return self._ep_costs
+
+    @ep_costs.setter
+    def ep_costs(self, value):
+        self._ep_costs = sequence(value)
+
+    @property
+    def existing(self):
+        return self._existing
+
+    @existing.setter
+    def existing(self, value):
+        self._existing = sequence(value)
+
+    @property
+    def maximum(self):
+        return self._maximum
+
+    @maximum.setter
+    def maximum(self, value):
+        self._maximum = sequence(value)
+
+    @property
+    def minimum(self):
+        return self._minimum
+
+    @minimum.setter
+    def minimum(self, value):
+        self._minimum = sequence(value)
+
+    @property
+    def offset(self):
+        return self._offset
+
+    @offset.setter
+    def offset(self, value):
+        self._offset = sequence(value)
+
+    @property
+    def lifetime(self):
+        return self._lifetime
+
+    @lifetime.setter
+    def lifetime(self, value):
+        self._lifetime = sequence(value)
 
     def relevant_periods(
         self,
@@ -232,15 +272,6 @@ class NonConvex:
         the minimum load.
     """
 
-    activity_costs = Apply(sequence)
-    inactivity_costs = Apply(sequence)
-    minimum_downtime = Apply(sequence)
-    minimum_uptime = Apply(sequence)
-    negative_gradient_limit = Apply(sequence)
-    positive_gradient_limit = Apply(sequence)
-    shutdown_costs = Apply(sequence)
-    startup_costs = Apply(sequence)
-
     def __init__(
         self,
         initial_status=0,
@@ -294,3 +325,67 @@ class NonConvex:
             self.first_flexible_timestep = self.minimum_downtime[0]
         else:
             self.first_flexible_timestep = self.minimum_uptime[0]
+
+    @property
+    def activity_costs(self):
+        return self._activity_costs
+
+    @activity_costs.setter
+    def activity_costs(self, value):
+        self._activity_costs = sequence(value)
+
+    @property
+    def inactivity_costs(self):
+        return self._inactivity_costs
+
+    @inactivity_costs.setter
+    def inactivity_costs(self, value):
+        self._inactivity_costs = sequence(value)
+
+    @property
+    def minimum_downtime(self):
+        return self._minimum_downtime
+
+    @minimum_downtime.setter
+    def minimum_downtime(self, value):
+        self._minimum_downtime = sequence(value)
+
+    @property
+    def minimum_uptime(self):
+        return self._minimum_uptime
+
+    @minimum_uptime.setter
+    def minimum_uptime(self, value):
+        self._minimum_uptime = sequence(value)
+
+    @property
+    def negative_gradient_limit(self):
+        return self._negative_gradient_limit
+
+    @negative_gradient_limit.setter
+    def negative_gradient_limit(self, value):
+        self._negative_gradient_limit = sequence(value)
+
+    @property
+    def positive_gradient_limit(self):
+        return self._positive_gradient_limit
+
+    @positive_gradient_limit.setter
+    def positive_gradient_limit(self, value):
+        self._positive_gradient_limit = sequence(value)
+
+    @property
+    def shutdown_costs(self):
+        return self._shutdown_costs
+
+    @shutdown_costs.setter
+    def shutdown_costs(self, value):
+        self._shutdown_costs = sequence(value)
+
+    @property
+    def startup_costs(self):
+        return self._startup_costs
+
+    @startup_costs.setter
+    def startup_costs(self, value):
+        self._startup_costs = sequence(value)

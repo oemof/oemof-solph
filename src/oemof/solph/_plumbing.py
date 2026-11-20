@@ -125,51 +125,6 @@ class SequenceDict(UserDict):
         self.data[key] = sequence(value)
 
 
-class Apply:
-    """Apply `converter` to values assigned to this attribute.
-
-    Whenever a `value` is assigned to an attribute that uses this
-    descriptor, what's actually stored is the result of
-    `converter(value)`, e.g.:
-
-    >>> class Inverter:
-    ...     inverted = Apply(lambda x: -x)
-    ...
-    >>> one = Inverter()
-    >>> one.inverted = 1
-    >>> one.inverted
-    -1
-
-    Note that the default is the default value,
-    i.e. the `converter` is not applied to the default.
-    """
-
-    unset = object()
-
-    def __init__(self, converter, default=unset):
-        self.converter = converter
-        self.default = default
-        self.name = None
-
-    # The converted value lives in the instance's own __dict__ (a data
-    # descriptor takes precedence over it on lookup), so it is released
-    # together with the instance.
-    def __get__(self, obj, objtype=None):
-        data = obj.__dict__
-        if (self.name not in data) and (self.default is self.unset):
-            raise AttributeError(
-                f"attribute '{self.name}' of '{objtype.__name__}'"
-                " object accessed before being assigned a value"
-            )
-        return data.get(self.name, self.default)
-
-    def __set__(self, obj, value):
-        obj.__dict__[self.name] = self.converter(value)
-
-    def __set_name__(self, owner, name):
-        self.name = name
-
-
 class _FakeSequence:
     """Emulates a numpy.array which length is not known in advance.
 

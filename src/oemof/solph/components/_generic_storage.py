@@ -38,7 +38,6 @@ from pyomo.environ import Var
 
 from oemof.solph._helpers import check_node_object_for_missing_attribute
 from oemof.solph._options import Investment
-from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 from oemof.solph._plumbing import valid_sequence
 from oemof.solph.flows import Flow
@@ -165,18 +164,6 @@ class GenericStorage(Node):
     ...     outflow_conversion_factor=0.8)
     """  # noqa: E501
 
-    fixed_losses_absolute = Apply(sequence)
-    fixed_losses_relative = Apply(sequence)
-    inflow_conversion_factor = Apply(sequence)
-    invest_relation_input_capacity = Apply(sequence)
-    invest_relation_input_output = Apply(sequence)
-    invest_relation_output_capacity = Apply(sequence)
-    loss_rate = Apply(sequence)
-    max_storage_level = Apply(sequence)
-    min_storage_level = Apply(sequence)
-    outflow_conversion_factor = Apply(sequence)
-    storage_costs = Apply(sequence)
-
     def __init__(
         self,
         label=None,
@@ -279,6 +266,94 @@ class GenericStorage(Node):
             flow = next(v for k, v in self.inputs.items())
             self.max_charge_capacity = flow.nominal_capacity
             self.relative_charge_limit = flow.maximum
+
+    @property
+    def fixed_losses_absolute(self):
+        return self._fixed_losses_absolute
+
+    @fixed_losses_absolute.setter
+    def fixed_losses_absolute(self, value):
+        self._fixed_losses_absolute = sequence(value)
+
+    @property
+    def fixed_losses_relative(self):
+        return self._fixed_losses_relative
+
+    @fixed_losses_relative.setter
+    def fixed_losses_relative(self, value):
+        self._fixed_losses_relative = sequence(value)
+
+    @property
+    def inflow_conversion_factor(self):
+        return self._inflow_conversion_factor
+
+    @inflow_conversion_factor.setter
+    def inflow_conversion_factor(self, value):
+        self._inflow_conversion_factor = sequence(value)
+
+    @property
+    def invest_relation_input_capacity(self):
+        return self._invest_relation_input_capacity
+
+    @invest_relation_input_capacity.setter
+    def invest_relation_input_capacity(self, value):
+        self._invest_relation_input_capacity = sequence(value)
+
+    @property
+    def invest_relation_input_output(self):
+        return self._invest_relation_input_output
+
+    @invest_relation_input_output.setter
+    def invest_relation_input_output(self, value):
+        self._invest_relation_input_output = sequence(value)
+
+    @property
+    def invest_relation_output_capacity(self):
+        return self._invest_relation_output_capacity
+
+    @invest_relation_output_capacity.setter
+    def invest_relation_output_capacity(self, value):
+        self._invest_relation_output_capacity = sequence(value)
+
+    @property
+    def loss_rate(self):
+        return self._loss_rate
+
+    @loss_rate.setter
+    def loss_rate(self, value):
+        self._loss_rate = sequence(value)
+
+    @property
+    def max_storage_level(self):
+        return self._max_storage_level
+
+    @max_storage_level.setter
+    def max_storage_level(self, value):
+        self._max_storage_level = sequence(value)
+
+    @property
+    def min_storage_level(self):
+        return self._min_storage_level
+
+    @min_storage_level.setter
+    def min_storage_level(self, value):
+        self._min_storage_level = sequence(value)
+
+    @property
+    def outflow_conversion_factor(self):
+        return self._outflow_conversion_factor
+
+    @outflow_conversion_factor.setter
+    def outflow_conversion_factor(self, value):
+        self._outflow_conversion_factor = sequence(value)
+
+    @property
+    def storage_costs(self):
+        return self._storage_costs
+
+    @storage_costs.setter
+    def storage_costs(self, value):
+        self._storage_costs = sequence(value)
 
     def _check_number_of_flows(self):
         """Ensure that there is only one inflow and outflow to the storage"""
@@ -1516,6 +1591,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
         )
 
         if not m.TSAM_MODE:
+
             def _storage_balance_rule(block, n, t):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1548,6 +1624,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_storage_balance_rule,
             )
         else:
+
             def _intra_storage_balance_rule(block, n, p, k, g):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1581,6 +1658,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
             )
 
         if m.TSAM_MODE:
+
             def _inter_storage_balance_rule(block, n, i):
                 """
                 Rule definition for the storage balance of every storage n and
@@ -1614,6 +1692,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_inter_storage_balance_rule,
             )
         else:
+
             def _balanced_storage_rule(block, n):
                 return (
                     block.storage_content[n, m.TIMEPOINTS.at(-1)]
@@ -1766,6 +1845,7 @@ class GenericInvestmentStorageBlock(ScalarBlock):
                 rule=_min_storage_content_invest_rule,
             )
         else:
+
             def _storage_inter_maximum_level_rule(block):
                 for n in self.INVESTSTORAGES:
                     for p, i, g in m.TIMEINDEX_CLUSTER:
