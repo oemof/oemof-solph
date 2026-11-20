@@ -58,10 +58,10 @@ def main():
 
     HEAT_PUMP_NOMINAL_POWER = 200  # kW
     HEAT_PUMP_EFFICIENCY = 0.45
-    HEAT_PUMP_OUTLET_TEMPERATURE = 45  # °C
+    HEAT_PUMP_OUTLET_TEMPERATURE = 35  # °C
 
     FRESH_WATER_TEMPERATURE = 10  # °C
-    SPACE_HEATING_TEMPERATURE = 25  # °C
+    SPACE_HEATING_TEMPERATURE = 30  # °C
     TAP_WATER_TEMPERATURE = 40  # °C
 
     SOLAR_COLLECTOR_BIG_M = 1500  # kW
@@ -186,7 +186,7 @@ def main():
     storage_warm = GenericStorage(
         label="storage_warm",
         nominal_capacity=WARM_STORAGE_CAPACITY,
-        min_storage_level=SPACE_HEATING_TEMPERATURE/WARM_STORAGE_CAPACITY,
+        min_storage_level=SPACE_HEATING_TEMPERATURE / WARM_STORAGE_CAPACITY,
         max_storage_level=0.60,  # maximum 60 °C
         balanced=True,
         loss_rate=0,
