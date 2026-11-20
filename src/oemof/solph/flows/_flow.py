@@ -28,7 +28,8 @@ import numpy as np
 from oemof.network import Edge
 from oemof.tools import debugging
 
-from oemof.solph._options import Investment, NonConvex
+from oemof.solph._options import Investment
+from oemof.solph._options import NonConvex
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import sequence
 
@@ -137,10 +138,11 @@ class Flow(Edge):
         full_load_time_min: float | None = None,
         integer: bool = False,
         # --- BEGIN: To be removed for versions >= v0.7 ---
-        bidirectional: bool =False,
+        bidirectional: bool = False,
         # --- END
         nonconvex: NonConvex | None = None,
-        custom_attributes: dict | None = None,  # To be removed for versions >= v0.7
+        custom_attributes: dict
+        | None = None,  # To be removed for versions >= v0.7
         custom_properties: dict | None = None,
     ):
         # TODO: Check if we can inherit from pyomo.core.base.var _VarData

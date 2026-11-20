@@ -12,10 +12,16 @@ SPDX-License-Identifier: MIT
 
 """
 
-from pyomo import environ as po
+from __future__ import annotations
+
 from collections.abc import Iterable
+from typing import TYPE_CHECKING
+
 from oemof.network import Node
-from oemof.solph import Model
+from pyomo import environ as po
+
+if TYPE_CHECKING:
+    from oemof.solph._models import Model
 
 
 def limit_active_flow_count(

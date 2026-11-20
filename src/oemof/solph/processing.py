@@ -41,7 +41,6 @@ from ._plumbing import _FakeSequence
 from .helpers import flatten
 
 if TYPE_CHECKING:
-    # import only for type checkers, ImportError otherwise
     from oemof.solph._energy_system import EnergySystem
     from oemof.solph._models import Model
 

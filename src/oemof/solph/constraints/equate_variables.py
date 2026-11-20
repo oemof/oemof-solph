@@ -9,9 +9,14 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pyomo import environ as po
 
-from oemof.solph import Model
+if TYPE_CHECKING:
+    from oemof.solph._models import Model
 
 
 def equate_variables(

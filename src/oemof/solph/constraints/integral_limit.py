@@ -13,13 +13,19 @@ SPDX-License-Identifier: MIT
 
 """
 
-import warnings
+from __future__ import annotations
 
-from pyomo import environ as po
+import warnings
+from typing import TYPE_CHECKING
 
 from oemof.network import Node
+from pyomo import environ as po
+
 from oemof.solph._plumbing import sequence
-from oemof.solph import Model, Flow
+
+if TYPE_CHECKING:
+    from oemof.solph._models import Model
+    from oemof.solph.flows._flow import Flow
 
 
 def emission_limit(

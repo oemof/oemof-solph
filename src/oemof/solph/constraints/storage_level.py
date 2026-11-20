@@ -7,10 +7,17 @@ SPDX-FileCopyrightText: Deutsches Zentrum für Luft- und Raumfahrt (DLR)
 SPDX-License-Identifier: MIT
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from pyomo import environ as po
 
-from oemof.solph import Model, Bus
 from oemof.solph.components import GenericStorage
+
+if TYPE_CHECKING:
+    from oemof.solph._models import Model
+    from oemof.solph.buses._bus import Bus
 
 
 def storage_level_constraint(

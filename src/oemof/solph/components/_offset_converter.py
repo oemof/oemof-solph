@@ -20,6 +20,8 @@ SPDX-License-Identifier: MIT
 
 """
 
+from __future__ import annotations
+
 from oemof.network import Node
 from pyomo.core import BuildAction
 from pyomo.core.base.block import ScalarBlock
@@ -28,7 +30,7 @@ from pyomo.environ import Set
 
 from oemof.solph._plumbing import Apply
 from oemof.solph._plumbing import SequenceDict
-from oemof.solph.components import Bus
+from oemof.solph.buses._bus import Bus
 
 
 class OffsetConverter(Node):
