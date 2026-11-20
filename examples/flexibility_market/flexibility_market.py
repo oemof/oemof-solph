@@ -123,9 +123,7 @@ if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     model = create_model()
-    model.solve()
-
-    results = solph.Results(model)
+    results = model.solve()
 
     results["flow"].plot(drawstyle="steps-post")
     results["storage_content"].plot.area()

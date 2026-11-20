@@ -253,7 +253,7 @@ def main(optimize=True, solver="cbc"):
 
     # if tee_switch is true solver messages will be displayed
     logging.info("Solve the optimization problem")
-    energysystem_model.solve(
+    results = energysystem_model.solve(
         solver=solver, solve_kwargs={"tee": solver_verbose}
     )
 
@@ -261,8 +261,6 @@ def main(optimize=True, solver="cbc"):
 
     # The processing module of the outputlib can be used to extract the results
     # from the model transfer them into a homogeneous structured dictionary.
-
-    results = Results(energysystem_model)
 
     result_dict = processing.results(energysystem_model)
 

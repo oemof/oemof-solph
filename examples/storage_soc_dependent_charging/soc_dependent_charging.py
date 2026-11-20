@@ -108,9 +108,9 @@ def main(optimize=True, solver="cbc"):
 
     logging.info("Optimise the energy system")
     om = solph.Model(energysystem)
-    om.solve(solver=solver, solve_kwargs={"tee": False})
+    results = om.solve(solver=solver, solve_kwargs={"tee": False})
 
-    return solph.Results(om)
+    return results
 
 
 if __name__ == "__main__":
