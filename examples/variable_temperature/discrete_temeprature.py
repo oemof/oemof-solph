@@ -31,13 +31,11 @@ from oemof.solph import EnergySystem
 from oemof.solph import Flow
 from oemof.solph import Flow
 from oemof.solph import Model
-from oemof.solph import NonConvex
 from oemof.solph import Results
 from oemof.solph.components import Converter
 from oemof.solph.components import GenericStorage
 from oemof.solph.components import Sink
 from oemof.solph.components import Source
-from oemof.solph.constraints import limit_active_flow_count_by_keyword
 from oemof.solph.constraints import shared_limit
 
 from _shared import celsius2kelvin
@@ -113,21 +111,31 @@ def main():
     )
     es.add(bus_el, input_grid_el)
 
+    # Solar power budget
+    #
+    # This replaces a binary either/or decision (e.g. limit_active_flow_count)
+    # by allowing fractional use as long as the total usage does not exceed
+    # a combined limit.
+    ##########################################################################
+    bus_st = Bus(label="bus_st")
+    input_solar = Source(
+        label="source_st",
+        outputs={bus_st: Flow(nominal_capacity=1)},
+    )
+    es.add(bus_st, input_solar)
+
     # Cold solar collector heat (15 °C, before heat pump)
     # We use freezing point (0 °C) as reference point.
     ####################################################################
 
     bus_heat_cold = Bus(label=f"heat_{COLD_STORAGE_TEMPERATURE}")
 
-    input_sol_cold = Source(
+    input_sol_cold = Converter(
         label="Collector cold",
-        outputs={
-            bus_heat_cold: Flow(
-                nominal_capacity=1,
-                maximum=Q_st_raw(COLD_STORAGE_TEMPERATURE).clip(lower=0),
-                nonconvex=NonConvex(),
-                custom_properties={"solar_thermal": True},
-            )
+        inputs={bus_st: Flow()},
+        outputs={bus_heat_cold: Flow()},
+        conversion_factors={
+            bus_heat_cold: Q_st_raw(COLD_STORAGE_TEMPERATURE).clip(lower=0),
         },
     )
 
@@ -177,15 +185,12 @@ def main():
         },
     )
 
-    input_sol_warm = Source(
+    input_sol_warm = Converter(
         label="Collector Warm",
-        outputs={
-            bus_heat_sh: Flow(
-                nominal_capacity=1,
-                maximum=Q_st_raw(SPACE_HEATING_TEMPERATURE).clip(lower=0),
-                nonconvex=NonConvex(),
-                custom_properties={"solar_thermal": True},
-            )
+        inputs={bus_st: Flow()},
+        outputs={bus_heat_sh: Flow()},
+        conversion_factors={
+            bus_heat_sh: Q_st_raw(SPACE_HEATING_TEMPERATURE).clip(lower=0),
         },
     )
 
@@ -239,15 +244,12 @@ def main():
         outflow_conversion_factor=1 / DHW_STORAGE_CONVERSION,
     )
 
-    input_sol_dhw = Source(
+    input_sol_dhw = Converter(
         label="Collector Hot",
-        outputs={
-            bus_heat_dhw: Flow(
-                nominal_capacity=1,
-                maximum=Q_st_raw(TAP_WATER_TEMPERATURE).clip(lower=0),
-                nonconvex=NonConvex(),
-                custom_properties={"solar_thermal": True},
-            )
+        inputs={bus_st: Flow()},
+        outputs={bus_heat_dhw: Flow()},
+        conversion_factors={
+            bus_heat_dhw: Q_st_raw(TAP_WATER_TEMPERATURE).clip(lower=0),
         },
     )
 
@@ -372,13 +374,6 @@ def main():
     ###################
     model = Model(es)
 
-    limit_active_flow_count_by_keyword(
-        model,
-        "solar_thermal",
-        lower_limit=0,
-        upper_limit=1,
-    )
-
     shared_limit(
         model=model,
         quantity=model.GenericStorageBlock.storage_content,
@@ -481,6 +476,7 @@ def main():
         WARM_STORAGE_VOLUME,
         color="tab:orange",
     )
+    ax1.set_ylabel("Volume (m³)")
 
     ax2.fill_between(
         storage_content.index,
@@ -496,6 +492,7 @@ def main():
         COLD_STORAGE_VOLUME,
         color="tab:purple",
     )
+    ax2.set_ylabel("Volume (m³)")
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
     ax2.set_xlim(storage_content.index[0], storage_content.index[-1])
 
