@@ -48,6 +48,7 @@ def main():
     START_TIME = "2017-07-01T00:00:00"
     END_TIME = "2017-07-10T23:00:00"
 
+    SOLVER = "highs"  # could also be e.g. "cbc"
     SOLVER_TIME_LIMIT = 300  # seconds
 
     COLD_STORAGE_VOLUME = 50  # m³
@@ -189,7 +190,7 @@ def main():
         min_storage_level=SPACE_HEATING_TEMPERATURE / WARM_STORAGE_CAPACITY,
         max_storage_level=0.60,  # maximum 60 °C
         balanced=True,
-        loss_rate=0,
+        loss_rate=0.01,
         inputs={bus_heat_warm: Flow()},
         outputs={bus_heat_warm: Flow()},
         inflow_conversion_factor=WARM_STORAGE_CONVERSION,
@@ -420,10 +421,20 @@ def main():
 
     # Optimisation and plotting
     ###########################
+
+    cmdlineoptions = {
+        "cbc": {
+            "seconds": SOLVER_TIME_LIMIT,
+        },
+        "highs": {
+            "time_limit": SOLVER_TIME_LIMIT,
+        },
+    }
+
     model.solve(
-        solver="cbc",
+        solver=SOLVER,
         solve_kwargs={"tee": True},
-        cmdline_options={"seconds": SOLVER_TIME_LIMIT},
+        cmdline_options=cmdlineoptions.get(SOLVER, {}),
         allow_nonoptimal=True,
     )
 

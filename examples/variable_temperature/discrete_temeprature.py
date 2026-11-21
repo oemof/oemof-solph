@@ -50,6 +50,7 @@ def main():
     START_TIME = "2017-02-01T00:00:00"
     END_TIME = "2017-02-10T23:00:00"
 
+    SOLVER = "highs"  # could also be e.g. "cbc"
     SOLVER_TIME_LIMIT = 300  # seconds
 
     COLD_STORAGE_VOLUME = 50  # m³
@@ -390,10 +391,20 @@ def main():
 
     # Optimisation and plotting
     ###########################
+
+    cmdlineoptions = {
+        "cbc": {
+            "seconds": SOLVER_TIME_LIMIT,
+        },
+        "highs": {
+            "time_limit": SOLVER_TIME_LIMIT,
+        },
+    }
+
     model.solve(
-        solver="cbc",
+        solver=SOLVER,
         solve_kwargs={"tee": True},
-        cmdline_options={"seconds": SOLVER_TIME_LIMIT},
+        cmdline_options=cmdlineoptions.get(SOLVER, {}),
         allow_nonoptimal=True,
     )
 
