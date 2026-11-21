@@ -1,0 +1,7 @@
+SPDX-FileCopyrightText: oemof e.V. and contributors
+
+SPDX-License-Identifier: MIT
+
+Hot water demand was created using LoadProfileGenerator,
+space heating demand comes from a building model considering
+internal gains by the LoadProfileGenerator electricity demands.
