@@ -492,6 +492,7 @@ def main():
     ax2.spines["left"].set_color("red")
     ax2.grid()
     ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
+    ax2.set_xlim(temperature.index[0], temperature.index[-1])
 
     fig.savefig(
         os.path.join(

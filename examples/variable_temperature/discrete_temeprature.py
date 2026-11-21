@@ -496,6 +496,8 @@ def main():
         COLD_STORAGE_VOLUME,
         color="tab:purple",
     )
+    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
+    ax2.set_xlim(storage_content.index[0], storage_content.index[-1])
 
     fig.savefig(
         os.path.join(
@@ -504,7 +506,6 @@ def main():
             + f"_{END_TIME.replace(':','-')}.eps",
         )
     )
-    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
 
     plt.show()
 
