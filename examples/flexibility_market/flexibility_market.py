@@ -18,7 +18,7 @@ from oemof import solph
 
 BATTERY_CAPACITY = 50
 
-def main():
+def main(optimize=True, solver="cbc"):
     es = solph.EnergySystem(timeindex=solph.create_time_index(2026, 1, 24))
 
     driving_pattern = np.array(
@@ -84,6 +84,9 @@ def main():
     )
     es.add(sink_plan, sink_flex)
 
+    if not optimize:
+        return es
+
     model = solph.Model(es)
 
     solph.constraints.limit_active_flow_count_by_keyword(
@@ -116,7 +119,7 @@ def main():
         "discharge_limit_build",
         po.BuildAction(rule=_limit_flow_rule),
     )
-    results = model.solve()
+    results = model.solve(solver=solver)
 
     return results
 
