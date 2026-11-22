@@ -66,6 +66,7 @@ SPDX-License-Identifier: MIT
 import logging
 import os
 
+import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from oemof.tools import logger
@@ -265,14 +266,16 @@ def main(optimize=True, solver="cbc"):
 
     var_costs_dict = {}
     for i, o in energysystem_model.FLOWS:
-        var_costs_dict["({}, {})".format(i, o)] = energysystem_model.flows[
-            i, o
-        ].variable_costs
+        var_costs_dict["({}, {})".format(i, o)] = float(
+            energysystem_model.flows[i, o].variable_costs
+        )
 
-    df_var_costs = pd.DataFrame.from_dict(var_costs_dict)
-    df_var_costs.index = create_time_index(
-        2012, number=number_of_time_steps - 1
+    timeindex = create_time_index(2012, number=number_of_time_steps - 1)
+    df_var_costs = pd.DataFrame(
+        var_costs_dict,
+        index=timeindex
     )
+    variable_costs.index = timeindex
 
     start_date = "2012-04-07 00:00:00"
     end_date = "2012-04-21 23:00:00"
