@@ -113,7 +113,7 @@ def write_lp_file(model):
 
 def main(optimize=True, solver="cbc"):
     # Read data file
-    filename = os.path.join(os.getcwd(), "variable_chp.csv")
+    filename = os.path.join(os.path.dirname(__file__), "variable_chp.csv")
     try:
         data = pd.read_csv(filename)
         data["demand_th"] *= 741000
