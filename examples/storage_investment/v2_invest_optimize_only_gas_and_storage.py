@@ -227,8 +227,9 @@ def main(optimize=True, solver="cbc"):
     # Check and plot the results
     ##########################################################################
 
+    # the following is still based the results dict
+    results = solph.processing.results(om)
     # check if the new result object is working for custom components
-
     electricity_bus = solph.views.node(results, "electricity")
 
     # returns a pandas Series with all scalar values (investment, total) of
