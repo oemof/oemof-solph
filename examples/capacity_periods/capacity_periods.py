@@ -11,7 +11,7 @@ import numpy as np
 
 from oemof import solph
 
-def main():
+def main(optimize=True, solver="cbc"):
     es = solph.EnergySystem(
         timeindex=np.linspace(start=0, stop=12, num=13),
         investment_times=[0, 4, 12],
@@ -38,12 +38,17 @@ def main():
     )
     es.add(bus, sink, source)
 
+    if optimize is False:
+        return es
+
     model = solph.Model(es)
 
-    results = model.solve()
+    results = model.solve(solver=solver)
 
     print(results["flow"])
     print(results["nominal_capacity"])
+
+    return results
 
 
 if __name__ == "__main__":
