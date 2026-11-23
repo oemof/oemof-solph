@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import numpy as np
 import pandas as pd
+from pytz import timezone
 
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -61,6 +62,7 @@ def main():
 
     HEAT_PUMP_NOMINAL_POWER = 200  # kW
     HEAT_PUMP_EFFICIENCY = 0.45
+    HEAT_PUMP_OUTLET_TEMPERATURE = 35  # °C
 
     DOWNHOLE_POWER = 200  # kW
 
@@ -185,7 +187,7 @@ def main():
         },
     )
 
-    input_sol_warm = Converter(
+    input_sol_sh = Converter(
         label="Collector Warm",
         inputs={bus_st: Flow()},
         outputs={bus_heat_sh: Flow()},
@@ -197,7 +199,7 @@ def main():
     WARM_STORAGE_CONVERSION = 1 / kcal2kilowatthours(
         1000 * (SPACE_HEATING_TEMPERATURE - FRESH_WATER_TEMPERATURE)
     )
-    storage_warm = GenericStorage(
+    storage_sh = GenericStorage(
         label=f"storage_{SPACE_HEATING_TEMPERATURE}",
         nominal_capacity=WARM_STORAGE_VOLUME,
         balanced=True,
@@ -208,7 +210,51 @@ def main():
         outflow_conversion_factor=1 / WARM_STORAGE_CONVERSION,
     )
 
-    es.add(bus_heat_sh, heating_rod, demand_sh, storage_warm, input_sol_warm)
+    es.add(bus_heat_sh, heating_rod, demand_sh, storage_sh, input_sol_sh)
+
+    # Hot heat (35°C, limit of heat pump)
+    # We use fresh water temperature (10 °C) as reference point.
+    ############################################################
+    bus_heat_hp = Bus(label=f"heat_{HEAT_PUMP_OUTLET_TEMPERATURE}")
+
+    HP_MAX_STORAGE_CONVERSION = 1 / kcal2kilowatthours(
+        1000 * (HEAT_PUMP_OUTLET_TEMPERATURE - FRESH_WATER_TEMPERATURE)
+    )
+    # another subvolume of storage_warm
+    storage_hp = GenericStorage(
+        label=f"storage_{HEAT_PUMP_OUTLET_TEMPERATURE}",
+        nominal_capacity=WARM_STORAGE_VOLUME,
+        balanced=True,
+        loss_rate=0,
+        inputs={bus_heat_hp: Flow()},
+        outputs={bus_heat_hp: Flow()},
+        inflow_conversion_factor=HP_MAX_STORAGE_CONVERSION,
+        outflow_conversion_factor=1 / HP_MAX_STORAGE_CONVERSION,
+    )
+
+    already_heated_fraction = (
+        SPACE_HEATING_TEMPERATURE - FRESH_WATER_TEMPERATURE
+    ) / (HEAT_PUMP_OUTLET_TEMPERATURE - FRESH_WATER_TEMPERATURE)
+    step_heater_hp = Converter(
+        label="step_heater_sh_hp",
+        inputs={bus_el: Flow(), bus_heat_sh: Flow()},
+        outputs={bus_heat_hp: Flow()},
+        conversion_factors={
+            bus_heat_sh: already_heated_fraction,
+            bus_el: (1 - already_heated_fraction) / 0.95,  #  95% efficiency
+        },
+    )
+
+    input_sol_hp = Converter(
+        label="Collector HP",
+        inputs={bus_st: Flow()},
+        outputs={bus_heat_hp: Flow()},
+        conversion_factors={
+            bus_heat_hp: Q_st_raw(HEAT_PUMP_OUTLET_TEMPERATURE).clip(lower=0),
+        },
+    )
+
+    es.add(bus_heat_hp, storage_hp, step_heater_hp, input_sol_hp)
 
     # Hot heat (40°C, e.g. for tap water)
     # We use fresh water temperature (10 °C) as reference point.
@@ -216,23 +262,23 @@ def main():
 
     bus_heat_dhw = Bus(label=f"heat_{TAP_WATER_TEMPERATURE}")
 
-    ALREADY_HEATED_FRACTION = (
-        SPACE_HEATING_TEMPERATURE - FRESH_WATER_TEMPERATURE
+    already_heated_fraction = (
+        HEAT_PUMP_OUTLET_TEMPERATURE - FRESH_WATER_TEMPERATURE
     ) / (TAP_WATER_TEMPERATURE - FRESH_WATER_TEMPERATURE)
-    flow_heater = Converter(
-        label="flow_heater",
-        inputs={bus_el: Flow(), bus_heat_sh: Flow()},
+    flow_heater_dhw = Converter(
+        label="step_heater_hp_dhw",
+        inputs={bus_el: Flow(), bus_heat_hp: Flow()},
         outputs={bus_heat_dhw: Flow()},
         conversion_factors={
-            bus_heat_sh: ALREADY_HEATED_FRACTION,
-            bus_el: (1 - ALREADY_HEATED_FRACTION) / 0.95,  #  95% efficiency
+            bus_heat_hp: already_heated_fraction,
+            bus_el: (1 - already_heated_fraction) / 0.95,  #  95% efficiency
         },
     )
 
     DHW_STORAGE_CONVERSION = 1 / kcal2kilowatthours(
         1000 * (TAP_WATER_TEMPERATURE - FRESH_WATER_TEMPERATURE)
     )
-    # other subvolume of storage_warm
+    # other ansubvolume of storage_warm
     storage_dhw = GenericStorage(
         label=f"storage_{TAP_WATER_TEMPERATURE}",
         nominal_capacity=WARM_STORAGE_VOLUME,
@@ -245,7 +291,7 @@ def main():
     )
 
     input_sol_dhw = Converter(
-        label="Collector Hot",
+        label="Collector DHW",
         inputs={bus_st: Flow()},
         outputs={bus_heat_dhw: Flow()},
         conversion_factors={
@@ -262,7 +308,9 @@ def main():
             ),
         },
     )
-    es.add(bus_heat_dhw, flow_heater, demand_dhw, storage_dhw, input_sol_dhw)
+    es.add(
+        bus_heat_dhw, flow_heater_dhw, demand_dhw, storage_dhw, input_sol_dhw
+    )
 
     # heat pump
     #
@@ -308,16 +356,16 @@ def main():
     cop_gt_dhw = HEAT_PUMP_EFFICIENCY / (
         1
         - celsius2kelvin(input_data["temp_soil (°C)"])
-        / celsius2kelvin(TAP_WATER_TEMPERATURE)
+        / celsius2kelvin(HEAT_PUMP_OUTLET_TEMPERATURE)
     )
     hp_gt_dhw = Converter(
-        label=f"HP_GT_{TAP_WATER_TEMPERATURE}",
+        label=f"HP_GT_{HEAT_PUMP_OUTLET_TEMPERATURE}",
         inputs={
             heat_pump_el: Flow(),
             bus_gt: Flow(),
         },
         outputs={
-            bus_heat_dhw: Flow(),
+            bus_heat_hp: Flow(),
             bus_hp_output: Flow(),
         },
         conversion_factors={
@@ -350,16 +398,16 @@ def main():
     cop_cold_dhw = HEAT_PUMP_EFFICIENCY / (
         1
         - celsius2kelvin(COLD_STORAGE_TEMPERATURE)
-        / celsius2kelvin(TAP_WATER_TEMPERATURE)
+        / celsius2kelvin(HEAT_PUMP_OUTLET_TEMPERATURE)
     )
     hp_cold_dhw = Converter(
-        label=f"HP_{COLD_STORAGE_TEMPERATURE}_{TAP_WATER_TEMPERATURE}",
+        label=f"HP_{COLD_STORAGE_TEMPERATURE}_{HEAT_PUMP_OUTLET_TEMPERATURE}",
         inputs={
             heat_pump_el: Flow(),
             bus_heat_cold: Flow(),
         },
         outputs={
-            bus_heat_dhw: Flow(),
+            bus_heat_hp: Flow(),
             bus_hp_output: Flow(),
         },
         conversion_factors={
@@ -378,7 +426,7 @@ def main():
         model=model,
         quantity=model.GenericStorageBlock.storage_content,
         limit_name=f"combined_warm_storage_limit",
-        components=[storage_dhw, storage_warm],
+        components=[storage_dhw, storage_hp, storage_sh],
         weights=[1, 1],
         lower_limit=0,
         upper_limit=WARM_STORAGE_VOLUME,
@@ -420,10 +468,15 @@ def main():
 
     heatsource_plot_data = [
         ("Geotehrmal", flows[(input_geothermal, bus_gt)], "tab:brown"),
-        ("Cold Solar", flows[(input_sol_cold, bus_heat_cold)], "tab:purple"),
+        ("Cold Solar", flows[(input_sol_cold, bus_heat_cold)], "tab:blue"),
         (
             f"Solar ({SPACE_HEATING_TEMPERATURE}°C)",
-            flows[(input_sol_warm, bus_heat_sh)],
+            flows[(input_sol_sh, bus_heat_sh)],
+            "tab:purple",
+        ),
+        (
+            f"Solar ({HEAT_PUMP_OUTLET_TEMPERATURE}°C)",
+            flows[(input_sol_hp, bus_heat_hp)],
             "tab:red",
         ),
         (
@@ -433,7 +486,7 @@ def main():
         ),
         ("Heat Pump (el.)", flows[(bus_el, heat_pump_el)], "tab:green"),
         ("Heating Rod", flows[(heating_rod, bus_heat_sh)], "tab:cyan"),
-        ("Flow Heater", flows[(bus_el, flow_heater)], "tab:pink"),
+        ("Flow Heater", flows[(bus_el, flow_heater_dhw)], "tab:pink"),
     ]
 
     plot_heat_flow_stack(ax0, flows, heatsource_plot_data)
@@ -453,48 +506,71 @@ def main():
     ax0.set_ylabel("Heat Flow (kW)")
 
     ax1.fill_between(
-        storage_content.index,
-        0,
-        WARM_STORAGE_VOLUME
+        x=storage_content.index,
+        y1=0,
+        y2=WARM_STORAGE_VOLUME
         - storage_content[f"storage_{SPACE_HEATING_TEMPERATURE}"]
+        - storage_content[f"storage_{HEAT_PUMP_OUTLET_TEMPERATURE}"]
+        - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
+        color="tab:blue",
+    )
+    ax1.fill_between(
+        x=storage_content.index,
+        y1=WARM_STORAGE_VOLUME
+        - storage_content[f"storage_{SPACE_HEATING_TEMPERATURE}"]
+        - storage_content[f"storage_{HEAT_PUMP_OUTLET_TEMPERATURE}"]
+        - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
+        y2=WARM_STORAGE_VOLUME
+        - storage_content[f"storage_{HEAT_PUMP_OUTLET_TEMPERATURE}"]
         - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
         color="tab:purple",
     )
     ax1.fill_between(
-        storage_content.index,
-        WARM_STORAGE_VOLUME
-        - storage_content[f"storage_{SPACE_HEATING_TEMPERATURE}"]
+        x=storage_content.index,
+        y1=WARM_STORAGE_VOLUME
+        - storage_content[f"storage_{HEAT_PUMP_OUTLET_TEMPERATURE}"]
         - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
-        WARM_STORAGE_VOLUME
+        y2=WARM_STORAGE_VOLUME
         - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
         color="tab:red",
     )
     ax1.fill_between(
-        storage_content.index,
-        WARM_STORAGE_VOLUME
+        x=storage_content.index,
+        y1=WARM_STORAGE_VOLUME
         - storage_content[f"storage_{TAP_WATER_TEMPERATURE}"],
-        WARM_STORAGE_VOLUME,
+        y2=WARM_STORAGE_VOLUME,
         color="tab:orange",
     )
+    ax1.set_ylim(0, WARM_STORAGE_VOLUME)
     ax1.set_ylabel("Volume (m³)")
 
     ax2.fill_between(
-        storage_content.index,
-        0,
-        COLD_STORAGE_VOLUME
+        x=storage_content.index,
+        y1=0,
+        y2=COLD_STORAGE_VOLUME
         - storage_content[f"storage_{COLD_STORAGE_TEMPERATURE}"],
-        color="tab:blue",
+        color="tab:cyan",
     )
     ax2.fill_between(
-        storage_content.index,
-        COLD_STORAGE_VOLUME
+        x=storage_content.index,
+        y1=COLD_STORAGE_VOLUME
         - storage_content[f"storage_{COLD_STORAGE_TEMPERATURE}"],
-        COLD_STORAGE_VOLUME,
-        color="tab:purple",
+        y2=COLD_STORAGE_VOLUME,
+        color="tab:blue",
     )
+    ax2.set_ylim(0, COLD_STORAGE_VOLUME)
     ax2.set_ylabel("Volume (m³)")
-    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
     ax2.set_xlim(storage_content.index[0], storage_content.index[-1])
+
+    ax2.xaxis.set_major_formatter(
+        mdates.DateFormatter(
+            "%b %d",
+            tz=timezone("Europe/Berlin"),
+        )
+    )
+    # remove last day tick
+    ax2.xaxis.get_major_ticks()[-1].label1.set_visible(False)
+    fig.autofmt_xdate(rotation=0, ha="left")
 
     fig.savefig(
         os.path.join(

@@ -25,6 +25,7 @@ import matplotlib.dates as mdates
 import numpy as np
 from pyomo import environ as po
 from pyomo.core import Var
+from pytz import timezone
 
 from oemof.solph import Bus
 from oemof.solph import EnergySystem
@@ -455,7 +456,7 @@ def main():
 
     heatsource_plot_data = [
         ("Geotehrmal", flows[(input_geothermal, bus_heat_cold)], "tab:brown"),
-        ("Cold Solar", flows[(input_sol_cold, bus_heat_cold)], "tab:purple"),
+        ("Cold Solar", flows[(input_sol_cold, bus_heat_cold)], "tab:blue"),
         ("Warm Solar", flows[(input_sol_warm, bus_heat_warm)], "tab:orange"),
         ("Heat Pump (el.)", flows[(bus_el, heat_pump)], "tab:green"),
         ("Heating Rod", flows[(heating_rod, bus_heat_warm)], "tab:cyan"),
@@ -478,21 +479,30 @@ def main():
     )
     ax0.set_ylabel("Heat Flow (kW)")
 
-    ax1.plot(temperature[storage_cold], "r-")
-    ax1.set_ylim(0, 15)
-    ax1.tick_params(axis="y", colors="red")
-    ax1.spines["left"].set_color("red")
+    ax1.plot(temperature[storage_cold], "b-")
+    ax1.set_ylim(-5, 10)
+    ax1.tick_params(axis="y", colors="blue")
+    ax1.spines["left"].set_color("blue")
     ax1.set_ylabel("Storage (°C)")
 
     ax2 = ax1.twinx()
     ax2.plot(temperature[storage_warm], "-", color="orange")
-    ax2.set_ylim(30, 60)
+    ax2.set_ylim(30, 45)
     ax2.tick_params(axis="y", colors="orange")
     ax2.spines["right"].set_color("orange")
-    ax2.spines["left"].set_color("red")
+    ax2.spines["left"].set_color("blue")
     ax2.grid()
-    ax2.xaxis.set_major_formatter(mdates.DateFormatter("%d"))
     ax2.set_xlim(temperature.index[0], temperature.index[-1])
+
+    ax2.xaxis.set_major_formatter(
+        mdates.DateFormatter(
+            "%b %d",
+            tz=timezone("Europe/Berlin"),
+        )
+    )
+    # remove last day tick
+    ax2.xaxis.get_major_ticks()[-1].label1.set_visible(False)
+    fig.autofmt_xdate(rotation=0, ha="left")
 
     fig.savefig(
         os.path.join(
