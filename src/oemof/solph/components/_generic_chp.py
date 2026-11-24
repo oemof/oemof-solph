@@ -97,26 +97,59 @@ class GenericCHP(Node):
 
     Examples
     --------
+    Model a combined cycle extraction turbine over three hourly intervals.
+    Provide one value per interval for each CHP parameter, including
+    constant ones. The backup heat source covers demand beyond the
+    turbine's heat output. This example uses HiGHS, available through the
+    :ref:`solver extra <installation_and_setup_label>`.
+
     >>> from oemof import solph
-    >>> bel = solph.buses.Bus(label='electricityBus')
-    >>> bth = solph.buses.Bus(label='heatBus')
-    >>> bgas = solph.buses.Bus(label='commodityBus')
-    >>> ccet = solph.components.GenericCHP(
-    ...    label='combined_cycle_extraction_turbine',
-    ...    fuel_input={bgas: solph.flows.Flow(
-    ...        custom_properties={"H_L_FG_share_max": [0.183]})},
-    ...    electrical_output={bel: solph.flows.Flow(
-    ...        custom_properties={
-    ...            "P_max_woDH": [155.946],
-    ...            "P_min_woDH": [68.787],
-    ...            "Eta_el_max_woDH": [0.525],
-    ...            "Eta_el_min_woDH": [0.444],
-    ...        })},
-    ...    heat_output={bth: solph.flows.Flow(
-    ...        custom_properties={"Q_CW_min": [10.552]})},
-    ...    beta=[0.122], back_pressure=False)
-    >>> type(ccet)
-    <class 'oemof.solph.components._generic_chp.GenericCHP'>
+    >>> intervals = 3
+    >>> timeindex = solph.create_time_index(2024, number=intervals)
+    >>> es = solph.EnergySystem(timeindex=timeindex, infer_last_interval=False)
+    >>> electricity = solph.Bus(label="electricity")
+    >>> heat = solph.Bus(label="heat")
+    >>> gas = solph.Bus(label="gas")
+    >>> chp = solph.components.GenericCHP(
+    ...     label="combined_cycle_extraction_turbine",
+    ...     fuel_input={gas: solph.Flow(
+    ...         custom_properties={"H_L_FG_share_max": [0.183] * intervals}
+    ...     )},
+    ...     electrical_output={electricity: solph.Flow(
+    ...         custom_properties={
+    ...             "P_max_woDH": [155.946] * intervals,
+    ...             "P_min_woDH": [68.787] * intervals,
+    ...             "Eta_el_max_woDH": [0.525] * intervals,
+    ...             "Eta_el_min_woDH": [0.444] * intervals,
+    ...         }
+    ...     )},
+    ...     heat_output={heat: solph.Flow(
+    ...         custom_properties={"Q_CW_min": [10.552] * intervals}
+    ...     )},
+    ...     beta=[0.122] * intervals,
+    ...     back_pressure=False,
+    ... )
+    >>> gas_supply = solph.components.Source(
+    ...     label="gas supply", outputs={gas: solph.Flow(variable_costs=75)}
+    ... )
+    >>> backup = solph.components.Source(
+    ...     label="backup heat",
+    ...     outputs={heat: solph.Flow(variable_costs=1000)},
+    ... )
+    >>> heat_demand = solph.components.Sink(
+    ...     label="heat demand",
+    ...     inputs={heat: solph.Flow(nominal_capacity=100, fix=[0.6, 0.7, 1])},
+    ... )
+    >>> power_export = solph.components.Sink(
+    ...     label="power export",
+    ...     inputs={electricity: solph.Flow(variable_costs=-100)},
+    ... )
+    >>> es.add(electricity, heat, gas, chp, gas_supply, backup, heat_demand,
+    ...        power_export)
+    >>> model = solph.Model(es)
+    >>> results = model.solve(solver="highs")
+    >>> bool(results.solver["optimal"])
+    True
     """
 
     def __init__(
