@@ -275,7 +275,7 @@ def main(optimize=True, solver="cbc"):
     myresults = solph.views.node(results, "natural_gas")
     myresults = myresults["sequences"].sum(axis=0)
     myresults = myresults.drop(myresults.index[0]).reset_index(drop=True)
-    myresults.rename({0: "fixed", 1: "variable", 2: "total"}, inplace=True)
+    myresults = myresults.rename({0: "fixed", 1: "variable", 2: "total"})
     myresults.plot(kind="bar", rot=0, title="Usage of natural gas")
     plt.show()
 
