@@ -141,83 +141,125 @@ def main(optimize=True, solver="cbc"):
     ##########################################################################
     logging.info("Create oemof.solph objects")
 
-    # container for instantiated nodes
-    noded = dict()
-
     # create natural gas bus
-    noded["bgas"] = solph.Bus(label="natural_gas")
+    energysystem.add(solph.Bus(label="bgas"))
 
     # create commodity object for gas resource
-    noded["rgas"] = solph.components.Source(
-        label="rgas", outputs={noded["bgas"]: solph.Flow(variable_costs=50)}
+    energysystem.add(
+        solph.components.Source(
+            label="rgas",
+            outputs={energysystem.node["bgas"]: solph.Flow(variable_costs=50)},
+        )
     )
 
     # create two electricity buses and two heat buses
-    noded["bel"] = solph.Bus(label="electricity")
-    noded["bel2"] = solph.Bus(label="electricity_2")
-    noded["bth"] = solph.Bus(label="heat")
-    noded["bth2"] = solph.Bus(label="heat_2")
+    energysystem.add(solph.Bus(label="bel"))
+    energysystem.add(solph.Bus(label="bel2"))
+    energysystem.add(solph.Bus(label="bth"))
+    energysystem.add(solph.Bus(label="bth2"))
 
     # create excess components for the elec/heat bus to allow overproduction
-    noded["excess_bth_2"] = solph.components.Sink(
-        label="excess_bth_2", inputs={noded["bth2"]: solph.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label="excess_bth_2",
+            inputs={energysystem.node["bth2"]: solph.Flow()},
+        )
     )
-    noded["excess_therm"] = solph.components.Sink(
-        label="excess_therm", inputs={noded["bth"]: solph.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label="excess_therm",
+            inputs={energysystem.node["bth"]: solph.Flow()},
+        )
     )
-    noded["excess_bel_2"] = solph.components.Sink(
-        label="excess_bel_2", inputs={noded["bel2"]: solph.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label="excess_bel_2",
+            inputs={energysystem.node["bel2"]: solph.Flow()},
+        )
     )
-    noded["excess_elec"] = solph.components.Sink(
-        label="excess_elec", inputs={noded["bel"]: solph.Flow()}
+    energysystem.add(
+        solph.components.Sink(
+            label="excess_elec",
+            inputs={energysystem.node["bel"]: solph.Flow()},
+        )
     )
 
     # create simple sink object for electrical demand for each electrical bus
-    noded["demand_elec"] = solph.components.Sink(
-        label="demand_elec",
-        inputs={
-            noded["bel"]: solph.Flow(fix=data["demand_el"], nominal_capacity=1)
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label="demand_elec",
+            inputs={
+                energysystem.node["bel"]: solph.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
+            },
+        )
     )
-    noded["demand_el_2"] = solph.components.Sink(
-        label="demand_el_2",
-        inputs={
-            noded["bel2"]: solph.Flow(
-                fix=data["demand_el"], nominal_capacity=1
-            )
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label="demand_el_2",
+            inputs={
+                energysystem.node["bel2"]: solph.Flow(
+                    fix=data["demand_el"], nominal_capacity=1
+                )
+            },
+        )
     )
 
     # create simple sink object for heat demand for each thermal bus
-    noded["demand_therm"] = solph.components.Sink(
-        label="demand_therm",
-        inputs={
-            noded["bth"]: solph.Flow(fix=data["demand_th"], nominal_capacity=1)
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label="demand_therm",
+            inputs={
+                energysystem.node["bth"]: solph.Flow(
+                    fix=data["demand_th"], nominal_capacity=1
+                )
+            },
+        )
     )
-    noded["demand_therm_2"] = solph.components.Sink(
-        label="demand_th_2",
-        inputs={
-            noded["bth2"]: solph.Flow(
-                fix=data["demand_th"], nominal_capacity=1
-            )
-        },
+    energysystem.add(
+        solph.components.Sink(
+            label="demand_th_2",
+            inputs={
+                energysystem.node["bth2"]: solph.Flow(
+                    fix=data["demand_th"], nominal_capacity=1
+                )
+            },
+        )
     )
 
     # This is just a dummy Converter with a nominal input of zero
-    noded["fixed_chp_gas"] = solph.components.Converter(
-        label="fixed_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_capacity=0)},
-        outputs={noded["bel"]: solph.Flow(), noded["bth"]: solph.Flow()},
-        conversion_factors={noded["bel"]: 0.3, noded["bth"]: 0.5},
+    energysystem.add(
+        solph.components.Converter(
+            label="fixed_chp_gas",
+            inputs={energysystem.node["bgas"]: solph.Flow(nominal_capacity=0)},
+            outputs={
+                energysystem.node["bel"]: solph.Flow(),
+                energysystem.node["bth"]: solph.Flow(),
+            },
+            conversion_factors={
+                energysystem.node["bel"]: 0.3,
+                energysystem.node["bth"]: 0.5,
+            },
+        )
     )
 
     # create a fixed Converter to distribute to the heat_2 and elec_2 buses
-    noded["fixed_chp_gas_2"] = solph.components.Converter(
-        label="fixed_chp_gas_2",
-        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-        outputs={noded["bel2"]: solph.Flow(), noded["bth2"]: solph.Flow()},
-        conversion_factors={noded["bel2"]: 0.3, noded["bth2"]: 0.5},
+    energysystem.add(
+        solph.components.Converter(
+            label="fixed_chp_gas_2",
+            inputs={
+                energysystem.node["bgas"]: solph.Flow(nominal_capacity=10e10)
+            },
+            outputs={
+                energysystem.node["bel2"]: solph.Flow(),
+                energysystem.node["bth2"]: solph.Flow(),
+            },
+            conversion_factors={
+                energysystem.node["bel2"]: 0.3,
+                energysystem.node["bth2"]: 0.5,
+            },
+        )
     )
 
     # create a fixed Converter to distribute to the heat and elec buses
@@ -226,24 +268,27 @@ def main(optimize=True, solver="cbc"):
     # raise an error even if the equal state is just in one time step.
     # Otherwise, only in this time step two more constraints will be
     # written to the lp-file to avoid mismatches.
-    abel = [0.5] * 192
-    abth = [0.2] * 192
-    bbel = [0.3] * 192
-    bbth = [0.5] * 192
 
-    noded["variable_chp_gas"] = solph.components.VariableSplitConverter(
-        label="variable_chp_gas",
-        inputs={noded["bgas"]: solph.Flow(nominal_capacity=10e10)},
-        outputs={noded["bth"]: solph.Flow(), noded["bel"]: solph.Flow()},
-        conversion_factors={
-            noded["bel"]: abel,
-            noded["bth"]: abth,
-        },
-        allow_equal_states=False,
-        conversion_factors_secondary_state={
-            noded["bel"]: bbel,
-            noded["bth"]: bbth,
-        },
+    energysystem.add(
+        solph.components.VariableSplitConverter(
+            label="variable_chp_gas",
+            inputs={
+                energysystem.node["bgas"]: solph.Flow(nominal_capacity=10e10)
+            },
+            outputs={
+                energysystem.node["bth"]: solph.Flow(),
+                energysystem.node["bel"]: solph.Flow(),
+            },
+            conversion_factors={
+                energysystem.node["bel"]: 0.5,
+                energysystem.node["bth"]: 0.2,
+            },
+            allow_equal_states=False,
+            conversion_factors_secondary_state={
+                energysystem.node["bel"]: 0.3,
+                energysystem.node["bth"]: 0.5,
+            },
+        )
     )
 
     ##########################################################################
@@ -254,8 +299,6 @@ def main(optimize=True, solver="cbc"):
         return energysystem
 
     logging.info("Optimise the energy system")
-
-    energysystem.add(*noded.values())
 
     om = solph.Model(energysystem)
 
@@ -272,7 +315,7 @@ def main(optimize=True, solver="cbc"):
     # Plot the results
     ##########################################################################
 
-    myresults = solph.views.node(results, "natural_gas")
+    myresults = solph.views.node(results, "bgas")
     myresults = myresults["sequences"].sum(axis=0)
     myresults = myresults.drop(myresults.index[0]).reset_index(drop=True)
     myresults = myresults.rename({0: "fixed", 1: "variable", 2: "total"})
@@ -287,20 +330,20 @@ def main(optimize=True, solver="cbc"):
         logging.info("Plot the results")
 
         cdict = {
-            (("variable_chp_gas", "electricity"), "flow"): "#42c77a",
-            (("fixed_chp_gas_2", "electricity_2"), "flow"): "#20b4b6",
-            (("fixed_chp_gas", "electricity"), "flow"): "#20b4b6",
-            (("fixed_chp_gas", "heat"), "flow"): "#20b4b6",
-            (("variable_chp_gas", "heat"), "flow"): "#42c77a",
-            (("heat", "demand_therm"), "flow"): "#5b5bae",
-            (("heat_2", "demand_th_2"), "flow"): "#5b5bae",
-            (("electricity", "demand_elec"), "flow"): "#5b5bae",
-            (("electricity_2", "demand_el_2"), "flow"): "#5b5bae",
-            (("heat", "excess_therm"), "flow"): "#f22222",
-            (("heat_2", "excess_bth_2"), "flow"): "#f22222",
-            (("electricity", "excess_elec"), "flow"): "#f22222",
-            (("electricity_2", "excess_bel_2"), "flow"): "#f22222",
-            (("fixed_chp_gas_2", "heat_2"), "flow"): "#20b4b6",
+            (("variable_chp_gas", "bel"), "flow"): "#42c77a",
+            (("fixed_chp_gas_2", "bel2"), "flow"): "#20b4b6",
+            (("fixed_chp_gas", "bel"), "flow"): "#20b4b6",
+            (("fixed_chp_gas", "bth"), "flow"): "#20b4b6",
+            (("variable_chp_gas", "bth"), "flow"): "#42c77a",
+            (("bth", "demand_therm"), "flow"): "#5b5bae",
+            (("bth2", "demand_th_2"), "flow"): "#5b5bae",
+            (("bel", "demand_elec"), "flow"): "#5b5bae",
+            (("bel2", "demand_el_2"), "flow"): "#5b5bae",
+            (("bth", "excess_therm"), "flow"): "#f22222",
+            (("bth2", "excess_bth_2"), "flow"): "#f22222",
+            (("bel", "excess_elec"), "flow"): "#f22222",
+            (("bel2", "excess_bel_2"), "flow"): "#f22222",
+            (("fixed_chp_gas_2", "bth2"), "flow"): "#20b4b6",
         }
 
         fig = plt.figure(figsize=(18, 9))
@@ -316,19 +359,19 @@ def main(optimize=True, solver="cbc"):
         )
 
         # subplot of electricity bus (fixed chp) [1]
-        electricity_2 = solph.views.node(results, "electricity_2")
+        electricity_2 = solph.views.node(results, "bel2")
         x_length = len(electricity_2["sequences"].index)
         myplot = oeplot.io_plot(
-            bus_label="electricity_2",
+            bus_label="bel2",
             df=electricity_2["sequences"],
             cdict=cdict,
             smooth=smooth_plot,
             line_kwa={"linewidth": 4},
             ax=fig.add_subplot(3, 2, 1),
-            inorder=[(("fixed_chp_gas_2", "electricity_2"), "flow")],
+            inorder=[(("fixed_chp_gas_2", "bel2"), "flow")],
             outorder=[
-                (("electricity_2", "demand_el_2"), "flow"),
-                (("electricity_2", "excess_bel_2"), "flow"),
+                (("bel2", "demand_el_2"), "flow"),
+                (("bel2", "excess_bel_2"), "flow"),
             ],
         )
         myplot["ax"].set_ylabel("Power in MW")
@@ -340,21 +383,21 @@ def main(optimize=True, solver="cbc"):
         myplot["ax"].legend_.remove()
 
         # subplot of electricity bus (variable chp) [2]
-        electricity = solph.views.node(results, "electricity")
+        electricity = solph.views.node(results, "bel")
         myplot = oeplot.io_plot(
-            bus_label="electricity",
+            bus_label="bel",
             df=electricity["sequences"],
             cdict=cdict,
             smooth=smooth_plot,
             line_kwa={"linewidth": 4},
             ax=fig.add_subplot(3, 2, 2),
             inorder=[
-                (("fixed_chp_gas", "electricity"), "flow"),
-                (("variable_chp_gas", "electricity"), "flow"),
+                (("fixed_chp_gas", "bel"), "flow"),
+                (("variable_chp_gas", "bel"), "flow"),
             ],
             outorder=[
-                (("electricity", "demand_elec"), "flow"),
-                (("electricity", "excess_elec"), "flow"),
+                (("bel", "demand_elec"), "flow"),
+                (("bel", "excess_elec"), "flow"),
             ],
         )
         myplot["ax"].get_yaxis().set_visible(False)
@@ -363,21 +406,21 @@ def main(optimize=True, solver="cbc"):
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_title("Electricity output (variable chp)")
         myplot["ax"].set_xlim(0, x_length)
-        shape_legend("electricity", plotshare=1, **myplot)
+        shape_legend("bel", plotshare=1, **myplot)
 
         # subplot of heat bus (fixed chp) [3]
-        heat_2 = solph.views.node(results, "heat_2")
+        heat_2 = solph.views.node(results, "bth2")
         myplot = oeplot.io_plot(
-            bus_label="heat_2",
+            bus_label="bth2",
             df=heat_2["sequences"],
             cdict=cdict,
             smooth=smooth_plot,
             line_kwa={"linewidth": 4},
             ax=fig.add_subplot(3, 2, 3),
-            inorder=[(("fixed_chp_gas_2", "heat_2"), "flow")],
+            inorder=[(("fixed_chp_gas_2", "bth2"), "flow")],
             outorder=[
-                (("heat_2", "demand_th_2"), "flow"),
-                (("heat_2", "excess_bth_2"), "flow"),
+                (("bth2", "demand_th_2"), "flow"),
+                (("bth2", "excess_bth_2"), "flow"),
             ],
         )
         myplot["ax"].set_ylabel("Power in MW")
@@ -388,21 +431,21 @@ def main(optimize=True, solver="cbc"):
         myplot["ax"].legend_.remove()
 
         # subplot of heat bus (variable chp) [4]
-        heat = solph.views.node(results, "heat")
+        heat = solph.views.node(results, "bth")
         myplot = oeplot.io_plot(
-            bus_label="heat",
+            bus_label="bth",
             df=heat["sequences"],
             cdict=cdict,
             smooth=smooth_plot,
             line_kwa={"linewidth": 4},
             ax=fig.add_subplot(3, 2, 4),
             inorder=[
-                (("fixed_chp_gas", "heat"), "flow"),
-                (("variable_chp_gas", "heat"), "flow"),
+                (("fixed_chp_gas", "bth"), "flow"),
+                (("variable_chp_gas", "bth"), "flow"),
             ],
             outorder=[
-                (("heat", "demand_therm"), "flow"),
-                (("heat", "excess_therm"), "flow"),
+                (("bth", "demand_therm"), "flow"),
+                (("bth", "excess_therm"), "flow"),
             ],
         )
         myplot["ax"].set_ylim([0, y_lim_heat])
@@ -410,7 +453,7 @@ def main(optimize=True, solver="cbc"):
         myplot["ax"].get_xaxis().set_visible(False)
         myplot["ax"].set_title("Heat output (variable chp)")
         myplot["ax"].set_xlim(0, x_length)
-        shape_legend("heat", plotshare=1, **myplot)
+        shape_legend("bth", plotshare=1, **myplot)
 
         if smooth_plot:
             style = None
@@ -419,19 +462,13 @@ def main(optimize=True, solver="cbc"):
 
         # subplot of efficiency (fixed chp) [5]
         fix_chp_gas2 = solph.views.node(results, "fixed_chp_gas_2")
-        ngas = fix_chp_gas2["sequences"][
-            (("natural_gas", "fixed_chp_gas_2"), "flow")
-        ]
-        elec = fix_chp_gas2["sequences"][
-            (("fixed_chp_gas_2", "electricity_2"), "flow")
-        ]
-        heat = fix_chp_gas2["sequences"][
-            (("fixed_chp_gas_2", "heat_2"), "flow")
-        ]
+        ngas = fix_chp_gas2["sequences"][(("bgas", "fixed_chp_gas_2"), "flow")]
+        elec = fix_chp_gas2["sequences"][(("fixed_chp_gas_2", "bel2"), "flow")]
+        heat = fix_chp_gas2["sequences"][(("fixed_chp_gas_2", "bth2"), "flow")]
         e_ef = elec.div(ngas)
         h_ef = heat.div(ngas)
         df_eff_fix = pd.DataFrame(
-            pd.concat([h_ef, e_ef], axis=1, keys=["heat", "electricity"])
+            pd.concat([h_ef, e_ef], axis=1, keys=["bth", "bel"])
         )
         my_ax = df_eff_fix.reset_index(drop=True).plot(
             drawstyle=style, ax=fig.add_subplot(3, 2, 5), linewidth=2
@@ -452,19 +489,15 @@ def main(optimize=True, solver="cbc"):
 
         # subplot of efficiency (variable chp) [6]
         var_chp_gas = solph.views.node(results, "variable_chp_gas")
-        ngas = var_chp_gas["sequences"][
-            (("natural_gas", "variable_chp_gas"), "flow")
-        ]
-        elec = var_chp_gas["sequences"][
-            (("variable_chp_gas", "electricity"), "flow")
-        ]
-        heat = var_chp_gas["sequences"][(("variable_chp_gas", "heat"), "flow")]
+        ngas = var_chp_gas["sequences"][(("bgas", "variable_chp_gas"), "flow")]
+        elec = var_chp_gas["sequences"][(("variable_chp_gas", "bel"), "flow")]
+        heat = var_chp_gas["sequences"][(("variable_chp_gas", "bth"), "flow")]
         e_ef = elec.div(ngas)
         h_ef = heat.div(ngas)
         e_ef.name = "electricity           "
-        h_ef.name = "heat"
+        h_ef.name = "bth"
         df_eff_var = pd.DataFrame(pd.concat([h_ef, e_ef], axis=1))
-        # df_eff_var.sort_values("heat").reset_index(drop=True).T.sum().T
+        # df_eff_var.sort_values("bth").reset_index(drop=True).T.sum().T
         # plt.show()
         my_ax = df_eff_var.reset_index(drop=True).plot(
             drawstyle=style, ax=fig.add_subplot(3, 2, 6), linewidth=2
@@ -489,10 +522,10 @@ def main(optimize=True, solver="cbc"):
         my_ax.legend(loc="center left", bbox_to_anchor=(1, 0.5), ncol=1)
 
         # plt.show()
-        df_eff_var.set_index("heat", drop=True).plot(
+        df_eff_var.set_index("bth", drop=True).plot(
             title="Variable CHP", marker="o"
         )
-        df_eff_fix.round(2).set_index("heat", drop=True).plot(
+        df_eff_fix.round(2).set_index("bth", drop=True).plot(
             title="Fixed CHP", marker="o"
         )
         plt.show()
