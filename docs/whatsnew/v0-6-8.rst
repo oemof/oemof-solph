@@ -17,11 +17,16 @@ Documentation
 Bug fixes
 #########
 
+* Correct the normalized offset calculated by both `OffsetConverter`
+  helpers when the maximum load differs from nominal capacity.
+
 Other changes
 #############
 
 Contributors
 ############
+
+* maoji-y
 
 Acknowledgements
 ################

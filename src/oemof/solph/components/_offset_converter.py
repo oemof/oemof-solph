@@ -52,16 +52,17 @@ class OffsetConverter(Node):
     Notes
     -----
 
-    :math:`m(t)` and :math:`y_\text{0,normed}(t)` can be calculated as follows:
+    For a nonconvex output flow, :math:`m(t)` and
+    :math:`y_\text{0,normed}(t)` can be calculated as follows:
 
     .. _OffsetConverterCoefficients-equations:
 
     .. math::
 
-        m = \frac{l_\text{max}/\eta_\text{max}-l_\text{min}/\eta_\text{min}}
-        {l_\text{max}-l_\text{min}}
-
-        y_\text{0,normed} = \frac{1}{\eta_{max}} - m
+        m &= \frac{l_\text{max}/\eta_\text{max}-l_\text{min}/\eta_\text{min}}
+        {l_\text{max}-l_\text{min}} \\
+        y_\text{0,normed} &= l_\text{max}
+        \left(\frac{1}{\eta_\text{max}} - m\right)
 
     Where :math:`l_{max}` and :math:`l_{min}` are the maximum and minimum
     partload share (e.g. 1.0 and 0.5) with reference to the `NonConvex` flow
@@ -89,12 +90,12 @@ class OffsetConverter(Node):
     >>> bel = solph.buses.Bus(label='bel')
     >>> bth = solph.buses.Bus(label='bth')
     >>> l_nominal = 60
-    >>> l_max = 1
-    >>> l_min = 0.5
+    >>> l_max = 0.75
+    >>> l_min = 0.25
     >>> eta_max = 0.5
-    >>> eta_min = 0.3
+    >>> eta_min = 0.25
     >>> slope = (l_max / eta_max - l_min / eta_min) / (l_max - l_min)
-    >>> offset = 1 / eta_max - slope
+    >>> offset = l_max * (1 / eta_max - slope)
 
     Or use the provided method as explained in the previous section:
 
@@ -121,15 +122,13 @@ class OffsetConverter(Node):
     The input required to operate at minimum load, can be computed from the
     slope and offset:
 
-    >>> input_at_min = ostf.conversion_factors[bel][0] * l_min + ostf.normed_offsets[bel][0] * l_max
-    >>> input_at_min * l_nominal
-    100.0
+    >>> l_nominal * (l_min * slope + offset)
+    60.0
 
-    The same can be done for the input at nominal load:
+    The same can be done for the input at maximum load:
 
-    >>> input_at_max = l_max * (ostf.conversion_factors[bel][0] + ostf.normed_offsets[bel][0])
-    >>> input_at_max * l_nominal
-    120.0
+    >>> l_nominal * (l_max * slope + offset)
+    90.0
 
     """  # noqa: E501
 
@@ -448,7 +447,8 @@ def slope_offset_from_nonconvex_input(
             - \text{min} \cdot \eta_\text{at min}
         }{\text{max} - \text{min}}\\
 
-        \text{offset} = \eta_\text{at,max} - \text{slope}
+        \text{offset} = \text{max} \cdot
+        (\eta_\text{at,max} - \text{slope})
 
     Parameters
     ----------
@@ -501,7 +501,7 @@ def slope_offset_from_nonconvex_input(
     slope = (max_load * eta_at_max - min_load * eta_at_min) / (
         max_load - min_load
     )
-    offset = eta_at_max - slope
+    offset = max_load * (eta_at_max - slope)
     return slope, offset
 
 
@@ -525,7 +525,8 @@ def slope_offset_from_nonconvex_output(
             - \frac{\text{min}}{\eta_\text{at min}}
         }{\text{max} - \text{min}}\\
 
-        \text{offset} = \frac{1}{\eta_\text{at,max}} - \text{slope}
+        \text{offset} = \text{max} \cdot
+        \left(\frac{1}{\eta_\text{at,max}} - \text{slope}\right)
 
     Parameters
     ----------
@@ -578,5 +579,5 @@ def slope_offset_from_nonconvex_output(
     slope = (max_load / eta_at_max - min_load / eta_at_min) / (
         max_load - min_load
     )
-    offset = 1 / eta_at_max - slope
+    offset = max_load * (1 / eta_at_max - slope)
     return slope, offset
