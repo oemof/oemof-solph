@@ -229,6 +229,23 @@ def test_invalid_normed_offset():
         )
 
 
+@pytest.mark.parametrize(
+    ("coefficient_function", "flow_at_min", "flow_at_max"),
+    [
+        (slope_offset_from_nonconvex_input, 0.25 * 0.25, 0.75 * 0.5),
+        (slope_offset_from_nonconvex_output, 0.25 / 0.25, 0.75 / 0.5),
+    ],
+    ids=["nonconvex-input", "nonconvex-output"],
+)
+def test_coefficients_at_reduced_maximum_load(
+    coefficient_function, flow_at_min, flow_at_max
+):
+    slope, offset = coefficient_function(0.75, 0.25, 0.5, 0.25)
+
+    assert slope * 0.25 + offset == pytest.approx(flow_at_min)
+    assert slope * 0.75 + offset == pytest.approx(flow_at_max)
+
+
 def test_OffsetConverter_single_input_output_ref_output():
     num_in = 1
     num_out = 1
