@@ -66,7 +66,6 @@ SPDX-License-Identifier: MIT
 import logging
 import os
 
-import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from oemof.tools import logger
