@@ -104,17 +104,17 @@ class GenericCHP(Node):
     >>> ccet = solph.components.GenericCHP(
     ...    label='combined_cycle_extraction_turbine',
     ...    fuel_input={bgas: solph.flows.Flow(
-    ...        custom_properties={"H_L_FG_share_max": [0.183]})},
+    ...        custom_properties={"H_L_FG_share_max": 0.183})},
     ...    electrical_output={bel: solph.flows.Flow(
     ...        custom_properties={
-    ...            "P_max_woDH": [155.946],
-    ...            "P_min_woDH": [68.787],
-    ...            "Eta_el_max_woDH": [0.525],
-    ...            "Eta_el_min_woDH": [0.444],
+    ...            "P_max_woDH": 155.946,
+    ...            "P_min_woDH": 68.787,
+    ...            "Eta_el_max_woDH": 0.525,
+    ...            "Eta_el_min_woDH": 0.444,
     ...        })},
     ...    heat_output={bth: solph.flows.Flow(
-    ...        custom_properties={"Q_CW_min": [10.552]})},
-    ...    beta=[0.122], back_pressure=False)
+    ...        custom_properties={"Q_CW_min": 10.552})},
+    ...    beta=0.122, back_pressure=False)
     >>> type(ccet)
     <class 'oemof.solph.components._generic_chp.GenericCHP'>
     """

@@ -65,9 +65,13 @@ def milp_es():
     return es
 
 
-def main(solver="cbc"):
+def main(optimize=True, solver="cbc"):
     # Solve MILP
-    m = solph.Model(milp_es())
+    es = milp_es()
+    if not optimize:
+        return es
+
+    m = solph.Model(es)
     m.solve(solver=solver)
 
     # Fix all integer and binary variables.
@@ -88,6 +92,8 @@ def main(solver="cbc"):
 
     print(duals)
     print(reduced_costs)
+
+    return lp_results
 
 
 if __name__ == "__main__":
